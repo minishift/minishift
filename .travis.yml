@@ -1,10 +1,10 @@
 language: go
-
 go:
-  - 1.6
-# We shouldn't need to install anything because we use vendoring.
+- 1.6
 install:
 - echo "Don't run anything."
-
-# Run unit tests and linters.
 script: make test
+
+env:
+  global:
+    secure: sbQsIvbcS9OX6/6sosz7UieB1lG/jV0buQ2hXHfZWwOvSXEr+89gfTdunWtL4fOY3GaMp25WLTJiEyuEgDBEbltPK7d+8oJiAoDM/QSkzuJCBFyYMtWnk1jmkhvJNT8k7PZDlLlGFK02Ycfpw6NR6VhzwVx4Mlz17UduIknOYF3WMc/KNT0JRqwwxT1HTcbIBHtTMroil8UDOdDkBaSwL8szwPNhS7LZpmVXwArkO4+JKDK92fLnCJNXPO0feDTbyMWfzZP2nKQDk6C7LYmZt0OkoqObhmI6fyg2rYOYhPB1+2z9MoHvxiHJtlUmsBovhhlZOgDePVbCiulwVjpaaEz6o4ItiRGJwOVedGB/t2IGvExES0KOrKfr4zDCposduAPywnsdQMjImd8w+lYuLhulgMeLM7sGqCeEUOwTdX4JYOnU04pPHw5C2tuCOva9k1rusKRbrdzLIcp+j/Gw9cHHY09MF2yuSFqj5YoSoFaCvvdGvy1j0fv2RPahvwIv6JCvVFurT9F4bkvHWGA1a0RATmBRb9hSaWpcOmIVkoGYfNffBFjMKCENRL5LEbUDWpDi3aURPo6bvXN13tF6CYI5OOw/AFMz7yAHFXJB1s6HiX00gP1IcN21hkYYRD2HR+yiokNcnyb/E2v5JDZCQTRMxQXzmOhQfuUUWsV4zIA=

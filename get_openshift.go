@@ -27,11 +27,21 @@ import (
 	"path/filepath"
 	"strings"
 
+	"golang.org/x/oauth2"
+
 	"github.com/google/go-github/github"
 )
 
 func main() {
-	client := github.NewClient(nil)
+	token := os.Getenv("GH_TOKEN")
+	var tc *http.Client
+	if len(token) > 0 {
+		ts := oauth2.StaticTokenSource(
+			&oauth2.Token{AccessToken: token},
+		)
+		tc = oauth2.NewClient(oauth2.NoContext, ts)
+	}
+	client := github.NewClient(tc)
 	var (
 		release *github.RepositoryRelease
 		resp    *github.Response

@@ -29,11 +29,11 @@ import (
 // stopCmd represents the stop command
 var stopCmd = &cobra.Command{
 	Use:   "stop",
-	Short: "Stops a running local kubernetes cluster.",
-	Long: `Stops a local kubernetes cluster running in Virtualbox. This command stops the VM
+	Short: "Stops a running local OpenShift cluster.",
+	Long: `Stops a local OpenShift cluster running in Virtualbox. This command stops the VM
 itself, leaving all files intact. The cluster can be started again with the "start" command.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Stopping local Kubernetes cluster...")
+		fmt.Println("Stopping local OpenShift cluster...")
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()
 

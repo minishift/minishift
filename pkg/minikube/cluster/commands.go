@@ -25,14 +25,14 @@ import (
 )
 
 // Kill any running instances.
-var stopCommand = "sudo killall localkube | true"
+var stopCommand = "sudo killall openshift | true"
 
 var startCommandFmtStr = `
 # Run with nohup so it stays up. Redirect logs to useful places.
-PATH=/usr/local/sbin:$PATH nohup sudo /usr/local/bin/localkube %s --generate-certs=false --logtostderr=true > %s 2> %s < /dev/null &
+PATH=/usr/local/sbin:$PATH nohup sudo /usr/local/bin/openshift --listen=https://localhost:443 %s --logtostderr=true > %s 2> %s < /dev/null &
 `
 
-var logsCommand = fmt.Sprintf("tail -n +1 %s %s", constants.RemoteLocalKubeErrPath, constants.RemoteLocalKubeOutPath)
+var logsCommand = fmt.Sprintf("tail -n +1 %s %s", constants.RemoteOpenShiftErrPath, constants.RemoteOpenShiftOutPath)
 
 func GetStartCommand() string {
 	flagVals := make([]string, len(constants.LogFlags))
@@ -42,5 +42,5 @@ func GetStartCommand() string {
 		}
 	}
 	flags := strings.Join(flagVals, " ")
-	return fmt.Sprintf(startCommandFmtStr, flags, constants.RemoteLocalKubeErrPath, constants.RemoteLocalKubeOutPath)
+	return fmt.Sprintf(startCommandFmtStr, flags, constants.RemoteOpenShiftErrPath, constants.RemoteOpenShiftOutPath)
 }

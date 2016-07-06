@@ -1,15 +1,15 @@
-# Minikube
+# Minishift
 
-[![Build Status](https://travis-ci.org/kubernetes/minikube.svg?branch=master)](https://travis-ci.org/kubernetes/minikube)
+[![Build Status](https://travis-ci.org/jimmidyson/minishift?branch=master)](https://travis-ci.org/jimmidyson/minishift)
 
-## What is Minikube?
+## What is Minishift?
 
-Minikube is a tool that makes it easy to run Kubernetes locally. Minikube runs a single-node Kubernetes cluster inside a VM on your laptop for users looking to try out Kubernetes or develop with it day-to-day.
+Minishift is a tool that makes it easy to run OpenShift locally. Minishift runs a single-node OpenShift cluster inside a VM on your laptop for users looking to try out OpenShift or develop with it day-to-day.
 
 ### Features
 
-* Minikube packages and configures a Linux VM, Docker and all Kubernetes components, optimized for local development.
-* Minikube supports Kubernetes features such as:
+* Minishift packages and configures a Linux VM, Docker and all OpenShift components, optimized for local development.
+* Minishift supports OpenShift features such as:
   * DNS
   * NodePorts
   * ConfigMaps and Secrets
@@ -27,12 +27,12 @@ Minikube is a tool that makes it easy to run Kubernetes locally. Minikube runs a
 
 ### Instructions
 
-See the installation instructions for the [latest release](https://github.com/kubernetes/minikube/releases).
+See the installation instructions for the [latest release](https://github.com/jimmidyson/minishift/releases).
 
 ## Quickstart
 
-Here's a brief demo of minikube usage.
-If you want to change the VM driver add the appropriate `--vm-driver=xxx` flag to `minikube start`. Minikube Supports
+Here's a brief demo of minishift usage.
+If you want to change the VM driver add the appropriate `--vm-driver=xxx` flag to `minishift start`. Minishift Supports
 the following drivers:
 
 * virtualbox
@@ -40,37 +40,37 @@ the following drivers:
 * kvm ([driver installation](DRIVERS.md#kvm-driver))
 * xhyve ([driver installation](DRIVERS.md#xhyve-driver))
 
-Note that the IP below is dynamic and can change. It can be retrieved with `minikube ip`.
+Note that the IP below is dynamic and can change. It can be retrieved with `minishift ip`.
 
 ```shell
-$ minikube start
-Starting local Kubernetes cluster...
+$ minishift start
+Starting local OpenShift cluster...
 Running pre-create checks...
 Creating machine...
-Starting local Kubernetes cluster...
-Kubernetes is available at https://192.168.99.100:443.
+Starting local OpenShift cluster...
+OpenShift is available at https://192.168.99.100:443.
 
-$ kubectl run hello-minikube --image=gcr.io/google_containers/echoserver:1.4 --hostport=8000 --port=8080
-deployment "hello-minikube" created
+$ oc run hello-minishift --image=gcr.io/google_containers/echoserver:1.4 --hostport=8000 --port=8080
+deployment "hello-minishift" created
 # We have now launched an echoserver pod but we have to wait until the pod is up before curling/accessing it
 # To check whether the pod is up and running we can use the following:
-$ kubectl get pod
+$ oc get pod
 NAME                              READY     STATUS              RESTARTS   AGE
-hello-minikube-3383150820-vctvh   1/1       ContainerCreating   0          3s
+hello-minishift-3383150820-vctvh   1/1       ContainerCreating   0          3s
 # We can see that the pod is still being created from the ContainerCreating status
-$ kubectl get pod
+$ oc get pod
 NAME                              READY     STATUS    RESTARTS   AGE
-hello-minikube-3383150820-vctvh   1/1       Running   0          13s
+hello-minishift-3383150820-vctvh   1/1       Running   0          13s
 # We can see that the pod is now Running and we will now be able to curl it:
-$ curl http://$(minikube ip):8000
+$ curl http://$(minishift ip):8000
 CLIENT VALUES:
 client_address=192.168.99.1
 command=GET
 real path=/
 ...
-$ minikube stop
-Stopping local Kubernetes cluster...
-Stopping "minikubeVM"...
+$ minishift stop
+Stopping local OpenShift cluster...
+Stopping "minishiftVM"...
 ```
 
 ### Driver plugins
@@ -80,14 +80,14 @@ plugins, if required.
 
 ### Reusing the Docker daemon
 
-When using a single VM of kubernetes its really handy to reuse the Docker daemon inside the VM; as this means you don't have to build on your host machine and push the image into a docker registry - you can just build inside the same docker daemon as minikube which speeds up local experiments.
+When using a single VM of OpenShift its really handy to reuse the Docker daemon inside the VM; as this means you don't have to build on your host machine and push the image into a docker registry - you can just build inside the same docker daemon as minishift  which speeds up local experiments.
 
-To be able to work with the docker daemon on your mac/linux host use the [docker-env command](https://github.com/kubernetes/minikube/blob/master/docs/minikube_docker-env.md) in your shell:
+To be able to work with the docker daemon on your mac/linux host use the [docker-env command](./docs/minishift_docker-env.md) in your shell:
 
 ```
-eval $(minikube docker-env)
+eval $(minishift docker-env)
 ```
-you should now be able to use docker on the command line on your host mac/linux machine talking to the docker daemon inside the minikube VM:
+you should now be able to use docker on the command line on your host mac/linux machine talking to the docker daemon inside the minishift VM:
 ```
 docker ps
 ```
@@ -96,42 +96,42 @@ docker ps
 
 ### Starting a Cluster
 
-The [minikube start](./docs/minikube_start.md) command can be used to start your cluster.
+The [minishift start](./docs/minishift_start.md) command can be used to start your cluster.
 This command creates and configures a virtual machine that runs a single-node Kubernetes cluster.
-This command also configures your [kubectl](http://kubernetes.io/docs/user-guide/kubectl-overview/) installation to communicate with this cluster.
+This command also configures your [oc](http://kubernetes.io/docs/user-guide/kubectl-overview/) installation to communicate with this cluster.
 
 ### Stopping a Cluster
-The [minikube stop](./docs/minikube_stop.md) command can be used to stop your cluster.
-This command shuts down the minikube virtual machine, but preserves all cluster state and data.
+The [minishift stop](./docs/minishift_stop.md) command can be used to stop your cluster.
+This command shuts down the minishift virtual machine, but preserves all cluster state and data.
 Starting the cluster again will restore it to it's previous state.
 
 ### Deleting a Cluster
-The [minikube delete](./docs/minikube_delete.md) command can be used to delete your cluster.
-This command shuts down and deletes the minikube virtual machine. No data or state is preserved.
+The [minishift delete](./docs/minishift_delete.md) command can be used to delete your cluster.
+This command shuts down and deletes the minishift virtual machine. No data or state is preserved.
 
 ## Interacting With your Cluster
 
-### Kubectl
+### oc
 
-The `minikube start` command creates a "[kubectl context](http://kubernetes.io/docs/user-guide/kubectl/kubectl_config_set-context/)" called "minikube".
-This context contains the configuration to communicate with your minikube cluster.
+The `minishift start` command creates a "[oc context](http://kubernetes.io/docs/user-guide/kubectl/kubectl_config_set-context/)" called "minishift".
+This context contains the configuration to communicate with your minishift cluster.
 
-Minikube sets this context to default automatically, but if you need to switch back to it in the future, run:
+Minishift sets this context to default automatically, but if you need to switch back to it in the future, run:
 
-`kubectl config set-context minikube`,
+`oc config set-context minishift`,
 
-or pass the context on each command like this: `kubectl get pods --context=minikube`.
+or pass the context on each command like this: `oc get pods --context=minishift`.
 
 ### Dashboard
 
-To access the [Kubernetes Dashboard](http://kubernetes.io/docs/user-guide/ui/), run this command in a shell after starting minikube to get the address:
+To access the [OpenShift console](http://kubernetes.io/docs/user-guide/ui/), run this command in a shell after starting minishift to get the address:
 ```shell
-minikube dashboard
+minishift dashboard
 ```
 
 ## Networking
 
-The minikube VM is exposed to the host system via a host-only IP address, that can be obtained with the `minikube ip` command.
+The minishift VM is exposed to the host system via a host-only IP address, that can be obtained with the `minishift ip` command.
 Any services of type `NodePort` can be accessed over that IP address, on the NodePort.
 
 To determine the NodePort for your service, you can use a `kubectl` command like this:
@@ -140,20 +140,20 @@ To determine the NodePort for your service, you can use a `kubectl` command like
 
 ## Persistent Volumes
 
-Minikube supports [PersistentVolumes](http://kubernetes.io/docs/user-guide/persistent-volumes/) of type `hostPath`.
-These PersistentVolumes are mapped to a directory inside the minikube VM.
+Minishift supports [PersistentVolumes](http://kubernetes.io/docs/user-guide/persistent-volumes/) of type `hostPath`.
+These PersistentVolumes are mapped to a directory inside the minishift VM.
 
 ## Private Container Registries
 
 To access a private container registry, follow the steps on [this page](http://kubernetes.io/docs/user-guide/images/).
 
-We recommend you use ImagePullSecrets, but if you would like to configure access on the minikube VM you can place the `.dockercfg` in the `/home/docker` directory or the `config.json` in the `/home/docker/.docker` directory.
+We recommend you use ImagePullSecrets, but if you would like to configure access on the minishift VM you can place the `.dockercfg` in the `/home/docker` directory or the `config.json` in the `/home/docker/.docker` directory.
 
 ## Documentation
-For a list of minikube's available commands see the [full CLI docs](https://github.com/kubernetes/minikube/blob/master/docs/minikube.md).
+For a list of minishift's available commands see the [full CLI docs](https://github.com/kubernetes/minishift/blob/master/docs/minishift.md).
 
 ## Known Issues
-* Features that require a Cloud Provider will not work in Minikube. These include:
+* Features that require a Cloud Provider will not work in Minishift. These include:
   * LoadBalancers
   * PersistentVolumes
   * Ingress
@@ -163,12 +163,12 @@ For a list of minikube's available commands see the [full CLI docs](https://gith
 
 ## Design
 
-Minikube uses [libmachine](https://github.com/docker/machine/tree/master/libmachine) for provisioning VMs, and [localkube](https://github.com/kubernetes/minikube/tree/master/pkg/localkube) (originally written and donated to this project by [RedSpread](https://redspread.com/)) for running the cluster.
+Minishift uses [libmachine](https://github.com/docker/machine/tree/master/libmachine) for provisioning VMs, and [localkube](https://github.com/kubernetes/minishift/tree/master/pkg/localkube) (originally written and donated to this project by [RedSpread](https://redspread.com/)) for running the cluster.
 
-For more information about minikube, see the [proposal](https://github.com/kubernetes/kubernetes/blob/master/docs/proposals/local-cluster-ux.md).
+For more information about minishift, see the [proposal](https://github.com/kubernetes/kubernetes/blob/master/docs/proposals/local-cluster-ux.md).
 
 ## Goals and Non-Goals
-For the goals and non-goals of the minikube project, please see our [roadmap](ROADMAP.md).
+For the goals and non-goals of the minishift project, please see our [roadmap](ROADMAP.md).
 
 ## Development Guide
 
@@ -178,7 +178,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for an overview of how to send pull reque
 
 * A recent Go distribution (>1.6)
 * If you're not on Linux, you'll need a Docker installation
-* Minikube requires at least 4GB of RAM to compile, which can be problematic when using docker-machine
+* Minishift requires at least 4GB of RAM to compile, which can be problematic when using docker-machine
 
 ### Build Instructions
 
@@ -188,10 +188,10 @@ make
 
 ### Run Instructions
 
-Start the cluster using your built minikube with:
+Start the cluster using your built minishift with:
 
 ```shell
-$ ./out/minikube start
+$ ./out/minishift start
 ```
 
 ### Running Tests
@@ -216,11 +216,11 @@ make integration
 #### Conformance Tests
 
 These are kubernetes tests that run against an arbitrary cluster and exercise a wide range of kubernetes features.
-You can run these against minikube by following these steps:
+You can run these against minishift by following these steps:
 
 * Clone the kubernetes repo somewhere on your system.
 * Run `make quick-release` in the k8s repo.
-* Start up a minikube cluster with: `minikube start`.
+* Start up a minishift cluster with: `minishift start`.
 * Set these two environment variables:
 ```shell
 export KUBECONFIG=$HOME/.kube/config
@@ -233,18 +233,18 @@ go run hack/e2e.go -v --test --test_args="--ginkgo.focus=\[Conformance\]" --chec
 
 #### Adding a New Dependency
 
-Minikube uses `Godep` to manage vendored dependencies.
+Minishift uses `Godep` to manage vendored dependencies.
 `Godep` can be a bit finnicky with a project with this many dependencies.
 Here is a rough set of steps that usually works to add a new dependency.
 
-1. Make a clean GOPATH, with minikube in it.
+1. Make a clean GOPATH, with minishift in it.
 This isn't strictly necessary, but it usually helps.
 
 ```shell
 mkdir -p $HOME/newgopath/src/k8s.io
 export GOPATH=$HOME/newgopath
 cd $HOME/newgopath/src/k8s.io
-git clone https://github.com/kubernetes/minikube.git
+git clone https://github.com/kubernetes/minishift.git
 ```
 
 2. `go get` your new dependency.
@@ -273,20 +273,20 @@ git commit -m "Adding cool feature"
 
 To update Kubernetes, follow these steps:
 
-1. Make a clean GOPATH, with minikube in it.
+1. Make a clean GOPATH, with minishift in it.
 This isn't strictly necessary, but it usually helps.
 
  ```shell
  mkdir -p $HOME/newgopath/src/k8s.io
  export GOPATH=$HOME/newgopath
  cd $HOME/newgopath/src/k8s.io
- git clone https://github.com/kubernetes/minikube.git
+ git clone https://github.com/kubernetes/minishift.git
  ```
 
 2. Copy your vendor directory back out to the new GOPATH.
 
  ```shell
- cd minikube
+ cd minishift
  godep restore ./...
  ```
 
@@ -318,12 +318,12 @@ Make sure to also fetch tags, as Godep relies on these.
  godep restore ./...
  ```
 
-4. Build and test minikube, making any manual changes necessary to build.
+4. Build and test minishift, making any manual changes necessary to build.
 
 5. Update godeps
 
  ```shell
- cd $GOPATH/src/k8s.io/minikube
+ cd $GOPATH/src/k8s.io/minishift
  rm -rf Godeps/ vendor/
  godep save ./...
  ```
@@ -332,15 +332,15 @@ Make sure to also fetch tags, as Godep relies on these.
 
  ```shell
  python hack/get_k8s_version.py
- -X k8s.io/minikube/vendor/k8s.io/kubernetes/pkg/version.gitCommit=caf9a4d87700ba034a7b39cced19bd5628ca6aa3 -X k8s.io/minikube/vendor/k8s.io/kubernetes/pkg/version.gitVersion=v1.3.0-beta.2 -X k8s.io/minikube/vendor/k8s.io/kubernetes/pkg/version.gitTreeState=clean
+ -X k8s.io/minishift/vendor/k8s.io/kubernetes/pkg/version.gitCommit=caf9a4d87700ba034a7b39cced19bd5628ca6aa3 -X k8s.io/minishift/vendor/k8s.io/kubernetes/pkg/version.gitVersion=v1.3.0-beta.2 -X k8s.io/minishift/vendor/k8s.io/kubernetes/pkg/version.gitTreeState=clean
 ```
 
-The `-X k8s.io/minikube/vendor/k8s.io/kubernetes/pkg/version.gitVersion` flag should contain the right tag.
+The `-X k8s.io/minishift/vendor/k8s.io/kubernetes/pkg/version.gitVersion` flag should contain the right tag.
 
-Once you've build and started minikube, you can also run:
+Once you've build and started minishift, you can also run:
 
 ```shell
-kubectl version
+oc version
 Client Version: version.Info{Major:"1", Minor:"2", GitVersion:"v1.2.4", GitCommit:"3eed1e3be6848b877ff80a93da3785d9034d0a4f", GitTreeState:"clean"}
 Server Version: version.Info{Major:"1", Minor:"3+", GitVersion:"v1.3.0-beta.2", GitCommit:"caf9a4d87700ba034a7b39cced19bd5628ca6aa3", GitTreeState:"clean"}
 ```
@@ -359,4 +359,4 @@ git commit -m "Manual changes to update Kubernetes to foo"
 
 ## Community
 
-Contributions, questions, and comments are all welcomed and encouraged! minkube developers hang out on [Slack](https://kubernetes.slack.com) in the #minikube channel (get an invitation [here](http://slack.kubernetes.io/)). We also have the [kubernetes-dev Google Groups mailing list](https://groups.google.com/forum/#!forum/kubernetes-dev). If you are posting to the list please prefix your subject with "minikube: ".
+Contributions, questions, and comments are all welcomed and encouraged! minishift developers hang out on [Slack](https://kubernetes.slack.com) in the #minishift channel (get an invitation [here](http://slack.kubernetes.io/)). We also have the [kubernetes-dev Google Groups mailing list](https://groups.google.com/forum/#!forum/kubernetes-dev). If you are posting to the list please prefix your subject with "minishift: ".

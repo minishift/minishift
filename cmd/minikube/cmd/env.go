@@ -50,7 +50,7 @@ func buildDockerEnvShellOutput(envMap map[string]string) string {
 	for env_name, env_val := range envMap {
 		output += fmt.Sprintf("export %s=%s\n", env_name, env_val)
 	}
-	howToRun := "# Run this command to configure your shell: \n# eval $(minikube docker-env)"
+	howToRun := "# Run this command to configure your shell: \n# eval $(minishift docker-env)"
 	output += howToRun
 	return output
 }

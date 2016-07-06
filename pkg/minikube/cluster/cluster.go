@@ -189,28 +189,10 @@ type fileToCopy struct {
 
 var assets = []fileToCopy{
 	{
-		AssetName:   "out/localkube",
+		AssetName:   "out/openshift",
 		TargetDir:   "/usr/local/bin",
-		TargetName:  "localkube",
+		TargetName:  "openshift",
 		Permissions: "0777",
-	},
-	{
-		AssetName:   "deploy/iso/addon-manager.yaml",
-		TargetDir:   "/etc/kubernetes/manifests/",
-		TargetName:  "addon-manager.yaml",
-		Permissions: "0640",
-	},
-	{
-		AssetName:   "deploy/addons/dashboard-rc.yaml",
-		TargetDir:   "/etc/kubernetes/addons/",
-		TargetName:  "dashboard-rc.yaml",
-		Permissions: "0640",
-	},
-	{
-		AssetName:   "deploy/addons/dashboard-svc.yaml",
-		TargetDir:   "/etc/kubernetes/addons/",
-		TargetName:  "dashboard-svc.yaml",
-		Permissions: "0640",
 	},
 }
 
@@ -336,7 +318,7 @@ func GetHostDockerEnv(api libmachine.API) (map[string]string, error) {
 	return envMap, nil
 }
 
-// GetHostLogs gets the localkube logs of the host VM.
+// GetHostLogs gets the openshift logs of the host VM.
 func GetHostLogs(api libmachine.API) (string, error) {
 	host, err := checkIfApiExistsAndLoad(api)
 	if err != nil {
@@ -398,12 +380,7 @@ func GetDashboardURL(api libmachine.API) (string, error) {
 		return "", err
 	}
 
-	port, err := getDashboardPort()
-	if err != nil {
-		return "", err
-	}
-
-	return fmt.Sprintf("http://%s:%d", ip, port), nil
+	return fmt.Sprintf("https://%s", ip), nil
 }
 
 type serviceGetter interface {

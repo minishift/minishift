@@ -16,10 +16,10 @@ limitations under the License.
 
 package util
 
-// These constants are used by both minikube and localkube
+// These constants are used by both minikube and openshift
 const (
-	DefaultLocalkubeDirectory = "/var/lib/localkube"
-	DefaultCertPath           = DefaultLocalkubeDirectory + "/certs/"
+	DefaultOpenShiftDirectory = "/var/lib/openshift"
+	DefaultCertPath           = DefaultOpenShiftDirectory + "/openshift.local.config/master/"
 	DefaultServiceClusterIP   = "10.0.0.1"
 	DefaultDNSDomain          = "cluster.local"
 	DefaultDNSIP              = "10.0.0.10"

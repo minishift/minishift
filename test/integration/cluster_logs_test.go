@@ -19,10 +19,11 @@ limitations under the License.
 package integration
 
 import (
-	"k8s.io/minikube/pkg/minikube/constants"
-	"k8s.io/minikube/test/integration/util"
 	"strings"
 	"testing"
+
+	"k8s.io/minikube/pkg/minikube/constants"
+	"k8s.io/minikube/test/integration/util"
 )
 
 func TestClusterLogs(t *testing.T) {
@@ -34,7 +35,7 @@ func TestClusterLogs(t *testing.T) {
 
 	logsCmdOutput := minikubeRunner.RunCommand("logs", true)
 	//check for # of lines or check for strings
-	logFiles := []string{constants.RemoteLocalKubeErrPath, constants.RemoteLocalKubeOutPath}
+	logFiles := []string{constants.RemoteOpenShiftErrPath, constants.RemoteOpenShiftOutPath}
 	for _, logFile := range logFiles {
 		if !strings.Contains(logsCmdOutput, logFile) {
 			t.Fatalf("Error in logsCmdOutput, expected to find: %s. Output: %s", logFile, logsCmdOutput)

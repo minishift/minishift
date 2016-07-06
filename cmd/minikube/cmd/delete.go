@@ -29,11 +29,11 @@ import (
 // deleteCmd represents the delete command
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "Deletes a local kubernetes cluster.",
-	Long: `Deletes a local kubernetes cluster. This command deletes the VM, and removes all
+	Short: "Deletes a local OpenShift cluster.",
+	Long: `Deletes a local OpenShift cluster. This command deletes the VM, and removes all
 associated files.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Deleting local Kubernetes cluster...")
+		fmt.Println("Deleting local OpenShift cluster...")
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()
 

@@ -42,14 +42,14 @@ var (
 // startCmd represents the start command
 var startCmd = &cobra.Command{
 	Use:   "start",
-	Short: "Starts a local kubernetes cluster.",
-	Long: `Starts a local kubernetes cluster using Virtualbox. This command
+	Short: "Starts a local OpenShift cluster.",
+	Long: `Starts a local OpenShift cluster using Virtualbox. This command
 assumes you already have Virtualbox installed.`,
 	Run: runStart,
 }
 
 func runStart(cmd *cobra.Command, args []string) {
-	fmt.Println("Starting local Kubernetes cluster...")
+	fmt.Println("Starting local OpenShift cluster...")
 	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 	defer api.Close()
 
@@ -92,7 +92,7 @@ func runStart(cmd *cobra.Command, args []string) {
 	}
 	kubeHost = strings.Replace(kubeHost, "tcp://", "https://", -1)
 	kubeHost = strings.Replace(kubeHost, ":2376", ":443", -1)
-	fmt.Printf("Kubernetes is available at %s.\n", kubeHost)
+	fmt.Printf("OpenShift is available at %s.\n", kubeHost)
 
 	// setup kubeconfig
 	name := constants.MinikubeContext
@@ -103,10 +103,13 @@ func runStart(cmd *cobra.Command, args []string) {
 		glog.Errorln("Error setting up kubeconfig: ", err)
 		os.Exit(1)
 	} else if !active {
-		fmt.Println("Run this command to use the cluster: ")
-		fmt.Printf("kubectl config use-context %s\n", name)
+		fmt.Println("Run these commands to use the cluster: ")
+		fmt.Printf("oc config use-context %s\n", name)
+		fmt.Println("oc login --username=admin --password=admin --insecure-tls-skip-verify")
 	} else {
-		fmt.Println("Kubectl is now configured to use the cluster.")
+		fmt.Println("oc is now configured to use the cluster.")
+		fmt.Println("Run this command to login: ")
+		fmt.Println("oc login --username=admin --password=admin --insecure-tls-skip-verify")
 	}
 }
 

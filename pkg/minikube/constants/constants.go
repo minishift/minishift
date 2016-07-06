@@ -24,27 +24,26 @@ import (
 )
 
 // MachineName is the name to use for the VM.
-const MachineName = "minikubeVM"
+const MachineName = "minishiftVM"
 
 // Fix for windows
-var Minipath = filepath.Join(homedir.HomeDir(), ".minikube")
+var Minipath = filepath.Join(homedir.HomeDir(), ".minishift")
 
 // TODO: Fix for windows
 // KubeconfigPath is the path to the Kubernetes client config
 var KubeconfigPath = clientcmd.RecommendedHomeFile
 
-// MinikubeContext is the kubeconfig context name used for minikube
-const MinikubeContext = "minikube"
+// MinikubeContext is the kubeconfig context name used for minishift
+const MinikubeContext = "minishift"
 
 // MakeMiniPath is a utility to calculate a relative path to our directory.
 func MakeMiniPath(fileName string) string {
 	return filepath.Join(Minipath, fileName)
 }
 
-// Only pass along these flags to localkube.
+// Only pass along these flags to openshift.
 var LogFlags = [...]string{
-	"v",
-	"vmodule",
+	"loglevel",
 }
 
 var SupportedVMDrivers = [...]string{
@@ -62,8 +61,8 @@ const (
 )
 
 const (
-	RemoteLocalKubeErrPath = "/var/log/localkube.err"
-	RemoteLocalKubeOutPath = "/var/log/localkube.out"
+	RemoteOpenShiftErrPath = "/var/log/openshift.err"
+	RemoteOpenShiftOutPath = "/var/log/openshift.out"
 )
 
 var ConfigFilePath = MakeMiniPath("config")

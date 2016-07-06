@@ -35,39 +35,33 @@ endif
 PYTHON := $(shell command -v python || echo "docker run --rm -it -v $(shell pwd):/minikube -w /minikube python python")
 BUILD_OS := $(shell uname -s)
 
-# Set the version information for the Kubernetes servers, and build localkube statically
+# Set the version information for the Kubernetes servers
 K8S_VERSION_LDFLAGS := $(shell $(PYTHON) hack/get_k8s_version.py 2>&1)
 MINIKUBE_LDFLAGS := -X k8s.io/minikube/pkg/version.version=$(VERSION)
-LOCALKUBE_LDFLAGS := "$(K8S_VERSION_LDFLAGS) $(MINIKUBE_LDFLAGS) -s -w -extldflags '-static'"
 
 MKGOPATH := mkdir -p $(shell dirname $(GOPATH)/src/$(REPOPATH)) && ln -s -f $(shell pwd) $(GOPATH)/src/$(REPOPATH)
 
-LOCALKUBEFILES := $(shell go list  -f '{{join .Deps "\n"}}' ./cmd/localkube/ | grep k8s.io | xargs go list -f '{{ range $$file := .GoFiles }} {{$$.Dir}}/{{$$file}}{{"\n"}}{{end}}')
 MINIKUBEFILES := $(shell go list  -f '{{join .Deps "\n"}}' ./cmd/minikube/ | grep k8s.io | xargs go list -f '{{ range $$file := .GoFiles }} {{$$.Dir}}/{{$$file}}{{"\n"}}{{end}}')
 
-out/minikube: out/minikube-$(GOOS)-$(GOARCH)
-	cp $(BUILD_DIR)/minikube-$(GOOS)-$(GOARCH) $(BUILD_DIR)/minikube
+out/minishift: out/minishift-$(GOOS)-$(GOARCH)
+	cp $(BUILD_DIR)/minishift-$(GOOS)-$(GOARCH) $(BUILD_DIR)/minishift
 
-out/localkube: $(LOCALKUBEFILES)
+out/openshift: get_openshift.go
 	$(MKGOPATH)
-ifeq ($(BUILD_OS),Linux)
-	CGO_ENABLED=1 go build -ldflags=$(LOCALKUBE_LDFLAGS) -o $(BUILD_DIR)/localkube ./cmd/localkube
-else
-	docker run -w /go/src/$(REPOPATH) -e IN_DOCKER=1 -v $(shell pwd):/go/src/$(REPOPATH) $(BUILD_IMAGE) make out/localkube
-endif
+	mkdir -p $(GOPATH)/src/github.com
+	ln -s $(shell pwd)/vendor/github.com/google $(GOPATH)/src/github.com/google
+	mkdir out || true
+	go run get_openshift.go
 
-out/minikube-$(GOOS)-$(GOARCH): $(MINIKUBEFILES) pkg/minikube/cluster/assets.go
+out/minishift-$(GOOS)-$(GOARCH): $(MINIKUBEFILES) pkg/minikube/cluster/assets.go
 	$(MKGOPATH)
-	CGO_ENABLED=0 GOARCH=$(GOARCH) GOOS=$(GOOS) go build --installsuffix cgo -ldflags="$(MINIKUBE_LDFLAGS)" -a -o $(BUILD_DIR)/minikube-$(GOOS)-$(GOARCH) ./cmd/minikube
-
-localkube-image: out/localkube
-	make -C deploy/docker VERSION=$(VERSION)
+	CGO_ENABLED=0 GOARCH=$(GOARCH) GOOS=$(GOOS) go build --installsuffix cgo -ldflags="$(MINIKUBE_LDFLAGS)" -a -o $(BUILD_DIR)/minishift-$(GOOS)-$(GOARCH) ./cmd/minikube
 
 iso:
 	cd deploy/iso && ./build.sh
 
 .PHONY: integration
-integration: out/minikube
+integration: out/minishift
 	go test -v $(REPOPATH)/test/integration --tags=integration
 
 .PHONY: test
@@ -75,8 +69,8 @@ test: pkg/minikube/cluster/assets.go
 	$(MKGOPATH)
 	./test.sh
 
-pkg/minikube/cluster/assets.go: out/localkube $(GOPATH)/bin/go-bindata deploy/iso/addon-manager.yaml deploy/addons/dashboard-rc.yaml deploy/addons/dashboard-svc.yaml
-	$(GOPATH)/bin/go-bindata -nomemcopy -o pkg/minikube/cluster/assets.go -pkg cluster ./out/localkube deploy/iso/addon-manager.yaml deploy/addons/dashboard-rc.yaml deploy/addons/dashboard-svc.yaml
+pkg/minikube/cluster/assets.go: out/openshift $(GOPATH)/bin/go-bindata
+	$(GOPATH)/bin/go-bindata -nomemcopy -o pkg/minikube/cluster/assets.go -pkg cluster ./out/openshift
 
 $(GOPATH)/bin/go-bindata:
 	$(MKGOPATH)
@@ -85,4 +79,4 @@ $(GOPATH)/bin/go-bindata:
 clean:
 	rm -rf $(GOPATH)
 	rm -rf $(BUILD_DIR)
-	rm pkg/minikube/cluster/assets.go
+	rm pkg/minikube/cluster/assets.go || true

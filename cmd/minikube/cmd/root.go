@@ -42,13 +42,13 @@ var (
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "minikube",
-	Short: "Minikube is a tool for managing local Kubernetes clusters.",
-	Long:  `Minikube is a CLI tool that provisions and manages single-node Kubernetes clusters optimized for development workflows.`,
+	Use:   "minishift",
+	Short: "Minishift is a tool for managing local OpenShift clusters.",
+	Long:  `Minishift is a CLI tool that provisions and manages single-node OpenShift clusters optimized for development workflows.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		for _, path := range dirs {
 			if err := os.MkdirAll(path, 0777); err != nil {
-				glog.Exitf("Error creating minikube directory: %s", err)
+				glog.Exitf("Error creating minishift directory: %s", err)
 			}
 		}
 

@@ -50,7 +50,7 @@ out/openshift: get_openshift.go
 	$(MKGOPATH)
 	mkdir -p $(GOPATH)/src/github.com
 	ln -s -f $(shell pwd)/vendor/github.com/google $(GOPATH)/src/github.com/google
-	mkdir out || true
+	mkdir out 2>/dev/null || true
 	go run get_openshift.go v1.3.0-alpha.2
 
 out/minishift-$(GOOS)-$(GOARCH): $(MINIKUBEFILES) pkg/minikube/cluster/assets.go

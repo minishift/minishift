@@ -105,11 +105,11 @@ func runStart(cmd *cobra.Command, args []string) {
 	} else if !active {
 		fmt.Println("Run these commands to use the cluster: ")
 		fmt.Printf("oc config use-context %s\n", name)
-		fmt.Println("oc login --username=admin --password=admin --insecure-tls-skip-verify")
+		fmt.Println("oc login --username=admin --password=admin --insecure-skip-tls-verify")
 	} else {
 		fmt.Println("oc is now configured to use the cluster.")
 		fmt.Println("Run this command to login: ")
-		fmt.Println("oc login --username=admin --password=admin --insecure-tls-skip-verify")
+		fmt.Println("oc login --username=admin --password=admin --insecure-skip-tls-verify")
 	}
 }
 

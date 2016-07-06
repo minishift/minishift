@@ -29,7 +29,7 @@ import (
 )
 
 var (
-	urlMode bool
+	dashboardURLMode bool
 )
 
 // dashboardCmd represents the dashboard command
@@ -42,10 +42,10 @@ var dashboardCmd = &cobra.Command{
 		defer api.Close()
 		url, err := cluster.GetDashboardURL(api)
 		if err != nil {
-			glog.Errorln("Error accessing the kubernetes dashboard (is minikube running?): Error: ", err)
+			glog.Errorln("Error accessing the kubernetes dashboard (is minishift running?): Error: ", err)
 			os.Exit(1)
 		}
-		if urlMode {
+		if dashboardURLMode {
 			fmt.Fprintln(os.Stdout, url)
 		} else {
 			fmt.Fprintln(os.Stdout, "Opening kubernetes dashboard in default browser...")
@@ -55,6 +55,6 @@ var dashboardCmd = &cobra.Command{
 }
 
 func init() {
-	dashboardCmd.Flags().BoolVarP(&urlMode, "url", "", false, "Display the kubernetes dashboard in the CLI instead of opening it in the default browser")
+	dashboardCmd.Flags().BoolVar(&dashboardURLMode, "url", false, "Display the kubernetes dashboard in the CLI instead of opening it in the default browser")
 	RootCmd.AddCommand(dashboardCmd)
 }

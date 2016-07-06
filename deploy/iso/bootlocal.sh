@@ -18,5 +18,5 @@
 BOOT2DOCKER_DATA=`blkid -o device -l -t LABEL=boot2docker-data`
 PARTNAME=`echo "$BOOT2DOCKER_DATA" | sed 's/.*\///'`
 
-mkdir -p /mnt/$PARTNAME/var/lib/openshift
-ln -s /mnt/$PARTNAME/var/lib/openshift /var/lib/openshift
+mkdir -p /mnt/$PARTNAME/var/lib/localkube
+ln -s /mnt/$PARTNAME/var/lib/localkube /var/lib/localkube

@@ -27,6 +27,7 @@ Minishift is a CLI tool that provisions and manages single-node OpenShift cluste
 * [minishift docker-env](minishift_docker-env.md)	 - sets up docker env variables; similar to '$(docker-machine env)'
 * [minishift ip](minishift_ip.md)	 - Retrieve the IP address of the running cluster.
 * [minishift logs](minishift_logs.md)	 - Gets the logs of the running OpenShift instance, used for debugging minikube, not user code.
+* [minishift service](minishift_service.md)	 - Gets the URL for the specified service in your local cluster
 * [minishift ssh](minishift_ssh.md)	 - Log into or run a command on a machine with SSH; similar to 'docker-machine ssh'
 * [minishift start](minishift_start.md)	 - Starts a local OpenShift cluster.
 * [minishift status](minishift_status.md)	 - Gets the status of a local OpenShift cluster.

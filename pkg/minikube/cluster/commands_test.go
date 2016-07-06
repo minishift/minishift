@@ -16,13 +16,7 @@ limitations under the License.
 
 package cluster
 
-import (
-	gflag "flag"
-	"fmt"
-	"strings"
-	"testing"
-)
-
+/*
 func TestGetStartCommandCustomValues(t *testing.T) {
 	flagMap := map[string]string{
 		"v":       "10",
@@ -47,3 +41,4 @@ func flagMapToSetFlags(flagMap map[string]string) {
 func getSingleFlagValue(flag, val string) string {
 	return fmt.Sprintf("--%s %s", flag, val)
 }
+*/

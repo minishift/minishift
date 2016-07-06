@@ -1,24 +1,21 @@
-## minishift start
+## minishift service
 
-Starts a local OpenShift cluster.
+Gets the URL for the specified service in your local cluster
 
 ### Synopsis
 
 
-Starts a local OpenShift cluster using Virtualbox. This command
-assumes you already have Virtualbox installed.
+Gets the URL for the specified service in your local cluster
 
 ```
-minishift start
+minishift service [flags] SERVICE
 ```
 
 ### Options
 
 ```
-      --cpus=1: Number of CPUs allocated to the minikube VM
-      --iso-url="https://storage.googleapis.com/minikube/minikube-0.5.iso": Location of the minikube iso
-      --memory=1024: Amount of RAM allocated to the minikube VM
-      --vm-driver="kvm": VM driver is one of: [virtualbox kvm]
+  -n, --namespace="default": The service namespace
+      --url[=false]: Display the kubernetes service URL in the CLI instead of opening it in the default browser
 ```
 
 ### Options inherited from parent commands

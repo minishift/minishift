@@ -16,7 +16,7 @@
 export GO15VENDOREXPERIMENT=1
 
 # Bump this on release
-VERSION ?= v0.4.0
+VERSION ?= v0.5.0
 
 GOOS ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)
@@ -41,7 +41,7 @@ MINIKUBE_LDFLAGS := -X github.com/jimmidyson/minishift/pkg/version.version=$(VER
 
 MKGOPATH := mkdir -p $(shell dirname $(GOPATH)/src/$(REPOPATH)) && ln -s -f $(shell pwd) $(GOPATH)/src/$(REPOPATH)
 
-MINIKUBEFILES := $(shell go list  -f '{{join .Deps "\n"}}' ./cmd/minikube/ | grep k8s.io | xargs go list -f '{{ range $$file := .GoFiles }} {{$$.Dir}}/{{$$file}}{{"\n"}}{{end}}')
+MINIKUBEFILES := $(shell go list  -f '{{join .Deps "\n"}}' ./cmd/minikube/ | grep github.com/jimmidyson/minishift | xargs go list -f '{{ range $$file := .GoFiles }} {{$$.Dir}}/{{$$file}}{{"\n"}}{{end}}')
 
 out/minishift: out/minishift-$(GOOS)-$(GOARCH)
 	cp $(BUILD_DIR)/minishift-$(GOOS)-$(GOARCH) $(BUILD_DIR)/minishift

@@ -383,24 +383,43 @@ func GetDashboardURL(api libmachine.API) (string, error) {
 	return fmt.Sprintf("https://%s", ip), nil
 }
 
+func GetServiceURL(api libmachine.API, namespace, service string) (string, error) {
+	host, err := checkIfApiExistsAndLoad(api)
+	if err != nil {
+		return "", err
+	}
+
+	ip, err := host.Driver.GetIP()
+	if err != nil {
+		return "", err
+	}
+
+	port, err := getServicePort(namespace, service)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("http://%s:%d", ip, port), nil
+}
+
 type serviceGetter interface {
 	Get(name string) (*kubeApi.Service, error)
 }
 
-func getDashboardPort() (int, error) {
-	services, err := getKubernetesServicesWithNamespace("kube-system")
+func getServicePort(namespace, service string) (int, error) {
+	services, err := getKubernetesServicesWithNamespace(namespace)
 	if err != nil {
 		return 0, err
 	}
-	return getDashboardPortFromServiceGetter(services)
+	return getServicePortFromServiceGetter(services, service)
 }
 
-func getDashboardPortFromServiceGetter(services serviceGetter) (int, error) {
-	dashboardService, err := services.Get("kubernetes-dashboard")
+func getServicePortFromServiceGetter(services serviceGetter, service string) (int, error) {
+	svc, err := services.Get(service)
 	if err != nil {
-		return 0, fmt.Errorf("Error getting kubernetes-dashboard service: %s", err)
+		return 0, fmt.Errorf("Error getting %s service: %s", service, err)
 	}
-	return int(dashboardService.Spec.Ports[0].NodePort), nil
+	return int(svc.Spec.Ports[0].NodePort), nil
 }
 
 func getKubernetesServicesWithNamespace(namespace string) (serviceGetter, error) {

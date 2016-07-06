@@ -1,4 +1,4 @@
-# Copyright 2016 The Kubernetes Authors All rights reserved.
+# Copyright (C) 2016 Red Hat, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,9 +49,9 @@ out/minishift: out/minishift-$(GOOS)-$(GOARCH)
 out/openshift: get_openshift.go
 	$(MKGOPATH)
 	mkdir -p $(GOPATH)/src/github.com
-	ln -s $(shell pwd)/vendor/github.com/google $(GOPATH)/src/github.com/google
+	ln -s -f $(shell pwd)/vendor/github.com/google $(GOPATH)/src/github.com/google
 	mkdir out || true
-	go run get_openshift.go
+	go run get_openshift.go v1.3.0-alpha.2
 
 out/minishift-$(GOOS)-$(GOARCH): $(MINIKUBEFILES) pkg/minikube/cluster/assets.go
 	$(MKGOPATH)

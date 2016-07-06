@@ -19,7 +19,7 @@ limitations under the License.
 package integration
 
 import (
-	"k8s.io/minikube/test/integration/util"
+	"github.com/jimmidyson/minishift/test/integration/util"
 	"strings"
 	"testing"
 )

@@ -19,7 +19,7 @@ package cluster
 import (
 	"net"
 
-	"k8s.io/minikube/pkg/util"
+	"github.com/jimmidyson/minishift/pkg/util"
 )
 
 var (

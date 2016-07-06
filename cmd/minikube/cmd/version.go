@@ -21,7 +21,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"k8s.io/minikube/pkg/version"
+	"github.com/jimmidyson/minishift/pkg/version"
 )
 
 var versionCmd = &cobra.Command{

@@ -1,5 +1,5 @@
 {
-	"ImportPath": "k8s.io/minikube",
+	"ImportPath": "github.com/jimmidyson/minishift",
 	"GoVersion": "go1.6",
 	"GodepVersion": "v74",
 	"Packages": [

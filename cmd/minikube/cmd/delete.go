@@ -21,9 +21,9 @@ import (
 	"os"
 
 	"github.com/docker/machine/libmachine"
+	"github.com/jimmidyson/minishift/pkg/minikube/cluster"
+	"github.com/jimmidyson/minishift/pkg/minikube/constants"
 	"github.com/spf13/cobra"
-	"k8s.io/minikube/pkg/minikube/cluster"
-	"k8s.io/minikube/pkg/minikube/constants"
 )
 
 // deleteCmd represents the delete command

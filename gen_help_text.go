@@ -17,8 +17,8 @@ limitations under the License.
 package main
 
 import (
+	"github.com/jimmidyson/minishift/cmd/minikube/cmd"
 	"github.com/spf13/cobra/doc"
-	"k8s.io/minikube/cmd/minikube/cmd"
 )
 
 func main() {

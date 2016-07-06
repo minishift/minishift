@@ -28,10 +28,10 @@ import (
 	"time"
 
 	"github.com/blang/semver"
+	"github.com/jimmidyson/minishift/pkg/minikube/config"
+	"github.com/jimmidyson/minishift/pkg/minikube/tests"
+	"github.com/jimmidyson/minishift/pkg/version"
 	"github.com/spf13/viper"
-	"k8s.io/minikube/pkg/minikube/config"
-	"k8s.io/minikube/pkg/minikube/tests"
-	"k8s.io/minikube/pkg/version"
 )
 
 func TestShouldCheckURL(t *testing.T) {

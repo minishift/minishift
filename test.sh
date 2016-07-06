@@ -16,7 +16,7 @@
 
 set -e
 
-REPO_PATH="k8s.io/minikube"
+REPO_PATH="github.com/jimmidyson/minishift"
 
 # Check for python on host, and use it if possible, otherwise fall back on python dockerized
 if [[ -f $(which python 2>&1) ]]; then

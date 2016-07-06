@@ -27,10 +27,10 @@ import (
 
 	"github.com/blang/semver"
 	"github.com/golang/glog"
+	"github.com/jimmidyson/minishift/pkg/minikube/config"
+	"github.com/jimmidyson/minishift/pkg/minikube/constants"
+	"github.com/jimmidyson/minishift/pkg/version"
 	"github.com/spf13/viper"
-	"k8s.io/minikube/pkg/minikube/config"
-	"k8s.io/minikube/pkg/minikube/constants"
-	"k8s.io/minikube/pkg/version"
 )
 
 const updateLinkPrefix = "https://github.com/kubernetes/minikube/releases/tag/v"

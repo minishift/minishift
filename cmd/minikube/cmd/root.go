@@ -23,12 +23,12 @@ import (
 
 	"github.com/docker/machine/libmachine/log"
 	"github.com/golang/glog"
+	"github.com/jimmidyson/minishift/pkg/minikube/config"
+	"github.com/jimmidyson/minishift/pkg/minikube/constants"
+	"github.com/jimmidyson/minishift/pkg/minikube/notify"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"k8s.io/minikube/pkg/minikube/config"
-	"k8s.io/minikube/pkg/minikube/constants"
-	"k8s.io/minikube/pkg/minikube/notify"
 )
 
 var dirs = [...]string{

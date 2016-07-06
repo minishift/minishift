@@ -23,7 +23,7 @@ import (
 )
 
 // The current version of the minikube and openshift
-// This is a private field and should be set when compiling with --ldflags="-X k8s.io/minikube/pkg/version.version=vX.Y.Z"
+// This is a private field and should be set when compiling with --ldflags="-X github.com/jimmidyson/minishift/pkg/version.version=vX.Y.Z"
 const VersionPrefix = "v"
 
 var version = "v0.0.0-unset"

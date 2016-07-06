@@ -24,12 +24,12 @@ import (
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/host"
 	"github.com/golang/glog"
+	"github.com/jimmidyson/minishift/pkg/minikube/cluster"
+	"github.com/jimmidyson/minishift/pkg/minikube/constants"
+	"github.com/jimmidyson/minishift/pkg/minikube/kubeconfig"
+	"github.com/jimmidyson/minishift/pkg/util"
 	"github.com/spf13/cobra"
 	cfg "k8s.io/kubernetes/pkg/client/unversioned/clientcmd/api"
-	"k8s.io/minikube/pkg/minikube/cluster"
-	"k8s.io/minikube/pkg/minikube/constants"
-	"k8s.io/minikube/pkg/minikube/kubeconfig"
-	"k8s.io/minikube/pkg/util"
 )
 
 var (

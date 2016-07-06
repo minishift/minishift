@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"strings"
 
-	"k8s.io/minikube/pkg/minikube/constants"
+	"github.com/jimmidyson/minishift/pkg/minikube/constants"
 )
 
 // Kill any running instances.

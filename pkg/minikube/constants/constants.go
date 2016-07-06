@@ -43,7 +43,8 @@ func MakeMiniPath(fileName string) string {
 
 // Only pass along these flags to openshift.
 var LogFlags = [...]string{
-	"loglevel",
+	"v",
+	"vmodule",
 }
 
 var SupportedVMDrivers = [...]string{

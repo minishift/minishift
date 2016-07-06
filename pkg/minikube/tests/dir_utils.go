@@ -20,7 +20,7 @@ import (
 	"io/ioutil"
 	"log"
 
-	"k8s.io/minikube/pkg/minikube/constants"
+	"github.com/jimmidyson/minishift/pkg/minikube/constants"
 )
 
 func MakeTempDir() string {

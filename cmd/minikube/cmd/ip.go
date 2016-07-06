@@ -22,7 +22,7 @@ import (
 
 	"github.com/docker/machine/libmachine"
 	"github.com/golang/glog"
-	"k8s.io/minikube/pkg/minikube/constants"
+	"github.com/jimmidyson/minishift/pkg/minikube/constants"
 
 	"github.com/spf13/cobra"
 )

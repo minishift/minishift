@@ -21,7 +21,7 @@ import subprocess
 import sys
 
 K8S_PACKAGE = 'k8s.io/kubernetes/'
-X_ARG_BASE = '-X k8s.io/minikube/vendor/k8s.io/kubernetes/pkg/version.'
+X_ARG_BASE = '-X github.com/jimmidyson/minishift/vendor/k8s.io/kubernetes/pkg/version.'
 
 def get_rev():
   return 'gitCommit=%s' % get_from_godep('Rev')

@@ -21,7 +21,7 @@ VERSION ?= v0.4.0
 GOOS ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)
 BUILD_DIR ?= ./out
-REPOPATH ?= k8s.io/minikube
+REPOPATH ?= github.com/jimmidyson/minishift
 BUILD_IMAGE ?= gcr.io/google_containers/kube-cross:v1.6.2-1
 
 ifeq ($(IN_DOCKER),1)
@@ -37,7 +37,7 @@ BUILD_OS := $(shell uname -s)
 
 # Set the version information for the Kubernetes servers
 K8S_VERSION_LDFLAGS := $(shell $(PYTHON) hack/get_k8s_version.py 2>&1)
-MINIKUBE_LDFLAGS := -X k8s.io/minikube/pkg/version.version=$(VERSION)
+MINIKUBE_LDFLAGS := -X github.com/jimmidyson/minishift/pkg/version.version=$(VERSION)
 
 MKGOPATH := mkdir -p $(shell dirname $(GOPATH)/src/$(REPOPATH)) && ln -s -f $(shell pwd) $(GOPATH)/src/$(REPOPATH)
 

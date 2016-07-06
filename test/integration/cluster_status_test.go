@@ -23,9 +23,9 @@ import (
 	"testing"
 	"time"
 
+	commonutil "github.com/jimmidyson/minishift/pkg/util"
+	"github.com/jimmidyson/minishift/test/integration/util"
 	"k8s.io/kubernetes/pkg/api"
-	commonutil "k8s.io/minikube/pkg/util"
-	"k8s.io/minikube/test/integration/util"
 )
 
 func TestClusterStatus(t *testing.T) {

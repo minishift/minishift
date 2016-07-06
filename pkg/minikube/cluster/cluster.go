@@ -33,12 +33,12 @@ import (
 	"github.com/docker/machine/libmachine/host"
 	"github.com/docker/machine/libmachine/state"
 	"github.com/golang/glog"
+	"github.com/jimmidyson/minishift/pkg/minikube/constants"
+	"github.com/jimmidyson/minishift/pkg/minikube/sshutil"
+	"github.com/jimmidyson/minishift/pkg/util"
 	kubeApi "k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/client/unversioned"
 	"k8s.io/kubernetes/pkg/client/unversioned/clientcmd"
-	"k8s.io/minikube/pkg/minikube/constants"
-	"k8s.io/minikube/pkg/minikube/sshutil"
-	"k8s.io/minikube/pkg/util"
 )
 
 var (

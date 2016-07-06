@@ -23,8 +23,8 @@ import (
 	"testing"
 	"time"
 
-	commonutil "k8s.io/minikube/pkg/util"
-	"k8s.io/minikube/test/integration/util"
+	commonutil "github.com/jimmidyson/minishift/pkg/util"
+	"github.com/jimmidyson/minishift/test/integration/util"
 )
 
 func TestClusterEnv(t *testing.T) {

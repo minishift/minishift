@@ -56,10 +56,10 @@ echo "Checking help documentation..."
 if [[ $(git diff) ]]; then
   echo "Skipping help text check because the git state is dirty."
 else
-  go run gen_help_text.go
+  go run -ldflags="-X github.com/jimmidyson/minishift/pkg/version.version=$(cat VERSION)" gen_help_text.go
   files=$(git diff)
   if [[ $files ]]; then
-    echo "Help text is out of date: $files \n Please run \"go run gen_help_text.go\"\n and make sure that those doc changes are committed"
+    echo "Help text is out of date: $files \n Please run 'go run -ldflags=\"-X github.com/jimmidyson/minishift/pkg/version.version=\$(cat VERSION)\" gen_help_text.go'\n and make sure that those doc changes are committed"
     exit 1
   else
     echo "Help text is up to date"

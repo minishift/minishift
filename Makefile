@@ -29,7 +29,6 @@ else
 	GOPATH := $(shell pwd)/_gopath
 endif
 
-
 # Use system python if it exists, otherwise use Docker.
 PYTHON := $(shell command -v python || echo "docker run --rm -it -v $(shell pwd):/minikube -w /minikube python python")
 BUILD_OS := $(shell uname -s)
@@ -47,11 +46,8 @@ out/minishift: out/minishift-$(GOOS)-$(GOARCH)
 
 out/openshift: hack/get_openshift.go
 	$(MKGOPATH)
-	mkdir -p $(GOPATH)/src/github.com
-	ln -s -f $(shell pwd)/vendor/github.com/google $(GOPATH)/src/github.com/google
-	ln -s -f $(shell pwd)/vendor/golang.org $(GOPATH)/src/golang.org
 	mkdir out 2>/dev/null || true
-	go run hack/get_openshift.go v1.3.0-alpha.2
+	cd $(GOPATH)/src/$(REPOPATH) && go run hack/get_openshift.go v1.3.0-alpha.2
 
 out/minishift-$(GOOS)-$(GOARCH): $(MINIKUBEFILES) pkg/minikube/cluster/assets.go
 	$(MKGOPATH)
@@ -79,6 +75,11 @@ $(GOPATH)/bin/go-bindata:
 $(GOPATH)/bin/gh-release:
 	$(MKGOPATH)
 	go get github.com/progrium/gh-release
+
+.PHONY: gendocs
+gendocs: out/minishift $(shell find cmd)
+	$(MKGOPATH)
+	cd $(GOPATH)/src/$(REPOPATH) && go run -ldflags="-X github.com/jimmidyson/minishift/pkg/version.version=$(shell cat VERSION)" gen_help_text.go
 
 .PHONY: release
 release: $(GOPATH)/bin/gh-release deploy/iso/minishift.iso test

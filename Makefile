@@ -94,4 +94,5 @@ release: clean deploy/iso/minishift.iso test $(GOPATH)/bin/gh-release
 clean:
 	rm -rf $(GOPATH)
 	rm -rf $(BUILD_DIR)
+	rm -rf release
 	rm -f pkg/minikube/cluster/assets.go

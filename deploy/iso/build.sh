@@ -16,7 +16,7 @@
 
 set -e
 
-ISO=minikube.iso
+ISO=minishift.iso
 tmpdir=$(mktemp -d)
 echo "Building in $tmpdir."
 cp -r . $tmpdir/

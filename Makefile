@@ -46,12 +46,13 @@ MINIKUBEFILES := $(shell go list  -f '{{join .Deps "\n"}}' ./cmd/minikube/ | gre
 out/minishift: out/minishift-$(GOOS)-$(GOARCH)
 	cp $(BUILD_DIR)/minishift-$(GOOS)-$(GOARCH) $(BUILD_DIR)/minishift
 
-out/openshift: get_openshift.go
+out/openshift: hack/get_openshift.go
 	$(MKGOPATH)
 	mkdir -p $(GOPATH)/src/github.com
 	ln -s -f $(shell pwd)/vendor/github.com/google $(GOPATH)/src/github.com/google
+	ln -s -f $(shell pwd)/vendor/golang.org $(GOPATH)/src/golang.org
 	mkdir out 2>/dev/null || true
-	go run get_openshift.go v1.3.0-alpha.2
+	go run hack/get_openshift.go v1.3.0-alpha.2
 
 out/minishift-$(GOOS)-$(GOARCH): $(MINIKUBEFILES) pkg/minikube/cluster/assets.go
 	$(MKGOPATH)
@@ -79,4 +80,4 @@ $(GOPATH)/bin/go-bindata:
 clean:
 	rm -rf $(GOPATH)
 	rm -rf $(BUILD_DIR)
-	rm pkg/minikube/cluster/assets.go || true
+	rm -f pkg/minikube/cluster/assets.go

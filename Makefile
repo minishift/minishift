@@ -82,7 +82,7 @@ gendocs: out/minishift $(shell find cmd)
 	cd $(GOPATH)/src/$(REPOPATH) && go run -ldflags="-X github.com/jimmidyson/minishift/pkg/version.version=$(shell cat VERSION)" gen_help_text.go
 
 .PHONY: release
-release: $(GOPATH)/bin/gh-release deploy/iso/minishift.iso test
+release: clean deploy/iso/minishift.iso test $(GOPATH)/bin/gh-release
 	GOOS=linux GOARCH=amd64 make out/minishift-linux-amd64
 	GOOS=darwin GOARCH=amd64 make out/minishift-darwin-amd64
 	mkdir -p release

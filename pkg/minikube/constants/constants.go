@@ -53,7 +53,7 @@ const (
 	DefaultCPUS   = 1
 )
 
-var DefaultIsoUrl = "https://github.com/jimmidyson/minishift/releases/download/" + version.GetVersion() + "/boot2docker.iso"
+var DefaultIsoUrl = "https://github.com/jimmidyson/minishift/releases/download/v" + version.GetVersion() + "/boot2docker.iso"
 
 const (
 	RemoteOpenShiftErrPath = "/var/log/openshift.err"

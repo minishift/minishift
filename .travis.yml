@@ -1,6 +1,9 @@
 language: go
 go:
 - 1.6
+branches:
+  only:
+    - master
 install:
 - echo "Don't run anything."
 script: make test

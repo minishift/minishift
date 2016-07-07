@@ -100,30 +100,25 @@ func runStart(cmd *cobra.Command, args []string) {
 	certAuth := constants.MakeMiniPath("apiserver.crt")
 	clientCert := constants.MakeMiniPath("apiserver.crt")
 	clientKey := constants.MakeMiniPath("apiserver.key")
-	if active, err := setupKubeconfig(name, kubeHost, certAuth, clientCert, clientKey); err != nil {
+	if err := setupKubeconfig(name, kubeHost, certAuth, clientCert, clientKey); err != nil {
 		glog.Errorln("Error setting up kubeconfig: ", err)
 		os.Exit(1)
-	} else if !active {
-		fmt.Println("Run these commands to use the cluster: ")
-		fmt.Printf("oc config use-context %s\n", name)
-		fmt.Println("oc login --username=admin --password=admin --insecure-skip-tls-verify")
-	} else {
-		fmt.Println("oc is now configured to use the cluster.")
-		fmt.Println("Run this command to login: ")
-		fmt.Println("oc login --username=admin --password=admin --insecure-skip-tls-verify")
 	}
+	fmt.Println("oc is now configured to use the cluster.")
+	fmt.Println("Run this command to use the cluster: ")
+	fmt.Println("oc login --username=admin --password=admin --insecure-skip-tls-verify")
 }
 
 // setupKubeconfig reads config from disk, adds the minikube settings, and writes it back.
 // activeContext is true when minikube is the CurrentContext
 // If no CurrentContext is set, the given name will be used.
-func setupKubeconfig(name, server, certAuth, cliCert, cliKey string) (activeContext bool, err error) {
+func setupKubeconfig(name, server, certAuth, cliCert, cliKey string) error {
 	configFile := constants.KubeconfigPath
 
 	// read existing config or create new if does not exist
 	config, err := kubeconfig.ReadConfigOrNew(configFile)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	clusterName := name
@@ -146,18 +141,14 @@ func setupKubeconfig(name, server, certAuth, cliCert, cliKey string) (activeCont
 	context.AuthInfo = userName
 	config.Contexts[contextName] = context
 
-	// set current context to minikube if unset
-	if len(config.CurrentContext) == 0 {
-		config.CurrentContext = contextName
-	}
+	// Always set current context to minikube.
+	config.CurrentContext = contextName
 
 	// write back to disk
 	if err := kubeconfig.WriteConfig(config, configFile); err != nil {
-		return false, err
+		return err
 	}
-
-	// activeContext if current matches name
-	return name == config.CurrentContext, nil
+	return nil
 }
 
 func init() {

@@ -91,6 +91,7 @@ release: clean deploy/iso/minishift.iso test $(GOPATH)/bin/gh-release
 	gh-release checksums sha1
 	gh-release create jimmidyson/minishift $(VERSION)
 
+.PHONY: clean
 clean:
 	rm -rf $(GOPATH)
 	rm -rf $(BUILD_DIR)

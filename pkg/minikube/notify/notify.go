@@ -17,39 +17,46 @@ limitations under the License.
 package notify
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
+	"golang.org/x/oauth2"
+
 	"github.com/blang/semver"
 	"github.com/golang/glog"
+	"github.com/google/go-github/github"
 	"github.com/jimmidyson/minishift/pkg/minikube/config"
 	"github.com/jimmidyson/minishift/pkg/minikube/constants"
 	"github.com/jimmidyson/minishift/pkg/version"
 	"github.com/spf13/viper"
 )
 
-const updateLinkPrefix = "https://github.com/kubernetes/minikube/releases/tag/v"
+const (
+	updateLinkPrefix = "https://github.com/jimmidyson/minishift/releases/tag/v"
+	githubOwner      = "jimmidyson"
+	githubRepo       = "minishift"
+	timeLayout       = time.RFC1123
+)
 
 var (
-	timeLayout                = time.RFC1123
-	lastUpdateCheckFilePath   = constants.MakeMiniPath("last_update_check")
-	githubMinikubeReleasesURL = "https://storage.googleapis.com/minikube/releases.json"
+	lastUpdateCheckFilePath                = constants.MakeMiniPath("last_update_check")
+	githubClient            *github.Client = nil
 )
 
 func MaybePrintUpdateTextFromGithub(output io.Writer) {
-	MaybePrintUpdateText(output, githubMinikubeReleasesURL, lastUpdateCheckFilePath)
+	MaybePrintUpdateText(output, githubOwner, githubRepo, lastUpdateCheckFilePath)
 }
 
-func MaybePrintUpdateText(output io.Writer, url string, lastUpdatePath string) {
+func MaybePrintUpdateText(output io.Writer, githubOwner, githubRepo, lastUpdatePath string) {
 	if !shouldCheckURLVersion(lastUpdatePath) {
 		return
 	}
-	latestVersion, err := getLatestVersionFromURL(url)
+	latestVersion, err := getLatestVersionFromGitHub(githubOwner, githubRepo)
 	if err != nil {
 		glog.Errorln(err)
 		return
@@ -61,7 +68,7 @@ func MaybePrintUpdateText(output io.Writer, url string, lastUpdatePath string) {
 	}
 	if localVersion.Compare(latestVersion) < 0 {
 		writeTimeToFile(lastUpdateCheckFilePath, time.Now().UTC())
-		fmt.Fprintf(output, `There is a newer version of minikube available (%s%s).  Download it here:
+		fmt.Fprintf(output, `There is a newer version of minishift available (%s%s).  Download it here:
 %s%s
 To disable this notification, add WantUpdateNotification: False to the json config file at %s
 (you may have to create the file config.json in this folder if you have no previous configuration)\n`,
@@ -80,38 +87,41 @@ func shouldCheckURLVersion(filePath string) bool {
 	return true
 }
 
-type release struct {
-	Name string
-}
-
-type releases []release
-
-func getJson(url string, target *releases) error {
-	r, err := http.Get(url)
-	if err != nil {
-		return err
+func getLatestVersionFromGitHub(githubOwner, githubRepo string) (semver.Version, error) {
+	if githubClient == nil {
+		token := os.Getenv("GH_TOKEN")
+		var tc *http.Client
+		if len(token) > 0 {
+			ts := oauth2.StaticTokenSource(
+				&oauth2.Token{AccessToken: token},
+			)
+			tc = oauth2.NewClient(oauth2.NoContext, ts)
+		}
+		githubClient = github.NewClient(tc)
 	}
-	defer r.Body.Close()
-
-	return json.NewDecoder(r.Body).Decode(target)
-}
-
-func getLatestVersionFromURL(url string) (semver.Version, error) {
-	var releases releases
-	if err := getJson(url, &releases); err != nil {
+	client := githubClient
+	var (
+		release *github.RepositoryRelease
+		resp    *github.Response
+		err     error
+	)
+	release, resp, err = client.Repositories.GetLatestRelease(githubOwner, githubRepo)
+	if err != nil {
 		return semver.Version{}, err
 	}
-	if len(releases) == 0 {
-		return semver.Version{}, fmt.Errorf("There were no json releases at the url specified: %s", url)
+	defer resp.Body.Close()
+	latestVersionString := release.Name
+	if latestVersionString != nil {
+		return semver.Make(strings.TrimPrefix(*latestVersionString, "v"))
+
 	}
-	latestVersionString := releases[0].Name
-	return semver.Make(strings.TrimPrefix(latestVersionString, version.VersionPrefix))
+	return semver.Version{}, fmt.Errorf("Cannot get release name")
 }
 
 func writeTimeToFile(path string, inputTime time.Time) error {
 	err := ioutil.WriteFile(path, []byte(inputTime.Format(timeLayout)), 0644)
 	if err != nil {
-		return fmt.Errorf("Error writing current update time to file: ", err)
+		return fmt.Errorf("Error writing current update time to file: %s", err)
 	}
 	return nil
 }

@@ -15,8 +15,7 @@
 # Use the native vendor/ dependency system
 export GO15VENDOREXPERIMENT=1
 
-# Bump this on release
-VERSION ?= v0.5.0
+VERSION ?= $(shell cat VERSION)
 
 GOOS ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)
@@ -58,7 +57,7 @@ out/minishift-$(GOOS)-$(GOARCH): $(MINIKUBEFILES) pkg/minikube/cluster/assets.go
 	$(MKGOPATH)
 	CGO_ENABLED=0 GOARCH=$(GOARCH) GOOS=$(GOOS) go build --installsuffix cgo -ldflags="$(MINIKUBE_LDFLAGS)" -a -o $(BUILD_DIR)/minishift-$(GOOS)-$(GOARCH) ./cmd/minikube
 
-iso:
+deploy/iso/minishift.iso: $(shell find deploy/iso -type f ! -name *.iso)
 	cd deploy/iso && ./build.sh
 
 .PHONY: integration
@@ -76,6 +75,20 @@ pkg/minikube/cluster/assets.go: out/openshift $(GOPATH)/bin/go-bindata
 $(GOPATH)/bin/go-bindata:
 	$(MKGOPATH)
 	go get github.com/jteeuwen/go-bindata/...
+
+$(GOPATH)/bin/gh-release:
+	$(MKGOPATH)
+	go get github.com/progrium/gh-release
+
+.PHONY: release
+release: $(GOPATH)/bin/gh-release deploy/iso/minishift.iso test
+	GOOS=linux GOARCH=amd64 make out/minishift-linux-amd64
+	GOOS=darwin GOARCH=amd64 make out/minishift-darwin-amd64
+	mkdir -p release
+	cp out/minishift-linux-amd64 out/minishift-darwin-amd64 release
+	cp deploy/iso/minishift.iso release/boot2docker.iso
+	gh-release checksums sha1
+	gh-release create jimmidyson/minishift $(VERSION)
 
 clean:
 	rm -rf $(GOPATH)

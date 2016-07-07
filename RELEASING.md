@@ -14,17 +14,6 @@ If you do this, bump the ISO URL to point to the new ISO, and send a PR.
 
 See [this PR](https://github.com/kubernetes/minikube/pull/165) for an example.
 
-## Add the version to the releases.json file
-
-Add an entry **to the top** of deploy/minikube/releases.json with the version, and send a PR.
-This file controls the auto update notifications in minikube.
-Only add entries to this file that should be released to all users (no pre-release, alpha or beta releases).
-The file must be uploaded to GCS before notifications will go out. That step comes at the end.
-
-The schema for this file can be found in deploy/minikube/schema.json.
-
-An automated test to verify the schema runs in Travis before each submit.
-
 ## Run integration tests
 
 Run this command:
@@ -37,22 +26,15 @@ Investigate and fix any failures.
 
 Run a command like this to tag it locally: `git tag -a v0.2.0 -m "0.2.0 Release"`.
 
-And run a command like this to push the tag: `git push upstream v0.2.0`.
+And run a command like this to push the tag: `git push origin v0.2.0`.
 
 ## Build the Release
 
 Run these commands:
 
 ```shell
-GOOS=linux GOARCH=amd64 make out/minikube-linux-amd64
-GOOS=darwin GOARCH=amd64 make out/minikube-darwin-amd64
-```
-
-## Upload to GCS:
-
-```shell
-gsutil cp out/minikube-linux-amd64  gs://minikube/releases/$RELEASE/
-gsutil cp out/minikube-darwin-amd64  gs://minikube/releases/$RELEASE/
+GOOS=linux GOARCH=amd64 make out/minishift-linux-amd64
+GOOS=darwin GOARCH=amd64 make out/minishift-darwin-amd64
 ```
 
 ## Create a Release in Github
@@ -60,12 +42,3 @@ gsutil cp out/minikube-darwin-amd64  gs://minikube/releases/$RELEASE/
 Create a new release based on your tag, like [this one](https://github.com/kubernetes/minikube/releases/tag/v0.2.0).
 
 Upload the files, and calculate checksums.
-
-## Upload the releases.json file to GCS
-
-This step makes the new release trigger update notifications in old versions of Minikube.
-Use this command from a clean git repo:
-
-```shell
-gsutil cp deploy/minikube/releases.json gs://minikube/releases.json
-```

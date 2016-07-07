@@ -19,6 +19,7 @@ package constants
 import (
 	"path/filepath"
 
+	"github.com/jimmidyson/minishift/pkg/version"
 	"k8s.io/kubernetes/pkg/client/unversioned/clientcmd"
 	"k8s.io/kubernetes/pkg/util/homedir"
 )
@@ -48,10 +49,11 @@ var LogFlags = [...]string{
 }
 
 const (
-	DefaultIsoUrl = "https://storage.googleapis.com/minikube/minikube-0.5.iso"
 	DefaultMemory = 1024
 	DefaultCPUS   = 1
 )
+
+var DefaultIsoUrl = "https://github.com/jimmidyson/minishift/releases/download/" + version.GetVersion() + "/boot2docker.iso"
 
 const (
 	RemoteOpenShiftErrPath = "/var/log/openshift.err"

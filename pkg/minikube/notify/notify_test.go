@@ -22,12 +22,14 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/blang/semver"
+	"github.com/google/go-github/github"
 	"github.com/jimmidyson/minishift/pkg/minikube/config"
 	"github.com/jimmidyson/minishift/pkg/minikube/tests"
 	"github.com/jimmidyson/minishift/pkg/version"
@@ -67,12 +69,16 @@ func TestShouldCheckURL(t *testing.T) {
 
 }
 
+type release struct {
+	Name string `json:name`
+}
+
 type URLHandlerCorrect struct {
-	releases releases
+	release release
 }
 
 func (h *URLHandlerCorrect) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	b, err := json.Marshal(h.releases)
+	b, err := json.Marshal(h.release)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -85,11 +91,16 @@ func TestGetLatestVersionFromURLCorrect(t *testing.T) {
 	// test that the version is correctly parsed if returned if valid JSON is returned the url endpoint
 	latestVersionFromURL := "0.0.0-dev"
 	handler := &URLHandlerCorrect{
-		releases: []release{{Name: version.VersionPrefix + latestVersionFromURL}},
+		release: release{Name: version.VersionPrefix + latestVersionFromURL},
 	}
 	server := httptest.NewServer(handler)
 
-	latestVersion, err := getLatestVersionFromURL(server.URL)
+	url, _ := url.Parse(server.URL)
+	githubClient = github.NewClient(nil)
+	githubClient.BaseURL = url
+	githubClient.UploadURL = url
+
+	latestVersion, err := getLatestVersionFromGitHub(githubOwner, githubRepo)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -109,7 +120,12 @@ func TestGetLatestVersionFromURLNone(t *testing.T) {
 	handler := &URLHandlerNone{}
 	server := httptest.NewServer(handler)
 
-	_, err := getLatestVersionFromURL(server.URL)
+	url, _ := url.Parse(server.URL)
+	githubClient = github.NewClient(nil)
+	githubClient.BaseURL = url
+	githubClient.UploadURL = url
+
+	_, err := getLatestVersionFromGitHub(githubOwner, githubRepo)
 	if err == nil {
 		t.Fatalf("No version value was returned from URL but no error was thrown")
 	}
@@ -127,7 +143,12 @@ func TestGetLatestVersionFromURLMalformed(t *testing.T) {
 	handler := &URLHandlerMalformed{}
 	server := httptest.NewServer(handler)
 
-	_, err := getLatestVersionFromURL(server.URL)
+	url, _ := url.Parse(server.URL)
+	githubClient = github.NewClient(nil)
+	githubClient.BaseURL = url
+	githubClient.UploadURL = url
+
+	_, err := getLatestVersionFromGitHub(githubOwner, githubRepo)
 	if err == nil {
 		t.Fatalf("Error: ")
 	}
@@ -146,11 +167,16 @@ func TestMaybePrintUpdateText(t *testing.T) {
 	// test that no update text is printed if the latest version is lower/equal to the current version
 	latestVersionFromURL := "0.0.0-dev"
 	handler := &URLHandlerCorrect{
-		releases: []release{{Name: version.VersionPrefix + latestVersionFromURL}},
+		release: release{Name: version.VersionPrefix + latestVersionFromURL},
 	}
 	server := httptest.NewServer(handler)
 
-	MaybePrintUpdateText(&outputBuffer, server.URL, lastUpdateCheckFilePath)
+	url, _ := url.Parse(server.URL)
+	githubClient = github.NewClient(nil)
+	githubClient.BaseURL = url
+	githubClient.UploadURL = url
+
+	MaybePrintUpdateText(&outputBuffer, githubOwner, githubRepo, lastUpdateCheckFilePath)
 	if len(outputBuffer.String()) != 0 {
 		t.Fatalf("Expected MaybePrintUpdateText to not output text as the current version is %s and version %s was served from URL but output was [%s]",
 			version.GetVersion(), latestVersionFromURL, outputBuffer.String())
@@ -159,11 +185,16 @@ func TestMaybePrintUpdateText(t *testing.T) {
 	// test that update text is printed if the latest version is greater than the current version
 	latestVersionFromURL = "100.0.0-dev"
 	handler = &URLHandlerCorrect{
-		releases: []release{{Name: version.VersionPrefix + latestVersionFromURL}},
+		release: release{Name: version.VersionPrefix + latestVersionFromURL},
 	}
 	server = httptest.NewServer(handler)
 
-	MaybePrintUpdateText(&outputBuffer, server.URL, lastUpdateCheckFilePath)
+	url, _ = url.Parse(server.URL)
+	githubClient = github.NewClient(nil)
+	githubClient.BaseURL = url
+	githubClient.UploadURL = url
+
+	MaybePrintUpdateText(&outputBuffer, githubOwner, githubRepo, lastUpdateCheckFilePath)
 	if len(outputBuffer.String()) == 0 {
 		t.Fatalf("Expected MaybePrintUpdateText to output text as the current version is %s and version %s was served from URL but output was [%s]",
 			version.GetVersion(), latestVersionFromURL, outputBuffer.String())

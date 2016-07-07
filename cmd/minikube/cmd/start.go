@@ -160,9 +160,9 @@ func setupKubeconfig(name, server, certAuth, cliCert, cliKey string) (activeCont
 }
 
 func init() {
-	startCmd.Flags().StringVarP(&minikubeISO, "iso-url", "", constants.DefaultIsoUrl, "Location of the minikube iso")
+	startCmd.Flags().StringVarP(&minikubeISO, "iso-url", "", constants.DefaultIsoUrl, "Location of the minishift iso")
 	startCmd.Flags().StringVarP(&vmDriver, "vm-driver", "", constants.DefaultVMDriver, fmt.Sprintf("VM driver is one of: %v", constants.SupportedVMDrivers))
-	startCmd.Flags().IntVarP(&memory, "memory", "", constants.DefaultMemory, "Amount of RAM allocated to the minikube VM")
-	startCmd.Flags().IntVarP(&cpus, "cpus", "", constants.DefaultCPUS, "Number of CPUs allocated to the minikube VM")
+	startCmd.Flags().IntVarP(&memory, "memory", "", constants.DefaultMemory, "Amount of RAM allocated to the minishift VM")
+	startCmd.Flags().IntVarP(&cpus, "cpus", "", constants.DefaultCPUS, "Number of CPUs allocated to the minishift VM")
 	RootCmd.AddCommand(startCmd)
 }

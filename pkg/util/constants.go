@@ -18,7 +18,7 @@ package util
 
 // These constants are used by both minikube and openshift
 const (
-	DefaultOpenShiftDirectory = "/var/lib/localkube"
+	DefaultOpenShiftDirectory = "/var/lib/minishift"
 	DefaultCertPath           = DefaultOpenShiftDirectory + "/openshift.local.config/master/"
 	DefaultServiceClusterIP   = "10.0.0.1"
 	DefaultDNSDomain          = "cluster.local"

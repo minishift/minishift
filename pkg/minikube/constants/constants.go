@@ -27,6 +27,9 @@ import (
 // MachineName is the name to use for the VM.
 const MachineName = "minishiftVM"
 
+// APIServerPort is the port that the API server should listen on.
+const APIServerPort = 8443
+
 // Fix for windows
 var Minipath = filepath.Join(homedir.HomeDir(), ".minishift")
 

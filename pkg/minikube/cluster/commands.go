@@ -28,8 +28,8 @@ var stopCommand = "sudo killall openshift | true"
 var startCommandFmtStr = `
 # Run with nohup so it stays up. Redirect logs to useful places.
 cd /var/lib/minishift;
-sudo sh -c 'PATH=/usr/local/sbin:$PATH nohup sudo /usr/local/bin/openshift start --listen=https://0.0.0.0:443 > %s 2> %s < /dev/null &'
-until $(curl --output /dev/null --silent --fail -k https://localhost/healthz/ready); do
+sudo sh -c 'PATH=/usr/local/sbin:$PATH nohup sudo /usr/local/bin/openshift start --listen=https://0.0.0.0:%d> %s 2> %s < /dev/null &'
+until $(curl --output /dev/null --silent --fail -k https://localhost:%d/healthz/ready); do
     printf '.'
     sleep 1
 done;
@@ -39,5 +39,5 @@ sudo /usr/local/bin/openshift admin policy add-cluster-role-to-user cluster-admi
 var logsCommand = fmt.Sprintf("tail -n +1 %s %s", constants.RemoteOpenShiftErrPath, constants.RemoteOpenShiftOutPath)
 
 func GetStartCommand() string {
-	return fmt.Sprintf(startCommandFmtStr, constants.RemoteOpenShiftErrPath, constants.RemoteOpenShiftOutPath)
+	return fmt.Sprintf(startCommandFmtStr, constants.APIServerPort, constants.RemoteOpenShiftErrPath, constants.RemoteOpenShiftOutPath, constants.APIServerPort)
 }

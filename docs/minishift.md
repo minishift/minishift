@@ -25,6 +25,7 @@ Minishift is a CLI tool that provisions and manages single-node OpenShift cluste
 * [minishift dashboard](minishift_dashboard.md)	 - Opens/displays the kubernetes dashboard URL for your local cluster
 * [minishift delete](minishift_delete.md)	 - Deletes a local OpenShift cluster.
 * [minishift docker-env](minishift_docker-env.md)	 - sets up docker env variables; similar to '$(docker-machine env)'
+* [minishift get-openshift-versions](minishift_get-openshift-versions.md)	 - Gets the list of available OpenShift versions available for minishift.
 * [minishift ip](minishift_ip.md)	 - Retrieve the IP address of the running cluster.
 * [minishift logs](minishift_logs.md)	 - Gets the logs of the running OpenShift instance, used for debugging minikube, not user code.
 * [minishift service](minishift_service.md)	 - Gets the URL for the specified service in your local cluster

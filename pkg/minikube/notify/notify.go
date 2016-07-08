@@ -71,7 +71,8 @@ func MaybePrintUpdateText(output io.Writer, githubOwner, githubRepo, lastUpdateP
 		fmt.Fprintf(output, `There is a newer version of minishift available (%s%s).  Download it here:
 %s%s
 To disable this notification, add WantUpdateNotification: False to the json config file at %s
-(you may have to create the file config.json in this folder if you have no previous configuration)\n`,
+(you may have to create the file config.json in this folder if you have no previous configuration)
+`,
 			version.VersionPrefix, latestVersion, updateLinkPrefix, latestVersion, constants.MakeMiniPath("config"))
 	}
 }

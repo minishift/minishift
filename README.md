@@ -1,6 +1,6 @@
 # Minishift
 
-[![Build Status](https://travis-ci.org/jimmidyson/minishift?branch=master)](https://travis-ci.org/jimmidyson/minishift)
+[![Build Status](https://secure.travis-ci.org/jimmidyson/minishift.png)](https://travis-ci.org/jimmidyson/minishift)
 
 ## What is Minishift?
 
@@ -131,9 +131,9 @@ minishift dashboard
 
 ### Services
 
-To access a service exposed via a node port, run this command in a shell after starting minikube to get the address:
+To access a service exposed via a node port, run this command in a shell after starting minishift to get the address:
 ```shell
-minikube service [-n NAMESPACE] [--url] NAME
+minishift service [-n NAMESPACE] [--url] NAME
 ```
 
 ## Networking

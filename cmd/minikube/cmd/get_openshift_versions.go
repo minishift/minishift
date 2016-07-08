@@ -1,5 +1,5 @@
 /*
-Copyright 2016 The Kubernetes Authors All rights reserved.
+Copyright (C) 2016 Red Hat, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,20 +19,20 @@ package cmd
 import (
 	"os"
 
+	"github.com/jimmidyson/minishift/pkg/minikube/openshiftversions"
 	"github.com/spf13/cobra"
-	"k8s.io/minikube/pkg/minikube/kubernetes_versions"
 )
 
-// getK8sVersionsCmd represents the ip command
-var getK8sVersionsCmd = &cobra.Command{
-	Use:   "get-k8s-versions",
-	Short: "Gets the list of available kubernetes versions available for minikube.",
-	Long:  `Gets the list of available kubernetes versions available for minikube.`,
+// getVersionsCmd represents the ip command
+var getVersionsCmd = &cobra.Command{
+	Use:   "get-openshift-versions",
+	Short: "Gets the list of available OpenShift versions available for minishift.",
+	Long:  `Gets the list of available OpenShift versions available for minishift.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		kubernetes_versions.PrintKubernetesVersionsFromGCS(os.Stdout)
+		openshiftversions.PrintOpenShiftVersionsFromGitHub(os.Stdout)
 	},
 }
 
 func init() {
-	RootCmd.AddCommand(getK8sVersionsCmd)
+	RootCmd.AddCommand(getVersionsCmd)
 }

@@ -1,14 +1,14 @@
-## minikube get-k8s-versions
+## minishift get-openshift-versions
 
-Gets the list of available kubernetes versions available for minikube.
+Gets the list of available OpenShift versions available for minishift.
 
 ### Synopsis
 
 
-Gets the list of available kubernetes versions available for minikube.
+Gets the list of available OpenShift versions available for minishift.
 
 ```
-minikube get-k8s-versions
+minishift get-openshift-versions
 ```
 
 ### Options inherited from parent commands
@@ -26,5 +26,5 @@ minikube get-k8s-versions
 ```
 
 ### SEE ALSO
-* [minikube](minikube.md)	 - Minikube is a tool for managing local Kubernetes clusters.
+* [minishift](minishift.md)	 - Minishift is a tool for managing local OpenShift clusters.
 

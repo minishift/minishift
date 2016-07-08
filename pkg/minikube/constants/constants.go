@@ -56,8 +56,8 @@ const (
 var DefaultIsoUrl = "https://github.com/jimmidyson/minishift/releases/download/v" + version.GetVersion() + "/boot2docker.iso"
 
 const (
-	RemoteOpenShiftErrPath = "/var/log/openshift.err"
-	RemoteOpenShiftOutPath = "/var/log/openshift.out"
+	RemoteOpenShiftErrPath = "/var/lib/minishift/openshift.err"
+	RemoteOpenShiftOutPath = "/var/lib/minishift/openshift.out"
 )
 
 var ConfigFilePath = MakeMiniPath("config")

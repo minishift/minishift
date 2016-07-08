@@ -82,14 +82,19 @@ gendocs: $(shell find cmd) pkg/minikube/cluster/assets.go
 	cd $(GOPATH)/src/$(REPOPATH) && go run -ldflags="-X github.com/jimmidyson/minishift/pkg/version.version=$(shell cat VERSION)" gen_help_text.go
 
 .PHONY: release
-release: clean deploy/iso/minishift.iso test $(GOPATH)/bin/gh-release
-	GOOS=linux GOARCH=amd64 make out/minishift-linux-amd64
-	GOOS=darwin GOARCH=amd64 make out/minishift-darwin-amd64
+release: clean deploy/iso/minishift.iso test $(GOPATH)/bin/gh-release cross
 	mkdir -p release
-	cp out/minishift-linux-amd64 out/minishift-darwin-amd64 release
+	cp out/minishift-*-amd64* release
 	cp deploy/iso/minishift.iso release/boot2docker.iso
 	gh-release checksums sha1
 	gh-release create jimmidyson/minishift $(VERSION)
+
+.PHONY: cross
+cross: out/openshift
+	GOOS=linux GOARCH=amd64 make out/minishift-linux-amd64
+	GOOS=darwin GOARCH=amd64 make out/minishift-darwin-amd64
+	GOOS=windows GOARCH=amd64 make out/minishift-windows-amd64
+	mv out/minishift-windows-amd64 out/minishift-windows-amd64.exe
 
 .PHONY: clean
 clean:

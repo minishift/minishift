@@ -77,7 +77,7 @@ $(GOPATH)/bin/gh-release:
 	go get github.com/progrium/gh-release
 
 .PHONY: gendocs
-gendocs: $(shell find cmd) out/openshift
+gendocs: $(shell find cmd) pkg/minikube/cluster/assets.go
 	$(MKGOPATH)
 	cd $(GOPATH)/src/$(REPOPATH) && go run -ldflags="-X github.com/jimmidyson/minishift/pkg/version.version=$(shell cat VERSION)" gen_help_text.go
 

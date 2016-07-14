@@ -111,7 +111,7 @@ func getLatestVersionFromGitHub(githubOwner, githubRepo string) (semver.Version,
 		return semver.Version{}, err
 	}
 	defer resp.Body.Close()
-	latestVersionString := release.Name
+	latestVersionString := release.TagName
 	if latestVersionString != nil {
 		return semver.Make(strings.TrimPrefix(*latestVersionString, "v"))
 

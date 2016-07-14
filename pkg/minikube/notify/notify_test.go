@@ -69,12 +69,8 @@ func TestShouldCheckURL(t *testing.T) {
 
 }
 
-type release struct {
-	Name string `json:name`
-}
-
 type URLHandlerCorrect struct {
-	release release
+	release github.RepositoryRelease
 }
 
 func (h *URLHandlerCorrect) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -90,8 +86,9 @@ func (h *URLHandlerCorrect) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func TestGetLatestVersionFromURLCorrect(t *testing.T) {
 	// test that the version is correctly parsed if returned if valid JSON is returned the url endpoint
 	latestVersionFromURL := "0.0.0-dev"
+	v := version.VersionPrefix + latestVersionFromURL
 	handler := &URLHandlerCorrect{
-		release: release{Name: version.VersionPrefix + latestVersionFromURL},
+		release: github.RepositoryRelease{TagName: &v},
 	}
 	server := httptest.NewServer(handler)
 
@@ -166,8 +163,9 @@ func TestMaybePrintUpdateText(t *testing.T) {
 
 	// test that no update text is printed if the latest version is lower/equal to the current version
 	latestVersionFromURL := "0.0.0-dev"
+	v := version.VersionPrefix + latestVersionFromURL
 	handler := &URLHandlerCorrect{
-		release: release{Name: version.VersionPrefix + latestVersionFromURL},
+		release: github.RepositoryRelease{TagName: &v},
 	}
 	server := httptest.NewServer(handler)
 
@@ -184,8 +182,9 @@ func TestMaybePrintUpdateText(t *testing.T) {
 
 	// test that update text is printed if the latest version is greater than the current version
 	latestVersionFromURL = "100.0.0-dev"
+	v = version.VersionPrefix + latestVersionFromURL
 	handler = &URLHandlerCorrect{
-		release: release{Name: version.VersionPrefix + latestVersionFromURL},
+		release: github.RepositoryRelease{TagName: &v},
 	}
 	server = httptest.NewServer(handler)
 

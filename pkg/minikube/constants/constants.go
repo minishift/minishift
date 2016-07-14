@@ -27,6 +27,9 @@ import (
 // MachineName is the name to use for the VM.
 const MachineName = "minishiftVM"
 
+// APIServerPort is the port that the API server should listen on.
+const APIServerPort = 8443
+
 // Fix for windows
 var Minipath = filepath.Join(homedir.HomeDir(), ".minishift")
 
@@ -49,15 +52,16 @@ var LogFlags = [...]string{
 }
 
 const (
-	DefaultMemory = 1024
-	DefaultCPUS   = 1
+	DefaultMemory   = 1024
+	DefaultCPUS     = 1
+	DefaultDiskSize = "20g"
 )
 
 var DefaultIsoUrl = "https://github.com/jimmidyson/minishift/releases/download/v" + version.GetVersion() + "/boot2docker.iso"
 
 const (
-	RemoteOpenShiftErrPath = "/var/log/openshift.err"
-	RemoteOpenShiftOutPath = "/var/log/openshift.out"
+	RemoteOpenShiftErrPath = "/var/lib/minishift/openshift.err"
+	RemoteOpenShiftOutPath = "/var/lib/minishift/openshift.out"
 )
 
 var ConfigFilePath = MakeMiniPath("config")

@@ -79,7 +79,7 @@ $(GOPATH)/bin/gh-release:
 .PHONY: gendocs
 gendocs: $(shell find cmd) pkg/minikube/cluster/assets.go
 	$(MKGOPATH)
-	cd $(GOPATH)/src/$(REPOPATH) && go run -ldflags="-X github.com/jimmidyson/minishift/pkg/version.version=$(shell cat VERSION)" gen_help_text.go
+	cd $(GOPATH)/src/$(REPOPATH) && go run -ldflags="$(MINIKUBE_LDFLAGS)" gen_help_text.go
 
 .PHONY: release
 release: clean deploy/iso/minishift.iso test $(GOPATH)/bin/gh-release cross

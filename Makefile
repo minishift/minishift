@@ -20,7 +20,8 @@ VERSION ?= $(shell cat VERSION)
 GOOS ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)
 BUILD_DIR ?= ./out
-REPOPATH ?= github.com/jimmidyson/minishift
+ORG := github.com/jimmidyson
+REPOPATH ?= $(ORG)/minishift
 BUILD_IMAGE ?= gcr.io/google_containers/kube-cross:v1.6.2-1
 
 ifeq ($(IN_DOCKER),1)
@@ -37,7 +38,7 @@ BUILD_OS := $(shell uname -s)
 K8S_VERSION_LDFLAGS := $(shell $(PYTHON) hack/get_k8s_version.py 2>&1)
 MINIKUBE_LDFLAGS := $(K8S_VERSION_LDFLAGS) -X github.com/jimmidyson/minishift/pkg/version.version=$(VERSION) -s -w -extldflags '-static'
 
-MKGOPATH := mkdir -p $(shell dirname $(GOPATH)/src/$(REPOPATH)) && ln -s -f $(shell pwd) $(GOPATH)/src/$(REPOPATH)
+MKGOPATH := mkdir -p $(GOPATH)/src/$(ORG) && ln -s -f $(shell pwd) $(GOPATH)/src/$(ORG)
 
 MINIKUBEFILES := $(shell go list  -f '{{join .Deps "\n"}}' ./cmd/minikube/ | grep github.com/jimmidyson/minishift | xargs go list -f '{{ range $$file := .GoFiles }} {{$$.Dir}}/{{$$file}}{{"\n"}}{{end}}')
 

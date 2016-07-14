@@ -35,7 +35,7 @@ BUILD_OS := $(shell uname -s)
 
 # Set the version information for the Kubernetes servers
 K8S_VERSION_LDFLAGS := $(shell $(PYTHON) hack/get_k8s_version.py 2>&1)
-MINIKUBE_LDFLAGS := -X github.com/jimmidyson/minishift/pkg/version.version=$(VERSION)
+MINIKUBE_LDFLAGS := $(K8S_VERSION_LDFLAGS) -X github.com/jimmidyson/minishift/pkg/version.version=$(VERSION) -s -w -extldflags '-static'
 
 MKGOPATH := mkdir -p $(shell dirname $(GOPATH)/src/$(REPOPATH)) && ln -s -f $(shell pwd) $(GOPATH)/src/$(REPOPATH)
 
@@ -79,7 +79,7 @@ $(GOPATH)/bin/gh-release:
 .PHONY: gendocs
 gendocs: $(shell find cmd) pkg/minikube/cluster/assets.go
 	$(MKGOPATH)
-	cd $(GOPATH)/src/$(REPOPATH) && go run -ldflags="-X github.com/jimmidyson/minishift/pkg/version.version=$(shell cat VERSION)" gen_help_text.go
+	cd $(GOPATH)/src/$(REPOPATH) && go run -ldflags="$(MINIKUBE_LDFLAGS)" gen_help_text.go
 
 .PHONY: release
 release: clean deploy/iso/minishift.iso test $(GOPATH)/bin/gh-release cross

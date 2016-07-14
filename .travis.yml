@@ -6,7 +6,9 @@ branches:
     - master
 install:
 - echo "Don't run anything."
-script: make test
+script:
+  - make test
+  - make cross
 
 env:
   global:

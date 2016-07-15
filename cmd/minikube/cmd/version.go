@@ -26,11 +26,11 @@ import (
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print the version of minikube.",
-	Long:  `Print the version of minikube.`,
+	Short: "Print the version of minishift.",
+	Long:  `Print the version of minishift.`,
 	Run: func(command *cobra.Command, args []string) {
 
-		fmt.Println("minikube version:", version.GetVersion())
+		fmt.Println("minishift version:", version.GetVersion())
 	},
 }
 

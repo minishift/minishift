@@ -30,8 +30,8 @@ import (
 // logsCmd represents the logs command
 var logsCmd = &cobra.Command{
 	Use:   "logs",
-	Short: "Gets the logs of the running OpenShift instance, used for debugging minikube, not user code.",
-	Long:  `Gets the logs of the running OpenShift instance, used for debugging minikube, not user code.`,
+	Short: "Gets the logs of the running OpenShift instance, used for debugging minishift, not user code.",
+	Long:  `Gets the logs of the running OpenShift instance, used for debugging minishift, not user code.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()

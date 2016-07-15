@@ -17,7 +17,7 @@ minishift start
 ```
       --cpus=1: Number of CPUs allocated to the minishift VM
       --disk-size=20g: Disk size allocated to the minishift VM (format: <number>[<unit>], where unit = b, k, m or g)
-      --iso-url="https://github.com/jimmidyson/minishift/releases/download/v0.2.0/boot2docker.iso": Location of the minishift iso
+      --iso-url="https://github.com/jimmidyson/minishift/releases/download/v0.2.1/boot2docker.iso": Location of the minishift iso
       --memory=1024: Amount of RAM allocated to the minishift VM
       --vm-driver="kvm": VM driver is one of: [virtualbox kvm]
 ```

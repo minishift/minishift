@@ -40,7 +40,7 @@ MINIKUBE_LDFLAGS := $(K8S_VERSION_LDFLAGS) -X github.com/jimmidyson/minishift/pk
 
 MKGOPATH := mkdir -p $(GOPATH)/src/$(ORG) && ln -s -f $(shell pwd) $(GOPATH)/src/$(ORG)
 
-MINIKUBEFILES := $(shell go list  -f '{{join .Deps "\n"}}' ./cmd/minikube/ | grep github.com/jimmidyson/minishift | xargs go list -f '{{ range $$file := .GoFiles }} {{$$.Dir}}/{{$$file}}{{"\n"}}{{end}}')
+MINIKUBEFILES := go list  -f '{{join .Deps "\n"}}' ./cmd/minikube/ | grep $(REPOPATH) | xargs go list -f '{{ range $$file := .GoFiles }} {{$$.Dir}}/{{$$file}}{{"\n"}}{{end}}'
 
 out/minishift: out/minishift-$(GOOS)-$(GOARCH)
 	cp $(BUILD_DIR)/minishift-$(GOOS)-$(GOARCH) $(BUILD_DIR)/minishift
@@ -50,9 +50,17 @@ out/openshift: hack/get_openshift.go
 	mkdir out 2>/dev/null || true
 	cd $(GOPATH)/src/$(REPOPATH) && go run hack/get_openshift.go v1.3.0-alpha.2
 
-out/minishift-$(GOOS)-$(GOARCH): $(MINIKUBEFILES) pkg/minikube/cluster/assets.go
+out/minishift-darwin-amd64: pkg/minikube/cluster/assets.go $(shell $(MINIKUBEFILES))
 	$(MKGOPATH)
-	CGO_ENABLED=0 GOARCH=$(GOARCH) GOOS=$(GOOS) go build --installsuffix cgo -ldflags="$(MINIKUBE_LDFLAGS)" -a -o $(BUILD_DIR)/minishift-$(GOOS)-$(GOARCH) ./cmd/minikube
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build --installsuffix cgo -ldflags="$(MINIKUBE_LDFLAGS)" -a -o $(BUILD_DIR)/minishift-darwin-amd64 ./cmd/minikube
+
+out/minishift-linux-amd64: pkg/minikube/cluster/assets.go $(shell $(MINIKUBEFILES))
+	$(MKGOPATH)
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build --installsuffix cgo -ldflags="$(MINIKUBE_LDFLAGS)" -a -o $(BUILD_DIR)/minishift-linux-amd64 ./cmd/minikube
+
+out/minishift-windows-amd64: pkg/minikube/cluster/assets.go $(shell $(MINIKUBEFILES))
+	$(MKGOPATH)
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build --installsuffix cgo -ldflags="$(MINIKUBE_LDFLAGS)" -a -o $(BUILD_DIR)/minishift-windows-amd64.exe ./cmd/minikube
 
 deploy/iso/minishift.iso: $(shell find deploy/iso -type f ! -name *.iso)
 	cd deploy/iso && ./build.sh
@@ -91,11 +99,7 @@ release: clean deploy/iso/minishift.iso test $(GOPATH)/bin/gh-release cross
 	gh-release create jimmidyson/minishift $(VERSION)
 
 .PHONY: cross
-cross: out/openshift
-	GOOS=linux GOARCH=amd64 make out/minishift-linux-amd64
-	GOOS=darwin GOARCH=amd64 make out/minishift-darwin-amd64
-	GOOS=windows GOARCH=amd64 make out/minishift-windows-amd64
-	mv out/minishift-windows-amd64 out/minishift-windows-amd64.exe
+cross: out/minishift-linux-amd64 out/minishift-darwin-amd64 out/minishift-windows-amd64
 
 .PHONY: clean
 clean:

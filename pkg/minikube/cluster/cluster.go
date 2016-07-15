@@ -385,7 +385,7 @@ func GetDashboardURL(api libmachine.API) (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf("https://%s", ip), nil
+	return fmt.Sprintf("https://%s:%d", ip, constants.APIServerPort), nil
 }
 
 func GetServiceURL(api libmachine.API, namespace, service string) (string, error) {

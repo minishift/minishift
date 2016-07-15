@@ -28,7 +28,7 @@ var stopCommand = "sudo killall openshift | true"
 var startCommandFmtStr = `
 # Run with nohup so it stays up. Redirect logs to useful places.
 cd /var/lib/minishift;
-sudo sh -c 'PATH=/usr/local/sbin:$PATH nohup sudo /usr/local/bin/openshift start --listen=https://0.0.0.0:%d> %s 2> %s < /dev/null &'
+sudo sh -c 'PATH=/usr/local/sbin:$PATH nohup sudo /usr/local/bin/openshift start --listen=https://0.0.0.0:%d --cors-allowed-origins=.*> %s 2> %s < /dev/null &'
 until $(curl --output /dev/null --silent --fail -k https://localhost:%d/healthz/ready); do
     printf '.'
     sleep 1

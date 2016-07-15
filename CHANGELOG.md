@@ -1,5 +1,10 @@
 # MiniShift Release Notes
 
+# Version 0.2.1 - 2016/07/15
+ * Enable all CORS origins for API server
+ * Strip binary for smaller download
+ * Build enhancements to check for valid cross compilation
+
 ## Version 0.2.0 - 2016/07/14
  * Changed API server port to 8443 to allow OpenShift router/ingress controllers to bind to 443 if required
  * Added a --disk-size flag to minishift start.

@@ -25,7 +25,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/jimmidyson/minishift/pkg/minikube/config"
 	"github.com/jimmidyson/minishift/pkg/minikube/constants"
-	"github.com/jimmidyson/minishift/pkg/minikube/notify"
+	"github.com/jimmidyson/minishift/pkg/minikube/update"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -56,7 +56,7 @@ var RootCmd = &cobra.Command{
 			log.SetOutWriter(ioutil.Discard)
 			log.SetErrWriter(ioutil.Discard)
 		}
-		notify.MaybePrintUpdateTextFromGithub(os.Stdout)
+		update.MaybeUpdateFromGithub(os.Stdout)
 	},
 }
 

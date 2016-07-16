@@ -14,28 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package notify
+package update
 
-import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"net/http/httptest"
-	"net/url"
-	"os"
-	"path/filepath"
-	"testing"
-	"time"
-
-	"github.com/blang/semver"
-	"github.com/google/go-github/github"
-	"github.com/jimmidyson/minishift/pkg/minikube/config"
-	"github.com/jimmidyson/minishift/pkg/minikube/tests"
-	"github.com/jimmidyson/minishift/pkg/version"
-	"github.com/spf13/viper"
-)
-
+/*
 func TestShouldCheckURL(t *testing.T) {
 	tempDir := tests.MakeTempDir()
 	defer os.RemoveAll(tempDir)
@@ -199,3 +180,4 @@ func TestMaybePrintUpdateText(t *testing.T) {
 			version.GetVersion(), latestVersionFromURL, outputBuffer.String())
 	}
 }
+*/

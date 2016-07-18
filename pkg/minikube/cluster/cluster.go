@@ -54,33 +54,40 @@ func init() {
 
 // StartHost starts a host VM.
 func StartHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
-	if exists, err := api.Exists(constants.MachineName); err != nil {
+	exists, err := api.Exists(constants.MachineName)
+	if err != nil {
 		return nil, fmt.Errorf("Error checking if host exists: %s", err)
-	} else if exists {
-		glog.Infoln("Machine exists!")
-		h, err := api.Load(constants.MachineName)
-		if err != nil {
-			return nil, fmt.Errorf("Error loading existing host: %s", err)
-		}
-		s, err := h.Driver.GetState()
-		if err != nil {
-			return nil, fmt.Errorf("Error getting state for host: %s", err)
-		}
-		if s != state.Running {
-			if err := h.Driver.Start(); err != nil {
-				return nil, fmt.Errorf("Error starting stopped host: %s", err)
-			}
-			if err := api.Save(h); err != nil {
-				return nil, fmt.Errorf("Error saving started host: %s", err)
-			}
-		}
-		if err := h.ConfigureAuth(); err != nil {
-			return nil, fmt.Errorf("Error configuring auth on host: %s", err)
-		}
-		return h, nil
-	} else {
+	}
+	if !exists {
 		return createHost(api, config)
 	}
+
+	glog.Infoln("Machine exists!")
+	h, err := api.Load(constants.MachineName)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"Error loading existing host: %s. Please try running [minikube delete], then run [minikube start] again.", err)
+	}
+
+	s, err := h.Driver.GetState()
+	glog.Infoln("Machine state: ", s)
+	if err != nil {
+		return nil, fmt.Errorf("Error getting state for host: %s", err)
+	}
+
+	if s != state.Running {
+		if err := h.Driver.Start(); err != nil {
+			return nil, fmt.Errorf("Error starting stopped host: %s", err)
+		}
+		if err := api.Save(h); err != nil {
+			return nil, fmt.Errorf("Error saving started host: %s", err)
+		}
+	}
+
+	if err := h.ConfigureAuth(); err != nil {
+		return nil, fmt.Errorf("Error configuring auth on host: %s", err)
+	}
+	return h, nil
 }
 
 // StopHost stops the host VM.
@@ -163,6 +170,7 @@ type MachineConfig struct {
 	CPUs        int
 	DiskSize    int
 	VMDriver    string
+	DockerEnv   []string // Each entry is formatted as KEY=VALUE.
 }
 
 // StartCluster starts a k8s cluster on the specified Host.
@@ -251,17 +259,29 @@ func SetupCerts(d drivers.Driver) error {
 	return nil
 }
 
+func engineOptions(config MachineConfig) *engine.Options {
+
+	o := engine.Options{
+		Env: config.DockerEnv,
+	}
+	return &o
+}
+
+func createVirtualboxHost(config MachineConfig) drivers.Driver {
+	d := virtualbox.NewDriver(constants.MachineName, constants.Minipath)
+	d.Boot2DockerURL = config.MinikubeISO
+	d.Memory = config.Memory
+	d.CPU = config.CPUs
+	d.DiskSize = int(config.DiskSize)
+	return d
+}
+
 func createHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 	var driver interface{}
 
 	switch config.VMDriver {
 	case "virtualbox":
-		d := virtualbox.NewDriver(constants.MachineName, constants.Minipath)
-		d.Boot2DockerURL = config.MinikubeISO
-		d.Memory = config.Memory
-		d.CPU = config.CPUs
-		d.DiskSize = int(config.DiskSize)
-		driver = d
+		driver = createVirtualboxHost(config)
 	case "vmwarefusion":
 		driver = createVMwareFusionHost(config)
 	case "kvm":
@@ -286,7 +306,7 @@ func createHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 
 	h.HostOptions.AuthOptions.CertDir = constants.Minipath
 	h.HostOptions.AuthOptions.StorePath = constants.Minipath
-	h.HostOptions.EngineOptions = &engine.Options{}
+	h.HostOptions.EngineOptions = engineOptions(config)
 
 	if err := api.Create(h); err != nil {
 		// Wait for all the logs to reach the client

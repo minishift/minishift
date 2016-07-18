@@ -75,12 +75,12 @@ func TestCreateHost(t *testing.T) {
 
 func TestStartCluster(t *testing.T) {
 	h := tests.NewMockHost()
-	err := StartCluster(h)
+	err := StartCluster(h, "127.0.0.1")
 	if err != nil {
 		t.Fatalf("Error starting cluster: %s", err)
 	}
 
-	for _, cmd := range []string{stopCommand, GetStartCommand()} {
+	for _, cmd := range []string{stopCommand, GetStartCommand("127.0.0.1")} {
 		if _, ok := h.Commands[cmd]; !ok {
 			t.Fatalf("Expected command not run: %s. Commands run: %s", cmd, h.Commands)
 		}
@@ -91,7 +91,7 @@ func TestStartClusterError(t *testing.T) {
 	h := tests.NewMockHost()
 	h.Error = "error"
 
-	err := StartCluster(h)
+	err := StartCluster(h, "")
 	if err == nil {
 		t.Fatal("Error not thrown starting cluster.")
 	}

@@ -166,8 +166,8 @@ type MachineConfig struct {
 }
 
 // StartCluster starts a k8s cluster on the specified Host.
-func StartCluster(h sshAble) error {
-	commands := []string{stopCommand, GetStartCommand()}
+func StartCluster(h sshAble, ip string) error {
+	commands := []string{stopCommand, GetStartCommand(ip)}
 
 	for _, cmd := range commands {
 		glog.Infoln(cmd)

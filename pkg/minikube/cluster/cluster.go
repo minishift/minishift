@@ -374,7 +374,7 @@ func CreateSSHShell(api libmachine.API, args []string) error {
 	return client.Shell(strings.Join(args, " "))
 }
 
-func GetDashboardURL(api libmachine.API) (string, error) {
+func GetConsoleURL(api libmachine.API) (string, error) {
 	host, err := checkIfApiExistsAndLoad(api)
 	if err != nil {
 		return "", err

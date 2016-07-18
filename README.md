@@ -13,7 +13,7 @@ Minishift is a tool that makes it easy to run OpenShift locally. Minishift runs 
   * DNS
   * NodePorts
   * ConfigMaps and Secrets
-  * Dashboards
+  * Console
 
 ## Installation
 
@@ -22,7 +22,9 @@ Minishift is a tool that makes it easy to run OpenShift locally. Minishift runs 
 * OS X
     * [xhyve driver](DRIVERS.md#xhyve-driver), [VirtualBox](https://www.virtualbox.org/wiki/Downloads) or [VMware Fusion](https://www.vmware.com/products/fusion) installation
 * Linux
-    * [VirtualBox](https://www.virtualbox.org/wiki/Downloads) or [KVM](http://www.linux-kvm.org/) installation, 
+    * [VirtualBox](https://www.virtualbox.org/wiki/Downloads) or [KVM](http://www.linux-kvm.org/) installation,
+* Windows
+    * [VirtualBox](https://www.virtualbox.org/wiki/Downloads) or [Hyper-V](https://technet.microsoft.com/en-us/library/mt169373.aspx) installation,
 * VT-x/AMD-v virtualization must be enabled in BIOS
 
 ### Instructions
@@ -128,11 +130,11 @@ Minishift sets this context to default automatically, but if you need to switch 
 
 or pass the context on each command like this: `oc get pods --context=minishift`.
 
-### Dashboard
+### Console
 
 To access the [OpenShift console](http://kubernetes.io/docs/user-guide/ui/), run this command in a shell after starting minishift to get the address:
 ```shell
-minishift dashboard
+minishift console
 ```
 
 ### Services

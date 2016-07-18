@@ -1,20 +1,20 @@
-## minishift dashboard
+## minishift console
 
-Opens/displays the kubernetes dashboard URL for your local cluster
+Opens/displays the OpenShift console URL for your local cluster
 
 ### Synopsis
 
 
-Opens/displays the kubernetes dashboard URL for your local cluster
+Opens/displays the OpenShift console URL for your local cluster
 
 ```
-minishift dashboard
+minishift console
 ```
 
 ### Options
 
 ```
-      --url[=false]: Display the kubernetes dashboard in the CLI instead of opening it in the default browser
+      --url[=false]: Display the OpenShift console in the CLI instead of opening it in the default browser
 ```
 
 ### Options inherited from parent commands

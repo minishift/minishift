@@ -67,7 +67,7 @@ NAME                              READY     STATUS    RESTARTS   AGE
 hello-minishift-3383150820-vctvh   1/1       Running   0          13s
 
 # We can see that the pod is now Running and we will now be able to curl it:
-$ curl $(minishift service hello-minikube --url)
+$ curl $(minishift service hello-minishift --url)
 CLIENT VALUES:
 client_address=192.168.99.1
 command=GET

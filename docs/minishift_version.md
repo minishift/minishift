@@ -1,11 +1,11 @@
 ## minishift version
 
-Print the version of minikube.
+Print the version of minishift.
 
 ### Synopsis
 
 
-Print the version of minikube.
+Print the version of minishift.
 
 ```
 minishift version

@@ -29,32 +29,32 @@ import (
 )
 
 var (
-	dashboardURLMode bool
+	consoleURLMode bool
 )
 
-// dashboardCmd represents the dashboard command
-var dashboardCmd = &cobra.Command{
-	Use:   "dashboard",
-	Short: "Opens/displays the kubernetes dashboard URL for your local cluster",
-	Long:  `Opens/displays the kubernetes dashboard URL for your local cluster`,
+// consoleCmd represents the console command
+var consoleCmd = &cobra.Command{
+	Use:   "console",
+	Short: "Opens/displays the OpenShift console URL for your local cluster",
+	Long:  `Opens/displays the OpenShift console URL for your local cluster`,
 	Run: func(cmd *cobra.Command, args []string) {
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()
-		url, err := cluster.GetDashboardURL(api)
+		url, err := cluster.GetConsoleURL(api)
 		if err != nil {
-			glog.Errorln("Error accessing the kubernetes dashboard (is minishift running?): Error: ", err)
+			glog.Errorln("Error accessing the OpenShift console (is minishift running?): Error: ", err)
 			os.Exit(1)
 		}
-		if dashboardURLMode {
+		if consoleURLMode {
 			fmt.Fprintln(os.Stdout, url)
 		} else {
-			fmt.Fprintln(os.Stdout, "Opening kubernetes dashboard in default browser...")
+			fmt.Fprintln(os.Stdout, "Opening OpenShift console in default browser...")
 			browser.OpenURL(url)
 		}
 	},
 }
 
 func init() {
-	dashboardCmd.Flags().BoolVar(&dashboardURLMode, "url", false, "Display the kubernetes dashboard in the CLI instead of opening it in the default browser")
-	RootCmd.AddCommand(dashboardCmd)
+	consoleCmd.Flags().BoolVar(&consoleURLMode, "url", false, "Display the OpenShift console in the CLI instead of opening it in the default browser")
+	RootCmd.AddCommand(consoleCmd)
 }

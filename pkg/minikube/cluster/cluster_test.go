@@ -441,28 +441,17 @@ func (mockServiceGetter *MockServiceGetter) Get(name string) (*api.Service, erro
 	return &service, nil
 }
 
-func TestGetDashboardURL(t *testing.T) {
-	mockServiceGetter := NewMockServiceGetter()
-	nodeport := api.ServicePort{
-		NodePort: 1234,
-	}
-	mockDashboardService := api.Service{
-		Spec: api.ServiceSpec{
-			Ports: []api.ServicePort{nodeport},
-		},
-	}
-	mockServiceGetter.services["kubernetes-dashboard"] = mockDashboardService
-
-	port, err := getServicePortFromServiceGetter(mockServiceGetter, "kubernetes-dashboard")
-	if err != nil {
-		t.Fatalf("Error getting dashboard port from api: Error: ", err)
-	}
-	expected := 1234
-	if port != expected {
-		t.Fatalf("Error getting dashboard port from api: Expected: %s, Got: %s", port, expected)
-	}
-
-}
+//func TestGetConsoleURL(t *testing.T) {
+//	port, err := GetConsoleURL()
+//	if err != nil {
+//		t.Fatalf("Error getting dashboard port from api: Error: ", err)
+//	}
+//	expected := 1234
+//	if port != expected {
+//		t.Fatalf("Error getting dashboard port from api: Expected: %s, Got: %s", port, expected)
+//	}
+//
+//}
 
 func TestGetServiceURLWithoutNodePort(t *testing.T) {
 	mockServiceGetter := NewMockServiceGetter()

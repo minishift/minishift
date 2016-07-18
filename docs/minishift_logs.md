@@ -1,11 +1,11 @@
 ## minishift logs
 
-Gets the logs of the running OpenShift instance, used for debugging minikube, not user code.
+Gets the logs of the running OpenShift instance, used for debugging minishift, not user code.
 
 ### Synopsis
 
 
-Gets the logs of the running OpenShift instance, used for debugging minikube, not user code.
+Gets the logs of the running OpenShift instance, used for debugging minishift, not user code.
 
 ```
 minishift logs

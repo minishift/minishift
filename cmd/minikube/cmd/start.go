@@ -85,7 +85,12 @@ func runStart(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	if err := cluster.StartCluster(host); err != nil {
+	kubeIP, err := host.Driver.GetIP()
+	if err != nil {
+		glog.Errorln("Error connecting to cluster: ", err)
+		os.Exit(1)
+	}
+	if err := cluster.StartCluster(host, kubeIP); err != nil {
 		glog.Errorln("Error starting cluster: ", err)
 		os.Exit(1)
 	}
@@ -93,6 +98,7 @@ func runStart(cmd *cobra.Command, args []string) {
 	kubeHost, err := host.Driver.GetURL()
 	if err != nil {
 		glog.Errorln("Error connecting to cluster: ", err)
+		os.Exit(1)
 	}
 	kubeHost = strings.Replace(kubeHost, "tcp://", "https://", -1)
 	kubeHost = strings.Replace(kubeHost, ":2376", ":"+strconv.Itoa(constants.APIServerPort), -1)

@@ -1,5 +1,12 @@
 # MiniShift Release Notes
 
+# Version 0.3.0 - 2016/07/18
+ * BREAKING: Rename dashboard command to console
+ * Add flag to pass extra Docker env vars to start command
+ * Set router subdomain to <ip>.xip.io by default
+ * EXPERIMENTAL: Auto-update of binaries
+ * Build enhancements
+
 # Version 0.2.1 - 2016/07/15
  * Enable all CORS origins for API server
  * Strip binary for smaller download

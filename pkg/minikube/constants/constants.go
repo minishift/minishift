@@ -63,5 +63,3 @@ const (
 	RemoteOpenShiftErrPath = "/var/lib/minishift/openshift.err"
 	RemoteOpenShiftOutPath = "/var/lib/minishift/openshift.out"
 )
-
-var ConfigFilePath = MakeMiniPath("config")

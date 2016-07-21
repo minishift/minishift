@@ -1,5 +1,11 @@
 # MiniShift Release Notes
 
+# Version 0.3.2 - 2016-07-21
+ * [BUG] Fix autoupdate checksums
+
+# VERSION 0.3.1 - 2016-07-21
+ * [BUG] Fix start command when running under xhyve on OS X
+
 # Version 0.3.0 - 2016/07/18
  * BREAKING: Rename dashboard command to console
  * Add flag to pass extra Docker env vars to start command

@@ -51,9 +51,9 @@ const (
 )
 
 var (
-	lastUpdateCheckFilePath                = constants.MakeMiniPath("last_update_check")
-	githubClient            *github.Client = nil
-	downloadBinary                         = "minishift-" + runtime.GOOS + "-" + runtime.GOARCH
+	lastUpdateCheckFilePath = constants.MakeMiniPath("last_update_check")
+	githubClient            *github.Client
+	downloadBinary          = "minishift-" + runtime.GOOS + "-" + runtime.GOARCH
 )
 
 func MaybeUpdateFromGithub(output io.Writer) {
@@ -77,16 +77,19 @@ func MaybeUpdate(output io.Writer, githubOwner, githubRepo, lastUpdatePath strin
 	if localVersion.Compare(latestVersion) < 0 {
 		writeTimeToFile(lastUpdateCheckFilePath, time.Now().UTC())
 		fmt.Fprintf(output, `There is a newer version of minishift available (%s%s). Do you want to
-automatically update now[y/N]? `,
+automatically update now [y/N]? `,
 			version.VersionPrefix, latestVersion)
 
 		var confirm string
 		fmt.Scanln(&confirm)
 
 		if confirm == "y" {
+			fmt.Printf("Updating to version %s\n", latestVersion)
 			updateBinary(latestVersion)
 			return
 		}
+
+		fmt.Println("Skipping autoupdate")
 	}
 }
 
@@ -188,14 +191,19 @@ func updateBinary(v semver.Version) {
 }
 
 func downloadChecksum(v semver.Version) ([]byte, error) {
-	checksumResp, err := http.Get(fmt.Sprintf(downloadLinkFormat, v, downloadBinary+".sha256"))
+	u := fmt.Sprintf(downloadLinkFormat, v, downloadBinary+".sha256")
+	checksumResp, err := http.Get(u)
 	if err != nil {
 		return nil, err
 	}
 	defer checksumResp.Body.Close()
+	if checksumResp.StatusCode != 200 {
+		return nil, fmt.Errorf("received %d", checksumResp.StatusCode)
+	}
 	b, err := ioutil.ReadAll(checksumResp.Body)
 	if err != nil {
 		return nil, err
 	}
-	return hex.DecodeString(string(b))
+
+	return hex.DecodeString(strings.TrimSpace(string(b)))
 }

@@ -178,9 +178,7 @@ For a list of minishift's available commands see the [full CLI docs](https://git
 
 ## Design
 
-Minishift uses [libmachine](https://github.com/docker/machine/tree/master/libmachine) for provisioning VMs, and [localkube](https://github.com/kubernetes/minishift/tree/master/pkg/localkube) (originally written and donated to this project by [RedSpread](https://redspread.com/)) for running the cluster.
-
-For more information about minishift, see the [proposal](https://github.com/kubernetes/kubernetes/blob/master/docs/proposals/local-cluster-ux.md).
+Minishift uses [libmachine](https://github.com/docker/machine/tree/master/libmachine) for provisioning VMs, and [OpenShift Origin](https://github.com/openshift/origin) for running the cluster.
 
 ## Goals and Non-Goals
 For the goals and non-goals of the minishift project, please see our [roadmap](ROADMAP.md).
@@ -346,9 +344,10 @@ Make sure to also fetch tags, as Godep relies on these.
 5. Update godeps
 
  ```shell
- cd $GOPATH/src/k8s.io/minishift
+ cd $GOPATH/src/github.com/jimmidyson/minishift
  rm -rf Godeps/ vendor/
  godep save ./...
+ GOOS=windows godep save ./...
  ```
 
  6. Verify that the correct tag is marked in the Godeps.json file by running this script:
@@ -380,6 +379,9 @@ git add --all
 git commit -m "Manual changes to update Kubernetes to foo"
 ```
 
+## Steps to Release MiniShift
+The steps to release minishift can be found at [RELEASING.md](RELEASING.md)
+
 ## Community
 
-Contributions, questions, and comments are all welcomed and encouraged! minishift developers hang out on [Slack](https://kubernetes.slack.com) in the #minishift channel (get an invitation [here](http://slack.kubernetes.io/)). We also have the [kubernetes-dev Google Groups mailing list](https://groups.google.com/forum/#!forum/kubernetes-dev). If you are posting to the list please prefix your subject with "minishift: ".
+Contributions, questions, and comments are all welcomed and encouraged! minishift developers hang out on IRC in the #openshift-dev channel on Freenode.

@@ -41,8 +41,10 @@ var KubeconfigPath = clientcmd.RecommendedHomeFile
 const MinikubeContext = "minishift"
 
 // MakeMiniPath is a utility to calculate a relative path to our directory.
-func MakeMiniPath(fileName string) string {
-	return filepath.Join(Minipath, fileName)
+func MakeMiniPath(fileName ...string) string {
+	args := []string{Minipath}
+	args = append(args, fileName...)
+	return filepath.Join(args...)
 }
 
 // Only pass along these flags to openshift.
@@ -63,5 +65,3 @@ const (
 	RemoteOpenShiftErrPath = "/var/lib/minishift/openshift.err"
 	RemoteOpenShiftOutPath = "/var/lib/minishift/openshift.out"
 )
-
-var ConfigFilePath = MakeMiniPath("config")

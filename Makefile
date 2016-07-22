@@ -58,7 +58,7 @@ out/minishift-linux-amd64: pkg/minikube/cluster/assets.go $(shell $(MINIKUBEFILE
 	$(MKGOPATH)
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build --installsuffix cgo -ldflags="$(MINIKUBE_LDFLAGS)" -a -o $(BUILD_DIR)/minishift-linux-amd64 ./cmd/minikube
 
-out/minishift-windows-amd64: pkg/minikube/cluster/assets.go $(shell $(MINIKUBEFILES))
+out/minishift-windows-amd64.exe: pkg/minikube/cluster/assets.go $(shell $(MINIKUBEFILES))
 	$(MKGOPATH)
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build --installsuffix cgo -ldflags="$(MINIKUBE_LDFLAGS)" -a -o $(BUILD_DIR)/minishift-windows-amd64.exe ./cmd/minikube
 
@@ -99,7 +99,7 @@ release: clean deploy/iso/minishift.iso test $(GOPATH)/bin/gh-release cross
 	gh-release create jimmidyson/minishift $(VERSION)
 
 .PHONY: cross
-cross: out/minishift-linux-amd64 out/minishift-darwin-amd64 out/minishift-windows-amd64
+cross: out/minishift-linux-amd64 out/minishift-darwin-amd64 out/minishift-windows-amd64.exe
 
 .PHONY: clean
 clean:

@@ -24,8 +24,8 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -48,6 +48,8 @@ import (
 var (
 	certs = []string{"apiserver.crt", "apiserver.key"}
 )
+
+const fileScheme = "file"
 
 //This init function is used to set the logtostderr variable to false so that INFO level log info does not clutter the CLI
 //INFO lvl logging is displayed due to the kubernetes api calling flag.Set("logtostderr", "true") in its init()
@@ -275,14 +277,14 @@ func engineOptions(config MachineConfig) *engine.Options {
 
 func createVirtualboxHost(config MachineConfig) drivers.Driver {
 	d := virtualbox.NewDriver(constants.MachineName, constants.Minipath)
-	d.Boot2DockerURL = config.GetISOCacheFileURI()
+	d.Boot2DockerURL = config.GetISOFileURI()
 	d.Memory = config.Memory
 	d.CPU = config.CPUs
 	d.DiskSize = int(config.DiskSize)
 	return d
 }
 
-func (m *MachineConfig) CacheMinikubeISO() error {
+func (m *MachineConfig) CacheMinikubeISOFromURL() error {
 	// store the miniube-iso inside the .minikube dir
 	response, err := http.Get(m.MinikubeISO)
 	if err != nil {
@@ -301,12 +303,37 @@ func (m *MachineConfig) CacheMinikubeISO() error {
 	return nil
 }
 
+func (m *MachineConfig) ShouldCacheMinikubeISO() bool {
+	// store the miniube-iso inside the .minikube dir
+
+	urlObj, err := url.Parse(m.MinikubeISO)
+	if err != nil {
+		return false
+	}
+	if urlObj.Scheme == fileScheme {
+		return false
+	}
+	if m.IsMinikubeISOCached() {
+		return false
+	}
+	return true
+}
+
 func (m *MachineConfig) GetISOCacheFilepath() string {
 	return filepath.Join(constants.Minipath, "cache", "iso", filepath.Base(m.MinikubeISO))
 }
 
-func (m *MachineConfig) GetISOCacheFileURI() string {
-	return "file://" + path.Join(constants.Minipath, "cache", "iso", filepath.Base(m.MinikubeISO))
+func (m *MachineConfig) GetISOFileURI() string {
+	urlObj, err := url.Parse(m.MinikubeISO)
+	if err != nil {
+		return m.MinikubeISO
+	}
+	if urlObj.Scheme == fileScheme {
+		return m.MinikubeISO
+	}
+	isoPath := filepath.Join(constants.Minipath, "cache", "iso", filepath.Base(m.MinikubeISO))
+	// As this is a file URL there should be no backslashes regardless of platform running on.
+	return "file://" + filepath.ToSlash(isoPath)
 }
 
 func (m *MachineConfig) IsMinikubeISOCached() bool {
@@ -319,8 +346,8 @@ func (m *MachineConfig) IsMinikubeISOCached() bool {
 func createHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 	var driver interface{}
 
-	if !config.IsMinikubeISOCached() {
-		if err := config.CacheMinikubeISO(); err != nil {
+	if config.ShouldCacheMinikubeISO() {
+		if err := config.CacheMinikubeISOFromURL(); err != nil {
 			return nil, err
 		}
 	}

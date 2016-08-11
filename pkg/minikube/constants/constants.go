@@ -68,3 +68,6 @@ const (
 	RemoteOpenShiftErrPath = "/var/lib/minishift/openshift.err"
 	RemoteOpenShiftOutPath = "/var/lib/minishift/openshift.out"
 )
+
+// DockerAPIVersion is the API version implemented by Docker running in the minikube VM.
+const DockerAPIVersion = "1.23"

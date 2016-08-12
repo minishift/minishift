@@ -22,6 +22,9 @@ import (
 
 	"github.com/jimmidyson/minishift/pkg/minikube/tests"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"k8s.io/minikube/pkg/minikube/constants"
+	"k8s.io/minikube/pkg/minikube/tests"
 )
 
 func runCommand(f func(*cobra.Command, []string)) {
@@ -42,5 +45,18 @@ func TestPreRunDirectories(t *testing.T) {
 		if os.IsNotExist(err) {
 			t.Fatalf("Directory %s does not exist.", dir)
 		}
+	}
+}
+
+func getEnvVarName(name string) string {
+	return constants.MinikubeEnvPrefix + name
+}
+
+func TestEnvVariable(t *testing.T) {
+	defer os.Unsetenv("WANTUPDATENOTIFICATION")
+	initConfig()
+	os.Setenv(getEnvVarName("WANTUPDATENOTIFICATION"), "true")
+	if !viper.GetBool("WantUpdateNotification") {
+		t.Fatalf("Viper did not respect environment variable")
 	}
 }

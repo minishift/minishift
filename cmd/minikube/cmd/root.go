@@ -82,6 +82,11 @@ func init() {
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	configPath := constants.MakeMiniPath("config")
+
+	// Bind all viper values to env variables
+	viper.SetEnvPrefix(constants.MiniShiftEnvPrefix)
+	viper.AutomaticEnv()
+
 	viper.SetConfigName("config")
 	viper.AddConfigPath(configPath)
 	err := viper.ReadInConfig()

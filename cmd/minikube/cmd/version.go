@@ -20,7 +20,9 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
+	"github.com/jimmidyson/minishift/pkg/minikube/config"
 	"github.com/jimmidyson/minishift/pkg/version"
 )
 
@@ -28,8 +30,13 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print the version of minishift.",
 	Long:  `Print the version of minishift.`,
-	Run: func(command *cobra.Command, args []string) {
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		// Explicitly disable update checking for the version command
+		viper.Set(config.WantUpdateNotification, "false")
 
+		RootCmd.PersistentPreRun(cmd, args)
+	},
+	Run: func(command *cobra.Command, args []string) {
 		fmt.Println("minishift version:", version.GetVersion())
 	},
 }

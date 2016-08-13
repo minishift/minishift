@@ -42,6 +42,8 @@ var (
 	vmDriver         string
 	dockerEnv        []string
 	insecureRegistry []string
+	registryMirror   []string
+	hostOnlyCIDR     string
 )
 
 // startCmd represents the start command
@@ -66,6 +68,8 @@ func runStart(cmd *cobra.Command, args []string) {
 		VMDriver:         vmDriver,
 		DockerEnv:        dockerEnv,
 		InsecureRegistry: insecureRegistry,
+		RegistryMirror:   registryMirror,
+		HostOnlyCIDR:     hostOnlyCIDR,
 	}
 
 	var host *host.Host
@@ -176,5 +180,7 @@ func init() {
 
 	startCmd.Flags().StringSliceVar(&dockerEnv, "docker-env", nil, "Environment variables to pass to the Docker daemon. (format: key=value)")
 	startCmd.Flags().StringSliceVar(&insecureRegistry, "insecure-registry", nil, "Insecure Docker registries to pass to the Docker daemon")
+	startCmd.Flags().StringSliceVar(&registryMirror, "registry-mirror", nil, "Registry mirrors to pass to the Docker daemon")
+
 	RootCmd.AddCommand(startCmd)
 }

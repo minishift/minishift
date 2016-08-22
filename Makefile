@@ -48,7 +48,7 @@ out/minishift: out/minishift-$(GOOS)-$(GOARCH)
 out/openshift: hack/get_openshift.go
 	$(MKGOPATH)
 	mkdir out 2>/dev/null || true
-	cd $(GOPATH)/src/$(REPOPATH) && go run hack/get_openshift.go v1.3.0-alpha.2
+	cd $(GOPATH)/src/$(REPOPATH) && go run hack/get_openshift.go v1.3.0-alpha.3
 
 out/minishift-darwin-amd64: pkg/minikube/cluster/assets.go $(shell $(MINIKUBEFILES))
 	$(MKGOPATH)

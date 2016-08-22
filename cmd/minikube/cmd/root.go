@@ -39,8 +39,8 @@ var dirs = [...]string{
 	constants.MakeMiniPath("cache", "iso"),
 	constants.MakeMiniPath("config")}
 
-var (
-	showLibmachineLogs bool
+const (
+	showLibmachineLogs = "show-libmachine-logs"
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -49,14 +49,15 @@ var RootCmd = &cobra.Command{
 	Short: "Minishift is a tool for managing local OpenShift clusters.",
 	Long:  `Minishift is a CLI tool that provisions and manages single-node OpenShift clusters optimized for development workflows.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		setFlagsUsingViper()
 		for _, path := range dirs {
 			if err := os.MkdirAll(path, 0777); err != nil {
 				glog.Exitf("Error creating minishift directory: %s", err)
 			}
 		}
 
-		log.SetDebug(showLibmachineLogs)
-		if !showLibmachineLogs {
+		log.SetDebug(viper.Get(showLibmachineLogs))
+		if !viper.GetBool(showLibmachineLogs) {
 			log.SetOutWriter(ioutil.Discard)
 			log.SetErrWriter(ioutil.Discard)
 		}
@@ -72,9 +73,27 @@ func Execute() {
 	}
 }
 
+// Handle config values for flags used in external packages (e.g. glog)
+// by setting them directly, using values from viper when not passed in as args
+func setFlagsUsingViper() {
+	setFlagValues := func(a *pflag.Flag) {
+		viper.SetDefault(a.Name, a.DefValue)
+		// If the flag is set, override viper value
+		if a.Changed {
+			viper.Set(a.Name, a.Value.String())
+		}
+		// Viper will give precedence first to calls to the Set command,
+		// then to values from the config.yml
+		a.Value.Set(viper.GetString(a.Name))
+	}
+
+	pflag.VisitAll(setFlagValues)
+}
+
 func init() {
-	RootCmd.PersistentFlags().BoolVarP(&showLibmachineLogs, "show-libmachine-logs", "", false, "Whether or not to show logs from libmachine.")
+	RootCmd.PersistentFlags().Bool(showLibmachineLogs, false, "Whether or not to show logs from libmachine.")
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
+	viper.BindPFlags(RootCmd.PersistentFlags())
 	cobra.OnInitialize(initConfig)
 }
 

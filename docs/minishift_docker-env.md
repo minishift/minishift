@@ -15,7 +15,7 @@ minishift docker-env
 
 ```
       --no-proxy[=false]: Add machine IP to NO_PROXY environment variable
-      --shell="": Force environment to be configured for a specified shell: [fish, cmd, powershell, tcsh], default is auto-detect
+      --shell="": Force environment to be configured for a specified shell: [fish, cmd, powershell, tcsh, bash, zsh], default is auto-detect
   -u, --unset[=false]: Unset variables instead of setting them
 ```
 

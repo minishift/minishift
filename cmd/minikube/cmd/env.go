@@ -21,37 +21,41 @@ package cmd
 
 import (
 	"fmt"
-	"html/template"
 	"os"
 	"strings"
+	"text/template"
+
+	"github.com/jimmidyson/minishift/pkg/minikube/cluster"
+	"github.com/jimmidyson/minishift/pkg/minikube/constants"
 
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/shell"
 	"github.com/golang/glog"
-	"github.com/jimmidyson/minishift/pkg/minikube/cluster"
-	"github.com/jimmidyson/minishift/pkg/minikube/constants"
 	"github.com/spf13/cobra"
 )
 
 const (
-	envTmpl = `{{ .Prefix }}DOCKER_TLS_VERIFY{{ .Delimiter }}{{ .DockerTLSVerify }}{{ .Suffix }}{{ .Prefix }}DOCKER_HOST{{ .Delimiter }}{{ .DockerHost }}{{ .Suffix }}{{ .Prefix }}DOCKER_CERT_PATH{{ .Delimiter }}{{ .DockerCertPath }}{{ .Suffix }}{{ if .NoProxyVar }}{{ .Prefix }}{{ .NoProxyVar }}{{ .Delimiter }}{{ .NoProxyValue }}{{ .Suffix }}{{end}}{{ .UsageHint }}`
+	envTmpl = `{{ .Prefix }}DOCKER_TLS_VERIFY{{ .Delimiter }}{{ .DockerTLSVerify }}{{ .Suffix }}{{ .Prefix }}DOCKER_HOST{{ .Delimiter }}{{ .DockerHost }}{{ .Suffix }}{{ .Prefix }}DOCKER_CERT_PATH{{ .Delimiter }}{{ .DockerCertPath }}{{ .Suffix }}{{ .Prefix }}DOCKER_API_VERSION{{ .Delimiter }}{{ .DockerAPIVersion }}{{ .Suffix }}{{ if .NoProxyVar }}{{ .Prefix }}{{ .NoProxyVar }}{{ .Delimiter }}{{ .NoProxyValue }}{{ .Suffix }}{{end}}{{ .UsageHint }}`
 )
 
 type ShellConfig struct {
-	Prefix          string
-	Delimiter       string
-	Suffix          string
-	DockerCertPath  string
-	DockerHost      string
-	DockerTLSVerify string
-	UsageHint       string
-	NoProxyVar      string
-	NoProxyValue    string
+	Prefix           string
+	Delimiter        string
+	Suffix           string
+	DockerCertPath   string
+	DockerHost       string
+	DockerTLSVerify  string
+	DockerAPIVersion string
+	UsageHint        string
+	NoProxyVar       string
+	NoProxyValue     string
 }
 
-var noProxy bool
-var shellForce string
-var unset bool
+var (
+	noProxy    bool
+	forceShell string
+	unset      bool
+)
 
 func generateUsageHint(userShell string) string {
 
@@ -84,16 +88,17 @@ func shellCfgSet(api libmachine.API) (*ShellConfig, error) {
 		return nil, err
 	}
 
-	userShell, err := getShell(shellForce)
+	userShell, err := getShell(forceShell)
 	if err != nil {
 		return nil, err
 	}
 
 	shellCfg := &ShellConfig{
-		DockerCertPath:  envMap["DOCKER_CERT_PATH"],
-		DockerHost:      envMap["DOCKER_HOST"],
-		DockerTLSVerify: envMap["DOCKER_TLS_VERIFY"],
-		UsageHint:       generateUsageHint(userShell),
+		DockerCertPath:   envMap["DOCKER_CERT_PATH"],
+		DockerHost:       envMap["DOCKER_HOST"],
+		DockerTLSVerify:  envMap["DOCKER_TLS_VERIFY"],
+		DockerAPIVersion: constants.DockerAPIVersion,
+		UsageHint:        generateUsageHint(userShell),
 	}
 
 	if noProxy {
@@ -152,7 +157,7 @@ func shellCfgSet(api libmachine.API) (*ShellConfig, error) {
 
 func shellCfgUnset(api libmachine.API) (*ShellConfig, error) {
 
-	userShell, err := getShell(shellForce)
+	userShell, err := getShell(forceShell)
 	if err != nil {
 		return nil, err
 	}
@@ -192,12 +197,7 @@ func shellCfgUnset(api libmachine.API) (*ShellConfig, error) {
 }
 
 func executeTemplateStdout(shellCfg *ShellConfig) error {
-	t := template.New("envConfig")
-	tmpl, err := t.Parse(envTmpl)
-	if err != nil {
-		return err
-	}
-
+	tmpl := template.Must(template.New("envConfig").Parse(envTmpl))
 	return tmpl.Execute(os.Stdout, shellCfg)
 }
 
@@ -257,6 +257,6 @@ var dockerEnvCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(dockerEnvCmd)
 	dockerEnvCmd.Flags().BoolVar(&noProxy, "no-proxy", false, "Add machine IP to NO_PROXY environment variable")
-	dockerEnvCmd.Flags().StringVar(&shellForce, "shell", "", "Force environment to be configured for a specified shell: [fish, cmd, powershell, tcsh], default is auto-detect")
+	dockerEnvCmd.Flags().StringVar(&forceShell, "shell", "", "Force environment to be configured for a specified shell: [fish, cmd, powershell, tcsh, bash, zsh], default is auto-detect")
 	dockerEnvCmd.Flags().BoolVarP(&unset, "unset", "u", false, "Unset variables instead of setting them")
 }

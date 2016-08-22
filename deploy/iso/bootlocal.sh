@@ -20,3 +20,5 @@ PARTNAME=`echo "$BOOT2DOCKER_DATA" | sed 's/.*\///'`
 
 mkdir -p /mnt/$PARTNAME/var/lib/minishift
 ln -s /mnt/$PARTNAME/var/lib/minishift /var/lib/minishift
+mkdir -p /mnt/$PARTNAME/data
+ln -s /mnt/$PARTNAME/data /data

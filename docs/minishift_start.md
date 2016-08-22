@@ -21,6 +21,7 @@ minishift start
       --insecure-registry=[]: Insecure Docker registries to pass to the Docker daemon
       --iso-url="https://github.com/jimmidyson/minishift/releases/download/v0.3.4/boot2docker.iso": Location of the minishift iso
       --memory=1024: Amount of RAM allocated to the minishift VM
+      --registry-mirror=[]: Registry mirrors to pass to the Docker daemon
       --vm-driver="kvm": VM driver is one of: [virtualbox kvm]
 ```
 

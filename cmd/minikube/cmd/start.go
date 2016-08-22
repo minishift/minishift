@@ -22,7 +22,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/docker/go-units"
+	units "github.com/docker/go-units"
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/host"
 	"github.com/golang/glog"
@@ -42,6 +42,8 @@ var (
 	vmDriver         string
 	dockerEnv        []string
 	insecureRegistry []string
+	registryMirror   []string
+	hostOnlyCIDR     string
 )
 
 // startCmd represents the start command
@@ -66,11 +68,16 @@ func runStart(cmd *cobra.Command, args []string) {
 		VMDriver:         vmDriver,
 		DockerEnv:        dockerEnv,
 		InsecureRegistry: insecureRegistry,
+		RegistryMirror:   registryMirror,
+		HostOnlyCIDR:     hostOnlyCIDR,
 	}
 
 	var host *host.Host
 	start := func() (err error) {
 		host, err = cluster.StartHost(api, config)
+		if err != nil {
+			glog.Errorf("Error starting host: %s. Retrying.\n", err)
+		}
 		return err
 	}
 	err := util.Retry(3, start)
@@ -106,7 +113,6 @@ func runStart(cmd *cobra.Command, args []string) {
 	}
 	kubeHost = strings.Replace(kubeHost, "tcp://", "https://", -1)
 	kubeHost = strings.Replace(kubeHost, ":2376", ":"+strconv.Itoa(constants.APIServerPort), -1)
-	fmt.Printf("OpenShift is available at %s.\n", kubeHost)
 
 	// setup kubeconfig
 	name := constants.MinikubeContext
@@ -174,5 +180,7 @@ func init() {
 
 	startCmd.Flags().StringSliceVar(&dockerEnv, "docker-env", nil, "Environment variables to pass to the Docker daemon. (format: key=value)")
 	startCmd.Flags().StringSliceVar(&insecureRegistry, "insecure-registry", nil, "Insecure Docker registries to pass to the Docker daemon")
+	startCmd.Flags().StringSliceVar(&registryMirror, "registry-mirror", nil, "Registry mirrors to pass to the Docker daemon")
+
 	RootCmd.AddCommand(startCmd)
 }

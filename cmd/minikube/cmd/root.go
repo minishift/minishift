@@ -56,6 +56,7 @@ var RootCmd = &cobra.Command{
 			}
 		}
 
+		log.SetDebug(showLibmachineLogs)
 		if !showLibmachineLogs {
 			log.SetOutWriter(ioutil.Discard)
 			log.SetErrWriter(ioutil.Discard)
@@ -80,9 +81,18 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	configPath := constants.MakeMiniPath("config")
+
+	// Bind all viper values to env variables
+	viper.SetEnvPrefix(constants.MiniShiftEnvPrefix)
+	viper.AutomaticEnv()
+
 	viper.SetConfigName("config")
-	viper.AddConfigPath(constants.MakeMiniPath("config"))
-	viper.ReadInConfig()
+	viper.AddConfigPath(configPath)
+	err := viper.ReadInConfig()
+	if err != nil {
+		glog.Warningf("Error reading config file at %s: %s", configPath, err)
+	}
 	viper.SetDefault(config.WantUpdateNotification, true)
 	viper.SetDefault(config.ReminderWaitPeriodInHours, 24)
 }

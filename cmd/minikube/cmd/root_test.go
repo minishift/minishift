@@ -20,11 +20,10 @@ import (
 	"os"
 	"testing"
 
+	"github.com/jimmidyson/minishift/pkg/minikube/constants"
 	"github.com/jimmidyson/minishift/pkg/minikube/tests"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"k8s.io/minikube/pkg/minikube/constants"
-	"k8s.io/minikube/pkg/minikube/tests"
 )
 
 func runCommand(f func(*cobra.Command, []string)) {
@@ -49,7 +48,7 @@ func TestPreRunDirectories(t *testing.T) {
 }
 
 func getEnvVarName(name string) string {
-	return constants.MinikubeEnvPrefix + name
+	return constants.MiniShiftEnvPrefix + name
 }
 
 func TestEnvVariable(t *testing.T) {

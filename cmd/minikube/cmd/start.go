@@ -44,6 +44,8 @@ var (
 	insecureRegistry []string
 	registryMirror   []string
 	hostOnlyCIDR     string
+	deployRouter     bool
+	deployRegistry   bool
 )
 
 // startCmd represents the start command
@@ -70,6 +72,8 @@ func runStart(cmd *cobra.Command, args []string) {
 		InsecureRegistry: insecureRegistry,
 		RegistryMirror:   registryMirror,
 		HostOnlyCIDR:     hostOnlyCIDR,
+		DeployRouter:     deployRouter,
+		DeployRegistry:   deployRegistry,
 	}
 
 	var host *host.Host
@@ -101,7 +105,7 @@ func runStart(cmd *cobra.Command, args []string) {
 		glog.Errorln("Error connecting to cluster: ", err)
 		os.Exit(1)
 	}
-	if err := cluster.StartCluster(host, kubeIP); err != nil {
+	if err := cluster.StartCluster(host, kubeIP, config); err != nil {
 		glog.Errorln("Error starting cluster: ", err)
 		os.Exit(1)
 	}
@@ -181,6 +185,9 @@ func init() {
 	startCmd.Flags().StringSliceVar(&dockerEnv, "docker-env", nil, "Environment variables to pass to the Docker daemon. (format: key=value)")
 	startCmd.Flags().StringSliceVar(&insecureRegistry, "insecure-registry", nil, "Insecure Docker registries to pass to the Docker daemon")
 	startCmd.Flags().StringSliceVar(&registryMirror, "registry-mirror", nil, "Registry mirrors to pass to the Docker daemon")
+
+	startCmd.Flags().BoolVarP(&deployRegistry, "deploy-registry", "", false, "Should the OpenShift internal Docker registry be deployed?")
+	startCmd.Flags().BoolVarP(&deployRouter, "deploy-router", "", false, "Should the OpenShift router be deployed?")
 
 	RootCmd.AddCommand(startCmd)
 }

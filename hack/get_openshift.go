@@ -36,6 +36,7 @@ func main() {
 	token := os.Getenv("GH_TOKEN")
 	var tc *http.Client
 	if len(token) > 0 {
+		fmt.Println("Using GH_TOKEN environment variable")
 		ts := oauth2.StaticTokenSource(
 			&oauth2.Token{AccessToken: token},
 		)

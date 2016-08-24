@@ -19,6 +19,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"text/template"
 
 	"github.com/docker/machine/libmachine"
 	"github.com/jimmidyson/minishift/pkg/minikube/cluster"
@@ -28,8 +29,10 @@ import (
 )
 
 var (
-	namespace      string
-	serviceURLMode bool
+	namespace          string
+	serviceURLMode     bool
+	serviceURLFormat   string
+	serviceURLTemplate *template.Template
 )
 
 // serviceCmd represents the service command
@@ -37,6 +40,14 @@ var serviceCmd = &cobra.Command{
 	Use:   "service [flags] SERVICE",
 	Short: "Gets the URL for the specified service in your local cluster",
 	Long:  `Gets the URL for the specified service in your local cluster`,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		t, err := template.New("serviceURL").Parse(serviceURLFormat)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "The value passed to --format is invalid:\n\n", err)
+			os.Exit(1)
+		}
+		serviceURLTemplate = t
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 || len(args) > 1 {
 			fmt.Fprintln(os.Stderr, "Please specify a service name.")
@@ -47,7 +58,8 @@ var serviceCmd = &cobra.Command{
 
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()
-		url, err := cluster.GetServiceURL(api, namespace, service)
+
+		url, err := cluster.GetServiceURL(api, namespace, service, serviceURLTemplate)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			if _, ok := err.(cluster.MissingNodePortError); !ok {
@@ -68,5 +80,6 @@ var serviceCmd = &cobra.Command{
 func init() {
 	serviceCmd.Flags().StringVarP(&namespace, "namespace", "n", "default", "The service namespace")
 	serviceCmd.Flags().BoolVar(&serviceURLMode, "url", false, "Display the kubernetes service URL in the CLI instead of opening it in the default browser")
+	serviceCmd.PersistentFlags().StringVar(&serviceURLFormat, "format", "http://{{.IP}}:{{.Port}}", "Format to output service URL in")
 	RootCmd.AddCommand(serviceCmd)
 }

@@ -21,6 +21,7 @@ minishift service list [flags]
 
 ```
       --alsologtostderr[=false]: log to standard error as well as files
+      --format="http://{{.IP}}:{{.Port}}": Format to output service URL in
       --log-flush-frequency=5s: Maximum number of seconds between log flushes
       --log_backtrace_at=:0: when logging hits line file:N, emit a stack trace
       --log_dir="": If non-empty, write log files in this directory

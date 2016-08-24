@@ -39,7 +39,7 @@ var serviceListCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()
-		serviceURLs, err := cluster.GetServiceURLs(api, serviceListNamespace)
+		serviceURLs, err := cluster.GetServiceURLs(api, serviceListNamespace, serviceURLTemplate)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			fmt.Fprintln(os.Stderr, "Check that minishift is running and that you have specified the correct namespace (-n flag) if required.")

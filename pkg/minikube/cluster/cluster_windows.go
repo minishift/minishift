@@ -28,5 +28,6 @@ func createHypervHost(config MachineConfig) drivers.Driver {
 	d.MemSize = config.Memory
 	d.CPU = config.CPUs
 	d.DiskSize = int(config.DiskSize)
+	d.SSHUser = "docker"
 	return d
 }

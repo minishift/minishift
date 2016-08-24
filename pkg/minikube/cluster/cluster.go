@@ -17,6 +17,7 @@ limitations under the License.
 package cluster
 
 import (
+	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -26,6 +27,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/docker/machine/drivers/virtualbox"
@@ -445,7 +447,12 @@ func GetConsoleURL(api libmachine.API) (string, error) {
 	return fmt.Sprintf("https://%s:%d", ip, constants.APIServerPort), nil
 }
 
-func GetServiceURL(api libmachine.API, namespace, service string) (string, error) {
+type ipPort struct {
+	IP   string
+	Port int
+}
+
+func GetServiceURL(api libmachine.API, namespace, service string, t *template.Template) (string, error) {
 	host, err := checkIfApiExistsAndLoad(api)
 	if err != nil {
 		return "", err
@@ -466,7 +473,12 @@ func GetServiceURL(api libmachine.API, namespace, service string) (string, error
 		return "", err
 	}
 
-	return fmt.Sprintf("http://%s:%d", ip, port), nil
+	var doc bytes.Buffer
+	err = t.Execute(&doc, ipPort{ip, port})
+	if err != nil {
+		return "", err
+	}
+	return doc.String(), nil
 }
 
 type serviceGetter interface {
@@ -525,7 +537,7 @@ type ServiceURL struct {
 
 type ServiceURLs []ServiceURL
 
-func GetServiceURLs(api libmachine.API, namespace string) (ServiceURLs, error) {
+func GetServiceURLs(api libmachine.API, namespace string, t *template.Template) (ServiceURLs, error) {
 	host, err := checkIfApiExistsAndLoad(api)
 	if err != nil {
 		return nil, err
@@ -554,12 +566,17 @@ func GetServiceURLs(api libmachine.API, namespace string) (ServiceURLs, error) {
 		port, err := getServicePort(client, svc.Namespace, svc.Name)
 		if err != nil {
 			if _, ok := err.(MissingNodePortError); ok {
-				serviceURLs = append(serviceURLs, ServiceURL{Namespace: svc.Namespace, Name: svc.Name, URL: "Missing node port"})
+				serviceURLs = append(serviceURLs, ServiceURL{Namespace: svc.Namespace, Name: svc.Name, URL: "No node port"})
 				continue
 			}
 			return nil, err
 		} else {
-			serviceURLs = append(serviceURLs, ServiceURL{Namespace: svc.Namespace, Name: svc.Name, URL: fmt.Sprintf("http://%s:%d", ip, port)})
+			var doc bytes.Buffer
+			err = t.Execute(&doc, ipPort{ip, port})
+			if err != nil {
+				return nil, err
+			}
+			serviceURLs = append(serviceURLs, ServiceURL{Namespace: svc.Namespace, Name: svc.Name, URL: doc.String()})
 		}
 	}
 

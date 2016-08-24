@@ -554,7 +554,7 @@ func GetServiceURLs(api libmachine.API, namespace string) (ServiceURLs, error) {
 		port, err := getServicePort(client, svc.Namespace, svc.Name)
 		if err != nil {
 			if _, ok := err.(MissingNodePortError); ok {
-				serviceURLs = append(serviceURLs, ServiceURL{Namespace: svc.Namespace, Name: svc.Name, URL: "Missing node port"})
+				serviceURLs = append(serviceURLs, ServiceURL{Namespace: svc.Namespace, Name: svc.Name, URL: "No node port"})
 				continue
 			}
 			return nil, err

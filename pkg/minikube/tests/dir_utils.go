@@ -34,10 +34,6 @@ func MakeTempDir() string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = os.MkdirAll(filepath.Join(tempDir, "cache", "localkube"), 0777)
-	if err != nil {
-		log.Fatal(err)
-	}
 	constants.Minipath = tempDir
 	return tempDir
 }

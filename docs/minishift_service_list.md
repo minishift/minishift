@@ -1,21 +1,20 @@
-## minishift service
+## minishift service list
 
-Gets the URL for the specified service in your local cluster
+Lists the URLs for the services in your local cluster
 
 ### Synopsis
 
 
-Gets the URL for the specified service in your local cluster
+Lists the URLs for the services in your local cluster
 
 ```
-minishift service [flags] SERVICE
+minishift service list [flags]
 ```
 
 ### Options
 
 ```
-  -n, --namespace="default": The service namespace
-      --url[=false]: Display the kubernetes service URL in the CLI instead of opening it in the default browser
+  -n, --namespace="": The services namespace
 ```
 
 ### Options inherited from parent commands
@@ -33,6 +32,5 @@ minishift service [flags] SERVICE
 ```
 
 ### SEE ALSO
-* [minishift](minishift.md)	 - Minishift is a tool for managing local OpenShift clusters.
-* [minishift service list](minishift_service_list.md)	 - Lists the URLs for the services in your local cluster
+* [minishift service](minishift_service.md)	 - Gets the URL for the specified service in your local cluster
 

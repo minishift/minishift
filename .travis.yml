@@ -7,7 +7,7 @@ branches:
 install:
 - echo "Don't run anything."
 script:
-- make test
+- travis_retry make test
 - make cross
 env:
   global:

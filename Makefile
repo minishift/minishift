@@ -52,15 +52,15 @@ out/openshift: hack/get_openshift.go
 
 out/minishift-darwin-amd64: pkg/minikube/cluster/assets.go $(shell $(MINIKUBEFILES)) VERSION
 	$(MKGOPATH)
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build --installsuffix cgo -ldflags="$(MINIKUBE_LDFLAGS)" -a -o $(BUILD_DIR)/minishift-darwin-amd64 ./cmd/minikube
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build --installsuffix cgo -ldflags="$(MINIKUBE_LDFLAGS)" -o $(BUILD_DIR)/minishift-darwin-amd64 ./cmd/minikube
 
 out/minishift-linux-amd64: pkg/minikube/cluster/assets.go $(shell $(MINIKUBEFILES)) VERSION
 	$(MKGOPATH)
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build --installsuffix cgo -ldflags="$(MINIKUBE_LDFLAGS)" -a -o $(BUILD_DIR)/minishift-linux-amd64 ./cmd/minikube
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build --installsuffix cgo -ldflags="$(MINIKUBE_LDFLAGS)" -o $(BUILD_DIR)/minishift-linux-amd64 ./cmd/minikube
 
 out/minishift-windows-amd64.exe: pkg/minikube/cluster/assets.go $(shell $(MINIKUBEFILES)) VERSION
 	$(MKGOPATH)
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build --installsuffix cgo -ldflags="$(MINIKUBE_LDFLAGS)" -a -o $(BUILD_DIR)/minishift-windows-amd64.exe ./cmd/minikube
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build --installsuffix cgo -ldflags="$(MINIKUBE_LDFLAGS)" -o $(BUILD_DIR)/minishift-windows-amd64.exe ./cmd/minikube
 
 deploy/iso/minishift.iso: $(shell find deploy/iso -type f ! -name *.iso)
 	cd deploy/iso && ./build.sh

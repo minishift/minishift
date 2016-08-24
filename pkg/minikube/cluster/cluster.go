@@ -40,7 +40,7 @@ import (
 	"github.com/jimmidyson/minishift/pkg/minikube/constants"
 	"github.com/jimmidyson/minishift/pkg/minikube/sshutil"
 	"github.com/jimmidyson/minishift/pkg/util"
-	kubeApi "k8s.io/kubernetes/pkg/api"
+	kubeapi "k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/client/unversioned"
 	"k8s.io/kubernetes/pkg/client/unversioned/clientcmd"
 )
@@ -478,7 +478,12 @@ func GetServiceURL(api libmachine.API, namespace, service string) (string, error
 		return "", err
 	}
 
-	port, err := getServicePort(namespace, service)
+	client, err := getKubernetesClient()
+	if err != nil {
+		return "", err
+	}
+
+	port, err := getServicePort(client, namespace, service)
 	if err != nil {
 		return "", err
 	}
@@ -487,15 +492,21 @@ func GetServiceURL(api libmachine.API, namespace, service string) (string, error
 }
 
 type serviceGetter interface {
-	Get(name string) (*kubeApi.Service, error)
+	Get(name string) (*kubeapi.Service, error)
+	List(kubeapi.ListOptions) (*kubeapi.ServiceList, error)
 }
 
-func getServicePort(namespace, service string) (int, error) {
-	services, err := getKubernetesServicesWithNamespace(namespace)
-	if err != nil {
-		return 0, err
-	}
+func getServicePort(client *unversioned.Client, namespace, service string) (int, error) {
+	services := getKubernetesServicesWithNamespace(client, namespace)
 	return getServicePortFromServiceGetter(services, service)
+}
+
+type MissingNodePortError struct {
+	service *kubeapi.Service
+}
+
+func (e MissingNodePortError) Error() string {
+	return fmt.Sprintf("Service %s/%s does not have a node port. To have one assigned automatically, the service type must be NodePort or LoadBalancer, but this service is of type %s.", e.service.Namespace, e.service.Name, e.service.Spec.Type)
 }
 
 func getServicePortFromServiceGetter(services serviceGetter, service string) (int, error) {
@@ -508,12 +519,12 @@ func getServicePortFromServiceGetter(services serviceGetter, service string) (in
 		nodePort = int(svc.Spec.Ports[0].NodePort)
 	}
 	if nodePort == 0 {
-		return 0, fmt.Errorf("Service %s does not have a node port. To have one assigned automatically, the service type must be NodePort or LoadBalancer, but this service is of type %s.", service, svc.Spec.Type)
+		return 0, MissingNodePortError{svc}
 	}
 	return nodePort, nil
 }
 
-func getKubernetesServicesWithNamespace(namespace string) (serviceGetter, error) {
+func getKubernetesClient() (*unversioned.Client, error) {
 	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
 	configOverrides := &clientcmd.ConfigOverrides{}
 	kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, configOverrides)
@@ -521,10 +532,58 @@ func getKubernetesServicesWithNamespace(namespace string) (serviceGetter, error)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating kubeConfig: %s", err)
 	}
-	client, err := unversioned.New(config)
+	return unversioned.New(config)
+}
+
+func getKubernetesServicesWithNamespace(client *unversioned.Client, namespace string) serviceGetter {
+	return client.Services(namespace)
+}
+
+type ServiceURL struct {
+	Namespace string
+	Name      string
+	URL       string
+}
+
+type ServiceURLs []ServiceURL
+
+func GetServiceURLs(api libmachine.API, namespace string) (ServiceURLs, error) {
+	host, err := checkIfApiExistsAndLoad(api)
 	if err != nil {
 		return nil, err
 	}
-	services := client.Services(namespace)
-	return services, nil
+
+	ip, err := host.Driver.GetIP()
+	if err != nil {
+		return nil, err
+	}
+
+	client, err := getKubernetesClient()
+	if err != nil {
+		return nil, err
+	}
+
+	getter := getKubernetesServicesWithNamespace(client, namespace)
+
+	svcs, err := getter.List(kubeapi.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	var serviceURLs []ServiceURL
+
+	for _, svc := range svcs.Items {
+		port, err := getServicePort(client, svc.Namespace, svc.Name)
+		if err != nil {
+			if _, ok := err.(MissingNodePortError); ok {
+				serviceURLs = append(serviceURLs, ServiceURL{Namespace: svc.Namespace, Name: svc.Name, URL: "Missing node port"})
+				continue
+			}
+			return nil, err
+		} else {
+			serviceURLs = append(serviceURLs, ServiceURL{Namespace: svc.Namespace, Name: svc.Name, URL: fmt.Sprintf("http://%s:%d", ip, port)})
+		}
+	}
+
+	return serviceURLs, nil
 }

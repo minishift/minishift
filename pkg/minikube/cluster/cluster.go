@@ -21,8 +21,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -220,40 +218,6 @@ func UpdateCluster(d drivers.Driver) error {
 		}
 
 		if err := sshutil.Transfer(contents, a.TargetDir, a.TargetName, a.Permissions, client); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// SetupCerts gets the generated credentials required to talk to the APIServer.
-func SetupCerts(d drivers.Driver) error {
-	localPath := constants.Minipath
-	ipStr, err := d.GetIP()
-	if err != nil {
-		return err
-	}
-	glog.Infoln("Setting up certificates for IP: %s", ipStr)
-
-	ip := net.ParseIP(ipStr)
-	publicPath := filepath.Join(localPath, "apiserver.crt")
-	privatePath := filepath.Join(localPath, "apiserver.key")
-	if err := GenerateCerts(publicPath, privatePath, ip); err != nil {
-		return err
-	}
-
-	client, err := sshutil.NewSSHClient(d)
-	if err != nil {
-		return err
-	}
-
-	for _, cert := range certs {
-		p := filepath.Join(localPath, cert)
-		data, err := ioutil.ReadFile(p)
-		if err != nil {
-			return err
-		}
-		if err := sshutil.Transfer(data, util.DefaultCertPath, cert, "0644", client); err != nil {
 			return err
 		}
 	}
@@ -600,4 +564,12 @@ func GetServiceURLs(api libmachine.API, namespace string) (ServiceURLs, error) {
 	}
 
 	return serviceURLs, nil
+}
+
+func GetCA(h sshAble) (string, error) {
+	s, err := h.RunSSHCommand(getCACertCommand)
+	if err != nil {
+		return "", nil
+	}
+	return s, nil
 }

@@ -41,7 +41,10 @@ done;
 sudo /usr/local/bin/openshift admin policy add-cluster-role-to-user cluster-admin admin --config=openshift.local.config/master/admin.kubeconfig
 `
 
-var logsCommand = fmt.Sprintf("tail -n +1 %s %s", constants.RemoteOpenShiftErrPath, constants.RemoteOpenShiftOutPath)
+var (
+	logsCommand      = fmt.Sprintf("tail -n +1 %s %s", constants.RemoteOpenShiftErrPath, constants.RemoteOpenShiftOutPath)
+	getCACertCommand = fmt.Sprintf("cat %s", constants.RemoteOpenShiftCAPath)
+)
 
 func GetStartCommand(ip string) string {
 	return fmt.Sprintf(startCommandFmtStr, constants.APIServerPort, ip, constants.RemoteOpenShiftErrPath, constants.RemoteOpenShiftOutPath, constants.APIServerPort)

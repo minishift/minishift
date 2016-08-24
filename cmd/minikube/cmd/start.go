@@ -95,11 +95,6 @@ func runStart(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	if err := cluster.SetupCerts(host.Driver); err != nil {
-		glog.Errorln("Error configuring authentication: ", err)
-		os.Exit(1)
-	}
-
 	kubeIP, err := host.Driver.GetIP()
 	if err != nil {
 		glog.Errorln("Error connecting to cluster: ", err)
@@ -120,22 +115,24 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	// setup kubeconfig
 	name := constants.MinikubeContext
-	certAuth := constants.MakeMiniPath("apiserver.crt")
-	clientCert := constants.MakeMiniPath("apiserver.crt")
-	clientKey := constants.MakeMiniPath("apiserver.key")
-	if err := setupKubeconfig(name, kubeHost, certAuth, clientCert, clientKey); err != nil {
+	certAuth, err := cluster.GetCA(host)
+	if err != nil {
+		glog.Errorln("Error setting up kubeconfig: ", err)
+		os.Exit(1)
+	}
+	if err := setupKubeconfig(name, kubeHost, certAuth); err != nil {
 		glog.Errorln("Error setting up kubeconfig: ", err)
 		os.Exit(1)
 	}
 	fmt.Println("oc is now configured to use the cluster.")
 	fmt.Println("Run this command to use the cluster: ")
-	fmt.Println("oc login --username=admin --password=admin --insecure-skip-tls-verify")
+	fmt.Println("oc login --username=admin --password=admin")
 }
 
 // setupKubeconfig reads config from disk, adds the minikube settings, and writes it back.
 // activeContext is true when minikube is the CurrentContext
 // If no CurrentContext is set, the given name will be used.
-func setupKubeconfig(name, server, certAuth, cliCert, cliKey string) error {
+func setupKubeconfig(name, server, certAuth string) error {
 	configFile := constants.KubeconfigPath
 
 	// read existing config or create new if does not exist
@@ -147,14 +144,12 @@ func setupKubeconfig(name, server, certAuth, cliCert, cliKey string) error {
 	clusterName := name
 	cluster := cfg.NewCluster()
 	cluster.Server = server
-	cluster.CertificateAuthority = certAuth
+	cluster.CertificateAuthorityData = []byte(certAuth)
 	config.Clusters[clusterName] = cluster
 
 	// user
 	userName := name
 	user := cfg.NewAuthInfo()
-	user.ClientCertificate = cliCert
-	user.ClientKey = cliKey
 	config.AuthInfos[userName] = user
 
 	// context

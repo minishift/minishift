@@ -64,5 +64,6 @@ func createXhyveHost(config MachineConfig) *xhyveDriver {
 		DiskSize:       int64(config.DiskSize),
 		Virtio9p:       true,
 		Virtio9pFolder: "/Users",
+		UUID:           "F4BB3F79-AB4E-4708-95CA-E32FBFCDEFD3",
 	}
 }

@@ -96,7 +96,7 @@ release: clean deploy/iso/minishift.iso test $(GOPATH)/bin/gh-release cross
 	cp out/minishift-*-amd64* release
 	cp deploy/iso/minishift.iso release/boot2docker.iso
 	gh-release checksums sha256
-	gh-release create jimmidyson/minishift $(VERSION) master $(VERSION)
+	gh-release create jimmidyson/minishift $(VERSION) master v$(VERSION)
 
 .PHONY: cross
 cross: out/minishift-linux-amd64 out/minishift-darwin-amd64 out/minishift-windows-amd64.exe

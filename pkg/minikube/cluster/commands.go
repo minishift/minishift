@@ -29,7 +29,7 @@ var startCommandFmtStr = `
 # Run with nohup so it stays up. Redirect logs to useful places.
 cd /var/lib/minishift;
 if [ ! -f openshift.local.config/master/master-config.yaml ]; then
-    sudo /usr/local/bin/openshift start --listen=https://0.0.0.0:%d --cors-allowed-origins=.* --write-config=openshift.local.config;
+    sudo /usr/local/bin/openshift start --listen=https://0.0.0.0:%d --cors-allowed-origins=.* --master=https://%s:%d --write-config=openshift.local.config;
     sudo /usr/local/bin/openshift ex config patch openshift.local.config/master/master-config.yaml --patch='{"routingConfig": {"subdomain": "%s.xip.io"}}' > /tmp/master-config.yaml;
     sudo mv /tmp/master-config.yaml openshift.local.config/master/master-config.yaml
 fi;
@@ -47,5 +47,5 @@ var (
 )
 
 func GetStartCommand(ip string) string {
-	return fmt.Sprintf(startCommandFmtStr, constants.APIServerPort, ip, constants.RemoteOpenShiftErrPath, constants.RemoteOpenShiftOutPath, constants.APIServerPort)
+	return fmt.Sprintf(startCommandFmtStr, constants.APIServerPort, ip, constants.APIServerPort, ip, constants.RemoteOpenShiftErrPath, constants.RemoteOpenShiftOutPath, constants.APIServerPort)
 }

@@ -158,12 +158,26 @@ type MachineConfig struct {
 	InsecureRegistry []string
 	RegistryMirror   []string
 	HostOnlyCIDR     string // Only used by the virtualbox driver
+	DeployRegistry   bool
+	DeployRouter     bool
 }
 
 // StartCluster starts a k8s cluster on the specified Host.
-func StartCluster(h sshAble, ip string) error {
+func StartCluster(h sshAble, ip string, config MachineConfig) error {
 	commands := []string{stopCommand, GetStartCommand(ip)}
-
+	if config.DeployRegistry {
+		commands = append(commands, `
+cd /var/lib/minishift;
+sudo /usr/local/bin/openshift admin registry --service-account=registry --config=openshift.local.config/master/admin.kubeconfig
+`)
+	}
+	if config.DeployRouter {
+		commands = append(commands, `
+cd /var/lib/minishift;
+sudo /usr/local/bin/openshift admin policy add-scc-to-user hostnetwork -z router --config=openshift.local.config/master/admin.kubeconfig;
+sudo /usr/local/bin/openshift admin router --service-account=router --config=openshift.local.config/master/admin.kubeconfig
+`)
+	}
 	for _, cmd := range commands {
 		glog.Infoln(cmd)
 		output, err := h.RunSSHCommand(cmd)

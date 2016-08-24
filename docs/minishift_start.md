@@ -18,7 +18,7 @@ minishift start
       --cpus=1: Number of CPUs allocated to the minishift VM
       --disk-size=20g: Disk size allocated to the minishift VM (format: <number>[<unit>], where unit = b, k, m or g)
       --docker-env=[]: Environment variables to pass to the Docker daemon. (format: key=value)
-      --insecure-registry=[]: Insecure Docker registries to pass to the Docker daemon
+      --insecure-registry=[172.30.0.0/16]: Insecure Docker registries to pass to the Docker daemon
       --iso-url="https://github.com/jimmidyson/minishift/releases/download/v0.3.5/boot2docker.iso": Location of the minishift iso
       --memory=1024: Amount of RAM allocated to the minishift VM
       --registry-mirror=[]: Registry mirrors to pass to the Docker daemon

@@ -19,13 +19,15 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 	"text/template"
 
 	"github.com/docker/machine/libmachine"
-	"github.com/jimmidyson/minishift/pkg/minikube/cluster"
-	"github.com/jimmidyson/minishift/pkg/minikube/constants"
 	"github.com/pkg/browser"
 	"github.com/spf13/cobra"
+
+	"github.com/jimmidyson/minishift/pkg/minikube/cluster"
+	"github.com/jimmidyson/minishift/pkg/minikube/constants"
 )
 
 var (
@@ -33,6 +35,7 @@ var (
 	serviceURLMode     bool
 	serviceURLFormat   string
 	serviceURLTemplate *template.Template
+	https              bool
 )
 
 // serviceCmd represents the service command
@@ -68,6 +71,9 @@ var serviceCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		if https {
+			url = strings.Replace(url, "http", "https", 1)
+		}
 		if serviceURLMode {
 			fmt.Fprintln(os.Stdout, url)
 		} else {
@@ -81,5 +87,6 @@ func init() {
 	serviceCmd.Flags().StringVarP(&namespace, "namespace", "n", "default", "The service namespace")
 	serviceCmd.Flags().BoolVar(&serviceURLMode, "url", false, "Display the kubernetes service URL in the CLI instead of opening it in the default browser")
 	serviceCmd.PersistentFlags().StringVar(&serviceURLFormat, "format", "http://{{.IP}}:{{.Port}}", "Format to output service URL in")
+	serviceCmd.Flags().BoolVar(&https, "https", false, "Open the service URL with https instead of http")
 	RootCmd.AddCommand(serviceCmd)
 }

@@ -23,7 +23,7 @@ $ sudo curl -L https://github.com/dhiltgen/docker-machine-kvm/releases/download/
 $ sudo chmod +x /usr/local/bin/docker-machine-driver-kvm
 ```
 
-On debian/ubuntu
+On Debian/Ubuntu
 ```
 # Install libvirt and qemu-kvm on your system, e.g.
 $ sudo apt install libvirt-bin qemu-kvm
@@ -35,7 +35,7 @@ $ sudo usermod -a -G libvirtd $(whoami)
 $ newgrp libvirtd
 ```
 
-On fedora
+On Fedora
 ```
 # Install libvirt and qemu-kvm on your system, e.g.
 $ sudo dnf install libvirt qemu-kvm

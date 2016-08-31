@@ -21,7 +21,10 @@ From https://github.com/dhiltgen/docker-machine-kvm#quick-start-instructions:
 ```
 $ sudo curl -L https://github.com/dhiltgen/docker-machine-kvm/releases/download/v0.7.0/docker-machine-driver-kvm -o /usr/local/bin/docker-machine-driver-kvm
 $ sudo chmod +x /usr/local/bin/docker-machine-driver-kvm
+```
 
+On debian/ubuntu
+```
 # Install libvirt and qemu-kvm on your system, e.g.
 $ sudo apt install libvirt-bin qemu-kvm
 
@@ -30,6 +33,18 @@ $ sudo usermod -a -G libvirtd $(whoami)
 
 # Update your current session for the group change to take effect
 $ newgrp libvirtd
+```
+
+On fedora
+```
+# Install libvirt and qemu-kvm on your system, e.g.
+$ sudo dnf install libvirt qemu-kvm
+
+# Add yourself to the libvirt group so you don't need to sudo
+$ sudo usermod -a -G libvirt $(whoami)
+
+# Update your current session for the group change to take effect
+$ newgrp libvirt
 ```
 
 #### xhyve driver

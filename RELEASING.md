@@ -1,4 +1,4 @@
-# Steps to Release Minikube
+# Steps to Release MiniShift
 
 ## Create a Release Notes PR
 

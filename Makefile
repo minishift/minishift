@@ -24,6 +24,7 @@ ORG := github.com/jimmidyson
 REPOPATH ?= $(ORG)/minishift
 BUILD_IMAGE ?= gcr.io/google_containers/kube-cross:v1.6.2-1
 
+ORIGINAL_GOPATH := $(GOPATH)
 ifeq ($(IN_DOCKER),1)
 	GOPATH := /go
 else
@@ -41,6 +42,12 @@ MINIKUBE_LDFLAGS := $(K8S_VERSION_LDFLAGS) -X github.com/jimmidyson/minishift/pk
 MKGOPATH := if [ ! -e $(GOPATH)/src/$(ORG) ]; then mkdir -p $(GOPATH)/src/$(ORG) && ln -s -f $(shell pwd) $(GOPATH)/src/$(ORG); fi
 
 MINIKUBEFILES := go list  -f '{{join .Deps "\n"}}' ./cmd/minikube/ | grep $(REPOPATH) | xargs go list -f '{{ range $$file := .GoFiles }} {{$$.Dir}}/{{$$file}}{{"\n"}}{{end}}'
+
+.PHONY: install
+install: $(ORIGINAL_GOPATH)/bin/minishift
+
+$(ORIGINAL_GOPATH)/bin/minishift: out/minishift-$(GOOS)-$(GOARCH)
+	cp $(BUILD_DIR)/minishift-$(GOOS)-$(GOARCH) $(ORIGINAL_GOPATH)/bin/minishift
 
 out/minishift: out/minishift-$(GOOS)-$(GOARCH)
 	cp $(BUILD_DIR)/minishift-$(GOOS)-$(GOARCH) $(BUILD_DIR)/minishift

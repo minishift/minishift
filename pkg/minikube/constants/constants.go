@@ -19,9 +19,10 @@ package constants
 import (
 	"path/filepath"
 
-	"github.com/jimmidyson/minishift/pkg/version"
 	"k8s.io/kubernetes/pkg/client/unversioned/clientcmd"
 	"k8s.io/kubernetes/pkg/util/homedir"
+
+	"github.com/jimmidyson/minishift/pkg/version"
 )
 
 // MachineName is the name to use for the VM.
@@ -69,6 +70,9 @@ const (
 	RemoteOpenShiftOutPath = "/var/lib/minishift/openshift.out"
 	RemoteOpenShiftCAPath  = "/var/lib/minishift/openshift.local.config/master/ca.crt"
 )
+
+var ConfigFilePath = MakeMiniPath("config")
+var ConfigFile = MakeMiniPath("config", "config.json")
 
 // DockerAPIVersion is the API version implemented by Docker running in the minikube VM.
 const DockerAPIVersion = "1.23"

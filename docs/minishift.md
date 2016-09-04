@@ -22,6 +22,7 @@ Minishift is a CLI tool that provisions and manages single-node OpenShift cluste
 ```
 
 ### SEE ALSO
+* [minishift config](minishift_config.md)	 - Modify minishift config
 * [minishift console](minishift_console.md)	 - Opens/displays the OpenShift console URL for your local cluster
 * [minishift delete](minishift_delete.md)	 - Deletes a local OpenShift cluster.
 * [minishift docker-env](minishift_docker-env.md)	 - sets up docker env variables; similar to '$(docker-machine env)'

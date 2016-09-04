@@ -23,12 +23,14 @@ import (
 
 	"github.com/docker/machine/libmachine/log"
 	"github.com/golang/glog"
-	"github.com/jimmidyson/minishift/pkg/minikube/config"
-	"github.com/jimmidyson/minishift/pkg/minikube/constants"
-	"github.com/jimmidyson/minishift/pkg/minikube/update"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+
+	configCmd "github.com/jimmidyson/minishift/cmd/minikube/cmd/config"
+	"github.com/jimmidyson/minishift/pkg/minikube/config"
+	"github.com/jimmidyson/minishift/pkg/minikube/constants"
+	"github.com/jimmidyson/minishift/pkg/minikube/update"
 )
 
 var dirs = [...]string{
@@ -105,6 +107,7 @@ func setFlagsUsingViper() {
 
 func init() {
 	RootCmd.PersistentFlags().Bool(showLibmachineLogs, false, "Whether or not to show logs from libmachine.")
+	RootCmd.AddCommand(configCmd.ConfigCmd)
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
 	viper.BindPFlags(RootCmd.PersistentFlags())
 	cobra.OnInitialize(initConfig)
@@ -112,9 +115,9 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	configPath := constants.MakeMiniPath("config")
-	viper.SetConfigName("config")
-	viper.AddConfigPath(configPath)
+	configPath := constants.ConfigFile
+	viper.SetConfigFile(configPath)
+	viper.SetConfigType("json")
 	err := viper.ReadInConfig()
 	if err != nil {
 		glog.Warningf("Error reading config file at %s: %s", configPath, err)

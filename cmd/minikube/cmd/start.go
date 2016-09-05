@@ -26,26 +26,32 @@ import (
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/host"
 	"github.com/golang/glog"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	cfg "k8s.io/kubernetes/pkg/client/unversioned/clientcmd/api"
+
 	"github.com/jimmidyson/minishift/pkg/minikube/cluster"
 	"github.com/jimmidyson/minishift/pkg/minikube/constants"
 	"github.com/jimmidyson/minishift/pkg/minikube/kubeconfig"
 	"github.com/jimmidyson/minishift/pkg/util"
-	"github.com/spf13/cobra"
-	cfg "k8s.io/kubernetes/pkg/client/unversioned/clientcmd/api"
+)
+
+const (
+	isoURL                = "iso-url"
+	memory                = "memory"
+	cpus                  = "cpus"
+	humanReadableDiskSize = "disk-size"
+	vmDriver              = "vm-driver"
+	kubernetesVersion     = "kubernetes-version"
+	hostOnlyCIDR          = "host-only-cidr"
+	deployRegistry        = "deploy-registry"
+	deployRouter          = "deploy-router"
 )
 
 var (
-	minikubeISO      string
-	memory           int
-	cpus             int
-	disk             = newUnitValue(20 * units.GB)
-	vmDriver         string
 	dockerEnv        []string
 	insecureRegistry []string
 	registryMirror   []string
-	hostOnlyCIDR     string
-	deployRouter     bool
-	deployRegistry   bool
 )
 
 // startCmd represents the start command
@@ -63,17 +69,17 @@ func runStart(cmd *cobra.Command, args []string) {
 	defer api.Close()
 
 	config := cluster.MachineConfig{
-		MinikubeISO:      minikubeISO,
-		Memory:           memory,
-		CPUs:             cpus,
-		DiskSize:         int(*disk / units.MB),
-		VMDriver:         vmDriver,
+		MinikubeISO:      viper.GetString(isoURL),
+		Memory:           viper.GetInt(memory),
+		CPUs:             viper.GetInt(cpus),
+		DiskSize:         calculateDiskSizeInMB(viper.GetString(humanReadableDiskSize)),
+		VMDriver:         viper.GetString(vmDriver),
 		DockerEnv:        dockerEnv,
 		InsecureRegistry: insecureRegistry,
 		RegistryMirror:   registryMirror,
-		HostOnlyCIDR:     hostOnlyCIDR,
-		DeployRouter:     deployRouter,
-		DeployRegistry:   deployRegistry,
+		HostOnlyCIDR:     viper.GetString(hostOnlyCIDR),
+		DeployRouter:     viper.GetBool(deployRouter),
+		DeployRegistry:   viper.GetBool(deployRegistry),
 	}
 
 	var host *host.Host
@@ -129,6 +135,14 @@ func runStart(cmd *cobra.Command, args []string) {
 	fmt.Println("oc login --username=admin --password=admin")
 }
 
+func calculateDiskSizeInMB(humanReadableDiskSize string) int {
+	diskSize, err := units.FromHumanSize(humanReadableDiskSize)
+	if err != nil {
+		glog.Errorf("Invalid disk size: %s", err)
+	}
+	return int(diskSize / units.MB)
+}
+
 // setupKubeconfig reads config from disk, adds the minikube settings, and writes it back.
 // activeContext is true when minikube is the CurrentContext
 // If no CurrentContext is set, the given name will be used.
@@ -170,19 +184,19 @@ func setupKubeconfig(name, server, certAuth string) error {
 }
 
 func init() {
-	startCmd.Flags().StringVarP(&minikubeISO, "iso-url", "", constants.DefaultIsoUrl, "Location of the minishift iso")
-	startCmd.Flags().StringVarP(&vmDriver, "vm-driver", "", constants.DefaultVMDriver, fmt.Sprintf("VM driver is one of: %v", constants.SupportedVMDrivers))
-	startCmd.Flags().IntVarP(&memory, "memory", "", constants.DefaultMemory, "Amount of RAM allocated to the minishift VM")
-	startCmd.Flags().IntVarP(&cpus, "cpus", "", constants.DefaultCPUS, "Number of CPUs allocated to the minishift VM")
-	diskFlag := startCmd.Flags().VarPF(disk, "disk-size", "", "Disk size allocated to the minishift VM (format: <number>[<unit>], where unit = b, k, m or g)")
-	diskFlag.DefValue = constants.DefaultDiskSize
-
+	startCmd.Flags().String(isoURL, constants.DefaultIsoUrl, "Location of the minishift iso")
+	startCmd.Flags().String(vmDriver, constants.DefaultVMDriver, fmt.Sprintf("VM driver is one of: %v", constants.SupportedVMDrivers))
+	startCmd.Flags().Int(memory, constants.DefaultMemory, "Amount of RAM allocated to the minishift VM")
+	startCmd.Flags().Int(cpus, constants.DefaultCPUS, "Number of CPUs allocated to the minishift VM")
+	startCmd.Flags().String(humanReadableDiskSize, constants.DefaultDiskSize, "Disk size allocated to the minishift VM (format: <number>[<unit>], where unit = b, k, m or g)")
+	startCmd.Flags().String(hostOnlyCIDR, "192.168.99.1/24", "The CIDR to be used for the minishift VM (only supported with Virtualbox driver)")
 	startCmd.Flags().StringSliceVar(&dockerEnv, "docker-env", nil, "Environment variables to pass to the Docker daemon. (format: key=value)")
 	startCmd.Flags().StringSliceVar(&insecureRegistry, "insecure-registry", []string{"172.30.0.0/16"}, "Insecure Docker registries to pass to the Docker daemon")
 	startCmd.Flags().StringSliceVar(&registryMirror, "registry-mirror", nil, "Registry mirrors to pass to the Docker daemon")
+	startCmd.Flags().Bool(deployRegistry, false, "Should the OpenShift internal Docker registry be deployed?")
+	startCmd.Flags().Bool(deployRouter, false, "Should the OpenShift router be deployed?")
 
-	startCmd.Flags().BoolVarP(&deployRegistry, "deploy-registry", "", false, "Should the OpenShift internal Docker registry be deployed?")
-	startCmd.Flags().BoolVarP(&deployRouter, "deploy-router", "", false, "Should the OpenShift router be deployed?")
+	viper.BindPFlags(startCmd.Flags())
 
 	RootCmd.AddCommand(startCmd)
 }

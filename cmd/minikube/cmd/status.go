@@ -22,9 +22,10 @@ import (
 
 	"github.com/docker/machine/libmachine"
 	"github.com/golang/glog"
+	"github.com/spf13/cobra"
+
 	"github.com/jimmidyson/minishift/pkg/minikube/cluster"
 	"github.com/jimmidyson/minishift/pkg/minikube/constants"
-	"github.com/spf13/cobra"
 )
 
 // statusCmd represents the status command

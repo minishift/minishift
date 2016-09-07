@@ -1,5 +1,15 @@
 # MiniShift Release Notes
 
+# Version 0.5.0 - 2016-09-07
+* [FEATURE] Enable host path provisioner
+* [BREAKING] Rename VM to `minishift`
+* [BUG] Fix xhyve hostname to `minishift`, rather than `boot2docker`
+* [BUG] Ensure node IP is routeable
+* [FEATURE] Reuse generated CA certificate
+* [FEATURE] Ensure xhyve driver uses same IP on restarts
+* [FEATURE] Add defaut insecure registry flag to include minishift service IP range
+* [FEATURE] Allow environment variables to specify flags
+
 # Version 0.3.2 - 2016-07-21
  * [BUG] Fix autoupdate checksums
 

@@ -32,6 +32,8 @@ if [ ! -f openshift.local.config/master/master-config.yaml ]; then
     sudo /usr/local/bin/openshift start --listen=https://0.0.0.0:%d --cors-allowed-origins=.* --master=https://%s:%d --write-config=openshift.local.config;
     sudo /usr/local/bin/openshift ex config patch openshift.local.config/master/master-config.yaml --patch='{"routingConfig": {"subdomain": "%s.xip.io"}}' > /tmp/master-config.yaml;
     sudo mv /tmp/master-config.yaml openshift.local.config/master/master-config.yaml;
+		sudo /usr/local/bin/openshift ex config patch openshift.local.config/master/master-config.yaml --patch='{"kubernetesMasterConfig": {"controllerArguments": {"enable-hostpath-provisioner": ["true"]}}}' > /tmp/master-config.yaml;
+    sudo mv /tmp/master-config.yaml openshift.local.config/master/master-config.yaml;
     sudo /usr/local/bin/openshift ex config patch openshift.local.config/node-minishift/node-config.yaml --patch='{"nodeIP": "%s"}}' > /tmp/node-config.yaml;
     sudo mv /tmp/node-config.yaml openshift.local.config/node-minishift/node-config.yaml;
 fi;

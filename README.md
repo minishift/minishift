@@ -29,7 +29,14 @@ Minishift is a tool that makes it easy to run OpenShift locally. Minishift runs 
 
 ### Instructions
 
-See the installation instructions for the [latest release](https://github.com/jimmidyson/minishift/releases).
+* OS X
+  ```
+  brew cask install minishift
+  ```
+
+* Other OS
+
+  See the installation instructions for the [latest release](https://github.com/jimmidyson/minishift/releases).
 
 ## Quickstart
 

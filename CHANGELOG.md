@@ -1,5 +1,8 @@
 # MiniShift Release Notes
 
+# Version 0.6.0 - 2016-09-08
+* Upgrade to OpenShift 1.3.0-rc1
+
 # Version 0.5.0 - 2016-09-07
 * [FEATURE] Enable host path provisioner
 * [BREAKING] Rename VM to `minishift`

@@ -16,6 +16,7 @@
 export GO15VENDOREXPERIMENT=1
 
 VERSION ?= $(shell cat VERSION)
+OPENSHIFT_VERSION ?= $(shell cat OPENSHIFT_VERSION)
 
 GOOS ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)
@@ -52,10 +53,10 @@ $(ORIGINAL_GOPATH)/bin/minishift: out/minishift-$(GOOS)-$(GOARCH)
 out/minishift: out/minishift-$(GOOS)-$(GOARCH)
 	cp $(BUILD_DIR)/minishift-$(GOOS)-$(GOARCH) $(BUILD_DIR)/minishift
 
-out/openshift: hack/get_openshift.go
+out/openshift: hack/get_openshift.go OPENSHIFT_VERSION
 	$(MKGOPATH)
 	mkdir out 2>/dev/null || true
-	cd $(GOPATH)/src/$(REPOPATH) && go run hack/get_openshift.go v1.3.0-rc1
+	cd $(GOPATH)/src/$(REPOPATH) && go run hack/get_openshift.go $(OPENSHIFT_VERSION)
 
 out/minishift-darwin-amd64: pkg/minikube/cluster/assets.go $(shell $(MINIKUBEFILES)) VERSION
 	$(MKGOPATH)

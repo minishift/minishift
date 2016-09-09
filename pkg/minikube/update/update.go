@@ -78,9 +78,9 @@ func MaybeUpdate(output io.Writer, githubOwner, githubRepo, binaryName, lastUpda
 	}
 	if localVersion.Compare(latestVersion) < 0 {
 		writeTimeToFile(lastUpdateCheckFilePath, time.Now().UTC())
-		fmt.Fprintf(output, `There is a newer version of %s available (%s%s). Do you want to
-automatically update now [y/N]? `,
-			githubRepo, version.VersionPrefix, latestVersion)
+		fmt.Fprintf(output, `There is a newer version of %s available. Do you want to
+automatically update from %s%s to %s%s now? [y/N] `,
+			binaryName, version.VersionPrefix, localVersion, version.VersionPrefix, latestVersion)
 
 		var confirm string
 		fmt.Scanln(&confirm)

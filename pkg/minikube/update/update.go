@@ -43,24 +43,26 @@ import (
 )
 
 const (
-	updateLinkPrefix   = "https://github.com/jimmidyson/minishift/releases/tag/" + version.VersionPrefix
-	downloadLinkFormat = "https://github.com/jimmidyson/minishift/releases/download/v%s/%s"
-	githubOwner        = "jimmidyson"
-	githubRepo         = "minishift"
-	timeLayout         = time.RFC1123
+	timeLayout  = time.RFC1123
+	githubOwner = "jimmidyson"
+	githubRepo  = "minishift"
 )
 
 var (
 	lastUpdateCheckFilePath = constants.MakeMiniPath("last_update_check")
 	githubClient            *github.Client
-	downloadBinary          = "minishift-" + runtime.GOOS + "-" + runtime.GOARCH
 )
 
 func MaybeUpdateFromGithub(output io.Writer) {
-	MaybeUpdate(output, githubOwner, githubRepo, lastUpdateCheckFilePath)
+	MaybeUpdate(output, githubOwner, githubRepo, githubRepo, lastUpdateCheckFilePath)
 }
 
-func MaybeUpdate(output io.Writer, githubOwner, githubRepo, lastUpdatePath string) {
+func MaybeUpdate(output io.Writer, githubOwner, githubRepo, binaryName, lastUpdatePath string) {
+
+	downloadBinary := binaryName + "-" + runtime.GOOS + "-" + runtime.GOARCH
+	updateLinkPrefix := "https://github.com/" + githubOwner + "/" + githubRepo + "/releases/tag/" + version.VersionPrefix
+	downloadLinkFormat := "https://github.com/" + githubOwner + "/" + githubRepo + "/releases/download/v%s/%s"
+
 	if !shouldCheckURLVersion(lastUpdatePath) {
 		return
 	}
@@ -76,16 +78,16 @@ func MaybeUpdate(output io.Writer, githubOwner, githubRepo, lastUpdatePath strin
 	}
 	if localVersion.Compare(latestVersion) < 0 {
 		writeTimeToFile(lastUpdateCheckFilePath, time.Now().UTC())
-		fmt.Fprintf(output, `There is a newer version of minishift available (%s%s). Do you want to
+		fmt.Fprintf(output, `There is a newer version of %s available (%s%s). Do you want to
 automatically update now [y/N]? `,
-			version.VersionPrefix, latestVersion)
+			githubRepo, version.VersionPrefix, latestVersion)
 
 		var confirm string
 		fmt.Scanln(&confirm)
 
 		if confirm == "y" {
 			fmt.Printf("Updating to version %s\n", latestVersion)
-			updateBinary(latestVersion)
+			updateBinary(latestVersion, downloadBinary, updateLinkPrefix, downloadLinkFormat)
 			return
 		}
 
@@ -155,8 +157,8 @@ func getTimeFromFileIfExists(path string) time.Time {
 	return timeInFile
 }
 
-func updateBinary(v semver.Version) {
-	checksum, err := downloadChecksum(v)
+func updateBinary(v semver.Version, downloadBinary, updateLinkPrefix, downloadLinkFormat string) {
+	checksum, err := downloadChecksum(v, downloadBinary, downloadLinkFormat)
 	if err != nil {
 		glog.Errorf("Cannot download checksum: %s", err)
 		os.Exit(1)
@@ -190,7 +192,7 @@ func updateBinary(v semver.Version) {
 	}
 }
 
-func downloadChecksum(v semver.Version) ([]byte, error) {
+func downloadChecksum(v semver.Version, downloadBinary, downloadLinkFormat string) ([]byte, error) {
 	u := fmt.Sprintf(downloadLinkFormat, v, downloadBinary+".sha256")
 	checksumResp, err := http.Get(u)
 	if err != nil {

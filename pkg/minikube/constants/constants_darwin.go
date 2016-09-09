@@ -1,3 +1,5 @@
+// +build darwin,!gendocs
+
 /*
 Copyright (C) 2016 Red Hat, Inc.
 
@@ -21,7 +23,3 @@ var SupportedVMDrivers = [...]string{
 	"vmwarefusion",
 	"xhyve",
 }
-
-const (
-	DefaultVMDriver = "xhyve"
-)

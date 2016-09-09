@@ -25,7 +25,7 @@ minishift start
       --iso-url="https://github.com/jimmidyson/minishift/releases/download/v0.6.0/boot2docker.iso": Location of the minishift iso
       --memory=1024: Amount of RAM allocated to the minishift VM
       --registry-mirror=[]: Registry mirrors to pass to the Docker daemon
-      --vm-driver="kvm": VM driver is one of: [virtualbox kvm]
+      --vm-driver="kvm": VM driver is one of: [virtualbox vmwarefusion kvm xhyve hyperv]
 ```
 
 ### Options inherited from parent commands

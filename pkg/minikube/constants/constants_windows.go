@@ -1,3 +1,5 @@
+// +build windows,!gendocs
+
 /*
 Copyright (C) 2016 Red Hat, Inc.
 
@@ -20,7 +22,3 @@ var SupportedVMDrivers = [...]string{
 	"virtualbox",
 	"hyperv",
 }
-
-const (
-	DefaultVMDriver = "hyperv"
-)

@@ -96,7 +96,8 @@ $(GOPATH)/bin/gh-release:
 .PHONY: gendocs
 gendocs: $(shell find cmd) pkg/minikube/cluster/assets.go
 	$(MKGOPATH)
-	cd $(GOPATH)/src/$(REPOPATH) && go run -ldflags="$(MINIKUBE_LDFLAGS)" gen_help_text.go
+	# https://github.com/golang/go/issues/15038#issuecomment-207631885 ( CGO_ENABLED=0 )
+	cd $(GOPATH)/src/$(REPOPATH) && CGO_ENABLED=0 go run -ldflags="$(MINIKUBE_LDFLAGS)" -tags gendocs gen_help_text.go
 
 .PHONY: release
 release: clean deploy/iso/minishift.iso test $(GOPATH)/bin/gh-release cross

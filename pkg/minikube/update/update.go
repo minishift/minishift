@@ -54,10 +54,15 @@ var (
 )
 
 func MaybeUpdateFromGithub(output io.Writer) {
-	MaybeUpdate(output, githubOwner, githubRepo, githubRepo, lastUpdateCheckFilePath)
+	localVersion, err := version.GetSemverVersion()
+	if err != nil {
+		glog.Errorln(err)
+		return
+	}
+	MaybeUpdate(output, githubOwner, githubRepo, githubRepo, lastUpdateCheckFilePath, localVersion)
 }
 
-func MaybeUpdate(output io.Writer, githubOwner, githubRepo, binaryName, lastUpdatePath string) {
+func MaybeUpdate(output io.Writer, githubOwner, githubRepo, binaryName, lastUpdatePath string, localVersion semver.Version) {
 
 	downloadBinary := binaryName + "-" + runtime.GOOS + "-" + runtime.GOARCH
 	updateLinkPrefix := "https://github.com/" + githubOwner + "/" + githubRepo + "/releases/tag/" + version.VersionPrefix
@@ -67,11 +72,6 @@ func MaybeUpdate(output io.Writer, githubOwner, githubRepo, binaryName, lastUpda
 		return
 	}
 	latestVersion, err := getLatestVersionFromGitHub(githubOwner, githubRepo)
-	if err != nil {
-		glog.Errorln(err)
-		return
-	}
-	localVersion, err := version.GetSemverVersion()
 	if err != nil {
 		glog.Errorln(err)
 		return

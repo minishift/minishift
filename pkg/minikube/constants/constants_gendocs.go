@@ -1,4 +1,4 @@
-// +build linux,!gendocs
+// +build gendocs
 
 /*
 Copyright (C) 2016 Red Hat, Inc.
@@ -20,5 +20,8 @@ package constants
 
 var SupportedVMDrivers = [...]string{
 	"virtualbox",
+	"vmwarefusion",
 	"kvm",
+	"xhyve",
+	"hyperv",
 }

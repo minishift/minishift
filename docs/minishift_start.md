@@ -16,7 +16,7 @@ minishift start
 
 ```
       --cpus=1: Number of CPUs allocated to the minishift VM
-      --deploy-registry[=false]: Should the OpenShift internal Docker registry be deployed?
+      --deploy-registry[=true]: Should the OpenShift internal Docker registry be deployed?
       --deploy-router[=false]: Should the OpenShift router be deployed?
       --disk-size="20g": Disk size allocated to the minishift VM (format: <number>[<unit>], where unit = b, k, m or g)
       --docker-env=[]: Environment variables to pass to the Docker daemon. (format: key=value)

@@ -193,7 +193,7 @@ func init() {
 	startCmd.Flags().StringSliceVar(&dockerEnv, "docker-env", nil, "Environment variables to pass to the Docker daemon. (format: key=value)")
 	startCmd.Flags().StringSliceVar(&insecureRegistry, "insecure-registry", []string{"172.30.0.0/16"}, "Insecure Docker registries to pass to the Docker daemon")
 	startCmd.Flags().StringSliceVar(&registryMirror, "registry-mirror", nil, "Registry mirrors to pass to the Docker daemon")
-	startCmd.Flags().Bool(deployRegistry, false, "Should the OpenShift internal Docker registry be deployed?")
+	startCmd.Flags().Bool(deployRegistry, true, "Should the OpenShift internal Docker registry be deployed?")
 	startCmd.Flags().Bool(deployRouter, false, "Should the OpenShift router be deployed?")
 
 	viper.BindPFlags(startCmd.Flags())

@@ -8,7 +8,7 @@ Minishift is a tool that makes it easy to run OpenShift locally. Minishift runs 
 
 ### Features
 
-* Minishift packages and configures a Linux VM, Docker and all OpenShift components, optimized for local development.
+* Minishift packages and configures a Linux VM, Docker and all OpenShift components, optimized for local development
 * Minishift supports OpenShift features such as:
   * DNS
   * NodePorts
@@ -126,16 +126,21 @@ This command shuts down and deletes the minishift virtual machine. No data or st
 
 ## Interacting With your Cluster
 
-### oc
+### OpenShift Client binary (oc)
 
 The `minishift start` command creates a "[oc context](http://kubernetes.io/docs/user-guide/kubectl/kubectl_config_set-context/)" called "minishift".
 This context contains the configuration to communicate with your minishift cluster.
 
 Minishift sets this context to default automatically, but if you need to switch back to it in the future, run:
 
-`oc config set-context minishift`,
+```
+oc config set-context minishift
+```
 
-or pass the context on each command like this: `oc get pods --context=minishift`.
+or pass the context on each command like:
+```
+oc get pods --context=minishift`
+```
 
 ### Console
 
@@ -195,15 +200,15 @@ To access a private container registry, follow the steps on [this page](http://k
 We recommend you use ImagePullSecrets, but if you would like to configure access on the minishift VM you can place the `.dockercfg` in the `/home/docker` directory or the `config.json` in the `/home/docker/.docker` directory.
 
 ## Documentation
-For a list of minishift's available commands see the [full CLI docs](https://github.com/kubernetes/minishift/blob/master/docs/minishift.md).
+For a list of minishift's available commands see the [full CLI docs](https://github.com/jimmidyson/minishift/blob/master/docs/minishift.md).
 
 ## Known Issues
 * Features that require a Cloud Provider will not work in Minishift. These include:
-  * LoadBalancers
-  * PersistentVolumes
-  * Ingress
+    * LoadBalancers
+    * PersistentVolumes
+    * Ingress
 * Features that require multiple nodes. These include:
-  * Advanced scheduling policies
+    * Advanced scheduling policies
 * Alternate runtimes, like rkt.
 
 ## Design
@@ -218,18 +223,16 @@ For the goals and non-goals of the minishift project, please see our [roadmap](R
 See [CONTRIBUTING.md](CONTRIBUTING.md) for an overview of how to send pull requests.
 
 ## Building MiniShift
-For instructions on how to build/test minishift from source, see the [build guide](BUILD_GUIDE.md)
+For instructions on how to build/test minishift from source, see the [build guide](BUILD_GUIDE.md).
 
 ## Adding a New Dependency
-For instructions on how to add a new dependency to minishift see the [adding dependencies guide](ADD_DEPENDENCY.md)
+For instructions on how to add a new dependency to minishift see the [adding dependencies guide](ADD_DEPENDENCY.md).
 
 ## Updating Kubernetes
-For instructions on how to add a new dependency to minishift see the [updating kubernetes guide](UPDATE_KUBERNETES.md)
+For instructions on how to add a new dependency to minishift see the [updating kubernetes guide](UPDATE_KUBERNETES.md).
 
 ## Steps to Release MiniShift
-For instructions on how to release a new version of minishift see the [release guide](RELEASING.md)
-
->>>>>>> cdd10a0... Broke some things out of the main README.md to make it a more manageable size
+For instructions on how to release a new version of minishift see the [release guide](RELEASING.md).
 
 ## Community
 

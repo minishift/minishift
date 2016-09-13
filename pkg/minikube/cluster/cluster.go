@@ -174,7 +174,8 @@ func StartCluster(h sshAble, ip string, config MachineConfig) error {
 	if config.DeployRegistry {
 		commands = append(commands, `
 cd /var/lib/minishift;
-sudo /usr/local/bin/openshift admin registry --service-account=registry --config=openshift.local.config/master/admin.kubeconfig
+sudo /usr/local/bin/openshift admin registry --service-account=registry --config=openshift.local.config/master/admin.kubeconfig;
+sudo /usr/local/bin/openshift cli patch service docker-registry -p '{"spec": {"type": "NodePort"}}' --config=openshift.local.config/master/admin.kubeconfig
 `)
 	}
 	if config.DeployRouter {

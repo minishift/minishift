@@ -22,7 +22,7 @@ minishift start
       --docker-env=[]: Environment variables to pass to the Docker daemon. (format: key=value)
       --host-only-cidr="192.168.99.1/24": The CIDR to be used for the minishift VM (only supported with Virtualbox driver)
       --insecure-registry=[172.30.0.0/16]: Insecure Docker registries to pass to the Docker daemon
-      --iso-url="https://github.com/jimmidyson/minishift/releases/download/v0.6.0/boot2docker.iso": Location of the minishift iso
+      --iso-url="https://github.com/jimmidyson/minishift/releases/download/v0.7.0/boot2docker.iso": Location of the minishift iso
       --memory=1024: Amount of RAM allocated to the minishift VM
       --registry-mirror=[]: Registry mirrors to pass to the Docker daemon
       --vm-driver="kvm": VM driver is one of: [virtualbox vmwarefusion kvm xhyve hyperv]

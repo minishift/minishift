@@ -60,7 +60,6 @@ const (
 	DefaultMemory   = 1024
 	DefaultCPUS     = 1
 	DefaultDiskSize = "20g"
-	DefaultVMDriver = "kvm"
 )
 
 var DefaultIsoUrl = "https://github.com/jimmidyson/minishift/releases/download/v" + version.GetVersion() + "/boot2docker.iso"

@@ -78,6 +78,8 @@ func main() {
 			fmt.Printf("Could not download OpenShift release asset: %s\n", err)
 			os.Exit(1)
 		}
+		defer httpResp.Body.Close()
+
 		asset = httpResp.Body
 		if httpResp.ContentLength > 0 {
 			bar := pb.New64(httpResp.ContentLength).SetUnits(pb.U_BYTES)
@@ -88,8 +90,6 @@ func main() {
 			}()
 		}
 	}
-
-	defer asset.Close()
 
 	gzf, err := gzip.NewReader(asset)
 	if err != nil {

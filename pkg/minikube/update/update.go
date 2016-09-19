@@ -191,6 +191,8 @@ func updateBinaryFile(url string, checksum []byte) {
 		glog.Errorf("Cannot download binary: %s", err)
 		os.Exit(1)
 	}
+	defer httpResp.Body.Close()
+
 	binary := httpResp.Body
 	if httpResp.ContentLength > 0 {
 		bar := pb.New64(httpResp.ContentLength).SetUnits(pb.U_BYTES)
@@ -200,7 +202,6 @@ func updateBinaryFile(url string, checksum []byte) {
 			<-time.After(bar.RefreshRate)
 		}()
 	}
-	defer binary.Close()
 	err = update.Apply(binary, update.Options{
 		Hash:     crypto.SHA256,
 		Checksum: checksum,
@@ -222,6 +223,8 @@ func downloadChecksum(v semver.Version, downloadBinary, downloadLinkFormat strin
 	if err != nil {
 		return nil, err
 	}
+	defer checksumResp.Body.Close()
+
 	checksum := checksumResp.Body
 	if checksumResp.ContentLength > 0 {
 		bar := pb.New64(checksumResp.ContentLength).SetUnits(pb.U_BYTES)
@@ -231,7 +234,6 @@ func downloadChecksum(v semver.Version, downloadBinary, downloadLinkFormat strin
 			<-time.After(2 * bar.RefreshRate)
 		}()
 	}
-	defer checksum.Close()
 	b, err := ioutil.ReadAll(checksum)
 	if err != nil {
 		return nil, err

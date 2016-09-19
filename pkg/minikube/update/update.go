@@ -200,6 +200,7 @@ func updateBinaryFile(url string, checksum []byte) {
 		binary = bar.NewProxyReader(binary)
 		defer func() {
 			<-time.After(bar.RefreshRate)
+			fmt.Println()
 		}()
 	}
 	err = update.Apply(binary, update.Options{
@@ -232,6 +233,7 @@ func downloadChecksum(v semver.Version, downloadBinary, downloadLinkFormat strin
 		checksum = bar.NewProxyReader(checksum)
 		defer func() {
 			<-time.After(2 * bar.RefreshRate)
+			fmt.Println()
 		}()
 	}
 	b, err := ioutil.ReadAll(checksum)

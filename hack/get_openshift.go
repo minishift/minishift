@@ -87,6 +87,7 @@ func main() {
 			asset = bar.NewProxyReader(asset)
 			defer func() {
 				<-time.After(bar.RefreshRate)
+				fmt.Println()
 			}()
 		}
 	}

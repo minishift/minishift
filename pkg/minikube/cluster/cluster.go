@@ -30,6 +30,8 @@ import (
 	"text/template"
 	"time"
 
+	pb "gopkg.in/cheggaaa/pb.v1"
+
 	"github.com/docker/machine/drivers/virtualbox"
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/drivers"
@@ -258,11 +260,21 @@ func (m *MachineConfig) CacheMinikubeISOFromURL() error {
 	if err != nil {
 		return err
 	}
-
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		return fmt.Errorf("Received %d response from %s while trying to download minikube.iso", response.StatusCode, m.MinikubeISO)
+	}
+
+	iso := response.Body
+
+	if response.ContentLength > 0 {
+		bar := pb.New64(response.ContentLength).SetUnits(pb.U_BYTES)
+		bar.Start()
+		iso = bar.NewProxyReader(iso)
+		defer func() {
+			<-time.After(bar.RefreshRate)
+		}()
 	}
 
 	out, err := os.Create(m.GetISOCacheFilepath())
@@ -270,7 +282,7 @@ func (m *MachineConfig) CacheMinikubeISOFromURL() error {
 		return err
 	}
 	defer out.Close()
-	if _, err = io.Copy(out, response.Body); err != nil {
+	if _, err = io.Copy(out, iso); err != nil {
 		return err
 	}
 	return nil

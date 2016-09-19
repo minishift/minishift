@@ -29,6 +29,8 @@ import (
 	"syscall"
 	"time"
 
+	pb "gopkg.in/cheggaaa/pb.v1"
+
 	"golang.org/x/oauth2"
 
 	"github.com/blang/semver"
@@ -183,13 +185,23 @@ func updateBinary(v semver.Version, downloadBinary, updateLinkPrefix, downloadLi
 }
 
 func updateBinaryFile(url string, checksum []byte) {
-	binary, err := http.Get(url)
+	fmt.Println("Downloading updated binary")
+	httpResp, err := http.Get(url)
 	if err != nil {
 		glog.Errorf("Cannot download binary: %s", err)
 		os.Exit(1)
 	}
-	defer binary.Body.Close()
-	err = update.Apply(binary.Body, update.Options{
+	binary := httpResp.Body
+	if httpResp.ContentLength > 0 {
+		bar := pb.New64(httpResp.ContentLength).SetUnits(pb.U_BYTES)
+		bar.Start()
+		binary = bar.NewProxyReader(binary)
+		defer func() {
+			<-time.After(bar.RefreshRate)
+		}()
+	}
+	defer binary.Close()
+	err = update.Apply(binary, update.Options{
 		Hash:     crypto.SHA256,
 		Checksum: checksum,
 	})
@@ -204,18 +216,28 @@ func updateBinaryFile(url string, checksum []byte) {
 }
 
 func downloadChecksum(v semver.Version, downloadBinary, downloadLinkFormat string) ([]byte, error) {
+	fmt.Println("Downloading updated binary checksum to validate updated binary")
 	u := fmt.Sprintf(downloadLinkFormat, v, downloadBinary+".sha256")
 	checksumResp, err := http.Get(u)
 	if err != nil {
 		return nil, err
 	}
-	defer checksumResp.Body.Close()
-	if checksumResp.StatusCode != 200 {
-		return nil, fmt.Errorf("received %d", checksumResp.StatusCode)
+	checksum := checksumResp.Body
+	if checksumResp.ContentLength > 0 {
+		bar := pb.New64(checksumResp.ContentLength).SetUnits(pb.U_BYTES)
+		bar.Start()
+		checksum = bar.NewProxyReader(checksum)
+		defer func() {
+			<-time.After(2 * bar.RefreshRate)
+		}()
 	}
-	b, err := ioutil.ReadAll(checksumResp.Body)
+	defer checksum.Close()
+	b, err := ioutil.ReadAll(checksum)
 	if err != nil {
 		return nil, err
+	}
+	if checksumResp.StatusCode != 200 {
+		return nil, fmt.Errorf("received %d", checksumResp.StatusCode)
 	}
 
 	return hex.DecodeString(strings.TrimSpace(string(b)))

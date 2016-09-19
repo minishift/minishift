@@ -26,6 +26,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
+
+	pb "gopkg.in/cheggaaa/pb.v1"
 
 	"golang.org/x/oauth2"
 
@@ -76,6 +79,14 @@ func main() {
 			os.Exit(1)
 		}
 		asset = httpResp.Body
+		if httpResp.ContentLength > 0 {
+			bar := pb.New64(httpResp.ContentLength).SetUnits(pb.U_BYTES)
+			bar.Start()
+			asset = bar.NewProxyReader(asset)
+			defer func() {
+				<-time.After(bar.RefreshRate)
+			}()
+		}
 	}
 
 	defer asset.Close()

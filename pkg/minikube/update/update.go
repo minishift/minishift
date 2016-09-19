@@ -163,7 +163,27 @@ func updateBinary(v semver.Version, downloadBinary, updateLinkPrefix, downloadLi
 		glog.Errorf("Cannot download checksum: %s", err)
 		os.Exit(1)
 	}
-	binary, err := http.Get(fmt.Sprintf(downloadLinkFormat, v, downloadBinary))
+
+	currentBinary, err := osext.Executable()
+	if err != nil {
+		glog.Errorf("Cannot find current binary to exec: %s", err)
+		os.Exit(1)
+	}
+
+	url := fmt.Sprintf(downloadLinkFormat, v, downloadBinary)
+	updateBinaryFile(url, checksum)
+
+	env := os.Environ()
+	args := os.Args
+	err = syscall.Exec(currentBinary, args, env)
+	if err != nil {
+		glog.Errorf("Failed to exec updated binary %s: %s", currentBinary, err)
+		os.Exit(1)
+	}
+}
+
+func updateBinaryFile(url string, checksum []byte) {
+	binary, err := http.Get(url)
 	if err != nil {
 		glog.Errorf("Cannot download binary: %s", err)
 		os.Exit(1)
@@ -175,19 +195,10 @@ func updateBinary(v semver.Version, downloadBinary, updateLinkPrefix, downloadLi
 	})
 	if err != nil {
 		glog.Errorf("Cannot apply binary update: %s", err)
-		os.Exit(1)
-	}
-
-	env := os.Environ()
-	args := os.Args
-	currentBinary, err := osext.Executable()
-	if err != nil {
-		glog.Errorf("Cannot find current binary to exec: %s", err)
-		os.Exit(1)
-	}
-	err = syscall.Exec(currentBinary, args, env)
-	if err != nil {
-		glog.Errorf("Failed to exec updated binary: %s", err)
+		err := update.RollbackError(err)
+		if err != nil {
+			glog.Errorf("Failed to rollback update: %s", err)
+		}
 		os.Exit(1)
 	}
 }

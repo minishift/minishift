@@ -62,15 +62,10 @@ type KubeProxyConfiguration struct {
 	// udpIdleTimeout is how long an idle UDP connection will be kept open (e.g. '250ms', '2s').
 	// Must be greater than 0. Only applicable for proxyMode=userspace.
 	UDPIdleTimeout unversioned.Duration `json:"udpTimeoutMilliseconds"`
-	// conntrackMax is the maximum number of NAT connections to track (0 to
-	// leave as-is).  This takes precendence over conntrackMaxPerCore.
+	// conntrackMax is the maximum number of NAT connections to track (0 to leave as-is)")
 	ConntrackMax int32 `json:"conntrackMax"`
-	// conntrackMaxPerCore is the maximum number of NAT connections to track
-	// per CPU core (0 to leave as-is).  This value is only considered if
-	// conntrackMax == 0.
-	ConntrackMaxPerCore int32 `json:"conntrackMaxPerCore"`
-	// conntrackTCPEstablishedTimeout is how long an idle TCP connection will be kept open
-	// (e.g. '250ms', '2s').  Must be greater than 0.
+	// conntrackTCPEstablishedTimeout is how long an idle UDP connection will be kept open
+	// (e.g. '250ms', '2s').  Must be greater than 0. Only applicable for proxyMode is Userspace
 	ConntrackTCPEstablishedTimeout unversioned.Duration `json:"conntrackTCPEstablishedTimeout"`
 }
 
@@ -374,18 +369,6 @@ type KubeletConfiguration struct {
 	// manage attachment/detachment of volumes scheduled to this node, and
 	// disables kubelet from executing any attach/detach operations
 	EnableControllerAttachDetach bool `json:"enableControllerAttachDetach"`
-	// If true, Kubelet ensures a set of iptables rules are present on host.
-	// These rules will serve as utility for various components, e.g. kube-proxy.
-	// The rules will be created based on IPTablesMasqueradeBit and IPTablesDropBit.
-	MakeIPTablesUtilChains bool `json:"makeIPTablesUtilChains"`
-	// iptablesMasqueradeBit is the bit of the iptables fwmark space to use for SNAT
-	// Values must be within the range [0, 31].
-	// Warning: Please match the value of corresponding parameter in kube-proxy
-	// TODO: clean up IPTablesMasqueradeBit in kube-proxy
-	IPTablesMasqueradeBit int32 `json:"iptablesMasqueradeBit"`
-	// iptablesDropBit is the bit of the iptables fwmark space to use for dropping packets. Kubelet will ensure iptables mark and drop rules.
-	// Values must be within the range [0, 31]. Must be different from IPTablesMasqueradeBit
-	IPTablesDropBit int32 `json:"iptablesDropBit"`
 }
 
 type KubeSchedulerConfiguration struct {
@@ -488,6 +471,9 @@ type KubeControllerManagerConfiguration struct {
 	// concurrentNamespaceSyncs is the number of namespace objects that are
 	// allowed to sync concurrently.
 	ConcurrentNamespaceSyncs int32 `json:"concurrentNamespaceSyncs"`
+	// concurrentSATokenSyncs is the number of service account token syncing operations
+	// that will be done concurrently.
+	ConcurrentSATokenSyncs int32 `json:"concurrentSATokenSyncs"`
 	// lookupCacheSizeForRC is the size of lookup cache for replication controllers.
 	// Larger number = more responsive replica management, but more MEM load.
 	LookupCacheSizeForRC int32 `json:"lookupCacheSizeForRC"`

@@ -44,11 +44,15 @@ type Interface interface {
 	PersistentVolumeClaimsNamespacer
 	ComponentStatusesInterface
 	ConfigMapsNamespacer
+	Apps() AppsInterface
 	Autoscaling() AutoscalingInterface
+	Authentication() AuthenticationInterface
 	Batch() BatchInterface
 	Extensions() ExtensionsInterface
 	Rbac() RbacInterface
 	Discovery() discovery.DiscoveryInterface
+
+	SecurityContextConstraintsInterface
 }
 
 func (c *Client) ReplicationControllers(namespace string) ReplicationControllerInterface {
@@ -57,6 +61,10 @@ func (c *Client) ReplicationControllers(namespace string) ReplicationControllerI
 
 func (c *Client) Nodes() NodeInterface {
 	return newNodes(c)
+}
+
+func (c *Client) SecurityContextConstraints() SecurityContextConstraintInterface {
+	return newSecurityContextConstraints(c)
 }
 
 func (c *Client) Events(namespace string) EventInterface {
@@ -118,6 +126,7 @@ func (c *Client) ConfigMaps(namespace string) ConfigMapsInterface {
 type Client struct {
 	*restclient.RESTClient
 	*AutoscalingClient
+	*AuthenticationClient
 	*BatchClient
 	*ExtensionsClient
 	*AppsClient
@@ -150,6 +159,10 @@ func IsTimeout(err error) bool {
 
 func (c *Client) Autoscaling() AutoscalingInterface {
 	return c.AutoscalingClient
+}
+
+func (c *Client) Authentication() AuthenticationInterface {
+	return c.AuthenticationClient
 }
 
 func (c *Client) Batch() BatchInterface {

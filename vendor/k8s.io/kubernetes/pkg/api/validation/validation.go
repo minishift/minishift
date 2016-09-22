@@ -245,6 +245,12 @@ var ValidateServiceAccountName = NameIsDNSSubdomain
 // trailing dashes are allowed.
 var ValidateEndpointsName = NameIsDNSSubdomain
 
+// ValidateSecurityContextConstraintsName can be used to check whether the given
+// security context constraint name is valid.
+// Prefix indicates this name will be used as part of generation, in which case
+// trailing dashes are allowed.
+var ValidateSecurityContextConstraintsName = NameIsDNSSubdomain
+
 // NameIsDNSSubdomain is a ValidateNameFunc for names that must be a DNS subdomain.
 func NameIsDNSSubdomain(name string, prefix bool) []string {
 	if prefix {
@@ -1180,11 +1186,11 @@ func validateContainerResourceDivisor(rName string, divisor resource.Quantity, f
 	switch rName {
 	case "limits.cpu", "requests.cpu":
 		if !validContainerResourceDivisorForCPU.Has(divisor.String()) {
-			allErrs = append(allErrs, field.Invalid(fldPath.Child("divisor"), rName, "only divisor's values 1m and 1 are supported with the cpu resource"))
+			allErrs = append(allErrs, field.Invalid(fldPath.Child("divisor"), rName, fmt.Sprintf("only divisor's values 1m and 1 are supported with the cpu resource")))
 		}
 	case "limits.memory", "requests.memory":
 		if !validContainerResourceDivisorForMemory.Has(divisor.String()) {
-			allErrs = append(allErrs, field.Invalid(fldPath.Child("divisor"), rName, "only divisor's values 1, 1k, 1M, 1G, 1T, 1P, 1E, 1Ki, 1Mi, 1Gi, 1Ti, 1Pi, 1Ei are supported with the memory resource"))
+			allErrs = append(allErrs, field.Invalid(fldPath.Child("divisor"), rName, fmt.Sprintf("only divisor's values 1, 1k, 1M, 1G, 1T, 1P, 1E, 1Ki, 1Mi, 1Gi, 1Ti, 1Pi, 1Ei are supported with the memory resource")))
 		}
 	}
 	return allErrs
@@ -2442,7 +2448,7 @@ func validateContainerResourceName(value string, fldPath *field.Path) field.Erro
 
 // Validate resource names that can go in a resource quota
 // Refer to docs/design/resources.md for more details.
-func validateResourceQuotaResourceName(value string, fldPath *field.Path) field.ErrorList {
+func ValidateResourceQuotaResourceName(value string, fldPath *field.Path) field.ErrorList {
 	allErrs := validateResourceName(value, fldPath)
 	if len(strings.Split(value, "/")) == 1 {
 		if !api.IsStandardQuotaResourceName(value) {
@@ -2768,11 +2774,11 @@ func ValidateResourceRequirements(requirements *api.ResourceRequirements, fldPat
 		// Check that request <= limit.
 		requestQuantity, exists := requirements.Requests[resourceName]
 		if exists {
-			// For GPUs, not only requests can't exceed limits, they also can't be lower, i.e. must be equal.
-			if resourceName == api.ResourceNvidiaGPU && quantity.Cmp(requestQuantity) != 0 {
-				allErrs = append(allErrs, field.Invalid(reqPath, requestQuantity.String(), fmt.Sprintf("must be equal to %s limit", api.ResourceNvidiaGPU)))
+			// For GPUs, require that no request be set.
+			if resourceName == api.ResourceNvidiaGPU {
+				allErrs = append(allErrs, field.Invalid(reqPath, requestQuantity.String(), "cannot be set"))
 			} else if quantity.Cmp(requestQuantity) < 0 {
-				allErrs = append(allErrs, field.Invalid(limPath, quantity.String(), fmt.Sprintf("must be greater than or equal to %s request", resourceName)))
+				allErrs = append(allErrs, field.Invalid(fldPath, quantity.String(), "must be greater than or equal to request"))
 			}
 		}
 	}
@@ -2788,24 +2794,24 @@ func ValidateResourceRequirements(requirements *api.ResourceRequirements, fldPat
 }
 
 // validateResourceQuotaScopes ensures that each enumerated hard resource constraint is valid for set of scopes
-func validateResourceQuotaScopes(resourceQuota *api.ResourceQuota) field.ErrorList {
+func validateResourceQuotaScopes(resourceQuotaSpec *api.ResourceQuotaSpec, fld *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
-	if len(resourceQuota.Spec.Scopes) == 0 {
+	if len(resourceQuotaSpec.Scopes) == 0 {
 		return allErrs
 	}
 	hardLimits := sets.NewString()
-	for k := range resourceQuota.Spec.Hard {
+	for k := range resourceQuotaSpec.Hard {
 		hardLimits.Insert(string(k))
 	}
-	fldPath := field.NewPath("spec", "scopes")
+	fldPath := fld.Child("scopes")
 	scopeSet := sets.NewString()
-	for _, scope := range resourceQuota.Spec.Scopes {
+	for _, scope := range resourceQuotaSpec.Scopes {
 		if !api.IsStandardResourceQuotaScope(string(scope)) {
-			allErrs = append(allErrs, field.Invalid(fldPath, resourceQuota.Spec.Scopes, "unsupported scope"))
+			allErrs = append(allErrs, field.Invalid(fldPath, resourceQuotaSpec.Scopes, "unsupported scope"))
 		}
 		for _, k := range hardLimits.List() {
 			if api.IsStandardQuotaResourceName(k) && !api.IsResourceQuotaScopeValidForResource(scope, k) {
-				allErrs = append(allErrs, field.Invalid(fldPath, resourceQuota.Spec.Scopes, "unsupported scope applied to resource"))
+				allErrs = append(allErrs, field.Invalid(fldPath, resourceQuotaSpec.Scopes, "unsupported scope applied to resource"))
 			}
 		}
 		scopeSet.Insert(string(scope))
@@ -2816,7 +2822,7 @@ func validateResourceQuotaScopes(resourceQuota *api.ResourceQuota) field.ErrorLi
 	}
 	for _, invalidScopePair := range invalidScopePairs {
 		if scopeSet.HasAll(invalidScopePair.List()...) {
-			allErrs = append(allErrs, field.Invalid(fldPath, resourceQuota.Spec.Scopes, "conflicting scopes"))
+			allErrs = append(allErrs, field.Invalid(fldPath, resourceQuotaSpec.Scopes, "conflicting scopes"))
 		}
 	}
 	return allErrs
@@ -2826,32 +2832,47 @@ func validateResourceQuotaScopes(resourceQuota *api.ResourceQuota) field.ErrorLi
 func ValidateResourceQuota(resourceQuota *api.ResourceQuota) field.ErrorList {
 	allErrs := ValidateObjectMeta(&resourceQuota.ObjectMeta, true, ValidateResourceQuotaName, field.NewPath("metadata"))
 
-	fldPath := field.NewPath("spec", "hard")
-	for k, v := range resourceQuota.Spec.Hard {
-		resPath := fldPath.Key(string(k))
-		allErrs = append(allErrs, validateResourceQuotaResourceName(string(k), resPath)...)
-		allErrs = append(allErrs, validateResourceQuantityValue(string(k), v, resPath)...)
-	}
-	allErrs = append(allErrs, validateResourceQuotaScopes(resourceQuota)...)
+	allErrs = append(allErrs, ValidateResourceQuotaSpec(&resourceQuota.Spec, field.NewPath("spec"))...)
+	allErrs = append(allErrs, ValidateResourceQuotaStatus(&resourceQuota.Status, field.NewPath("status"))...)
 
-	fldPath = field.NewPath("status", "hard")
-	for k, v := range resourceQuota.Status.Hard {
+	return allErrs
+}
+
+func ValidateResourceQuotaStatus(status *api.ResourceQuotaStatus, fld *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	fldPath := fld.Child("hard")
+	for k, v := range status.Hard {
 		resPath := fldPath.Key(string(k))
-		allErrs = append(allErrs, validateResourceQuotaResourceName(string(k), resPath)...)
-		allErrs = append(allErrs, validateResourceQuantityValue(string(k), v, resPath)...)
+		allErrs = append(allErrs, ValidateResourceQuotaResourceName(string(k), resPath)...)
+		allErrs = append(allErrs, ValidateResourceQuantityValue(string(k), v, resPath)...)
 	}
-	fldPath = field.NewPath("status", "used")
-	for k, v := range resourceQuota.Status.Used {
+	fldPath = fld.Child("used")
+	for k, v := range status.Used {
 		resPath := fldPath.Key(string(k))
-		allErrs = append(allErrs, validateResourceQuotaResourceName(string(k), resPath)...)
-		allErrs = append(allErrs, validateResourceQuantityValue(string(k), v, resPath)...)
+		allErrs = append(allErrs, ValidateResourceQuotaResourceName(string(k), resPath)...)
+		allErrs = append(allErrs, ValidateResourceQuantityValue(string(k), v, resPath)...)
 	}
 
 	return allErrs
 }
 
-// validateResourceQuantityValue enforces that specified quantity is valid for specified resource
-func validateResourceQuantityValue(resource string, value resource.Quantity, fldPath *field.Path) field.ErrorList {
+func ValidateResourceQuotaSpec(resourceQuotaSpec *api.ResourceQuotaSpec, fld *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	fldPath := fld.Child("hard")
+	for k, v := range resourceQuotaSpec.Hard {
+		resPath := fldPath.Key(string(k))
+		allErrs = append(allErrs, ValidateResourceQuotaResourceName(string(k), resPath)...)
+		allErrs = append(allErrs, ValidateResourceQuantityValue(string(k), v, resPath)...)
+	}
+	allErrs = append(allErrs, validateResourceQuotaScopes(resourceQuotaSpec, fld)...)
+
+	return allErrs
+}
+
+// ValidateResourceQuantityValue enforces that specified quantity is valid for specified resource
+func ValidateResourceQuantityValue(resource string, value resource.Quantity, fldPath *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 	allErrs = append(allErrs, ValidateNonnegativeQuantity(value, fldPath)...)
 	if api.IsIntegerResourceName(resource) {
@@ -2866,15 +2887,10 @@ func validateResourceQuantityValue(resource string, value resource.Quantity, fld
 // newResourceQuota is updated with fields that cannot be changed.
 func ValidateResourceQuotaUpdate(newResourceQuota, oldResourceQuota *api.ResourceQuota) field.ErrorList {
 	allErrs := ValidateObjectMetaUpdate(&newResourceQuota.ObjectMeta, &oldResourceQuota.ObjectMeta, field.NewPath("metadata"))
-	fldPath := field.NewPath("spec", "hard")
-	for k, v := range newResourceQuota.Spec.Hard {
-		resPath := fldPath.Key(string(k))
-		allErrs = append(allErrs, validateResourceQuotaResourceName(string(k), resPath)...)
-		allErrs = append(allErrs, validateResourceQuantityValue(string(k), v, resPath)...)
-	}
+	allErrs = append(allErrs, ValidateResourceQuotaSpec(&newResourceQuota.Spec, field.NewPath("spec"))...)
 
 	// ensure scopes cannot change, and that resources are still valid for scope
-	fldPath = field.NewPath("spec", "scopes")
+	fldPath := field.NewPath("spec", "scopes")
 	oldScopes := sets.NewString()
 	newScopes := sets.NewString()
 	for _, scope := range newResourceQuota.Spec.Scopes {
@@ -2886,7 +2902,6 @@ func ValidateResourceQuotaUpdate(newResourceQuota, oldResourceQuota *api.Resourc
 	if !oldScopes.Equal(newScopes) {
 		allErrs = append(allErrs, field.Invalid(fldPath, newResourceQuota.Spec.Scopes, "field is immutable"))
 	}
-	allErrs = append(allErrs, validateResourceQuotaScopes(newResourceQuota)...)
 
 	newResourceQuota.Status = oldResourceQuota.Status
 	return allErrs
@@ -2902,14 +2917,14 @@ func ValidateResourceQuotaStatusUpdate(newResourceQuota, oldResourceQuota *api.R
 	fldPath := field.NewPath("status", "hard")
 	for k, v := range newResourceQuota.Status.Hard {
 		resPath := fldPath.Key(string(k))
-		allErrs = append(allErrs, validateResourceQuotaResourceName(string(k), resPath)...)
-		allErrs = append(allErrs, validateResourceQuantityValue(string(k), v, resPath)...)
+		allErrs = append(allErrs, ValidateResourceQuotaResourceName(string(k), resPath)...)
+		allErrs = append(allErrs, ValidateResourceQuantityValue(string(k), v, resPath)...)
 	}
 	fldPath = field.NewPath("status", "used")
 	for k, v := range newResourceQuota.Status.Used {
 		resPath := fldPath.Key(string(k))
-		allErrs = append(allErrs, validateResourceQuotaResourceName(string(k), resPath)...)
-		allErrs = append(allErrs, validateResourceQuantityValue(string(k), v, resPath)...)
+		allErrs = append(allErrs, ValidateResourceQuotaResourceName(string(k), resPath)...)
+		allErrs = append(allErrs, ValidateResourceQuantityValue(string(k), v, resPath)...)
 	}
 	newResourceQuota.Spec = oldResourceQuota.Spec
 	return allErrs
@@ -2936,7 +2951,7 @@ func validateFinalizerName(stringValue string, fldPath *field.Path) field.ErrorL
 
 	if len(strings.Split(stringValue, "/")) == 1 {
 		if !api.IsStandardFinalizerName(stringValue) {
-			return append(allErrs, field.Invalid(fldPath, stringValue, "name is neither a standard finalizer name nor is it fully qualified"))
+			return append(allErrs, field.Invalid(fldPath, stringValue, fmt.Sprintf("name is neither a standard finalizer name nor is it fully qualified")))
 		}
 	}
 
@@ -3166,4 +3181,116 @@ func isValidHostnamesMap(serializedPodHostNames string) bool {
 		}
 	}
 	return true
+}
+
+func ValidateSecurityContextConstraints(scc *api.SecurityContextConstraints) field.ErrorList {
+	allErrs := ValidateObjectMeta(&scc.ObjectMeta, false, ValidateSecurityContextConstraintsName, field.NewPath("metadata"))
+
+	if scc.Priority != nil {
+		if *scc.Priority < 0 {
+			allErrs = append(allErrs, field.Invalid(field.NewPath("priority"), *scc.Priority, "priority cannot be negative"))
+		}
+	}
+
+	// ensure the user strat has a valid type
+	runAsUserPath := field.NewPath("runAsUser")
+	switch scc.RunAsUser.Type {
+	case api.RunAsUserStrategyMustRunAs, api.RunAsUserStrategyMustRunAsNonRoot, api.RunAsUserStrategyRunAsAny, api.RunAsUserStrategyMustRunAsRange:
+		//good types
+	default:
+		msg := fmt.Sprintf("invalid strategy type.  Valid values are %s, %s, %s", api.RunAsUserStrategyMustRunAs, api.RunAsUserStrategyMustRunAsNonRoot, api.RunAsUserStrategyRunAsAny)
+		allErrs = append(allErrs, field.Invalid(runAsUserPath.Child("type"), scc.RunAsUser.Type, msg))
+	}
+
+	// if specified, uid cannot be negative
+	if scc.RunAsUser.UID != nil {
+		if *scc.RunAsUser.UID < 0 {
+			allErrs = append(allErrs, field.Invalid(runAsUserPath.Child("uid"), *scc.RunAsUser.UID, "uid cannot be negative"))
+		}
+	}
+
+	// ensure the selinux strat has a valid type
+	seLinuxContextPath := field.NewPath("seLinuxContext")
+	switch scc.SELinuxContext.Type {
+	case api.SELinuxStrategyMustRunAs, api.SELinuxStrategyRunAsAny:
+		//good types
+	default:
+		msg := fmt.Sprintf("invalid strategy type.  Valid values are %s, %s", api.SELinuxStrategyMustRunAs, api.SELinuxStrategyRunAsAny)
+		allErrs = append(allErrs, field.Invalid(seLinuxContextPath.Child("type"), scc.SELinuxContext.Type, msg))
+	}
+
+	// ensure the fsgroup strat has a valid type
+	if scc.FSGroup.Type != api.FSGroupStrategyMustRunAs && scc.FSGroup.Type != api.FSGroupStrategyRunAsAny {
+		allErrs = append(allErrs, field.NotSupported(field.NewPath("fsGroup", "type"), scc.FSGroup.Type,
+			[]string{string(api.FSGroupStrategyMustRunAs), string(api.FSGroupStrategyRunAsAny)}))
+	}
+	allErrs = append(allErrs, validateIDRanges(scc.FSGroup.Ranges, field.NewPath("fsGroup"))...)
+
+	if scc.SupplementalGroups.Type != api.SupplementalGroupsStrategyMustRunAs &&
+		scc.SupplementalGroups.Type != api.SupplementalGroupsStrategyRunAsAny {
+		allErrs = append(allErrs, field.NotSupported(field.NewPath("supplementalGroups", "type"), scc.SupplementalGroups.Type,
+			[]string{string(api.SupplementalGroupsStrategyMustRunAs), string(api.SupplementalGroupsStrategyRunAsAny)}))
+	}
+	allErrs = append(allErrs, validateIDRanges(scc.SupplementalGroups.Ranges, field.NewPath("supplementalGroups"))...)
+
+	// validate capabilities
+	allErrs = append(allErrs, validateSCCCapsAgainstDrops(scc.RequiredDropCapabilities, scc.DefaultAddCapabilities, field.NewPath("defaultAddCapabilities"))...)
+	allErrs = append(allErrs, validateSCCCapsAgainstDrops(scc.RequiredDropCapabilities, scc.AllowedCapabilities, field.NewPath("allowedCapabilities"))...)
+
+	return allErrs
+}
+
+// validateSCCCapsAgainstDrops ensures an allowed cap is not listed in the required drops.
+func validateSCCCapsAgainstDrops(requiredDrops []api.Capability, capsToCheck []api.Capability, fldPath *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+	if requiredDrops == nil {
+		return allErrs
+	}
+	for _, cap := range capsToCheck {
+		if hasCap(cap, requiredDrops) {
+			allErrs = append(allErrs, field.Invalid(fldPath, cap,
+				fmt.Sprintf("capability is listed in %s and requiredDropCapabilities", fldPath.String())))
+		}
+	}
+	return allErrs
+}
+
+// hasCap checks for needle in haystack.
+func hasCap(needle api.Capability, haystack []api.Capability) bool {
+	for _, c := range haystack {
+		if needle == c {
+			return true
+		}
+	}
+	return false
+}
+
+// validateIDRanges ensures the range is valid.
+func validateIDRanges(rng []api.IDRange, fldPath *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	for i, r := range rng {
+		// if 0 <= Min <= Max then we do not need to validate max.  It is always greater than or
+		// equal to 0 and Min.
+		minPath := fldPath.Child("ranges").Index(i).Child("min")
+		maxPath := fldPath.Child("ranges").Index(i).Child("max")
+
+		if r.Min < 0 {
+			allErrs = append(allErrs, field.Invalid(minPath, r.Min, "min cannot be negative"))
+		}
+		if r.Max < 0 {
+			allErrs = append(allErrs, field.Invalid(maxPath, r.Max, "max cannot be negative"))
+		}
+		if r.Min > r.Max {
+			allErrs = append(allErrs, field.Invalid(minPath, r, "min cannot be greater than max"))
+		}
+	}
+
+	return allErrs
+}
+
+func ValidateSecurityContextConstraintsUpdate(newScc, oldScc *api.SecurityContextConstraints) field.ErrorList {
+	allErrs := ValidateObjectMetaUpdate(&newScc.ObjectMeta, &oldScc.ObjectMeta, field.NewPath("metadata"))
+	allErrs = append(allErrs, ValidateSecurityContextConstraints(newScc)...)
+	return allErrs
 }

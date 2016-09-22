@@ -18,6 +18,7 @@ package restclient
 
 import (
 	"bytes"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -143,7 +144,10 @@ func NewRequest(client HTTPClient, verb string, baseURL *url.URL, versionedAPIPa
 		backoffMgr:  backoff,
 		throttle:    throttle,
 	}
-	if len(content.ContentType) > 0 {
+	switch {
+	case len(content.AcceptContentTypes) > 0:
+		r.SetHeader("Accept", content.AcceptContentTypes)
+	case len(content.ContentType) > 0:
 		r.SetHeader("Accept", content.ContentType+", */*")
 	}
 	return r
@@ -338,13 +342,13 @@ type versionToResourceToFieldMapping map[unversioned.GroupVersion]resourceTypeTo
 func (v versionToResourceToFieldMapping) filterField(groupVersion *unversioned.GroupVersion, resourceType, field, value string) (newField, newValue string, err error) {
 	rMapping, ok := v[*groupVersion]
 	if !ok {
-		glog.Warningf("Field selector: %v - %v - %v - %v: need to check if this is versioned correctly.", groupVersion, resourceType, field, value)
+		// glog.Warningf("Field selector: %v - %v - %v - %v: need to check if this is versioned correctly.", groupVersion, resourceType, field, value)
 		return field, value, nil
 	}
 	newField, newValue, err = rMapping.filterField(resourceType, field, value)
 	if err != nil {
 		// This is only a warning until we find and fix all of the client's usages.
-		glog.Warningf("Field selector: %v - %v - %v - %v: need to check if this is versioned correctly.", groupVersion, resourceType, field, value)
+		// glog.Warningf("Field selector: %v - %v - %v - %v: need to check if this is versioned correctly.", groupVersion, resourceType, field, value)
 		return field, value, nil
 	}
 	return newField, newValue, nil
@@ -888,16 +892,49 @@ func (r *Request) transformResponse(resp *http.Response, req *http.Request) Resu
 			body = data
 		}
 	}
-	glog.V(8).Infof("Response Body: %s", string(body))
+
+	if glog.V(8) {
+		switch {
+		case bytes.IndexFunc(body, func(r rune) bool { return r < 0x0a }) != -1:
+			glog.Infof("Response Body:\n%s", hex.Dump(body))
+		default:
+			glog.Infof("Response Body: %s", string(body))
+		}
+	}
+
+	// verify the content type is accurate
+	contentType := resp.Header.Get("Content-Type")
+	decoder := r.serializers.Decoder
+	if len(contentType) > 0 && (decoder == nil || (len(r.content.ContentType) > 0 && contentType != r.content.ContentType)) {
+		mediaType, params, err := mime.ParseMediaType(contentType)
+		if err != nil {
+			return Result{err: errors.NewInternalError(err)}
+		}
+		decoder, err = r.serializers.RenegotiatedDecoder(mediaType, params)
+		if err != nil {
+			// if we fail to negotiate a decoder, treat this as an unstructured error
+			switch {
+			case resp.StatusCode == http.StatusSwitchingProtocols:
+				// no-op, we've been upgraded
+			case resp.StatusCode < http.StatusOK || resp.StatusCode > http.StatusPartialContent:
+				return Result{err: r.transformUnstructuredResponseError(resp, req, body)}
+			}
+			return Result{
+				body:        body,
+				contentType: contentType,
+				statusCode:  resp.StatusCode,
+			}
+		}
+	}
 
 	// Did the server give us a status response?
 	isStatusResponse := false
+	status := &unversioned.Status{}
 	// Because release-1.1 server returns Status with empty APIVersion at paths
 	// to the Extensions resources, we need to use DecodeInto here to provide
 	// default groupVersion, otherwise a status response won't be correctly
 	// decoded.
-	status := &unversioned.Status{}
-	err := runtime.DecodeInto(r.serializers.Decoder, body, status)
+	err := runtime.DecodeInto(decoder, body, status)
 	if err == nil && len(status.Status) > 0 {
 		isStatusResponse = true
 	}
@@ -917,25 +954,6 @@ func (r *Request) transformResponse(resp *http.Response, req *http.Request) Resu
 	if isStatusResponse && (status.Status != unversioned.StatusSuccess && !success) {
 		// "Failed" requests are clearly just an error and it makes sense to return them as such.
 		return Result{err: errors.FromObject(status)}
-	}
-
-	contentType := resp.Header.Get("Content-Type")
-	var decoder runtime.Decoder
-	if contentType == r.content.ContentType {
-		decoder = r.serializers.Decoder
-	} else {
-		mediaType, params, err := mime.ParseMediaType(contentType)
-		if err != nil {
-			return Result{err: errors.NewInternalError(err)}
-		}
-		decoder, err = r.serializers.RenegotiatedDecoder(mediaType, params)
-		if err != nil {
-			return Result{
-				body:        body,
-				contentType: contentType,
-				statusCode:  resp.StatusCode,
-			}
-		}
 	}
 
 	return Result{

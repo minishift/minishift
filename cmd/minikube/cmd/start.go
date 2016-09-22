@@ -26,8 +26,10 @@ import (
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/host"
 	"github.com/golang/glog"
+	ocfg "github.com/openshift/origin/pkg/cmd/cli/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"k8s.io/kubernetes/pkg/api"
 	cfg "k8s.io/kubernetes/pkg/client/unversioned/clientcmd/api"
 
 	"github.com/jimmidyson/minishift/pkg/minikube/cluster"
@@ -120,19 +122,15 @@ func runStart(cmd *cobra.Command, args []string) {
 	kubeHost = strings.Replace(kubeHost, ":2376", ":"+strconv.Itoa(constants.APIServerPort), -1)
 
 	// setup kubeconfig
-	name := constants.MinikubeContext
 	certAuth, err := cluster.GetCA(host)
 	if err != nil {
 		glog.Errorln("Error setting up kubeconfig: ", err)
 		os.Exit(1)
 	}
-	if err := setupKubeconfig(name, kubeHost, certAuth); err != nil {
+	if err := setupKubeconfig(kubeHost, certAuth); err != nil {
 		glog.Errorln("Error setting up kubeconfig: ", err)
 		os.Exit(1)
 	}
-	fmt.Println("oc is now configured to use the cluster.")
-	fmt.Println("Run this command to use the cluster: ")
-	fmt.Println("oc login --username=admin --password=admin")
 }
 
 func calculateDiskSizeInMB(humanReadableDiskSize string) int {
@@ -146,7 +144,7 @@ func calculateDiskSizeInMB(humanReadableDiskSize string) int {
 // setupKubeconfig reads config from disk, adds the minikube settings, and writes it back.
 // activeContext is true when minikube is the CurrentContext
 // If no CurrentContext is set, the given name will be used.
-func setupKubeconfig(name, server, certAuth string) error {
+func setupKubeconfig(server, certAuth string) error {
 	configFile := constants.KubeconfigPath
 
 	// read existing config or create new if does not exist
@@ -155,31 +153,54 @@ func setupKubeconfig(name, server, certAuth string) error {
 		return err
 	}
 
-	clusterName := name
+	currentContextName := config.CurrentContext
+	currentContext := config.Contexts[currentContextName]
+
+	clusterName, err := ocfg.GetClusterNicknameFromURL(server)
+	if err != nil {
+		return err
+	}
 	cluster := cfg.NewCluster()
 	cluster.Server = server
 	cluster.CertificateAuthorityData = []byte(certAuth)
 	config.Clusters[clusterName] = cluster
 
 	// user
-	userName := name
+	userName := "admin/" + clusterName
 	user := cfg.NewAuthInfo()
+	if currentContext != nil && currentContext.AuthInfo == userName {
+		currentUser := config.AuthInfos[userName]
+		if currentUser != nil {
+			user.Token = config.AuthInfos[userName].Token
+		}
+	}
 	config.AuthInfos[userName] = user
 
 	// context
-	contextName := name
 	context := cfg.NewContext()
 	context.Cluster = clusterName
 	context.AuthInfo = userName
+	context.Namespace = api.NamespaceDefault
+	contextName := ocfg.GetContextNickname(api.NamespaceDefault, clusterName, userName)
+	if currentContext != nil && currentContext.Cluster == clusterName && currentContext.AuthInfo == userName {
+		contextName = currentContextName
+		context.Namespace = currentContext.Namespace
+	}
 	config.Contexts[contextName] = context
 
-	// Always set current context to minikube.
 	config.CurrentContext = contextName
 
 	// write back to disk
 	if err := kubeconfig.WriteConfig(config, configFile); err != nil {
 		return err
 	}
+
+	fmt.Println("oc is now configured to use the cluster.")
+	if len(user.Token) == 0 {
+		fmt.Println("Run this command to use the cluster: ")
+		fmt.Println("oc login --username=admin --password=admin")
+	}
+
 	return nil
 }
 

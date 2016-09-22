@@ -70,6 +70,7 @@ func DeepCopy_componentconfig_KubeControllerManagerConfiguration(in KubeControll
 	out.ConcurrentDaemonSetSyncs = in.ConcurrentDaemonSetSyncs
 	out.ConcurrentJobSyncs = in.ConcurrentJobSyncs
 	out.ConcurrentNamespaceSyncs = in.ConcurrentNamespaceSyncs
+	out.ConcurrentSATokenSyncs = in.ConcurrentSATokenSyncs
 	out.LookupCacheSizeForRC = in.LookupCacheSizeForRC
 	out.LookupCacheSizeForRS = in.LookupCacheSizeForRS
 	out.LookupCacheSizeForDaemonSet = in.LookupCacheSizeForDaemonSet
@@ -174,7 +175,6 @@ func DeepCopy_componentconfig_KubeProxyConfiguration(in KubeProxyConfiguration, 
 		return err
 	}
 	out.ConntrackMax = in.ConntrackMax
-	out.ConntrackMaxPerCore = in.ConntrackMaxPerCore
 	if err := unversioned.DeepCopy_unversioned_Duration(in.ConntrackTCPEstablishedTimeout, &out.ConntrackTCPEstablishedTimeout, c); err != nil {
 		return err
 	}
@@ -324,9 +324,6 @@ func DeepCopy_componentconfig_KubeletConfiguration(in KubeletConfiguration, out 
 	out.EvictionMaxPodGracePeriod = in.EvictionMaxPodGracePeriod
 	out.PodsPerCore = in.PodsPerCore
 	out.EnableControllerAttachDetach = in.EnableControllerAttachDetach
-	out.MakeIPTablesUtilChains = in.MakeIPTablesUtilChains
-	out.IPTablesMasqueradeBit = in.IPTablesMasqueradeBit
-	out.IPTablesDropBit = in.IPTablesDropBit
 	return nil
 }
 

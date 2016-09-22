@@ -62,15 +62,10 @@ type KubeProxyConfiguration struct {
 	// udpIdleTimeout is how long an idle UDP connection will be kept open (e.g. '250ms', '2s').
 	// Must be greater than 0. Only applicable for proxyMode=userspace.
 	UDPIdleTimeout unversioned.Duration `json:"udpTimeoutMilliseconds"`
-	// conntrackMax is the maximum number of NAT connections to track (0 to
-	// leave as-is).  This takes precendence over conntrackMaxPerCore.
+	// conntrackMax is the maximum number of NAT connections to track (0 to leave as-is)")
 	ConntrackMax int32 `json:"conntrackMax"`
-	// conntrackMaxPerCore is the maximum number of NAT connections to track
-	// per CPU core (0 to leave as-is).  This value is only considered if
-	// conntrackMax == 0.
-	ConntrackMaxPerCore int32 `json:"conntrackMaxPerCore"`
-	// conntrackTCPEstablishedTimeout is how long an idle TCP connection will be kept open
-	// (e.g. '250ms', '2s').  Must be greater than 0.
+	// conntrackTCPEstablishedTimeout is how long an idle UDP connection will be kept open
+	// (e.g. '250ms', '2s').  Must be greater than 0. Only applicable for proxyMode is Userspace
 	ConntrackTCPEstablishedTimeout unversioned.Duration `json:"conntrackTCPEstablishedTimeout"`
 }
 

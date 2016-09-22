@@ -58,12 +58,8 @@ func SetDefaults_KubeProxyConfiguration(obj *KubeProxyConfiguration) {
 	if obj.UDPIdleTimeout == zero {
 		obj.UDPIdleTimeout = unversioned.Duration{Duration: 250 * time.Millisecond}
 	}
-	// If ConntrackMax is set, respect it.
 	if obj.ConntrackMax == 0 {
-		// If ConntrackMax is *not* set, use per-core scaling.
-		if obj.ConntrackMaxPerCore == 0 {
-			obj.ConntrackMaxPerCore = 32 * 1024
-		}
+		obj.ConntrackMax = 256 * 1024 // 4x default (64k)
 	}
 	if obj.IPTablesMasqueradeBit == nil {
 		temp := int32(14)

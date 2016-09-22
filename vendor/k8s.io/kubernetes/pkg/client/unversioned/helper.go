@@ -23,6 +23,7 @@ import (
 	"k8s.io/kubernetes/pkg/api/unversioned"
 	"k8s.io/kubernetes/pkg/apimachinery/registered"
 	"k8s.io/kubernetes/pkg/apis/apps"
+	"k8s.io/kubernetes/pkg/apis/authentication"
 	"k8s.io/kubernetes/pkg/apis/autoscaling"
 	"k8s.io/kubernetes/pkg/apis/batch"
 	"k8s.io/kubernetes/pkg/apis/extensions"
@@ -65,6 +66,15 @@ func New(c *restclient.Config) (*Client, error) {
 	if registered.IsRegistered(autoscaling.GroupName) {
 		autoscalingConfig := *c
 		autoscalingClient, err = NewAutoscaling(&autoscalingConfig)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	var authenticationClient *AuthenticationClient
+	if registered.IsRegistered(authentication.GroupName) {
+		authenticationConfig := *c
+		authenticationClient, err = NewAuthentication(&authenticationConfig)
 		if err != nil {
 			return nil, err
 		}
@@ -114,7 +124,7 @@ func New(c *restclient.Config) (*Client, error) {
 		}
 	}
 
-	return &Client{RESTClient: client, AutoscalingClient: autoscalingClient, BatchClient: batchClient, ExtensionsClient: extensionsClient, DiscoveryClient: discoveryClient, AppsClient: appsClient, PolicyClient: policyClient, RbacClient: rbacClient}, nil
+	return &Client{RESTClient: client, AuthenticationClient: authenticationClient, AutoscalingClient: autoscalingClient, BatchClient: batchClient, ExtensionsClient: extensionsClient, DiscoveryClient: discoveryClient, AppsClient: appsClient, PolicyClient: policyClient, RbacClient: rbacClient}, nil
 }
 
 // MatchesServerVersion queries the server to compares the build version
@@ -193,6 +203,11 @@ func NegotiateVersion(client *Client, c *restclient.Config, requestedGV *unversi
 			return nil, fmt.Errorf("client does not support API version %q; client supported API versions: %v", preferredGV, clientVersions)
 
 		}
+		// If the server supports no versions, then we should just use the preferredGV
+		// This can happen because discovery fails due to 403 Forbidden errors
+		if len(serverVersions) == 0 {
+			return preferredGV, nil
+		}
 		if serverVersions.Has(preferredGV.String()) {
 			return preferredGV, nil
 		}
@@ -254,9 +269,5 @@ func SetKubernetesDefaults(config *restclient.Config) error {
 	if config.NegotiatedSerializer == nil {
 		config.NegotiatedSerializer = api.Codecs
 	}
-	if config.Codec == nil {
-		config.Codec = api.Codecs.LegacyCodec(*config.GroupVersion)
-	}
-
 	return restclient.SetKubernetesDefaults(config)
 }

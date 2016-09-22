@@ -59,30 +59,30 @@ Creating machine...
 Starting local OpenShift cluster...
 OpenShift is available at https://192.168.99.100:8443.
 
-$ oc run hello-minishift --image=gcr.io/google_containers/echoserver:1.4 --port=8080 --expose --service-overrides='{"apiVersion": "v1", "spec": {"type": "NodePort"}}'
-service "hello-minishift" created
-deploymentconfig "hello-minishift" created
+$ oc create -f hello-openshift.json
+pod "hello-openshift" created
+You have exposed your service on an external port on all nodes in your
+cluster.  If you want to expose this service to the external internet, you may
+need to set up firewall rules for the service port(s) (tcp:31616) to serve traffic.
 
-# We have now launched an echoserver pod but we have to wait until the pod is up before curling/accessing it
+See http://releases.k8s.io/release-1.2/docs/user-guide/services-firewalls.md for more details.
+service "hello-openshift" created
+
+# NOTE: Ignore above warning. Only for production use.
+
+# We have now launched 'hello-openshift' pod but we have to wait until the pod is up before curling/accessing it
 # via the exposed service.
-# To check whether the pod is up and running we can use the following:
+# To check whether the pod is up and running we can use the following command:
 $ oc get pod
-NAME                              READY     STATUS              RESTARTS   AGE
-hello-minishift-3383150820-vctvh   1/1       ContainerCreating   0          3s
+NAME                      READY     STATUS    RESTARTS   AGE
+docker-registry-1-1lbfl   1/1       Running   0          2h
+hello-openshift           1/1       Running   0          3s
 
-# We can see that the pod is still being created from the ContainerCreating status
-$ oc get pod
-NAME                              READY     STATUS    RESTARTS   AGE
-hello-minishift-3383150820-vctvh   1/1       Running   0          13s
+# Once the pod is running then we can able to curl it as:
+$ curl $(minishift service hello-openshift --url)
+Hello OpenShift!
 
-# We can see that the pod is now Running and we will now be able to curl it:
-$ curl $(minishift service hello-minishift --url)
-CLIENT VALUES:
-client_address=192.168.99.1
-command=GET
-real path=/
-...
-
+# Stop cluster as:
 $ minishift stop
 Stopping local OpenShift cluster...
 Stopping "minishift"...

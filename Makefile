@@ -12,9 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Use the native vendor/ dependency system
-export GO15VENDOREXPERIMENT=1
-
 VERSION ?= $(shell cat VERSION)
 OPENSHIFT_VERSION ?= $(shell cat OPENSHIFT_VERSION)
 

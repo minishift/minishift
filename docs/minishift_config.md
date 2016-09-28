@@ -6,6 +6,17 @@ Modify minishift config
 
 
 config modifies minishift config files using subcommands like "minishift config set vm-driver kvm"
+Configurable fields: 
+
+ * vm-driver
+ * v
+ * cpus
+ * disk-size
+ * host-only-cidr
+ * memory
+ * show-libmachine-logs
+ * log_dir
+ * openshift-version
 
 ```
 minishift config SUBCOMMAND [flags]

@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 
 	"os"
 
@@ -97,13 +98,22 @@ var settings []Setting = []Setting{
 var ConfigCmd = &cobra.Command{
 	Use:   "config SUBCOMMAND [flags]",
 	Short: "Modify minishift config",
-	Long:  `config modifies minishift config files using subcommands like "minishift config set vm-driver kvm"`,
+	Long: `config modifies minishift config files using subcommands like "minishift config set vm-driver kvm"
+Configurable fields: ` + "\n\n" + configurableFields(),
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
 }
 
-// Reads in the JSON minikube config
+func configurableFields() string {
+	var fields []string
+	for _, s := range settings {
+		fields = append(fields, " * "+s.name)
+	}
+	return strings.Join(fields, "\n")
+}
+
+// ReadConfig reads in the JSON minishift config
 func ReadConfig() (MinikubeConfig, error) {
 	f, err := os.Open(constants.ConfigFile)
 	if err != nil {

@@ -20,12 +20,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"strings"
-
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 
+	"github.com/jimmidyson/minishift/pkg/minikube/config"
 	"github.com/jimmidyson/minishift/pkg/minikube/constants"
 )
 
@@ -92,6 +92,14 @@ var settings []Setting = []Setting{
 	{
 		name: "openshift-version",
 		set:  SetString,
+	},
+	{
+		name: config.WantUpdateNotification,
+		set:  SetBool,
+	},
+	{
+		name: config.ReminderWaitPeriodInHours,
+		set:  SetInt,
 	},
 }
 

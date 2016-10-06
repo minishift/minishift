@@ -17,6 +17,8 @@ Configurable fields:
  * show-libmachine-logs
  * log_dir
  * openshift-version
+ * WantUpdateNotification
+ * ReminderWaitPeriodInHours
 
 ```
 minishift config SUBCOMMAND [flags]

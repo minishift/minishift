@@ -192,6 +192,18 @@ spec:
     path: /data/pv0001/
 ```
 
+## Mounted Host Folders
+Some of drivers will mount a host folder within the VM so that you can easily share files between the VM and host.  These are no configurable at the moment and different for the driver and OS you are using.  Note: Host folder sharing is not implemented in the KVM driver yet.
+
+| Driver | OS | HostFolder | VM |
+| --- | --- | --- | --- |
+| Virtualbox | Linux | /home | /hosthome |
+| Virtualbox | OSX | /Users | /Users |
+| Virtualbox | Windows | C://Users | /c/Users |
+| VMWare Fusion | OSX | /Users | /Users |
+| Xhyve | OSX | /Users | /Users |
+
+
 ## Private Container Registries
 
 To access a private container registry, follow the steps on [this page](http://kubernetes.io/docs/user-guide/images/).

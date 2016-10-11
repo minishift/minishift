@@ -22,17 +22,17 @@ REPO_PATH="github.com/jimmidyson/minishift"
 if [[ -f $(which python 2>&1) ]]; then
 	PYTHON="python"
 else
-	PYTHON="docker run --rm -it -v $(pwd):/minikube -w /minikube python python"
+	PYTHON="docker run --rm -it -v $(pwd):/minishift -w /minishift python python"
 fi
+
+# Ignore these paths in the following tests.
+ignore="vendor\|\_gopath\|assets.go"
 
 # Run "go test" on packages that have test files.
 echo "Running go tests..."
 cd ${GOPATH}/src/${REPO_PATH}
-TESTS=$(go list -f '{{ if .TestGoFiles }} {{.ImportPath}} {{end}}' ./...)
+TESTS=$(go list -f '{{ if .TestGoFiles }} {{.ImportPath}} {{end}}' ./... | grep -v $ignore)
 go test -v ${TESTS}
-
-# Ignore these paths in the following tests.
-ignore="vendor\|\_gopath\|assets.go"
 
 # Check gofmt
 echo "Checking gofmt..."

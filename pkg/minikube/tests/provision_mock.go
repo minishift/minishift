@@ -90,6 +90,11 @@ func (provisioner *MockProvisioner) GetDriver() drivers.Driver {
 	return &MockDriver{}
 }
 
+// Get the swarm options associated with this host.
+func (provisioner *MockProvisioner) GetSwarmOptions() swarm.Options {
+	return swarm.Options{}
+}
+
 type MockDetector struct {
 	Provisioner *MockProvisioner
 }

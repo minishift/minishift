@@ -73,9 +73,6 @@ const (
 	// https://developer.github.com/changes/2016-04-04-git-signing-api-preview/
 	mediaTypeGitSigningPreview = "application/vnd.github.cryptographer-preview+json"
 
-	// https://developer.github.com/changes/2016-5-27-multiple-assignees/
-	mediaTypeMultipleAssigneesPreview = "application/vnd.github.cerberus-preview+json"
-
 	// https://developer.github.com/changes/2016-05-23-timeline-preview-api/
 	mediaTypeTimelinePreview = "application/vnd.github.mockingbird-preview+json"
 
@@ -84,14 +81,21 @@ const (
 
 	// https://developer.github.com/changes/2016-04-21-oauth-authorizations-grants-api-preview/
 	mediaTypeOAuthGrantAuthorizationsPreview = "application/vnd.github.damage-preview+json"
+
+	// https://developer.github.com/changes/2016-07-06-github-pages-preiew-api/
+	mediaTypePagesPreview = "application/vnd.github.mister-fantastic-preview+json"
+
+	// https://developer.github.com/v3/repos/traffic/
+	mediaTypeTrafficPreview = "application/vnd.github.spiderman-preview+json"
+
+	// https://developer.github.com/changes/2016-09-14-projects-api/
+	mediaTypeProjectsPreview = "application/vnd.github.inertia-preview+json"
 )
 
 // A Client manages communication with the GitHub API.
 type Client struct {
-	// HTTP client used to communicate with the API.
-	client *http.Client
-	// clientMu protects the client during calls that modify the CheckRedirect func.
-	clientMu sync.Mutex
+	clientMu sync.Mutex   // clientMu protects the client during calls that modify the CheckRedirect func.
+	client   *http.Client // HTTP client used to communicate with the API.
 
 	// Base URL for API requests.  Defaults to the public GitHub API, but can be
 	// set to a domain endpoint to use with GitHub Enterprise.  BaseURL should
@@ -225,9 +229,12 @@ func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Requ
 		return nil, err
 	}
 
-	req.Header.Add("Accept", mediaTypeV3)
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	req.Header.Set("Accept", mediaTypeV3)
 	if c.UserAgent != "" {
-		req.Header.Add("User-Agent", c.UserAgent)
+		req.Header.Set("User-Agent", c.UserAgent)
 	}
 	return req, nil
 }
@@ -248,12 +255,12 @@ func (c *Client) NewUploadRequest(urlStr string, reader io.Reader, size int64, m
 	}
 	req.ContentLength = size
 
-	if len(mediaType) == 0 {
+	if mediaType == "" {
 		mediaType = defaultMediaType
 	}
-	req.Header.Add("Content-Type", mediaType)
-	req.Header.Add("Accept", mediaTypeV3)
-	req.Header.Add("User-Agent", c.UserAgent)
+	req.Header.Set("Content-Type", mediaType)
+	req.Header.Set("Accept", mediaTypeV3)
+	req.Header.Set("User-Agent", c.UserAgent)
 	return req, nil
 }
 
@@ -413,7 +420,7 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 
 // checkRateLimitBeforeDo does not make any network calls, but uses existing knowledge from
 // current client state in order to quickly check if *RateLimitError can be immediately returned
-// from Client.Do, and if so, returns it so that Client.Do can skip making a network API call unneccessarily.
+// from Client.Do, and if so, returns it so that Client.Do can skip making a network API call unnecessarily.
 // Otherwise it returns nil, and Client.Do should proceed normally.
 func (c *Client) checkRateLimitBeforeDo(req *http.Request, rateLimitCategory rateLimitCategory) error {
 	c.rateMu.Lock()
@@ -607,8 +614,8 @@ type RateLimits struct {
 	Core *Rate `json:"core"`
 
 	// The rate limit for search API requests.  Unauthenticated requests
-	// are limited to 5 requests per minutes.  Authenticated requests are
-	// limited to 20 per minute.
+	// are limited to 10 requests per minutes.  Authenticated requests are
+	// limited to 30 per minute.
 	//
 	// GitHub API docs: https://developer.github.com/v3/search/#rate-limit
 	Search *Rate `json:"search"`
@@ -637,6 +644,8 @@ func category(path string) rateLimitCategory {
 	}
 }
 
+// RateLimit returns the core rate limit for the current client.
+//
 // Deprecated: RateLimit is deprecated, use RateLimits instead.
 func (c *Client) RateLimit() (*Rate, *Response, error) {
 	limits, resp, err := c.RateLimits()
@@ -761,7 +770,7 @@ func (t *BasicAuthTransport) RoundTrip(req *http.Request) (*http.Response, error
 	req = cloneRequest(req) // per RoundTrip contract
 	req.SetBasicAuth(t.Username, t.Password)
 	if t.OTP != "" {
-		req.Header.Add(headerOTP, t.OTP)
+		req.Header.Set(headerOTP, t.OTP)
 	}
 	return t.transport().RoundTrip(req)
 }

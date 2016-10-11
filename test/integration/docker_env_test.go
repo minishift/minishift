@@ -23,7 +23,7 @@ import (
 	"strings"
 	"testing"
 
-	"k8s.io/minikube/test/integration/util"
+	"github.com/jimmidyson/minishift/test/integration/util"
 )
 
 func TestDockerEnv(t *testing.T) {

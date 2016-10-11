@@ -10,6 +10,7 @@ import (
 
 var reLoc = regexp.MustCompile(`^[a-z][a-z][a-z]?(?:_[A-Z][A-Z])?\.(.+)`)
 
+// IsEastAsian return true if the current locale is CJK
 func IsEastAsian() bool {
 	locale := os.Getenv("LC_CTYPE")
 	if locale == "" {

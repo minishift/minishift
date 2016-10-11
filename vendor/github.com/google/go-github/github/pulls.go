@@ -18,6 +18,7 @@ type PullRequestsService service
 
 // PullRequest represents a GitHub pull request on a repository.
 type PullRequest struct {
+	ID           *int       `json:"id,omitempty"`
 	Number       *int       `json:"number,omitempty"`
 	State        *string    `json:"state,omitempty"`
 	Title        *string    `json:"title,omitempty"`
@@ -41,7 +42,9 @@ type PullRequest struct {
 	StatusesURL  *string    `json:"statuses_url,omitempty"`
 	DiffURL      *string    `json:"diff_url,omitempty"`
 	PatchURL     *string    `json:"patch_url,omitempty"`
-	Assignee     *User      `json:"assignee,omitempty"` // probably only in webhooks
+	Assignee     *User      `json:"assignee,omitempty"`
+	Assignees    []*User    `json:"assignees,omitempty"`
+	Milestone    *Milestone `json:"milestone,omitempty"`
 
 	Head *PullRequestBranch `json:"head,omitempty"`
 	Base *PullRequestBranch `json:"base,omitempty"`

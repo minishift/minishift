@@ -1,0 +1,16 @@
+{
+  "kind": "Route",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "testroute",
+    "creationTimestamp": null
+  },
+  "spec": {
+    "host": "test.example.com",
+    "to": {
+      "kind": "Service",
+      "name": "testservice"
+    }
+  },
+  "status": {}
+}

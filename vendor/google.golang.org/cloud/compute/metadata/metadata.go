@@ -17,7 +17,7 @@
 //
 // This package is a wrapper around the GCE metadata service,
 // as documented at https://developers.google.com/compute/docs/metadata.
-package metadata
+package metadata // import "google.golang.org/cloud/compute/metadata"
 
 import (
 	"encoding/json"
@@ -31,14 +31,8 @@ import (
 	"sync"
 	"time"
 
-	"golang.org/x/net/context"
-	"golang.org/x/net/context/ctxhttp"
-
 	"google.golang.org/cloud/internal"
 )
-
-// metadataIP is the documented metadata server IP address.
-const metadataIP = "169.254.169.254"
 
 type cachedValue struct {
 	k    string
@@ -53,29 +47,17 @@ var (
 	instID  = &cachedValue{k: "instance/id", trim: true}
 )
 
-var (
-	metaClient = &http.Client{
-		Transport: &internal.Transport{
-			Base: &http.Transport{
-				Dial: (&net.Dialer{
-					Timeout:   2 * time.Second,
-					KeepAlive: 30 * time.Second,
-				}).Dial,
-				ResponseHeaderTimeout: 2 * time.Second,
-			},
+var metaClient = &http.Client{
+	Transport: &internal.Transport{
+		Base: &http.Transport{
+			Dial: (&net.Dialer{
+				Timeout:   750 * time.Millisecond,
+				KeepAlive: 30 * time.Second,
+			}).Dial,
+			ResponseHeaderTimeout: 750 * time.Millisecond,
 		},
-	}
-	subscribeClient = &http.Client{
-		Transport: &internal.Transport{
-			Base: &http.Transport{
-				Dial: (&net.Dialer{
-					Timeout:   2 * time.Second,
-					KeepAlive: 30 * time.Second,
-				}).Dial,
-			},
-		},
-	}
-)
+	},
+}
 
 // NotDefinedError is returned when requested metadata is not defined.
 //
@@ -98,13 +80,13 @@ func (suffix NotDefinedError) Error() string {
 // If the requested metadata is not defined, the returned error will
 // be of type NotDefinedError.
 func Get(suffix string) (string, error) {
-	val, _, err := getETag(metaClient, suffix)
+	val, _, err := getETag(suffix)
 	return val, err
 }
 
 // getETag returns a value from the metadata service as well as the associated
-// ETag using the provided client. This func is otherwise equivalent to Get.
-func getETag(client *http.Client, suffix string) (value, etag string, err error) {
+// ETag. This func is otherwise equivalent to Get.
+func getETag(suffix string) (value, etag string, err error) {
 	// Using a fixed IP makes it very difficult to spoof the metadata service in
 	// a container, which is an important use-case for local testing of cloud
 	// deployments. To enable spoofing of the metadata service, the environment
@@ -117,12 +99,12 @@ func getETag(client *http.Client, suffix string) (value, etag string, err error)
 		// know the search suffix for "metadata" is
 		// ".google.internal", and this IP address is documented as
 		// being stable anyway.
-		host = metadataIP
+		host = "169.254.169.254"
 	}
 	url := "http://" + host + "/computeMetadata/v1/" + suffix
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("Metadata-Flavor", "Google")
-	res, err := client.Do(req)
+	res, err := metaClient.Do(req)
 	if err != nil {
 		return "", "", err
 	}
@@ -177,43 +159,19 @@ func OnGCE() bool {
 		return onGCE.v
 	}
 	onGCE.set = true
-	onGCE.v = testOnGCE()
+
+	// We use the DNS name of the metadata service here instead of the IP address
+	// because we expect that to fail faster in the not-on-GCE case.
+	res, err := metaClient.Get("http://metadata.google.internal")
+	if err != nil {
+		return false
+	}
+	onGCE.v = res.Header.Get("Metadata-Flavor") == "Google"
 	return onGCE.v
-}
-
-func testOnGCE() bool {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	resc := make(chan bool, 2)
-
-	// Try two strategies in parallel.
-	// See https://github.com/GoogleCloudPlatform/gcloud-golang/issues/194
-	go func() {
-		res, err := ctxhttp.Get(ctx, metaClient, "http://"+metadataIP)
-		if err != nil {
-			resc <- false
-			return
-		}
-		defer res.Body.Close()
-		resc <- res.Header.Get("Metadata-Flavor") == "Google"
-	}()
-
-	go func() {
-		addrs, err := net.LookupHost("metadata.google.internal")
-		if err != nil || len(addrs) == 0 {
-			resc <- false
-			return
-		}
-		resc <- strsContains(addrs, metadataIP)
-	}()
-
-	return <-resc
 }
 
 // Subscribe subscribes to a value from the metadata service.
 // The suffix is appended to "http://${GCE_METADATA_HOST}/computeMetadata/v1/".
-// The suffix may contain query parameters.
 //
 // Subscribe calls fn with the latest metadata value indicated by the provided
 // suffix. If the metadata value is deleted, fn is called with the empty string
@@ -224,7 +182,7 @@ func Subscribe(suffix string, fn func(v string, ok bool) error) error {
 	const failedSubscribeSleep = time.Second * 5
 
 	// First check to see if the metadata value exists at all.
-	val, lastETag, err := getETag(subscribeClient, suffix)
+	val, lastETag, err := getETag(suffix)
 	if err != nil {
 		return err
 	}
@@ -234,13 +192,9 @@ func Subscribe(suffix string, fn func(v string, ok bool) error) error {
 	}
 
 	ok := true
-	if strings.ContainsRune(suffix, '?') {
-		suffix += "&wait_for_change=true&last_etag="
-	} else {
-		suffix += "?wait_for_change=true&last_etag="
-	}
+	suffix += "?wait_for_change=true&last_etag="
 	for {
-		val, etag, err := getETag(subscribeClient, suffix+url.QueryEscape(lastETag))
+		val, etag, err := getETag(suffix + url.QueryEscape(lastETag))
 		if err != nil {
 			if _, deleted := err.(NotDefinedError); !deleted {
 				time.Sleep(failedSubscribeSleep)
@@ -370,13 +324,4 @@ func Scopes(serviceAccount string) ([]string, error) {
 		serviceAccount = "default"
 	}
 	return lines("instance/service-accounts/" + serviceAccount + "/scopes")
-}
-
-func strsContains(ss []string, s string) bool {
-	for _, v := range ss {
-		if v == s {
-			return true
-		}
-	}
-	return false
 }

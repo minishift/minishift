@@ -1,0 +1,34 @@
+version: 0.1
+log:
+  level: debug
+http:
+  addr: :5000
+storage:
+  cache:
+    blobdescriptor: inmemory
+  filesystem:
+    rootdirectory: /registry
+  delete:
+    enabled: true
+auth:
+  openshift:
+    realm: openshift
+    
+    # tokenrealm is a base URL to use for the token-granting registry endpoint.
+    # If unspecified, the scheme and host for the token redirect are determined from the incoming request.
+    # If specified, a scheme and host must be chosen that all registry clients can resolve and access:
+    #
+    # tokenrealm: https://example.com:5000
+middleware:
+  registry:
+    - name: openshift
+  repository:
+    - name: openshift
+      options:
+        acceptschema2: false
+        pullthrough: true
+        enforcequota: false
+        projectcachettl: 1m
+        blobrepositorycachettl: 10m
+  storage:
+    - name: openshift

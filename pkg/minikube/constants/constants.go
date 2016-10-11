@@ -57,8 +57,8 @@ var LogFlags = [...]string{
 }
 
 const (
-	DefaultMemory   = 1024
-	DefaultCPUS     = 1
+	DefaultMemory   = 2048
+	DefaultCPUS     = 2
 	DefaultDiskSize = "20g"
 )
 

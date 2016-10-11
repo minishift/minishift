@@ -1,0 +1,76 @@
+package: github.com/jimmidyson/minishift
+import:
+- package: github.com/blang/semver
+- package: github.com/docker/go-units
+- package: github.com/docker/machine
+  version: 91e368eb7422665278b1d5665139ee0f9980b588
+  subpackages:
+  - drivers/hyperv
+  - drivers/virtualbox
+  - drivers/vmwarefusion
+  - libmachine
+  - libmachine/auth
+  - libmachine/drivers
+  - libmachine/drivers/plugin
+  - libmachine/drivers/plugin/localbinary
+  - libmachine/engine
+  - libmachine/host
+  - libmachine/log
+  - libmachine/mcnerror
+  - libmachine/mcnflag
+  - libmachine/provision
+  - libmachine/provision/pkgaction
+  - libmachine/provision/serviceaction
+  - libmachine/shell
+  - libmachine/ssh
+  - libmachine/state
+  - libmachine/swarm
+- package: github.com/golang/glog
+  repo: https://github.com/openshift/glog.git
+  vcs: git
+  version: 335da9dda11408a34b64344f82e9c03779b71673
+- package: github.com/google/go-github
+  subpackages:
+  - github
+- package: github.com/inconshreveable/go-update
+- package: github.com/kardianos/osext
+- package: github.com/olekukonko/tablewriter
+- package: github.com/openshift/origin
+  version: 1.3.0
+  subpackages:
+  - pkg/cmd/cli/config
+- package: github.com/pkg/browser
+- package: github.com/spf13/cobra
+  subpackages:
+  - doc
+- package: github.com/spf13/pflag
+- package: github.com/spf13/viper
+  repo: https://github.com/jimmidyson/viper.git
+  vcs: git
+- package: github.com/xeipuuv/gojsonschema
+- package: golang.org/x/crypto
+  subpackages:
+  - ssh
+- package: golang.org/x/oauth2
+- package: gopkg.in/cheggaaa/pb.v1
+- package: k8s.io/kubernetes
+  repo: https://github.com/openshift/kubernetes.git
+  vcs: git
+  version: 52492b4bff99ef3b8ca617d385a3ff0612f9402d
+  subpackages:
+  - pkg/api
+  - pkg/api/v1
+  - pkg/client/unversioned
+  - pkg/client/unversioned/clientcmd
+  - pkg/client/unversioned/clientcmd/api
+  - pkg/client/unversioned/clientcmd/api/latest
+  - pkg/runtime
+  - pkg/util/homedir
+- package: github.com/emicklei/go-restful
+  version: 673225fcad91a5833672dcbc596b61735fbc4914
+- package: github.com/docker/distribution
+  version: 559433598c7be9d30d6cfc5cad5b5dfdb686725c
+  repo: https://github.com/openshift/docker-distribution.git
+  vcs: git
+- package: github.com/docker/docker
+  version: 0f5c9d301b9b1cca66b3ea0f9dec3b5317d3686d

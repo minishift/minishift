@@ -12,15 +12,11 @@ import (
 	"net/http"
 )
 
-func configureTransport(t1 *http.Transport) (*Transport, error) {
+func configureTransport(t1 *http.Transport) error {
 	connPool := new(clientConnPool)
-	t2 := &Transport{
-		ConnPool: noDialClientConnPool{connPool},
-		t1:       t1,
-	}
-	connPool.t = t2
+	t2 := &Transport{ConnPool: noDialClientConnPool{connPool}}
 	if err := registerHTTPSProtocol(t1, noDialH2RoundTripper{t2}); err != nil {
-		return nil, err
+		return err
 	}
 	if t1.TLSClientConfig == nil {
 		t1.TLSClientConfig = new(tls.Config)
@@ -28,21 +24,13 @@ func configureTransport(t1 *http.Transport) (*Transport, error) {
 	if !strSliceContains(t1.TLSClientConfig.NextProtos, "h2") {
 		t1.TLSClientConfig.NextProtos = append([]string{"h2"}, t1.TLSClientConfig.NextProtos...)
 	}
-	if !strSliceContains(t1.TLSClientConfig.NextProtos, "http/1.1") {
-		t1.TLSClientConfig.NextProtos = append(t1.TLSClientConfig.NextProtos, "http/1.1")
-	}
 	upgradeFn := func(authority string, c *tls.Conn) http.RoundTripper {
-		addr := authorityAddr(authority)
-		if used, err := connPool.addConnIfNeeded(addr, t2, c); err != nil {
-			go c.Close()
+		cc, err := t2.NewClientConn(c)
+		if err != nil {
+			c.Close()
 			return erringRoundTripper{err}
-		} else if !used {
-			// Turns out we don't need this c.
-			// For example, two goroutines made requests to the same host
-			// at the same time, both kicking off TCP dials. (since protocol
-			// was unknown)
-			go c.Close()
 		}
+		connPool.addConn(authorityAddr(authority), cc)
 		return t2
 	}
 	if m := t1.TLSNextProto; len(m) == 0 {
@@ -52,7 +40,7 @@ func configureTransport(t1 *http.Transport) (*Transport, error) {
 	} else {
 		m["h2"] = upgradeFn
 	}
-	return t2, nil
+	return nil
 }
 
 // registerHTTPSProtocol calls Transport.RegisterProtocol but
@@ -73,7 +61,8 @@ func registerHTTPSProtocol(t *http.Transport, rt http.RoundTripper) (err error) 
 type noDialClientConnPool struct{ *clientConnPool }
 
 func (p noDialClientConnPool) GetClientConn(req *http.Request, addr string) (*ClientConn, error) {
-	return p.getClientConn(req, addr, noDialOnMiss)
+	const doDial = false
+	return p.getClientConn(req, addr, doDial)
 }
 
 // noDialH2RoundTripper is a RoundTripper which only tries to complete the request

@@ -33,12 +33,12 @@ else
 endif
 
 # Use system python if it exists, otherwise use Docker.
-PYTHON := $(shell command -v python || echo "docker run --rm -it -v $(shell pwd):/minikube -w /minikube python python")
+PYTHON := $(shell command -v python || echo "docker run --rm -it -v $(shell pwd):/minishift -w /minishift python python")
 BUILD_OS := $(shell uname -s)
 
 # Set the version information for the Kubernetes servers
 K8S_VERSION_LDFLAGS := $(shell $(PYTHON) hack/get_k8s_version.py 2>&1)
-MINIKUBE_LDFLAGS := $(K8S_VERSION_LDFLAGS) -X github.com/jimmidyson/minishift/pkg/version.version=$(VERSION) -s -w -extldflags '-static'
+MINIKUBE_LDFLAGS := -X github.com/jimmidyson/minishift/pkg/version.version=$(VERSION) -s -w -extldflags '-static'
 
 MINIKUBEFILES := go list  -f '{{join .Deps "\n"}}' ./cmd/minikube/ | grep $(REPOPATH) | xargs go list -f '{{ range $$file := .GoFiles }} {{$$.Dir}}/{{$$file}}{{"\n"}}{{end}}'
 
@@ -51,17 +51,17 @@ $(ORIGINAL_GOPATH)/bin/minishift: out/minishift-$(GOOS)-$(GOARCH)
 out/minishift: out/minishift-$(GOOS)-$(GOARCH)
 	cp $(BUILD_DIR)/minishift-$(GOOS)-$(GOARCH) $(BUILD_DIR)/minishift
 
-out/openshift: gopath hack/get_openshift.go OPENSHIFT_VERSION
+out/openshift: $(GOPATH)/src/$(ORG) hack/get_openshift.go OPENSHIFT_VERSION
 	mkdir out 2>/dev/null || true
 	cd $(GOPATH)/src/$(REPOPATH) && go run hack/get_openshift.go $(OPENSHIFT_VERSION)
 
-out/minishift-darwin-amd64: gopath pkg/minikube/cluster/assets.go $(shell $(MINIKUBEFILES)) VERSION
+out/minishift-darwin-amd64: $(GOPATH)/src/$(ORG) pkg/minikube/cluster/assets.go $(shell $(MINIKUBEFILES)) VERSION
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build --installsuffix cgo -ldflags="$(MINIKUBE_LDFLAGS)" -o $(BUILD_DIR)/minishift-darwin-amd64 ./cmd/minikube
 
-out/minishift-linux-amd64: gopath pkg/minikube/cluster/assets.go $(shell $(MINIKUBEFILES)) VERSION
+out/minishift-linux-amd64: $(GOPATH)/src/$(ORG) pkg/minikube/cluster/assets.go $(shell $(MINIKUBEFILES)) VERSION
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build --installsuffix cgo -ldflags="$(MINIKUBE_LDFLAGS)" -o $(BUILD_DIR)/minishift-linux-amd64 ./cmd/minikube
 
-out/minishift-windows-amd64.exe: gopath pkg/minikube/cluster/assets.go $(shell $(MINIKUBEFILES)) VERSION
+out/minishift-windows-amd64.exe: $(GOPATH)/src/$(ORG) pkg/minikube/cluster/assets.go $(shell $(MINIKUBEFILES)) VERSION
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build --installsuffix cgo -ldflags="$(MINIKUBE_LDFLAGS)" -o $(BUILD_DIR)/minishift-windows-amd64.exe ./cmd/minikube
 
 deploy/iso/minishift.iso: $(shell find deploy/iso -type f ! -name *.iso)
@@ -72,20 +72,20 @@ integration: out/minishift
 	go test -v $(REPOPATH)/test/integration --tags=integration
 
 .PHONY: test
-test: gopath pkg/minikube/cluster/assets.go
+test: $(GOPATH)/src/$(ORG) pkg/minikube/cluster/assets.go
 	./test.sh
 
 pkg/minikube/cluster/assets.go: out/openshift $(GOPATH)/bin/go-bindata
 	$(GOPATH)/bin/go-bindata -nomemcopy -o pkg/minikube/cluster/assets.go -pkg cluster ./out/openshift
 
-$(GOPATH)/bin/go-bindata: gopath
+$(GOPATH)/bin/go-bindata: $(GOPATH)/src/$(ORG)
 	GOBIN=$(GOPATH)/bin go get github.com/jteeuwen/go-bindata/...
 
-$(GOPATH)/bin/gh-release: gopath
+$(GOPATH)/bin/gh-release: $(GOPATH)/src/$(ORG)
 	go get github.com/progrium/gh-release
 
 .PHONY: gendocs
-gendocs: gopath $(shell find cmd) pkg/minikube/cluster/assets.go
+gendocs: $(GOPATH)/src/$(ORG) $(shell find cmd) pkg/minikube/cluster/assets.go
 	# https://github.com/golang/go/issues/15038#issuecomment-207631885 ( CGO_ENABLED=0 )
 	cd $(GOPATH)/src/$(REPOPATH) && CGO_ENABLED=0 go run -ldflags="$(MINIKUBE_LDFLAGS)" -tags gendocs gen_help_text.go
 

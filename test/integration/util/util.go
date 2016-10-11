@@ -31,9 +31,9 @@ import (
 	"time"
 
 	"github.com/docker/machine/libmachine/log"
-
 	"k8s.io/kubernetes/pkg/api"
-	commonutil "k8s.io/minikube/pkg/util"
+
+	commonutil "github.com/jimmidyson/minishift/pkg/util"
 )
 
 type MinikubeRunner struct {

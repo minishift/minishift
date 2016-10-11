@@ -136,7 +136,7 @@ func (l *jsonReferenceLoader) LoadJSON() (interface{}, error) {
 
 	if reference.HasFileScheme {
 
-		filename := strings.Replace(refToUrl.String(), "file://", "", -1)
+		filename := strings.Replace(refToUrl.GetUrl().Path, "file://", "", -1)
 		if runtime.GOOS == "windows" {
 			// on Windows, a file URL may have an extra leading slash, use slashes
 			// instead of backslashes, and have spaces escaped
@@ -144,7 +144,6 @@ func (l *jsonReferenceLoader) LoadJSON() (interface{}, error) {
 				filename = filename[1:]
 			}
 			filename = filepath.FromSlash(filename)
-			filename = strings.Replace(filename, "%20", " ", -1)
 		}
 
 		document, err = l.loadFromFile(filename)
@@ -228,6 +227,32 @@ func (l *jsonStringLoader) LoadJSON() (interface{}, error) {
 
 	return decodeJsonUsingNumber(strings.NewReader(l.JsonSource().(string)))
 
+}
+
+// JSON bytes loader
+
+type jsonBytesLoader struct {
+	source []byte
+}
+
+func (l *jsonBytesLoader) JsonSource() interface{} {
+	return l.source
+}
+
+func (l *jsonBytesLoader) JsonReference() (gojsonreference.JsonReference, error) {
+	return gojsonreference.NewJsonReference("#")
+}
+
+func (l *jsonBytesLoader) LoaderFactory() JSONLoaderFactory {
+	return &DefaultJSONLoaderFactory{}
+}
+
+func NewBytesLoader(source []byte) *jsonBytesLoader {
+	return &jsonBytesLoader{source: source}
+}
+
+func (l *jsonBytesLoader) LoadJSON() (interface{}, error) {
+	return decodeJsonUsingNumber(bytes.NewReader(l.JsonSource().([]byte)))
 }
 
 // JSON Go (types) loader

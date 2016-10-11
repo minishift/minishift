@@ -294,7 +294,7 @@ func composeResponseMessages(route restful.Route, decl *ApiDeclaration) (message
 			if isCollection {
 				modelName = "array[" + modelName + "]"
 			}
-			modelBuilder{Models: &decl.Models}.addModel(st, "")
+			modelBuilder{&decl.Models}.addModel(st, "")
 			// reference the model
 			message.ResponseModel = modelName
 		}
@@ -332,11 +332,11 @@ func detectCollectionType(st reflect.Type) (bool, reflect.Type) {
 // addModelFromSample creates and adds (or overwrites) a Model from a sample resource
 func (sws SwaggerService) addModelFromSampleTo(operation *Operation, isResponse bool, sample interface{}, models *ModelList) {
 	if isResponse {
-		type_, items := asDataType(sample, &sws.config)
+		type_, items := asDataType(sample)
 		operation.Type = type_
 		operation.Items = items
 	}
-	modelBuilder{Models: models, Config: &sws.config}.addModelFrom(sample)
+	modelBuilder{models}.addModelFrom(sample)
 }
 
 func asSwaggerParameter(param restful.ParameterData) Parameter {
@@ -411,7 +411,7 @@ func asParamType(kind int) string {
 	return ""
 }
 
-func asDataType(any interface{}, config *Config) (*string, *Item) {
+func asDataType(any interface{}) (*string, *Item) {
 	// If it's not a collection, return the suggested model name
 	st := reflect.TypeOf(any)
 	isCollection, st := detectCollectionType(st)
@@ -424,7 +424,7 @@ func asDataType(any interface{}, config *Config) (*string, *Item) {
 	// XXX: This is not very elegant
 	// We create an Item object referring to the given model
 	models := ModelList{}
-	mb := modelBuilder{Models: &models, Config: config}
+	mb := modelBuilder{&models}
 	mb.addModelFrom(any)
 
 	elemTypeName := mb.getElementTypeName(modelName, "", st)

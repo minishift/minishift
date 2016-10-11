@@ -7,9 +7,7 @@ package http2
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"net/http"
-	"sort"
 	"time"
 
 	"golang.org/x/net/http2/hpack"
@@ -25,11 +23,7 @@ type writeFramer interface {
 // frame writing scheduler (see writeScheduler in writesched.go).
 //
 // This interface is implemented by *serverConn.
-//
-// TODO: decide whether to a) use this in the client code (which didn't
-// end up using this yet, because it has a simpler design, not
-// currently implementing priorities), or b) delete this and
-// make the server code a bit more concrete.
+// TODO: use it from the client code too, once it exists.
 type writeContext interface {
 	Framer() *Framer
 	Flush() error
@@ -97,16 +91,6 @@ func (w *writeData) writeFrame(ctx writeContext) error {
 	return ctx.Framer().WriteData(w.streamID, w.endStream, w.p)
 }
 
-// handlerPanicRST is the message sent from handler goroutines when
-// the handler panics.
-type handlerPanicRST struct {
-	StreamID uint32
-}
-
-func (hp handlerPanicRST) writeFrame(ctx writeContext) error {
-	return ctx.Framer().WriteRSTStream(hp.StreamID, ErrCodeInternal)
-}
-
 func (se StreamError) writeFrame(ctx writeContext) error {
 	return ctx.Framer().WriteRSTStream(se.StreamID, se.Code)
 }
@@ -124,48 +108,40 @@ func (writeSettingsAck) writeFrame(ctx writeContext) error {
 }
 
 // writeResHeaders is a request to write a HEADERS and 0+ CONTINUATION frames
-// for HTTP response headers or trailers from a server handler.
+// for HTTP response headers from a server handler.
 type writeResHeaders struct {
 	streamID    uint32
-	httpResCode int         // 0 means no ":status" line
+	httpResCode int
 	h           http.Header // may be nil
-	trailers    []string    // if non-nil, which keys of h to write. nil means all.
 	endStream   bool
 
-	date          string
 	contentType   string
 	contentLength string
-}
-
-func encKV(enc *hpack.Encoder, k, v string) {
-	if VerboseLogs {
-		log.Printf("http2: server encoding header %q = %q", k, v)
-	}
-	enc.WriteField(hpack.HeaderField{Name: k, Value: v})
 }
 
 func (w *writeResHeaders) writeFrame(ctx writeContext) error {
 	enc, buf := ctx.HeaderEncoder()
 	buf.Reset()
-
-	if w.httpResCode != 0 {
-		encKV(enc, ":status", httpCodeString(w.httpResCode))
+	enc.WriteField(hpack.HeaderField{Name: ":status", Value: httpCodeString(w.httpResCode)})
+	for k, vv := range w.h {
+		k = lowerHeader(k)
+		for _, v := range vv {
+			// TODO: more of "8.1.2.2 Connection-Specific Header Fields"
+			if k == "transfer-encoding" && v != "trailers" {
+				continue
+			}
+			enc.WriteField(hpack.HeaderField{Name: k, Value: v})
+		}
 	}
-
-	encodeHeaders(enc, w.h, w.trailers)
-
 	if w.contentType != "" {
-		encKV(enc, "content-type", w.contentType)
+		enc.WriteField(hpack.HeaderField{Name: "content-type", Value: w.contentType})
 	}
 	if w.contentLength != "" {
-		encKV(enc, "content-length", w.contentLength)
-	}
-	if w.date != "" {
-		encKV(enc, "date", w.date)
+		enc.WriteField(hpack.HeaderField{Name: "content-length", Value: w.contentLength})
 	}
 
 	headerBlock := buf.Bytes()
-	if len(headerBlock) == 0 && w.trailers == nil {
+	if len(headerBlock) == 0 {
 		panic("unexpected empty hpack")
 	}
 
@@ -211,7 +187,7 @@ type write100ContinueHeadersFrame struct {
 func (w write100ContinueHeadersFrame) writeFrame(ctx writeContext) error {
 	enc, buf := ctx.HeaderEncoder()
 	buf.Reset()
-	encKV(enc, ":status", "100")
+	enc.WriteField(hpack.HeaderField{Name: ":status", Value: "100"})
 	return ctx.Framer().WriteHeaders(HeadersFrameParam{
 		StreamID:      w.streamID,
 		BlockFragment: buf.Bytes(),
@@ -227,37 +203,4 @@ type writeWindowUpdate struct {
 
 func (wu writeWindowUpdate) writeFrame(ctx writeContext) error {
 	return ctx.Framer().WriteWindowUpdate(wu.streamID, wu.n)
-}
-
-func encodeHeaders(enc *hpack.Encoder, h http.Header, keys []string) {
-	// TODO: garbage. pool sorters like http1? hot path for 1 key?
-	if keys == nil {
-		keys = make([]string, 0, len(h))
-		for k := range h {
-			keys = append(keys, k)
-		}
-		sort.Strings(keys)
-	}
-	for _, k := range keys {
-		vv := h[k]
-		k = lowerHeader(k)
-		if !validHeaderFieldName(k) {
-			// TODO: return an error? golang.org/issue/14048
-			// For now just omit it.
-			continue
-		}
-		isTE := k == "transfer-encoding"
-		for _, v := range vv {
-			if !validHeaderFieldValue(v) {
-				// TODO: return an error? golang.org/issue/14048
-				// For now just omit it.
-				continue
-			}
-			// TODO: more of "8.1.2.2 Connection-Specific Header Fields"
-			if isTE && v != "trailers" {
-				continue
-			}
-			encKV(enc, k, v)
-		}
-	}
 }

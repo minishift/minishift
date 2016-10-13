@@ -24,6 +24,7 @@ minishift start
       --insecure-registry stringSlice   Insecure Docker registries to pass to the Docker daemon (default [172.30.0.0/16])
       --iso-url string                  Location of the minishift iso (default "https://github.com/jimmidyson/minishift/releases/download/v0.8.0/boot2docker.iso")
       --memory int                      Amount of RAM allocated to the minishift VM (default 2048)
+      --openshift-version string        The OpenShift version that the minishift VM will run (ex: v1.2.3) OR a URI which contains an openshift binary (ex: file:///home/developer/go/src/github.com/openshift/origin/_output/local/bin/linux/amd64/openshift)
       --registry-mirror stringSlice     Registry mirrors to pass to the Docker daemon
       --vm-driver string                VM driver is one of: [virtualbox vmwarefusion kvm xhyve hyperv] (default "kvm")
 ```

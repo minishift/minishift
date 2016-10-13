@@ -450,7 +450,7 @@ func IsAmbiguousWidth(r rune) bool {
 	return ct(r) == ambiguous
 }
 
-// IsAmbiguousWidth returns whether is ambiguous width or not.
+// IsNeutralWidth returns whether is neutral width or not.
 func IsNeutralWidth(r rune) bool {
 	return ct(r) == neutral
 }

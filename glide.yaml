@@ -26,9 +26,9 @@ import:
   - libmachine/state
   - libmachine/swarm
 - package: github.com/golang/glog
+  version: 335da9dda11408a34b64344f82e9c03779b71673
   repo: https://github.com/openshift/glog.git
   vcs: git
-  version: 335da9dda11408a34b64344f82e9c03779b71673
 - package: github.com/google/go-github
   subpackages:
   - github
@@ -54,9 +54,9 @@ import:
 - package: golang.org/x/oauth2
 - package: gopkg.in/cheggaaa/pb.v1
 - package: k8s.io/kubernetes
+  version: 52492b4bff99ef3b8ca617d385a3ff0612f9402d
   repo: https://github.com/openshift/kubernetes.git
   vcs: git
-  version: 52492b4bff99ef3b8ca617d385a3ff0612f9402d
   subpackages:
   - pkg/api
   - pkg/api/v1
@@ -74,3 +74,5 @@ import:
   vcs: git
 - package: github.com/docker/docker
   version: 0f5c9d301b9b1cca66b3ea0f9dec3b5317d3686d
+- package: github.com/pkg/errors
+  version: ^0.8.0

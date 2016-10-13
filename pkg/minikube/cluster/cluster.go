@@ -42,6 +42,7 @@ import (
 	"github.com/jimmidyson/minishift/pkg/minikube/constants"
 	"github.com/jimmidyson/minishift/pkg/minikube/sshutil"
 	"github.com/jimmidyson/minishift/pkg/util"
+	"github.com/pkg/errors"
 	kubeapi "k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/client/unversioned"
 	"k8s.io/kubernetes/pkg/client/unversioned/clientcmd"
@@ -168,6 +169,7 @@ type MachineConfig struct {
 	HostOnlyCIDR     string // Only used by the virtualbox driver
 	DeployRegistry   bool
 	DeployRouter     bool
+	OpenShiftVersion string
 }
 
 // StartCluster starts a k8s cluster on the specified Host.
@@ -199,40 +201,28 @@ sudo /usr/local/bin/openshift admin router --service-account=router --config=ope
 	return nil
 }
 
-type fileToCopy struct {
-	AssetName   string
-	TargetDir   string
-	TargetName  string
-	Permissions string
-}
-
-var assets = []fileToCopy{
-	{
-		AssetName:   "out/openshift",
-		TargetDir:   "/usr/local/bin",
-		TargetName:  "openshift",
-		Permissions: "0777",
-	},
-}
-
-func UpdateCluster(d drivers.Driver) error {
+func UpdateCluster(d drivers.Driver, config MachineConfig) error {
 	client, err := sshutil.NewSSHClient(d)
 	if err != nil {
 		return err
 	}
 
-	for _, a := range assets {
-		contents, err := Asset(a.AssetName)
-		if err != nil {
-			glog.Infof("Error loading asset %s: %s", a.AssetName, err)
-			return err
+	// transfer openshift from cache/asset to vm
+	if openshiftURIWasSpecified(config) {
+		lCacher := openshiftCacher{config}
+		if err = lCacher.updateOpenShiftFromURI(client); err != nil {
+			return errors.Wrap(err, "Error updating openshift from uri")
 		}
-
-		if err := sshutil.Transfer(contents, a.TargetDir, a.TargetName, a.Permissions, client); err != nil {
-			return err
+	} else {
+		if err = updateOpenShiftFromAsset(client); err != nil {
+			return errors.Wrap(err, "Error updating openshift from asset")
 		}
 	}
 	return nil
+}
+
+func openshiftURIWasSpecified(config MachineConfig) bool {
+	return len(config.OpenShiftVersion) > 0
 }
 
 func engineOptions(config MachineConfig) *engine.Options {

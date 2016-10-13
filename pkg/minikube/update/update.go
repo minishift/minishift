@@ -29,19 +29,18 @@ import (
 	"syscall"
 	"time"
 
-	pb "gopkg.in/cheggaaa/pb.v1"
-
-	"golang.org/x/oauth2"
-
 	"github.com/blang/semver"
 	"github.com/golang/glog"
 	"github.com/google/go-github/github"
 	update "github.com/inconshreveable/go-update"
-	"github.com/jimmidyson/minishift/pkg/minikube/config"
-	"github.com/jimmidyson/minishift/pkg/minikube/constants"
-	"github.com/jimmidyson/minishift/pkg/version"
 	"github.com/kardianos/osext"
 	"github.com/spf13/viper"
+	pb "gopkg.in/cheggaaa/pb.v1"
+
+	"github.com/jimmidyson/minishift/pkg/minikube/config"
+	"github.com/jimmidyson/minishift/pkg/minikube/constants"
+	githubutils "github.com/jimmidyson/minishift/pkg/util/github"
+	"github.com/jimmidyson/minishift/pkg/version"
 )
 
 const (
@@ -52,7 +51,6 @@ const (
 
 var (
 	lastUpdateCheckFilePath = constants.MakeMiniPath("last_update_check")
-	githubClient            *github.Client
 )
 
 func MaybeUpdateFromGithub(output io.Writer) {
@@ -79,7 +77,10 @@ func MaybeUpdate(output io.Writer, githubOwner, githubRepo, binaryName, lastUpda
 		return
 	}
 	if localVersion.Compare(latestVersion) < 0 {
-		writeTimeToFile(lastUpdatePath, time.Now().UTC())
+		err := writeTimeToFile(lastUpdatePath, time.Now().UTC())
+		if err != nil {
+			fmt.Println("Failed to update last update time")
+		}
 		fmt.Fprintf(output, `There is a newer version of %s available. Do you want to
 automatically update from %s%s to %s%s now? [y/N] `,
 			binaryName, version.VersionPrefix, localVersion, version.VersionPrefix, latestVersion)
@@ -109,18 +110,7 @@ func shouldCheckURLVersion(filePath string) bool {
 }
 
 func getLatestVersionFromGitHub(githubOwner, githubRepo string) (semver.Version, error) {
-	if githubClient == nil {
-		token := os.Getenv("GH_TOKEN")
-		var tc *http.Client
-		if len(token) > 0 {
-			ts := oauth2.StaticTokenSource(
-				&oauth2.Token{AccessToken: token},
-			)
-			tc = oauth2.NewClient(oauth2.NoContext, ts)
-		}
-		githubClient = github.NewClient(tc)
-	}
-	client := githubClient
+	client := githubutils.Client()
 	var (
 		release *github.RepositoryRelease
 		resp    *github.Response
@@ -130,7 +120,7 @@ func getLatestVersionFromGitHub(githubOwner, githubRepo string) (semver.Version,
 	if err != nil {
 		return semver.Version{}, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	latestVersionString := release.TagName
 	if latestVersionString != nil {
 		return semver.Make(strings.TrimPrefix(*latestVersionString, "v"))
@@ -191,7 +181,7 @@ func updateBinaryFile(url string, checksum []byte) {
 		glog.Errorf("Cannot download binary: %s", err)
 		os.Exit(1)
 	}
-	defer httpResp.Body.Close()
+	defer func() { _ = httpResp.Body.Close() }()
 
 	binary := httpResp.Body
 	if httpResp.ContentLength > 0 {
@@ -224,7 +214,7 @@ func downloadChecksum(v semver.Version, downloadBinary, downloadLinkFormat strin
 	if err != nil {
 		return nil, err
 	}
-	defer checksumResp.Body.Close()
+	defer func() { _ = checksumResp.Body.Close() }()
 
 	checksum := checksumResp.Body
 	if checksumResp.ContentLength > 0 {

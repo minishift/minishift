@@ -28,24 +28,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/go-github/github"
 	pb "gopkg.in/cheggaaa/pb.v1"
 
-	"golang.org/x/oauth2"
-
-	"github.com/google/go-github/github"
+	githubutils "github.com/jimmidyson/minishift/pkg/util/github"
 )
 
 func main() {
-	token := os.Getenv("GH_TOKEN")
-	var tc *http.Client
-	if len(token) > 0 {
-		fmt.Println("Using GH_TOKEN environment variable")
-		ts := oauth2.StaticTokenSource(
-			&oauth2.Token{AccessToken: token},
-		)
-		tc = oauth2.NewClient(oauth2.NoContext, ts)
-	}
-	client := github.NewClient(tc)
+	client := githubutils.Client()
 	var (
 		release *github.RepositoryRelease
 		resp    *github.Response
@@ -60,7 +50,7 @@ func main() {
 		fmt.Printf("Could not get latest OpenShift release: %s", err)
 		os.Exit(1)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	assetID := getOpenShiftServerAssetID(release)
 	if assetID == 0 {
@@ -78,7 +68,7 @@ func main() {
 			fmt.Printf("Could not download OpenShift release asset: %s\n", err)
 			os.Exit(1)
 		}
-		defer httpResp.Body.Close()
+		defer func() { _ = httpResp.Body.Close() }()
 
 		asset = httpResp.Body
 		if httpResp.ContentLength > 0 {
@@ -97,7 +87,7 @@ func main() {
 		fmt.Printf("Could not ungzip OpenShift release asset: %s\n", err)
 		os.Exit(1)
 	}
-	defer gzf.Close()
+	defer func() { _ = gzf.Close() }()
 	tr := tar.NewReader(gzf)
 	for {
 		hdr, err := tr.Next()

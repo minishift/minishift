@@ -44,7 +44,7 @@ const (
 	cpus                  = "cpus"
 	humanReadableDiskSize = "disk-size"
 	vmDriver              = "vm-driver"
-	kubernetesVersion     = "kubernetes-version"
+	openshiftVersion      = "openshift-version"
 	hostOnlyCIDR          = "host-only-cidr"
 	deployRegistry        = "deploy-registry"
 	deployRouter          = "deploy-router"
@@ -82,6 +82,7 @@ func runStart(cmd *cobra.Command, args []string) {
 		HostOnlyCIDR:     viper.GetString(hostOnlyCIDR),
 		DeployRouter:     viper.GetBool(deployRouter),
 		DeployRegistry:   viper.GetBool(deployRegistry),
+		OpenShiftVersion: viper.GetString(openshiftVersion),
 	}
 
 	var host *host.Host
@@ -98,7 +99,7 @@ func runStart(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	if err := cluster.UpdateCluster(host.Driver); err != nil {
+	if err := cluster.UpdateCluster(host.Driver, config); err != nil {
 		glog.Errorln("Error updating cluster: ", err)
 		os.Exit(1)
 	}
@@ -216,6 +217,7 @@ func init() {
 	startCmd.Flags().StringSliceVar(&registryMirror, "registry-mirror", nil, "Registry mirrors to pass to the Docker daemon")
 	startCmd.Flags().Bool(deployRegistry, true, "Should the OpenShift internal Docker registry be deployed?")
 	startCmd.Flags().Bool(deployRouter, false, "Should the OpenShift router be deployed?")
+	startCmd.Flags().String(openshiftVersion, "", "The OpenShift version that the minishift VM will run (ex: v1.2.3) OR a URI which contains an openshift binary (ex: file:///home/developer/go/src/github.com/openshift/origin/_output/local/bin/linux/amd64/openshift)")
 
 	viper.BindPFlags(startCmd.Flags())
 

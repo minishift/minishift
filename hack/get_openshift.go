@@ -17,109 +17,20 @@ limitations under the License.
 package main
 
 import (
-	"archive/tar"
-	"compress/gzip"
 	"fmt"
-	"io"
-	"io/ioutil"
-	"net/http"
 	"os"
-	"path/filepath"
-	"strings"
-	"time"
 
-	"github.com/google/go-github/github"
-	pb "gopkg.in/cheggaaa/pb.v1"
-
-	githubutils "github.com/jimmidyson/minishift/pkg/util/github"
+	"github.com/jimmidyson/minishift/pkg/util/github"
 )
 
 func main() {
-	client := githubutils.Client()
-	var (
-		release *github.RepositoryRelease
-		resp    *github.Response
-		err     error
-	)
+	version := ""
 	if len(os.Args) > 1 {
-		release, resp, err = client.Repositories.GetReleaseByTag("openshift", "origin", os.Args[1])
-	} else {
-		release, resp, err = client.Repositories.GetLatestRelease("openshift", "origin")
+		version = os.Args[1]
 	}
+	err := github.DownloadOpenShiftRelease(version, "out/openshift")
 	if err != nil {
-		fmt.Printf("Could not get latest OpenShift release: %s", err)
+		fmt.Println(err)
 		os.Exit(1)
 	}
-	defer func() { _ = resp.Body.Close() }()
-
-	assetID := getOpenShiftServerAssetID(release)
-	if assetID == 0 {
-		fmt.Println("Could not get OpenShift release URL")
-		os.Exit(1)
-	}
-	asset, url, err := client.Repositories.DownloadReleaseAsset("openshift", "origin", assetID)
-	if err != nil {
-		fmt.Printf("Could not download OpenShift release asset: %s\n", err)
-		os.Exit(1)
-	}
-	if len(url) > 0 {
-		httpResp, err := http.Get(url)
-		if err != nil {
-			fmt.Printf("Could not download OpenShift release asset: %s\n", err)
-			os.Exit(1)
-		}
-		defer func() { _ = httpResp.Body.Close() }()
-
-		asset = httpResp.Body
-		if httpResp.ContentLength > 0 {
-			bar := pb.New64(httpResp.ContentLength).SetUnits(pb.U_BYTES)
-			bar.Start()
-			asset = bar.NewProxyReader(asset)
-			defer func() {
-				<-time.After(bar.RefreshRate)
-				fmt.Println()
-			}()
-		}
-	}
-
-	gzf, err := gzip.NewReader(asset)
-	if err != nil {
-		fmt.Printf("Could not ungzip OpenShift release asset: %s\n", err)
-		os.Exit(1)
-	}
-	defer func() { _ = gzf.Close() }()
-	tr := tar.NewReader(gzf)
-	for {
-		hdr, err := tr.Next()
-		if err == io.EOF {
-			// end of tar archive
-			break
-		}
-		if err != nil {
-			fmt.Printf("Could not extract OpenShift release asset: %s\n", err)
-			os.Exit(1)
-		}
-		if hdr.Typeflag != tar.TypeReg || filepath.Base(hdr.Name) != "kube-apiserver" {
-			continue
-		}
-		contents, err := ioutil.ReadAll(tr)
-		if err != nil {
-			fmt.Printf("Could not extract OpenShift release asset: %s\n", err)
-			os.Exit(1)
-		}
-		err = ioutil.WriteFile("out/openshift", contents, os.ModePerm)
-		if err != nil {
-			fmt.Printf("Could not write OpenShift binary: %s\n", err)
-			os.Exit(1)
-		}
-	}
-}
-
-func getOpenShiftServerAssetID(release *github.RepositoryRelease) int {
-	for _, asset := range release.Assets {
-		if strings.HasPrefix(*asset.Name, "openshift-origin-server") && strings.HasSuffix(*asset.Name, "linux-64bit.tar.gz") {
-			return *asset.ID
-		}
-	}
-	return 0
 }

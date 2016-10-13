@@ -17,7 +17,6 @@ limitations under the License.
 package sshutil
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"net"
@@ -27,6 +26,7 @@ import (
 
 	"github.com/docker/machine/libmachine/drivers"
 	machinessh "github.com/docker/machine/libmachine/ssh"
+	"github.com/pkg/errors"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -62,24 +62,24 @@ func NewSSHClient(d drivers.Driver) (*ssh.Client, error) {
 }
 
 // Transfer uses an SSH session to copy a file to the remote machine.
-func Transfer(data []byte, remotedir, filename string, perm string, c *ssh.Client) error {
+func Transfer(reader io.Reader, readerLen int, remotedir, filename string, perm string, c *ssh.Client) error {
 	// Delete the old file first. This makes sure permissions get reset.
 	deleteCmd := fmt.Sprintf("sudo rm -f %s", filepath.Join(remotedir, filename))
 	mkdirCmd := fmt.Sprintf("sudo mkdir -p %s", remotedir)
 	for _, cmd := range []string{deleteCmd, mkdirCmd} {
 		if err := RunCommand(c, cmd); err != nil {
-			return err
+			return errors.Wrapf(err, "Error running command: %s", cmd)
 		}
 	}
 
 	s, err := c.NewSession()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Error creating new session via ssh client")
 	}
 
 	w, err := s.StdinPipe()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Error accessing StdinPipe via ssh session")
 	}
 	// The scpcmd below *should not* return until all data is copied and the
 	// StdinPipe is closed. But let's use a WaitGroup to make it expicit.
@@ -88,15 +88,15 @@ func Transfer(data []byte, remotedir, filename string, perm string, c *ssh.Clien
 	go func() {
 		defer wg.Done()
 		defer w.Close()
-		header := fmt.Sprintf("C%s %d %s\n", perm, len(data), filename)
+		header := fmt.Sprintf("C%s %d %s\n", perm, readerLen, filename)
 		fmt.Fprint(w, header)
-		reader := bytes.NewReader(data)
 		io.Copy(w, reader)
 		fmt.Fprint(w, "\x00")
 	}()
-	scpcmd := fmt.Sprintf("sudo /usr/local/bin/scp -t %s", remotedir)
+
+	scpcmd := fmt.Sprintf("sudo scp -t %s", remotedir)
 	if err := s.Run(scpcmd); err != nil {
-		return err
+		return errors.Wrap(err, "Error running scp command")
 	}
 	wg.Wait()
 

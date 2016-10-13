@@ -1,5 +1,5 @@
-hash: cc04948723cb5368a370318f476d7838b03333835b40a18d45b748bab4752d8b
-updated: 2016-10-11T14:59:47.491677335+01:00
+hash: 31ec58022f115c29459627712a0b0c161e888d2dd342ff4db81ecc1beea9bcf2
+updated: 2016-10-13T13:58:23.638828211+01:00
 imports:
 - name: github.com/beorn7/perks
   version: 3ac7bf7a47d159a033b107610db8a1b6575507a4
@@ -232,7 +232,7 @@ imports:
   - validate
   - version
 - name: github.com/google/go-github
-  version: 3e246d29992beb5a5d2fc253adebea86997c45b0
+  version: 93d3f730320429a6e1ecf2ac1778db832930948a
   subpackages:
   - github
 - name: github.com/google/go-querystring
@@ -278,7 +278,7 @@ imports:
 - name: github.com/magiconair/properties
   version: 0723e352fa358f9322c938cc2dadda874e9151a9
 - name: github.com/mattn/go-runewidth
-  version: a5618203d53e59dcabc4b70980ecbdb7e9523c4f
+  version: 737072b4e32b7a5018b4a7125da8d12de90e8045
 - name: github.com/matttproud/golang_protobuf_extensions
   version: fc2b8d3a73c4867e51861bbdd5ae3c1f0869dd6a
   subpackages:
@@ -333,6 +333,8 @@ imports:
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/pkg/browser
   version: 9302be274faad99162b9d48ec97b24306872ebb0
+- name: github.com/pkg/errors
+  version: 645ef00459ed84a119197bfb8d8205042c6df63d
 - name: github.com/prometheus/client_golang
   version: 3b78d7a77f51ccbc364d4bc170920153022cfd08
   subpackages:

@@ -23,9 +23,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"testing"
 
 	"github.com/google/go-github/github"
+
+	githubutils "github.com/jimmidyson/minishift/pkg/util/github"
 )
 
 type URLHandlerCorrect struct {
@@ -52,7 +55,8 @@ func TestGetVersionsCorrect(t *testing.T) {
 	server := httptest.NewServer(handler)
 
 	url, _ := url.Parse(server.URL)
-	githubClient = github.NewClient(nil)
+	os.Clearenv()
+	githubClient := githubutils.Client()
 	githubClient.BaseURL = url
 	githubClient.UploadURL = url
 
@@ -77,7 +81,8 @@ func TestGetVersionsNone(t *testing.T) {
 	server := httptest.NewServer(handler)
 
 	url, _ := url.Parse(server.URL)
-	githubClient = github.NewClient(nil)
+	os.Clearenv()
+	githubClient := githubutils.Client()
 	githubClient.BaseURL = url
 	githubClient.UploadURL = url
 
@@ -100,7 +105,8 @@ func TestGetVersionsMalformed(t *testing.T) {
 	server := httptest.NewServer(handler)
 
 	url, _ := url.Parse(server.URL)
-	githubClient = github.NewClient(nil)
+	os.Clearenv()
+	githubClient := githubutils.Client()
 	githubClient.BaseURL = url
 	githubClient.UploadURL = url
 
@@ -117,7 +123,8 @@ func TestPrintOpenShiftVersions(t *testing.T) {
 	server := httptest.NewServer(handlerNone)
 
 	url, _ := url.Parse(server.URL)
-	githubClient = github.NewClient(nil)
+	os.Clearenv()
+	githubClient := githubutils.Client()
 	githubClient.BaseURL = url
 	githubClient.UploadURL = url
 
@@ -137,13 +144,12 @@ func TestPrintOpenShiftVersions(t *testing.T) {
 	server = httptest.NewServer(handlerCorrect)
 
 	url, _ = url.Parse(server.URL)
-	githubClient = github.NewClient(nil)
 	githubClient.BaseURL = url
 	githubClient.UploadURL = url
 
 	PrintOpenShiftVersions(&outputBuffer)
 	if len(outputBuffer.String()) == 0 {
-		t.Fatalf("Expected PrintOpenShiftVersion to output text as %s versions were served from URL but output was [%s]",
+		t.Fatalf("Expected PrintOpenShiftVersion to output text as %d versions were served from URL but output was [%s]",
 			2, outputBuffer.String()) //TODO(aprindle) change the 2
 	}
 }

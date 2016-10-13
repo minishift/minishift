@@ -19,13 +19,11 @@ package openshiftversions
 import (
 	"fmt"
 	"io"
-	"net/http"
-	"os"
-
-	"golang.org/x/oauth2"
 
 	"github.com/golang/glog"
 	"github.com/google/go-github/github"
+
+	githubutil "github.com/jimmidyson/minishift/pkg/util/github"
 )
 
 const githubOwner = "openshift"
@@ -48,23 +46,8 @@ func PrintOpenShiftVersions(output io.Writer) {
 	}
 }
 
-var (
-	githubClient *github.Client = nil
-)
-
 func getVersions() ([]*github.RepositoryRelease, error) {
-	if githubClient == nil {
-		token := os.Getenv("GH_TOKEN")
-		var tc *http.Client
-		if len(token) > 0 {
-			ts := oauth2.StaticTokenSource(
-				&oauth2.Token{AccessToken: token},
-			)
-			tc = oauth2.NewClient(oauth2.NoContext, ts)
-		}
-		githubClient = github.NewClient(tc)
-	}
-	client := githubClient
+	client := githubutil.Client()
 
 	releases, resp, err := client.Repositories.ListReleases(githubOwner, githubRepo, nil)
 	if err != nil {

@@ -20,7 +20,9 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"net"
 	"path/filepath"
+	"strconv"
 	"sync"
 
 	"github.com/docker/machine/libmachine/drivers"
@@ -52,7 +54,7 @@ func NewSSHClient(d drivers.Driver) (*ssh.Client, error) {
 		return nil, err
 	}
 
-	client, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", h.IP, h.Port), &config)
+	client, err := ssh.Dial("tcp", net.JoinHostPort(h.IP, strconv.Itoa(h.Port)), &config)
 	if err != nil {
 		return nil, err
 	}

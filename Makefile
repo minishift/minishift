@@ -12,18 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Use the native vendor/ dependency system
-export GO15VENDOREXPERIMENT=1
-
 VERSION ?= $(shell cat VERSION)
 OPENSHIFT_VERSION ?= $(shell cat OPENSHIFT_VERSION)
 
 GOOS ?= $(shell go env GOOS)
+$(shell go env GOOS | echo)
 GOARCH ?= $(shell go env GOARCH)
 BUILD_DIR ?= ./out
 ORG := github.com/jimmidyson
 REPOPATH ?= $(ORG)/minishift
 BUILD_IMAGE ?= gcr.io/google_containers/kube-cross:v1.6.2-1
+ifeq ($(GOOS),windows)
+	IS_EXE := .exe
+endif
 
 ORIGINAL_GOPATH := $(GOPATH)
 ifeq ($(IN_DOCKER),1)
@@ -43,13 +44,13 @@ MINIKUBE_LDFLAGS := -X github.com/jimmidyson/minishift/pkg/version.version=$(VER
 MINIKUBEFILES := go list  -f '{{join .Deps "\n"}}' ./cmd/minikube/ | grep $(REPOPATH) | xargs go list -f '{{ range $$file := .GoFiles }} {{$$.Dir}}/{{$$file}}{{"\n"}}{{end}}'
 
 .PHONY: install
-install: $(ORIGINAL_GOPATH)/bin/minishift
+install: $(ORIGINAL_GOPATH)/bin/minishift$(IS_EXE)
 
-$(ORIGINAL_GOPATH)/bin/minishift: out/minishift-$(GOOS)-$(GOARCH)
-	cp $(BUILD_DIR)/minishift-$(GOOS)-$(GOARCH) $(ORIGINAL_GOPATH)/bin/minishift
+$(ORIGINAL_GOPATH)/bin/minishift$(IS_EXE): out/minishift-$(GOOS)-$(GOARCH)$(IS_EXE)
+	cp $(BUILD_DIR)/minishift-$(GOOS)-$(GOARCH)$(IS_EXE) $(ORIGINAL_GOPATH)/bin/minishift$(IS_EXE)
 
-out/minishift: out/minishift-$(GOOS)-$(GOARCH)
-	cp $(BUILD_DIR)/minishift-$(GOOS)-$(GOARCH) $(BUILD_DIR)/minishift
+out/minishift$(IS_EXE): out/minishift-$(GOOS)-$(GOARCH)$(IS_EXE)
+	cp $(BUILD_DIR)/minishift-$(GOOS)-$(GOARCH)$(IS_EXE) $(BUILD_DIR)/minishift$(IS_EXE)
 
 out/openshift: $(GOPATH)/src/$(ORG) hack/get_openshift.go OPENSHIFT_VERSION
 	mkdir out 2>/dev/null || true

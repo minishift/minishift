@@ -14,37 +14,40 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cmd
+package config
 
 import (
 	"fmt"
 	"os"
 
-	"github.com/docker/machine/libmachine"
-	"github.com/golang/glog"
 	"github.com/spf13/cobra"
-
-	"github.com/jimmidyson/minishift/pkg/minikube/cluster"
-	"github.com/jimmidyson/minishift/pkg/minikube/constants"
 )
 
-// statusCmd represents the status command
-var statusCmd = &cobra.Command{
-	Use:   "status",
-	Short: "Gets the status of a local OpenShift cluster.",
-	Long:  `Gets the status of a local OpenShift cluster.`,
+var configUnsetCmd = &cobra.Command{
+	Use:   "unset PROPERTY_NAME",
+	Short: "unsets an individual value in a minishift config file",
+	Long:  "unsets PROPERTY_NAME from the minishift config file.  Can be overwritten by flags or environmental variables",
 	Run: func(cmd *cobra.Command, args []string) {
-		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
-		defer api.Close()
-		s, err := cluster.GetHostStatus(api)
-		if err != nil {
-			glog.Errorln("Error getting machine status:", err)
+		if len(args) != 1 {
+			fmt.Fprintf(os.Stdout, "usage: minishift config unset PROPERTY_NAME")
 			os.Exit(1)
 		}
-		fmt.Fprintln(os.Stdout, s)
+		err := unset(args[0])
+		if err != nil {
+			fmt.Fprintln(os.Stdout, err)
+		}
 	},
 }
 
 func init() {
-	RootCmd.AddCommand(statusCmd)
+	ConfigCmd.AddCommand(configUnsetCmd)
+}
+
+func unset(name string) error {
+	m, err := ReadConfig()
+	if err != nil {
+		return err
+	}
+	delete(m, name)
+	return WriteConfig(m)
 }

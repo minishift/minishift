@@ -37,9 +37,8 @@ endif
 PYTHON := $(shell command -v python || echo "docker run --rm -it -v $(shell pwd):/minishift -w /minishift python python")
 BUILD_OS := $(shell uname -s)
 
-# Set the version information for the Kubernetes servers
-K8S_VERSION_LDFLAGS := $(shell $(PYTHON) hack/get_k8s_version.py 2>&1)
-MINIKUBE_LDFLAGS := -X github.com/jimmidyson/minishift/pkg/version.version=$(VERSION) -s -w -extldflags '-static'
+MINIKUBE_LDFLAGS := -X github.com/jimmidyson/minishift/pkg/version.version=$(VERSION) \
+	-X github.com/jimmidyson/minishift/pkg/version.openshiftVersion=$(OPENSHIFT_VERSION) -s -w -extldflags '-static'
 
 MINIKUBEFILES := go list  -f '{{join .Deps "\n"}}' ./cmd/minikube/ | grep $(REPOPATH) | xargs go list -f '{{ range $$file := .GoFiles }} {{$$.Dir}}/{{$$file}}{{"\n"}}{{end}}'
 

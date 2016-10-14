@@ -22,10 +22,10 @@ import (
 	"github.com/blang/semver"
 )
 
-// The current version of the minikube and openshift
-// This is a private field and should be set when compiling with --ldflags="-X github.com/jimmidyson/minishift/pkg/version.version=vX.Y.Z"
 const VersionPrefix = "v"
 
+// The current version of minishift
+// This is a private field and should be set when compiling with --ldflags="-X github.com/jimmidyson/minishift/pkg/version.version=vX.Y.Z"
 var version = "v0.0.0-unset"
 
 func GetVersion() string {
@@ -34,4 +34,16 @@ func GetVersion() string {
 
 func GetSemverVersion() (semver.Version, error) {
 	return semver.Make(strings.TrimPrefix(GetVersion(), VersionPrefix))
+}
+
+// The default version of OpenShift
+// This is a private field and should be set when compiling with --ldflags="-X github.com/jimmidyson/minishift/pkg/version.openshiftVersion=vX.Y.Z"
+var openshiftVersion = "v0.0.0-unset"
+
+func GetOpenShiftVersion() string {
+	return openshiftVersion
+}
+
+func GetOpenShiftSemverVersion() (semver.Version, error) {
+	return semver.Make(strings.TrimPrefix(GetOpenShiftVersion(), VersionPrefix))
 }

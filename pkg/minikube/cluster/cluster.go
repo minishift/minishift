@@ -30,8 +30,6 @@ import (
 	"text/template"
 	"time"
 
-	pb "gopkg.in/cheggaaa/pb.v1"
-
 	"github.com/docker/machine/drivers/virtualbox"
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/drivers"
@@ -39,13 +37,16 @@ import (
 	"github.com/docker/machine/libmachine/host"
 	"github.com/docker/machine/libmachine/state"
 	"github.com/golang/glog"
-	"github.com/jimmidyson/minishift/pkg/minikube/constants"
-	"github.com/jimmidyson/minishift/pkg/minikube/sshutil"
-	"github.com/jimmidyson/minishift/pkg/util"
-	"github.com/pkg/errors"
+	pb "gopkg.in/cheggaaa/pb.v1"
 	kubeapi "k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/client/unversioned"
 	"k8s.io/kubernetes/pkg/client/unversioned/clientcmd"
+
+	"github.com/jimmidyson/minishift/pkg/minikube/constants"
+	"github.com/jimmidyson/minishift/pkg/minikube/sshutil"
+	"github.com/jimmidyson/minishift/pkg/util"
+	"github.com/jimmidyson/minishift/pkg/version"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -222,7 +223,7 @@ func UpdateCluster(d drivers.Driver, config MachineConfig) error {
 }
 
 func openshiftURIWasSpecified(config MachineConfig) bool {
-	return len(config.OpenShiftVersion) > 0
+	return config.OpenShiftVersion != version.GetOpenShiftVersion()
 }
 
 func engineOptions(config MachineConfig) *engine.Options {

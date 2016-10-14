@@ -1,27 +1,21 @@
-## minishift config
+## minishift config view
 
-Modify minishift config
+Display values currently set in the minishift config file
 
 ### Synopsis
 
 
-config modifies minishift config files using subcommands like "minishift config set vm-driver kvm"
-Configurable fields: 
-
- * vm-driver
- * v
- * cpus
- * disk-size
- * host-only-cidr
- * memory
- * show-libmachine-logs
- * log_dir
- * openshift-version
- * WantUpdateNotification
- * ReminderWaitPeriodInHours
+Display values currently set in the minishift  config file.
 
 ```
-minishift config SUBCOMMAND [flags]
+minishift config view
+```
+
+### Options
+
+```
+      --format string   Go template format string for the config view output.  The format for Go templates can be found here: https://golang.org/pkg/text/template/
+For the list of accessible variables for the template, see the struct values here: https://godoc.org/github.com/jimmidyson/minishift/cmd/minikube/cmd/config#ConfigViewTemplate (default "- {{.ConfigKey}}: {{.ConfigValue}}\n")
 ```
 
 ### Options inherited from parent commands
@@ -39,9 +33,5 @@ minishift config SUBCOMMAND [flags]
 ```
 
 ### SEE ALSO
-* [minishift](minishift.md)	 - Minishift is a tool for managing local OpenShift clusters.
-* [minishift config get](minishift_config_get.md)	 - Gets the value of PROPERTY_NAME from the minishift config file
-* [minishift config set](minishift_config_set.md)	 - Sets an individual value in a minishift config file
-* [minishift config unset](minishift_config_unset.md)	 - unsets an individual value in a minishift config file
-* [minishift config view](minishift_config_view.md)	 - Display values currently set in the minishift config file
+* [minishift config](minishift_config.md)	 - Modify minishift config
 

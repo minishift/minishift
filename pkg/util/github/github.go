@@ -131,15 +131,18 @@ func DownloadOpenShiftRelease(version, outputPath string) error {
 		if hdr.Typeflag != tar.TypeReg || filepath.Base(hdr.Name) != "kube-apiserver" {
 			continue
 		}
-		contents, err := ioutil.ReadAll(tr)
-		if err != nil {
-			return errors.Wrap(err, "Could not extract OpenShift release asset")
-		}
-		err = os.MkdirAll(filepath.Dir(outputPath), 0755)
+		destDir := filepath.Dir(outputPath)
+		err = os.MkdirAll(destDir, 0755)
 		if err != nil && !os.IsExist(err) {
 			return errors.Wrap(err, "Could not create target directory")
 		}
-		err = ioutil.WriteFile(outputPath, contents, os.ModePerm)
+		destFileName := filepath.Base(outputPath)
+		tmp, err := ioutil.TempFile(destDir, ".tmp-"+destFileName)
+		_, err = io.Copy(tmp, tr)
+		if err != nil {
+			return errors.Wrap(err, "Could not extract OpenShift release asset")
+		}
+		err = os.Rename(tmp.Name(), outputPath)
 		if err != nil {
 			return errors.Wrap(err, "Could not write OpenShift binary")
 		}

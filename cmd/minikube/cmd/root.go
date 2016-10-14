@@ -40,7 +40,10 @@ var dirs = [...]string{
 	constants.MakeMiniPath("machines"),
 	constants.MakeMiniPath("cache"),
 	constants.MakeMiniPath("cache", "iso"),
-	constants.MakeMiniPath("config")}
+	constants.MakeMiniPath("config"),
+	constants.MakeMiniPath("cache", "openshift"),
+	constants.MakeMiniPath("logs"),
+}
 
 const (
 	showLibmachineLogs = "show-libmachine-logs"
@@ -104,6 +107,7 @@ func setFlagsUsingViper() {
 		// Viper will give precedence first to calls to the Set command,
 		// then to values from the config.yml
 		a.Value.Set(viper.GetString(a.Name))
+		a.Changed = true
 	}
 }
 
@@ -111,6 +115,10 @@ func init() {
 	RootCmd.PersistentFlags().Bool(showLibmachineLogs, false, "Whether or not to show logs from libmachine.")
 	RootCmd.AddCommand(configCmd.ConfigCmd)
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
+	logDir := pflag.Lookup("log_dir")
+	if !logDir.Changed {
+		logDir.Value.Set(constants.MakeMiniPath("logs"))
+	}
 	viper.BindPFlags(RootCmd.PersistentFlags())
 	cobra.OnInitialize(initConfig)
 }

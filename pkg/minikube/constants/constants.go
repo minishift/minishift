@@ -66,6 +66,8 @@ const (
 var DefaultIsoUrl = "https://github.com/jimmidyson/minishift/releases/download/v" + version.GetVersion() + "/boot2docker.iso"
 
 const (
+	DefaultConfigViewFormat = "- {{.ConfigKey}}: {{.ConfigValue}}\n"
+
 	RemoteOpenShiftErrPath = "/var/lib/minishift/openshift.err"
 	RemoteOpenShiftOutPath = "/var/lib/minishift/openshift.out"
 	RemoteOpenShiftCAPath  = "/var/lib/minishift/openshift.local.config/master/ca.crt"

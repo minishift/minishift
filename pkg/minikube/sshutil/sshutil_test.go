@@ -111,7 +111,7 @@ func TestTransfer(t *testing.T) {
 
 	dest := "bar"
 	contents := []byte("testcontents")
-	if err := Transfer(bytes.NewReader(contents), len(contents), "/tmp", dest, "0777", c); err != nil {
+	if err := Transfer(bytes.NewReader(contents), int64(len(contents)), "/tmp", dest, "0777", c); err != nil {
 		t.Fatalf("Unexpected error: %s", err)
 	}
 }

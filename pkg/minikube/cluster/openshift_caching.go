@@ -18,18 +18,24 @@ package cluster
 
 import (
 	"bytes"
-	"io/ioutil"
+	"fmt"
+	"io"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
+	"github.com/blang/semver"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/ssh"
+	pb "gopkg.in/cheggaaa/pb.v1"
 
 	"github.com/jimmidyson/minishift/pkg/minikube/constants"
 	"github.com/jimmidyson/minishift/pkg/minikube/sshutil"
 	"github.com/jimmidyson/minishift/pkg/util/github"
+	"github.com/jimmidyson/minishift/pkg/version"
 )
 
 func updateOpenShiftFromAsset(client *ssh.Client) error {
@@ -37,7 +43,7 @@ func updateOpenShiftFromAsset(client *ssh.Client) error {
 	if err != nil {
 		return errors.Wrap(err, "Error loading asset out/openshift")
 	}
-	if err := sshutil.Transfer(bytes.NewReader(contents), len(contents), "/usr/local/bin",
+	if err := sshutil.Transfer(bytes.NewReader(contents), int64(len(contents)), "/usr/local/bin",
 		"openshift", "0777", client); err != nil {
 		return errors.Wrap(err, "Error transferring openshift via ssh")
 	}
@@ -67,13 +73,46 @@ func (l *openshiftCacher) updateOpenShiftFromURI(client *ssh.Client) error {
 		return errors.Wrap(err, "Error parsing --openshift-version url")
 	}
 	if urlObj.Scheme == fileScheme {
-		return l.updateOpenShiftFromFile(client)
+		f, err := os.Open(strings.Replace(urlObj.Path, "/", string(filepath.Separator), -1))
+		if err != nil {
+			return errors.Wrapf(err, "Error opening specified OpenShift file %s", l.config.OpenShiftVersion)
+		}
+		defer f.Close()
+		stat, err := f.Stat()
+		if err != nil {
+			return errors.Wrapf(err, "Error opening specified OpenShift file %s", urlObj.Path)
+		}
+		return l.updateOpenShiftFromReader(f, stat.Size(), client)
 	} else {
-		return l.updateOpenShiftFromURL(client)
+		if _, err := semver.Make(strings.TrimPrefix(l.config.OpenShiftVersion, version.VersionPrefix)); err != nil {
+			resp, err := http.Get(l.config.OpenShiftVersion)
+			if err != nil {
+				return errors.Wrapf(err, "Error downloading OpenShift from %s", l.config.OpenShiftVersion)
+			}
+			defer resp.Body.Close()
+			if resp.StatusCode != http.StatusOK {
+				return errors.Errorf("Error downloading OpenShift from %s: received status code %d", l.config.OpenShiftVersion, resp.StatusCode)
+			}
+			openshiftFile := resp.Body
+
+			if resp.ContentLength > 0 {
+				bar := pb.New64(resp.ContentLength).SetUnits(pb.U_BYTES)
+				bar.Start()
+				openshiftFile = bar.NewProxyReader(openshiftFile)
+				defer func() {
+					<-time.After(bar.RefreshRate)
+					fmt.Println()
+				}()
+			}
+
+			return l.updateOpenShiftFromReader(openshiftFile, resp.ContentLength, client)
+		} else {
+			return l.updateOpenShiftFromRelease(client)
+		}
 	}
 }
 
-func (l *openshiftCacher) updateOpenShiftFromURL(client *ssh.Client) error {
+func (l *openshiftCacher) updateOpenShiftFromRelease(client *ssh.Client) error {
 	if !l.isOpenShiftCached() {
 		if err := github.DownloadOpenShiftRelease(l.config.OpenShiftVersion, l.getOpenShiftCacheFilepath()); err != nil {
 			return errors.Wrap(err, "Error attempting to download and cache openshift")
@@ -86,28 +125,27 @@ func (l *openshiftCacher) updateOpenShiftFromURL(client *ssh.Client) error {
 }
 
 func (l *openshiftCacher) transferCachedOpenShiftToVM(client *ssh.Client) error {
-	contents, err := ioutil.ReadFile(l.getOpenShiftCacheFilepath())
+	f, err := os.Open(l.getOpenShiftCacheFilepath())
+	if err != nil {
+		return errors.Wrap(err, "Error reading file: openshift cache filepath")
+	}
+	defer f.Close()
+	stat, err := f.Stat()
 	if err != nil {
 		return errors.Wrap(err, "Error reading file: openshift cache filepath")
 	}
 
-	if err = sshutil.Transfer(bytes.NewReader(contents), len(contents), "/usr/local/bin",
+	if err = sshutil.Transfer(f, stat.Size(), "/usr/local/bin",
 		"openshift", "0777", client); err != nil {
 		return errors.Wrap(err, "Error transferring cached openshift to VM via ssh")
 	}
 	return nil
 }
 
-func (l *openshiftCacher) updateOpenShiftFromFile(client *ssh.Client) error {
-	path := strings.TrimPrefix(l.config.OpenShiftVersion, "file://")
-	path = filepath.FromSlash(path)
-	contents, err := ioutil.ReadFile(path)
-	if err != nil {
-		return errors.Wrapf(err, "Error reading openshift file at %s", path)
-	}
-	if err := sshutil.Transfer(bytes.NewReader(contents), len(contents), "/usr/local/bin",
+func (l *openshiftCacher) updateOpenShiftFromReader(r io.Reader, size int64, client *ssh.Client) error {
+	if err := sshutil.Transfer(r, size, "/usr/local/bin",
 		"openshift", "0777", client); err != nil {
-		return errors.Wrapf(err, "Error transferring specified openshift file at %s to VM via ssh", path)
+		return errors.Wrap(err, "Error transferring file to VM via ssh")
 	}
 	return nil
 }

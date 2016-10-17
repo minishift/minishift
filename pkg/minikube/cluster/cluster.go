@@ -223,7 +223,7 @@ func UpdateCluster(d drivers.Driver, config MachineConfig) error {
 }
 
 func openshiftURIWasSpecified(config MachineConfig) bool {
-	return config.OpenShiftVersion != version.GetOpenShiftVersion()
+	return len(config.OpenShiftVersion) != 0 && config.OpenShiftVersion != version.GetOpenShiftVersion()
 }
 
 func engineOptions(config MachineConfig) *engine.Options {

@@ -18,8 +18,8 @@ package config
 
 import (
 	"fmt"
-	"html/template"
 	"os"
+	"text/template"
 
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"

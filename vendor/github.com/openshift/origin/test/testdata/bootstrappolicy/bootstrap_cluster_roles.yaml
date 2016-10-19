@@ -294,6 +294,7 @@ items:
     attributeRestrictions: null
     resources:
     - nodes/metrics
+    - nodes/spec
     verbs:
     - get
   - apiGroups:
@@ -1653,6 +1654,13 @@ items:
     - '*'
     verbs:
     - '*'
+  - apiGroups: null
+    attributeRestrictions: null
+    nonResourceURLs:
+    - '*'
+    resources: []
+    verbs:
+    - '*'
 - apiVersion: v1
   kind: ClusterRole
   metadata:
@@ -1794,6 +1802,7 @@ items:
     - nodes/log
     - nodes/metrics
     - nodes/proxy
+    - nodes/spec
     - nodes/stats
     verbs:
     - '*'
@@ -1817,6 +1826,7 @@ items:
     attributeRestrictions: null
     resources:
     - nodes/metrics
+    - nodes/spec
     verbs:
     - get
   - apiGroups:

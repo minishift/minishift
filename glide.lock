@@ -1,5 +1,5 @@
-hash: 31ec58022f115c29459627712a0b0c161e888d2dd342ff4db81ecc1beea9bcf2
-updated: 2016-10-13T13:58:23.638828211+01:00
+hash: e4162855452f4bdc669881ce16a67ced5d1276d60a142e730632d7b1716e6504
+updated: 2016-10-19T10:03:45.387799048+01:00
 imports:
 - name: github.com/beorn7/perks
   version: 3ac7bf7a47d159a033b107610db8a1b6575507a4
@@ -122,7 +122,9 @@ imports:
   - libmachine/version
   - version
 - name: github.com/emicklei/go-restful
-  version: 673225fcad91a5833672dcbc596b61735fbc4914
+  version: 152183b11abcd2b07ee814c8da82296340949747
+  repo: https://github.com/openshift/go-restful.git
+  vcs: git
   subpackages:
   - log
   - swagger
@@ -232,7 +234,7 @@ imports:
   - validate
   - version
 - name: github.com/google/go-github
-  version: 93d3f730320429a6e1ecf2ac1778db832930948a
+  version: 1bc362c7737e51014af7299e016444b654095ad9
   subpackages:
   - github
 - name: github.com/google/go-querystring
@@ -306,7 +308,7 @@ imports:
   - libcontainer/user
   - libcontainer/utils
 - name: github.com/openshift/origin
-  version: d45151824821195c9d3db7e5d2da0a1c982a614c
+  version: 274842360258d4f6ea1d3ec19559ecd395fd4d4f
   subpackages:
   - pkg/api/latest
   - pkg/auth/api
@@ -364,13 +366,13 @@ imports:
 - name: github.com/spf13/cast
   version: 2580bc98dc0e62908119e4737030cc2fdfc45e4c
 - name: github.com/spf13/cobra
-  version: ec2fe7859914a5106dcab4e7901633d959bfc2f4
+  version: 856b96dcb49d6427babe192998a35190a12c2230
   subpackages:
   - doc
 - name: github.com/spf13/jwalterweatherman
   version: 33c24e77fb80341fe7130ee7c594256ff08ccc46
 - name: github.com/spf13/pflag
-  version: bf8481a6aebc13a8aab52e699ffe2e79771f5a3f
+  version: dabebe21bf790f782ea4c7bbd2efc430de182afd
 - name: github.com/spf13/viper
   version: c975dc1b4eacf4ec7fdbf0873638de5d090ba323
   repo: https://github.com/jimmidyson/viper.git

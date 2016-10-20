@@ -88,7 +88,7 @@ automatically update from %s%s to %s%s now? [y/N] `,
 		var confirm string
 		fmt.Scanln(&confirm)
 
-		if confirm == "y" {
+		if strings.ToLower(confirm) == "y" {
 			fmt.Printf("Updating to version %s\n", latestVersion)
 			updateBinary(latestVersion, downloadBinary, updateLinkPrefix, downloadLinkFormat)
 			return

@@ -34,3 +34,4 @@ _testmain.go
 
 *.iso
 /.idea
+*.iml

@@ -1,5 +1,5 @@
-hash: e4162855452f4bdc669881ce16a67ced5d1276d60a142e730632d7b1716e6504
-updated: 2016-10-19T10:03:45.387799048+01:00
+hash: f0f9906056562c5ccea818ad27d50572a73d18ff3ef61c4b389ff12672925272
+updated: 2016-11-29T11:18:33.6400418+01:00
 imports:
 - name: github.com/beorn7/perks
   version: 3ac7bf7a47d159a033b107610db8a1b6575507a4
@@ -248,7 +248,7 @@ imports:
 - name: github.com/gorilla/mux
   version: 8096f47503459bcc74d1f4c487b7e6e42e5746b5
 - name: github.com/hashicorp/hcl
-  version: 6f5bfed9a0a22222fbe4e731ae3481730ba41e93
+  version: d8c773c4cba11b11539e3d45f93daeaa5dcf1fa1
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -366,13 +366,13 @@ imports:
 - name: github.com/spf13/cast
   version: 2580bc98dc0e62908119e4737030cc2fdfc45e4c
 - name: github.com/spf13/cobra
-  version: 856b96dcb49d6427babe192998a35190a12c2230
+  version: f62e98d28ab7ad31d707ba837a966378465c7b57
   subpackages:
   - doc
 - name: github.com/spf13/jwalterweatherman
   version: 33c24e77fb80341fe7130ee7c594256ff08ccc46
 - name: github.com/spf13/pflag
-  version: dabebe21bf790f782ea4c7bbd2efc430de182afd
+  version: 1560c1005499d61b80f865c04d39ca7505bf7f0b
 - name: github.com/spf13/viper
   version: c975dc1b4eacf4ec7fdbf0873638de5d090ba323
   repo: https://github.com/jimmidyson/viper.git

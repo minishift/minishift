@@ -1,7 +1,5 @@
 package: github.com/minishift/minishift
 import:
-- package: github.com/blang/semver
-- package: github.com/docker/go-units
 - package: github.com/docker/machine
   version: 91e368eb7422665278b1d5665139ee0f9980b588
   subpackages:
@@ -25,25 +23,13 @@ import:
   - libmachine/ssh
   - libmachine/state
   - libmachine/swarm
-- package: github.com/golang/glog
-  version: 335da9dda11408a34b64344f82e9c03779b71673
-  repo: https://github.com/openshift/glog.git
-  vcs: git
 - package: github.com/google/go-github
   subpackages:
   - github
 - package: github.com/inconshreveable/go-update
 - package: github.com/kardianos/osext
 - package: github.com/olekukonko/tablewriter
-- package: github.com/openshift/origin
-  version: 1.3.1
-  subpackages:
-  - pkg/cmd/cli/config
 - package: github.com/pkg/browser
-- package: github.com/spf13/cobra
-  subpackages:
-  - doc
-- package: github.com/spf13/pflag
 - package: github.com/spf13/viper
   repo: https://github.com/jimmidyson/viper.git
   vcs: git
@@ -51,8 +37,12 @@ import:
 - package: golang.org/x/crypto
   subpackages:
   - ssh
-- package: golang.org/x/oauth2
 - package: gopkg.in/cheggaaa/pb.v1
+- package: github.com/pkg/errors
+  version: ^0.8.0
+# The following repositories need to be specified explicitly, since the versions referenced by the openshift/origin dependency
+# refer to forks of these projects within the openshift organizaton
+# This needs to be manually updated after upgrading the openshift/origin dependnecy
 - package: k8s.io/kubernetes
   version: 52492b4bff99ef3b8ca617d385a3ff0612f9402d
   repo: https://github.com/openshift/kubernetes.git
@@ -76,5 +66,7 @@ import:
   vcs: git
 - package: github.com/docker/docker
   version: 0f5c9d301b9b1cca66b3ea0f9dec3b5317d3686d
-- package: github.com/pkg/errors
-  version: ^0.8.0
+- package: github.com/golang/glog
+  version: 335da9dda11408a34b64344f82e9c03779b71673
+  repo: https://github.com/openshift/glog.git
+  vcs: git

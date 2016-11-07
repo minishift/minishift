@@ -32,6 +32,7 @@ import (
 	"golang.org/x/crypto/ssh"
 	pb "gopkg.in/cheggaaa/pb.v1"
 
+	"github.com/google/cadvisor/pages/static"
 	"github.com/jimmidyson/minishift/pkg/minikube/constants"
 	"github.com/jimmidyson/minishift/pkg/minikube/sshutil"
 	"github.com/jimmidyson/minishift/pkg/util/github"
@@ -39,7 +40,7 @@ import (
 )
 
 func updateOpenShiftFromAsset(client *ssh.Client) error {
-	contents, err := Asset("out/openshift")
+	contents, err := static.Asset("out/openshift")
 	if err != nil {
 		return errors.Wrap(err, "Error loading asset out/openshift")
 	}

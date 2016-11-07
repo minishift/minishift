@@ -19,26 +19,27 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strconv"
-	"strings"
+	"path/filepath"
 
 	units "github.com/docker/go-units"
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/host"
 	"github.com/golang/glog"
-	ocfg "github.com/openshift/origin/pkg/cmd/cli/config"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"k8s.io/kubernetes/pkg/api"
-	cfg "k8s.io/kubernetes/pkg/client/unversioned/clientcmd/api"
-
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
-	"github.com/minishift/minishift/pkg/minikube/kubeconfig"
+	"github.com/minishift/minishift/pkg/minishift/cache"
 	"github.com/minishift/minishift/pkg/util"
+	"github.com/minishift/minishift/pkg/version"
+	dockerhost "github.com/openshift/origin/pkg/bootstrap/docker/host"
+	"github.com/spf13/cobra"
+	flag "github.com/spf13/pflag"
+	"github.com/spf13/viper"
 )
 
 const (
+	commandName = "start"
+
+	// minishift
 	isoURL                = "iso-url"
 	memory                = "memory"
 	cpus                  = "cpus"
@@ -46,29 +47,66 @@ const (
 	vmDriver              = "vm-driver"
 	openshiftVersion      = "openshift-version"
 	hostOnlyCIDR          = "host-only-cidr"
-	deployRegistry        = "deploy-registry"
-	deployRouter          = "deploy-router"
+
+	// cluster up
+	skipRegistryCheck = "skip-registry-check"
+	publicHostname    = "public-hostname"
+	routingSuffix     = "routing-suffix"
+	useExistingConfig = "use-existing-config"
+	hostConfigDir     = "host-config-dir"
+	hostVolumesDir    = "host-volumes-dir"
+	hostDataDir       = "host-data-dir"
+	forwardPorts      = "forward-ports"
+	serverLogLevel    = "server-loglevel"
+	openshiftEnv      = "openshift-env"
+	metrics           = "metrics"
 )
 
 var (
 	dockerEnv        []string
 	insecureRegistry []string
 	registryMirror   []string
+	openShiftEnv     []string
 )
 
 // startCmd represents the start command
 var startCmd = &cobra.Command{
-	Use:   "start",
+	Use:   commandName,
 	Short: "Starts a local OpenShift cluster.",
 	Long: `Starts a local OpenShift cluster using Virtualbox. This command
 assumes you already have Virtualbox installed.`,
 	Run: runStart,
 }
 
+// startFlagSet contains the minishift specific command line switches
+var startFlagSet = flag.NewFlagSet(commandName, flag.ContinueOnError)
+
+// clusterUpFlagSet contains the command line switches which needs to be passed on to 'cluster up'
+var clusterUpFlagSet = flag.NewFlagSet(commandName, flag.ContinueOnError)
+
+// minishiftToClusterUp is a mapping between falg names used in minishift CLI and flag name as passed to 'cluster up'
+var minishiftToClusterUp = map[string]string{
+	"openshift-env": "env",
+}
+
+// runner executes commands on the host
+var runner util.Runner = &util.RealRunner{}
+
+func SetRunner(newRunner util.Runner) {
+	runner = newRunner
+}
+
+// TODO Figure out what I cannot use constants.Minipath in the test - http://stackoverflow.com/questions/37284423/glog-flag-redefined-error
+func SetMinishiftDir(newDir string) {
+	constants.Minipath = newDir
+}
+
+// runStart is executed as part of the start command
 func runStart(cmd *cobra.Command, args []string) {
 	fmt.Println("Starting local OpenShift cluster...")
-	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
-	defer api.Close()
+
+	libMachineClient := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+	defer libMachineClient.Close()
 
 	config := cluster.MachineConfig{
 		MinikubeISO:      viper.GetString(isoURL),
@@ -80,14 +118,12 @@ func runStart(cmd *cobra.Command, args []string) {
 		InsecureRegistry: insecureRegistry,
 		RegistryMirror:   registryMirror,
 		HostOnlyCIDR:     viper.GetString(hostOnlyCIDR),
-		DeployRouter:     viper.GetBool(deployRouter),
-		DeployRegistry:   viper.GetBool(deployRegistry),
 		OpenShiftVersion: viper.GetString(openshiftVersion),
 	}
 
 	var host *host.Host
 	start := func() (err error) {
-		host, err = cluster.StartHost(api, config)
+		host, err = cluster.StartHost(libMachineClient, config)
 		if err != nil {
 			glog.Errorf("Error starting host: %s. Retrying.\n", err)
 		}
@@ -99,41 +135,16 @@ func runStart(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	if err := cluster.UpdateCluster(host.Driver, config); err != nil {
-		glog.Errorln("Error updating cluster: ", err)
-		os.Exit(1)
+	// Making sure the required Docker environment variables are set to make 'cluster up' work
+	envMap, err := cluster.GetHostDockerEnv(libMachineClient)
+	for k, v := range envMap {
+		os.Setenv(k, v)
 	}
 
-	kubeIP, err := host.Driver.GetIP()
-	if err != nil {
-		glog.Errorln("Error connecting to cluster: ", err)
-		os.Exit(1)
-	}
-	if err := cluster.StartCluster(host, kubeIP, config); err != nil {
-		glog.Errorln("Error starting cluster: ", err)
-		os.Exit(1)
-	}
-
-	kubeHost, err := host.Driver.GetURL()
-	if err != nil {
-		glog.Errorln("Error connecting to cluster: ", err)
-		os.Exit(1)
-	}
-	kubeHost = strings.Replace(kubeHost, "tcp://", "https://", -1)
-	kubeHost = strings.Replace(kubeHost, ":2376", ":"+strconv.Itoa(constants.APIServerPort), -1)
-
-	// setup kubeconfig
-	certAuth, err := cluster.GetCA(host)
-	if err != nil {
-		glog.Errorln("Error setting up kubeconfig: ", err)
-		os.Exit(1)
-	}
-	if err := setupKubeconfig(kubeHost, certAuth); err != nil {
-		glog.Errorln("Error setting up kubeconfig: ", err)
-		os.Exit(1)
-	}
+	clusterUp(&config)
 }
 
+// calculateDiskSizeInMB converts a human specified disk size like "1000MB" or "1GB" and converts it into Megabits
 func calculateDiskSizeInMB(humanReadableDiskSize string) int {
 	diskSize, err := units.FromHumanSize(humanReadableDiskSize)
 	if err != nil {
@@ -142,84 +153,79 @@ func calculateDiskSizeInMB(humanReadableDiskSize string) int {
 	return int(diskSize / units.MB)
 }
 
-// setupKubeconfig reads config from disk, adds the minikube settings, and writes it back.
-// activeContext is true when minikube is the CurrentContext
-// If no CurrentContext is set, the given name will be used.
-func setupKubeconfig(server, certAuth string) error {
-	configFile := constants.KubeconfigPath
-
-	// read existing config or create new if does not exist
-	config, err := kubeconfig.ReadConfigOrNew(configFile)
-	if err != nil {
-		return err
-	}
-
-	currentContextName := config.CurrentContext
-	currentContext := config.Contexts[currentContextName]
-
-	clusterName, err := ocfg.GetClusterNicknameFromURL(server)
-	if err != nil {
-		return err
-	}
-	cluster := cfg.NewCluster()
-	cluster.Server = server
-	cluster.CertificateAuthorityData = []byte(certAuth)
-	config.Clusters[clusterName] = cluster
-
-	// user
-	userName := "admin/" + clusterName
-	user := cfg.NewAuthInfo()
-	if currentContext != nil && currentContext.AuthInfo == userName {
-		currentUser := config.AuthInfos[userName]
-		if currentUser != nil {
-			user.Token = config.AuthInfos[userName].Token
-		}
-	}
-	config.AuthInfos[userName] = user
-
-	// context
-	context := cfg.NewContext()
-	context.Cluster = clusterName
-	context.AuthInfo = userName
-	context.Namespace = api.NamespaceDefault
-	contextName := ocfg.GetContextNickname(api.NamespaceDefault, clusterName, userName)
-	if currentContext != nil && currentContext.Cluster == clusterName && currentContext.AuthInfo == userName {
-		contextName = currentContextName
-		context.Namespace = currentContext.Namespace
-	}
-	config.Contexts[contextName] = context
-
-	config.CurrentContext = contextName
-
-	// write back to disk
-	if err := kubeconfig.WriteConfig(config, configFile); err != nil {
-		return err
-	}
-
-	fmt.Println("oc is now configured to use the cluster.")
-	if len(user.Token) == 0 {
-		fmt.Println("Run this command to use the cluster: ")
-		fmt.Println("oc login --username=admin --password=admin")
-	}
-
-	return nil
-}
-
+// init configures the command line options of this command
 func init() {
-	startCmd.Flags().String(isoURL, constants.DefaultIsoUrl, "Location of the minishift iso")
-	startCmd.Flags().String(vmDriver, constants.DefaultVMDriver, fmt.Sprintf("VM driver is one of: %v", constants.SupportedVMDrivers))
-	startCmd.Flags().Int(memory, constants.DefaultMemory, "Amount of RAM allocated to the minishift VM")
-	startCmd.Flags().Int(cpus, constants.DefaultCPUS, "Number of CPUs allocated to the minishift VM")
-	startCmd.Flags().String(humanReadableDiskSize, constants.DefaultDiskSize, "Disk size allocated to the minishift VM (format: <number>[<unit>], where unit = b, k, m or g)")
-	startCmd.Flags().String(hostOnlyCIDR, "192.168.99.1/24", "The CIDR to be used for the minishift VM (only supported with Virtualbox driver)")
-	startCmd.Flags().StringSliceVar(&dockerEnv, "docker-env", nil, "Environment variables to pass to the Docker daemon. (format: key=value)")
-	startCmd.Flags().StringSliceVar(&insecureRegistry, "insecure-registry", []string{"172.30.0.0/16"}, "Insecure Docker registries to pass to the Docker daemon")
-	startCmd.Flags().StringSliceVar(&registryMirror, "registry-mirror", nil, "Registry mirrors to pass to the Docker daemon")
-	startCmd.Flags().Bool(deployRegistry, true, "Should the OpenShift internal Docker registry be deployed?")
-	startCmd.Flags().Bool(deployRouter, false, "Should the OpenShift router be deployed?")
-	startCmd.Flags().String(openshiftVersion, "", "The OpenShift version that the minishift VM will run (ex: v1.2.3) OR a URI which contains an openshift binary (ex: file:///home/developer/go/src/github.com/openshift/origin/_output/local/bin/linux/amd64/openshift)")
+	initStartFlags()
+	initClusterUpFlags()
+
+	startCmd.Flags().AddFlagSet(startFlagSet)
+	startCmd.Flags().AddFlagSet(clusterUpFlagSet)
 
 	viper.BindPFlags(startCmd.Flags())
-
 	RootCmd.AddCommand(startCmd)
+}
+
+// initClusterUpFlags creates the CLI flags which needs to be passed on to 'oc cluster up'
+func initStartFlags() {
+	startFlagSet.String(isoURL, constants.DefaultIsoUrl, "Location of the minishift iso")
+	startFlagSet.String(vmDriver, constants.DefaultVMDriver, fmt.Sprintf("VM driver is one of: %v", constants.SupportedVMDrivers))
+	startFlagSet.Int(memory, constants.DefaultMemory, "Amount of RAM allocated to the minishift VM")
+	startFlagSet.Int(cpus, constants.DefaultCPUS, "Number of CPUs allocated to the minishift VM")
+	startFlagSet.String(humanReadableDiskSize, constants.DefaultDiskSize, "Disk size allocated to the minishift VM (format: <number>[<unit>], where unit = b, k, m or g)")
+	startFlagSet.String(hostOnlyCIDR, "192.168.99.1/24", "The CIDR to be used for the minishift VM (only supported with Virtualbox driver)")
+	startFlagSet.StringSliceVar(&dockerEnv, "docker-env", nil, "Environment variables to pass to the Docker daemon. (format: key=value)")
+	startFlagSet.StringSliceVar(&insecureRegistry, "insecure-registry", []string{"172.30.0.0/16"}, "Insecure Docker registries to pass to the Docker daemon")
+	startFlagSet.StringSliceVar(&registryMirror, "registry-mirror", nil, "Registry mirrors to pass to the Docker daemon")
+	startFlagSet.String(openshiftVersion, version.GetOpenShiftVersion(), "The OpenShift version that the minishift VM will run (ex: v1.2.3)")
+}
+
+// initClusterUpFlags creates the CLI flags which needs to be passed on to 'oc cluster up'
+func initClusterUpFlags() {
+	//clusterUpFlagSet.StringVar(&clusterUpConfig.Image, "image", "openshift/origin", "Specify the images to use for OpenShift")
+	clusterUpFlagSet.Bool(skipRegistryCheck, false, "Skip Docker daemon registry check")
+	clusterUpFlagSet.String(publicHostname, "", "Public hostname for OpenShift cluster")
+	clusterUpFlagSet.String(routingSuffix, "", "Default suffix for server routes")
+	clusterUpFlagSet.Bool(useExistingConfig, false, "Use existing configuration if present")
+	clusterUpFlagSet.String(hostConfigDir, dockerhost.DefaultConfigDir, "Directory on Docker host for OpenShift configuration")
+	clusterUpFlagSet.String(hostVolumesDir, dockerhost.DefaultVolumesDir, "Directory on Docker host for OpenShift volumes")
+	clusterUpFlagSet.String(hostDataDir, "", "Directory on Docker host for OpenShift data. If not specified, etcd data will not be persisted on the host.")
+	clusterUpFlagSet.Bool(forwardPorts, false, "Use Docker port-forwarding to communicate with origin container. Requires 'socat' locally.")
+	clusterUpFlagSet.Int(serverLogLevel, 0, "Log level for OpenShift server")
+	clusterUpFlagSet.StringSliceVarP(&openShiftEnv, openshiftEnv, "e", []string{}, "Specify key value pairs of environment variables to set on OpenShift container")
+	clusterUpFlagSet.Bool(metrics, false, "Install metrics (experimental)")
+}
+
+// clusterUp downloads and installs the oc binary in order to run 'cluster up'
+func clusterUp(config *cluster.MachineConfig) {
+	oc := cache.Oc{
+		OpenShiftVersion:  config.OpenShiftVersion,
+		MinishiftCacheDir: filepath.Join(constants.Minipath, "cache"),
+	}
+	err := oc.EnsureIsCached()
+	if err != nil {
+		glog.Errorln("Error starting 'cluster up': ", err)
+		os.Exit(1)
+	}
+
+	cmdName := filepath.Join(oc.GetCacheFilepath(), cache.OC_BINARY_NAME)
+	cmdArgs := []string{"cluster", "up"}
+	clusterUpFlagSet.VisitAll(func(flag *flag.Flag) {
+		if viper.IsSet(flag.Name) {
+			value := viper.GetString(flag.Name)
+			key := flag.Name
+			_, exists := minishiftToClusterUp[key]
+			if exists {
+				key = minishiftToClusterUp[key]
+			}
+			cmdArgs = append(cmdArgs, "--"+key)
+			cmdArgs = append(cmdArgs, value)
+		}
+	})
+
+	err = runner.Run(cmdName, cmdArgs...)
+	if err != nil {
+		// TODO glog is probably not right here. Need some sort of logging wrapper
+		glog.Errorln("Error starting 'cluster up': ", err)
+		os.Exit(1)
+	}
 }

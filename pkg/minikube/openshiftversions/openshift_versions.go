@@ -20,10 +20,10 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/golang/glog"
 	"github.com/google/go-github/github"
 
 	githubutil "github.com/minishift/minishift/pkg/util/github"
+	"github.com/pkg/errors"
 )
 
 const githubOwner = "openshift"
@@ -36,7 +36,7 @@ func PrintOpenShiftVersionsFromGitHub(output io.Writer) {
 func PrintOpenShiftVersions(output io.Writer) {
 	versions, err := getVersions()
 	if err != nil {
-		glog.Errorln(err)
+		fmt.Println(err.Error())
 		return
 	}
 	fmt.Fprint(output, "The following OpenShift versions are available: \n")
@@ -56,7 +56,7 @@ func getVersions() ([]*github.RepositoryRelease, error) {
 	defer resp.Body.Close()
 
 	if len(releases) == 0 {
-		return nil, fmt.Errorf("There were no OpenShift Releases available")
+		return nil, errors.New("There were no OpenShift releases available")
 	}
 	return releases, nil
 }

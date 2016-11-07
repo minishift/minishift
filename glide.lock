@@ -1,5 +1,5 @@
 hash: f0f9906056562c5ccea818ad27d50572a73d18ff3ef61c4b389ff12672925272
-updated: 2016-11-29T11:18:33.6400418+01:00
+updated: 2016-11-29T11:56:31.490022127+01:00
 imports:
 - name: github.com/beorn7/perks
   version: 3ac7bf7a47d159a033b107610db8a1b6575507a4
@@ -41,52 +41,21 @@ imports:
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
   subpackages:
   - spew
-- name: github.com/dgrijalva/jwt-go
-  version: afef698c326bfd906b11659432544e5aae441d44
 - name: github.com/docker/distribution
   version: 559433598c7be9d30d6cfc5cad5b5dfdb686725c
   repo: https://github.com/openshift/docker-distribution.git
   vcs: git
   subpackages:
-  - context
   - digest
-  - manifest
-  - manifest/schema1
-  - manifest/schema2
   - reference
-  - uuid
 - name: github.com/docker/docker
   version: 0f5c9d301b9b1cca66b3ea0f9dec3b5317d3686d
   subpackages:
   - pkg/mount
   - pkg/term
   - pkg/term/winconsole
-- name: github.com/docker/engine-api
-  version: 3d72d392d07bece8d7d7b2a3b6b2e57c2df376a2
-  subpackages:
-  - client
-  - client/transport
-  - client/transport/cancellable
-  - types
-  - types/blkiodev
-  - types/container
-  - types/filters
-  - types/network
-  - types/reference
-  - types/registry
-  - types/strslice
-  - types/time
-  - types/versions
-- name: github.com/docker/go-connections
-  version: f549a9393d05688dff0992ef3efd8bbe6c628aeb
-  subpackages:
-  - nat
-  - sockets
-  - tlsconfig
 - name: github.com/docker/go-units
   version: 0bbddae09c5a5419a8c6dcdd7ff90da3d450393b
-- name: github.com/docker/libtrust
-  version: c54fbb67c1f1e68d7d6f8d2ad7c9360404616a41
 - name: github.com/docker/machine
   version: 91e368eb7422665278b1d5665139ee0f9980b588
   subpackages:
@@ -128,8 +97,6 @@ imports:
   subpackages:
   - log
   - swagger
-- name: github.com/evanphx/json-patch
-  version: 465937c80b3c07a7c7ad20cc934898646a91c1de
 - name: github.com/fsouza/go-dockerclient
   version: bf97c77db7c945cbcdbf09d56c6f87a66f54537b
   subpackages:
@@ -183,10 +150,6 @@ imports:
   version: 335da9dda11408a34b64344f82e9c03779b71673
   repo: https://github.com/openshift/glog.git
   vcs: git
-- name: github.com/golang/groupcache
-  version: 604ed5785183e59ae2789449d89e73f3a2a77987
-  subpackages:
-  - lru
 - name: github.com/golang/protobuf
   version: 3c84672111d91bb5ac31719e112f9f7126a0e26e
   subpackages:
@@ -243,10 +206,6 @@ imports:
   - query
 - name: github.com/google/gofuzz
   version: bbcb9da2d746f8bdbd6a936686a0a6067ada0ec5
-- name: github.com/gorilla/context
-  version: 215affda49addc4c8ef7e2534915df2c8c35c6cd
-- name: github.com/gorilla/mux
-  version: 8096f47503459bcc74d1f4c487b7e6e42e5746b5
 - name: github.com/hashicorp/hcl
   version: d8c773c4cba11b11539e3d45f93daeaa5dcf1fa1
   subpackages:
@@ -310,27 +269,34 @@ imports:
 - name: github.com/openshift/origin
   version: 274842360258d4f6ea1d3ec19559ecd395fd4d4f
   subpackages:
-  - pkg/api/latest
-  - pkg/auth/api
-  - pkg/auth/authenticator
-  - pkg/auth/authenticator/request/x509request
-  - pkg/authorization/api
-  - pkg/build/api
-  - pkg/client
-  - pkg/cmd/cli/config
-  - pkg/cmd/util
-  - pkg/deploy/api
-  - pkg/image/api
-  - pkg/oauth/api
-  - pkg/project/api
-  - pkg/quota/api
-  - pkg/quota/util
-  - pkg/route/api
-  - pkg/sdn/api
-  - pkg/template/api
-  - pkg/user/api
-  - pkg/util/namer
-  - pkg/version
+  - pkg/bootstrap/docker/errors
+  - pkg/bootstrap/docker/host
+  - pkg/bootstrap/docker/run
+  - pkg/cmd/util/prefixwriter
+- name: github.com/openshift/source-to-image
+  version: 89b96680e451c0fa438446043f967b5660942974
+  subpackages:
+  - pkg/api
+  - pkg/api/describe
+  - pkg/api/validation
+  - pkg/build
+  - pkg/build/strategies
+  - pkg/build/strategies/layered
+  - pkg/build/strategies/onbuild
+  - pkg/build/strategies/sti
+  - pkg/docker
+  - pkg/errors
+  - pkg/ignore
+  - pkg/scm
+  - pkg/scm/empty
+  - pkg/scm/file
+  - pkg/scm/git
+  - pkg/scripts
+  - pkg/tar
+  - pkg/util
+  - pkg/util/glog
+  - pkg/util/interrupt
+  - pkg/util/user
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/pkg/browser
@@ -442,14 +408,7 @@ imports:
   repo: https://github.com/openshift/kubernetes.git
   vcs: git
   subpackages:
-  - federation/apis/federation
-  - federation/apis/federation/install
-  - federation/apis/federation/v1beta1
-  - federation/client/clientset_generated/federation_internalclientset
-  - federation/client/clientset_generated/federation_internalclientset/typed/core/unversioned
-  - federation/client/clientset_generated/federation_internalclientset/typed/federation/unversioned
   - pkg/api
-  - pkg/api/annotations
   - pkg/api/endpoints
   - pkg/api/errors
   - pkg/api/install
@@ -457,7 +416,6 @@ imports:
   - pkg/api/meta/metatypes
   - pkg/api/pod
   - pkg/api/resource
-  - pkg/api/rest
   - pkg/api/service
   - pkg/api/unversioned
   - pkg/api/unversioned/validation
@@ -488,52 +446,31 @@ imports:
   - pkg/apis/extensions
   - pkg/apis/extensions/install
   - pkg/apis/extensions/v1beta1
-  - pkg/apis/extensions/validation
   - pkg/apis/policy
   - pkg/apis/policy/install
   - pkg/apis/policy/v1alpha1
   - pkg/apis/rbac
   - pkg/apis/rbac/install
   - pkg/apis/rbac/v1alpha1
-  - pkg/auth/authenticator
   - pkg/auth/user
   - pkg/capabilities
-  - pkg/client/cache
-  - pkg/client/clientset_generated/internalclientset
-  - pkg/client/clientset_generated/internalclientset/typed/authentication/unversioned
-  - pkg/client/clientset_generated/internalclientset/typed/autoscaling/unversioned
-  - pkg/client/clientset_generated/internalclientset/typed/batch/unversioned
-  - pkg/client/clientset_generated/internalclientset/typed/core/unversioned
-  - pkg/client/clientset_generated/internalclientset/typed/extensions/unversioned
-  - pkg/client/clientset_generated/internalclientset/typed/rbac/unversioned
   - pkg/client/metrics
-  - pkg/client/record
   - pkg/client/restclient
   - pkg/client/transport
   - pkg/client/typed/discovery
   - pkg/client/unversioned
-  - pkg/client/unversioned/adapters/internalclientset
   - pkg/client/unversioned/auth
   - pkg/client/unversioned/clientcmd
   - pkg/client/unversioned/clientcmd/api
   - pkg/client/unversioned/clientcmd/api/latest
   - pkg/client/unversioned/clientcmd/api/v1
-  - pkg/controller
-  - pkg/controller/framework
   - pkg/conversion
   - pkg/conversion/queryparams
-  - pkg/credentialprovider
-  - pkg/fieldpath
   - pkg/fields
-  - pkg/kubectl
-  - pkg/kubectl/cmd/util
-  - pkg/kubectl/resource
   - pkg/kubelet/qos
   - pkg/kubelet/qos/util
   - pkg/labels
   - pkg/master/ports
-  - pkg/registry/generic
-  - pkg/registry/thirdpartyresourcedata
   - pkg/runtime
   - pkg/runtime/serializer
   - pkg/runtime/serializer/json
@@ -541,38 +478,24 @@ imports:
   - pkg/runtime/serializer/recognizer
   - pkg/runtime/serializer/streaming
   - pkg/runtime/serializer/versioning
-  - pkg/security/podsecuritypolicy/util
   - pkg/securitycontextconstraints/util
-  - pkg/serviceaccount
-  - pkg/storage
   - pkg/types
   - pkg/util
   - pkg/util/crypto
-  - pkg/util/deployment
-  - pkg/util/diff
   - pkg/util/errors
-  - pkg/util/flag
   - pkg/util/flowcontrol
   - pkg/util/framer
   - pkg/util/hash
   - pkg/util/homedir
   - pkg/util/integer
-  - pkg/util/interrupt
   - pkg/util/intstr
   - pkg/util/json
-  - pkg/util/jsonpath
-  - pkg/util/labels
   - pkg/util/net
   - pkg/util/net/sets
   - pkg/util/parsers
-  - pkg/util/pod
   - pkg/util/rand
-  - pkg/util/replicaset
   - pkg/util/runtime
   - pkg/util/sets
-  - pkg/util/slice
-  - pkg/util/strategicpatch
-  - pkg/util/term
   - pkg/util/validation
   - pkg/util/validation/field
   - pkg/util/wait
@@ -583,8 +506,5 @@ imports:
   - plugin/pkg/client/auth
   - plugin/pkg/client/auth/gcp
   - plugin/pkg/client/auth/oidc
-  - third_party/forked/json
   - third_party/forked/reflect
-  - third_party/golang/netutil
-  - third_party/golang/template
 testImports: []

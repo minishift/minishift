@@ -17,28 +17,17 @@ limitations under the License.
 package cmd
 
 import (
-	"bytes"
 	"os"
-	"strings"
 	"testing"
 
-	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
-	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minikube/tests"
+	"github.com/minishift/minishift/pkg/testing/cli"
 )
 
-type configTest struct {
-	Name          string
-	EnvValue      string
-	ConfigValue   string
-	FlagValue     string
-	ExpectedValue string
-}
-
-var configTests = []configTest{
+var configTests = []cli.TestOption{
 	{
 		Name:          "v",
 		ExpectedValue: "0",
@@ -86,39 +75,12 @@ var configTests = []configTest{
 	},
 }
 
-func runCommand(f func(*cobra.Command, []string)) {
-	cmd := cobra.Command{}
-	var args []string
-	f(&cmd, args)
-}
-
-// Temporarily unsets the env variables for the test cases
-// returns a function to reset them to their initial values
-func hideEnv(t *testing.T) func(t *testing.T) {
-	envs := make(map[string]string)
-	for _, env := range os.Environ() {
-		if strings.HasPrefix(env, constants.MiniShiftEnvPrefix) {
-			line := strings.Split(env, "=")
-			key, val := line[0], line[1]
-			envs[key] = val
-			t.Logf("TestConfig: Unsetting %s=%s for unit test!", key, val)
-			os.Unsetenv(key)
-		}
-	}
-	return func(t *testing.T) {
-		for key, val := range envs {
-			t.Logf("TestConfig: Finished test, Resetting Env %s=%s", key, val)
-			os.Setenv(key, val)
-		}
-	}
-}
-
 func TestPreRunDirectories(t *testing.T) {
 	// Make sure we create the required directories.
 	tempDir := tests.MakeTempDir()
 	defer os.RemoveAll(tempDir)
 
-	runCommand(RootCmd.PersistentPreRun)
+	cli.RunCommand(RootCmd.PersistentPreRun)
 
 	for _, dir := range dirs {
 		_, err := os.Stat(dir)
@@ -128,64 +90,28 @@ func TestPreRunDirectories(t *testing.T) {
 	}
 }
 
-func initTestConfig(config string) error {
-	viper.SetConfigType("json")
-	r := bytes.NewReader([]byte(config))
-	return viper.ReadConfig(r)
-}
-
 func TestViperConfig(t *testing.T) {
 	defer viper.Reset()
-	err := initTestConfig(`{ "v": "999" }`)
+	err := cli.InitTestConfig(`{ "v": "999" }`)
 	if viper.GetString("v") != "999" || err != nil {
 		t.Fatalf("Viper did not read test config file: %v", err)
 	}
 }
 
-func getEnvVarName(name string) string {
-	return constants.MiniShiftEnvPrefix + "_" + strings.ToUpper(name)
-}
-
-func setValues(t *testing.T, tt configTest) {
-	if tt.FlagValue != "" {
-		pflag.Set(tt.Name, tt.FlagValue)
-	}
-	if tt.EnvValue != "" {
-		s := strings.Replace(getEnvVarName(tt.Name), "-", "_", -1)
-		os.Setenv(s, tt.EnvValue)
-	}
-	if tt.ConfigValue != "" {
-		err := initTestConfig(tt.ConfigValue)
-		if err != nil {
-			t.Fatalf("Config %s not read correctly: %v", tt.ConfigValue, err)
-		}
-	}
-}
-
-func unsetValues(tt configTest) {
-	var f = pflag.Lookup(tt.Name)
-	f.Value.Set(f.DefValue)
-	f.Changed = false
-
-	os.Unsetenv(getEnvVarName(tt.Name))
-
-	viper.Reset()
-}
-
 func TestViperAndFlags(t *testing.T) {
-	restore := hideEnv(t)
+	restore := cli.HideEnv(t)
 	defer restore(t)
-	for _, tt := range configTests {
-		setValues(t, tt)
+	for _, testOption := range configTests {
+		cli.SetOptionValue(t, testOption)
 		setupViper()
-		f := pflag.Lookup(tt.Name)
+		f := pflag.Lookup(testOption.Name)
 		if f == nil {
-			t.Fatalf("Could not find flag for %s", tt.Name)
+			t.Fatalf("Could not find flag for %s", testOption.Name)
 		}
 		actual := f.Value.String()
-		if actual != tt.ExpectedValue {
-			t.Errorf("pflag.Value(%s) => %s, wanted %s [%+v]", tt.Name, actual, tt.ExpectedValue, tt)
+		if actual != testOption.ExpectedValue {
+			t.Errorf("pflag.Value(%s) => %s, wanted %s [%+v]", testOption.Name, actual, testOption.ExpectedValue, testOption)
 		}
-		unsetValues(tt)
+		cli.UnsetValues(testOption)
 	}
 }

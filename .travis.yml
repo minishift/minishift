@@ -1,14 +1,29 @@
 language: go
+
 go:
 - 1.7.1
+
 branches:
   only:
   - master
+  - cluster-up
+
 install:
-- echo "Don't run anything."
+- mkdir /home/travis/gopath/bin
+- mkdir /home/travis/gopath/pkg
+# Install Glide - https://github.com/Masterminds/glide/issues/639
+- GLIDE_OS_ARCH=`go env GOHOSTOS`-`go env GOHOSTARCH`
+- GLIDE_TAG=$(curl -s https://glide.sh/version)
+- GLIDE_LATEST_RELEASE_URL="https://github.com/Masterminds/glide/releases/download/${GLIDE_TAG}/glide-${GLIDE_TAG}-${GLIDE_OS_ARCH}.tar.gz"
+- wget ${GLIDE_LATEST_RELEASE_URL} -O /tmp/glide.tar.gz
+- mkdir /tmp/glide
+- tar --directory=/tmp/glide -xvf /tmp/glide.tar.gz
+- export PATH=$PATH:/tmp/glide/${GLIDE_OS_ARCH}
+
 script:
 - travis_retry make test
 - make cross
+
 env:
   global:
   - secure: lvq7aBhE3VgdnehG1tokBnbwsjxjhyiOn5S7C3x7WKzepnIeytT3tEfTu9HoJf41qL1MqJNr9dw77lgpN/5t8+T8XHwB19HkCydLJ+plVg8u1A8go/usbHjmDNitj2g3U8u/d1gSAbrHPhNQ7xIlwzvq8VBk8iJSM+M21ejS5SLp22iuFSL6sbT5UVMbq2MQepatBmt3y0S+s7H+V9KJbYn9r4WfAQNgb6IkKC6JIs5c2Yeo8sQEJZDYAoCxiVCCl/MYga0kOK1WFUjrZ/PyNN4An2nCGx+gJ/ve/k8ft4mP7f7QYrN7LvkDz3df4iK03KbHrSTvpvxv69x+yWpf/LJM7b54ppNcPwu8S/U/iL7jsOLWOjdeIfCNb2jSGZf4qNClY6hLRYjQSK+nTC9igp/OoSZ5/8mUXxXsm3GFn2GblAYZdapBKJ80bs1WxO64qzB0guiRxyPKNuKn7rvsmELFCAj2wsBt67dy4TkGmkyNtvICrje1zjnGIu1w1oWEAGGePrZTO/3RZpDUgPHN3tOAug5ckpMaAPdFh5Ekooi6HrQG+ETrUABYv7kngVTik4p5cntYsmFduBE4q8VCri8wf+piy57lVea/oArV4n1EWBYV1vZB/tyl5Qbu+K6QMDex4k2BMUspF71nkZMmS+3dFSC1OEE+yAGmA7det0U=

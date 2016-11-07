@@ -46,17 +46,20 @@ $(ORIGINAL_GOPATH)/bin/minishift$(IS_EXE): out/minishift-$(GOOS)-$(GOARCH)$(IS_E
 out/minishift$(IS_EXE): out/minishift-$(GOOS)-$(GOARCH)$(IS_EXE)
 	cp $(BUILD_DIR)/minishift-$(GOOS)-$(GOARCH)$(IS_EXE) $(BUILD_DIR)/minishift$(IS_EXE)
 
+vendor: $(GOPATH)/src/$(ORG)
+	glide install -v
+
 out/openshift: $(GOPATH)/src/$(ORG) hack/get_openshift.go OPENSHIFT_VERSION
 	mkdir out 2>/dev/null || true
 	cd $(GOPATH)/src/$(REPOPATH) && go run hack/get_openshift.go $(OPENSHIFT_VERSION)
 
-out/minishift-darwin-amd64: $(GOPATH)/src/$(ORG) pkg/minikube/cluster/assets.go $(shell $(MINIKUBEFILES)) VERSION
+out/minishift-darwin-amd64: vendor $(GOPATH)/src/$(ORG) pkg/minikube/cluster/assets.go $(shell $(MINIKUBEFILES)) VERSION
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build --installsuffix cgo -ldflags="$(MINIKUBE_LDFLAGS)" -o $(BUILD_DIR)/minishift-darwin-amd64 ./cmd/minikube
 
-out/minishift-linux-amd64: $(GOPATH)/src/$(ORG) pkg/minikube/cluster/assets.go $(shell $(MINIKUBEFILES)) VERSION
+out/minishift-linux-amd64: vendor $(GOPATH)/src/$(ORG) pkg/minikube/cluster/assets.go $(shell $(MINIKUBEFILES)) VERSION
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build --installsuffix cgo -ldflags="$(MINIKUBE_LDFLAGS)" -o $(BUILD_DIR)/minishift-linux-amd64 ./cmd/minikube
 
-out/minishift-windows-amd64.exe: $(GOPATH)/src/$(ORG) pkg/minikube/cluster/assets.go $(shell $(MINIKUBEFILES)) VERSION
+out/minishift-windows-amd64.exe: vendor $(GOPATH)/src/$(ORG) pkg/minikube/cluster/assets.go $(shell $(MINIKUBEFILES)) VERSION
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build --installsuffix cgo -ldflags="$(MINIKUBE_LDFLAGS)" -o $(BUILD_DIR)/minishift-windows-amd64.exe ./cmd/minikube
 
 deploy/iso/minishift.iso: $(shell find deploy/iso -type f ! -name *.iso)
@@ -67,7 +70,7 @@ integration: out/minishift
 	go test -v $(REPOPATH)/test/integration --tags=integration
 
 .PHONY: test
-test: $(GOPATH)/src/$(ORG) pkg/minikube/cluster/assets.go
+test: vendor $(GOPATH)/src/$(ORG) pkg/minikube/cluster/assets.go
 	./test.sh
 
 pkg/minikube/cluster/assets.go: out/openshift $(GOPATH)/bin/go-bindata
@@ -108,3 +111,4 @@ clean:
 	rm -rf $(BUILD_DIR)
 	rm -rf release
 	rm -f pkg/minikube/cluster/assets.go
+	rm -rf vendor

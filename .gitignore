@@ -28,7 +28,6 @@ _testmain.go
 /_gopath
 /release
 
-/pkg/minikube/cluster/assets.go
 /minishift
 
 .DS_Store

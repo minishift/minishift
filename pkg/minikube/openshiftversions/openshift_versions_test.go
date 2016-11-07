@@ -54,11 +54,11 @@ func TestGetVersionsCorrect(t *testing.T) {
 	}
 	server := httptest.NewServer(handler)
 
-	url, _ := url.Parse(server.URL)
+	parsedUrl, _ := url.Parse(server.URL)
 	os.Clearenv()
 	githubClient := githubutils.Client()
-	githubClient.BaseURL = url
-	githubClient.UploadURL = url
+	githubClient.BaseURL = parsedUrl
+	githubClient.UploadURL = parsedUrl
 
 	releases, err := getVersions()
 	if err != nil {
@@ -80,15 +80,15 @@ func TestGetVersionsNone(t *testing.T) {
 	handler := &URLHandlerNone{}
 	server := httptest.NewServer(handler)
 
-	url, _ := url.Parse(server.URL)
+	parsedUrl, _ := url.Parse(server.URL)
 	os.Clearenv()
 	githubClient := githubutils.Client()
-	githubClient.BaseURL = url
-	githubClient.UploadURL = url
+	githubClient.BaseURL = parsedUrl
+	githubClient.UploadURL = parsedUrl
 
 	_, err := getVersions()
 	if err == nil {
-		t.Fatalf("No kubernetes versions were returned from URL but no error was thrown")
+		t.Fatal("No kubernetes versions were returned from URL but no error was thrown")
 	}
 }
 
@@ -96,7 +96,7 @@ type URLHandlerMalformed struct{}
 
 func (h *URLHandlerMalformed) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/javascript")
-	fmt.Fprintf(w, "Malformed JSON")
+	fmt.Fprint(w, "Malformed JSON")
 }
 
 func TestGetVersionsMalformed(t *testing.T) {
@@ -104,15 +104,15 @@ func TestGetVersionsMalformed(t *testing.T) {
 	handler := &URLHandlerMalformed{}
 	server := httptest.NewServer(handler)
 
-	url, _ := url.Parse(server.URL)
+	parsedUrl, _ := url.Parse(server.URL)
 	os.Clearenv()
 	githubClient := githubutils.Client()
-	githubClient.BaseURL = url
-	githubClient.UploadURL = url
+	githubClient.BaseURL = parsedUrl
+	githubClient.UploadURL = parsedUrl
 
 	_, err := getVersions()
 	if err == nil {
-		t.Fatalf("Malformed version value was returned from URL but no error was thrown")
+		t.Fatal("Malformed version value was returned from URL but no error was thrown")
 	}
 }
 
@@ -122,11 +122,11 @@ func TestPrintOpenShiftVersions(t *testing.T) {
 	handlerNone := &URLHandlerNone{}
 	server := httptest.NewServer(handlerNone)
 
-	url, _ := url.Parse(server.URL)
+	parsedUrl, _ := url.Parse(server.URL)
 	os.Clearenv()
 	githubClient := githubutils.Client()
-	githubClient.BaseURL = url
-	githubClient.UploadURL = url
+	githubClient.BaseURL = parsedUrl
+	githubClient.UploadURL = parsedUrl
 
 	var outputBuffer bytes.Buffer
 	PrintOpenShiftVersions(&outputBuffer)
@@ -143,9 +143,9 @@ func TestPrintOpenShiftVersions(t *testing.T) {
 	}
 	server = httptest.NewServer(handlerCorrect)
 
-	url, _ = url.Parse(server.URL)
-	githubClient.BaseURL = url
-	githubClient.UploadURL = url
+	parsedUrl, _ = url.Parse(server.URL)
+	githubClient.BaseURL = parsedUrl
+	githubClient.UploadURL = parsedUrl
 
 	PrintOpenShiftVersions(&outputBuffer)
 	if len(outputBuffer.String()) == 0 {

@@ -28,7 +28,7 @@ func main() {
 	if len(os.Args) > 1 {
 		version = os.Args[1]
 	}
-	err := github.DownloadOpenShiftRelease(version, "out/openshift")
+	err := github.DownloadOpenShiftReleaseBinary(github.OPENSHIFT, github.LINUX, version, "out")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

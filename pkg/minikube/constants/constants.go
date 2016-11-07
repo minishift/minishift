@@ -19,7 +19,6 @@ package constants
 import (
 	"path/filepath"
 
-	"k8s.io/kubernetes/pkg/client/unversioned/clientcmd"
 	"k8s.io/kubernetes/pkg/util/homedir"
 
 	"github.com/minishift/minishift/pkg/version"
@@ -33,10 +32,6 @@ const APIServerPort = 8443
 
 // Fix for windows
 var Minipath = filepath.Join(homedir.HomeDir(), ".minishift")
-
-// TODO: Fix for windows
-// KubeconfigPath is the path to the Kubernetes client config
-var KubeconfigPath = clientcmd.RecommendedHomeFile
 
 // MinikubeContext is the kubeconfig context name used for minishift
 const MinikubeContext = "minishift"
@@ -75,6 +70,9 @@ const (
 
 var ConfigFilePath = MakeMiniPath("config")
 var ConfigFile = MakeMiniPath("config", "config.json")
+
+var TmpFilePath = MakeMiniPath("tmp")
+var OcCachePath = MakeMiniPath("cache", "oc")
 
 // DockerAPIVersion is the API version implemented by Docker running in the minikube VM.
 const DockerAPIVersion = "1.23"

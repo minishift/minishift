@@ -114,7 +114,7 @@ func (l *openshiftCacher) updateOpenShiftFromURI(client *ssh.Client) error {
 
 func (l *openshiftCacher) updateOpenShiftFromRelease(client *ssh.Client) error {
 	if !l.isOpenShiftCached() {
-		if err := github.DownloadOpenShiftRelease(l.config.OpenShiftVersion, l.getOpenShiftCacheFilepath()); err != nil {
+		if err := github.DownloadOpenShiftReleaseBinary(github.OC, github.LINUX, l.config.OpenShiftVersion, l.getOpenShiftCacheFilepath()); err != nil {
 			return errors.Wrap(err, "Error attempting to download and cache openshift")
 		}
 	}

@@ -43,6 +43,8 @@ var dirs = [...]string{
 	constants.MakeMiniPath("config"),
 	constants.MakeMiniPath("cache", "openshift"),
 	constants.MakeMiniPath("logs"),
+	constants.TmpFilePath,
+	constants.OcCachePath,
 }
 
 const (

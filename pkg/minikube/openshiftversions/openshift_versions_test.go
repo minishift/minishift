@@ -28,7 +28,7 @@ import (
 
 	"github.com/google/go-github/github"
 
-	githubutils "github.com/jimmidyson/minishift/pkg/util/github"
+	githubutils "github.com/minishift/minishift/pkg/util/github"
 )
 
 type URLHandlerCorrect struct {

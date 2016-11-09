@@ -22,8 +22,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jimmidyson/minishift/pkg/minikube/constants"
-	"github.com/jimmidyson/minishift/test/integration/util"
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/test/integration/util"
 )
 
 func TestClusterLogs(t *testing.T) {

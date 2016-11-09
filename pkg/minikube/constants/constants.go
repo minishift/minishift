@@ -22,7 +22,7 @@ import (
 	"k8s.io/kubernetes/pkg/client/unversioned/clientcmd"
 	"k8s.io/kubernetes/pkg/util/homedir"
 
-	"github.com/jimmidyson/minishift/pkg/version"
+	"github.com/minishift/minishift/pkg/version"
 )
 
 // MachineName is the name to use for the VM.

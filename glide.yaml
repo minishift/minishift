@@ -1,4 +1,4 @@
-package: github.com/jimmidyson/minishift
+package: github.com/minishift/minishift
 import:
 - package: github.com/blang/semver
 - package: github.com/docker/go-units

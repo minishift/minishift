@@ -22,8 +22,8 @@ import (
 
 	"github.com/docker/machine/libmachine"
 	"github.com/golang/glog"
-	"github.com/jimmidyson/minishift/pkg/minikube/cluster"
-	"github.com/jimmidyson/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minikube/cluster"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/pkg/browser"
 	"github.com/spf13/cobra"
 )

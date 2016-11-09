@@ -25,8 +25,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/jimmidyson/minishift/pkg/minikube/config"
-	"github.com/jimmidyson/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minikube/config"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
 type configFile interface {

@@ -24,7 +24,7 @@ import (
 
 	units "github.com/docker/go-units"
 
-	"github.com/jimmidyson/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
 func IsValidDriver(string, driver string) error {

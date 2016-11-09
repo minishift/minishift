@@ -32,10 +32,10 @@ import (
 	"k8s.io/kubernetes/pkg/api"
 	cfg "k8s.io/kubernetes/pkg/client/unversioned/clientcmd/api"
 
-	"github.com/jimmidyson/minishift/pkg/minikube/cluster"
-	"github.com/jimmidyson/minishift/pkg/minikube/constants"
-	"github.com/jimmidyson/minishift/pkg/minikube/kubeconfig"
-	"github.com/jimmidyson/minishift/pkg/util"
+	"github.com/minishift/minishift/pkg/minikube/cluster"
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minikube/kubeconfig"
+	"github.com/minishift/minishift/pkg/util"
 )
 
 const (

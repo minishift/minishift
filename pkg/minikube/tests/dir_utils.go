@@ -22,7 +22,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jimmidyson/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
 func MakeTempDir() string {

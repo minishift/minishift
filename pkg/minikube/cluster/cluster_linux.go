@@ -21,7 +21,7 @@ import (
 	"path/filepath"
 
 	"github.com/docker/machine/libmachine/drivers"
-	"github.com/jimmidyson/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
 type kvmDriver struct {

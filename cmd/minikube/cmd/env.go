@@ -25,8 +25,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/jimmidyson/minishift/pkg/minikube/cluster"
-	"github.com/jimmidyson/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minikube/cluster"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/shell"

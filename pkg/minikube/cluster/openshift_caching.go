@@ -32,10 +32,10 @@ import (
 	"golang.org/x/crypto/ssh"
 	pb "gopkg.in/cheggaaa/pb.v1"
 
-	"github.com/jimmidyson/minishift/pkg/minikube/constants"
-	"github.com/jimmidyson/minishift/pkg/minikube/sshutil"
-	"github.com/jimmidyson/minishift/pkg/util/github"
-	"github.com/jimmidyson/minishift/pkg/version"
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minikube/sshutil"
+	"github.com/minishift/minishift/pkg/util/github"
+	"github.com/minishift/minishift/pkg/version"
 )
 
 func updateOpenShiftFromAsset(client *ssh.Client) error {

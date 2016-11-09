@@ -23,7 +23,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jimmidyson/minishift/test/integration/util"
+	"github.com/minishift/minishift/test/integration/util"
 )
 
 func TestStartStop(t *testing.T) {

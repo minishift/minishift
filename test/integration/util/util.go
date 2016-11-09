@@ -33,7 +33,7 @@ import (
 	"github.com/docker/machine/libmachine/log"
 	"k8s.io/kubernetes/pkg/api"
 
-	commonutil "github.com/jimmidyson/minishift/pkg/util"
+	commonutil "github.com/minishift/minishift/pkg/util"
 )
 
 type MinikubeRunner struct {

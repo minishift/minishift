@@ -22,7 +22,7 @@ import (
 
 	"github.com/docker/machine/libmachine/drivers"
 
-	"github.com/jimmidyson/minishift/pkg/minikube/tests"
+	"github.com/minishift/minishift/pkg/minikube/tests"
 )
 
 func TestNewSSHClient(t *testing.T) {

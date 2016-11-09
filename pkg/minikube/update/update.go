@@ -37,10 +37,10 @@ import (
 	"github.com/spf13/viper"
 	pb "gopkg.in/cheggaaa/pb.v1"
 
-	"github.com/jimmidyson/minishift/pkg/minikube/config"
-	"github.com/jimmidyson/minishift/pkg/minikube/constants"
-	githubutils "github.com/jimmidyson/minishift/pkg/util/github"
-	"github.com/jimmidyson/minishift/pkg/version"
+	"github.com/minishift/minishift/pkg/minikube/config"
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	githubutils "github.com/minishift/minishift/pkg/util/github"
+	"github.com/minishift/minishift/pkg/version"
 )
 
 const (

@@ -19,7 +19,7 @@ GOOS ?= $(shell go env GOOS)
 $(shell go env GOOS | echo)
 GOARCH ?= $(shell go env GOARCH)
 BUILD_DIR ?= ./out
-ORG := github.com/jimmidyson
+ORG := github.com/minishift
 REPOPATH ?= $(ORG)/minishift
 BUILD_IMAGE ?= gcr.io/google_containers/kube-cross:v1.6.2-1
 ifeq ($(GOOS),windows)
@@ -37,8 +37,8 @@ endif
 PYTHON := $(shell command -v python || echo "docker run --rm -it -v $(shell pwd):/minishift -w /minishift python python")
 BUILD_OS := $(shell uname -s)
 
-MINIKUBE_LDFLAGS := -X github.com/jimmidyson/minishift/pkg/version.version=$(VERSION) \
-	-X github.com/jimmidyson/minishift/pkg/version.openshiftVersion=$(OPENSHIFT_VERSION) -s -w -extldflags '-static'
+MINIKUBE_LDFLAGS := -X $(REPOPATH)/pkg/version.version=$(VERSION) \
+	-X $(REPOPATH)/pkg/version.openshiftVersion=$(OPENSHIFT_VERSION) -s -w -extldflags '-static'
 
 MINIKUBEFILES := go list  -f '{{join .Deps "\n"}}' ./cmd/minikube/ | grep $(REPOPATH) | xargs go list -f '{{ range $$file := .GoFiles }} {{$$.Dir}}/{{$$file}}{{"\n"}}{{end}}'
 

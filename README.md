@@ -1,6 +1,6 @@
 # Minishift
 
-[![Build Status](https://secure.travis-ci.org/jimmidyson/minishift.png)](https://travis-ci.org/jimmidyson/minishift)
+[![Build Status](https://secure.travis-ci.org/minishift/minishift.png)](https://travis-ci.org/minishift/minishift)
 
 ## What is Minishift?
 

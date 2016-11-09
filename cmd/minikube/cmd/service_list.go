@@ -25,8 +25,8 @@ import (
 	"github.com/spf13/cobra"
 	"k8s.io/kubernetes/pkg/api/v1"
 
-	"github.com/jimmidyson/minishift/pkg/minikube/cluster"
-	"github.com/jimmidyson/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minikube/cluster"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
 var serviceListNamespace string

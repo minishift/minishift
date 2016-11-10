@@ -24,10 +24,10 @@ import (
 	"testing"
 	"time"
 
-	commonutil "github.com/jimmidyson/minishift/pkg/util"
+	commonutil "github.com/minishift/minishift/pkg/util"
 	"k8s.io/kubernetes/pkg/api"
 
-	"github.com/jimmidyson/minishift/test/integration/util"
+	"github.com/minishift/minishift/test/integration/util"
 )
 
 var (

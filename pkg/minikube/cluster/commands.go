@@ -19,7 +19,7 @@ package cluster
 import (
 	"fmt"
 
-	"github.com/jimmidyson/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
 // Kill any running instances.

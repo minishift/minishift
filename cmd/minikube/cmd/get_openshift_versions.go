@@ -19,7 +19,7 @@ package cmd
 import (
 	"os"
 
-	"github.com/jimmidyson/minishift/pkg/minikube/openshiftversions"
+	"github.com/minishift/minishift/pkg/minikube/openshiftversions"
 	"github.com/spf13/cobra"
 )
 

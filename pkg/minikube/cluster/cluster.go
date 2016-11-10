@@ -42,10 +42,10 @@ import (
 	"k8s.io/kubernetes/pkg/client/unversioned"
 	"k8s.io/kubernetes/pkg/client/unversioned/clientcmd"
 
-	"github.com/jimmidyson/minishift/pkg/minikube/constants"
-	"github.com/jimmidyson/minishift/pkg/minikube/sshutil"
-	"github.com/jimmidyson/minishift/pkg/util"
-	"github.com/jimmidyson/minishift/pkg/version"
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minikube/sshutil"
+	"github.com/minishift/minishift/pkg/util"
+	"github.com/minishift/minishift/pkg/version"
 	"github.com/pkg/errors"
 )
 

@@ -23,8 +23,8 @@ import (
 	"testing"
 	"time"
 
-	commonutil "github.com/jimmidyson/minishift/pkg/util"
-	"github.com/jimmidyson/minishift/test/integration/util"
+	commonutil "github.com/minishift/minishift/pkg/util"
+	"github.com/minishift/minishift/test/integration/util"
 )
 
 func TestClusterEnv(t *testing.T) {

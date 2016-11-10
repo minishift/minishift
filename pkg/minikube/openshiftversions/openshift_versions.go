@@ -23,7 +23,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/google/go-github/github"
 
-	githubutil "github.com/jimmidyson/minishift/pkg/util/github"
+	githubutil "github.com/minishift/minishift/pkg/util/github"
 )
 
 const githubOwner = "openshift"

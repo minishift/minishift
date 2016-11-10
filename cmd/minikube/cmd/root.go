@@ -28,10 +28,10 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
-	configCmd "github.com/jimmidyson/minishift/cmd/minikube/cmd/config"
-	"github.com/jimmidyson/minishift/pkg/minikube/config"
-	"github.com/jimmidyson/minishift/pkg/minikube/constants"
-	"github.com/jimmidyson/minishift/pkg/minikube/update"
+	configCmd "github.com/minishift/minishift/cmd/minikube/cmd/config"
+	"github.com/minishift/minishift/pkg/minikube/config"
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minikube/update"
 )
 
 var dirs = [...]string{

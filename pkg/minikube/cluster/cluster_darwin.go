@@ -19,7 +19,7 @@ package cluster
 import (
 	"github.com/docker/machine/drivers/vmwarefusion"
 	"github.com/docker/machine/libmachine/drivers"
-	"github.com/jimmidyson/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
 func createVMwareFusionHost(config MachineConfig) drivers.Driver {

@@ -23,7 +23,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/jimmidyson/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 	"k8s.io/kubernetes/pkg/client/unversioned/clientcmd/api"
 )
 

@@ -19,7 +19,7 @@ package cluster
 import (
 	"github.com/docker/machine/drivers/hyperv"
 	"github.com/docker/machine/libmachine/drivers"
-	"github.com/jimmidyson/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
 func createHypervHost(config MachineConfig) drivers.Driver {

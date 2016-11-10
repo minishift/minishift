@@ -19,7 +19,7 @@ limitations under the License.
 package integration
 
 import (
-	"github.com/jimmidyson/minishift/test/integration/util"
+	"github.com/minishift/minishift/test/integration/util"
 	"strings"
 	"testing"
 )

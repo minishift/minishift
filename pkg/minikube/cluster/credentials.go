@@ -19,7 +19,7 @@ package cluster
 import (
 	"net"
 
-	"github.com/jimmidyson/minishift/pkg/util"
+	"github.com/minishift/minishift/pkg/util"
 )
 
 var (

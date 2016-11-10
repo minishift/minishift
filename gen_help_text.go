@@ -17,7 +17,7 @@ limitations under the License.
 package main
 
 import (
-	"github.com/jimmidyson/minishift/cmd/minikube/cmd"
+	"github.com/minishift/minishift/cmd/minikube/cmd"
 	"github.com/spf13/cobra/doc"
 )
 

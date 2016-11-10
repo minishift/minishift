@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jimmidyson/minishift/pkg/util/github"
+	"github.com/minishift/minishift/pkg/util/github"
 )
 
 func main() {

@@ -25,7 +25,7 @@ import (
 	"testing"
 
 	"github.com/docker/machine/libmachine/drivers/plugin/localbinary"
-	"github.com/jimmidyson/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
 func makeTempDir() string {

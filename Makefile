@@ -21,7 +21,6 @@ GOARCH ?= $(shell go env GOARCH)
 BUILD_DIR ?= ./out
 ORG := github.com/minishift
 REPOPATH ?= $(ORG)/minishift
-BUILD_IMAGE ?= gcr.io/google_containers/kube-cross:v1.6.2-1
 ifeq ($(GOOS),windows)
 	IS_EXE := .exe
 endif
@@ -32,10 +31,6 @@ ifeq ($(IN_DOCKER),1)
 else
 	GOPATH := $(shell pwd)/_gopath
 endif
-
-# Use system python if it exists, otherwise use Docker.
-PYTHON := $(shell command -v python || echo "docker run --rm -it -v $(shell pwd):/minishift -w /minishift python python")
-BUILD_OS := $(shell uname -s)
 
 MINIKUBE_LDFLAGS := -X $(REPOPATH)/pkg/version.version=$(VERSION) \
 	-X $(REPOPATH)/pkg/version.openshiftVersion=$(OPENSHIFT_VERSION) -s -w -extldflags '-static'

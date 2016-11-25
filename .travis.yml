@@ -1,5 +1,9 @@
 language: go
 
+cache:
+  directories:
+  - $HOME/.glide
+
 go:
 - 1.7.1
 
@@ -7,10 +11,17 @@ branches:
   only:
   - master
   - cluster-up
+  - /^issue-[0-9]+$/
 
 install:
+# Work around the fact that I don't seem to be able to change the git checkout command
+# In order to build any fork, we need to make sure that the code lives in 'minishift'
 - mkdir /home/travis/gopath/bin
 - mkdir /home/travis/gopath/pkg
+- cd $HOME/gopath/src/github.com
+- mv `ls` foo
+- mv foo minishift
+- cd minishift/minishift
 # Install Glide - https://github.com/Masterminds/glide/issues/639
 - GLIDE_OS_ARCH=`go env GOHOSTOS`-`go env GOHOSTARCH`
 - GLIDE_TAG=$(curl -s https://glide.sh/version)
@@ -21,8 +32,11 @@ install:
 - export PATH=$PATH:/tmp/glide/${GLIDE_OS_ARCH}
 
 script:
-- travis_retry make test
+- make
+- make test
 - make cross
+- make fmtcheck
+- make prerelease
 
 env:
   global:

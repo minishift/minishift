@@ -49,6 +49,10 @@ const (
 	showLibmachineLogs = "show-libmachine-logs"
 )
 
+const (
+	disableUpdateNotification = "disable-update-notification"
+)
+
 var (
 	enableUpdateNotification = true
 )
@@ -80,6 +84,9 @@ var RootCmd = &cobra.Command{
 			log.SetErrWriter(ioutil.Discard)
 		}
 
+		if viper.GetBool(disableUpdateNotification) {
+			enableUpdateNotification = false
+		}
 		if enableUpdateNotification {
 			update.MaybeUpdateFromGithub(os.Stdout)
 		}
@@ -113,6 +120,7 @@ func setFlagsUsingViper() {
 
 func init() {
 	RootCmd.PersistentFlags().Bool(showLibmachineLogs, false, "Whether or not to show logs from libmachine.")
+	RootCmd.PersistentFlags().Bool(disableUpdateNotification, false, "Whether to disable VM update check.")
 	RootCmd.AddCommand(configCmd.ConfigCmd)
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
 	logDir := pflag.Lookup("log_dir")

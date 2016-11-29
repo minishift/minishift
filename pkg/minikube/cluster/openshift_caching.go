@@ -17,7 +17,6 @@ limitations under the License.
 package cluster
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"net/http"
@@ -37,18 +36,6 @@ import (
 	"github.com/minishift/minishift/pkg/util/github"
 	"github.com/minishift/minishift/pkg/version"
 )
-
-func updateOpenShiftFromAsset(client *ssh.Client) error {
-	contents, err := Asset("out/openshift")
-	if err != nil {
-		return errors.Wrap(err, "Error loading asset out/openshift")
-	}
-	if err := sshutil.Transfer(bytes.NewReader(contents), int64(len(contents)), "/usr/local/bin",
-		"openshift", "0777", client); err != nil {
-		return errors.Wrap(err, "Error transferring openshift via ssh")
-	}
-	return nil
-}
 
 // openshiftCacher is a struct with methods designed for caching openshift
 type openshiftCacher struct {

@@ -49,10 +49,6 @@ out/minishift$(IS_EXE): out/minishift-$(GOOS)-$(GOARCH)$(IS_EXE)
 vendor: $(GOPATH)/src/$(ORG)
 	glide install -v
 
-out/openshift: $(GOPATH)/src/$(ORG) hack/get_openshift.go OPENSHIFT_VERSION
-	mkdir out 2>/dev/null || true
-	cd $(GOPATH)/src/$(REPOPATH) && go run hack/get_openshift.go $(OPENSHIFT_VERSION)
-
 out/minishift-darwin-amd64: vendor $(GOPATH)/src/$(ORG) pkg/minikube/cluster/assets.go $(shell $(MINIKUBEFILES)) VERSION
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build --installsuffix cgo -ldflags="$(MINIKUBE_LDFLAGS)" -o $(BUILD_DIR)/minishift-darwin-amd64 ./cmd/minikube
 
@@ -70,11 +66,8 @@ integration: out/minishift
 	go test -v $(REPOPATH)/test/integration --tags=integration
 
 .PHONY: test
-test: vendor $(GOPATH)/src/$(ORG) pkg/minikube/cluster/assets.go
+test: vendor $(GOPATH)/src/$(ORG)
 	./test.sh
-
-pkg/minikube/cluster/assets.go: out/openshift $(GOPATH)/bin/go-bindata
-	$(GOPATH)/bin/go-bindata -nomemcopy -o pkg/minikube/cluster/assets.go -pkg cluster ./out/openshift
 
 $(GOPATH)/bin/go-bindata: $(GOPATH)/src/$(ORG)
 	GOBIN=$(GOPATH)/bin go get github.com/jteeuwen/go-bindata/...
@@ -83,7 +76,7 @@ $(GOPATH)/bin/gh-release: $(GOPATH)/src/$(ORG)
 	go get github.com/progrium/gh-release
 
 .PHONY: gendocs
-gendocs: $(GOPATH)/src/$(ORG) $(shell find cmd) pkg/minikube/cluster/assets.go
+gendocs: $(GOPATH)/src/$(ORG) $(shell find cmd)
 	# https://github.com/golang/go/issues/15038#issuecomment-207631885 ( CGO_ENABLED=0 )
 	cd $(GOPATH)/src/$(REPOPATH) && CGO_ENABLED=0 go run -ldflags="$(MINIKUBE_LDFLAGS)" -tags gendocs gen_help_text.go
 
@@ -110,5 +103,4 @@ clean:
 	rm -rf $(GOPATH)
 	rm -rf $(BUILD_DIR)
 	rm -rf release
-	rm -f pkg/minikube/cluster/assets.go
 	rm -rf vendor

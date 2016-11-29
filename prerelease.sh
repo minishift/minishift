@@ -26,23 +26,7 @@ else
 fi
 
 # Ignore these paths in the following tests.
-ignore="vendor\|\_gopath\|assets.go"
-
-# Run "go test" on packages that have test files.
-echo "Running go tests..."
-cd ${GOPATH}/src/${REPO_PATH}
-TESTS=$(go list -f '{{ if .TestGoFiles }} {{.ImportPath}} {{end}}' ./... | grep -v $ignore)
-go test -v ${TESTS}
-
-# Check gofmt
-echo "Checking gofmt..."
-set +e
-files=$(gofmt -l -s . | grep -v ${ignore})
-set -e
-if [[ $files ]]; then
-  echo "Gofmt errors in files: $files"
-  exit 1
-fi
+ignore="vendor"
 
 # Check boilerplate
 echo "Checking boilerplate..."

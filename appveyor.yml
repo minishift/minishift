@@ -1,0 +1,29 @@
+# AppVeyor CI configuration for Minishift
+---
+version: "{build}"
+
+clone_folder: C:\gopath\src\github.com\minishift\minishift
+
+environment:
+  GOPATH: C:\gopath
+
+platform:
+- x64
+
+install:
+# Dump some info
+- go version
+- go env
+# Install Glide and create a specific tmp path to avoid error with too long dir names
+- go get github.com/Masterminds/glide
+- set PATH=%PATH%;%GOPATH%\bin
+- mkdir c:\tmp
+# Use Chocolatey to install make
+- choco install make
+
+build_script:
+- glide --tmp C:\tmp install -v
+- make cross test
+
+artifacts:
+  - path: out\minishift-*

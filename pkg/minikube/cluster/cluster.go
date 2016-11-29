@@ -43,10 +43,7 @@ import (
 	"k8s.io/kubernetes/pkg/client/unversioned/clientcmd"
 
 	"github.com/minishift/minishift/pkg/minikube/constants"
-	"github.com/minishift/minishift/pkg/minikube/sshutil"
 	"github.com/minishift/minishift/pkg/util"
-	"github.com/minishift/minishift/pkg/version"
-	"github.com/pkg/errors"
 )
 
 var (
@@ -171,59 +168,6 @@ type MachineConfig struct {
 	DeployRegistry   bool
 	DeployRouter     bool
 	OpenShiftVersion string
-}
-
-// StartCluster starts a k8s cluster on the specified Host.
-func StartCluster(h sshAble, ip string, config MachineConfig) error {
-	commands := []string{stopCommand, GetStartCommand(ip)}
-	if config.DeployRegistry {
-		commands = append(commands, `
-cd /var/lib/minishift;
-sudo /usr/local/bin/openshift admin registry --service-account=registry --config=openshift.local.config/master/admin.kubeconfig;
-sudo /usr/local/bin/openshift cli patch service docker-registry -p '{"spec": {"type": "NodePort"}}' --config=openshift.local.config/master/admin.kubeconfig
-`)
-	}
-	if config.DeployRouter {
-		commands = append(commands, `
-cd /var/lib/minishift;
-sudo /usr/local/bin/openshift admin policy add-scc-to-user hostnetwork -z router --config=openshift.local.config/master/admin.kubeconfig;
-sudo /usr/local/bin/openshift admin router --service-account=router --config=openshift.local.config/master/admin.kubeconfig
-`)
-	}
-	for _, cmd := range commands {
-		glog.Infoln(cmd)
-		output, err := h.RunSSHCommand(cmd)
-		glog.Infoln(output)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func UpdateCluster(d drivers.Driver, config MachineConfig) error {
-	client, err := sshutil.NewSSHClient(d)
-	if err != nil {
-		return err
-	}
-
-	// transfer openshift from cache/asset to vm
-	if openshiftURIWasSpecified(config) {
-		lCacher := openshiftCacher{config}
-		if err = lCacher.updateOpenShiftFromURI(client); err != nil {
-			return errors.Wrap(err, "Error updating openshift from uri")
-		}
-	} else {
-		if err = updateOpenShiftFromAsset(client); err != nil {
-			return errors.Wrap(err, "Error updating openshift from asset")
-		}
-	}
-	return nil
-}
-
-func openshiftURIWasSpecified(config MachineConfig) bool {
-	return len(config.OpenShiftVersion) != 0 && config.OpenShiftVersion != version.GetOpenShiftVersion()
 }
 
 func engineOptions(config MachineConfig) *engine.Options {

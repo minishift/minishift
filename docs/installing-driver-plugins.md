@@ -12,7 +12,10 @@ the host PATH:
 * [KVM](#kvm-driver)
 * [xhyve](#xhyve-driver)
 
-#### KVM driver
+- [KVM driver](#kvm-driver)   
+- [xhyve driver](#xhyve-driver)   
+
+## KVM driver
 
 Minikube is currently tested against `docker-machine-driver-kvm` 0.7.0.
 
@@ -47,7 +50,7 @@ $ sudo usermod -a -G libvirt $(whoami)
 $ newgrp libvirt
 ```
 
-#### xhyve driver
+## xhyve driver
 
 From https://github.com/zchee/docker-machine-driver-xhyve#install:
 

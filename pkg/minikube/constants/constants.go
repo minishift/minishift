@@ -63,7 +63,7 @@ const (
 	DefaultDiskSize = "20g"
 )
 
-var DefaultIsoUrl = "https://github.com/jimmidyson/minishift/releases/download/v" + version.GetVersion() + "/boot2docker.iso"
+var DefaultIsoUrl = "https://github.com/minishift/minishift/releases/download/v" + version.GetVersion() + "/boot2docker.iso"
 
 const (
 	DefaultConfigViewFormat = "- {{.ConfigKey}}: {{.ConfigValue}}\n"

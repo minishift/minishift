@@ -1,23 +1,25 @@
-# Driver plugin installation
+# Docker Machine driver installation
 
-Minikube uses Docker Machine to manage the Kubernetes VM so it benefits from the
+Minishift uses Docker Machine to manage the OpenShift VM, so it benefits from the
 driver plugin architecture that Docker Machine uses to provide a consistent way to
 manage various VM providers. Minikube embeds VirtualBox and VMware Fusion drivers
 so there are no additional steps to use them. However, other drivers require an
-extra binary to be present in the host PATH.
+extra binary to be present in the host _PATH_.
 
 The following drivers currently require driver plugin binaries to be present in
 the host PATH:
 
-* [KVM](#kvm-driver)
-* [xhyve](#xhyve-driver)
+<!-- MarkdownTOC -->
 
-- [KVM driver](#kvm-driver)   
-- [xhyve driver](#xhyve-driver)   
+- [KVM driver](#kvm-driver)
+- [xhyve driver](#xhyve-driver)
 
+<!-- /MarkdownTOC -->
+
+<a name="kvm-driver"></a>
 ## KVM driver
 
-Minikube is currently tested against `docker-machine-driver-kvm` 0.7.0.
+Minishift is currently tested against `docker-machine-driver-kvm` 0.7.0.
 
 From https://github.com/dhiltgen/docker-machine-kvm#quick-start-instructions:
 
@@ -50,6 +52,7 @@ $ sudo usermod -a -G libvirt $(whoami)
 $ newgrp libvirt
 ```
 
+<a name="xhyve-driver"></a>
 ## xhyve driver
 
 From https://github.com/zchee/docker-machine-driver-xhyve#install:

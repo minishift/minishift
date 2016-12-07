@@ -24,10 +24,12 @@ import (
 	units "github.com/docker/go-units"
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/host"
+	"github.com/docker/machine/libmachine/provision"
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/cache"
+	"github.com/minishift/minishift/pkg/minishift/provisioner"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/version"
 	dockerhost "github.com/openshift/origin/pkg/bootstrap/docker/host"
@@ -163,6 +165,8 @@ func init() {
 
 	viper.BindPFlags(startCmd.Flags())
 	RootCmd.AddCommand(startCmd)
+
+	provision.SetDetector(&provisioner.MinishiftProvisionerDetector{Delegate: provision.StandardDetector{}})
 }
 
 // initClusterUpFlags creates the CLI flags which needs to be passed on to 'oc cluster up'

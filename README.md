@@ -53,8 +53,8 @@ it needs to be disabled.
 <a name="instructions"></a>
 ### Instructions
 
-Download the binary matching your host OS from the Minishift [releases page](https://github.com/minishift/minishift/releases) and copy it to your preferred location. Make sure it is executable and optionally rename
-it to _minishift_.
+Download the archive matching your host OS from the Minishift [releases page](https://github.com/minishift/minishift/releases) and unpack it. Then copy the contained binary to your preferred
+location and optionally ensure it is added to your _PATH_.
 
 On OS X you can also use [Homebrew Cask](https://caskroom.github.io) to install Minishift:
 

@@ -6,28 +6,24 @@ The following paragraphs describe how to build and release Minishift.
 
 - [Prerequisites](#prerequisites)
 - [Setting up the developing environment](#setting-up-the-developing-environment)
-   - [Creating the Go workspace](#creating-the-go-workspace)
-   - [Cloning the repository](#cloning-the-repository)
-   - [Using an IDE](#using-an-ide)
+  - [Creating the Go workspace](#creating-the-go-workspace)
+  - [Cloning the repository](#cloning-the-repository)
+  - [Using an IDE](#using-an-ide)
 - [Managing dependencies](#managing-dependencies)
-   - [Installing Glide](#installing-glide)
-   - [Bootstrapping dependencies](#bootstrapping-dependencies)
-   - [Updating dependencies](#updating-dependencies)
+  - [Installing Glide](#installing-glide)
+  - [Bootstrapping dependencies](#bootstrapping-dependencies)
+  - [Updating dependencies](#updating-dependencies)
 - [Building Minishift](#building-minishift)
-   - [Building the Minishift binary](#building-the-minishift-binary)
-   - [Running the compiled binary](#running-the-compiled-binary)
-   - [Running Tests](#running-tests)
-      - [Unit Tests](#unit-tests)
-      - [Integration Tests](#integration-tests)
-   - [Formatting the source](#formatting-the-source)
-   - [Cleaning all](#cleaning-all)
+  - [Building the Minishift binary](#building-the-minishift-binary)
+  - [Running the Minishift binary](#running-the-minishift-binary)
+  - [Running Tests](#running-tests)
+    - [Unit Tests](#unit-tests)
+    - [Integration Tests](#integration-tests)
+  - [Formatting the source](#formatting-the-source)
+  - [Cleaning all](#cleaning-all)
 - [Releasing Minishift](#releasing-minishift)
-   - [Create a Release Notes PR](#create-a-release-notes-pr)
-   - [Build and Release a New ISO](#build-and-release-a-new-iso)
-   - [Bump the version in the Makefile](#bump-the-version-in-the-makefile)
-   - [Tag the Release](#tag-the-release)
-   - [Build the Release](#build-the-release)
-   - [Create a Release in GitHub](#create-a-release-in-github)
+  - [Prerequisites](#prerequisites-1)
+  - [Cutting the release](#cutting-the-release)
 
 <!-- /MarkdownTOC -->
 
@@ -138,8 +134,8 @@ Double check everything still compiles with the new lock file in place.
 make
 ```
 
-<a name="running-the-compiled-binary"></a>
-### Running the compiled binary
+<a name="running-the-minishift-binary"></a>
+### Running the Minishift binary
 
 Start the cluster using your built minikube with:
 
@@ -189,44 +185,18 @@ To remove all generated artifacts and installed dependencies, run:
 <a name="releasing-minishift"></a>
 ## Releasing Minishift
 
-**Note**: The following paragraphs are partly out of date. Work in progress ...
+<a name="prerequisites-1"></a>
+### Prerequisites
 
-<a name="create-a-release-notes-pr"></a>
-### Create a Release Notes PR
+* A [GitHub personal access token](https://help.github.com/articles/creating-an-access-token-for-command-line-use)
+  defined in your environment as GITHUB_ACCESS_TOKEN
 
-Assemble all the meaningful changes since the last release into the CHANGELOG.md file.
-See [this PR](https://github.com/kubernetes/minikube/pull/164) for an example.
+<a name="cutting-the-release"></a>
+### Cutting the release
 
-<a name="build-and-release-a-new-iso"></a>
-### Build and Release a New ISO
+* Update the [CHANGELOG.md](../CHANGELOG.md) with the changes since the last release.
+* Bump the version in the [VERSION](../VERSION)
+* Commit
+* Create binaries and upload them to GitHub (this will also tag the release):
 
-This step isn't always required. Check if there were changes in the deploy directory.
-If you do this, bump the ISO URL to point to the new ISO, and send a PR.
-
-<a name="bump-the-version-in-the-makefile"></a>
-### Bump the version in the Makefile
-
-See [this PR](https://github.com/kubernetes/minikube/pull/165) for an example.
-
-<a name="tag-the-release"></a>
-### Tag the Release
-
-Run a command like this to tag it locally: `git tag -a v0.2.0 -m "0.2.0 Release"`.
-
-And run a command like this to push the tag: `git push origin v0.2.0`.
-
-<a name="build-the-release"></a>
-### Build the Release
-
-Run:
-
-```shell
-make cross
-```
-
-<a name="create-a-release-in-github"></a>
-### Create a Release in GitHub
-
-Create a new release based on your tag, like [this one](https://github.com/kubernetes/minikube/releases/tag/v0.2.0).
-
-Upload the files, and calculate checksums.
+        $ make release

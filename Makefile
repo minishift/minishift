@@ -16,7 +16,6 @@ VERSION ?= $(shell cat VERSION)
 OPENSHIFT_VERSION ?= $(shell cat OPENSHIFT_VERSION)
 
 GOOS ?= $(shell go env GOOS)
-$(shell go env GOOS | echo)
 GOARCH ?= $(shell go env GOARCH)
 BUILD_DIR ?= ./out
 ORG := github.com/minishift
@@ -32,23 +31,23 @@ GOFILES := go list  -f '{{join .Deps "\n"}}' ./cmd/minikube/ | grep $(REPOPATH) 
 GOFILES_NO_VENDOR := $(GOFILES) | grep -v /vendor
 PACKAGES := go list ./... | grep -v /vendor
 
-$(GOPATH)/bin/minishift$(IS_EXE): out/minishift-$(GOOS)-$(GOARCH)$(IS_EXE)
-	cp $(BUILD_DIR)/minishift-$(GOOS)-$(GOARCH)$(IS_EXE) $(GOPATH)/bin/minishift$(IS_EXE)
-
-out/minishift$(IS_EXE): out/minishift-$(GOOS)-$(GOARCH)$(IS_EXE)
-	cp $(BUILD_DIR)/minishift-$(GOOS)-$(GOARCH)$(IS_EXE) $(BUILD_DIR)/minishift$(IS_EXE)
+$(GOPATH)/bin/minishift$(IS_EXE): $(BUILD_DIR)/$(GOOS)-$(GOARCH)/minishift$(IS_EXE)
+	cp $(BUILD_DIR)/$(GOOS)-$(GOARCH)/minishift$(IS_EXE) $(GOPATH)/bin/minishift$(IS_EXE)
 
 vendor:
 	glide install -v
 
-out/minishift-darwin-amd64: vendor $(GOPATH)/src/$(ORG) $(shell $(GOFILES)) VERSION
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/minishift-darwin-amd64 ./cmd/minikube
+$(BUILD_DIR)/$(GOOS)-$(GOARCH):
+	mkdir -p $(BUILD_DIR)/$(GOOS)-$(GOARCH)
 
-out/minishift-linux-amd64: vendor $(GOPATH)/src/$(ORG) $(shell $(GOFILES)) VERSION
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/minishift-linux-amd64 ./cmd/minikube
+$(BUILD_DIR)/darwin-amd64/minishift: vendor $(GOPATH)/src/$(ORG) $(BUILD_DIR)/$(GOOS)-$(GOARCH) $(shell $(GOFILES)) VERSION
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/darwin-amd64/minishift ./cmd/minikube
 
-out/minishift-windows-amd64.exe: vendor $(GOPATH)/src/$(ORG) $(shell $(GOFILES)) VERSION
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/minishift-windows-amd64.exe ./cmd/minikube
+$(BUILD_DIR)/linux-amd64/minishift: vendor $(GOPATH)/src/$(ORG) $(BUILD_DIR)/$(GOOS)-$(GOARCH) $(shell $(GOFILES)) VERSION
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/linux-amd64/minishift ./cmd/minikube
+
+$(BUILD_DIR)/windows-amd64/minishift.exe: vendor $(GOPATH)/src/$(ORG) $(BUILD_DIR)/$(GOOS)-$(GOARCH) $(shell $(GOFILES)) VERSION
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/windows-amd64/minishift.exe ./cmd/minikube
 
 deploy/iso/minishift.iso: $(shell find deploy/iso -type f ! -name *.iso)
 	cd deploy/iso && ./build.sh
@@ -68,16 +67,15 @@ gendocs: $(GOPATH)/src/$(ORG) $(shell find cmd)
 .PHONY: release
 release: clean deploy/iso/minishift.iso fmtcheck test prerelease $(GOPATH)/bin/gh-release cross
 	mkdir -p release
-	cp out/minishift-*-amd64* release
 	cp deploy/iso/minishift.iso release/boot2docker.iso
+	gnutar -zcf release/minishift-$(VERSION)-darwin-amd64.tgz LICENSE README.md -C $(BUILD_DIR)/darwin-amd64 minishift
+	gnutar -zcf release/minishift-$(VERSION)-linux-amd64.tgz LICENSE README.md -C $(BUILD_DIR)/linux-amd64 minishift
+	zip -j release/minishift-$(VERSION)-windows-amd64.zip LICENSE README.md $(BUILD_DIR)/windows-amd64/minishift.exe
 	gh-release checksums sha256
 	gh-release create minishift/minishift $(VERSION) master v$(VERSION)
 
 .PHONY: cross
-cross: out/minishift-linux-amd64 out/minishift-darwin-amd64 out/minishift-windows-amd64.exe
-
-.PHONY: gopath
-gopath: $(GOPATH)/src/$(ORG)
+cross: $(BUILD_DIR)/darwin-amd64/minishift $(BUILD_DIR)/linux-amd64/minishift $(BUILD_DIR)/windows-amd64/minishift.exe
 
 .PHONY: clean
 clean:
@@ -91,7 +89,7 @@ test: vendor $(GOPATH)/src/$(ORG)
 	@go test $(shell $(PACKAGES))
 
 .PHONY: integration
-integration: out/minishift
+integration: $(BUILD_DIR)/$(GOOS)-$(GOARCH)/minishift$(IS_EXE)
 	go test $(REPOPATH)/test/integration --tags=integration
 
 .PHONY: fmt

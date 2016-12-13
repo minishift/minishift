@@ -118,7 +118,7 @@ the total path lengths:
 
 If your work requires a change to the dependencies, edit _glide.yaml_ adding or changing the
 dependency list as needed. Next remove _glide.lock_ and re-create the vendor directory by
-[bootstrapping](#bootstrapping-dependencies)) it. Glide will recognize that there is no lock
+[bootstrapping](#bootstrapping-dependencies) it. Glide will recognize that there is no lock
 file and recalculate the required dependencies. Once complete, there will be an updated
 _glide.lock_ file which you then check in together with the updated _glide.yaml_.
 
@@ -194,9 +194,9 @@ To remove all generated artifacts and installed dependencies, run:
 <a name="cutting-the-release"></a>
 ### Cutting the release
 
-* Update the [CHANGELOG.md](../CHANGELOG.md) with the changes since the last release.
+* Update the [CHANGELOG.md](../CHANGELOG.md) with the changes since the last release
 * Bump the version in the [VERSION](../VERSION)
-* Commit
+* Commit your changes with appropriate message
 * Create binaries and upload them to GitHub (this will also tag the release):
 
         $ make release

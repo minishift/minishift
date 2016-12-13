@@ -124,7 +124,7 @@ eval $(minishift docker-env)
 ```
 
 You should now be able to use _docker_ on the command line of your host talking to the docker daemon
-inside the minishift VM:
+inside the Minishift VM:
 ```
 docker ps
 ```

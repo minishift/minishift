@@ -34,13 +34,13 @@ This command creates and configures a virtual machine that runs a single-node Op
 <a name="stopping-a-cluster"></a>
 ### Stopping a cluster
 The [minishift stop](./docs/minishift_stop.md) command can be used to stop your cluster.
-This command shuts down the minishift virtual machine, but preserves all cluster state and data.
+This command shuts down the Minishift virtual machine, but preserves all cluster state and data.
 Starting the cluster again will restore it to it's previous state.
 
 <a name="deleting-a-cluster"></a>
 ### Deleting a cluster
 The [minishift delete](./docs/minishift_delete.md) command can be used to delete your cluster.
-This command shuts down and deletes the minishift virtual machine. No data or state is preserved.
+This command shuts down and deletes the Minishift virtual machine. No data or state is preserved.
 
 <a name="interacting-with-your-cluster"></a>
 ## Interacting With your Cluster
@@ -63,7 +63,7 @@ also Github issue [#142](https://github.com/minishift/minishift/issues/142).
 ### Console
 
 To access the [OpenShift console](https://docs.openshift.org/latest/architecture/infrastructure_components/web_console.html),
-run this command in a shell after starting minishift to get the address:
+run this command in a shell after starting Minishift to get the address:
 
 ```shell
 minishift console
@@ -72,7 +72,7 @@ minishift console
 <a name="services"></a>
 ### Services
 
-To access a service exposed via a node port, run this command in a shell after starting minishift to get the address:
+To access a service exposed via a node port, run this command in a shell after starting Minishift to get the address:
 
 ```shell
 minishift service [-n NAMESPACE] [--url] NAME
@@ -104,7 +104,7 @@ with the `minishift ip` command.
 ## Persistent volumes
 
 Minishift supports [PersistentVolumes](https://docs.openshift.org/latest/dev_guide/persistent_volumes.html)
-of type `hostPath`. These PersistentVolumes are mapped to a directory inside the minishift VM.
+of type `hostPath`. These PersistentVolumes are mapped to a directory inside the Minishift VM.
 
 The MiniShift VM boots into a tmpfs, so most directories will not be persisted across reboots (`minishift stop`).
 However, MiniShift is configured to persist files stored under the following host directories:

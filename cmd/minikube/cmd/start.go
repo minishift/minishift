@@ -34,6 +34,8 @@ import (
 	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"github.com/docker/machine/libmachine/provision"
+	"github.com/minishift/minishift/pkg/minishift/provisioner"
 )
 
 const (
@@ -163,6 +165,8 @@ func init() {
 
 	viper.BindPFlags(startCmd.Flags())
 	RootCmd.AddCommand(startCmd)
+
+	provision.SetDetector(&provisioner.MinishiftProvisionerDetector{Delegate: provision.StandardDetector{}})
 }
 
 // initClusterUpFlags creates the CLI flags which needs to be passed on to 'oc cluster up'

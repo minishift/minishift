@@ -24,7 +24,7 @@ minishift start
       --host-only-cidr string      The CIDR to be used for the minishift VM (only supported with Virtualbox driver) (default "192.168.99.1/24")
       --host-volumes-dir string    Directory on Docker host for OpenShift volumes (default "/var/lib/origin/openshift.local.volumes")
       --insecure-registry value    Insecure Docker registries to pass to the Docker daemon (default [172.30.0.0/16])
-      --iso-url string             Location of the minishift iso (default "https://github.com/jimmidyson/minishift/releases/download/v0.9.0/boot2docker.iso")
+      --iso-url string             Location of the minishift iso (default "https://github.com/minishift/minishift/releases/download/v1.0.0-beta.1/boot2docker.iso")
       --memory int                 Amount of RAM allocated to the minishift VM (default 2048)
       --metrics                    Install metrics (experimental)
   -e, --openshift-env value        Specify key value pairs of environment variables to set on OpenShift container (default [])

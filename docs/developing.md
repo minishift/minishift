@@ -194,9 +194,8 @@ To remove all generated artifacts and installed dependencies, run:
 <a name="cutting-the-release"></a>
 ### Cutting the release
 
-* Update the [CHANGELOG.md](../CHANGELOG.md) with the changes since the last release
 * Bump the version in the [VERSION](../VERSION)
-* Commit your changes with appropriate message
+* Commit and push your changes with a message of the form "cut v1.0.0"
 * Create binaries and upload them to GitHub (this will also tag the release):
 
         $ make release

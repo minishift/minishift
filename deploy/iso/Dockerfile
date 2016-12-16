@@ -14,7 +14,7 @@
 
 # TODO: Move this to somewhere on GCR and manage tags explicitly instead of
 # relying on latest.
-FROM boot2docker/boot2docker
+FROM boot2docker/boot2docker:1.12.3
 
 # Set the version of Docker and the expected sha.
 RUN echo "1.11.2" > $ROOTFS/etc/version
@@ -42,7 +42,7 @@ RUN curl -fSL -o /tmp/dockerbin.tgz https://get.docker.com/builds/Linux/x86_64/d
 RUN $ROOTFS/usr/local/bin/docker -v
 
 # Build the actual iso image
-RUN /tmp/make_iso.sh
+RUN /make_iso.sh
 
 # Output it to transfer back to the host
 CMD ["cat", "boot2docker.iso"]

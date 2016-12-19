@@ -30,6 +30,7 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/cache"
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
+	"github.com/minishift/minishift/pkg/minishift/registration"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/version"
 	dockerhost "github.com/openshift/origin/pkg/bootstrap/docker/host"
@@ -85,6 +86,9 @@ var startFlagSet = flag.NewFlagSet(commandName, flag.ContinueOnError)
 
 // clusterUpFlagSet contains the command line switches which needs to be passed on to 'cluster up'
 var clusterUpFlagSet = flag.NewFlagSet(commandName, flag.ContinueOnError)
+
+// registerFlagSet contains registration specific switches
+var registerFlagSet = flag.NewFlagSet(commandName, flag.ContinueOnError)
 
 // minishiftToClusterUp is a mapping between falg names used in minishift CLI and flag name as passed to 'cluster up'
 var minishiftToClusterUp = map[string]string{
@@ -143,6 +147,20 @@ func runStart(cmd *cobra.Command, args []string) {
 		os.Setenv(k, v)
 	}
 
+	registrator, err := registration.DetectRegistrator(host.Driver)
+	if err != nil {
+		fmt.Println("Distribution doesn't support registration")
+	} else {
+		fmt.Printf("Registration with %s...", registrator)
+		m := make(map[string]string)
+		m["username"] = viper.GetString(username)
+		m["password"] = viper.GetString(password)
+		if err := registrator.Register(m); err != nil {
+			fmt.Errorf("Error running registration: %s", err)
+			os.Exit(1)
+		}
+	}
+
 	clusterUp(&config)
 }
 
@@ -162,6 +180,7 @@ func init() {
 
 	startCmd.Flags().AddFlagSet(startFlagSet)
 	startCmd.Flags().AddFlagSet(clusterUpFlagSet)
+	startCmd.Flags().AddFlagSet(registerFlagSet)
 
 	viper.BindPFlags(startCmd.Flags())
 	RootCmd.AddCommand(startCmd)

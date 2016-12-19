@@ -23,6 +23,7 @@ import (
 	"github.com/docker/machine/libmachine"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minishift/registration"
 	"github.com/spf13/cobra"
 )
 
@@ -36,6 +37,22 @@ itself, leaving all files intact. The cluster can be started again with the "sta
 		fmt.Println("Stopping local OpenShift cluster...")
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()
+		// Unregister VM when stop
+		host, err := api.Load(constants.MachineName)
+		if err != nil {
+			fmt.Println("Error stopping machine: ", err)
+			os.Exit(1)
+		}
+		registrator, err := registration.DetectRegistrator(host.Driver)
+		if err != nil {
+			fmt.Println("Distribution doesn't support unregister")
+		} else {
+			fmt.Println("Unregistering distribution...")
+			if err := registrator.Unregister(); err != nil {
+				fmt.Println("Error Unregistering distribution ", err)
+				os.Exit(1)
+			}
+		}
 
 		if err := cluster.StopHost(api); err != nil {
 			fmt.Println("Error stopping machine: ", err)

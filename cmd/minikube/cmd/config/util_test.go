@@ -27,51 +27,51 @@ var minikubeConfig = MinikubeConfig{
 func TestFindSettingNotFound(t *testing.T) {
 	s, err := findSetting("nonexistant")
 	if err == nil {
-		t.Fatalf("Shouldn't have found setting, but did. [%+v]", s)
+		t.Fatalf("Unexpected setting found. [%+v]", s)
 	}
 }
 
 func TestFindSetting(t *testing.T) {
 	s, err := findSetting("vm-driver")
 	if err != nil {
-		t.Fatalf("Couldn't find setting, vm-driver: %s", err)
+		t.Fatalf("Cannot find the setting of the vm-driver: %s", err)
 	}
 	if s.name != "vm-driver" {
-		t.Fatalf("Found wrong setting, expected vm-driver, got %s", s.name)
+		t.Fatalf("Incorrect setting, expected vm-driver, received %s", s.name)
 	}
 }
 
 func TestSetString(t *testing.T) {
 	err := SetString(minikubeConfig, "vm-driver", "virtualbox")
 	if err != nil {
-		t.Fatalf("Couldnt set string: %s", err)
+		t.Fatalf("Cannot set the string: %s", err)
 	}
 }
 
 func TestSetInt(t *testing.T) {
 	err := SetInt(minikubeConfig, "cpus", "22")
 	if err != nil {
-		t.Fatalf("Couldn't set int in config: %s", err)
+		t.Fatalf("Cannot set integer value in config: %s", err)
 	}
 	val, ok := minikubeConfig["cpus"].(int)
 	if !ok {
-		t.Fatalf("Type not set to int")
+		t.Fatalf("Type is not set to int")
 	}
 	if val != 22 {
-		t.Fatalf("SetInt set wrong value")
+		t.Fatalf("SetInt set value is incorrect")
 	}
 }
 
 func TestSetBool(t *testing.T) {
 	err := SetBool(minikubeConfig, "show-libmachine-logs", "true")
 	if err != nil {
-		t.Fatalf("Couldn't set bool in config: %s", err)
+		t.Fatalf("Cannot set boolean value in config: %s", err)
 	}
 	val, ok := minikubeConfig["show-libmachine-logs"].(bool)
 	if !ok {
-		t.Fatalf("Type not set to bool")
+		t.Fatalf("Type is not set to bool")
 	}
 	if !val {
-		t.Fatalf("SetBool set wrong value")
+		t.Fatalf("SetBool set value is incorrect")
 	}
 }

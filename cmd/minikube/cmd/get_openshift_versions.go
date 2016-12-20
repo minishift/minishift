@@ -26,8 +26,8 @@ import (
 // getVersionsCmd represents the ip command
 var getVersionsCmd = &cobra.Command{
 	Use:   "get-openshift-versions",
-	Short: "Gets the list of available OpenShift versions available for minishift.",
-	Long:  `Gets the list of available OpenShift versions available for minishift.`,
+	Short: "Gets the list of OpenShift versions available for Minishift.",
+	Long:  `Gets the list of OpenShift versions available for Minishift.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		openshiftversions.PrintOpenShiftVersionsFromGitHub(os.Stdout)
 	},

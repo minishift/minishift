@@ -60,7 +60,7 @@ func TestStartClusterUpNoFlags(t *testing.T) {
 
 	expectedOc := filepath.Join(testDir, "cache", "oc", testMachineConfig.OpenShiftVersion, constants.OC_BINARY_NAME)
 	if testRunner.Cmd != expectedOc {
-		t.Errorf("Expected command '%s'. Got '%s'", expectedOc, testRunner.Cmd)
+		t.Errorf("Expected command '%s'. Received '%s'", expectedOc, testRunner.Cmd)
 	}
 
 	expectedArguments := []string{"cluster", "up", "--use-existing-config",
@@ -68,7 +68,7 @@ func TestStartClusterUpNoFlags(t *testing.T) {
 		"--host-data-dir", hostDataDirectory}
 	for i, v := range testRunner.Args {
 		if v != expectedArguments[i] {
-			t.Errorf("Expected argument '%s'. Got '%s'", expectedArguments[i], v)
+			t.Errorf("Expected argument '%s'. Received '%s'", expectedArguments[i], v)
 		}
 	}
 }
@@ -145,16 +145,16 @@ func TestStartClusterUpWithOpenShiftEnv(t *testing.T) {
 
 func assertCommandLineArguments(expectedArguments []string, t *testing.T) {
 	if len(expectedArguments) > len(testRunner.Args) {
-		t.Errorf("Expected more arguments than were received. Expected: '%s'. Got: '%s'", expectedArguments, testRunner.Args)
+		t.Errorf("Expected more arguments than received. Expected: '%s'. Got: '%s'", expectedArguments, testRunner.Args)
 	}
 
 	if len(expectedArguments) < len(testRunner.Args) {
-		t.Errorf("Got more arguments than were expected. Expected: '%s'. Got '%s'", expectedArguments, testRunner.Args)
+		t.Errorf("Received more arguments than expected. Expected: '%s'. Got '%s'", expectedArguments, testRunner.Args)
 	}
 
 	for i, v := range testRunner.Args {
 		if v != expectedArguments[i] {
-			t.Errorf("Expected argument '%s'. Got '%s'", expectedArguments[i], v)
+			t.Errorf("Expected argument '%s'. Received '%s'", expectedArguments[i], v)
 		}
 	}
 }

@@ -1,11 +1,11 @@
 ## minishift
 
-Minishift is a tool for managing local OpenShift clusters.
+Minishift is a tool for application development in local OpenShift clusters.
 
 ### Synopsis
 
 
-Minishift is a CLI tool that provisions and manages single-node OpenShift clusters optimized for development workflows.
+Minishift is a command-line tool that provisions and manages single-node OpenShift clusters optimized for development workflows.
 
 ### Options
 
@@ -15,26 +15,26 @@ Minishift is a CLI tool that provisions and manages single-node OpenShift cluste
       --log_backtrace_at value         when logging hits line file:N, emit a stack trace (default :0)
       --log_dir value                  If non-empty, write log files in this directory
       --logtostderr value              log to standard error instead of files
-      --password string                Password to register Virtual Machine
-      --show-libmachine-logs           Whether or not to show logs from libmachine.
+      --password string                Password for the virtual machine.
+      --show-libmachine-logs           Show logs from libmachine.
       --stderrthreshold value          logs at or above this threshold go to stderr (default 2)
-      --username string                Username to register Virtual Machine
+      --username string                User name for the virtual machine.
   -v, --v value                        log level for V logs
       --vmodule value                  comma-separated list of pattern=N settings for file-filtered logging
 ```
 
 ### SEE ALSO
-* [minishift config](minishift_config.md)	 - Modify minishift config
-* [minishift console](minishift_console.md)	 - Opens/displays the OpenShift console URL for your local cluster
-* [minishift delete](minishift_delete.md)	 - Deletes a local OpenShift cluster.
-* [minishift docker-env](minishift_docker-env.md)	 - sets up docker env variables; similar to '$(docker-machine env)'
-* [minishift get-openshift-versions](minishift_get-openshift-versions.md)	 - Gets the list of available OpenShift versions available for minishift.
-* [minishift ip](minishift_ip.md)	 - Retrieve the IP address of the running cluster.
-* [minishift logs](minishift_logs.md)	 - Gets the logs of the running OpenShift instance, used for debugging minishift, not user code.
-* [minishift service](minishift_service.md)	 - Gets the URL for the specified service in your local cluster
-* [minishift ssh](minishift_ssh.md)	 - Log into or run a command on a machine with SSH; similar to 'docker-machine ssh'
+* [minishift config](minishift_config.md)	 - Modifies Minishift configuration properties.
+* [minishift console](minishift_console.md)	 - Opens the OpenShift Web console to the root of your local cluster.
+* [minishift delete](minishift_delete.md)	 - Deletes the Minishift VM.
+* [minishift docker-env](minishift_docker-env.md)	 - Sets Docker environment variables.
+* [minishift get-openshift-versions](minishift_get-openshift-versions.md)	 - Gets the list of OpenShift versions available for Minishift.
+* [minishift ip](minishift_ip.md)	 - Gets the IP address of the running cluster.
+* [minishift logs](minishift_logs.md)	 - Gets the logs of the running OpenShift cluster.
+* [minishift service](minishift_service.md)	 - Opens the specified service in the OpenShift Web console.
+* [minishift ssh](minishift_ssh.md)	 - Log in to or run a command on a Minishift VM with SSH.
 * [minishift start](minishift_start.md)	 - Starts a local OpenShift cluster.
-* [minishift status](minishift_status.md)	 - Gets the status of a local OpenShift cluster.
-* [minishift stop](minishift_stop.md)	 - Stops a running local OpenShift cluster.
-* [minishift version](minishift_version.md)	 - Print the version of minishift.
+* [minishift status](minishift_status.md)	 - Gets the status of the local OpenShift cluster.
+* [minishift stop](minishift_stop.md)	 - Stops the running local OpenShift cluster.
+* [minishift version](minishift_version.md)	 - Gets the version of Minishift.
 

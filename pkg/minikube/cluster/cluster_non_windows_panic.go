@@ -21,5 +21,5 @@ package cluster
 import "github.com/docker/machine/libmachine/drivers"
 
 func createHypervHost(config MachineConfig) drivers.Driver {
-	panic("hyperv not supported")
+	panic("hyperv is not supported")
 }

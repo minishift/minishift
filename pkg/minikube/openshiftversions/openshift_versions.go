@@ -56,7 +56,7 @@ func getVersions() ([]*github.RepositoryRelease, error) {
 	defer resp.Body.Close()
 
 	if len(releases) == 0 {
-		return nil, errors.New("There were no OpenShift releases available")
+		return nil, errors.New("There are no OpenShift versions available.")
 	}
 	return releases, nil
 }

@@ -107,7 +107,7 @@ func decideStorageDriver(p *MinishiftProvisioner, defaultDriver, suppliedDriver 
 
 	defer func() {
 		if bestSuitedDriver != "" {
-			log.Debugf("No storagedriver specified, using %s\n", bestSuitedDriver)
+			log.Debugf("No storage driver specified, instead using %s\n", bestSuitedDriver)
 		}
 	}()
 
@@ -131,7 +131,7 @@ func decideStorageDriver(p *MinishiftProvisioner, defaultDriver, suppliedDriver 
 func getFilesystemType(p *MinishiftProvisioner, directory string) (string, error) {
 	statCommandOutput, err := p.SSHCommand("stat -f -c %T " + directory)
 	if err != nil {
-		err = fmt.Errorf("Error looking up filesystem type: %s", err)
+		err = fmt.Errorf("Error looking up file system type: %s", err)
 		return "", err
 	}
 

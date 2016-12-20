@@ -99,10 +99,10 @@ func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minis
 	errorMessage := ""
 	if len(version) > 1 {
 		release, resp, err = client.Repositories.GetReleaseByTag("openshift", "origin", version)
-		errorMessage = fmt.Sprintf("Could not get OpenShift release version %s ", version)
+		errorMessage = fmt.Sprintf("Cannot get the OpenShift release version %s ", version)
 	} else {
 		release, resp, err = client.Repositories.GetLatestRelease("openshift", "origin")
-		errorMessage = "Could not get latest OpenShift release"
+		errorMessage = "Cannot get the latest OpenShift release."
 
 	}
 	if err != nil {
@@ -114,7 +114,7 @@ func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minis
 	// Get asset id and filename based on the method parameters
 	assetID, assetFilename := getAssetIdAndFilename(binaryType, osType, release)
 	if assetID == 0 {
-		return errors.New(fmt.Sprintf("Could not get binary '%s' in version %s for target environment %s",
+		return errors.New(fmt.Sprintf("Cannot get binary '%s' in version %s for the target environment %s",
 			binaryType.String(), version, strings.Title(osType.String())))
 	}
 
@@ -122,13 +122,13 @@ func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minis
 	var asset io.Reader
 	asset, url, err := client.Repositories.DownloadReleaseAsset("openshift", "origin", assetID)
 	if err != nil {
-		return errors.Wrap(err, fmt.Sprintf("Could not download OpenShift release asset %d", assetID))
+		return errors.Wrap(err, fmt.Sprintf("Cannot download OpenShift release asset %d", assetID))
 	}
 	if len(url) > 0 {
 		glog.V(2).Infof("Downloading %s %s\n", binaryType.String(), *release.TagName)
 		httpResp, err := http.Get(url)
 		if err != nil {
-			return errors.Wrap(err, "Could not download OpenShift release asset")
+			return errors.Wrap(err, "Cannot download OpenShift release asset.")
 		}
 		defer func() { _ = httpResp.Body.Close() }()
 
@@ -150,7 +150,7 @@ func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minis
 	// Create target directory and file
 	tmpDir, err := ioutil.TempDir("", "minishift-asset-download-")
 	if err != nil {
-		return errors.Wrap(err, "Unable to create temporary download directory")
+		return errors.Wrap(err, "Cannot create temporary download directory.")
 	}
 	defer os.RemoveAll(tmpDir)
 
@@ -159,17 +159,17 @@ func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minis
 	out, err := os.Create(assetTmpFile)
 	defer out.Close()
 	if err != nil {
-		return errors.Wrapf(err, "Unable to create file %s", assetTmpFile)
+		return errors.Wrapf(err, "Cannot create file %s", assetTmpFile)
 	}
 
 	// Copy the asset and verify its hash
 	_, err = io.Copy(out, asset)
 	if err != nil {
-		return errors.Wrapf(err, "Failed to copy %s to %s", assetTmpFile, tmpDir)
+		return errors.Wrapf(err, "Cannot copy %s to %s", assetTmpFile, tmpDir)
 	}
 	err = out.Sync()
 	if err != nil {
-		return errors.Wrapf(err, "Failed to copy %s to %s", assetTmpFile, tmpDir)
+		return errors.Wrapf(err, "Cannot copy %s to %s", assetTmpFile, tmpDir)
 	}
 
 	// Disabling hash verification due to inconsistent checksums on OpenShift download page - https://github.com/openshift/origin/issues/12025
@@ -193,18 +193,18 @@ func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minis
 		tarFile := assetTmpFile[:len(assetTmpFile)-3]
 		err = archive.Ungzip(assetTmpFile, tarFile)
 		if err != nil {
-			return errors.Wrapf(err, "Unable to ungzip %s", assetTmpFile)
+			return errors.Wrapf(err, "Cannot run ungzip %s", assetTmpFile)
 		}
 		err = archive.Untar(tarFile, tmpDir)
 		if err != nil {
-			return errors.Wrapf(err, "Unable to untar %s", tarFile)
+			return errors.Wrapf(err, "Cannot run untar %s", tarFile)
 		}
 		binaryPath = tarFile[:len(tarFile)-4]
 	case strings.HasSuffix(assetTmpFile, ZIP):
 		contentDir := assetTmpFile[:len(assetTmpFile)-4]
 		err = archive.Unzip(assetTmpFile, contentDir)
 		if err != nil {
-			return errors.Wrapf(err, "Unable to unzip %s", assetTmpFile)
+			return errors.Wrapf(err, "Cannot run unzip %s", assetTmpFile)
 		}
 		binaryPath = contentDir
 	}
@@ -218,7 +218,7 @@ func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minis
 	// Copy the requested asset into its final destination
 	err = os.MkdirAll(outputPath, 0755)
 	if err != nil && !os.IsExist(err) {
-		return errors.Wrap(err, "Could not create target directory")
+		return errors.Wrap(err, "Cannot create the target directory.")
 	}
 
 	finalBinaryPath := filepath.Join(outputPath, binaryName)
@@ -229,7 +229,7 @@ func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minis
 
 	err = os.Chmod(finalBinaryPath, 0777)
 	if err != nil {
-		return errors.Wrapf(err, "Could not make %s executable", finalBinaryPath)
+		return errors.Wrapf(err, "Cannot make %s executable", finalBinaryPath)
 	}
 
 	return nil
@@ -269,18 +269,18 @@ func getAssetIdAndFilename(binaryType OpenShiftBinaryType, osType minishiftos.OS
 func downloadHash(release *github.RepositoryRelease, filename string) (string, error) {
 	checksumAssetID := getOpenShiftChecksumAssetID(release)
 	if checksumAssetID == 0 {
-		return "", errors.New("Could not get OpenShift release checksum URL")
+		return "", errors.New("Cannot get the OpenShift release checksum URL.")
 	}
 	var asset io.Reader
 	asset, url, err := client.Repositories.DownloadReleaseAsset("openshift", "origin", checksumAssetID)
 	if err != nil {
-		return "", errors.Wrap(err, "Could not download OpenShift release checksum asset")
+		return "", errors.Wrap(err, "Cannot download the OpenShift release checksum asset.")
 	}
 	if len(url) > 0 {
 		glog.V(2).Infof("Downloading OpenShift %s checksums\n", *release.TagName)
 		httpResp, err := http.Get(url)
 		if err != nil {
-			return "", errors.Wrap(err, "Could not download OpenShift release checksum asset")
+			return "", errors.Wrap(err, "Cannot download the OpenShift release checksum asset.")
 		}
 		defer func() { _ = httpResp.Body.Close() }()
 
@@ -320,23 +320,23 @@ func copy(src, dest string) error {
 	srcFile, err := os.Open(src)
 	defer srcFile.Close()
 	if err != nil {
-		return errors.Wrapf(err, "Unable to open src file %s", src)
+		return errors.Wrapf(err, "Cannot open src file %s", src)
 	}
 
 	destFile, err := os.Create(dest)
 	defer destFile.Close()
 	if err != nil {
-		return errors.Wrapf(err, "Unable to create dst file %s", dest)
+		return errors.Wrapf(err, "Cannot create dst file %s", dest)
 	}
 
 	_, err = io.Copy(destFile, srcFile)
 	if err != nil {
-		return errors.Wrapf(err, "Unable to copy %s to %s", src, dest)
+		return errors.Wrapf(err, "Cannot copy %s to %s", src, dest)
 	}
 
 	err = destFile.Sync()
 	if err != nil {
-		return errors.Wrapf(err, "Unable to copy %s to %s", src, dest)
+		return errors.Wrapf(err, "Cannot copy %s to %s", src, dest)
 	}
 
 	return nil

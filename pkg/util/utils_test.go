@@ -38,11 +38,11 @@ func TestErrorGenerator(t *testing.T) {
 	f := errorGenerator(errors)
 	for i := 0; i < errors-1; i++ {
 		if err := f(); err == nil {
-			t.Fatalf("Error should have been thrown at iteration %v", i)
+			t.Fatalf("Error should have been reported at iteration %v", i)
 		}
 	}
 	if err := f(); err == nil {
-		t.Fatalf("Error should not have been thrown this call!")
+		t.Fatalf("Error should not have been reported by this call.")
 	}
 }
 
@@ -50,12 +50,12 @@ func TestRetry(t *testing.T) {
 
 	f := errorGenerator(4)
 	if err := Retry(5, f); err != nil {
-		t.Fatalf("Error should not have been raised by retry.")
+		t.Fatalf("Error should not have been reported during retry.")
 	}
 
 	f = errorGenerator(5)
 	if err := Retry(4, f); err == nil {
-		t.Fatalf("Error should have been raised by retry.")
+		t.Fatalf("Error should have been reported during retry.")
 	}
 
 }

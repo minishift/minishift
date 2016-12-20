@@ -21,5 +21,5 @@ package cluster
 import "github.com/docker/machine/libmachine/drivers"
 
 func createKVMHost(config MachineConfig) drivers.Driver {
-	panic("kvm not supported")
+	panic("kvm is not supported")
 }

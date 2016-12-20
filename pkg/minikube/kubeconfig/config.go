@@ -41,7 +41,7 @@ func ReadConfigOrNew(filename string) (*api.Config, error) {
 	// decode config, empty if no bytes
 	config, err := decode(data)
 	if err != nil {
-		return nil, fmt.Errorf("could not read config: %v", err)
+		return nil, fmt.Errorf("Cannot read config: %v", err)
 	}
 
 	// initialize nil maps
@@ -62,13 +62,13 @@ func ReadConfigOrNew(filename string) (*api.Config, error) {
 // If the file exists, it's contents will be overwritten.
 func WriteConfig(config *api.Config, filename string) error {
 	if config == nil {
-		glog.Errorf("could not write to '%s': config can't be nil", filename)
+		glog.Errorf("Cannot write to '%s': Config must not be nil.", filename)
 	}
 
 	// encode config to YAML
 	data, err := runtime.Encode(latest.Codec, config)
 	if err != nil {
-		return fmt.Errorf("could not write to '%s': failed to encode config: %v", filename, err)
+		return fmt.Errorf("Cannot write to '%s': Error encoding config: %v", filename, err)
 	}
 
 	// create parent dir if doesn't exist

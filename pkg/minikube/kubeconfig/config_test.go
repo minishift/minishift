@@ -33,7 +33,7 @@ func TestEmptyConfig(t *testing.T) {
 
 	cfg, err := ReadConfigOrNew(tmp)
 	if err != nil {
-		t.Fatalf("could not read config: %v", err)
+		t.Fatalf("Cannot read config: %v", err)
 	}
 
 	if len(cfg.AuthInfos) != 0 {
@@ -73,7 +73,7 @@ func TestNewConfig(t *testing.T) {
 	}
 
 	if !configEquals(actual, expected) {
-		t.Fatal("configs did not match")
+		t.Fatal("Configurations do not match.")
 	}
 }
 

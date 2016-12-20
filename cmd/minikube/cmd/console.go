@@ -35,26 +35,26 @@ var (
 // consoleCmd represents the console command
 var consoleCmd = &cobra.Command{
 	Use:   "console",
-	Short: "Opens/displays the OpenShift console URL for your local cluster",
-	Long:  `Opens/displays the OpenShift console URL for your local cluster`,
+	Short: "Opens the OpenShift Web console to the root of your local cluster.",
+	Long:  `Opens the OpenShift Web console to the root of your local cluster in the default browser.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()
 		url, err := cluster.GetConsoleURL(api)
 		if err != nil {
-			glog.Errorln("Error accessing the OpenShift console (is minishift running?): Error: ", err)
+			glog.Errorln("Cannot access the OpenShift console. Verify that Minishift is running. Error: ", err)
 			os.Exit(1)
 		}
 		if consoleURLMode {
 			fmt.Fprintln(os.Stdout, url)
 		} else {
-			fmt.Fprintln(os.Stdout, "Opening OpenShift console in default browser...")
+			fmt.Fprintln(os.Stdout, "Opening the OpenShift Web console in the default browser...")
 			browser.OpenURL(url)
 		}
 	},
 }
 
 func init() {
-	consoleCmd.Flags().BoolVar(&consoleURLMode, "url", false, "Display the OpenShift console in the CLI instead of opening it in the default browser")
+	consoleCmd.Flags().BoolVar(&consoleURLMode, "url", false, "Open the local cluster in the OpenShift CLI console instead of the Web console.")
 	RootCmd.AddCommand(consoleCmd)
 }

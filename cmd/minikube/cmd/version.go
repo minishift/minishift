@@ -26,13 +26,13 @@ import (
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print the version of minishift.",
-	Long:  `Print the version of minishift.`,
+	Short: "Gets the version of Minishift.",
+	Long:  `Gets the currently installed version of Minishift and prints it to the standard output.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		RootCmd.PersistentPreRun(cmd, args)
 	},
 	Run: func(command *cobra.Command, args []string) {
-		fmt.Println("minishift version:", version.GetVersion())
+		fmt.Println("Minishift version:", version.GetVersion())
 	},
 }
 

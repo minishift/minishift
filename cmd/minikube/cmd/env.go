@@ -224,8 +224,8 @@ func findNoProxyFromEnv() (string, string) {
 // envCmd represents the docker-env command
 var dockerEnvCmd = &cobra.Command{
 	Use:   "docker-env",
-	Short: "sets up docker env variables; similar to '$(docker-machine env)'",
-	Long:  `sets up docker env variables; similar to '$(docker-machine env)'`,
+	Short: "Sets Docker environment variables.",
+	Long:  `Sets Docker environment variables, similar to '$(docker-machine env)'.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
@@ -239,13 +239,13 @@ var dockerEnvCmd = &cobra.Command{
 		if unset {
 			shellCfg, err = shellCfgUnset(api)
 			if err != nil {
-				glog.Errorln("Error setting machine env variable(s):", err)
+				glog.Errorln("Error unsetting environment variables:", err)
 				os.Exit(1)
 			}
 		} else {
 			shellCfg, err = shellCfgSet(api)
 			if err != nil {
-				glog.Errorln("Error setting machine env variable(s):", err)
+				glog.Errorln("Error setting environment variables:", err)
 				os.Exit(1)
 			}
 		}
@@ -256,7 +256,7 @@ var dockerEnvCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(dockerEnvCmd)
-	dockerEnvCmd.Flags().BoolVar(&noProxy, "no-proxy", false, "Add machine IP to NO_PROXY environment variable")
-	dockerEnvCmd.Flags().StringVar(&forceShell, "shell", "", "Force environment to be configured for a specified shell: [fish, cmd, powershell, tcsh, bash, zsh], default is auto-detect")
-	dockerEnvCmd.Flags().BoolVarP(&unset, "unset", "u", false, "Unset variables instead of setting them")
+	dockerEnvCmd.Flags().BoolVar(&noProxy, "no-proxy", false, "Add the virtual machine IP to the NO_PROXY environment variable.")
+	dockerEnvCmd.Flags().StringVar(&forceShell, "shell", "", "Force setting the environment for a specified shell: [fish, cmd, powershell, tcsh, bash, zsh]. Default is auto-detect.")
+	dockerEnvCmd.Flags().BoolVarP(&unset, "unset", "u", false, "Clear the environment variable values instead of setting them.")
 }

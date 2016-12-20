@@ -31,14 +31,14 @@ import (
 // statusCmd represents the status command
 var statusCmd = &cobra.Command{
 	Use:   "status",
-	Short: "Gets the status of a local OpenShift cluster.",
-	Long:  `Gets the status of a local OpenShift cluster.`,
+	Short: "Gets the status of the local OpenShift cluster.",
+	Long:  `Gets the status of the local OpenShift cluster.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()
 		s, err := cluster.GetHostStatus(api)
 		if err != nil {
-			glog.Errorln("Error getting machine status:", err)
+			glog.Errorln("Error getting cluster status:", err)
 			os.Exit(1)
 		}
 		fmt.Fprintln(os.Stdout, s)

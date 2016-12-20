@@ -25,9 +25,9 @@ import (
 
 var configSetCmd = &cobra.Command{
 	Use:   "set PROPERTY_NAME PROPERTY_VALUE",
-	Short: "Sets an individual value in a minishift config file",
-	Long: `Sets the PROPERTY_NAME config value to PROPERTY_VALUE
-	These values can be overwritten by flags or environment variables at runtime.`,
+	Short: "Sets the value of a configuration property in the Minishift configuration file.",
+	Long: `Sets the value of one or more configuration properties in the Minishift configuration file.
+These values can be overwritten by flags or environment variables at runtime.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 2 {
 			fmt.Fprintln(os.Stderr, "usage: minishift config set PROPERTY_NAME PROPERTY_VALUE")

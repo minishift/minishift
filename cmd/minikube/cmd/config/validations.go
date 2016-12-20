@@ -37,14 +37,14 @@ func IsValidDriver(string, driver string) error {
 }
 
 func RequiresRestartMsg(string, string) error {
-	fmt.Fprintln(os.Stdout, "These changes will take effect upon a minishift delete and then a minishift start")
+	fmt.Fprintln(os.Stdout, "To apply the changes, you must delete the current VM with `minishift delete` and start a new VM with `minishift start`.")
 	return nil
 }
 
 func IsValidDiskSize(name string, disksize string) error {
 	_, err := units.FromHumanSize(disksize)
 	if err != nil {
-		return fmt.Errorf("Not valid disk size: %v", err)
+		return fmt.Errorf("Disk size is not valid: %v", err)
 	}
 	return nil
 }

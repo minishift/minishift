@@ -81,7 +81,7 @@ func MaybeUpdate(output io.Writer, githubOwner, githubRepo, binaryName, lastUpda
 		if err != nil {
 			fmt.Println("Failed to update last update time")
 		}
-		fmt.Fprintf(output, `There is a newer version of %s available. Do you want to
+		fmt.Fprintf(output, `A newer version of %s is available. Do you want to
 automatically update from %s%s to %s%s now? [y/N] `,
 			binaryName, version.VersionPrefix, localVersion, version.VersionPrefix, latestVersion)
 
@@ -94,7 +94,7 @@ automatically update from %s%s to %s%s now? [y/N] `,
 			return
 		}
 
-		fmt.Println("Skipping autoupdate")
+		fmt.Println("Skipping auto-update.")
 	}
 }
 
@@ -126,7 +126,7 @@ func getLatestVersionFromGitHub(githubOwner, githubRepo string) (semver.Version,
 		return semver.Make(strings.TrimPrefix(*latestVersionString, "v"))
 
 	}
-	return semver.Version{}, fmt.Errorf("Cannot get release name")
+	return semver.Version{}, fmt.Errorf("Cannot get release name.")
 }
 
 func writeTimeToFile(path string, inputTime time.Time) error {
@@ -158,7 +158,7 @@ func updateBinary(v semver.Version, downloadBinary, updateLinkPrefix, downloadLi
 
 	currentBinary, err := osext.Executable()
 	if err != nil {
-		glog.Errorf("Cannot find current binary to exec: %s", err)
+		glog.Errorf("Cannot find current binary to execute: %s", err)
 		os.Exit(1)
 	}
 
@@ -169,7 +169,7 @@ func updateBinary(v semver.Version, downloadBinary, updateLinkPrefix, downloadLi
 	args := os.Args
 	err = syscall.Exec(currentBinary, args, env)
 	if err != nil {
-		glog.Errorf("Failed to exec updated binary %s: %s", currentBinary, err)
+		glog.Errorf("Failed to execute updated binary %s: %s", currentBinary, err)
 		os.Exit(1)
 	}
 }

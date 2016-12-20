@@ -74,12 +74,12 @@ func Transfer(reader io.Reader, readerLen int64, remotedir, filename string, per
 
 	s, err := c.NewSession()
 	if err != nil {
-		return errors.Wrap(err, "Error creating new session via ssh client")
+		return errors.Wrap(err, "Error creating a new session via ssh client.")
 	}
 
 	w, err := s.StdinPipe()
 	if err != nil {
-		return errors.Wrap(err, "Error accessing StdinPipe via ssh session")
+		return errors.Wrap(err, "Error accessing StdinPipe via ssh session.")
 	}
 	// The scpcmd below *should not* return until all data is copied and the
 	// StdinPipe is closed. But let's use a WaitGroup to make it expicit.
@@ -96,7 +96,7 @@ func Transfer(reader io.Reader, readerLen int64, remotedir, filename string, per
 
 	scpcmd := fmt.Sprintf("sudo scp -t %s", remotedir)
 	if err := s.Run(scpcmd); err != nil {
-		return errors.Wrap(err, "Error running scp command")
+		return errors.Wrap(err, "Error running scp command.")
 	}
 	wg.Wait()
 

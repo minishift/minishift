@@ -55,7 +55,7 @@ func (driver *MockDriver) GetSSHPort() (int, error) {
 // GetSSHHostname returns the hostname for SSH
 func (driver *MockDriver) GetSSHHostname() (string, error) {
 	if driver.HostError {
-		return "", fmt.Errorf("Error getting host!")
+		return "", fmt.Errorf("Error getting host.")
 	}
 	return "localhost", nil
 }

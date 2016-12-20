@@ -21,9 +21,9 @@ package cluster
 import "github.com/docker/machine/libmachine/drivers"
 
 func createVMwareFusionHost(config MachineConfig) drivers.Driver {
-	panic("vmwarefusion not supported")
+	panic("vmwarefusion is not supported")
 }
 
 func createXhyveHost(config MachineConfig) drivers.Driver {
-	panic("xhyve not supported")
+	panic("xhyve is not supported")
 }

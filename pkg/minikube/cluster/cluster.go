@@ -69,7 +69,7 @@ func init() {
 func StartHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 	exists, err := api.Exists(constants.MachineName)
 	if err != nil {
-		return nil, fmt.Errorf("Error checking if host exists: %s", err)
+		return nil, fmt.Errorf("Error checking if the host exists: %s", err)
 	}
 	if !exists {
 		return createHost(api, config)
@@ -79,13 +79,13 @@ func StartHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 	h, err := api.Load(constants.MachineName)
 	if err != nil {
 		return nil, fmt.Errorf(
-			"Error loading existing host: %s. Please try running [minikube delete], then run [minikube start] again.", err)
+			"Error loading existing host: %s. Try running `minishift delete` and then run `minishift start` again.", err)
 	}
 
 	s, err := h.Driver.GetState()
 	glog.Infoln("Machine state: ", s)
 	if err != nil {
-		return nil, fmt.Errorf("Error getting state for host: %s", err)
+		return nil, fmt.Errorf("Error getting the state for host: %s", err)
 	}
 
 	if s != state.Running {
@@ -98,7 +98,7 @@ func StartHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 	}
 
 	if err := h.ConfigureAuth(); err != nil {
-		return nil, fmt.Errorf("Error configuring auth on host: %s", err)
+		return nil, fmt.Errorf("Error configuring authorization on host: %s", err)
 	}
 	return h, nil
 }
@@ -198,7 +198,7 @@ func (m *MachineConfig) CacheMinikubeISOFromURL() error {
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		return fmt.Errorf("Received %d response from %s while trying to download minikube.iso", response.StatusCode, m.MinikubeISO)
+		return fmt.Errorf("Received %d response from %s while trying to download the ISO", response.StatusCode, m.MinikubeISO)
 	}
 
 	iso := response.Body
@@ -305,7 +305,7 @@ func createHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 	if err := api.Create(h); err != nil {
 		// Wait for all the logs to reach the client
 		time.Sleep(2 * time.Second)
-		return nil, fmt.Errorf("Error creating. %s", err)
+		return nil, fmt.Errorf("Error creating the VM. %s", err)
 	}
 
 	if err := api.Save(h); err != nil {
@@ -356,7 +356,7 @@ func checkIfApiExistsAndLoad(api libmachine.API) (*host.Host, error) {
 		return nil, err
 	}
 	if !exists {
-		return nil, fmt.Errorf("Machine does not exist for api.Exists(%s)", constants.MachineName)
+		return nil, fmt.Errorf("Machine does not exist for API. Exists(%s)", constants.MachineName)
 	}
 
 	host, err := api.Load(constants.MachineName)
@@ -473,7 +473,7 @@ type MissingNodePortError struct {
 }
 
 func (e MissingNodePortError) Error() string {
-	return fmt.Sprintf("Service %s/%s does not have a node port. To have one assigned automatically, the service type must be NodePort or LoadBalancer, but this service is of type %s.", e.service.Namespace, e.service.Name, e.service.Spec.Type)
+	return fmt.Sprintf("Service %s/%s does not have a node port. To assign a port automatically, the service type must be NodePort or LoadBalancer, but this service is of type %s.", e.service.Namespace, e.service.Name, e.service.Spec.Type)
 }
 
 func getServiceFromServiceGetter(services serviceGetter, service string) (*kubeapi.Service, error) {

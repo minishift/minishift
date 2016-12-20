@@ -25,8 +25,9 @@ import (
 
 var configUnsetCmd = &cobra.Command{
 	Use:   "unset PROPERTY_NAME",
-	Short: "unsets an individual value in a minishift config file",
-	Long:  "unsets PROPERTY_NAME from the minishift config file.  Can be overwritten by flags or environmental variables",
+	Short: "Clears the value of a configuration property in the Minishift configuration file.",
+	Long:  "Clears the value of a configuration property in the Minishift configuration file. The value can be overwritten at runtime by flags or environmental variables",
+	//NEEDINFO: can I run this any time? what supercedes if I do this at runtime?
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
 			fmt.Fprintf(os.Stdout, "usage: minishift config unset PROPERTY_NAME")

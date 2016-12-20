@@ -34,15 +34,16 @@ var serviceListNamespace string
 // serviceListCmd represents the service list command
 var serviceListCmd = &cobra.Command{
 	Use:   "list [flags]",
-	Short: "Lists the URLs for the services in your local cluster",
-	Long:  `Lists the URLs for the services in your local cluster`,
+	Short: "Gets the URLs of the services in your local cluster.",
+	Long:  `Gets the URLs of the services in your local cluster and prints them to the standard output.`,
+	//NEEDINFO: Is it standard out? or does it launch them in the browser? do they need to have the same namespace? when is the namespace required?
 	Run: func(cmd *cobra.Command, args []string) {
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()
 		serviceURLs, err := cluster.GetServiceURLs(api, serviceListNamespace, serviceURLTemplate)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
-			fmt.Fprintln(os.Stderr, "Check that minishift is running and that you have specified the correct namespace (-n flag) if required.")
+			fmt.Fprintln(os.Stderr, "Check that Minishift is running and that the correct namespace is specified in the -n option if it is required.")
 			os.Exit(1)
 		}
 
@@ -61,6 +62,6 @@ var serviceListCmd = &cobra.Command{
 }
 
 func init() {
-	serviceListCmd.Flags().StringVarP(&serviceListNamespace, "namespace", "n", v1.NamespaceAll, "The services namespace")
+	serviceListCmd.Flags().StringVarP(&serviceListNamespace, "namespace", "n", v1.NamespaceAll, "The namespace of the services.")
 	serviceCmd.AddCommand(serviceListCmd)
 }

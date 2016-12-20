@@ -63,7 +63,7 @@ func TestReadConfig(t *testing.T) {
 		r := bytes.NewBufferString(tt.data)
 		config, err := decode(r)
 		if reflect.DeepEqual(config, tt.config) || err != nil {
-			t.Errorf("Did not read config correctly,\n\n wanted %+v, \n\n got %+v", tt.config, config)
+			t.Errorf("Cannot read config. \n\n expected %+v, \n\n received %+v", tt.config, config)
 		}
 	}
 }
@@ -76,7 +76,7 @@ func TestWriteConfig(t *testing.T) {
 			t.Errorf("Error encoding: %s", err)
 		}
 		if b.String() != tt.data {
-			t.Errorf("Did not write config correctly, \n\n expected:\n %+v \n\n actual:\n %+v", tt.data, b.String())
+			t.Errorf("Cannot write config. \n\n expected \n %+v, \n\n received \n %+v", tt.data, b.String())
 		}
 		b.Reset()
 	}

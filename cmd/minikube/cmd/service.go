@@ -41,19 +41,20 @@ var (
 // serviceCmd represents the service command
 var serviceCmd = &cobra.Command{
 	Use:   "service [flags] SERVICE",
-	Short: "Gets the URL for the specified service in your local cluster",
-	Long:  `Gets the URL for the specified service in your local cluster`,
+	Short: "Opens the specified service in the OpenShift Web console.",
+	Long:  `Opens the specified service in the OpenShift Web console using the default browser. You must specify the service name and namespace.`,
+	//NEEDINFO: Can you specify more than one service? How? Examples?
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		t, err := template.New("serviceURL").Parse(serviceURLFormat)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "The value passed to --format is invalid:\n\n", err)
+			fmt.Fprintln(os.Stderr, "The URL format specified in the --format option is not valid: \n\n", err)
 			os.Exit(1)
 		}
 		serviceURLTemplate = t
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 || len(args) > 1 {
-			fmt.Fprintln(os.Stderr, "Please specify a service name.")
+			fmt.Fprintln(os.Stderr, "You must specify the name of the service.")
 			os.Exit(1)
 		}
 
@@ -66,7 +67,7 @@ var serviceCmd = &cobra.Command{
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			if _, ok := err.(cluster.MissingNodePortError); !ok {
-				fmt.Fprintln(os.Stderr, "Check that minishift is running and that you have specified the correct namespace (-n flag).")
+				fmt.Fprintln(os.Stderr, "Verify that Minishift is running and that the correct namespace is specified in the -n option.")
 			}
 			os.Exit(1)
 		}
@@ -77,16 +78,16 @@ var serviceCmd = &cobra.Command{
 		if serviceURLMode {
 			fmt.Fprintln(os.Stdout, url)
 		} else {
-			fmt.Fprintln(os.Stdout, "Opening kubernetes service "+namespace+"/"+service+" in default browser...")
+			fmt.Fprintln(os.Stdout, "Opening the service "+namespace+"/"+service+" in the default browser...")
 			browser.OpenURL(url)
 		}
 	},
 }
 
 func init() {
-	serviceCmd.Flags().StringVarP(&namespace, "namespace", "n", "default", "The service namespace")
-	serviceCmd.Flags().BoolVar(&serviceURLMode, "url", false, "Display the kubernetes service URL in the CLI instead of opening it in the default browser")
-	serviceCmd.PersistentFlags().StringVar(&serviceURLFormat, "format", "http://{{.IP}}:{{.Port}}", "Format to output service URL in")
-	serviceCmd.Flags().BoolVar(&https, "https", false, "Open the service URL with https instead of http")
+	serviceCmd.Flags().StringVarP(&namespace, "namespace", "n", "default", "The namespace of the service.")
+	serviceCmd.Flags().BoolVar(&serviceURLMode, "url", false, "Access the service in the command-line console instead of the default browser.")
+	serviceCmd.PersistentFlags().StringVar(&serviceURLFormat, "format", "http://{{.IP}}:{{.Port}}", "The URL format of the service.")
+	serviceCmd.Flags().BoolVar(&https, "https", false, "Access the service with HTTPS instead of HTTP.")
 	RootCmd.AddCommand(serviceCmd)
 }

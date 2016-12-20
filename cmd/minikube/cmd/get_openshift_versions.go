@@ -26,8 +26,9 @@ import (
 // getVersionsCmd represents the ip command
 var getVersionsCmd = &cobra.Command{
 	Use:   "get-openshift-versions",
-	Short: "Gets the list of available OpenShift versions available for minishift.",
-	Long:  `Gets the list of available OpenShift versions available for minishift.`,
+	Short: "Gets the list of OpenShift versions available for Minishift.",
+	Long:  `Gets the list of OpenShift versions available for Minishift.`,
+	//MOREINFO: Do we want to elaborate on usage or examples? Like is this STDOUT only, can we output to a file, do we want to pass this onto something else?
 	Run: func(cmd *cobra.Command, args []string) {
 		openshiftversions.PrintOpenShiftVersionsFromGitHub(os.Stdout)
 	},

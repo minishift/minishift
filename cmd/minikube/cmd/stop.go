@@ -30,18 +30,20 @@ import (
 var stopCmd = &cobra.Command{
 	Use:   "stop",
 	Short: "Stops a running local OpenShift cluster.",
-	Long: `Stops a local OpenShift cluster running in Virtualbox. This command stops the VM
-itself, leaving all files intact. The cluster can be started again with the "start" command.`,
+	//NEEDINFO: which cluster? more than one? etc.
+	Long: `Stops a local OpenShift cluster running in Virtualbox. This command stops the Minishift
+	VM but does not delete any associated files. To start the cluster again, use the start command.`,
+	//NEEDINFO: is this a graceful stop? what would make it impossible to stop? can you force stop somehow? and what does virtualbox have to do with it?
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Stopping local OpenShift cluster...")
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()
 
 		if err := cluster.StopHost(api); err != nil {
-			fmt.Println("Error stopping machine: ", err)
+			fmt.Println("Error stopping cluster: ", err)
 			os.Exit(1)
 		}
-		fmt.Println("Machine stopped.")
+		fmt.Println("Cluster stopped.")
 	},
 }
 

@@ -30,8 +30,9 @@ import (
 // ipCmd represents the ip command
 var ipCmd = &cobra.Command{
 	Use:   "ip",
-	Short: "Retrieve the IP address of the running cluster.",
-	Long:  `Retrieves the IP address of the running cluster, and writes it to STDOUT.`,
+	Short: "Gets the IP address of the running cluster.",
+	Long:  `Gets the IP address of the running cluster and prints it to the standard output.`,
+	//NEEDINFO: Elaborate? What about cases with multiple running clusters? Examples?
 	Run: func(cmd *cobra.Command, args []string) {
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()

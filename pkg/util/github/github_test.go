@@ -132,7 +132,7 @@ func TestInvalidVersion(t *testing.T) {
 		t.Error("There should have been an error")
 	}
 
-	expectedErrorMessage := fmt.Sprintf("Could not get OpenShift release version %s", dummyVersion)
+	expectedErrorMessage := fmt.Sprintf("Cannot get the OpenShift release version %s", dummyVersion)
 	if !strings.HasPrefix(err.Error(), expectedErrorMessage) {
 		t.Errorf("Expected error: '%s'. Got: '%s'\n", expectedErrorMessage, err.Error())
 	}
@@ -150,7 +150,7 @@ func TestInvalidBinaryFormat(t *testing.T) {
 		t.Error("There should have been an error")
 	}
 
-	expectedErrorMessage := "Could not get binary 'openshift' in version v1.3.1 for target environment Windows"
+	expectedErrorMessage := "Cannot get binary 'openshift' in version v1.3.1 for the target environment Windows"
 	if err.Error() != expectedErrorMessage {
 		t.Errorf("Expected error: '%s'. Got: '%s'\n", expectedErrorMessage, err.Error())
 	}

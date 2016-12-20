@@ -66,7 +66,7 @@ func TestGetVersionsCorrect(t *testing.T) {
 	}
 	if len(releases) != 2 { // TODO(aprindle) change to len(handler....)
 		//Check values here as well?  Write eq method?
-		t.Fatalf("Expected two OpenShift releases, it was instead %s", len(releases))
+		t.Fatalf("Expected two OpenShift releases, received instead %s", len(releases))
 	}
 }
 
@@ -88,7 +88,7 @@ func TestGetVersionsNone(t *testing.T) {
 
 	_, err := getVersions()
 	if err == nil {
-		t.Fatal("No kubernetes versions were returned from URL but no error was thrown")
+		t.Fatal("No OpenShift versions returned from URL but no error reported.")
 	}
 }
 
@@ -112,7 +112,7 @@ func TestGetVersionsMalformed(t *testing.T) {
 
 	_, err := getVersions()
 	if err == nil {
-		t.Fatal("Malformed version value was returned from URL but no error was thrown")
+		t.Fatal("Malformed version value returned from URL but no error reported.")
 	}
 }
 
@@ -131,7 +131,7 @@ func TestPrintOpenShiftVersions(t *testing.T) {
 	var outputBuffer bytes.Buffer
 	PrintOpenShiftVersions(&outputBuffer)
 	if len(outputBuffer.String()) != 0 {
-		t.Fatalf("Expected PrintOpenShiftVersions to not output text as there are no versioned served at the current URL but output was [%s]", outputBuffer.String())
+		t.Fatalf("Expected no output from PrintOpenShiftVersions because no versions exist at the current URL but the output was [%s]", outputBuffer.String())
 	}
 
 	// test that update text is printed if the latest version is greater than the current version
@@ -149,7 +149,7 @@ func TestPrintOpenShiftVersions(t *testing.T) {
 
 	PrintOpenShiftVersions(&outputBuffer)
 	if len(outputBuffer.String()) == 0 {
-		t.Fatalf("Expected PrintOpenShiftVersion to output text as %d versions were served from URL but output was [%s]",
+		t.Fatalf("Expected PrintOpenShiftVersion to output %d versions from the current URL but the output was [%s]",
 			2, outputBuffer.String()) //TODO(aprindle) change the 2
 	}
 }

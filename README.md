@@ -58,8 +58,20 @@ location and optionally ensure it is added to your _PATH_.
 
 On OS X you can also use [Homebrew Cask](https://caskroom.github.io) to install Minishift:
 
-  ```
+  ```sh
   $ brew cask install minishift
+  ```
+
+You can also install the latest unstable version of minishift, after you install homebrew-cask, run the following command:
+
+  ```sh
+  $ brew tap caskroom/versions
+  ```
+
+You can now install the latest unstable version of minishift.
+
+  ```sh
+  $ brew cask install minishift-unstable
   ```
 
 <a name="quickstart"></a>

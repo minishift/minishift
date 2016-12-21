@@ -13,6 +13,7 @@ provisioning VMs, and [OpenShift Origin](https://github.com/openshift/origin) fo
 - [Installation](#installation)
   - [Prerequisites](#prerequisites)
   - [Instructions](#instructions)
+    - [macOS](#macos)
 - [Quickstart](#quickstart)
   - [Starting Minishift](#starting-minishift)
   - [Reusing the Docker daemon](#reusing-the-docker-daemon)
@@ -56,11 +57,30 @@ it needs to be disabled.
 Download the archive matching your host OS from the Minishift [releases page](https://github.com/minishift/minishift/releases) and unpack it. Then copy the contained binary to your preferred
 location and optionally ensure it is added to your _PATH_.
 
-On OS X you can also use [Homebrew Cask](https://caskroom.github.io) to install Minishift:
+<a name="macos"></a>
+#### macOS
 
-  ```
+##### Stable
+
+On macOS you can also use [Homebrew Cask](https://caskroom.github.io) to install Minishift:
+
+```sh
   $ brew cask install minishift
-  ```
+```
+
+##### Latest Beta
+
+If you want to install the latest beta version of minishift you will need the homebrew-cask versions tap. After you install homebrew-cask, run the following command:
+
+```sh
+  $ brew tap caskroom/versions
+```
+
+You can now install the latest beta version of minishift.
+
+```sh
+  $ brew cask install minishift-beta
+```
 
 <a name="quickstart"></a>
 ## Quickstart

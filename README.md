@@ -62,7 +62,7 @@ On OS X you can also use [Homebrew Cask](https://caskroom.github.io) to install 
   $ brew cask install minishift
   ```
 
-You can also install the latest unstable version of minishift, after you install homebrew-cask, run the following command:
+If you want to install the latest unstable version of minishift you will need the homebrew-cask versions tap. After you install homebrew-cask, run the following command:
 
   ```sh
   $ brew tap caskroom/versions

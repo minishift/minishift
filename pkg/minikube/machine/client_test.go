@@ -42,7 +42,7 @@ func TestRunNotDriver(t *testing.T) {
 	defer os.RemoveAll(tempDir)
 	StartDriver()
 	if !localbinary.CurrentBinaryIsDockerMachine {
-		t.Fatal("CurrentBinaryIsDockerMachine not set. This will break driver initialization.")
+		t.Fatal("CurrentBinaryIsDockerMachine is not set. This will prevent driver initialization.")
 	}
 }
 
@@ -70,12 +70,12 @@ func TestRunDriver(t *testing.T) {
 	reader := bufio.NewReader(r)
 	addr, _, err := reader.ReadLine()
 	if err != nil {
-		t.Fatal("Failed to read address over stdout.")
+		t.Fatal("Cannot read address in the standard output.")
 	}
 	os.Stdout = old
 
 	// Now that we got the port, make sure we can connect.
 	if _, err := net.Dial("tcp", string(addr)); err != nil {
-		t.Fatal("Driver not listening.")
+		t.Fatal("Driver is not listening.")
 	}
 }

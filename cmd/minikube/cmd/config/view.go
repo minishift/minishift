@@ -36,8 +36,9 @@ type ConfigViewTemplate struct {
 
 var configViewCmd = &cobra.Command{
 	Use:   "view",
-	Short: "Display values currently set in the minishift config file",
-	Long:  "Display values currently set in the minishift  config file.",
+	Short: "Display the properties and values of the Minishift configuration file.",
+	Long:  "Display the properties and values of the Minishift configuration file. You can set the output format from one of the available Go templates.",
+	//NEEDINFO: is the format option required? what happens if we don't set this option? STDOUT?
 	Run: func(cmd *cobra.Command, args []string) {
 		err := configView()
 		if err != nil {
@@ -49,8 +50,8 @@ var configViewCmd = &cobra.Command{
 
 func init() {
 	configViewCmd.Flags().StringVar(&configViewFormat, "format", constants.DefaultConfigViewFormat,
-		`Go template format string for the config view output.  The format for Go templates can be found here: https://golang.org/pkg/text/template/
-For the list of accessible variables for the template, see the struct values here: https://godoc.org/github.com/jimmidyson/minishift/cmd/minikube/cmd/config#ConfigViewTemplate`)
+		`Go template format to apply to the configuration file. For more information about Go templates, see: https://golang.org/pkg/text/template/
+For the list of configurable variables for the template, see the struct values section of ConfigViewTemplate at: https://godoc.org/github.com/minishift/minishift/cmd/minikube/cmd/config#ConfigViewTemplate`)
 }
 
 func init() {

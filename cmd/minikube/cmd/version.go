@@ -26,8 +26,9 @@ import (
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print the version of minishift.",
-	Long:  `Print the version of minishift.`,
+	Short: "Gets the version of Minishift.",
+	Long:  `Gets the currently installed version of Minishift and prints it to the standard output.`,
+	//NEEDINFO: is there usage beyond just getting the info? can/should users pass this onto something?
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		// Explicitly disable update checking for the version command
 		enableUpdateNotification = false
@@ -35,7 +36,7 @@ var versionCmd = &cobra.Command{
 		RootCmd.PersistentPreRun(cmd, args)
 	},
 	Run: func(command *cobra.Command, args []string) {
-		fmt.Println("minishift version:", version.GetVersion())
+		fmt.Println("Minishift version:", version.GetVersion())
 	},
 }
 

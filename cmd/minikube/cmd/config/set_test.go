@@ -22,5 +22,6 @@ func TestNotFound(t *testing.T) {
 	err := set("nonexistant", "10")
 	if err == nil {
 		t.Fatalf("Set did not return error for unknown property")
+		//NEEDINFO: So it did or didn't? What is the error here? :)
 	}
 }

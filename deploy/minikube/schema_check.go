@@ -45,9 +45,9 @@ func validateSchema(schemaPathString string, docPathString string) {
 	}
 
 	if result.Valid() {
-		fmt.Printf("The document %s is valid\n", docPathString)
+		fmt.Printf("The document %s is valid \n", docPathString)
 	} else {
-		fmt.Printf("The document %s is not valid. see errors :\n", docPathString)
+		fmt.Printf("The document %s is not valid. Error: \n", docPathString)
 		for _, desc := range result.Errors() {
 			fmt.Printf("- %s\n", desc)
 		}

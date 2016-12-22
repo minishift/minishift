@@ -75,8 +75,10 @@ var (
 var startCmd = &cobra.Command{
 	Use:   commandName,
 	Short: "Starts a local OpenShift cluster.",
-	Long: `Starts a local OpenShift cluster using Virtualbox. This command
-assumes you already have Virtualbox installed.`,
+	Long: `Starts a local OpenShift cluster using VirtualBox. You must have VirtualBox installed
+	to start the cluster. If you have an existing configuration file, you can use it by setting the
+	--use-existing-config option.`,
+	//NEEDINFO: There are lots of options, we should give examples for different use-cases. Also, does this create a new cluster or just spin up an existing cluster?
 	Run: runStart,
 }
 
@@ -105,7 +107,7 @@ func SetMinishiftDir(newDir string) {
 
 // runStart is executed as part of the start command
 func runStart(cmd *cobra.Command, args []string) {
-	fmt.Println("Starting local OpenShift cluster...")
+	fmt.Println("Starting the local OpenShift cluster...")
 
 	libMachineClient := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 	defer libMachineClient.Close()
@@ -127,13 +129,13 @@ func runStart(cmd *cobra.Command, args []string) {
 	start := func() (err error) {
 		host, err = cluster.StartHost(libMachineClient, config)
 		if err != nil {
-			glog.Errorf("Error starting host: %s. Retrying.\n", err)
+			glog.Errorf("Error starting the host: %s. Retrying.\n", err)
 		}
 		return err
 	}
 	err := util.Retry(3, start)
 	if err != nil {
-		glog.Errorln("Error starting host: ", err)
+		glog.Errorln("Error starting the host: ", err)
 		os.Exit(1)
 	}
 
@@ -150,7 +152,7 @@ func runStart(cmd *cobra.Command, args []string) {
 func calculateDiskSizeInMB(humanReadableDiskSize string) int {
 	diskSize, err := units.FromHumanSize(humanReadableDiskSize)
 	if err != nil {
-		glog.Errorf("Invalid disk size: %s", err)
+		glog.Errorf("Disk size is not valid: %s", err)
 	}
 	return int(diskSize / units.MB)
 }
@@ -171,32 +173,43 @@ func init() {
 
 // initClusterUpFlags creates the CLI flags which needs to be passed on to 'oc cluster up'
 func initStartFlags() {
-	startFlagSet.String(isoURL, constants.DefaultIsoUrl, "Location of the minishift iso")
-	startFlagSet.String(vmDriver, constants.DefaultVMDriver, fmt.Sprintf("VM driver is one of: %v", constants.SupportedVMDrivers))
-	startFlagSet.Int(memory, constants.DefaultMemory, "Amount of RAM allocated to the minishift VM")
-	startFlagSet.Int(cpus, constants.DefaultCPUS, "Number of CPUs allocated to the minishift VM")
-	startFlagSet.String(humanReadableDiskSize, constants.DefaultDiskSize, "Disk size allocated to the minishift VM (format: <number>[<unit>], where unit = b, k, m or g)")
+	startFlagSet.String(isoURL, constants.DefaultIsoUrl, "Location of the minishift ISO.")
+	//NEEDINFO: Is this the same as the binary? we should be consistent in how we refer to it. Also, we need to change the default from jdyson.
+	startFlagSet.String(vmDriver, constants.DefaultVMDriver, fmt.Sprintf("The driver to use for the Minishift VM. Possible values: %v", constants.SupportedVMDrivers))
+	//NEEDINFO: If virtualbox is the virt provider how come kvm is the default driver and how are drivers related to this at all?
+	startFlagSet.Int(memory, constants.DefaultMemory, "Amount of RAM to allocate to the Minishift VM.")
+	startFlagSet.Int(cpus, constants.DefaultCPUS, "Number of CPU cores to allocate to the Minishift VM.")
+	startFlagSet.String(humanReadableDiskSize, constants.DefaultDiskSize, "Disk size to allocate to the Minishift VM. Use the format <size><unit>, where unit = b, k, m or g.")
 	startFlagSet.String(hostOnlyCIDR, "192.168.99.1/24", "The CIDR to be used for the minishift VM (only supported with Virtualbox driver)")
-	startFlagSet.StringSliceVar(&dockerEnv, "docker-env", nil, "Environment variables to pass to the Docker daemon. (format: key=value)")
+	//NEEDINFO: What is a CIDR?
+	startFlagSet.StringSliceVar(&dockerEnv, "docker-env", nil, "Environment variables to pass to the Docker daemon. Use the format <key>=<value>.")
+	//NEEDINFO: How do you separate multiple env vars? Comma? Space + comma? etc..
 	startFlagSet.StringSliceVar(&insecureRegistry, "insecure-registry", []string{"172.30.0.0/16"}, "Insecure Docker registries to pass to the Docker daemon")
-	startFlagSet.StringSliceVar(&registryMirror, "registry-mirror", nil, "Registry mirrors to pass to the Docker daemon")
-	startFlagSet.String(openshiftVersion, version.GetOpenShiftVersion(), "The OpenShift version that the minishift VM will run (ex: v1.2.3)")
+	//NEEDINFO: "insecure" is a really inappropriate word, not sure what it's supposed to mean but we really cannot use it.
+	startFlagSet.StringSliceVar(&registryMirror, "registry-mirror", nil, "Registry mirrors to pass to the Docker daemon.")
+	//NEEDINFO: Is this URLs of the mirrors? hostnames? also, there's a blank default and that looks weird, either remove it or populate it
+	startFlagSet.String(openshiftVersion, version.GetOpenShiftVersion(), "The OpenShift version to run. Use the format v<n.n.n>")
 }
 
 // initClusterUpFlags creates the CLI flags which needs to be passed on to 'oc cluster up'
 func initClusterUpFlags() {
 	//clusterUpFlagSet.StringVar(&clusterUpConfig.Image, "image", "openshift/origin", "Specify the images to use for OpenShift")
-	clusterUpFlagSet.Bool(skipRegistryCheck, false, "Skip Docker daemon registry check")
-	clusterUpFlagSet.String(publicHostname, "", "Public hostname for OpenShift cluster")
-	clusterUpFlagSet.String(routingSuffix, "", "Default suffix for server routes")
-	clusterUpFlagSet.Bool(useExistingConfig, false, "Use existing configuration if present")
-	clusterUpFlagSet.String(hostConfigDir, dockerhost.DefaultConfigDir, "Directory on Docker host for OpenShift configuration")
-	clusterUpFlagSet.String(hostVolumesDir, dockerhost.DefaultVolumesDir, "Directory on Docker host for OpenShift volumes")
-	clusterUpFlagSet.String(hostDataDir, "", "Directory on Docker host for OpenShift data. If not specified, etcd data will not be persisted on the host.")
-	clusterUpFlagSet.Bool(forwardPorts, false, "Use Docker port-forwarding to communicate with origin container. Requires 'socat' locally.")
-	clusterUpFlagSet.Int(serverLogLevel, 0, "Log level for OpenShift server")
-	clusterUpFlagSet.StringSliceVarP(&openShiftEnv, openshiftEnv, "e", []string{}, "Specify key value pairs of environment variables to set on OpenShift container")
+	clusterUpFlagSet.Bool(skipRegistryCheck, false, "Skip the Docker daemon registry check.")
+	clusterUpFlagSet.String(publicHostname, "", "Public host name of the OpenShift cluster.")
+	clusterUpFlagSet.String(routingSuffix, "", "Default suffix for the server routes.")
+	clusterUpFlagSet.Bool(useExistingConfig, false, "Use existing configuration if available.")
+	clusterUpFlagSet.String(hostConfigDir, dockerhost.DefaultConfigDir, "Location of the OpenShift configuration files on the host.")
+	clusterUpFlagSet.String(hostVolumesDir, dockerhost.DefaultVolumesDir, "Location of the OpenShift volumes on the host.")
+	clusterUpFlagSet.String(hostDataDir, "", "Location of the OpenShift data on the host. If not specified, etcd data will not be persisted on the host.")
+	//NEEDINFO: what does etcd data mean? persistent?
+	clusterUpFlagSet.Bool(forwardPorts, false, "Use Docker port forwarding to communicate with origin container. Requires 'socat' locally.")
+	//NEEDINFO: origin or original? origin might not be the right word here. what is socat?
+	clusterUpFlagSet.Int(serverLogLevel, 0, "Set the log level for the OpenShift server.")
+	//NEEDINFO: do we need to default and possible values here? what is this used for, debugging openshift? the app? minishift?
+	clusterUpFlagSet.StringSliceVarP(&openShiftEnv, openshiftEnv, "e", []string{}, "Specify key-value pairs of environment variables to pass to the OpenShift container.")
+	//NEEDINFO: This is the first time I see OpenShift container, isn't this the same as Minishift VM? or app? and what's the difference between this and the Docker daemon env vars?
 	clusterUpFlagSet.Bool(metrics, false, "Install metrics (experimental)")
+	//NEEDINFO: What is this? do we even support this?
 }
 
 // clusterUp downloads and installs the oc binary in order to run 'cluster up'
@@ -207,7 +220,7 @@ func clusterUp(config *cluster.MachineConfig) {
 	}
 	err := oc.EnsureIsCached()
 	if err != nil {
-		glog.Errorln("Error starting 'cluster up': ", err)
+		glog.Errorln("Error starting the cluster: ", err)
 		os.Exit(1)
 	}
 
@@ -229,7 +242,7 @@ func clusterUp(config *cluster.MachineConfig) {
 	err = runner.Run(cmdName, cmdArgs...)
 	if err != nil {
 		// TODO glog is probably not right here. Need some sort of logging wrapper
-		glog.Errorln("Error starting 'cluster up': ", err)
+		glog.Errorln("Error starting the cluster: ", err)
 		os.Exit(1)
 	}
 }

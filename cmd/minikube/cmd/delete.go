@@ -30,18 +30,18 @@ import (
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Deletes a local OpenShift cluster.",
-	Long: `Deletes a local OpenShift cluster. This command deletes the VM, and removes all
-associated files.`,
+	Long: `Deletes a local OpenShift cluster, including the Minishift VM and all associated files.`,
+	//MOREINFO: Can we delete more than one? Is there a way to exclude files? Do we want to elaborate on usage or examples?
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Deleting local OpenShift cluster...")
+		fmt.Println("Deleting the local OpenShift cluster...")
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()
 
 		if err := cluster.DeleteHost(api); err != nil {
-			fmt.Println("Errors occurred deleting machine: ", err)
+			fmt.Println("Error deleting cluster: ", err)
 			os.Exit(1)
 		}
-		fmt.Println("Machine deleted.")
+		fmt.Println("Cluster deleted.")
 	},
 }
 

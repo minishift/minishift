@@ -29,7 +29,7 @@ func TestNewSSHClient(t *testing.T) {
 	s, _ := tests.NewSSHServer()
 	port, err := s.Start()
 	if err != nil {
-		t.Fatalf("Error starting ssh server: %s", err)
+		t.Fatalf("Error starting the ssh server: %s", err)
 	}
 	d := &tests.MockDriver{
 		Port: port,
@@ -87,7 +87,7 @@ func TestNewSSHHostError(t *testing.T) {
 
 	_, err := newSSHHost(&d)
 	if err == nil {
-		t.Fatal("Expected error creating host, got nil")
+		t.Fatal("Expected error creating host, received nil.")
 	}
 }
 

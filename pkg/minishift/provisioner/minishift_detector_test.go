@@ -71,7 +71,7 @@ VARIANT_VERSION="1.0.0-alpha.1"
 
 	osRelease, _ := provisioner.GetOsReleaseInfo()
 	if osRelease.Variant != "minishift" {
-		t.Fatal("Release info should contain 'minishift' variant")
+		t.Fatal("Release info must contain 'minishift' variant")
 	}
 
 }

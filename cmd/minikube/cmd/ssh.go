@@ -29,14 +29,15 @@ import (
 // sshCmd represents the docker-ssh command
 var sshCmd = &cobra.Command{
 	Use:   "ssh",
-	Short: "Log into or run a command on a machine with SSH; similar to 'docker-machine ssh'",
-	Long:  "Log into or run a command on a machine with SSH; similar to 'docker-machine ssh'",
+	Short: "Log in to or run a command on a Minishift VM with SSH.",
+	Long:  "Log in to or run a command on a Minishift VM with SSH. This command is similar to 'docker-machine ssh'.",
+	//NEEDINFO: is it really docker-mashine ssh or libmachine ssh in our case? Anything else? What credentials do we need to have?
 	Run: func(cmd *cobra.Command, args []string) {
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()
 		err := cluster.CreateSSHShell(api, args)
 		if err != nil {
-			glog.Errorln("Error attempting to ssh into machine: ", err)
+			glog.Errorln("Cannot establish SSH connection to the VM: ", err)
 			os.Exit(1)
 		}
 	},

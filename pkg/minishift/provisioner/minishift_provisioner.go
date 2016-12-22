@@ -89,7 +89,7 @@ func (provisioner *MinishiftProvisioner) dockerDaemonResponding() bool {
 	log.Debug("checking docker daemon")
 
 	if out, err := provisioner.SSHCommand("sudo docker version"); err != nil {
-		log.Warnf("Error getting SSH command to check if the daemon is up: %s", err)
+		log.Warnf("Error getting SSH command to check if the daemon is running: %s", err)
 		log.Debugf("'sudo docker version' output:\n%s", out)
 		return false
 	}

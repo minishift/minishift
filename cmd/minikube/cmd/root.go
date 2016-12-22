@@ -48,11 +48,10 @@ var dirs = [...]string{
 }
 
 const (
-	showLibmachineLogs = "show-libmachine-logs"
-)
-
-const (
+	showLibmachineLogs        = "show-libmachine-logs"
 	disableUpdateNotification = "disable-update-notification"
+	username                  = "username"
+	password                  = "password"
 )
 
 var (
@@ -123,6 +122,8 @@ func setFlagsUsingViper() {
 func init() {
 	RootCmd.PersistentFlags().Bool(showLibmachineLogs, false, "Whether or not to show logs from libmachine.")
 	RootCmd.PersistentFlags().Bool(disableUpdateNotification, false, "Whether to disable VM update check.")
+	RootCmd.PersistentFlags().String(username, "", "Username to register Virtual Machine")
+	RootCmd.PersistentFlags().String(password, "", "Password to register Virtual Machine")
 	RootCmd.AddCommand(configCmd.ConfigCmd)
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
 	logDir := pflag.Lookup("log_dir")

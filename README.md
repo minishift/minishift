@@ -71,7 +71,7 @@ You can also install the latest unstable version of minishift, after you install
 You can now install the latest unstable version of minishift.
 
   ```sh
-  $ brew cask install minishift-unstable
+  $ brew cask install minishift-beta
   ```
 
 <a name="quickstart"></a>

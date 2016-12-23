@@ -36,6 +36,7 @@ import (
 	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"github.com/minishift/minishift/pkg/minishift/registration"
 )
 
 const (
@@ -134,6 +135,11 @@ func runStart(cmd *cobra.Command, args []string) {
 	err := util.Retry(3, start)
 	if err != nil {
 		glog.Errorln("Error starting host: ", err)
+		os.Exit(1)
+	}
+	// Register Host VM
+	if err := registration.RegisterHostVM(host, RegistrationParameters); err !=nil {
+		fmt.Printf("Error registering Host VM: %s", err)
 		os.Exit(1)
 	}
 

@@ -24,6 +24,7 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/spf13/cobra"
+	"github.com/minishift/minishift/pkg/minishift/registration"
 )
 
 // stopCmd represents the stop command
@@ -36,6 +37,17 @@ itself, leaving all files intact. The cluster can be started again with the "sta
 		fmt.Println("Stopping local OpenShift cluster...")
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()
+
+		host, err := api.Load(constants.MachineName)
+		if err != nil {
+			fmt.Println("Errors occurred deleting machine: ", err)
+			os.Exit(1)
+		}
+		// Unregister Host VM
+		if err := registration.UnregisterHostVM(host, RegistrationParameters); err !=nil {
+			fmt.Printf("Error unregistring Host VM: %s", err)
+			os.Exit(1)
+		}
 
 		if err := cluster.StopHost(api); err != nil {
 			fmt.Println("Error stopping machine: ", err)

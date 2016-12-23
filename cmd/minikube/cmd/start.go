@@ -30,6 +30,7 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/cache"
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
+	"github.com/minishift/minishift/pkg/minishift/registration"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/version"
 	dockerhost "github.com/openshift/origin/pkg/bootstrap/docker/host"
@@ -127,13 +128,18 @@ func runStart(cmd *cobra.Command, args []string) {
 	start := func() (err error) {
 		host, err = cluster.StartHost(libMachineClient, config)
 		if err != nil {
-			glog.Errorf("Error starting host: %s. Retrying.\n", err)
+			glog.Errorf("Error starting machine: %s. Retrying.\n", err)
 		}
 		return err
 	}
 	err := util.Retry(3, start)
 	if err != nil {
-		glog.Errorln("Error starting host: ", err)
+		glog.Errorln("Error starting machine: ", err)
+		os.Exit(1)
+	}
+	// Register Host VM
+	if err := registration.RegisterHostVM(host, RegistrationParameters); err != nil {
+		fmt.Printf("Error registering machine: %s", err)
 		os.Exit(1)
 	}
 

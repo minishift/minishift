@@ -55,6 +55,18 @@ $ newgrp libvirt
 <a name="xhyve-driver"></a>
 ## xhyve driver
 
+Minishift is currently tested against `docker-machine-driver-xhyve` 0.3.1
+
+```
+$ brew info --installed docker-machine-driver-xhyve
+docker-machine-driver-xhyve: stable 0.3.1 (bottled), HEAD
+Docker Machine driver for xhyve
+https://github.com/zchee/docker-machine-driver-xhyve
+/usr/local/Cellar/docker-machine-driver-xhyve/0.3.1 (3 files, 13.2M) *
+  Poured from bottle on 2016-12-20 at 17:44:35
+From: https://github.com/Homebrew/homebrew-core/blob/master/Formula/docker-machine-driver-xhyve.rb
+```
+
 From https://github.com/zchee/docker-machine-driver-xhyve#install:
 
 ```
@@ -63,4 +75,18 @@ $ brew install docker-machine-driver-xhyve
 # docker-machine-driver-xhyve need root owner and uid
 $ sudo chown root:wheel $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
 $ sudo chmod u+s $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
+```
+
+Manual Installation
+
+```
+$ go get -u -d github.com/zchee/docker-machine-driver-xhyve
+$ cd $GOPATH/src/github.com/zchee/docker-machine-driver-xhyve
+
+# Install docker-machine-driver-xhyve binary into /usr/local/bin
+$ make install
+
+# docker-machine-driver-xhyve need root owner and uid
+$ sudo chown root:wheel /usr/local/bin/docker-machine-driver-xhyve
+$ sudo chmod u+s /usr/local/bin/docker-machine-driver-xhyve
 ```

@@ -2,9 +2,9 @@
 
 Minishift uses Docker Machine to manage the OpenShift VM, so it benefits from the
 driver plugin architecture that Docker Machine uses to provide a consistent way to
-manage various VM providers. Minikube embeds VirtualBox and VMware Fusion drivers
+manage various VM providers. Minishift embeds VirtualBox and VMware Fusion drivers
 so there are no additional steps to use them. However, other drivers require an
-extra binary to be present in the host _PATH_.
+extra binary to be present on the _PATH_.
 
 The following drivers currently require driver plugin binaries to be present in
 the host PATH:
@@ -13,6 +13,8 @@ the host PATH:
 
 - [KVM driver](#kvm-driver)
 - [xhyve driver](#xhyve-driver)
+	- [Homebrew install](#homebrew-install)
+	- [Manual install](#manual-install)
 
 <!-- /MarkdownTOC -->
 
@@ -57,6 +59,11 @@ $ newgrp libvirt
 
 Minishift is currently tested against `docker-machine-driver-xhyve` 0.3.1
 
+<a name="homebrew-install"></a>
+### Homebrew install
+
+You can verify the installed version of the driver via:
+
 ```
 $ brew info --installed docker-machine-driver-xhyve
 docker-machine-driver-xhyve: stable 0.3.1 (bottled), HEAD
@@ -67,7 +74,7 @@ https://github.com/zchee/docker-machine-driver-xhyve
 From: https://github.com/Homebrew/homebrew-core/blob/master/Formula/docker-machine-driver-xhyve.rb
 ```
 
-From https://github.com/zchee/docker-machine-driver-xhyve#install:
+To install the latest driver version via brew:
 
 ```
 $ brew install docker-machine-driver-xhyve
@@ -77,7 +84,8 @@ $ sudo chown root:wheel $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/doc
 $ sudo chmod u+s $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
 ```
 
-Manual Installation
+<a name="manual-install"></a>
+### Manual install
 
 ```
 $ go get -u -d github.com/zchee/docker-machine-driver-xhyve

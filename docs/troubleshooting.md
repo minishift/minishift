@@ -1,63 +1,75 @@
 # Troubleshooting
 
-This section contains solutions to common problems that you might encounter while
-using Minishift.
+This section contains solutions to common problems that you might encounter
+while using Minishift.
 
-- [KVM drivers](#kvm-drivers)
-- [XHYVE drivers](#xhyve-drivers)
+<!-- MarkdownTOC -->
 
-## KVM drivers
+- [KVM driver](#kvm-driver)
+  - [Error creating new host: dial tcp: missing address](#error-creating-new-host-dial-tcp-missing-address)
+  - [Failed to connect socket to '/var/run/libvirt/virtlogd-sock'](#failed-to-connect-socket-to-varrunlibvirtvirtlogd-sock)
+- [xhyve driver](#xhyve-driver)
+  - [Error: could not create vmnet interface, permission denied or no entitlement](#error-could-not-create-vmnet-interface-permission-denied-or-no-entitlement)
 
-- Minishift fails to start because of ```Error creating new host: dial tcp: missing address```.
+<!-- /MarkdownTOC -->
 
-  The problem is likely to be that the `libvirtd` service is not running, you can check it with
+<a name="kvm-driver"></a>
+## KVM driver
 
-  ```
-  systemctl status libvirtd
-  ```
+<a name="error-creating-new-host-dial-tcp-missing-address"></a>
+### Error creating new host: dial tcp: missing address
 
-  If `libvirtd` is not running, start and enable it to start on boot:
-  ```
-  systemctl start libvirtd
-  systemctl enable libvirtd
-  ```
+The problem is likely to be that the `libvirtd` service is not running, you can check it with
 
+```
+systemctl status libvirtd
+```
 
-- Minishift fails to start because of ```Failed to connect socket to '/var/run/libvirt/virtlogd-sock'```.
+If `libvirtd` is not running, start and enable it to start on boot:
 
-  The problem is likely to be that the `virtlogd` service not running, you can check it with
+```
+systemctl start libvirtd
+systemctl enable libvirtd
+```
 
-  ```
-  systemctl status virtlogd
-  ```
+<a name="failed-to-connect-socket-to-varrunlibvirtvirtlogd-sock"></a>
+### Failed to connect socket to '/var/run/libvirt/virtlogd-sock'
 
-  If `virtlogd` is not running, start and enable it to start on boot:
-  ```
-  systemctl start virtlogd
-  systemctl enable virtlogd
-  ```
+The problem is likely to be that the `virtlogd` service not running, you can check it with
 
+```
+systemctl status virtlogd
+```
 
-## XHYVE drivers
+If `virtlogd` is not running, start and enable it to start on boot:
 
-- Minishift failed to start because of ```Error: could not create vmnet interface, permission denied or no entitlement```.
+```
+systemctl start virtlogd
+systemctl enable virtlogd
+```
 
-    The problem is likely to be that the xhyve driver is not able to clean up vmnet when a VM is removed.
+<a name="xhyve-driver"></a>
+## xhyve driver
 
-    Workaround:
-        vmnet.framework decides the IP based on following files:
+<a name="error-could-not-create-vmnet-interface-permission-denied-or-no-entitlement"></a>
+### Error: could not create vmnet interface, permission denied or no entitlement
 
-            /var/db/dhcpd_leases
-            /Library/Preferences/SystemConfiguration/com.apple.vmnet.plist
+The problem is likely to be that the xhyve driver is not able to clean up
+vmnet when a VM is removed. vmnet.framework decides the IP based on following files:
 
-    Reset the `minishift` specific IP database and make sure you remove `minishift` entry section from `dhcpd_leases` file. Finally, reboot your system.
+* _/var/db/dhcpd_leases_
+* _/Library/Preferences/SystemConfiguration/com.apple.vmnet.plist_
 
-            {
-                ip_address=192.168.64.2
-                hw_address=1,2:51:8:22:87:a6
-                identifier=1,2:51:8:22:87:a6
-                lease=0x585e6e70
-                name=minishift
-            }
+Reset the `minishift` specific IP database and make sure you remove `minishift`
+entry section from `dhcpd_leases` file. Finally, reboot your system.
 
-    **Note:** You can do a complete reset IP database by removing both the files manually but this is very **risky**.
+    {
+      ip_address=192.168.64.2
+      hw_address=1,2:51:8:22:87:a6
+      identifier=1,2:51:8:22:87:a6
+      lease=0x585e6e70
+      name=minishift
+    }
+
+**Note:** You can completely reset IP database by removing both the files
+manually but this is very **risky**.

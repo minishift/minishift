@@ -21,6 +21,8 @@ import (
 	"os"
 
 	"github.com/docker/machine/libmachine"
+	"github.com/docker/machine/libmachine/drivers"
+	"github.com/docker/machine/libmachine/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/registration"
@@ -40,14 +42,16 @@ itself, leaving all files intact. The cluster can be started again with the "sta
 
 		host, err := api.Load(constants.MachineName)
 		if err != nil {
-			fmt.Println("Errors occurred deleting machine: ", err)
+			fmt.Println("Error occurred stopping machine: ", err)
 			os.Exit(1)
 		}
 
-		// Unregister Host VM
-		if err := registration.UnregisterHostVM(host, RegistrationParameters); err != nil {
-			fmt.Printf("Error unregistring machine: %s", err)
-			os.Exit(1)
+		if !drivers.MachineInState(host.Driver, state.Stopped)() {
+			// Unregister Host VM
+			if err := registration.UnregisterHostVM(host, RegistrationParameters); err != nil {
+				fmt.Printf("Error unregistring machine: %s", err)
+				os.Exit(1)
+			}
 		}
 
 		if err := cluster.StopHost(api); err != nil {

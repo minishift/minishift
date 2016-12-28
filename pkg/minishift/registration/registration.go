@@ -24,13 +24,13 @@ import (
 )
 
 var (
-	ErrDetectionFailed          = errors.New("Distro type not recognized to Registration")
+	ErrDetectionFailed          = errors.New("Distribution type not recognized to Registration")
 	registrators                = make(map[string]*RegisteredRegistrator)
 	detector           Detector = &StandardRegistrator{}
 )
 
 type Detector interface {
-	DetectRegistrator(c provision.SSHCommander) (Registrator, error)
+	DetectRegistrator(c provision.SSHCommander) (Registrator, bool, error)
 }
 
 type StandardRegistrator struct{}
@@ -62,30 +62,30 @@ func Register(name string, r *RegisteredRegistrator) {
 	registrators[name] = r
 }
 
-func DetectRegistrator(c provision.SSHCommander) (Registrator, error) {
+func DetectRegistrator(c provision.SSHCommander) (Registrator, bool, error) {
 	return detector.DetectRegistrator(c)
 }
 
-func (detector StandardRegistrator) DetectRegistrator(c provision.SSHCommander) (Registrator, error) {
+func (detector StandardRegistrator) DetectRegistrator(c provision.SSHCommander) (Registrator, bool, error) {
 	osReleaseOut, err := c.SSHCommand("sudo cat /etc/os-release")
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	osReleaseInfo, err := provision.NewOsRelease([]byte(osReleaseOut))
 	if err != nil {
-		return nil, fmt.Errorf("Error parsing /etc/os-release file: %s", err)
+		return nil, false, fmt.Errorf("Error parsing /etc/os-release file: %s", err)
 	}
 
-	log.Info("Detecting Host VM is managed by registration manager...")
+	log.Debug("Detecting whether virtual machine is managed by a registration manager...")
 
 	for _, r := range registrators {
 		registrator := r.New(c)
 
 		if registrator.CompatibleWithDistribution(osReleaseInfo) {
 			log.Debugf("found compatible host")
-			return registrator, nil
+			return registrator, true, err
 		}
 	}
 
-	return nil, ErrDetectionFailed
+	return nil, false, ErrDetectionFailed
 }

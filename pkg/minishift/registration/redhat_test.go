@@ -21,6 +21,7 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/tests"
 	"testing"
 	"github.com/docker/machine/libmachine/provision"
+	"fmt"
 )
 
 var (
@@ -28,9 +29,12 @@ var (
 		Username: "foo",
 		Password: "foo",
 	}
+	expectedCMDRegistration = fmt.Sprintf("sudo subscription-manager register --auto-attach --username %s --password %s ",
+		param.Username, param.Password)
+	expectedCMDUnregistration = "sudo subscription-manager unregister"
 )
 
-func TestRedHatRegistratorCompatibleWithDistribution(t *testing.T) {
+func setup(t *testing.T) (registrator Registrator){
 	s, _ := tests.NewSSHServer()
 	s.CommandToOutput = make(map[string]string)
 	s.CommandToOutput["sudo subscription-manager version"] = `server type: This system is currently not registered.`
@@ -48,7 +52,12 @@ func TestRedHatRegistratorCompatibleWithDistribution(t *testing.T) {
 
 	commander := provision.GenericSSHCommander{Driver: d}
 
-	registrator := NewRedHatRegistrator(commander)
+	registrator = NewRedHatRegistrator(commander)
+	return registrator
+}
+
+func TestRedHatRegistratorCompatibleWithDistribution(t *testing.T) {
+	registrator := setup(t)
 	info := &provision.OsRelease{
 		Name:      "Red Hat Enterprise Linux Server",
 		ID: 	   "rhel",
@@ -56,6 +65,18 @@ func TestRedHatRegistratorCompatibleWithDistribution(t *testing.T) {
 	}
 	if !registrator.CompatibleWithDistribution(info) {
 		t.Fatal("Registration capability should be in the Distribution")
+	}
+}
+
+func TestRedHatRegistratorNotCompatibleWithDistribution(t *testing.T) {
+	registrator := setup(t)
+	info := &provision.OsRelease{
+		Name:      "CentOS",
+		ID: 	   "centos",
+		VersionID: "7.3",
+	}
+	if registrator.CompatibleWithDistribution(info) {
+		t.Fatal("Registration capability shouldn't be in the Distribution")
 	}
 }
 
@@ -75,22 +96,13 @@ func TestRedHatRegistratorRegister(t *testing.T) {
 	}
 	commander := provision.GenericSSHCommander{Driver: d}
 	registrator := NewRedHatRegistrator(commander)
-	s.CommandToOutput["sudo subscription-manager version"] = `server type: RedHat Subscription Management`
-	if err := registrator.Register(param); err != nil {
-		t.Fatal("Distribution shouldn't have to register")
-	} else {
-		cmd := "sudo subscription-manager register --auto-attach --username foo --password foo"
-		if _, ok := s.Commands[cmd]; ok{
-			t.Fatalf("Expected command: %s", cmd)
-		}
-	}
+
 	s.CommandToOutput["sudo subscription-manager version"] = `server type: This system is currently not registered.`
 	if err := registrator.Register(param); err != nil {
 		t.Fatal("Distribution should able to register")
 	} else {
-		cmd := "sudo subscription-manager register --auto-attach --username foo --password foo "
-		if _, ok := s.Commands[cmd]; !ok{
-			t.Fatalf("Expected command: %s", cmd)
+		if _, ok := s.Commands[expectedCMDRegistration]; !ok{
+			t.Fatalf("Expected command: %s", expectedCMDRegistration)
 		}
 	}
 
@@ -112,22 +124,13 @@ func TestRedHatRegistratorUnregister(t *testing.T) {
 	}
 	commander := provision.GenericSSHCommander{Driver: d}
 	registrator := NewRedHatRegistrator(commander)
-	s.CommandToOutput["sudo subscription-manager version"] = `server type: This system is currently not registered.`
-	if err := registrator.Unregister(param); err != nil {
-		t.Fatal("Distribution shouldn't able to unregister")
-	} else {
-		cmd := "sudo subscription-manager unregister"
-		if _, ok := s.Commands[cmd]; ok{
-			t.Fatalf("Expected command: %s", cmd)
-		}
-	}
+
 	s.CommandToOutput["sudo subscription-manager version"] = `server type: RedHat Subscription Management`
 	if err := registrator.Unregister(param); err != nil {
-		t.Fatal("Distribution should able to unregister")
+		t.Fatal("Distribution should be able to unregister")
 	} else {
-		cmd := "sudo subscription-manager unregister"
-		if _, ok := s.Commands[cmd]; !ok{
-			t.Fatalf("Expected command: %s", cmd)
+		if _, ok := s.Commands[expectedCMDUnregistration]; !ok{
+			t.Fatalf("Expected command: %s", expectedCMDUnregistration)
 		}
 	}
 }

@@ -18,10 +18,10 @@ package registration
 
 import (
 	"fmt"
-	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/host"
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/pkg/errors"
+	"github.com/docker/machine/libmachine/log"
 )
 
 type RegistrationParameters struct {
@@ -35,21 +35,24 @@ type RegistrationParameters struct {
 // Register host VM
 func RegisterHostVM(host *host.Host, param *RegistrationParameters) error {
 	commander := provision.GenericSSHCommander{Driver: host.Driver}
-	registrator, err := DetectRegistrator(commander)
-	if err == ErrDetectionFailed {
-		fmt.Println("Distribution doesn't support registration")
-	} else if err != nil {
-		fmt.Errorf("Error running registration: %s", err)
-		return fmt.Errorf("Error running registration: %s", err)
+	registrator, supportRegistration, err := DetectRegistrator(commander)
+	if ! supportRegistration {
+		log.Debug("Distribution doesn't support registration")
+	}
+
+	if err != nil && err != ErrDetectionFailed {
+		return err
 	}
 
 	if registrator != nil {
 		if param.Username == "" || param.Password == "" {
-			return errors.New(fmt.Sprint("This virutal machine requires registration. Credentials must either be passed via the environment variables MINISHIFT_USERNAME and MINISHIFT_PASSWORD " +
-				" or the --username and --password flags\n"))
+			return errors.New("This virutal machine requires registration. " +
+				"Credentials must either be passed via the environment variables " +
+			        "MINISHIFT_USERNAME and MINISHIFT_PASSWORD " +
+				" or the --username and --password flags\n")
 		}
 		if err := registrator.Register(param); err != nil {
-			return fmt.Errorf("Error running registration: %s", err)
+			return err
 		}
 	}
 	return nil
@@ -58,19 +61,20 @@ func RegisterHostVM(host *host.Host, param *RegistrationParameters) error {
 // Unregister host VM
 func UnregisterHostVM(host *host.Host, param *RegistrationParameters) error {
 	commander := provision.GenericSSHCommander{Driver: host.Driver}
-	registrator, err := DetectRegistrator(commander)
+	registrator, supportUnregistration, err := DetectRegistrator(commander)
 
-	if err == ErrDetectionFailed {
-		fmt.Println("Distribution doesn't support unregistration")
-	} else if err != drivers.ErrHostIsNotRunning {
-	} else if err != nil {
-		return fmt.Errorf("Error during unregistration: %s", err)
+	if ! supportUnregistration {
+		log.Debug("Distribution doesn't support unregistration")
+	}
+
+	if err != nil && err != ErrDetectionFailed {
+		return err
 	}
 
 	if registrator != nil {
 		fmt.Println("Unregistering machine")
 		if err := registrator.Unregister(param); err != nil {
-			return fmt.Errorf("Error during unregistration: %s", err)
+			return err
 		}
 	}
 	return nil

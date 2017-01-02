@@ -10,8 +10,10 @@ while using Minishift.
   - [Failed to connect socket to '/var/run/libvirt/virtlogd-sock'](#failed-to-connect-socket-to-varrunlibvirtvirtlogd-sock)
 - [xhyve driver](#xhyve-driver)
   - [Error: could not create vmnet interface, permission denied or no entitlement](#error-could-not-create-vmnet-interface-permission-denied-or-no-entitlement)
-
+- [virtualbox driver](#virtualbox-driver)
+  - [Error: getting state for host: machine does not exist](#error-getting-state-for-host-machine-does-not-exist)
 <!-- /MarkdownTOC -->
+
 
 <a name="kvm-driver"></a>
 ## KVM driver
@@ -73,3 +75,14 @@ entry section from `dhcpd_leases` file. Finally, reboot your system.
 
 **Note:** You can completely reset IP database by removing both the files
 manually but this is very **risky**.
+
+<a name="virtualbox-driver"></a>
+## virtualbox driver
+
+<a name="error-getting-state-for-host-machine-does-not-exist"></a>
+### Error: getting state for host: machine does not exist
+
+If you are using Windows, the problem is likely to be either an outdated version
+of Virtual Box or you forgot to use `--vm-driver virtualbox` option when starting minishift.
+
+We recommend to use `Virtualbox >= 5.1.12` to avoid this issue.

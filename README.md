@@ -48,8 +48,10 @@ The driver can be selected via the `--vm-driver=xxx` flag of `minishift start`. 
 [docker machine drivers](./docs/docker-machine-drivers.md) for more details on supported drivers
 and how to install them.
 
-**Note**: For most hyervisor VT-x/AMD-v virtualization must be enabled in BIOS. For Hyper-V, however,
+**Note**:
+- For most hyervisor VT-x/AMD-v virtualization must be enabled in BIOS. For Hyper-V, however,
 it needs to be disabled.
+- We recommend to use `Virtualbox >= 5.1.12` on Windows to avoid this [known issue](./docs/troubleshooting.md#error-getting-state-for-host-machine-does-not-exist)
 
 <a name="instructions"></a>
 ### Instructions

@@ -27,13 +27,11 @@ import (
 )
 
 func TestStartStop(t *testing.T) {
-
-	runner := util.MinikubeRunner{
+	runner := util.MinishiftRunner{
 		Args:       *args,
 		BinaryPath: *binaryPath,
 		T:          t}
-	runner.RunCommand("delete", false)
-	runner.CheckStatus("Does Not Exist")
+	defer runner.EnsureDeleted()
 
 	runner.Start()
 	runner.CheckStatus("Running")
@@ -46,9 +44,6 @@ func TestStartStop(t *testing.T) {
 
 	runner.RunCommand("stop", true)
 	runner.CheckStatus("Stopped")
-
-	runner.Start()
-	runner.CheckStatus("Running")
 
 	runner.RunCommand("delete", true)
 	runner.CheckStatus("Does Not Exist")

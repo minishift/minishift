@@ -19,44 +19,21 @@ limitations under the License.
 package util
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"math/rand"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
-
-	"github.com/docker/machine/libmachine/log"
-	"k8s.io/kubernetes/pkg/api"
-
-	commonutil "github.com/minishift/minishift/pkg/util"
 )
 
-type MinikubeRunner struct {
+type MinishiftRunner struct {
 	T          *testing.T
 	BinaryPath string
 	Args       string
 }
 
-func IsPodReady(p *api.Pod) bool {
-	for _, cond := range p.Status.Conditions {
-		if cond.Type == "Ready" {
-			if cond.Status == "True" {
-				return true
-			}
-			log.Debugf("Pod %s not ready. Ready: %s. Reason: %s", p.Name, cond.Status, cond.Reason)
-			return false /**/
-		}
-	}
-	log.Debugf("Unable to find ready pod condition: %v", p.Status.Conditions)
-	return false
-}
-
-func (m *MinikubeRunner) RunCommand(command string, checkError bool) string {
+func (m *MinishiftRunner) RunCommand(command string, checkError bool) string {
 	commandArr := strings.Split(command, " ")
 	path, _ := filepath.Abs(m.BinaryPath)
 	cmd := exec.Command(path, commandArr...)
@@ -72,105 +49,78 @@ func (m *MinikubeRunner) RunCommand(command string, checkError bool) string {
 	return string(stdout)
 }
 
-func (m *MinikubeRunner) Start() {
+func (m *MinishiftRunner) Start() {
 	m.RunCommand(fmt.Sprintf("start %s", m.Args), true)
 }
 
-func (m *MinikubeRunner) EnsureRunning() {
+func (m *MinishiftRunner) EnsureRunning() {
 	if m.GetStatus() != "Running" {
 		m.Start()
 	}
 	m.CheckStatus("Running")
 }
 
-func (m *MinikubeRunner) SetEnvFromEnvCmdOutput(dockerEnvVars string) error {
+func (m *MinishiftRunner) IsRunning() bool {
+	return m.GetStatus() == "Running"
+}
+
+func (m *MinishiftRunner) EnsureDeleted() {
+	m.RunCommand("delete", false)
+	m.CheckStatus("Does Not Exist")
+}
+
+func (m *MinishiftRunner) SetEnvFromEnvCmdOutput(dockerEnvVars string) error {
 	lines := strings.Split(dockerEnvVars, "\n")
 	var envKey, envVal string
 	seenEnvVar := false
 	for _, line := range lines {
-		if _, err := fmt.Sscanf(line, "export %s=%s", envKey, envVal); err != nil {
+		fmt.Println(line)
+		if strings.HasPrefix("export ", line)  {
+			line = strings.TrimPrefix(line, "export ")
+		}
+		if _, err := fmt.Sscanf(line, "export %s=\"%s\"", &envKey, &envVal); err != nil {
 			seenEnvVar = true
+			fmt.Println(fmt.Sprintf("%s=%s", envKey, envVal))
 			os.Setenv(envKey, envVal)
 		}
 	}
 	if seenEnvVar == false {
-		return fmt.Errorf("Error: No environment variables were found in docker-env command output: ", dockerEnvVars)
+		return fmt.Errorf("Error: No environment variables were found in docker-env command output: %s", dockerEnvVars)
 	}
 	return nil
 }
 
-func (m *MinikubeRunner) GetStatus() string {
-	return m.RunCommand("status --format={{.MinikubeStatus}}", true)
+func (m *MinishiftRunner) GetStatus() string {
+	return strings.Trim(m.RunCommand("status", true), " \n")
 }
 
-func (m *MinikubeRunner) CheckStatus(desired string) {
+func (m *MinishiftRunner) CheckStatus(desired string) {
 	s := m.GetStatus()
 	if s != desired {
 		m.T.Fatalf("Machine is in the wrong state: %s, expected  %s", s, desired)
 	}
 }
 
-type KubectlRunner struct {
+type OcRunner struct {
 	T          *testing.T
 	BinaryPath string
 }
 
-func NewKubectlRunner(t *testing.T) *KubectlRunner {
+func NewOcRunner(t *testing.T) *OcRunner {
 	p, err := exec.LookPath("kubectl")
 	if err != nil {
-		t.Fatalf("Couldn't find kubectl on path.")
+		t.Fatal("Couldn't find kubectl on path.")
 	}
-	return &KubectlRunner{BinaryPath: p, T: t}
+	return &OcRunner{BinaryPath: p, T: t}
 }
 
-func (k *KubectlRunner) RunCommandParseOutput(args []string, outputObj interface{}) error {
-	args = append(args, "-o=json")
-	output, err := k.RunCommand(args)
-	if err != nil {
-		return err
-	}
-	d := json.NewDecoder(bytes.NewReader(output))
-	if err := d.Decode(outputObj); err != nil {
-		return err
-	}
+func (k *OcRunner) RunCommandParseOutput(args []string, outputObj interface{}) error {
+	// TODO implement (HF)
 	return nil
 }
 
-func (k *KubectlRunner) RunCommand(args []string) (stdout []byte, err error) {
-	inner := func() error {
-		cmd := exec.Command(k.BinaryPath, args...)
-		stdout, err = cmd.CombinedOutput()
-		if err != nil {
-			log.Errorf("Error %s running command %s. Return code: %s", stdout, args, err)
-			return fmt.Errorf("Error running command. Error  %s. Output: %s", err, stdout)
-		}
-		return nil
-	}
-
-	err = commonutil.RetryAfter(3, inner, 2*time.Second)
-	return stdout, err
+func (k *OcRunner) RunCommand(args []string) (stdout []byte, err error) {
+	// TODO implement (HF)
+	return nil, err
 }
 
-func (k *KubectlRunner) CreateRandomNamespace() string {
-	const strLen = 20
-	name := genRandString(strLen)
-	if _, err := k.RunCommand([]string{"create", "namespace", name}); err != nil {
-		k.T.Fatalf("Error creating namespace: %s", err)
-	}
-	return name
-}
-
-func genRandString(strLen int) string {
-	const chars = "abcdefghijklmnopqrstuvwxyz0123456789"
-	rand.Seed(time.Now().UTC().UnixNano())
-	result := make([]byte, strLen)
-	for i := 0; i < strLen; i++ {
-		result[i] = chars[rand.Intn(len(chars))]
-	}
-	return string(result)
-}
-
-func (k *KubectlRunner) DeleteNamespace(namespace string) error {
-	_, err := k.RunCommand([]string{"delete", "namespace", namespace})
-	return err
-}

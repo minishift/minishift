@@ -19,28 +19,23 @@ limitations under the License.
 package integration
 
 import (
-	"fmt"
+	"github.com/minishift/minishift/test/integration/util"
 	"strings"
 	"testing"
-
-	"github.com/minishift/minishift/test/integration/util"
 )
 
-func TestDockerEnv(t *testing.T) {
-	minikubeRunner := util.MinikubeRunner{
+func TestClusterSSH(t *testing.T) {
+	runner := util.MinishiftRunner{
 		Args:       *args,
 		BinaryPath: *binaryPath,
 		T:          t}
+	defer runner.EnsureDeleted()
 
-	minikubeRunner.RunCommand("delete", true)
-	minikubeRunner.RunCommand("start --docker-env=FOO=BAR --docker-env=BAZ=BAT", true)
-	minikubeRunner.EnsureRunning()
+	runner.EnsureRunning()
 
-	profileContents := minikubeRunner.RunCommand("ssh cat /var/lib/boot2docker/profile", true)
-	fmt.Println(profileContents)
-	for _, envVar := range []string{"FOO=BAR", "BAZ=BAT"} {
-		if !strings.Contains(profileContents, fmt.Sprintf("export \"%s\"", envVar)) {
-			t.Fatalf("Env var %s missing from file: %s.", envVar, profileContents)
-		}
+	expectedStr := "hello"
+	sshCmdOutput := runner.RunCommand("ssh echo " + expectedStr, true)
+	if !strings.Contains(sshCmdOutput, expectedStr) {
+		t.Fatalf("Expected output from ssh to be: %s. Output was: %s", expectedStr, sshCmdOutput)
 	}
 }

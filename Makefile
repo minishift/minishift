@@ -90,7 +90,7 @@ test: vendor $(GOPATH)/src/$(ORG)
 
 .PHONY: integration
 integration: $(BUILD_DIR)/$(GOOS)-$(GOARCH)/minishift$(IS_EXE)
-	go test $(REPOPATH)/test/integration --tags=integration
+	go test -timeout 3600s $(REPOPATH)/test/integration --tags=integration
 
 .PHONY: fmt
 fmt:

@@ -20,8 +20,10 @@ package integration
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"testing"
+	"runtime"
 )
 
 func TestMain(m *testing.M) {
@@ -29,5 +31,6 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-var binaryPath = flag.String("binary", "../../out/minikube", "path to minikube binary")
-var args = flag.String("minikube-args", "", "Arguments to pass to minikube")
+var binaryPath = flag.String("binary", fmt.Sprintf("../../out/%s-amd64/minishift", runtime.GOOS), "path to minishift binary")
+// For now lets use VirtualBox cross the board
+var args = flag.String("minishift-args", "--vm-driver virtualbox", "Arguments to pass to minishift")

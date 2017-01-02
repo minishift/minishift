@@ -1,13 +1,9 @@
 # Docker Machine driver installation
 
-Minishift uses Docker Machine to manage the OpenShift VM, so it benefits from the
-driver plugin architecture that Docker Machine uses to provide a consistent way to
-manage various VM providers. Minishift embeds VirtualBox and VMware Fusion drivers
-so there are no additional steps to use them. However, other drivers require an
-extra binary to be present on the _PATH_.
+Minishift uses Docker Machine and its driver plugin architecture to provide a consistent way to manage the OpenShift VM. Minishift embeds VirtualBox and VMware Fusion drivers
+so that there are no additional steps to use them.
 
-The following drivers currently require driver plugin binaries to be present in
-the host PATH:
+However, other drivers like those listed below, require extra driver plugin binaries to be present in the host _PATH_:
 
 <!-- MarkdownTOC -->
 
@@ -21,48 +17,62 @@ the host PATH:
 <a name="kvm-driver"></a>
 ## KVM driver
 
-Minishift is currently tested against `docker-machine-driver-kvm` 0.7.0.
+Minishift is currently tested against `docker-machine-driver-kvm`, version 0.7.0.
 
-From https://github.com/dhiltgen/docker-machine-kvm#quick-start-instructions:
+Install and execute the KVM binary as follows:
 
-```
+ ```
 $ sudo curl -L https://github.com/dhiltgen/docker-machine-kvm/releases/download/v0.7.0/docker-machine-driver-kvm -o /usr/local/bin/docker-machine-driver-kvm
 $ sudo chmod +x /usr/local/bin/docker-machine-driver-kvm
 ```
+For further information refer to: https://github.com/dhiltgen/docker-machine-kvm#quick-start-instructions
 
-On Debian/Ubuntu
-```
-# Install libvirt and qemu-kvm on your system, e.g.
+
+**On Debian/Ubuntu**
+
+1. Install libvirt and qemu-kvm on your system:
+
+ ```sh
 $ sudo apt install libvirt-bin qemu-kvm
+```
+1. Add yourself to the libvirtd group (this may vary by the linux distribution) so that you do not need to `sudo`:
 
-# Add yourself to the libvirtd group (may vary by linux distro) so you don't need to sudo
-$ sudo usermod -a -G libvirtd $(whoami)
+ ```sh
+$ sudo usermod -a -G libvirtd <username>
+```
+1. Update your current session for the group change to take effect:
 
-# Update your current session for the group change to take effect
+ ```sh
 $ newgrp libvirtd
 ```
 
-On Fedora
-```
-# Install libvirt and qemu-kvm on your system, e.g.
+**On Fedora**
+
+1. Install libvirt and qemu-kvm on your system:
+
+ ```sh
 $ sudo dnf install libvirt qemu-kvm
+```
+1. Add yourself to the libvirt group so that you do not need to sudo:
 
-# Add yourself to the libvirt group so you don't need to sudo
-$ sudo usermod -a -G libvirt $(whoami)
+ ```sh
+$ sudo usermod -a -G libvirt <username>
+```
+1. Update your current session for the group change to take effect:
 
-# Update your current session for the group change to take effect
+ ```sh
 $ newgrp libvirt
 ```
 
 <a name="xhyve-driver"></a>
 ## xhyve driver
 
-Minishift is currently tested against `docker-machine-driver-xhyve` 0.3.1
+Minishift is currently tested against `docker-machine-driver-xhyve`, version 0.3.1.
 
 <a name="homebrew-install"></a>
 ### Homebrew install
 
-You can verify the installed version of the driver via:
+You can verify the installed version of the xhyve driver on your system, before you install it as follows:
 
 ```
 $ brew info --installed docker-machine-driver-xhyve
@@ -74,7 +84,7 @@ https://github.com/zchee/docker-machine-driver-xhyve
 From: https://github.com/Homebrew/homebrew-core/blob/master/Formula/docker-machine-driver-xhyve.rb
 ```
 
-To install the latest driver version via brew:
+To install the latest version of the driver via brew:
 
 ```
 $ brew install docker-machine-driver-xhyve
@@ -83,10 +93,12 @@ $ brew install docker-machine-driver-xhyve
 $ sudo chown root:wheel $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
 $ sudo chmod u+s $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
 ```
+For further information refer to, https://github.com/zchee/docker-machine-driver-xhyve#install
 
 <a name="manual-install"></a>
 ### Manual install
 
+You can manually install the xhyve driver as follows:
 ```
 $ go get -u -d github.com/zchee/docker-machine-driver-xhyve
 $ cd $GOPATH/src/github.com/zchee/docker-machine-driver-xhyve

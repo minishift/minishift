@@ -1,7 +1,7 @@
 # Minishift
 
-Minishift is a tool that helps you to run OpenShift locally by running a single-node OpenShift
-cluster inside a VM. You can try out OpenShift or develop with it day-to-day on your local host.
+Minishift is a tool that helps you run OpenShift locally by running a single-node OpenShift
+cluster inside a VM. You can try out OpenShift or develop with it, day-to-day, on your local host.
 
 Minishift uses [libmachine](https://github.com/docker/machine/tree/master/libmachine) for
 provisioning VMs, and [OpenShift Origin](https://github.com/openshift/origin) for running the cluster.
@@ -12,10 +12,11 @@ provisioning VMs, and [OpenShift Origin](https://github.com/openshift/origin) fo
 
 - [Installation](#installation)
   - [Prerequisites](#prerequisites)
-  - [Instructions](#instructions)
-    - [macOS](#macos)
+  - [Installing Minshift](#installing-minishift)
+    - [Homebrew for OS X](#homebrew-OS-X)
 - [Quickstart](#quickstart)
   - [Starting Minishift](#starting-minishift)
+  - [Deploying a sample application](#deploying-sample-application)
   - [Reusing the Docker daemon](#reusing-the-docker-daemon)
 - [Documentation](#documentation)
 - [Known Issues](#known-issues)
@@ -35,44 +36,42 @@ provisioning VMs, and [OpenShift Origin](https://github.com/openshift/origin) fo
 ### Prerequisites
 
 Minishift requires a hypervisor to run the virtual machine containing OpenShift. Depending on your
-host OS, you have the following choices:
+host OS, you have the choice to install any of the following drivers or hypervisors:
 
 * OS X
-    * [xhyve driver](./docs/docker-machine-drivers.md#xhyve-driver), [VirtualBox](https://www.virtualbox.org/wiki/Downloads) or [VMware Fusion](https://www.vmware.com/products/fusion) installation
+    * [xhyve driver](./docs/docker-machine-drivers.md#xhyve-driver), [VirtualBox](https://www.virtualbox.org/wiki/Downloads) or [VMware Fusion](https://www.vmware.com/products/fusion)
 * Linux
-    * [VirtualBox](https://www.virtualbox.org/wiki/Downloads) or [KVM](http://www.linux-kvm.org/) installation
+    * [KVM](./docs/docker-machine-drivers.md#kvm-driver) or [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 * Windows
-    * [VirtualBox](https://www.virtualbox.org/wiki/Downloads) or [Hyper-V](https://technet.microsoft.com/en-us/library/mt169373.aspx) installation
+    * [Hyper-V](https://technet.microsoft.com/en-us/library/mt169373.aspx) or [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 
-The driver can be selected via the `--vm-driver=xxx` flag of `minishift start`. See
-[docker machine drivers](./docs/docker-machine-drivers.md) for more details on supported drivers
-and how to install them.
+Minishift embeds VirtualBox and VMware Fusion drivers so there are no additional configurations required to use them. However, some of the drivers, require a few extra steps, see [docker machine drivers](./docs/docker-machine-drivers.md) for more details on supported drivers and how to install them.
 
-**Note**:
-- For most hyervisor VT-x/AMD-v virtualization must be enabled in BIOS. For Hyper-V, however,
+The driver can be selected via the `--vm-driver=xxx` flag of `minishift start` as mentioned in the [Starting Minishift](#starting-minishift) section below. See the [Troubleshooting](/docs/troubleshooting.md#kvm-drivers) guide, in case you encounter any issues with the drivers.
+
+**Note:**
+- For most hypervisors, VT-x/AMD-v virtualization must be enabled in the BIOS. For Hyper-V, however,
 it needs to be disabled.
-- We recommend to use `Virtualbox >= 5.1.12` on Windows to avoid this [known issue](./docs/troubleshooting.md#error-getting-state-for-host-machine-does-not-exist)
+- We recommend that you use `Virtualbox >= 5.1.12` on Windows to avoid this [known issue](./docs/troubleshooting.md#error-getting-state-for-host-machine-does-not-exist)
 
-<a name="instructions"></a>
-### Instructions
+<a name="installing minishift"></a>
+### Installing Minshift
 
-Download the archive matching your host OS from the Minishift [releases page](https://github.com/minishift/minishift/releases) and unpack it. Then copy the contained binary to your preferred
+Download the archive matching your host OS from the Minishift [releases page](https://github.com/minishift/minishift/releases) and unpack it. Copy the contained binary to your preferred
 location and optionally ensure it is added to your _PATH_.
 
-<a name="macos"></a>
-#### macOS
+<a name="homebrew-OS-X"></a>
+#### Homebrew for OS X
 
 ##### Stable
-
-On macOS you can also use [Homebrew Cask](https://caskroom.github.io) to install Minishift:
+On OS X you can also use [Homebrew Cask](https://caskroom.github.io) to install the stable version of Minishift:
 
 ```sh
   $ brew cask install minishift
 ```
 
 ##### Latest Beta
-
-If you want to install the latest beta version of minishift you will need the homebrew-cask versions tap. After you install homebrew-cask, run the following command:
+If you want to install the latest beta version of Minishift you will need the homebrew-cask versions tap. After you install homebrew-cask, run the following command:
 
 ```sh
   $ brew tap caskroom/versions
@@ -87,14 +86,13 @@ You can now install the latest beta version of minishift.
 <a name="quickstart"></a>
 ## Quickstart
 
-This section contains a brief demo of Minishift usage.
+This section contains a brief demo of using OpenShift as provisioned by Minishift. For details on the usage of Minishift refer to the [Using Minishift](/docs/using.md) guide.
 
 <a name="starting-minishift"></a>
 ### Starting Minishift
+1. Navigate to the extracted Minishift directory and start Minishift:
 
-Note that the IP below is dynamic and can change. It can be retrieved with `minishift ip`.
-
-```shell
+ ```shell
 $ minishift start
 Starting local OpenShift cluster...
 ...
@@ -108,44 +106,76 @@ Starting local OpenShift cluster...
 
    To login as administrator:
        oc login -u system:admin
+```
+Note that, the IP seen above is dynamic and can change. It can be retrieved with `minishift ip`.
 
-# Adding 'oc' to the PATH (Note, concrete version might be different)
+ **Note:** By default Minishift uses the driver most relevant to the host OS.
+To use a driver of choice for Minishift, use the `--vm-driver=xxx` flag with `minishift start`. For example, to use VirtualBox instead of KVM for Fedora, use: `$ minishift start --vm-driver=virtualbox`.
+
+1. Add `oc` binary to the
+_PATH_: 
+
+ **Note:** The following command could vary based on your host OS, version of the OC binary and other variables. In case of doubt, you can check `~/.minishift/cache/oc`.
+
+ ```sh
 $ export PATH=$PATH:~/.minishift/cache/oc/v1.3.1
+```
+1. Login to your OpenShift account and authenticate yourself:
 
-# Authenticate against OpenShift
+ ```sh
 $ oc login https://192.168.99.128:8443 -u developer -p developer
+```
 
-# Create Node.js example app
+<a name="deploying sample application"></a>
+### Deploying a sample application
+You can use Minishift to run a sample Node.js application on OpenShift as follows:
+1. Create a Node.js example app:
+
+ ```sh
 $ oc new-app https://github.com/openshift/nodejs-ex -l name=myapp
+```
 
-# Tail the built log until the app is build and deployed
+1. Track the build log until the app is built and deployed using:
+
+ ```sh
 $ oc logs -f bc/nodejs-ex
+```
 
-# Expose a route to the service
+1. Expose a route to the service as follows:
+
+ ```sh
 oc expose svc/nodejs-ex
+```
 
-# Access the app
+1. Access the app:
+
+ ```sh
 $ curl http://nodejs-ex-myproject.192.168.99.128.xip.io
+```
 
+1. To stop Minishift use:
+
+ ```sh
 $ minishift stop
 Stopping local OpenShift cluster...
 Stopping "minishift"...
 ```
+
 <a name="reusing-the-docker-daemon"></a>
 ### Reusing the Docker daemon
 
-When running OpenShift in a single VM, it's recommended to reuse the Docker daemon Minishift uses
+When running OpenShift in a single VM, it is recommended to reuse the Docker daemon Minishift uses
 for pure Docker use-cases as well.
-You can use the same docker daemon as Minishift, which speeds up local experiments.
+By using the same docker daemon as Minishift, you can speed up your local experiments.
 
 To be able to work with the docker daemon on your Mac/Linux host use the
-[docker-env command](./docs/minishift_docker-env.md) in your shell:
+[`docker-env command`](./docs/minishift_docker-env.md) in your shell:
 
 ```
 eval $(minishift docker-env)
 ```
 
-You should now be able to use _docker_ on the command line of your host talking to the docker daemon
+You should now be able to use _docker_ on the command line of your host, talking to the docker daemon
 inside the Minishift VM:
 ```
 docker ps

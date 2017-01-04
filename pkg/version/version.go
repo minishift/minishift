@@ -39,6 +39,7 @@ func GetSemverVersion() (semver.Version, error) {
 // The default version of OpenShift
 // This is a private field and should be set when compiling with --ldflags="-X github.com/jimmidyson/minishift/pkg/version.openshiftVersion=vX.Y.Z"
 var openshiftVersion = "v0.0.0-unset"
+var isoVersion = "v0.0.0-unset"
 
 func GetOpenShiftVersion() string {
 	return openshiftVersion
@@ -46,4 +47,8 @@ func GetOpenShiftVersion() string {
 
 func GetOpenShiftSemverVersion() (semver.Version, error) {
 	return semver.Make(strings.TrimPrefix(GetOpenShiftVersion(), VersionPrefix))
+}
+
+func GetIsoVersion() string {
+	return isoVersion
 }

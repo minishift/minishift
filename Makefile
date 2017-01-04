@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-VERSION ?= $(shell cat VERSION)
-OPENSHIFT_VERSION ?= $(shell cat OPENSHIFT_VERSION)
+VERSION = 1.0.0-beta.2
+OPENSHIFT_VERSION = v1.3.1
+ISO_VERSION = v1.0.0
 
 GOOS ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)
@@ -25,6 +26,7 @@ ifeq ($(GOOS),windows)
 endif
 
 LDFLAGS := -X $(REPOPATH)/pkg/version.version=$(VERSION) \
+	-X $(REPOPATH)/pkg/version.isoVersion=$(ISO_VERSION) \
 	-X $(REPOPATH)/pkg/version.openshiftVersion=$(OPENSHIFT_VERSION) -s -w -extldflags '-static'
 
 GOFILES := go list  -f '{{join .Deps "\n"}}' ./cmd/minikube/ | grep $(REPOPATH) | xargs go list -f '{{ range $$file := .GoFiles }} {{$$.Dir}}/{{$$file}}{{"\n"}}{{end}}'
@@ -40,17 +42,14 @@ vendor:
 $(BUILD_DIR)/$(GOOS)-$(GOARCH):
 	mkdir -p $(BUILD_DIR)/$(GOOS)-$(GOARCH)
 
-$(BUILD_DIR)/darwin-amd64/minishift: vendor $(GOPATH)/src/$(ORG) $(BUILD_DIR)/$(GOOS)-$(GOARCH) $(shell $(GOFILES)) VERSION
+$(BUILD_DIR)/darwin-amd64/minishift: vendor $(GOPATH)/src/$(ORG) $(BUILD_DIR)/$(GOOS)-$(GOARCH) $(shell $(GOFILES))
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/darwin-amd64/minishift ./cmd/minikube
 
-$(BUILD_DIR)/linux-amd64/minishift: vendor $(GOPATH)/src/$(ORG) $(BUILD_DIR)/$(GOOS)-$(GOARCH) $(shell $(GOFILES)) VERSION
+$(BUILD_DIR)/linux-amd64/minishift: vendor $(GOPATH)/src/$(ORG) $(BUILD_DIR)/$(GOOS)-$(GOARCH) $(shell $(GOFILES))
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/linux-amd64/minishift ./cmd/minikube
 
-$(BUILD_DIR)/windows-amd64/minishift.exe: vendor $(GOPATH)/src/$(ORG) $(BUILD_DIR)/$(GOOS)-$(GOARCH) $(shell $(GOFILES)) VERSION
+$(BUILD_DIR)/windows-amd64/minishift.exe: vendor $(GOPATH)/src/$(ORG) $(BUILD_DIR)/$(GOOS)-$(GOARCH) $(shell $(GOFILES))
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/windows-amd64/minishift.exe ./cmd/minikube
-
-deploy/iso/minishift.iso: $(shell find deploy/iso -type f ! -name *.iso)
-	cd deploy/iso && ./build.sh
 
 $(GOPATH)/bin/gh-release: $(GOPATH)/src/$(ORG)
 	go get github.com/progrium/gh-release
@@ -65,9 +64,8 @@ gendocs: $(GOPATH)/src/$(ORG) $(shell find cmd)
 	cd $(GOPATH)/src/$(REPOPATH) && CGO_ENABLED=0 go run -ldflags="$(LDFLAGS)" -tags gendocs gen_help_text.go
 
 .PHONY: release
-release: clean deploy/iso/minishift.iso fmtcheck test prerelease $(GOPATH)/bin/gh-release cross
+release: clean fmtcheck test prerelease $(GOPATH)/bin/gh-release cross
 	mkdir -p release
-	cp deploy/iso/minishift.iso release/boot2docker.iso
 	gnutar -zcf release/minishift-$(VERSION)-darwin-amd64.tgz LICENSE README.md -C $(BUILD_DIR)/darwin-amd64 minishift
 	gnutar -zcf release/minishift-$(VERSION)-linux-amd64.tgz LICENSE README.md -C $(BUILD_DIR)/linux-amd64 minishift
 	zip -j release/minishift-$(VERSION)-windows-amd64.zip LICENSE README.md $(BUILD_DIR)/windows-amd64/minishift.exe

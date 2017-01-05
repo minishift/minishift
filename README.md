@@ -62,6 +62,8 @@ it needs to be disabled.
 Download the archive matching your host OS from the Minishift [releases page](https://github.com/minishift/minishift/releases) and unpack it. Copy the contained binary to your preferred
 location and optionally ensure it is added to your _PATH_.
 
+**Note**: Due to issue [#236](https://github.com/minishift/minishift/issues/236), you need to execute the minishift binary on Windows OS from the drive containing your %USERPROFILE% directory.
+
 <a name="installing-via-homebrew"></a>
 #### Installing via Homebrew
 

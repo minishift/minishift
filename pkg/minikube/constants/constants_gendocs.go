@@ -27,3 +27,4 @@ var SupportedVMDrivers = [...]string{
 }
 
 const DefaultVMDriver = "kvm"
+const OC_BINARY_NAME = "oc"

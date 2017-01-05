@@ -217,7 +217,7 @@ func clusterUp(config *cluster.MachineConfig) {
 		os.Exit(1)
 	}
 
-	cmdName := filepath.Join(oc.GetCacheFilepath(), cache.OC_BINARY_NAME)
+	cmdName := filepath.Join(oc.GetCacheFilepath(), constants.OC_BINARY_NAME)
 	cmdArgs := []string{"cluster", "up"}
 	clusterUpFlagSet.VisitAll(func(flag *flag.Flag) {
 		if viper.IsSet(flag.Name) {

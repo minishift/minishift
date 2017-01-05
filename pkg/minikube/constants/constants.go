@@ -17,11 +17,9 @@ limitations under the License.
 package constants
 
 import (
-	"path/filepath"
-
-	"k8s.io/kubernetes/pkg/util/homedir"
-
+	"github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/version"
+	"path/filepath"
 )
 
 // MachineName is the name to use for the VM.
@@ -31,10 +29,7 @@ const MachineName = "minishift"
 const APIServerPort = 8443
 
 // Fix for windows
-var Minipath = filepath.Join(homedir.HomeDir(), ".minishift")
-
-// MinikubeContext is the kubeconfig context name used for minishift
-const MinikubeContext = "minishift"
+var Minipath = filepath.Join(util.HomeDir(), ".minishift")
 
 // MiniShiftEnvPrefix is the prefix for the environmental variables
 const MiniShiftEnvPrefix = "MINISHIFT"
@@ -44,12 +39,6 @@ func MakeMiniPath(fileName ...string) string {
 	args := []string{Minipath}
 	args = append(args, fileName...)
 	return filepath.Join(args...)
-}
-
-// Only pass along these flags to openshift.
-var LogFlags = [...]string{
-	"v",
-	"vmodule",
 }
 
 const (
@@ -68,11 +57,10 @@ const (
 	RemoteOpenShiftCAPath  = "/var/lib/minishift/openshift.local.config/master/ca.crt"
 )
 
-var ConfigFilePath = MakeMiniPath("config")
 var ConfigFile = MakeMiniPath("config", "config.json")
 
 var TmpFilePath = MakeMiniPath("tmp")
 var OcCachePath = MakeMiniPath("cache", "oc")
 
-// DockerAPIVersion is the API version implemented by Docker running in the minikube VM.
+// DockerAPIVersion is the API version implemented by Docker running in the minishift VM.
 const DockerAPIVersion = "1.23"

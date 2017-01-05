@@ -19,6 +19,7 @@ package constants
 import (
 	"github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/version"
+	"os"
 	"path/filepath"
 )
 
@@ -29,17 +30,13 @@ const MachineName = "minishift"
 const APIServerPort = 8443
 
 // Fix for windows
-var Minipath = filepath.Join(util.HomeDir(), ".minishift")
+var Minipath = getMinishiftHomeDir()
 
 // MiniShiftEnvPrefix is the prefix for the environmental variables
 const MiniShiftEnvPrefix = "MINISHIFT"
 
-// MakeMiniPath is a utility to calculate a relative path to our directory.
-func MakeMiniPath(fileName ...string) string {
-	args := []string{Minipath}
-	args = append(args, fileName...)
-	return filepath.Join(args...)
-}
+// MiniShiftHomeEnv is the environment variable used to change the Minishift home directory
+const MiniShiftHomeEnv = "MINISHIFT_HOME"
 
 const (
 	DefaultMemory   = 2048
@@ -64,3 +61,22 @@ var OcCachePath = MakeMiniPath("cache", "oc")
 
 // DockerAPIVersion is the API version implemented by Docker running in the minishift VM.
 const DockerAPIVersion = "1.23"
+
+// MakeMiniPath is a utility to calculate a relative path to our directory.
+func MakeMiniPath(fileName ...string) string {
+	args := []string{Minipath}
+	args = append(args, fileName...)
+	return filepath.Join(args...)
+}
+
+// getMinishiftHomeDir determines the Minishift home directory where all state information is kept.
+// The default directory is .minishift in the users HOME directory which can be overwritten by the MINISHIFT_HOME
+// environment variable
+func getMinishiftHomeDir() string {
+	homeEnv, ok := os.LookupEnv(MiniShiftHomeEnv)
+	if ok {
+		return homeEnv
+	} else {
+		return filepath.Join(util.HomeDir(), ".minishift")
+	}
+}

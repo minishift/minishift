@@ -5,12 +5,13 @@ overview of different components and services.
 
 <!-- MarkdownTOC -->
 
-- [Managing your cluster](#managing-your-cluster)
-  - [Starting a cluster](#starting-a-cluster)
-  - [Stopping a cluster](#stopping-a-cluster)
-  - [Deleting a cluster](#deleting-a-cluster)
-- [Interacting With your Cluster](#interacting-with-your-cluster)
-  - [OpenShift Client binary \(oc\)](#openshift-client-binary-oc)
+- [Managing your Openshift instance](#managing-your-openshift-instance)
+  - [Starting OpenShift](#starting-openshift)
+  - [Stopping OpenShift](#stopping-openshift)
+  - [Deleting OpenShift](#deleting-openshift)
+- [Environment variables](#environment-variables)
+- [Interacting with OpenShift](#interacting-with-openshift)
+  - [OpenShift client binary \(oc\)](#openshift-client-binary-oc)
   - [Console](#console)
   - [Services](#services)
 - [Mounted host folders](#mounted-host-folders)
@@ -20,35 +21,57 @@ overview of different components and services.
 
 <!-- /MarkdownTOC -->
 
-<a name="managing-your-cluster"></a>
-## Managing your cluster
+<a name="managing-your-openshift-instance"></a>
+## Managing your Openshift instance
 
-This section contains information about basic cluster management operations.
+This section contains information about basic virtual machine and OpenShift management operations.
 
-<a name="starting-a-cluster"></a>
-### Starting a cluster
+<a name="starting-openshift"></a>
+### Starting OpenShift
 
-The [minishift start](./docs/minishift_start.md) command can be used to start your cluster.
-This command creates and configures a virtual machine that runs a single-node OpenShift cluster.
+The [minishift start](./docs/minishift_start.md) command can be used to start your OpenShift instance.
+This command creates and configures a virtual machine that runs a single-node OpenShift instance.
 
-<a name="stopping-a-cluster"></a>
-### Stopping a cluster
-The [minishift stop](./docs/minishift_stop.md) command can be used to stop your cluster.
-This command shuts down the Minishift virtual machine, but preserves all cluster state and data.
-Starting the cluster again will restore it to it's previous state.
+<a name="stopping-openshift"></a>
+### Stopping OpenShift
 
-<a name="deleting-a-cluster"></a>
-### Deleting a cluster
-The [minishift delete](./docs/minishift_delete.md) command can be used to delete your cluster.
+The [minishift stop](./docs/minishift_stop.md) command can be used to stop your OpenShift instance.
+This command shuts down the Minishift virtual machine, but preserves all instance state and data.
+Starting the instance again will restore it to it's previous state.
+
+<a name="deleting-openshift"></a>
+### Deleting OpenShift
+
+The [minishift delete](./docs/minishift_delete.md) command can be used to delete the OpenShift instance.
 This command shuts down and deletes the Minishift virtual machine. No data or state is preserved.
 
-<a name="interacting-with-your-cluster"></a>
-## Interacting With your Cluster
+<a name="environment-variables"></a>
+## Environment variables
+
+Minishift allows you to specify command line flags you commonly use via environment variables.
+To do so, apply the following rules to the flag you want to set via an environment variable.
+
+* Apply the _MINISHIFT__ as a prefix to your environment variable, for example the _vm-driver_ flag
+  of the [start](./docs/minishift_start.md) command becomes _MINISHIFT_vm-driver_.
+* Uppercase the flag, _MINISHIFT_vm-driver_ becomes _MINISHIFT_VM-DRIVER_.
+* Last but not least, replace _-_ with _\__, _MINISHIFT_VM-DRIVER_ becomes _MINISHIFT_VM_DRIVER_
+
+Another common example might be the URL of the ISO to be used. Usually you specify it via
+_iso-url_ of the [start](./docs/minishift_start.md) command. Applying the rules from above, you can
+also specify this URL by setting the environment variable _MINISHIFT_ISO_URL_.
+
+**Note:** There is also the _MINISHIFT_HOME_ environment variable. Per default Minishift places all
+its runtime state into _~/.minishift_. Using _MINISHIFT_HOME_, you can choose a different directory
+as Minishift's home directory. This is currently experimental and semantics might change in
+future releases.
+
+<a name="interacting-with-openshift"></a>
+## Interacting with OpenShift
 
 <a name="openshift-client-binary-oc"></a>
-### OpenShift Client binary (oc)
+### OpenShift client binary (oc)
 
-The `minishift start` command creates an OpenShift cluster using the
+The `minishift start` command creates an OpenShift instance using the
 [cluster up](https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md) approach.
 For this purpose it copies the _oc_ binary onto  your host. You find it under
 _~/.minishift/cache/oc/\<OpenShift version\>/oc_. You can add this binary to your _PATH_ variable

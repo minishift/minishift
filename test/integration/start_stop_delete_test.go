@@ -22,11 +22,17 @@ import (
 	"net"
 	"strings"
 	"testing"
+	"os"
 
 	"github.com/minishift/minishift/test/integration/util"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
 func TestStartStop(t *testing.T) {
+	testDir := setUp(t)
+	defer os.RemoveAll(testDir)
+	defer os.Unsetenv(constants.MiniShiftHomeEnv)
+
 	runner := util.MinishiftRunner{
 		Args:       *args,
 		BinaryPath: *binaryPath,

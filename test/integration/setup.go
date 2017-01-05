@@ -19,29 +19,17 @@ limitations under the License.
 package integration
 
 import (
-	"github.com/minishift/minishift/test/integration/util"
-	"strings"
 	"testing"
+	"io/ioutil"
 	"os"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
-func TestClusterSSH(t *testing.T) {
-	testDir := setUp(t)
-	defer os.RemoveAll(testDir)
-	defer os.Unsetenv(constants.MiniShiftHomeEnv)
-
-	runner := util.MinishiftRunner{
-		Args:       *args,
-		BinaryPath: *binaryPath,
-		T:          t}
-	defer runner.EnsureDeleted()
-
-	runner.EnsureRunning()
-
-	expectedStr := "hello"
-	sshCmdOutput := runner.RunCommand("ssh echo " + expectedStr, true)
-	if !strings.Contains(sshCmdOutput, expectedStr) {
-		t.Fatalf("Expected output from ssh to be: %s. Output was: %s", expectedStr, sshCmdOutput)
+func setUp(t *testing.T) string {
+	testDir, err := ioutil.TempDir("", "minishift-integration-test-")
+	if(err != nil) {
+		t.Fatalf("Failed to create temp directory '%s'", testDir)
 	}
+	os.Setenv(constants.MiniShiftHomeEnv, testDir)
+	return testDir
 }

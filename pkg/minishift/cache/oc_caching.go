@@ -17,16 +17,15 @@ limitations under the License.
 package cache
 
 import (
-	"os"
-	"path/filepath"
-
-	"github.com/pkg/errors"
-
+	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/util/github"
 	minishiftos "github.com/minishift/minishift/pkg/util/os"
+	"github.com/pkg/errors"
+	"os"
+	"path/filepath"
 )
 
-const OC_BINARY_NAME = "oc"
+const OC_CACHE_DIR = "oc"
 
 // Oc is a struct with methods designed for dealing with the oc binary
 type Oc struct {
@@ -46,11 +45,11 @@ func (oc *Oc) EnsureIsCached() error {
 }
 
 func (oc *Oc) GetCacheFilepath() string {
-	return filepath.Join(oc.MinishiftCacheDir, OC_BINARY_NAME, oc.OpenShiftVersion)
+	return filepath.Join(oc.MinishiftCacheDir, OC_CACHE_DIR, oc.OpenShiftVersion)
 }
 
 func (oc *Oc) isCached() bool {
-	if _, err := os.Stat(filepath.Join(oc.GetCacheFilepath(), OC_BINARY_NAME)); os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(oc.GetCacheFilepath(), constants.OC_BINARY_NAME)); os.IsNotExist(err) {
 		return false
 	}
 	return true

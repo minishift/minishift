@@ -25,3 +25,4 @@ var SupportedVMDrivers = [...]string{
 }
 
 const DefaultVMDriver = "xhyve"
+const OC_BINARY_NAME = "oc"

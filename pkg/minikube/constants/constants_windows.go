@@ -24,3 +24,4 @@ var SupportedVMDrivers = [...]string{
 }
 
 const DefaultVMDriver = "hyperv"
+const OC_BINARY_NAME = "oc.exe"

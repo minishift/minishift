@@ -29,6 +29,7 @@ import (
 	"path/filepath"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"net/http"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
 type RecordingRunner struct {
@@ -57,7 +58,7 @@ func TestStartClusterUpNoFlags(t *testing.T) {
 
 	clusterUp(&testMachineConfig)
 
-	expectedOc := filepath.Join(testDir, "cache", "oc", testMachineConfig.OpenShiftVersion, "oc")
+	expectedOc := filepath.Join(testDir, "cache", "oc", testMachineConfig.OpenShiftVersion, constants.OC_BINARY_NAME)
 	if testRunner.Cmd != expectedOc {
 		t.Errorf("Expected command '%s'. Got '%s'", expectedOc, testRunner.Cmd)
 	}

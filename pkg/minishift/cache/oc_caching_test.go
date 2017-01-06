@@ -23,6 +23,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
 var testDir string
@@ -40,7 +41,8 @@ func TestIsCached(t *testing.T) {
 	}
 
 	content := []byte("foo")
-	if err := ioutil.WriteFile(filepath.Join(ocDir, "oc"), content, os.ModePerm); err != nil {
+
+	if err := ioutil.WriteFile(filepath.Join(ocDir, constants.OC_BINARY_NAME), content, os.ModePerm); err != nil {
 		t.Error()
 	}
 

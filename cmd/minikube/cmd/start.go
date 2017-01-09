@@ -55,7 +55,6 @@ const (
 	skipRegistryCheck = "skip-registry-check"
 	publicHostname    = "public-hostname"
 	routingSuffix     = "routing-suffix"
-	useExistingConfig = "use-existing-config"
 	hostConfigDir     = "host-config-dir"
 	hostVolumesDir    = "host-volumes-dir"
 	hostDataDir       = "host-data-dir"
@@ -80,6 +79,12 @@ var startCmd = &cobra.Command{
 assumes you already have Virtualbox installed.`,
 	Run: runStart,
 }
+
+// Set default value for host data and config dir
+var (
+	hostConfigDirectory = "/var/lib/minishift/openshift.local.config"
+	hostDataDirectory   = "/var/lib/minishift/hostdata"
+)
 
 // startFlagSet contains the minishift specific command line switches
 var startFlagSet = flag.NewFlagSet(commandName, flag.ContinueOnError)
@@ -174,7 +179,7 @@ func init() {
 	provision.SetDetector(&provisioner.MinishiftProvisionerDetector{Delegate: provision.StandardDetector{}})
 }
 
-// initClusterUpFlags creates the CLI flags which needs to be passed on to 'oc cluster up'
+// initStartFlags creates the CLI flags which needs to be passed on to 'libmachine'
 func initStartFlags() {
 	startFlagSet.String(isoURL, constants.DefaultIsoUrl, "Location of the minishift iso")
 	startFlagSet.String(vmDriver, constants.DefaultVMDriver, fmt.Sprintf("VM driver is one of: %v", constants.SupportedVMDrivers))
@@ -194,10 +199,9 @@ func initClusterUpFlags() {
 	clusterUpFlagSet.Bool(skipRegistryCheck, false, "Skip Docker daemon registry check")
 	clusterUpFlagSet.String(publicHostname, "", "Public hostname for OpenShift cluster")
 	clusterUpFlagSet.String(routingSuffix, "", "Default suffix for server routes")
-	clusterUpFlagSet.Bool(useExistingConfig, false, "Use existing configuration if present")
-	clusterUpFlagSet.String(hostConfigDir, dockerhost.DefaultConfigDir, "Directory on Docker host for OpenShift configuration")
+	clusterUpFlagSet.String(hostConfigDir, hostConfigDirectory, "Directory on Docker host for OpenShift configuration")
 	clusterUpFlagSet.String(hostVolumesDir, dockerhost.DefaultVolumesDir, "Directory on Docker host for OpenShift volumes")
-	clusterUpFlagSet.String(hostDataDir, "", "Directory on Docker host for OpenShift data. If not specified, etcd data will not be persisted on the host.")
+	clusterUpFlagSet.String(hostDataDir, hostDataDirectory, "Directory on Docker host for OpenShift data. If not specified, etcd data will not be persisted on the host.")
 	clusterUpFlagSet.Bool(forwardPorts, false, "Use Docker port-forwarding to communicate with origin container. Requires 'socat' locally.")
 	clusterUpFlagSet.Int(serverLogLevel, 0, "Log level for OpenShift server")
 	clusterUpFlagSet.StringSliceVarP(&openShiftEnv, openshiftEnv, "e", []string{}, "Specify key value pairs of environment variables to set on OpenShift container")
@@ -217,7 +221,12 @@ func clusterUp(config *cluster.MachineConfig) {
 	}
 
 	cmdName := filepath.Join(oc.GetCacheFilepath(), constants.OC_BINARY_NAME)
-	cmdArgs := []string{"cluster", "up"}
+	cmdArgs := []string{"cluster", "up", "--use-existing-config"}
+
+	// Set default value for host config and data
+	viper.Set(hostConfigDir, viper.GetString(hostConfigDir))
+	viper.Set(hostDataDir, viper.GetString(hostDataDir))
+
 	clusterUpFlagSet.VisitAll(func(flag *flag.Flag) {
 		if viper.IsSet(flag.Name) {
 			value := viper.GetString(flag.Name)

@@ -151,11 +151,32 @@ For more options refer to the _minishift_ [synopsis](./minishift.md).
 <a name="unit-tests"></a>
 #### Unit Tests
 
-Unit tests are run on Travis before code is merged. To run as part of a development cycle:
+Unit tests get run on Travis before code is merged. To run as part of a development cycle:
 
 ```shell
 make test
 ```
+
+To run specific tests, use one of the following approach:
+
+- Run tests within entire package
+```
+go test -v <relative path of package>
+
+# Eg: go test -v ./cmd/minikube/cmd
+```
+
+- Run specific test case
+```
+go test -v <relative path of package> -run <Testcase Name>
+```
+
+- Run tests matching pattern
+```
+go test -v <relative path of package> -run "Test<Regex pattern to match tests>"
+```
+
+Run `go test --help` to check more options.
 
 <a name="integration-tests"></a>
 #### Integration Tests

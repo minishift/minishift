@@ -121,10 +121,10 @@ func runStart(cmd *cobra.Command, args []string) {
 		HostOnlyCIDR:     viper.GetString(hostOnlyCIDR),
 		OpenShiftVersion: viper.GetString(openshiftVersion),
 	}
+	fmt.Printf("Starting local OpenShift instance using '%s' hypervisor...\n", config.VMDriver)
 
 	var host *host.Host
 	start := func() (err error) {
-		fmt.Printf("Starting local OpenShift instance using '%s' hypervisor...\n", config.VMDriver)
 		host, err = cluster.StartHost(libMachineClient, config)
 		if err != nil {
 			glog.Errorf("Error starting machine: %s. Retrying.\n", err)

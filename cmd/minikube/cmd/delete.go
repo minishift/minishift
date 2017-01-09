@@ -36,7 +36,7 @@ var deleteCmd = &cobra.Command{
 	Long: `Deletes a local OpenShift cluster. This command deletes the VM, and removes all
 associated files.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Deleting local OpenShift cluster...")
+		fmt.Println("Deleting local OpenShift instance...")
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()
 		host, err := api.Load(constants.MachineName)

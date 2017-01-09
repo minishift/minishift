@@ -160,23 +160,20 @@ make test
 To run specific tests, use one of the following approach:
 
 - Run tests within entire package
-```
-go test -v <relative path of package>
 
-# Eg: go test -v ./cmd/minikube/cmd
-```
+        # Eg: go test -v ./cmd/minikube/cmd
+        go test -v <relative path of package>
 
-- Run specific test case
-```
-go test -v <relative path of package> -run <Testcase Name>
-```
+- Run a single test
+
+        go test -v <relative path of package> -run <Testcase Name>
 
 - Run tests matching pattern
-```
-go test -v <relative path of package> -run "Test<Regex pattern to match tests>"
-```
 
-Run `go test --help` to check more options.
+        go test -v <relative path of package> -run "Test<Regex pattern to match tests>"
+
+
+Run `go test --help` to read more about test options.
 
 <a name="integration-tests"></a>
 #### Integration Tests

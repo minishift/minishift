@@ -31,7 +31,6 @@ import (
 	configCmd "github.com/minishift/minishift/cmd/minikube/cmd/config"
 	"github.com/minishift/minishift/pkg/minikube/config"
 	"github.com/minishift/minishift/pkg/minikube/constants"
-	"github.com/minishift/minishift/pkg/minikube/update"
 	"github.com/minishift/minishift/pkg/minishift/registration"
 )
 
@@ -50,13 +49,11 @@ var dirs = [...]string{
 
 const (
 	showLibmachineLogs        = "show-libmachine-logs"
-	disableUpdateNotification = "disable-update-notification"
 	username                  = "username"
 	password                  = "password"
 )
 
 var (
-	enableUpdateNotification = true
 	RegistrationParameters   = new(registration.RegistrationParameters)
 )
 
@@ -85,13 +82,6 @@ var RootCmd = &cobra.Command{
 		if !shouldShowLibmachineLogs {
 			log.SetOutWriter(ioutil.Discard)
 			log.SetErrWriter(ioutil.Discard)
-		}
-
-		if viper.GetBool(disableUpdateNotification) {
-			enableUpdateNotification = false
-		}
-		if enableUpdateNotification {
-			update.MaybeUpdateFromGithub(os.Stdout)
 		}
 	},
 }
@@ -123,7 +113,6 @@ func setFlagsUsingViper() {
 
 func init() {
 	RootCmd.PersistentFlags().Bool(showLibmachineLogs, false, "Whether or not to show logs from libmachine.")
-	RootCmd.PersistentFlags().Bool(disableUpdateNotification, false, "Whether to disable VM update check.")
 	RootCmd.PersistentFlags().String(username, "", "Username to register Virtual Machine")
 	RootCmd.PersistentFlags().String(password, "", "Password to register Virtual Machine")
 	RootCmd.AddCommand(configCmd.ConfigCmd)

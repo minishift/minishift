@@ -22,7 +22,6 @@ For the list of accessible variables for the template, see the struct values her
 
 ```
       --alsologtostderr value          log to standard error as well as files
-      --disable-update-notification    Whether to disable VM update check.
       --log-flush-frequency duration   Maximum number of seconds between log flushes (default 5s)
       --log_backtrace_at value         when logging hits line file:N, emit a stack trace (default :0)
       --log_dir value                  If non-empty, write log files in this directory

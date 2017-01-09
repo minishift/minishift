@@ -62,7 +62,14 @@ it needs to be disabled.
 Download the archive matching your host OS from the Minishift [releases page](https://github.com/minishift/minishift/releases) and unpack it. Copy the contained binary to your preferred
 location and optionally ensure it is added to your _PATH_.
 
-**Note**: Due to issue [#236](https://github.com/minishift/minishift/issues/236), you need to execute the minishift binary on Windows OS from the drive containing your %USERPROFILE% directory.
+**Note:**
+- Due to issue [#236](https://github.com/minishift/minishift/issues/236), you need to execute the minishift binary on Windows OS from the drive containing your %USERPROFILE% directory.
+- Automatic update of minishift binary and virtual machine ISO is currently disabled, due to issues
+ [#204](https://github.com/minishift/minishift/issues/204),
+ [#178](https://github.com/minishift/minishift/issues/178),
+ [#112](https://github.com/minishift/minishift/issues/112) and
+ [#192](https://github.com/minishift/minishift/issues/192). We will take a comprehensive look at
+ these issues in an upcoming release and provide an improved solution for automatic updates.
 
 <a name="installing-via-homebrew"></a>
 #### Installing via Homebrew

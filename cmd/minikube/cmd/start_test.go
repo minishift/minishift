@@ -17,19 +17,19 @@ limitations under the License.
 package cmd
 
 import (
-	"testing"
 	minitesting "github.com/minishift/minishift/pkg/testing"
+	"testing"
 
-	"github.com/minishift/minishift/pkg/util"
-	"os"
-	"io/ioutil"
-	"github.com/minishift/minishift/pkg/minikube/tests"
 	"github.com/docker/machine/libmachine/provision"
-	"github.com/spf13/viper"
-	"path/filepath"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
-	"net/http"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minikube/tests"
+	"github.com/minishift/minishift/pkg/util"
+	"github.com/spf13/viper"
+	"io/ioutil"
+	"net/http"
+	"os"
+	"path/filepath"
 )
 
 type RecordingRunner struct {
@@ -45,7 +45,7 @@ func (r *RecordingRunner) Run(command string, args ...string) error {
 
 var testDir string
 var testRunner *RecordingRunner
-var testMachineConfig = cluster.MachineConfig {
+var testMachineConfig = cluster.MachineConfig{
 	OpenShiftVersion: "v1.3.1",
 }
 
@@ -63,12 +63,48 @@ func TestStartClusterUpNoFlags(t *testing.T) {
 		t.Errorf("Expected command '%s'. Got '%s'", expectedOc, testRunner.Cmd)
 	}
 
-	expectedArguments := []string{"cluster", "up"}
+	expectedArguments := []string{"cluster", "up", "--use-existing-config",
+		"--host-config-dir", hostConfigDirectory,
+		"--host-data-dir", hostDataDirectory}
 	for i, v := range testRunner.Args {
 		if v != expectedArguments[i] {
 			t.Errorf("Expected argument '%s'. Got '%s'", expectedArguments[i], v)
 		}
 	}
+}
+
+func TestStartClusterUpWithOverrideHostConfigDirFlag(t *testing.T){
+	setUp(t)
+	defer os.RemoveAll(testDir)
+	defer minitesting.ResetDefaultRoundTripper()
+	defer SetRunner(util.RealRunner{})
+	defer viper.Reset()
+
+	viper.Set("host-config-dir", "/var/tmp/foo")
+	clusterUp(&testMachineConfig)
+
+	expectedArguments := []string{"cluster", "up", "--use-existing-config",
+		"--host-config-dir", "/var/tmp/foo",
+		"--host-data-dir", hostDataDirectory,
+	}
+	assertCommandLineArguments(expectedArguments, t)
+}
+
+func TestStartClusterUpWithOverrideHostDataDirFlag(t *testing.T){
+	setUp(t)
+	defer os.RemoveAll(testDir)
+	defer minitesting.ResetDefaultRoundTripper()
+	defer SetRunner(util.RealRunner{})
+	defer viper.Reset()
+
+	viper.Set("host-data-dir", "/var/tmp/foo")
+	clusterUp(&testMachineConfig)
+
+	expectedArguments := []string{"cluster", "up", "--use-existing-config",
+		"--host-config-dir", hostConfigDirectory,
+		"--host-data-dir", "/var/tmp/foo",
+	}
+	assertCommandLineArguments(expectedArguments, t)
 }
 
 func TestStartClusterUpWithFlag(t *testing.T) {
@@ -82,7 +118,11 @@ func TestStartClusterUpWithFlag(t *testing.T) {
 	viper.Set("skip-registry-check", "true")
 	clusterUp(&testMachineConfig)
 
-	expectedArguments := []string{"cluster", "up", "--public-hostname", "foobar", "--skip-registry-check", "true"}
+	expectedArguments := []string{"cluster", "up", "--use-existing-config",
+		"--host-config-dir", hostConfigDirectory,
+		"--host-data-dir", hostDataDirectory,
+		"--public-hostname", "foobar",
+		"--skip-registry-check", "true"}
 	assertCommandLineArguments(expectedArguments, t)
 }
 
@@ -96,7 +136,10 @@ func TestStartClusterUpWithOpenShiftEnv(t *testing.T) {
 	viper.Set("openshift-env", "HTTP_PROXY=http://localhost:3128,HTTP_PROXY_USER=foo,HTTP_PROXY_PASS=bar")
 	clusterUp(&testMachineConfig)
 
-	expectedArguments := []string{"cluster", "up", "--env", "HTTP_PROXY=http://localhost:3128,HTTP_PROXY_USER=foo,HTTP_PROXY_PASS=bar"}
+	expectedArguments := []string{"cluster", "up", "--use-existing-config",
+		"--host-config-dir", hostConfigDirectory,
+		"--host-data-dir", hostDataDirectory,
+		"--env", "HTTP_PROXY=http://localhost:3128,HTTP_PROXY_USER=foo,HTTP_PROXY_PASS=bar"}
 	assertCommandLineArguments(expectedArguments, t)
 }
 
@@ -138,6 +181,10 @@ func setUp(t *testing.T) {
 
 	testRunner = &RecordingRunner{}
 	SetRunner(testRunner)
+
+	// Set default value for host config and data
+	viper.Set("host-config-dir", hostConfigDirectory)
+	viper.Set("host-data-dir", hostDataDirectory)
 
 	provision.SetDetector(&tests.MockDetector{&tests.MockProvisioner{Provisioned: true}})
 }

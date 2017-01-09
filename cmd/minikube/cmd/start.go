@@ -106,8 +106,6 @@ func SetMinishiftDir(newDir string) {
 
 // runStart is executed as part of the start command
 func runStart(cmd *cobra.Command, args []string) {
-	fmt.Println("Starting local OpenShift cluster...")
-
 	libMachineClient := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 	defer libMachineClient.Close()
 
@@ -126,6 +124,7 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	var host *host.Host
 	start := func() (err error) {
+		fmt.Printf("Starting local OpenShift instance using '%s' hypervisor...\n", config.VMDriver)
 		host, err = cluster.StartHost(libMachineClient, config)
 		if err != nil {
 			glog.Errorf("Error starting machine: %s. Retrying.\n", err)

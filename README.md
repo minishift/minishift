@@ -100,7 +100,7 @@ The interaction with OpenShift is via the command line tool _oc_ which is copied
 1. Assuming you have put _minishift_  on the _PATH_ as described in [Installing Minishift](#installing-minshift) you can start Minishift via:
 
         $ minishift start
-        Starting local OpenShift cluster...
+        Starting local OpenShift instance using 'kvm' hypervisor...
         ...
            OpenShift server started.
            The server is accessible via web console at:
@@ -113,7 +113,8 @@ The interaction with OpenShift is via the command line tool _oc_ which is copied
            To login as administrator:
                oc login -u system:admin
 
-    Note that, the IP seen above is dynamic and can change. It can be retrieved with `minishift ip`.
+    Note that, the IP seen above is dynamic and can change. It can be retrieved with `minishift ip`. Also,
+    instead of 'kvm', you will see 'xhyve' in Mac OS and 'hyperv' in Windows.
 
     **Note:** By default Minishift uses the driver most relevant to the host OS.
 To use a driver of choice for Minishift, use the `--vm-driver=xxx` flag with `minishift start`. For example, to use VirtualBox instead of KVM for Fedora, use `minishift start --vm-driver=virtualbox`.

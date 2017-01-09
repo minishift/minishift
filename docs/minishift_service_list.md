@@ -21,7 +21,6 @@ minishift service list [flags]
 
 ```
       --alsologtostderr value          log to standard error as well as files
-      --disable-update-notification    Whether to disable VM update check.
       --format string                  Format to output service URL in (default "http://{{.IP}}:{{.Port}}")
       --log-flush-frequency duration   Maximum number of seconds between log flushes (default 5s)
       --log_backtrace_at value         when logging hits line file:N, emit a stack trace (default :0)

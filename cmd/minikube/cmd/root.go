@@ -48,13 +48,13 @@ var dirs = [...]string{
 }
 
 const (
-	showLibmachineLogs        = "show-libmachine-logs"
-	username                  = "username"
-	password                  = "password"
+	showLibmachineLogs = "show-libmachine-logs"
+	username           = "username"
+	password           = "password"
 )
 
 var (
-	RegistrationParameters   = new(registration.RegistrationParameters)
+	RegistrationParameters = new(registration.RegistrationParameters)
 )
 
 var viperWhiteList = []string{

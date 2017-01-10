@@ -31,7 +31,7 @@ import:
 - package: github.com/olekukonko/tablewriter
 - package: github.com/pkg/browser
 - package: github.com/spf13/viper
-  repo: https://github.com/jimmidyson/viper.git
+- package: github.com/spf13/viper.git
   vcs: git
 - package: github.com/xeipuuv/gojsonschema
 - package: golang.org/x/crypto

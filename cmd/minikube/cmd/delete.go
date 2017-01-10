@@ -33,7 +33,7 @@ import (
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Deletes the Minishift VM.",
-	Long: `Deletes the Minishift VM, including the local OpenShift cluster and all associated files.`,
+	Long:  `Deletes the Minishift VM, including the local OpenShift cluster and all associated files.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Deleting the Minishift VM...")
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))

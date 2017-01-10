@@ -41,8 +41,8 @@ var (
 // serviceCmd represents the service command
 var serviceCmd = &cobra.Command{
 	Use:   "service [flags] SERVICE",
-	Short: "Opens the specified service in the OpenShift Web console.",
-	Long:  `Opens the specified service in the OpenShift Web console using the default browser. You must specify the service name and namespace.`,
+	Short: "Prints the URL for the specified service to the console.",
+	Long:  `Prints the URL for the specified service to the console.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		t, err := template.New("serviceURL").Parse(serviceURLFormat)
 		if err != nil {

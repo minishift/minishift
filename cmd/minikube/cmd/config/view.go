@@ -37,7 +37,7 @@ type ConfigViewTemplate struct {
 var configViewCmd = &cobra.Command{
 	Use:   "view",
 	Short: "Display the properties and values of the Minishift configuration file.",
-	Long: "Display the properties and values of the Minishift configuration file. You can set the output format from one of the available Go templates.",
+	Long:  "Display the properties and values of the Minishift configuration file. You can set the output format from one of the available Go templates.",
 	Run: func(cmd *cobra.Command, args []string) {
 		err := configView()
 		if err != nil {

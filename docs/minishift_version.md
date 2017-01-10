@@ -5,7 +5,7 @@ Gets the version of Minishift.
 ### Synopsis
 
 
-Gets the currently installed version of Minishift and prints it to the standard output.
+Gets the currently installed version of Minishift and prints it to standard output.
 
 ```
 minishift version

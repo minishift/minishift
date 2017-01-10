@@ -1,11 +1,11 @@
 ## minishift service
 
-Opens the specified service in the OpenShift Web console.
+Prints the URL for the specified service to the console.
 
 ### Synopsis
 
 
-Opens the specified service in the OpenShift Web console using the default browser. You must specify the service name and namespace.
+Prints the URL for the specified service to the console.
 
 ```
 minishift service [flags] SERVICE

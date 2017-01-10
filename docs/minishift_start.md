@@ -6,8 +6,6 @@ Starts a local OpenShift cluster.
 
 
 Starts a local single-node OpenShift cluster on the specified hypervisor.
-If you are restarting the cluster and you use persistant storage for the host data,
-you can specify --use-existing-config to maintain the cluster state.
 
 ```
 minishift start
@@ -29,8 +27,8 @@ minishift start
       --memory int                 Amount of RAM to allocate to the Minishift VM. (default 2048)
       --metrics                    Install metrics (experimental)
   -e, --openshift-env value        Specify key-value pairs of environment variables to set on the OpenShift container. (default [])
-      --openshift-version string   The OpenShift version to run. Use the format v<n.n.n> (default "v1.3.1")
-      --public-hostname string     Public host name of the OpenShift cluster.
+      --openshift-version string   The OpenShift version to run, eg. v1.3.1 (default "v1.3.1")
+      --public-hostname string     Public hostname of the OpenShift cluster.
       --registry-mirror value      Registry mirrors to pass to the Docker daemon. (default [])
       --routing-suffix string      Default suffix for the server routes.
       --server-loglevel int        Log level for the OpenShift server.

@@ -34,8 +34,7 @@ var stopCmd = &cobra.Command{
 	Use:   "stop",
 	Short: "Stops the running local OpenShift cluster.",
 	Long: `Stops the running local OpenShift cluster. This command stops the Minishift
-VM but does not delete any associated files. To start the cluster again, use
-the 'minishift start' command.`,
+VM but does not delete any associated files. To start the cluster again, use the 'minishift start' command.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Stopping local OpenShift cluster...")
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))

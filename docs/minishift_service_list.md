@@ -35,5 +35,5 @@ minishift service list [flags]
 ```
 
 ### SEE ALSO
-* [minishift service](minishift_service.md)	 - Opens the specified service in the OpenShift Web console.
+* [minishift service](minishift_service.md)	 - Prints the URL for the specified service to the console.
 

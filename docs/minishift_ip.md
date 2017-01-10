@@ -5,7 +5,7 @@ Gets the IP address of the running cluster.
 ### Synopsis
 
 
-Gets the IP address of the running cluster and prints it to the standard output.
+Gets the IP address of the running cluster and prints it to standard output.
 
 ```
 minishift ip

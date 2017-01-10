@@ -75,10 +75,8 @@ var (
 var startCmd = &cobra.Command{
 	Use:   commandName,
 	Short: "Starts a local OpenShift cluster.",
-	Long: `Starts a local single-node OpenShift cluster on the specified hypervisor.
-If you are restarting the cluster and you use persistant storage for the host data,
-you can specify --use-existing-config to maintain the cluster state.`,
-	Run: runStart,
+	Long:  `Starts a local single-node OpenShift cluster on the specified hypervisor.`,
+	Run:   runStart,
 }
 
 // Set default value for host data and config dir
@@ -192,14 +190,14 @@ func initStartFlags() {
 	startFlagSet.StringSliceVar(&dockerEnv, "docker-env", nil, "Environment variables to pass to the Docker daemon. Use the format <key>=<value>.")
 	startFlagSet.StringSliceVar(&insecureRegistry, "insecure-registry", []string{"172.30.0.0/16"}, "Non-secure Docker registries to pass to the Docker daemon.")
 	startFlagSet.StringSliceVar(&registryMirror, "registry-mirror", nil, "Registry mirrors to pass to the Docker daemon.")
-	startFlagSet.String(openshiftVersion, version.GetOpenShiftVersion(), "The OpenShift version to run. Use the format v<n.n.n>")
+	startFlagSet.String(openshiftVersion, version.GetOpenShiftVersion(), "The OpenShift version to run, eg. v1.3.1")
 }
 
 // initClusterUpFlags creates the CLI flags which needs to be passed on to 'oc cluster up'
 func initClusterUpFlags() {
 	//clusterUpFlagSet.StringVar(&clusterUpConfig.Image, "image", "openshift/origin", "Specify the images to use for OpenShift")
 	clusterUpFlagSet.Bool(skipRegistryCheck, false, "Skip the Docker daemon registry check.")
-	clusterUpFlagSet.String(publicHostname, "", "Public host name of the OpenShift cluster.")
+	clusterUpFlagSet.String(publicHostname, "", "Public hostname of the OpenShift cluster.")
 	clusterUpFlagSet.String(routingSuffix, "", "Default suffix for the server routes.")
 	clusterUpFlagSet.String(hostConfigDir, hostConfigDirectory, "Location of the OpenShift configuration on the Docker host.")
 	clusterUpFlagSet.String(hostVolumesDir, dockerhost.DefaultVolumesDir, "Location of the OpenShift volumes on the Docker host.")

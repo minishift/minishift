@@ -1,11 +1,11 @@
 ## minishift console
 
-Opens the OpenShift Web console to the root of your local cluster.
+Opens or displays the OpenShift Web Console URL.
 
 ### Synopsis
 
 
-Opens the OpenShift Web console to the root of your local cluster in the default browser.
+Opens the OpenShift Web Console URL in the default browser or displays it to the console.
 
 ```
 minishift console
@@ -14,7 +14,7 @@ minishift console
 ### Options
 
 ```
-      --url   Open the local cluster in the OpenShift CLI console instead of the Web console.
+      --url   Prints the OpenShift Web Console URL to the console.
 ```
 
 ### Options inherited from parent commands

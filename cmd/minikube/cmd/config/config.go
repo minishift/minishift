@@ -105,9 +105,11 @@ var settings []Setting = []Setting{
 
 var ConfigCmd = &cobra.Command{
 	Use:   "config SUBCOMMAND [flags]",
-	Short: "Modify minishift config",
-	Long: `config modifies minishift config files using subcommands like "minishift config set vm-driver kvm"
-Configurable fields: ` + "\n\n" + configurableFields(),
+	Short: "Modifies Minishift configuration properties.",
+	Long: `Modifies Minishift configuration properties. Some of the configuration properties are equivalent
+to the options that you set when you run the minishift start command.
+
+Configurable properties (enter as SUBCOMMAND): ` + "\n\n" + configurableFields(),
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -128,12 +130,12 @@ func ReadConfig() (MinikubeConfig, error) {
 		if os.IsNotExist(err) {
 			return make(map[string]interface{}), nil
 		}
-		return nil, fmt.Errorf("Could not open file %s: %s", constants.ConfigFile, err)
+		return nil, fmt.Errorf("Cannot open file %s: %s", constants.ConfigFile, err)
 	}
 	var m MinikubeConfig
 	m, err = decode(f)
 	if err != nil {
-		return nil, fmt.Errorf("Could not decode config %s: %s", constants.ConfigFile, err)
+		return nil, fmt.Errorf("Cannot decode config %s: %s", constants.ConfigFile, err)
 	}
 
 	return m, nil
@@ -143,12 +145,12 @@ func ReadConfig() (MinikubeConfig, error) {
 func WriteConfig(m MinikubeConfig) error {
 	f, err := os.Create(constants.ConfigFile)
 	if err != nil {
-		return fmt.Errorf("Could not open file %s: %s", constants.ConfigFile, err)
+		return fmt.Errorf("Cannot create file %s: %s", constants.ConfigFile, err)
 	}
 	defer f.Close()
 	err = encode(f, m)
 	if err != nil {
-		return fmt.Errorf("Error encoding config %s: %s", constants.ConfigFile, err)
+		return fmt.Errorf("Cannot encode config %s: %s", constants.ConfigFile, err)
 	}
 	return nil
 }

@@ -32,32 +32,31 @@ import (
 // deleteCmd represents the delete command
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "Deletes a local OpenShift cluster.",
-	Long: `Deletes a local OpenShift cluster. This command deletes the VM, and removes all
-associated files.`,
+	Short: "Deletes the Minishift VM.",
+	Long: `Deletes the Minishift VM, including the local OpenShift cluster and all associated files.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Deleting local OpenShift instance...")
+		fmt.Println("Deleting the Minishift VM...")
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()
 		host, err := api.Load(constants.MachineName)
 		if err != nil {
-			fmt.Println("Error occurred deleting machine: ", err)
+			fmt.Println("Error occurred while deleting the VM: ", err)
 			os.Exit(1)
 		}
 
 		if !drivers.MachineInState(host.Driver, state.Stopped)() {
 			// Unregister Host VM
 			if err := registration.UnregisterHostVM(host, RegistrationParameters); err != nil {
-				fmt.Printf("Error unregistring machine: %s", err)
+				fmt.Printf("Error unregistring the VM: %s", err)
 				os.Exit(1)
 			}
 		}
 
 		if err := cluster.DeleteHost(api); err != nil {
-			fmt.Println("Errors occurred deleting machine: ", err)
+			fmt.Println("Error deleting the VM: ", err)
 			os.Exit(1)
 		}
-		fmt.Println("Machine deleted.")
+		fmt.Println("Minishift VM deleted.")
 	},
 }
 

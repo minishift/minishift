@@ -25,8 +25,8 @@ import (
 
 var configGetCmd = &cobra.Command{
 	Use:   "get PROPERTY_NAME",
-	Short: "Gets the value of PROPERTY_NAME from the minishift config file",
-	Long:  "Returns the value of PROPERTY_NAME from the minishift config file.  Can be overwritten at runtime by flags or environmental variables.",
+	Short: "Gets the value of a configuration property from the Minishift configuration file.",
+	Long: "Gets the value of a configuration property from the minishift configuration file. This value can be overwritten at runtime by flags or environmental variables.",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
 			fmt.Fprintln(os.Stderr, "usage: minishift config get PROPERTY_NAME")

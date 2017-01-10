@@ -66,8 +66,8 @@ var viperWhiteList = []string{
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "minishift",
-	Short: "Minishift is a tool for managing local OpenShift clusters.",
-	Long:  `Minishift is a CLI tool that provisions and manages single-node OpenShift clusters optimized for development workflows.`,
+	Short: "Minishift is a tool for application development in local OpenShift clusters.",
+	Long:  `Minishift is a command-line tool that provisions and manages single-node OpenShift clusters optimized for development workflows.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		for _, path := range dirs {
 			if err := os.MkdirAll(path, 0777); err != nil {
@@ -112,9 +112,9 @@ func setFlagsUsingViper() {
 }
 
 func init() {
-	RootCmd.PersistentFlags().Bool(showLibmachineLogs, false, "Whether or not to show logs from libmachine.")
-	RootCmd.PersistentFlags().String(username, "", "Username to register Virtual Machine")
-	RootCmd.PersistentFlags().String(password, "", "Password to register Virtual Machine")
+	RootCmd.PersistentFlags().Bool(showLibmachineLogs, false, "Show logs from libmachine.")
+	RootCmd.PersistentFlags().String(username, "", "User name for the virtual machine.")
+	RootCmd.PersistentFlags().String(password, "", "Password for the virtual machine.")
 	RootCmd.AddCommand(configCmd.ConfigCmd)
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
 	logDir := pflag.Lookup("log_dir")

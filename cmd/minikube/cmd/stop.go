@@ -32,9 +32,10 @@ import (
 // stopCmd represents the stop command
 var stopCmd = &cobra.Command{
 	Use:   "stop",
-	Short: "Stops a running local OpenShift cluster.",
-	Long: `Stops a local OpenShift cluster running in Virtualbox. This command stops the VM
-itself, leaving all files intact. The cluster can be started again with the "start" command.`,
+	Short: "Stops the running local OpenShift cluster.",
+	Long: `Stops the running local OpenShift cluster. This command stops the Minishift
+VM but does not delete any associated files. To start the cluster again, use
+the 'minishift start' command.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Stopping local OpenShift cluster...")
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
@@ -42,23 +43,23 @@ itself, leaving all files intact. The cluster can be started again with the "sta
 
 		host, err := api.Load(constants.MachineName)
 		if err != nil {
-			fmt.Println("Error occurred stopping machine: ", err)
+			fmt.Println("Error occurred while stopping the VM: ", err)
 			os.Exit(1)
 		}
 
 		if !drivers.MachineInState(host.Driver, state.Stopped)() {
 			// Unregister Host VM
 			if err := registration.UnregisterHostVM(host, RegistrationParameters); err != nil {
-				fmt.Printf("Error unregistring machine: %s", err)
+				fmt.Printf("Error unregistring the VM: %s", err)
 				os.Exit(1)
 			}
 		}
 
 		if err := cluster.StopHost(api); err != nil {
-			fmt.Println("Error stopping machine: ", err)
+			fmt.Println("Error stopping cluster: ", err)
 			os.Exit(1)
 		}
-		fmt.Println("Machine stopped.")
+		fmt.Println("Cluster stopped.")
 	},
 }
 

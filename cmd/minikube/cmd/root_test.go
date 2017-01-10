@@ -94,7 +94,7 @@ func TestViperConfig(t *testing.T) {
 	defer viper.Reset()
 	err := cli.InitTestConfig(`{ "v": "999" }`)
 	if viper.GetString("v") != "999" || err != nil {
-		t.Fatalf("Viper did not read test config file: %v", err)
+		t.Fatalf("Viper cannot read the test config file: %v", err)
 	}
 }
 
@@ -106,7 +106,7 @@ func TestViperAndFlags(t *testing.T) {
 		setupViper()
 		f := pflag.Lookup(testOption.Name)
 		if f == nil {
-			t.Fatalf("Could not find flag for %s", testOption.Name)
+			t.Fatalf("Cannot find the flag for %s", testOption.Name)
 		}
 		actual := f.Value.String()
 		if actual != testOption.ExpectedValue {

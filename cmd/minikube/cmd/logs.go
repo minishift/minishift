@@ -30,14 +30,14 @@ import (
 // logsCmd represents the logs command
 var logsCmd = &cobra.Command{
 	Use:   "logs",
-	Short: "Gets the logs of the running OpenShift instance, used for debugging minishift, not user code.",
-	Long:  `Gets the logs of the running OpenShift instance, used for debugging minishift, not user code.`,
+	Short: "Gets the logs of the running OpenShift cluster.",
+	Long:  `Gets the logs of the running OpenShift cluster. The logs do not contain information about your application code.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()
 		s, err := cluster.GetHostLogs(api)
 		if err != nil {
-			log.Println("Error getting machine logs:", err)
+			log.Println("Error getting logs:", err)
 			os.Exit(1)
 		}
 		fmt.Fprintln(os.Stdout, s)

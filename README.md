@@ -12,7 +12,7 @@ provisioning VMs, and [OpenShift Origin](https://github.com/openshift/origin) fo
 
 - [Installation](#installation)
   - [Prerequisites](#prerequisites)
-  - [Installing Minshift](#installing-minshift)
+  - [Installing Minishift](#installing-minishift)
     - [Installing via Homebrew](#installing-via-homebrew)
 - [Quickstart](#quickstart)
   - [Starting Minishift](#starting-minishift)
@@ -56,8 +56,8 @@ it needs to be disabled.
 - We recommend that you use `Virtualbox >= 5.1.12` on Windows to avoid the issue
 [Error: getting state for host: machine does not exist](./docs/troubleshooting.md#error-getting-state-for-host-machine-does-not-exist)
 
-<a name="installing-minshift"></a>
-### Installing Minshift
+<a name="installing-minishift"></a>
+### Installing Minishift
 
 Download the archive matching your host OS from the Minishift [releases page](https://github.com/minishift/minishift/releases) and unpack it. Copy the contained binary to your preferred
 location and optionally ensure it is added to your _PATH_.
@@ -97,14 +97,14 @@ You can now install the latest beta version of minishift.
 <a name="quickstart"></a>
 ## Quickstart
 
-This section contains a brief demo of Minishift and the provisoned OpenShift instance.
+This section contains a brief demo of Minishift and the provisioned OpenShift instance.
 For details on the usage of Minishift refer to the [Using Minishift](/docs/using.md) guide.
 The interaction with OpenShift is via the command line tool _oc_ which is copied to your host.
 
 <a name="starting-minishift"></a>
 ### Starting Minishift
 
-1. Assuming you have put _minishift_  on the _PATH_ as described in [Installing Minishift](#installing-minshift) you can start Minishift via:
+1. Assuming you have put _minishift_  on the _PATH_ as described in [Installing Minishift](#installing-minishift) you can start Minishift via:
 
         $ minishift start
         Starting local OpenShift instance using 'kvm' hypervisor...

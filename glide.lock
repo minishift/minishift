@@ -1,5 +1,5 @@
 hash: f0f9906056562c5ccea818ad27d50572a73d18ff3ef61c4b389ff12672925272
-updated: 2016-11-29T11:56:31.490022127+01:00
+updated: 2017-01-12T16:10:08.09273158+01:00
 imports:
 - name: github.com/beorn7/perks
   version: 3ac7bf7a47d159a033b107610db8a1b6575507a4
@@ -61,6 +61,7 @@ imports:
   subpackages:
   - commands/mcndirs
   - drivers/errdriver
+  - drivers/fakedriver
   - drivers/hyperv
   - drivers/none
   - drivers/virtualbox
@@ -83,6 +84,7 @@ imports:
   - libmachine/persist
   - libmachine/provision
   - libmachine/provision/pkgaction
+  - libmachine/provision/provisiontest
   - libmachine/provision/serviceaction
   - libmachine/shell
   - libmachine/ssh

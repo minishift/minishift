@@ -55,16 +55,13 @@ deploy/iso/minishift.iso: $(shell find deploy/iso -type f ! -name *.iso)
 $(GOPATH)/bin/gh-release: $(GOPATH)/src/$(ORG)
 	go get github.com/progrium/gh-release
 
-.PHONY: prerelease
 prerelease: $(GOPATH)/src/$(ORG)
 	./prerelease.sh
 
-.PHONY: gendocs
 gendocs: $(GOPATH)/src/$(ORG) $(shell find cmd)
 	# https://github.com/golang/go/issues/15038#issuecomment-207631885 ( CGO_ENABLED=0 )
 	cd $(GOPATH)/src/$(REPOPATH) && CGO_ENABLED=0 go run -ldflags="$(LDFLAGS)" -tags gendocs gen_help_text.go
 
-.PHONY: release
 release: clean deploy/iso/minishift.iso fmtcheck test prerelease $(GOPATH)/bin/gh-release cross
 	mkdir -p release
 	cp deploy/iso/minishift.iso release/boot2docker.iso
@@ -74,28 +71,24 @@ release: clean deploy/iso/minishift.iso fmtcheck test prerelease $(GOPATH)/bin/g
 	gh-release checksums sha256
 	gh-release create minishift/minishift $(VERSION) master v$(VERSION)
 
-.PHONY: cross
 cross: $(BUILD_DIR)/darwin-amd64/minishift $(BUILD_DIR)/linux-amd64/minishift $(BUILD_DIR)/windows-amd64/minishift.exe
 
-.PHONY: clean
 clean:
 	rm -rf $(GOPATH)/pkg/$(GOOS)_$(GOARCH)/$(ORG)
 	rm -rf $(BUILD_DIR)
 	rm -rf release
 	rm -rf vendor
 
-.PHONY: test
 test: vendor $(GOPATH)/src/$(ORG)
 	@go test $(shell $(PACKAGES))
 
-.PHONY: integration
 integration: $(BUILD_DIR)/$(GOOS)-$(GOARCH)/minishift$(IS_EXE)
 	go test -timeout 3600s $(REPOPATH)/test/integration --tags=integration
 
-.PHONY: fmt
 fmt:
 	@gofmt -l -w $(shell $(GOFILES_NO_VENDOR))
 
-.PHONY: fmtcheck
 fmtcheck:
 	@test -z $(shell gofmt -l -s $(shell $(GOFILES_NO_VENDOR)) | tee /dev/stderr) || echo "[WARN] Fix formatting issues with 'make fmt'"
+
+.PHONY: prerelease gendocs release cross clean test integration fmt fmtcheck

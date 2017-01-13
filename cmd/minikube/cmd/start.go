@@ -126,7 +126,7 @@ func runStart(cmd *cobra.Command, args []string) {
 		OpenShiftVersion: viper.GetString(openshiftVersion),
 	}
 
-	fmt.Printf("Starting the local OpenShift cluster using '%s' hypervisor...\n", config.VMDriver)
+	fmt.Printf("Starting local OpenShift cluster using '%s' hypervisor...\n", config.VMDriver)
 
 	var host *host.Host
 	start := func() (err error) {

@@ -110,7 +110,6 @@ func SetMinishiftDir(newDir string) {
 
 // runStart is executed as part of the start command
 func runStart(cmd *cobra.Command, args []string) {
-	fmt.Println("Starting the local OpenShift cluster...")
 	libMachineClient := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 	defer libMachineClient.Close()
 
@@ -126,6 +125,7 @@ func runStart(cmd *cobra.Command, args []string) {
 		HostOnlyCIDR:     viper.GetString(hostOnlyCIDR),
 		OpenShiftVersion: viper.GetString(openshiftVersion),
 	}
+
 	fmt.Printf("Starting the local OpenShift cluster using '%s' hypervisor...\n", config.VMDriver)
 
 	var host *host.Host

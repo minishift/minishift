@@ -1,10 +1,16 @@
-# Scripts for building a VM iso based on boot2docker
+# Scripts for building a virtual machine ISO based on boot2docker
 
 ## Build instructions
+
+Run the following command:
+<!-- NEEDINFO: in which directory do we run this? -->
+----
 ./build.sh
+----
 
 ## Test instructions
-To manually try out the built iso, you can run the following commands to create a VM:
+
+To test the built ISO, run the following commands to create a VM:
 
 ```shell
 VBoxManage createvm --name testminishift --ostype "Linux_64" --register
@@ -13,10 +19,11 @@ VBoxManage storageattach testminishift --storagectl "IDE Controller" --port 0 --
 VBoxManage modifyvm testminishift --memory 1024 --vrde on --vrdeaddress 127.0.0.1 --vrdeport 3390 --vrdeauthtype null
 ```
 
-Then use the VirtualBox gui to start and open a session.
+You then use the VirtualBox GUI to start and open a session.
 
 ## Release instructions
- * Build an iso following the above build instructions.
- * Test the iso with --iso-url=file:///$PATHTOISO.
- * Push the new iso to GCS, with a new name (minishift-0x.iso) with a command like this: `gsutil cp $PATHTOISO gs://$BUCKET`
- * Update the default URL in start.go.
+
+ * Build an ISO following the above build instructions.
+ * Test the ISO with the command: `--iso-url=file:///$PATHTOISO`
+ * Push the new ISO to GCS, with a new name (minishift-0x.iso) by running a command similar to this: `gsutil cp $PATHTOISO gs://$BUCKET`
+ * Update the default URL in the `start.go` command.

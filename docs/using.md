@@ -29,20 +29,20 @@ This section contains information about basic virtual machine and OpenShift mana
 <a name="starting-openshift"></a>
 ### Starting OpenShift
 
-The [minishift start](./docs/minishift_start.md) command can be used to start your OpenShift instance.
+The [minishift start](./minishift_start.md) command is used to start your OpenShift instance.
 This command creates and configures a virtual machine that runs a single-node OpenShift instance.
 
 <a name="stopping-openshift"></a>
 ### Stopping OpenShift
 
-The [minishift stop](./docs/minishift_stop.md) command can be used to stop your OpenShift instance.
-This command shuts down the Minishift virtual machine, but preserves all instance state and data.
-Starting the instance again will restore it to it's previous state.
+The [minishift stop](./minishift_stop.md) command is used to stop your OpenShift instance.
+This command shuts down the Minishift virtual machine, but preserves the cluster state.
+Starting Minishift again will restore the cluster, allowing you to continue work from where you left-off.
 
 <a name="deleting-openshift"></a>
 ### Deleting OpenShift
 
-The [minishift delete](./docs/minishift_delete.md) command can be used to delete the OpenShift instance.
+The [minishift delete](./minishift_delete.md) command is used to delete the OpenShift instance.
 This command shuts down and deletes the Minishift virtual machine. No data or state is preserved.
 
 <a name="environment-variables"></a>
@@ -51,17 +51,17 @@ This command shuts down and deletes the Minishift virtual machine. No data or st
 Minishift allows you to specify command line flags you commonly use via environment variables.
 To do so, apply the following rules to the flag you want to set via an environment variable.
 
-* Apply the _MINISHIFT__ as a prefix to your environment variable, for example the _vm-driver_ flag
-  of the [start](./docs/minishift_start.md) command becomes _MINISHIFT_vm-driver_.
-* Uppercase the flag, _MINISHIFT_vm-driver_ becomes _MINISHIFT_VM-DRIVER_.
-* Last but not least, replace _-_ with _\__, _MINISHIFT_VM-DRIVER_ becomes _MINISHIFT_VM_DRIVER_
+* Apply `MINISHIFT_` as a prefix to your environment variable, for example the `vm-driver` flag
+  of the [start](./minishift_start.md) command becomes `MINISHIFT_vm-driver`.
+* Uppercase the flag, `MINISHIFT_vm-driver` becomes `MINISHIFT_VM-DRIVER`.
+* Last but not least, replace `-` with `_`, `MINISHIFT_VM-DRIVER` becomes `MINISHIFT_VM_DRIVER`
 
 Another common example might be the URL of the ISO to be used. Usually you specify it via
-_iso-url_ of the [start](./docs/minishift_start.md) command. Applying the rules from above, you can
-also specify this URL by setting the environment variable _MINISHIFT_ISO_URL_.
+`iso-url` of the [start](./minishift_start.md) command. Applying the rules from above, you can
+also specify this URL by setting the environment variable `MINISHIFT_ISO_URL`.
 
-**Note:** There is also the _MINISHIFT_HOME_ environment variable. Per default Minishift places all
-its runtime state into _~/.minishift_. Using _MINISHIFT_HOME_, you can choose a different directory
+**Note:** There is also the `MINISHIFT_HOME` environment variable. Per default Minishift places all
+its runtime state into `~/.minishift`. Using `MINISHIFT_HOME`, you can choose a different directory
 as Minishift's home directory. This is currently experimental and semantics might change in
 future releases.
 
@@ -74,13 +74,13 @@ future releases.
 The `minishift start` command creates an OpenShift instance using the
 [cluster up](https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md) approach.
 For this purpose it copies the _oc_ binary onto  your host. You find it under
-_~/.minishift/cache/oc/\<OpenShift version\>/oc_. You can add this binary to your _PATH_ variable
-in order to use _oc_, eg:
+`~/.minishift/cache/oc/\<OpenShift version\>/oc`. You can add this binary to your `PATH` variable
+in order to use `oc`, eg:
 
     $ export PATH=$PATH:~/.minishift/cache/oc/v1.3.1
 
-In further versions we will provide a command which will assit in setting up the _PATH_. See
-also Github issue [#142](https://github.com/minishift/minishift/issues/142).
+In future versions we will provide a command which will assist in setting up the `PATH`. Also
+see Github issue [#142](https://github.com/minishift/minishift/issues/142).
 
 <a name="console"></a>
 ### Console
@@ -104,8 +104,8 @@ minishift service [-n NAMESPACE] [--url] NAME
 <a name="mounted-host-folders"></a>
 ## Mounted host folders
 
-Some of drivers will mount a host folder within the VM so that you can easily share files between the VM and host.
-These are not configurable at the moment and are different for each driver and OS that you use.
+Some drivers will mount a host folder within the VM so that you can easily share files between the VM and the host.
+These are not configurable at the moment and are different for each driver and the OS that you use.
 
 **Note:** Host folder sharing is not implemented in the KVM driver yet.
 
@@ -136,7 +136,7 @@ However, MiniShift is configured to persist files stored under the following hos
 * `/var/lib/minishift`
 * `/var/lib/docker`
 
-Here is an example PersistentVolume config to persist data in the '/data' directory:
+Here is an example PersistentVolume config to persist data in the `/data` directory:
 
 ```yaml
 apiVersion: v1

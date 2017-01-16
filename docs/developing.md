@@ -92,7 +92,7 @@ Before being able to use Glide you need to install it via:
 
     $ go get github.com/Masterminds/glide
 
-This will install the _glide_ binary into _$GOPATH/bin_.
+This will install the _glide_ binary into _$GOPATH/bin_. Make sure to have a Glide version _>=0.12.3_.
 
 <a name="bootstrapping-dependencies"></a>
 ### Bootstrapping dependencies
@@ -106,7 +106,7 @@ or by calling the underlying Glide command directly:
 
     $ glide install -v
 
-**Note**: On Windows you might get problems with some too long pathnames in some of the dependencies.
+**Note**: On Windows you might get problems with too long pathnames in some of the dependencies.
 To work around this problem you can use a non default tmp directory for Glide which will shorten
 the total path lengths:
 
@@ -130,26 +130,33 @@ Double check everything still compiles with the new lock file in place.
 <a name="building-the-minishift-binary"></a>
 ### Building the Minishift binary
 
-The following command will create a platform specific binary.
+The following command will create a platform specific binary and copy it to _$GOPATH/bin_.
 
 ```shell
 make
 ```
 
-Note: using `make cross` you can cross-compile for other platforms.
-
+**Note**: using `make cross` you can cross-compile for other platforms.
 
 <a name="running-the-minishift-binary"></a>
 ### Running the Minishift binary
 
-Start the cluster using your built minishift with:
+Starting the OpenShift cluster using your built minishift binary:
 
 ```shell
-$ ./out/linux-amd64/minishift start    # or darwin-amd64, windows-amd64
+$ minishift start
 ```
 
-For more options refer to the _minishift_ [synopsis](./minishift.md).
+The above command will execute  _$GOPATH/bin/minishift_, provided you have set set up your
+Go workspace as described [above](#creating-the-go-workspace).
 
+You can also execute the binaries directly from the _out_ directory of the checkout.
+You will find the binary, depending on your OS, in:
+*  _out/darwin-amd64_
+*  _out/linux-amd64_
+*  _out/windows-amd64_
+
+For more minishift commands and flags refer to its [synopsis](./minishift.md).
 
 <a name="running-tests"></a>
 ### Running Tests
@@ -218,7 +225,8 @@ To remove all generated artifacts and installed dependencies, run:
 <a name="cutting-the-release"></a>
 ### Cutting the release
 
-* Bump the version in the [VERSION](../VERSION)
+* Bump the Minishift version in the [Makefile](../Makefile)
+* Run `make gendocs` to rebuild the docs
 * Commit and push your changes with a message of the form "cut v1.0.0"
 * Create binaries and upload them to GitHub (this will also tag the release):
 

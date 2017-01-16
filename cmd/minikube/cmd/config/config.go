@@ -94,6 +94,12 @@ var settings []Setting = []Setting{
 		set:  SetString,
 	},
 	{
+		name:        "iso-url",
+		set:         SetString,
+		validations: []setFn{IsValidUrl},
+		callbacks:   []setFn{RequiresRestartMsg},
+	},
+	{
 		name: config.WantUpdateNotification,
 		set:  SetBool,
 	},

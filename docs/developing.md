@@ -130,20 +130,26 @@ Double check everything still compiles with the new lock file in place.
 <a name="building-the-minishift-binary"></a>
 ### Building the Minishift binary
 
+The following command will create a platform specific binary.
+
 ```shell
 make
 ```
 
+Note: using `make cross` you can cross-compile for other platforms.
+
+
 <a name="running-the-minishift-binary"></a>
 ### Running the Minishift binary
 
-Start the cluster using your built minikube with:
+Start the cluster using your built minishift with:
 
 ```shell
-$ ./out/minishift start
+$ ./out/linux-amd64/minishift start    # or darwin-amd64, windows-amd64
 ```
 
 For more options refer to the _minishift_ [synopsis](./minishift.md).
+
 
 <a name="running-tests"></a>
 ### Running Tests

@@ -75,6 +75,19 @@ var RootCmd = &cobra.Command{
 			}
 		}
 
+		if _, err := os.Stat(constants.ConfigFile); os.IsNotExist(err) {
+			jsonRoot := []byte("{}")
+			f, err := os.Create(constants.ConfigFile)
+			if err != nil {
+				glog.Exitf("Cannot create file %s: %s", constants.ConfigFile, err)
+			}
+			defer f.Close()
+			_, err = f.Write(jsonRoot)
+			if err != nil {
+				glog.Exitf("Cannot encode config %s: %s", constants.ConfigFile, err)
+			}
+		}
+
 		shouldShowLibmachineLogs := viper.GetBool(showLibmachineLogs)
 		if glog.V(3) {
 			log.SetDebug(true)

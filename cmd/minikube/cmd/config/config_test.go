@@ -41,12 +41,14 @@ var configTestCases = []configTestCase{
     "ReminderWaitPeriodInHours": 99,
     "cpus": 4,
     "disk-size": "20g",
+    "iso-url": "http://foo.bar/minishift-centos.iso",
     "log_dir": "/etc/hosts",
     "show-libmachine-logs": true,
     "v": 5,
     "vm-driver": "kvm"
 }`,
 		config: map[string]interface{}{
+			"iso-url": "http://foo.bar/minishift-centos.iso",
 			"vm-driver": "kvm",
 			"cpus":      4,
 			"disk-size": "20g",

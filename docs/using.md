@@ -10,6 +10,7 @@ overview of different components and services.
   - [Stopping OpenShift](#stopping-openshift)
   - [Deleting OpenShift](#deleting-openshift)
 - [Environment variables](#environment-variables)
+- [Config file](#config-file)
 - [Interacting with OpenShift](#interacting-with-openshift)
   - [OpenShift client binary \(oc\)](#openshift-client-binary-oc)
   - [Console](#console)
@@ -64,6 +65,33 @@ also specify this URL by setting the environment variable _MINISHIFT_ISO_URL_.
 its runtime state into _~/.minishift_. Using _MINISHIFT_HOME_, you can choose a different directory
 as Minishift's home directory. This is currently experimental and semantics might change in
 future releases.
+
+<a name="config-file"></a>
+## Config file
+
+Minishift also maintains a config file (_~/.minishift/config/config.json_) which can be used to set some
+variables like (CPU, memory ...etc.) and can be used without using different parameter in start command.
+This can be used to control some of the default behavior similar to using
+[environment variables](#environment-variables).
+
+**Note:**
+
+* config.json file is not generated automatic until user use `set` sub-command as described below.
+* Manual edit to this file is discouraged because it might be error-prone, use defined sub-command for required use-case.
+
+```shell
+$ minishift config -h
+```
+
+You can set using `set` sub-command provided by config and it expect `PROPERTY_NAME PROPERTY_VALUE`
+
+    # Set default memory 4096 MB
+    $ minishift config set memory 4096
+
+To view what already set and available you can use `view` sub-command
+
+    $ minishift config view
+    - memory: 4096
 
 <a name="interacting-with-openshift"></a>
 ## Interacting with OpenShift

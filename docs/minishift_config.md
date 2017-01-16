@@ -19,6 +19,7 @@ Configurable properties (enter as SUBCOMMAND):
  * show-libmachine-logs
  * log_dir
  * openshift-version
+ * iso-url
  * WantUpdateNotification
  * ReminderWaitPeriodInHours
 

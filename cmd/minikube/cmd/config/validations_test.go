@@ -94,3 +94,27 @@ func TestValidCIDR(t *testing.T) {
 
 	runValidations(t, tests, "cidr", IsValidCIDR)
 }
+
+func TestValidURL(t *testing.T) {
+
+	var tests = []validationTest{
+		{
+			value:	   "http://foo.com/minishift.tar.gz",
+			shouldErr: false,
+		},
+		{
+			value:     "http/foo.com/minishift.tar.gz",
+			shouldErr: true,
+		},
+		{
+			value:     "file:///foo/download/minishift.tar.gz",
+			shouldErr: false,
+
+		},
+		{
+			value:      "file/foo/download/minishift.tar.gz",
+			shouldErr:  true,
+		},
+	}
+	runValidations(t, tests, "iso-url", IsValidUrl)
+}

@@ -16,11 +16,42 @@ limitations under the License.
 
 package config
 
-import "testing"
+import (
+	"testing"
+	"io/ioutil"
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	"os"
+	"path/filepath"
+)
 
 func TestNotFound(t *testing.T) {
 	err := set("nonexistant", "10")
 	if err == nil {
 		t.Fatalf("Set did not return error for unknown property")
+	}
+}
+
+func TestModifyData(t *testing.T) {
+	testDir, err := ioutil.TempDir("", "minishift-config-")
+	if err != nil {
+		t.Error()
+	}
+	constants.ConfigFile = filepath.Join(testDir, "config.json")
+	defer os.RemoveAll(testDir)
+	err = set("cpus", "4")
+	if err != nil {
+		t.Fatalf("Error setting value %s", err)
+	}
+	// override existing value and check if that persistent
+	err = set("cpus", "10")
+	if err != nil {
+		t.Fatalf("Error setting value %s", err)
+	}
+	getValue, err := get("cpus")
+	if err != nil {
+		t.Fatalf("Error getting value %s", err)
+	}
+	if getValue != "10" {
+		t.Fatal("Not able to update data to config file")
 	}
 }

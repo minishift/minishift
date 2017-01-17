@@ -16,11 +16,36 @@ limitations under the License.
 
 package config
 
-import "testing"
+import (
+	"testing"
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	"os"
+)
 
 func TestNotFound(t *testing.T) {
 	err := set("nonexistant", "10")
 	if err == nil {
 		t.Fatalf("Set did not return error for unknown property")
+	}
+}
+
+func TestModifyData(t *testing.T) {
+	constants.ConfigFile = "/tmp/config.json"
+	defer os.Remove("/tmp/config.json")
+	err := set("cpus", "4")
+	if err != nil {
+		t.Fatalf("Error setting value %s", err)
+	}
+	// override existing value and check if that persistent
+	err = set("cpus", "10")
+	if err != nil {
+		t.Fatalf("Error setting value %s", err)
+	}
+	getValue, err := get("cpus")
+	if err != nil {
+		t.Fatalf("Error getting value %s", err)
+	}
+	if getValue != "10" {
+		t.Fatal("Not able to update data to config file")
 	}
 }

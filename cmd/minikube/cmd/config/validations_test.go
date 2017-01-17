@@ -99,22 +99,30 @@ func TestValidURL(t *testing.T) {
 
 	var tests = []validationTest{
 		{
-			value:	   "http://foo.com/minishift.tar.gz",
-			shouldErr: false,
+			value:	   "",
+			shouldErr: true,
 		},
 		{
 			value:     "http/foo.com/minishift.tar.gz",
 			shouldErr: true,
 		},
 		{
-			value:     "file:///foo/download/minishift.tar.gz",
-			shouldErr: false,
-
-		},
-		{
-			value:      "file/foo/download/minishift.tar.gz",
+			value:      "foo/download/minishift.tar.gz",
 			shouldErr:  true,
 		},
+		{
+			value:      "/absolute/path/no/protocol/minishift.tar.gz",
+			shouldErr:  false,
+		},
+		{
+			value:	   "http://foo.com/minishift.tar.gz",
+			shouldErr: false,
+		},
+		{
+			value:     "file:///foo/download/minishift.tar.gz",
+			shouldErr: false,
+		},
+
 	}
 	runValidations(t, tests, "iso-url", IsValidUrl)
 }

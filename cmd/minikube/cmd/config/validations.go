@@ -19,9 +19,9 @@ package config
 import (
 	"fmt"
 	"net"
+	"net/url"
 	"os"
 	"strconv"
-	"net/url"
 
 	units "github.com/docker/go-units"
 
@@ -77,7 +77,7 @@ func IsValidPath(name string, path string) error {
 	return nil
 }
 
-func IsValidUrl(string, isoURL string) error {
+func IsValidUrl(_ string, isoURL string) error {
 	_, err := url.ParseRequestURI(isoURL)
 	if err != nil {
 		return fmt.Errorf("%s url is not valid: %v", isoURL, err)

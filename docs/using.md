@@ -10,7 +10,10 @@ overview of different components and services.
   - [Stopping OpenShift](#stopping-openshift)
   - [Deleting OpenShift](#deleting-openshift)
 - [Environment variables](#environment-variables)
-- [Config file](#config-file)
+- [Persistent configuration](#persistent-configuration)
+  - [Configuration options precedence](#configuration-options-precedence)
+  - [Setting persistent configuration values](#setting-persistent-configuration-values)
+  - [Unsetting persistent configuration values](#unsetting-persistent-configuration-values)
 - [Interacting with OpenShift](#interacting-with-openshift)
   - [OpenShift client binary \(oc\)](#openshift-client-binary-oc)
   - [Console](#console)
@@ -66,29 +69,53 @@ its runtime state into `~/.minishift`. Using `MINISHIFT_HOME`, you can choose a 
 as Minishift's home directory. This is currently experimental and semantics might change in
 future releases.
 
-<a name="config-file"></a>
-## Config file
+<a name="persistent-configuration"></a>
+## Persistent configuration
 
-Minishift also maintains a config file (_~/.minishift/config/config.json_) which can be used to set some
-variables like (CPU, memory ...etc.) and can be used without using different parameter in start command.
-This can be used to control some of the default behavior similar to using
-[environment variables](#environment-variables).
+Minishift also maintains a configuration file (`$MINISHIFT_HOME/config/config.json`) which can be
+used to set commonly used command-line flags persistently. For example `cpus`, `memory` or `vm-driver`.
+For a full set of supported configuration options refer to the synopsis of the
+[config](./minishift_config.md) sub-command.
 
-**Note:**
+<a name="configuration-options-precedence"></a>
+### Configuration options precedence
 
-* Manual edit to this file is discouraged because it might be error-prone,
-use defined [sub-command](./docs/minishift_config_set.md) for required use-case.
-* Check [minishift config help](./docs/minishift_config.md) before you define a property using `set` sub-command.
+Using persistent configuration allows you to control Minishift's behavior without specifying actual command
+line flags, similar as using [environment variables](#environment-variables).
+Note that the following precedence order applies. Each item in the list beloew takes precedence over
+the item below it:
 
-You can set using `set` sub-command provided by config and it expect `PROPERTY_NAME PROPERTY_VALUE`
+* flag as specified via the command line
+* environment variable as described in the [environment variables](#environment-variables) section
+* persistent configuration option as described in this section
+* default value as defined by Minishift
+
+<a name="setting-persistent-configuration-values"></a>
+### Setting persistent configuration values
+
+The easiest way to change a persistent configuration options, is via the
+[`config set`](./minishift_config_set.md) sub-command. For example:
 
     # Set default memory 4096 MB
     $ minishift config set memory 4096
 
-To view what already set and available you can use `view` sub-command
+To view persistent configuration values, you can use the [`view`](./minishift_config_view.md) sub-command:
 
     $ minishift config view
     - memory: 4096
+
+Alternatively one can just display a single value via the [`get`](./minishift_config_get.md) sub-command:
+
+    $ minishift config get memory
+    4096
+
+<a name="unsetting-persistent-configuration-values"></a>
+### Unsetting persistent configuration values
+
+To remove a persistent configuration option, the [`unset`](./minishift_config_unset.md) sub-command
+can be used:
+
+    $ minishift config unset memory
 
 <a name="interacting-with-openshift"></a>
 ## Interacting with OpenShift

@@ -27,7 +27,7 @@ import (
 func TestNotFound(t *testing.T) {
 	err := set("nonexistant", "10")
 	if err == nil {
-		t.Fatalf("Set did not return error for unknown property")
+		t.Fatal("Set did not return error for unknown property")
 	}
 }
 
@@ -38,20 +38,40 @@ func TestModifyData(t *testing.T) {
 	}
 	constants.ConfigFile = filepath.Join(testDir, "config.json")
 	defer os.RemoveAll(testDir)
-	err = set("cpus", "4")
-	if err != nil {
-		t.Fatalf("Error setting value %s", err)
-	}
+
+	verifyValueUnset(t, "cpus")
+
+	persistValue(t, "cpus", "4")
+	verifyStoredValue(t, "cpus", "4")
+
 	// override existing value and check if that persistent
-	err = set("cpus", "10")
-	if err != nil {
-		t.Fatalf("Error setting value %s", err)
-	}
-	getValue, err := get("cpus")
+	persistValue(t, "cpus", "10")
+	verifyStoredValue(t, "cpus", "10")
+}
+
+func verifyStoredValue(t *testing.T, key string, expectedValue string) {
+	actualValue, err := get(key)
 	if err != nil {
 		t.Fatalf("Error getting value %s", err)
 	}
-	if getValue != "10" {
-		t.Fatal("Not able to update data to config file")
+	if actualValue != expectedValue {
+		t.Fatalf("Unexpexted value in confif. Expected '%s'. Got '%s'.", expectedValue, actualValue)
+	}
+}
+
+func verifyValueUnset(t *testing.T, key string) {
+	actualValue, err := get(key)
+	if err != nil {
+		t.Fatalf("Error getting value %s", err)
+	}
+	if actualValue != "<nil>" {
+		t.Fatalf("Expexted '<nil>' value. Got '%s'.", actualValue)
+	}
+}
+
+func persistValue(t *testing.T, key string, value string) {
+	err := set(key, value)
+	if err != nil {
+		t.Fatalf("Error setting value %s", err)
 	}
 }

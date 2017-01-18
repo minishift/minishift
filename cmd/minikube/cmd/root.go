@@ -75,6 +75,8 @@ var RootCmd = &cobra.Command{
 			}
 		}
 
+		ensureConfigFileExists(constants.ConfigFile)
+
 		shouldShowLibmachineLogs := viper.GetBool(showLibmachineLogs)
 		if glog.V(3) {
 			log.SetDebug(true)
@@ -128,7 +130,6 @@ func init() {
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	configPath := constants.ConfigFile
-	ensureConfigFileExists(configPath)
 	viper.SetConfigFile(configPath)
 	viper.SetConfigType("json")
 	err := viper.ReadInConfig()

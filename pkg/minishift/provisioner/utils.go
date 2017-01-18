@@ -36,6 +36,8 @@ Type=notify
 ExecStart=/usr/bin/docker daemon -H tcp://0.0.0.0:{{.DockerPort}} -H unix:///var/run/docker.sock \
            --authorization-plugin rhel-push-plugin \
            --selinux-enabled \
+           --add-runtime docker-runc=/usr/libexec/docker/docker-runc-current \
+           --default-runtime=docker-runc \
            --add-registry registry.access.redhat.com \
            --storage-driver {{.EngineOptions.StorageDriver}} --tlsverify --tlscacert {{.AuthOptions.CaCertRemotePath}} \
            --tlscert {{.AuthOptions.ServerCertRemotePath}} --tlskey {{.AuthOptions.ServerKeyRemotePath}} \

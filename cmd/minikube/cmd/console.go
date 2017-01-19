@@ -30,6 +30,10 @@ import (
 
 var (
 	consoleURLMode bool
+	machineReadAble bool
+	machineDetails = `HOST=%s
+PORT=%d
+CONSOLE_URL=%s`
 )
 
 // consoleCmd represents the console command
@@ -47,6 +51,12 @@ var consoleCmd = &cobra.Command{
 		}
 		if consoleURLMode {
 			fmt.Fprintln(os.Stdout, url)
+		} else if machineReadAble{
+			hostIP, err := cluster.GetHostIP(api)
+			if err != nil {
+				glog.Errorln("Cannot get Host IP. Verify that Minishift is running. Error: ", err)
+			}
+			displayConsoleInMachineReadable(hostIP, url)
 		} else {
 			fmt.Fprintln(os.Stdout, "Opening the OpenShift Web console in the default browser...")
 			browser.OpenURL(url)
@@ -54,7 +64,13 @@ var consoleCmd = &cobra.Command{
 	},
 }
 
+func displayConsoleInMachineReadable(hostIP string, url string) {
+	machineDetails = fmt.Sprintf(machineDetails, hostIP, constants.APIServerPort, url)
+	fmt.Fprintln(os.Stdout, machineDetails)
+}
+
 func init() {
 	consoleCmd.Flags().BoolVar(&consoleURLMode, "url", false, "Prints the OpenShift Web Console URL to the console.")
+	consoleCmd.Flags().BoolVar(&machineReadAble, "machine-readable", false, "Prints OpenShift's IP, port and Web Console URL in Machine readable format")
 	RootCmd.AddCommand(consoleCmd)
 }

@@ -402,6 +402,19 @@ func GetConsoleURL(api libmachine.API) (string, error) {
 	return fmt.Sprintf("https://%s:%d", ip, constants.APIServerPort), nil
 }
 
+func GetHostIP(api libmachine.API) (string, error) {
+	host, err := checkIfApiExistsAndLoad(api)
+	if err != nil {
+		return "", err
+	}
+
+	ip, err := host.Driver.GetIP()
+	if err != nil {
+		return "", err
+	}
+	return ip, nil
+}
+
 type ipPort struct {
 	IP   string
 	Port int

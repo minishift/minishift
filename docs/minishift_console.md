@@ -14,7 +14,8 @@ minishift console
 ### Options
 
 ```
-      --url   Prints the OpenShift Web Console URL to the console.
+      --machine-readable   Prints OpenShift's IP, port and Web Console URL in Machine readable format
+      --url                Prints the OpenShift Web Console URL to the console.
 ```
 
 ### Options inherited from parent commands

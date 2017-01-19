@@ -29,7 +29,11 @@ import (
 )
 
 var (
-	consoleURLMode bool
+	consoleURLMode  bool
+	machineReadAble bool
+	machineDetails  = `HOST=%s
+PORT=%d
+CONSOLE_URL=%s`
 )
 
 // consoleCmd represents the console command
@@ -40,21 +44,42 @@ var consoleCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()
-		url, err := cluster.GetConsoleURL(api)
-		if err != nil {
-			glog.Errorln("Cannot access the OpenShift console. Verify that Minishift is running. Error: ", err)
-			os.Exit(1)
-		}
+
 		if consoleURLMode {
-			fmt.Fprintln(os.Stdout, url)
+			fmt.Fprintln(os.Stdout, getHostUrl(api))
+		} else if machineReadAble {
+			displayConsoleInMachineReadable(getHostIp(api), getHostUrl(api))
 		} else {
 			fmt.Fprintln(os.Stdout, "Opening the OpenShift Web console in the default browser...")
-			browser.OpenURL(url)
+			browser.OpenURL(getHostUrl(api))
 		}
 	},
 }
 
+func displayConsoleInMachineReadable(hostIP string, url string) {
+	machineDetails = fmt.Sprintf(machineDetails, hostIP, constants.APIServerPort, url)
+	fmt.Fprintln(os.Stdout, machineDetails)
+}
+
+func getHostUrl(api *libmachine.Client) string {
+	url, err := cluster.GetConsoleURL(api)
+	if err != nil {
+		glog.Errorln("Cannot access the OpenShift console. Verify that Minishift is running. Error: ", err)
+		os.Exit(1)
+	}
+	return url
+}
+
+func getHostIp(api *libmachine.Client) string {
+	hostIP, err := cluster.GetHostIP(api)
+	if err != nil {
+		glog.Errorln("Cannot get Host IP. Verify that Minishift is running. Error: ", err)
+	}
+	return hostIP
+}
+
 func init() {
 	consoleCmd.Flags().BoolVar(&consoleURLMode, "url", false, "Prints the OpenShift Web Console URL to the console.")
+	consoleCmd.Flags().BoolVar(&machineReadAble, "machine-readable", false, "Prints OpenShift's IP, port and Web Console URL in Machine readable format")
 	RootCmd.AddCommand(consoleCmd)
 }

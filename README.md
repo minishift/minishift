@@ -27,6 +27,7 @@ provisioning VMs, and [OpenShift Origin](https://github.com/openshift/origin) fo
 [![Build Status](https://secure.travis-ci.org/minishift/minishift.png)](https://travis-ci.org/minishift/minishift)
 [![Build status](https://ci.appveyor.com/api/projects/status/6wyv1cpd588cm4ce/branch/master?svg=true)](https://ci.appveyor.com/project/hferentschik/minishift-o61ou/branch/master)
 [![Build status](https://circleci.com/gh/minishift/minishift/tree/master.svg?style=svg)](https://circleci.com/gh/minishift/minishift/tree/master)
+[![Build Status](https://ci.centos.org/buildStatus/icon?job=minishift)](https://ci.centos.org/job/minishift/)
 
 ----
 

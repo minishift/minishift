@@ -52,10 +52,7 @@ var DefaultIsoUrl = githubProject + "/releases/download/" + isoVersion + "/" + i
 
 const (
 	DefaultConfigViewFormat = "- {{.ConfigKey}}: {{.ConfigValue}}\n"
-
-	RemoteOpenShiftErrPath = "/var/lib/minishift/openshift.err"
-	RemoteOpenShiftOutPath = "/var/lib/minishift/openshift.out"
-	RemoteOpenShiftCAPath  = "/var/lib/minishift/openshift.local.config/master/ca.crt"
+	RemoteOpenShiftCAPath   = "/var/lib/minishift/openshift.local.config/master/ca.crt"
 )
 
 var ConfigFile = MakeMiniPath("config", "config.json")

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 VERSION = 1.0.0-beta.2
-OPENSHIFT_VERSION = v1.3.1
+OPENSHIFT_VERSION = v1.4.0
 ISO_VERSION = v1.0.0
 
 GOOS ?= $(shell go env GOOS)

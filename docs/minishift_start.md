@@ -27,7 +27,7 @@ minishift start
       --memory int                 Amount of RAM to allocate to the Minishift VM. (default 2048)
       --metrics                    Install metrics (experimental)
   -e, --openshift-env value        Specify key-value pairs of environment variables to set on the OpenShift container. (default [])
-      --openshift-version string   The OpenShift version to run, eg. v1.3.1 (default "v1.3.1")
+      --openshift-version string   The OpenShift version to run, eg. v1.4.0 (default "v1.4.0")
       --public-hostname string     Public hostname of the OpenShift cluster.
       --registry-mirror value      Registry mirrors to pass to the Docker daemon. (default [])
       --routing-suffix string      Default suffix for the server routes.

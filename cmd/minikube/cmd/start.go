@@ -190,7 +190,7 @@ func initStartFlags() {
 	startFlagSet.StringSliceVar(&dockerEnv, "docker-env", nil, "Environment variables to pass to the Docker daemon. Use the format <key>=<value>.")
 	startFlagSet.StringSliceVar(&insecureRegistry, "insecure-registry", []string{"172.30.0.0/16"}, "Non-secure Docker registries to pass to the Docker daemon.")
 	startFlagSet.StringSliceVar(&registryMirror, "registry-mirror", nil, "Registry mirrors to pass to the Docker daemon.")
-	startFlagSet.String(openshiftVersion, version.GetOpenShiftVersion(), "The OpenShift version to run, eg. v1.3.1")
+	startFlagSet.String(openshiftVersion, version.GetOpenShiftVersion(), fmt.Sprintf("The OpenShift version to run, eg. %s", version.GetOpenShiftVersion()))
 }
 
 // initClusterUpFlags creates the CLI flags which needs to be passed on to 'oc cluster up'

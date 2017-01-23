@@ -40,6 +40,8 @@ import:
 - package: gopkg.in/cheggaaa/pb.v1
 - package: github.com/pkg/errors
   version: ^0.8.0
+- package: github.com/jteeuwen/go-bindata
+  version: ~3.0
 # The following repositories need to be specified explicitly, since the versions referenced by the openshift/origin dependency
 # refer to forks of these projects within the openshift organizaton
 # This needs to be manually updated after upgrading the openshift/origin dependnecy

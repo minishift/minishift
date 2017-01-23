@@ -582,11 +582,3 @@ func GetServiceURLs(api libmachine.API, namespace string, t *template.Template) 
 
 	return serviceURLs, nil
 }
-
-func GetCA(h sshAble) (string, error) {
-	s, err := h.RunSSHCommand(getCACertCommand)
-	if err != nil {
-		return "", nil
-	}
-	return s, nil
-}

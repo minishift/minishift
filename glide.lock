@@ -1,5 +1,5 @@
-hash: f0f9906056562c5ccea818ad27d50572a73d18ff3ef61c4b389ff12672925272
-updated: 2017-01-12T16:10:08.09273158+01:00
+hash: 938bf89a69d96a08c0af688cb9e8d2f1c568170ffc0eef5014529dfddaf78b5d
+updated: 2017-01-23T16:29:51.10992443+01:00
 imports:
 - name: github.com/beorn7/perks
   version: 3ac7bf7a47d159a033b107610db8a1b6575507a4
@@ -230,6 +230,8 @@ imports:
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/jonboulle/clockwork
   version: 3f831b65b61282ba6bece21b91beea2edc4c887a
+- name: github.com/jteeuwen/go-bindata
+  version: bbd0c6e271208dce66d8fda4bc536453cd27fc4a
 - name: github.com/juju/ratelimit
   version: 77ed1c8a01217656d2080ad51981f6e99adaa177
 - name: github.com/kardianos/osext
@@ -349,10 +351,6 @@ imports:
   version: f4485b318aadd133842532f841dc205a8e339d74
   subpackages:
   - codec
-- name: github.com/xeipuuv/gojsonpointer
-  version: e0fe6f68307607d540ed8eac07a342c33fa1b54a
-- name: github.com/xeipuuv/gojsonreference
-  version: e02fc20de94c78484cd5ffb007f8af96be030a45
 - name: github.com/xeipuuv/gojsonschema
   version: 00f9fafb54d2244d291b86ab63d12c38bd5c3886
 - name: golang.org/x/crypto

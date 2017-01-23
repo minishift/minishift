@@ -47,7 +47,7 @@ import (
 )
 
 var (
-	certs = []string{"apiserver.crt", "apiserver.key"}
+	logsCmd = "docker logs origin"
 )
 
 const (
@@ -343,7 +343,7 @@ func GetHostLogs(api libmachine.API) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	s, err := host.RunSSHCommand(logsCommand)
+	s, err := host.RunSSHCommand(logsCmd)
 	if err != nil {
 		return "", nil
 	}

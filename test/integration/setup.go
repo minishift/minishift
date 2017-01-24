@@ -22,14 +22,10 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"io/ioutil"
 	"os"
-	"testing"
 )
 
-func setUp(t *testing.T) string {
-	testDir, err := ioutil.TempDir("", "minishift-integration-test-")
-	if err != nil {
-		t.Fatalf("Failed to create temp directory '%s'", testDir)
-	}
+func setUp() string {
+	testDir, _ := ioutil.TempDir("", "minishift-integration-test-")
 	os.Setenv(constants.MiniShiftHomeEnv, testDir)
 	return testDir
 }

@@ -30,6 +30,7 @@ Minishift is a command-line tool that provisions and manages single-node OpenShi
 * [minishift get-openshift-versions](minishift_get-openshift-versions.md)	 - Gets the list of OpenShift versions available for Minishift.
 * [minishift ip](minishift_ip.md)	 - Gets the IP address of the running cluster.
 * [minishift logs](minishift_logs.md)	 - Gets the logs of the running OpenShift cluster.
+* [minishift openshift](minishift_openshift.md)	 - Modifies an OpenShift master configuration resource.
 * [minishift service](minishift_service.md)	 - Prints the URL for the specified service to the console.
 * [minishift ssh](minishift_ssh.md)	 - Log in to or run a command on a Minishift VM with SSH.
 * [minishift start](minishift_start.md)	 - Starts a local OpenShift cluster.

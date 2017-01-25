@@ -23,9 +23,9 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
+	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/testing/cli"
 	"io/ioutil"
-	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
 var configTests = []cli.TestOption{

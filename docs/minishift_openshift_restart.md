@@ -1,14 +1,14 @@
-## minishift openshift
+## minishift openshift restart
 
-Modifies an OpenShift master configuration resource.
+Restarts the OpenShift cluster.
 
 ### Synopsis
 
 
-Modifies an OpenShift master configuration resource.
+Restarts the OpenShift cluster, keeping the VM alive.
 
 ```
-minishift openshift SUBCOMMAND [flags]
+minishift openshift restart
 ```
 
 ### Options inherited from parent commands
@@ -27,7 +27,5 @@ minishift openshift SUBCOMMAND [flags]
 ```
 
 ### SEE ALSO
-* [minishift](minishift.md)	 - Minishift is a tool for application development in local OpenShift clusters.
-* [minishift openshift config](minishift_openshift_config.md)	 - Displays or patches OpenShift configuration.
-* [minishift openshift restart](minishift_openshift_restart.md)	 - Restarts the OpenShift cluster.
+* [minishift openshift](minishift_openshift.md)	 - Modifies an OpenShift master configuration resource.
 

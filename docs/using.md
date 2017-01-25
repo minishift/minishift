@@ -5,10 +5,11 @@ overview of different components and services.
 
 <!-- MarkdownTOC -->
 
-- [Managing your Openshift instance](#managing-your-openshift-instance)
+- [Managing your OpenShift instance](#managing-your-openshift-instance)
   - [Starting OpenShift](#starting-openshift)
   - [Stopping OpenShift](#stopping-openshift)
   - [Deleting OpenShift](#deleting-openshift)
+  - [Updating OpenShift configuration](#updating-openshift-configuration)
 - [Environment variables](#environment-variables)
 - [Persistent configuration](#persistent-configuration)
   - [Configuration options precedence](#configuration-options-precedence)
@@ -28,7 +29,7 @@ overview of different components and services.
 <!-- /MarkdownTOC -->
 
 <a name="managing-your-openshift-instance"></a>
-## Managing your Openshift instance
+## Managing your OpenShift instance
 
 This section contains information about basic virtual machine and OpenShift management operations.
 
@@ -50,6 +51,38 @@ Starting Minishift again will restore the cluster, allowing you to continue work
 
 The [minishift delete](./minishift_delete.md) command is used to delete the OpenShift instance.
 This command shuts down and deletes the Minishift virtual machine. No data or state is preserved.
+
+<a name="updating-openshift-configuration"></a>
+### Updating OpenShift configuration
+
+Once you have [started](#starting-openshift) OpenShift, you can view and change the master and
+node configuration of your OpenShift cluster.
+
+You can view the current OpenShift master configuration (_master-config.yaml_) via:
+
+```shell
+$ minishift openshift config view
+```
+
+For displaying the node configuration, you can specify the `target` flag.
+For more details about the `view` command refer its [synopsis](./minishift_openshift_config_view.md).
+
+Let's look at [Cross-origin resource sharing](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) (CORS) as an example for patching the OpenShift master configuration.
+Per default OpenShift will only allow cross origin resource requests from the IP of the
+cluster as well as localhost. This is specified via the `corsAllowedOrigins` property in the
+master configuration
+[master-config.yaml](https://docs.openshift.com/enterprise/3.0/admin_guide/master_node_configuration.html#master-configuration-files). To change this value and allow
+cross origin requests from all domains, one can execute:
+
+```
+$  minishift openshift config set --patch '{"corsAllowedOrigins": [".*"]}'
+```
+
+Per default the master configuration is targeted, but you can also path the node config
+by specifying the `target` flag. For more details about the
+`set` command refer to its [synopsis](./minishift_openshift_config_set.md).
+
+**Note:** OpenShift will be restarted after applying the patch.
 
 <a name="environment-variables"></a>
 ## Environment variables

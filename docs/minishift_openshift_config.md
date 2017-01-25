@@ -1,14 +1,14 @@
-## minishift openshift
+## minishift openshift config
 
-Modifies an OpenShift master configuration resource.
+Displays or patches OpenShift configuration.
 
 ### Synopsis
 
 
-Modifies an OpenShift master configuration resource.
+Displays or patches OpenShift master or node configuration. Patches are supplied in JSON format.
 
 ```
-minishift openshift SUBCOMMAND [flags]
+minishift openshift config SUBCOMMAND [flags]
 ```
 
 ### Options inherited from parent commands
@@ -27,7 +27,7 @@ minishift openshift SUBCOMMAND [flags]
 ```
 
 ### SEE ALSO
-* [minishift](minishift.md)	 - Minishift is a tool for application development in local OpenShift clusters.
-* [minishift openshift config](minishift_openshift_config.md)	 - Displays or patches OpenShift configuration.
-* [minishift openshift restart](minishift_openshift_restart.md)	 - Restarts the OpenShift cluster.
+* [minishift openshift](minishift_openshift.md)	 - Modifies an OpenShift master configuration resource.
+* [minishift openshift config set](minishift_openshift_config_set.md)	 - Updates the specified OpenShift configuration resource with the specified patch.
+* [minishift openshift config view](minishift_openshift_config_view.md)	 - Displays the specified OpenShift configuration resource.
 

@@ -1,14 +1,20 @@
-## minishift openshift
+## minishift openshift config view
 
-Modifies an OpenShift master configuration resource.
+Displays the specified OpenShift configuration resource.
 
 ### Synopsis
 
 
-Modifies an OpenShift master configuration resource.
+Displays the specified OpenShift configuration resource.
 
 ```
-minishift openshift SUBCOMMAND [flags]
+minishift openshift config view
+```
+
+### Options
+
+```
+      --target string   Target configuration to display. Either 'master' or 'node'. (default "master")
 ```
 
 ### Options inherited from parent commands
@@ -27,7 +33,5 @@ minishift openshift SUBCOMMAND [flags]
 ```
 
 ### SEE ALSO
-* [minishift](minishift.md)	 - Minishift is a tool for application development in local OpenShift clusters.
 * [minishift openshift config](minishift_openshift_config.md)	 - Displays or patches OpenShift configuration.
-* [minishift openshift restart](minishift_openshift_restart.md)	 - Restarts the OpenShift cluster.
 

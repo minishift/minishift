@@ -392,7 +392,7 @@ func CheckIfApiExistsAndLoad(api libmachine.API) (*host.Host, error) {
 		return nil, err
 	}
 	if !exists {
-		return nil, fmt.Errorf("Machine does not exist for API. Exists(%s)", constants.MachineName)
+		return nil, fmt.Errorf("Machine '%s' does not exist. You need to run 'minishift start' first", constants.MachineName)
 	}
 
 	host, err := api.Load(constants.MachineName)

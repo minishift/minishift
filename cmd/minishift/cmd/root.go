@@ -24,19 +24,14 @@ import (
 
 	"github.com/docker/machine/libmachine/log"
 	"github.com/golang/glog"
+	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
+	openShiftCmd "github.com/minishift/minishift/cmd/minishift/cmd/openshift"
+	"github.com/minishift/minishift/pkg/minikube/cluster"
+	"github.com/minishift/minishift/pkg/minikube/config"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-<<<<<<< HEAD:cmd/minikube/cmd/root.go
-
-	configCmd "github.com/minishift/minishift/cmd/minikube/cmd/config"
-	"github.com/minishift/minishift/pkg/minikube/cluster"
-=======
-	
-	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
->>>>>>> Issue #276 Renaming cmd/minikube cmd/minishift:cmd/minishift/cmd/root.go
-	"github.com/minishift/minishift/pkg/minikube/config"
-	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
 var dirs = [...]string{
@@ -119,6 +114,7 @@ func init() {
 	RootCmd.PersistentFlags().String(username, "", "User name for the virtual machine registration.")
 	RootCmd.PersistentFlags().String(password, "", "Password for the virtual machine registration.")
 	RootCmd.AddCommand(configCmd.ConfigCmd)
+	RootCmd.AddCommand(openShiftCmd.OpenShiftConfigCmd)
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
 	logDir := pflag.Lookup("log_dir")
 	if !logDir.Changed {

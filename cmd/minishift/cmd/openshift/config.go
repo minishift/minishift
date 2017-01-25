@@ -14,12 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package openshift
 
 import (
-	"github.com/minishift/minishift/cmd/minishift/cmd"
+	"github.com/spf13/cobra"
 )
 
-func main() {
-	cmd.Execute()
+const (
+	unableToRetrieveIpError = "Unable to retrieve virtual machine IP."
+	nonExistentMachineError = "There is no running OpenShift cluster."
+)
+
+var configCmd = &cobra.Command{
+	Use:   "config SUBCOMMAND [flags]",
+	Short: "Displays or patches OpenShift configuration.",
+	Long:  "Displays or patches OpenShift master or node configuration. Patches are supplied in JSON format.",
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
+}
+
+func init() {
+	OpenShiftConfigCmd.AddCommand(configCmd)
 }

@@ -14,12 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package openshift
 
 import (
-	"github.com/minishift/minishift/cmd/minishift/cmd"
+	"github.com/spf13/cobra"
 )
 
-func main() {
-	cmd.Execute()
+var OpenShiftConfigCmd = &cobra.Command{
+	Use:   "openshift SUBCOMMAND [flags]",
+	Short: "Modifies an OpenShift master configuration resource.",
+	Long:  "Modifies an OpenShift master configuration resource.",
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
 }

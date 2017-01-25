@@ -14,12 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package openshift
 
 import (
-	"github.com/minishift/minishift/cmd/minishift/cmd"
+	"github.com/minishift/minishift/pkg/minishift/util"
+	"testing"
 )
 
-func main() {
-	cmd.Execute()
+func Test_restart_command_needs_existing_vm(t *testing.T) {
+	setup(t)
+	defer tearDown()
+
+	util.RegisterExitHandler(createExitHandlerFunc(t, 1, nonExistentMachineError))
+
+	runRestart(nil, nil)
 }

@@ -14,12 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package openshift
 
 import (
-	"github.com/minishift/minishift/cmd/minishift/cmd"
+	"github.com/minishift/minishift/pkg/minishift/util"
+	"testing"
 )
 
-func main() {
-	cmd.Execute()
+func Test_view_commands_needs_existing_vm(t *testing.T) {
+	setup(t)
+	defer tearDown()
+
+	util.RegisterExitHandler(createExitHandlerFunc(t, 1, nonExistentMachineError))
+
+	target = "master"
+	runViewConfig(nil, nil)
+}
+
+func Test_unknown_config_target_aborts_view_command(t *testing.T) {
+	setup(t)
+	defer tearDown()
+
+	util.RegisterExitHandler(createExitHandlerFunc(t, 1, unknownPatchTargetError))
+
+	target = "foo"
+	runViewConfig(nil, nil)
 }

@@ -46,7 +46,7 @@ func (r *RecordingRunner) Run(command string, args ...string) error {
 var testDir string
 var testRunner *RecordingRunner
 var testMachineConfig = cluster.MachineConfig{
-	OpenShiftVersion: "v1.3.1",
+	OpenShiftVersion: tests.OPENSHIFT_VERSION,
 }
 
 func TestStartClusterUpNoFlags(t *testing.T) {

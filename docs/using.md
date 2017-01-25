@@ -129,7 +129,7 @@ For this purpose it copies the _oc_ binary onto  your host. You find it under
 `~/.minishift/cache/oc/\<OpenShift version\>/oc`. You can add this binary to your `PATH` variable
 in order to use `oc`, eg:
 
-    $ export PATH=$PATH:~/.minishift/cache/oc/v1.3.1
+    $ export PATH=$PATH:~/.minishift/cache/oc/v1.4.1
 
 In future versions we will provide a command which will assist in setting up the `PATH`. Also
 see Github issue [#142](https://github.com/minishift/minishift/issues/142).

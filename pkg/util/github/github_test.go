@@ -18,6 +18,7 @@ package github
 
 import (
 	"github.com/google/go-github/github"
+	"github.com/minishift/minishift/pkg/minikube/tests"
 	minitesting "github.com/minishift/minishift/pkg/testing"
 	minishiftos "github.com/minishift/minishift/pkg/util/os"
 	"io/ioutil"
@@ -37,7 +38,6 @@ var (
 	resp         *github.Response
 )
 
-var testVersion = "v1.3.1"
 var assetSet = []struct {
 	binary           OpenShiftBinaryType
 	os               minishiftos.OS
@@ -45,10 +45,10 @@ var assetSet = []struct {
 	expectedAssetId  int
 	expectedFilename string
 }{
-	{OPENSHIFT, minishiftos.LINUX, testVersion, 2489309, "openshift-origin-server-v1.3.1-dad658de7465ba8a234a4fb40b5b446a45a4cee1-linux-64bit.tar.gz"},
-	{OC, minishiftos.LINUX, testVersion, 2489310, "openshift-origin-client-tools-v1.3.1-dad658de7465ba8a234a4fb40b5b446a45a4cee1-linux-64bit.tar.gz"},
-	{OC, minishiftos.DARWIN, testVersion, 2586147, "openshift-origin-client-tools-v1.3.1-2748423-mac.zip"},
-	{OC, minishiftos.WINDOWS, testVersion, 2489312, "openshift-origin-client-tools-v1.3.1-dad658de7465ba8a234a4fb40b5b446a45a4cee1-windows.zip"},
+	{OPENSHIFT, minishiftos.LINUX, tests.OPENSHIFT_VERSION, 3053311, "openshift-origin-server-v1.4.1-3f9807a-linux-64bit.tar.gz"},
+	{OC, minishiftos.LINUX, tests.OPENSHIFT_VERSION, 3052623, "openshift-origin-client-tools-v1.4.1-3f9807a-linux-64bit.tar.gz"},
+	{OC, minishiftos.DARWIN, tests.OPENSHIFT_VERSION, 3052625, "openshift-origin-client-tools-v1.4.1-3f9807a-mac.zip"},
+	{OC, minishiftos.WINDOWS, tests.OPENSHIFT_VERSION, 3052627, "openshift-origin-client-tools-v1.4.1-3f9807a-windows.zip"},
 }
 
 func TestGetAssetIdAndFilename(t *testing.T) {
@@ -86,7 +86,7 @@ func TestDownloadOc(t *testing.T) {
 	defer os.RemoveAll(testDir)
 
 	for _, testAsset := range assetSet {
-		// don't test with openshift binary
+		// Don't test with openshift binary
 		if testAsset.binary == OPENSHIFT {
 			continue
 		}
@@ -145,12 +145,12 @@ func TestInvalidBinaryFormat(t *testing.T) {
 	}
 	defer os.RemoveAll(testDir)
 
-	err = DownloadOpenShiftReleaseBinary(OPENSHIFT, minishiftos.WINDOWS, testVersion, testDir)
+	err = DownloadOpenShiftReleaseBinary(OPENSHIFT, minishiftos.WINDOWS, tests.OPENSHIFT_VERSION, testDir)
 	if err == nil {
 		t.Error("There should have been an error")
 	}
 
-	expectedErrorMessage := "Cannot get binary 'openshift' in version v1.3.1 for the target environment Windows"
+	expectedErrorMessage := fmt.Sprintf("Cannot get binary '%s' in version %s for the target environment Windows", OPENSHIFT, tests.OPENSHIFT_VERSION)
 	if err.Error() != expectedErrorMessage {
 		t.Errorf("Expected error: '%s'. Got: '%s'\n", expectedErrorMessage, err.Error())
 	}

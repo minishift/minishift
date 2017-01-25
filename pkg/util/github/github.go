@@ -190,7 +190,16 @@ func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minis
 	binaryPath := ""
 	switch {
 	case strings.HasSuffix(assetTmpFile, TAR):
-		tarFile := assetTmpFile[:len(assetTmpFile)-3]
+		tarFile := ""
+		if osType == minishiftos.LINUX {
+			// https://github.com/openshift/origin/issues/12663
+			tokens := strings.Split(assetTmpFile, fmt.Sprintf("%s-", version))
+			updatedTmpTarPath := fmt.Sprintf("%s%s+%s", tokens[0], version, tokens[1])
+			tarFile = updatedTmpTarPath[:len(assetTmpFile) - 3]
+		} else {
+			tarFile = assetTmpFile[:len(assetTmpFile)-3]
+		}
+
 		err = archive.Ungzip(assetTmpFile, tarFile)
 		if err != nil {
 			return errors.Wrapf(err, "Cannot ungzip %s", assetTmpFile)

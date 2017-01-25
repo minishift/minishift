@@ -134,7 +134,7 @@ To use a driver of choice for Minishift, use the `--vm-driver=xxx` flag with `mi
      other variables. In case of doubt, you can check the content of the
      `~/.minishift/cache/oc` directory.
 
-        $ export PATH=$PATH:~/.minishift/cache/oc/v1.3.1
+        $ export PATH=$PATH:~/.minishift/cache/oc/v1.4.1
 
 1. Login to your OpenShift account and authenticate yourself:
 

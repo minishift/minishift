@@ -17,7 +17,7 @@ limitations under the License.
 package main
 
 import (
-	"github.com/minishift/minishift/cmd/minikube/cmd"
+	"github.com/minishift/minishift/cmd/minishift/cmd"
 	"github.com/minishift/minishift/pkg/minikube/machine"
 )
 

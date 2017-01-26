@@ -29,7 +29,7 @@ LDFLAGS := -X $(REPOPATH)/pkg/version.version=$(VERSION) \
 	-X $(REPOPATH)/pkg/version.isoVersion=$(ISO_VERSION) \
 	-X $(REPOPATH)/pkg/version.openshiftVersion=$(OPENSHIFT_VERSION) -s -w -extldflags '-static'
 
-GOFILES := go list  -f '{{join .Deps "\n"}}' ./cmd/minikube/ | grep $(REPOPATH) | xargs go list -f '{{ range $$file := .GoFiles }} {{$$.Dir}}/{{$$file}}{{"\n"}}{{end}}'
+GOFILES := go list  -f '{{join .Deps "\n"}}' ./cmd/minishift/ | grep $(REPOPATH) | xargs go list -f '{{ range $$file := .GoFiles }} {{$$.Dir}}/{{$$file}}{{"\n"}}{{end}}'
 PACKAGES := go list ./... | grep -v /vendor
 SOURCE_DIRS = cmd pkg test
 
@@ -43,13 +43,13 @@ $(BUILD_DIR)/$(GOOS)-$(GOARCH):
 	mkdir -p $(BUILD_DIR)/$(GOOS)-$(GOARCH)
 
 $(BUILD_DIR)/darwin-amd64/minishift: vendor $(GOPATH)/src/$(ORG) $(BUILD_DIR)/$(GOOS)-$(GOARCH) $(shell $(GOFILES))
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/darwin-amd64/minishift ./cmd/minikube
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/darwin-amd64/minishift ./cmd/minishift
 
 $(BUILD_DIR)/linux-amd64/minishift: vendor $(GOPATH)/src/$(ORG) $(BUILD_DIR)/$(GOOS)-$(GOARCH) $(shell $(GOFILES))
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/linux-amd64/minishift ./cmd/minikube
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/linux-amd64/minishift ./cmd/minishift
 
 $(BUILD_DIR)/windows-amd64/minishift.exe: vendor $(GOPATH)/src/$(ORG) $(BUILD_DIR)/$(GOOS)-$(GOARCH) $(shell $(GOFILES))
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/windows-amd64/minishift.exe ./cmd/minikube
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/windows-amd64/minishift.exe ./cmd/minishift
 
 $(GOPATH)/bin/gh-release: $(GOPATH)/src/$(ORG)
 	go get github.com/progrium/gh-release

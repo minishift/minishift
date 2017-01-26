@@ -27,9 +27,14 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+<<<<<<< HEAD:cmd/minikube/cmd/root.go
 
 	configCmd "github.com/minishift/minishift/cmd/minikube/cmd/config"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
+=======
+	
+	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
+>>>>>>> Issue #276 Renaming cmd/minikube cmd/minishift:cmd/minishift/cmd/root.go
 	"github.com/minishift/minishift/pkg/minikube/config"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 )

@@ -49,11 +49,6 @@ func Ungzip(source, target string) error {
 }
 
 func Untar(tarball, targetDir string) error {
-	err := os.MkdirAll(tarball[:len(tarball)-4], 0755)
-	if err != nil {
-		return err
-	}
-
 	reader, err := os.Open(tarball)
 	if err != nil {
 		return err
@@ -70,15 +65,13 @@ func Untar(tarball, targetDir string) error {
 		}
 
 		path := filepath.Join(targetDir, header.Name)
-		info := header.FileInfo()
-		if info.IsDir() {
-			if err = os.MkdirAll(path, info.Mode()); err != nil {
-				return err
-			}
-			continue
+
+		// tar.Next() will externally only iterate files, so we might have to create intermediate directories here
+		if err = os.MkdirAll(filepath.Dir(path), 0770); err != nil {
+			return err
 		}
 
-		file, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, info.Mode())
+		file, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, header.FileInfo().Mode())
 		if err != nil {
 			return err
 		}

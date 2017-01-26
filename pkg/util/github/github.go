@@ -37,6 +37,7 @@ import (
 	minishiftos "github.com/minishift/minishift/pkg/util/os"
 	"io/ioutil"
 	"path/filepath"
+	"regexp"
 )
 
 type OpenShiftBinaryType string
@@ -190,16 +191,28 @@ func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minis
 	binaryPath := ""
 	switch {
 	case strings.HasSuffix(assetTmpFile, TAR):
+		// unzip
 		tarFile := assetTmpFile[:len(assetTmpFile)-3]
 		err = archive.Ungzip(assetTmpFile, tarFile)
 		if err != nil {
 			return errors.Wrapf(err, "Cannot ungzip %s", assetTmpFile)
 		}
+
+		// untar
 		err = archive.Untar(tarFile, tmpDir)
 		if err != nil {
 			return errors.Wrapf(err, "Cannot untar %s", tarFile)
 		}
-		binaryPath = tarFile[:len(tarFile)-4]
+
+		content, err := listDirExcluding(tmpDir, ".*.tar.*")
+		if err != nil {
+			return errors.Wrapf(err, "Cannot list content of %s", tmpDir)
+		}
+		if len(content) > 1 {
+			return errors.New(fmt.Sprintf("Unexpected number of files in tmp directory: %s", content))
+		}
+
+		binaryPath = filepath.Join(tmpDir, content[0])
 	case strings.HasSuffix(assetTmpFile, ZIP):
 		contentDir := assetTmpFile[:len(assetTmpFile)-4]
 		err = archive.Unzip(assetTmpFile, contentDir)
@@ -233,6 +246,28 @@ func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minis
 	}
 
 	return nil
+}
+
+func listDirExcluding(dir string, excludeRegexp string) ([]string, error) {
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	result := []string{}
+	for _, f := range files {
+		matched, err := regexp.MatchString(excludeRegexp, f.Name())
+		if err != nil {
+			return nil, err
+		}
+
+		if !matched {
+			result = append(result, f.Name())
+		}
+
+	}
+
+	return result, nil
 }
 
 func getAssetIdAndFilename(binaryType OpenShiftBinaryType, osType minishiftos.OS, release *github.RepositoryRelease) (int, string) {

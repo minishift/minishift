@@ -55,7 +55,7 @@ func TestGetAssetIdAndFilename(t *testing.T) {
 	for _, testAsset := range assetSet {
 		release, resp, err = gitHubClient.Repositories.GetReleaseByTag("openshift", "origin", testAsset.version)
 		if err != nil {
-			t.Error(err, "Could not get OpenShift release")
+			t.Fatal(err, "Could not get OpenShift release")
 		}
 		defer func() {
 			_ = resp.Body.Close()
@@ -63,12 +63,12 @@ func TestGetAssetIdAndFilename(t *testing.T) {
 
 		actualAssetID, actualFilename := getAssetIdAndFilename(testAsset.binary, testAsset.os, release)
 		if actualAssetID != testAsset.expectedAssetId {
-			t.Errorf("Unexpected asset id for binary %d for OS %d. Expected %d, got %d",
+			t.Fatalf("Unexpected asset id for binary %d for OS %d. Expected %d, got %d",
 				testAsset.binary, testAsset.os, testAsset.expectedAssetId, actualAssetID)
 		}
 
 		if actualFilename != testAsset.expectedFilename {
-			t.Errorf("Unexpected filename for binary %d for OS %d. Expected %s, got %s",
+			t.Fatalf("Unexpected filename for binary %d for OS %d. Expected %s, got %s",
 				testAsset.binary, testAsset.os, testAsset.expectedFilename, actualFilename)
 		}
 	}
@@ -81,7 +81,7 @@ func TestDownloadOc(t *testing.T) {
 
 	testDir, err := ioutil.TempDir("", "minishift-test-")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	defer os.RemoveAll(testDir)
 
@@ -93,7 +93,7 @@ func TestDownloadOc(t *testing.T) {
 
 		err = DownloadOpenShiftReleaseBinary(testAsset.binary, testAsset.os, testAsset.version, testDir)
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 
 		expectedBinaryPath := filepath.Join(testDir, testAsset.binary.String())
@@ -102,19 +102,19 @@ func TestDownloadOc(t *testing.T) {
 		}
 		fileInfo, err := os.Lstat(expectedBinaryPath)
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 
 		if runtime.GOOS != "windows" {
 			expectedFilePermissions := "-rwxrwxrwx"
 			if fileInfo.Mode().String() != expectedFilePermissions {
-				t.Errorf("Wrong file permisisons. Expected %s. Got %s", expectedFilePermissions, fileInfo.Mode().String())
+				t.Fatalf("Wrong file permisisons. Expected %s. Got %s", expectedFilePermissions, fileInfo.Mode().String())
 			}
 		}
 
 		err = os.Remove(expectedBinaryPath)
 		if err != nil {
-			t.Errorf("Unable to delete %s", expectedBinaryPath)
+			t.Fatalf("Unable to delete %s", expectedBinaryPath)
 		}
 	}
 }
@@ -122,36 +122,73 @@ func TestDownloadOc(t *testing.T) {
 func TestInvalidVersion(t *testing.T) {
 	testDir, err := ioutil.TempDir("", "minishift-test-")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	defer os.RemoveAll(testDir)
 
 	dummyVersion := "foo"
 	err = DownloadOpenShiftReleaseBinary(OPENSHIFT, minishiftos.WINDOWS, dummyVersion, testDir)
 	if err == nil {
-		t.Error("There should have been an error")
+		t.Fatal("There should have been an error")
 	}
 
 	expectedErrorMessage := fmt.Sprintf("Cannot get the OpenShift release version %s", dummyVersion)
 	if !strings.HasPrefix(err.Error(), expectedErrorMessage) {
-		t.Errorf("Expected error: '%s'. Got: '%s'\n", expectedErrorMessage, err.Error())
+		t.Fatalf("Expected error: '%s'. Got: '%s'\n", expectedErrorMessage, err.Error())
 	}
 }
 
 func TestInvalidBinaryFormat(t *testing.T) {
 	testDir, err := ioutil.TempDir("", "minishift-test-")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	defer os.RemoveAll(testDir)
 
 	err = DownloadOpenShiftReleaseBinary(OPENSHIFT, minishiftos.WINDOWS, testVersion, testDir)
 	if err == nil {
-		t.Error("There should have been an error")
+		t.Fatal("There should have been an error")
 	}
 
 	expectedErrorMessage := "Cannot get binary 'openshift' in version v1.3.1 for the target environment Windows"
 	if err.Error() != expectedErrorMessage {
-		t.Errorf("Expected error: '%s'. Got: '%s'\n", expectedErrorMessage, err.Error())
+		t.Fatalf("Expected error: '%s'. Got: '%s'\n", expectedErrorMessage, err.Error())
+	}
+}
+
+// See https://github.com/minishift/minishift/issues/331
+func Test_Download_Oc_1_4_1(t *testing.T) {
+	client := http.DefaultClient
+	client.Transport = minitesting.NewMockRoundTripper()
+	defer minitesting.ResetDefaultRoundTripper()
+
+	testDir, err := ioutil.TempDir("", "minishift-test-")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(testDir)
+
+	err = DownloadOpenShiftReleaseBinary(OC, minishiftos.LINUX, "v1.4.1", testDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expectedBinaryPath := filepath.Join(testDir, "oc")
+
+	fileInfo, err := os.Lstat(expectedBinaryPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	
+	if runtime.GOOS != "windows" {
+		expectedFilePermissions := "-rwxrwxrwx"
+		if fileInfo.Mode().String() != expectedFilePermissions {
+			t.Fatalf("Wrong file permisisons. Expected %s. Got %s", expectedFilePermissions, fileInfo.Mode().String())
+		}
+	}
+
+	err = os.Remove(expectedBinaryPath)
+	if err != nil {
+		t.Fatalf("Unable to delete %s", expectedBinaryPath)
 	}
 }

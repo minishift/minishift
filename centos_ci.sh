@@ -38,7 +38,17 @@ yum -y install \
   gcc \
   make \
   git \
-  curl
+  curl \
+  kvm \
+  qemu-kvm \
+  libvirt
+
+# Start Libvirt
+sudo systemctl start libvirtd
+
+# Setup 'kvm' driver
+curl -L https://github.com/dhiltgen/docker-machine-kvm/releases/download/v0.7.0/docker-machine-driver-kvm > /usr/local/bin/docker-machine-driver-kvm && \
+chmod +x /usr/local/bin/docker-machine-driver-kvm
 
 # Install Go 1.7
 curl -LO https://storage.googleapis.com/golang/go1.7.linux-amd64.tar.gz
@@ -66,5 +76,8 @@ mkdir /tmp/glide
 tar --directory=/tmp/glide -xvf glide-${GLIDE_TAG}-${GLIDE_OS_ARCH}.tar.gz
 export PATH=$PATH:/tmp/glide/${GLIDE_OS_ARCH}
 
+make clean
 # Test
 make test cross fmtcheck prerelease
+# Run integration test with 'kvm' driver
+VM_DRIVER=kvm make integration

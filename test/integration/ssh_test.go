@@ -34,7 +34,8 @@ func TestClusterSSH(t *testing.T) {
 	runner := util.MinishiftRunner{
 		Args:       *args,
 		BinaryPath: *binaryPath,
-		T:          t}
+		T:          t,
+	}
 	defer runner.EnsureDeleted()
 
 	runner.EnsureRunning()

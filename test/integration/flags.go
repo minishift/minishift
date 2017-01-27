@@ -32,5 +32,15 @@ func TestMain(m *testing.M) {
 }
 
 var binaryPath = flag.String("binary", fmt.Sprintf("../../out/%s-amd64/minishift", runtime.GOOS), "path to minishift binary")
-// For now lets use VirtualBox cross the board
-var args = flag.String("minishift-args", "--vm-driver virtualbox", "Arguments to pass to minishift")
+
+var vmDriver = getenv("VM_DRIVER", "virtualbox") // Get the driver value from environment variable or use default
+
+var args = flag.String("minishift-args", fmt.Sprintf("--vm-driver %s", vmDriver), "Arguments to pass to minishift")
+
+func getenv(key, fallback string) string {
+	value := os.Getenv(key)
+	if len(value) == 0 {
+		return fallback
+	}
+	return value
+}

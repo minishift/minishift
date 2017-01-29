@@ -97,7 +97,7 @@ func shellCfgSet(api libmachine.API) (*ShellConfig, error) {
 		DockerCertPath:   envMap["DOCKER_CERT_PATH"],
 		DockerHost:       envMap["DOCKER_HOST"],
 		DockerTLSVerify:  envMap["DOCKER_TLS_VERIFY"],
-		DockerAPIVersion: constants.DockerAPIVersion,
+		DockerAPIVersion: envMap["DOCKER_API_VERSION"],
 		UsageHint:        generateUsageHint(userShell),
 	}
 

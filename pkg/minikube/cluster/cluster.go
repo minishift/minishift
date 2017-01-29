@@ -48,6 +48,7 @@ import (
 
 var (
 	logsCmd = "docker logs origin"
+	dockerAPIVersionCmd = "docker version --format '{{.Server.APIVersion}}'"
 )
 
 const (
@@ -320,6 +321,10 @@ func GetHostDockerEnv(api libmachine.API) (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	dockerAPIVersion, err := host.RunSSHCommand(dockerAPIVersionCmd)
+	if err != nil {
+		return  nil, err
+	}
 	ip, err := host.Driver.GetIP()
 	if err != nil {
 		return nil, err
@@ -333,6 +338,7 @@ func GetHostDockerEnv(api libmachine.API) (map[string]string, error) {
 		"DOCKER_TLS_VERIFY": "1",
 		"DOCKER_HOST":       tcpPrefix + ip + portDelimiter + port,
 		"DOCKER_CERT_PATH":  constants.MakeMiniPath("certs"),
+		"DOCKER_API_VERSION": strings.TrimRight(dockerAPIVersion, "\n"),
 	}
 	return envMap, nil
 }

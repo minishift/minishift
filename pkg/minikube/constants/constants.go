@@ -60,9 +60,6 @@ var ConfigFile = MakeMiniPath("config", "config.json")
 var TmpFilePath = MakeMiniPath("tmp")
 var OcCachePath = MakeMiniPath("cache", "oc")
 
-// DockerAPIVersion is the API version implemented by Docker running in the minishift VM.
-const DockerAPIVersion = "1.23"
-
 // MakeMiniPath is a utility to calculate a relative path to our directory.
 func MakeMiniPath(fileName ...string) string {
 	args := []string{Minipath}

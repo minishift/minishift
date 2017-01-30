@@ -26,7 +26,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// sshCmd represents the docker-ssh command
+// sshCmd represents the docker-machine ssh command
 var sshCmd = &cobra.Command{
 	Use:   "ssh",
 	Short: "Log in to or run a command on a Minishift VM with SSH.",

@@ -8,7 +8,7 @@ Log in to or run a command on a Minishift VM with SSH.
 Log in to or run a command on a Minishift VM with SSH. This command is similar to 'docker-machine ssh'.
 
 ```
-minishift ssh
+minishift ssh [-- COMMAND]
 ```
 
 ### Options inherited from parent commands

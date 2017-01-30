@@ -28,7 +28,7 @@ import (
 
 // sshCmd represents the docker-machine ssh command
 var sshCmd = &cobra.Command{
-	Use:   "ssh",
+	Use:   "ssh [-- COMMAND]",
 	Short: "Log in to or run a command on a Minishift VM with SSH.",
 	Long:  "Log in to or run a command on a Minishift VM with SSH. This command is similar to 'docker-machine ssh'.",
 	Run: func(cmd *cobra.Command, args []string) {

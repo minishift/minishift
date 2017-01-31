@@ -97,3 +97,7 @@ fmt:
 .PHONY: fmtcheck
 fmtcheck:
 	@test -z $(shell gofmt -l -s $(shell $(GOFILES_NO_VENDOR)) | tee /dev/stderr) || echo "[WARN] Fix formatting issues with 'make fmt'"
+
+.PHONY: cidemo
+cidemo:
+	@echo "CI Demo"

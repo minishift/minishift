@@ -1,14 +1,8 @@
-hash: 938bf89a69d96a08c0af688cb9e8d2f1c568170ffc0eef5014529dfddaf78b5d
-updated: 2017-01-23T16:29:51.10992443+01:00
+hash: b22433552234edad060646b980eebe603a7f98b8447c1b81bc831e49791f1fc1
+updated: 2017-02-02T17:05:27.616783744+05:30
 imports:
-- name: github.com/beorn7/perks
-  version: 3ac7bf7a47d159a033b107610db8a1b6575507a4
-  subpackages:
-  - quantile
 - name: github.com/blang/semver
-  version: 31b736133b98f26d5e078ec9eb591666edfd091f
-- name: github.com/BurntSushi/toml
-  version: 99064174e013895bbd9b025c31100bd1d9b590ca
+  version: ff9bd0e2be32754107fc7f37531b104b6219eab8
 - name: github.com/coreos/go-oidc
   version: 5cf2aa52da8c574d3aa4458f471ad6ae2240fe6b
   subpackages:
@@ -26,7 +20,7 @@ imports:
   - unit
   - util
 - name: github.com/coreos/pkg
-  version: 7f080b6c11ac2d2347c3cd7521e810207ea1a041
+  version: fa29b1d70f0beaddd4c7021607cc3c3be8ce94b8
   subpackages:
   - capnslog
   - dlopen
@@ -42,22 +36,80 @@ imports:
   subpackages:
   - spew
 - name: github.com/docker/distribution
-  version: 559433598c7be9d30d6cfc5cad5b5dfdb686725c
-  repo: https://github.com/openshift/docker-distribution.git
-  vcs: git
+  version: 12acdf0a6c1e56d965ac6eb395d2bce687bf22fc
   subpackages:
+  - configuration
+  - context
   - digest
+  - health
+  - health/checks
+  - manifest
+  - manifest/manifestlist
+  - manifest/schema1
+  - manifest/schema2
+  - notifications
   - reference
+  - registry/api/errcode
+  - registry/api/v2
+  - registry/auth
+  - registry/auth/htpasswd
+  - registry/auth/token
+  - registry/client
+  - registry/client/auth
+  - registry/client/transport
+  - registry/handlers
+  - registry/middleware/registry
+  - registry/middleware/repository
+  - registry/proxy
+  - registry/proxy/scheduler
+  - registry/storage
+  - registry/storage/cache
+  - registry/storage/cache/memory
+  - registry/storage/cache/redis
+  - registry/storage/driver
+  - registry/storage/driver/azure
+  - registry/storage/driver/base
+  - registry/storage/driver/factory
+  - registry/storage/driver/filesystem
+  - registry/storage/driver/gcs
+  - registry/storage/driver/inmemory
+  - registry/storage/driver/middleware
+  - registry/storage/driver/middleware/cloudfront
+  - registry/storage/driver/oss
+  - registry/storage/driver/s3-aws
+  - registry/storage/driver/swift
+  - uuid
+  - version
 - name: github.com/docker/docker
-  version: 0f5c9d301b9b1cca66b3ea0f9dec3b5317d3686d
+  version: a8a31eff10544860d2188dddabdee4d727545796
   subpackages:
-  - pkg/mount
   - pkg/term
-  - pkg/term/winconsole
+- name: github.com/docker/engine-api
+  version: dea108d3aa0c67d7162a3fd8aa65f38a430019fd
+  subpackages:
+  - client
+  - client/transport
+  - client/transport/cancellable
+  - types
+  - types/blkiodev
+  - types/container
+  - types/filters
+  - types/network
+  - types/reference
+  - types/registry
+  - types/strslice
+  - types/time
+  - types/versions
+- name: github.com/docker/go-connections
+  version: f549a9393d05688dff0992ef3efd8bbe6c628aeb
+  subpackages:
+  - nat
+  - sockets
+  - tlsconfig
 - name: github.com/docker/go-units
-  version: 0bbddae09c5a5419a8c6dcdd7ff90da3d450393b
+  version: 0dadbb0345b35ec7ef35e228dabb8de89a65bf52
 - name: github.com/docker/machine
-  version: 91e368eb7422665278b1d5665139ee0f9980b588
+  version: 15fd4c70403bab784d91031af02d9e169ce66412
   subpackages:
   - commands/mcndirs
   - drivers/errdriver
@@ -91,14 +143,15 @@ imports:
   - libmachine/state
   - libmachine/swarm
   - libmachine/version
+  - libmachine/versioncmp
   - version
 - name: github.com/emicklei/go-restful
-  version: 152183b11abcd2b07ee814c8da82296340949747
-  repo: https://github.com/openshift/go-restful.git
-  vcs: git
+  version: 89ef8af493ab468a45a42bb0d89a06fccdd2fb22
   subpackages:
   - log
   - swagger
+- name: github.com/fsnotify/fsnotify
+  version: 3c39c22b2c7b0516d5f2553f1608e5d13cb19053
 - name: github.com/fsouza/go-dockerclient
   version: bf97c77db7c945cbcdbf09d56c6f87a66f54537b
   subpackages:
@@ -122,9 +175,10 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/gogo/protobuf
-  version: 82d16f734d6d871204a3feb1a73cb220cc92574c
+  version: e18d7aa8f8c624c915db340349aad4c49b10d173
   subpackages:
   - gogoproto
+  - plugin/compare
   - plugin/defaultcheck
   - plugin/description
   - plugin/embedcheck
@@ -132,7 +186,6 @@ imports:
   - plugin/equal
   - plugin/face
   - plugin/gostring
-  - plugin/grpc
   - plugin/marshalto
   - plugin/oneofcheck
   - plugin/populate
@@ -144,6 +197,7 @@ imports:
   - proto
   - protoc-gen-gogo/descriptor
   - protoc-gen-gogo/generator
+  - protoc-gen-gogo/grpc
   - protoc-gen-gogo/plugin
   - sortkeys
   - vanity
@@ -157,7 +211,7 @@ imports:
   subpackages:
   - proto
 - name: github.com/google/cadvisor
-  version: 956e595d948ce8690296d297ba265d5e8649a088
+  version: ef63d70156d509efbbacfc3e86ed120228fab914
   subpackages:
   - api
   - cache/memory
@@ -199,7 +253,7 @@ imports:
   - validate
   - version
 - name: github.com/google/go-github
-  version: 1bc362c7737e51014af7299e016444b654095ad9
+  version: 0e7db468186d70bb8568a7e7322ba7eba6f7dd5d
   subpackages:
   - github
 - name: github.com/google/go-querystring
@@ -209,7 +263,7 @@ imports:
 - name: github.com/google/gofuzz
   version: bbcb9da2d746f8bdbd6a936686a0a6067ada0ec5
 - name: github.com/hashicorp/hcl
-  version: d8c773c4cba11b11539e3d45f93daeaa5dcf1fa1
+  version: 372e8ddaa16fd67e371e9323807d056b799360af
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -236,24 +290,18 @@ imports:
   version: 77ed1c8a01217656d2080ad51981f6e99adaa177
 - name: github.com/kardianos/osext
   version: c2c54e542fb797ad986b31721e1baedf214ca413
-- name: github.com/kr/pretty
-  version: cfb55aafdaf3ec08f0db22699ab822c50091b1c4
-- name: github.com/kr/text
-  version: 7cafcd837844e784b526369c9bce262804aebc60
 - name: github.com/magiconair/properties
-  version: 0723e352fa358f9322c938cc2dadda874e9151a9
+  version: b3b15ef068fd0b17ddf408a23669f20811d194d2
 - name: github.com/mattn/go-runewidth
-  version: 737072b4e32b7a5018b4a7125da8d12de90e8045
-- name: github.com/matttproud/golang_protobuf_extensions
-  version: fc2b8d3a73c4867e51861bbdd5ae3c1f0869dd6a
-  subpackages:
-  - pbutil
+  version: 14207d285c6c197daabb5c9793d63e7af9ab2d50
+- name: github.com/Microsoft/go-winio
+  version: 4f1a71750d95a5a8a46c40a67ffbed8129c2f138
 - name: github.com/mitchellh/mapstructure
-  version: 740c764bc6149d3f1806231418adb9f52c11bcbf
+  version: db1efb556f84b25a0a13a04aad883943538ad2e0
 - name: github.com/olekukonko/tablewriter
-  version: bdcc175572fd7abece6c831e643891b9331bc9e7
+  version: febf2d34b54a69ce7530036c7503b1c9fbfdf0bb
 - name: github.com/opencontainers/runc
-  version: 7ca2aa4873aea7cb4265b1726acb24b90d8726c6
+  version: 74317eaa20cf37eb2c762dc98b01e3e0b4d5e598
   subpackages:
   - libcontainer
   - libcontainer/apparmor
@@ -263,6 +311,7 @@ imports:
   - libcontainer/configs
   - libcontainer/configs/validate
   - libcontainer/criurpc
+  - libcontainer/keys
   - libcontainer/label
   - libcontainer/seccomp
   - libcontainer/selinux
@@ -270,15 +319,23 @@ imports:
   - libcontainer/system
   - libcontainer/user
   - libcontainer/utils
-- name: github.com/openshift/origin
-  version: 274842360258d4f6ea1d3ec19559ecd395fd4d4f
+- name: github.com/openshift/imagebuilder
+  version: 74238f0cbdc0d7296d2a826d4d2f6a9f79084f82
   subpackages:
+  - dockerclient
+  - imageprogress
+  - signal
+  - strslice
+- name: github.com/openshift/origin
+  version: 3f9807ab8282e1af64128834b246c41ce50172d4
+  subpackages:
+  - pkg/bootstrap/docker/dockerhelper
   - pkg/bootstrap/docker/errors
   - pkg/bootstrap/docker/host
   - pkg/bootstrap/docker/run
   - pkg/cmd/util/prefixwriter
 - name: github.com/openshift/source-to-image
-  version: 89b96680e451c0fa438446043f967b5660942974
+  version: 5741384e376d9c61b5b36156003ede6698ca563b
   subpackages:
   - pkg/api
   - pkg/api/describe
@@ -297,34 +354,23 @@ imports:
   - pkg/scm/git
   - pkg/scripts
   - pkg/tar
+  - pkg/test
   - pkg/util
   - pkg/util/glog
   - pkg/util/interrupt
   - pkg/util/user
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
+- name: github.com/pelletier/go-buffruneio
+  version: df1e16fde7fc330a0ca68167c23bf7ed6ac31d6d
+- name: github.com/pelletier/go-toml
+  version: a1f048ba24490f9b0674a67e1ce995d685cddf4a
 - name: github.com/pkg/browser
   version: 9302be274faad99162b9d48ec97b24306872ebb0
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
-- name: github.com/prometheus/client_golang
-  version: 3b78d7a77f51ccbc364d4bc170920153022cfd08
-  subpackages:
-  - prometheus
-- name: github.com/prometheus/client_model
-  version: fa8ad6fec33561be4280a8f0514318c79d7f6cb6
-  subpackages:
-  - go
-- name: github.com/prometheus/common
-  version: a6ab08426bb262e2d190097751f5cfd1cfdfd17d
-  subpackages:
-  - expfmt
-  - internal/bitbucket.org/ww/goautoneg
-  - model
-- name: github.com/prometheus/procfs
-  version: 490cc6eb5fa45bf8a8b7b73c8bc82a8160e8531d
 - name: github.com/russross/blackfriday
-  version: 77efab57b2f74dd3f9051c79752b2e8995c8b789
+  version: 300106c228d52c8941d4b3de6054a6062a86dda3
 - name: github.com/samalba/dockerclient
   version: f661dd4754aa5c52da85d04b5871ee0e11f4b59c
 - name: github.com/shurcooL/sanitized_anchor_name
@@ -333,26 +379,28 @@ imports:
   version: aaf92c95712104318fc35409745f1533aa5ff327
   subpackages:
   - formatters/logstash
+- name: github.com/spf13/afero
+  version: 72b31426848c6ef12a7a8e216708cb0d1530f074
+  subpackages:
+  - mem
 - name: github.com/spf13/cast
-  version: 2580bc98dc0e62908119e4737030cc2fdfc45e4c
+  version: d1139bab1c07d5ad390a65e7305876b3c1a8370b
 - name: github.com/spf13/cobra
-  version: f62e98d28ab7ad31d707ba837a966378465c7b57
+  version: 35136c09d8da66b901337c6e86fd8e88a1a255bd
   subpackages:
   - doc
 - name: github.com/spf13/jwalterweatherman
-  version: 33c24e77fb80341fe7130ee7c594256ff08ccc46
+  version: fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66
 - name: github.com/spf13/pflag
-  version: 1560c1005499d61b80f865c04d39ca7505bf7f0b
+  version: 9ff6c6923cfffbcd502984b8e0c80539a94968b7
 - name: github.com/spf13/viper
-  version: c975dc1b4eacf4ec7fdbf0873638de5d090ba323
-  repo: https://github.com/jimmidyson/viper.git
-  vcs: git
+  version: 382f87b929b84ce13e9c8a375a4b217f224e6c65
 - name: github.com/ugorji/go
   version: f4485b318aadd133842532f841dc205a8e339d74
   subpackages:
   - codec
 - name: github.com/xeipuuv/gojsonschema
-  version: 00f9fafb54d2244d291b86ab63d12c38bd5c3886
+  version: f06f290571ce81ab347174c6f7ad2e1865af41a7
 - name: golang.org/x/crypto
   version: beef0f4390813b96e8e68fd78570396d0f4751fc
   subpackages:
@@ -366,6 +414,7 @@ imports:
   - context/ctxhttp
   - http2
   - http2/hpack
+  - proxy
 - name: golang.org/x/oauth2
   version: 442624c9ec9243441e83b374a9e22ac549b5c51d
   subpackages:
@@ -376,8 +425,21 @@ imports:
 - name: golang.org/x/sys
   version: d9157a9621b69ad1d8d77a1933590c416593f24f
   subpackages:
-  - unix
+  - windows
   - windows/registry
+- name: golang.org/x/text
+  version: ceefd2213ed29504fff30155163c8f59827734f3
+  subpackages:
+  - cases
+  - internal/tag
+  - language
+  - runes
+  - secure/bidirule
+  - secure/precis
+  - transform
+  - unicode/bidi
+  - unicode/norm
+  - width
 - name: google.golang.org/appengine
   version: 6a436539be38c296a8075a871cc536686b458371
   subpackages:
@@ -396,15 +458,139 @@ imports:
   - compute/metadata
   - internal
 - name: gopkg.in/cheggaaa/pb.v1
-  version: 9453b2db37f4d8bc63751daca63bbe7049eb5e74
-- name: gopkg.in/fsnotify.v1
-  version: 629574ca2a5df945712d3079857300b5e4da0236
+  version: d7e6ca3010b6f084d8056847f55d7f572f180678
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: a83829b6f1293c91addabc89d0571c246397bbf4
+  version: 4c78c975fe7c825c6d1466c42be594d1d6f3aba6
+- name: k8s.io/client-go
+  version: d72c0e162789e1bbb33c33cfa26858a1375efe01
+  subpackages:
+  - 1.4/discovery
+  - 1.4/dynamic
+  - 1.4/kubernetes
+  - 1.4/kubernetes/typed/apps/v1alpha1
+  - 1.4/kubernetes/typed/authentication/v1beta1
+  - 1.4/kubernetes/typed/authorization/v1beta1
+  - 1.4/kubernetes/typed/autoscaling/v1
+  - 1.4/kubernetes/typed/batch/v1
+  - 1.4/kubernetes/typed/certificates/v1alpha1
+  - 1.4/kubernetes/typed/core/v1
+  - 1.4/kubernetes/typed/extensions/v1beta1
+  - 1.4/kubernetes/typed/policy/v1alpha1
+  - 1.4/kubernetes/typed/rbac/v1alpha1
+  - 1.4/kubernetes/typed/storage/v1beta1
+  - 1.4/pkg/api
+  - 1.4/pkg/api/endpoints
+  - 1.4/pkg/api/errors
+  - 1.4/pkg/api/install
+  - 1.4/pkg/api/meta
+  - 1.4/pkg/api/meta/metatypes
+  - 1.4/pkg/api/pod
+  - 1.4/pkg/api/resource
+  - 1.4/pkg/api/service
+  - 1.4/pkg/api/unversioned
+  - 1.4/pkg/api/unversioned/validation
+  - 1.4/pkg/api/util
+  - 1.4/pkg/api/v1
+  - 1.4/pkg/api/validation
+  - 1.4/pkg/apimachinery
+  - 1.4/pkg/apimachinery/registered
+  - 1.4/pkg/apis/apps
+  - 1.4/pkg/apis/apps/install
+  - 1.4/pkg/apis/apps/v1alpha1
+  - 1.4/pkg/apis/authentication
+  - 1.4/pkg/apis/authentication/install
+  - 1.4/pkg/apis/authentication/v1beta1
+  - 1.4/pkg/apis/authorization
+  - 1.4/pkg/apis/authorization/install
+  - 1.4/pkg/apis/authorization/v1beta1
+  - 1.4/pkg/apis/autoscaling
+  - 1.4/pkg/apis/autoscaling/install
+  - 1.4/pkg/apis/autoscaling/v1
+  - 1.4/pkg/apis/batch
+  - 1.4/pkg/apis/batch/install
+  - 1.4/pkg/apis/batch/v1
+  - 1.4/pkg/apis/batch/v2alpha1
+  - 1.4/pkg/apis/certificates
+  - 1.4/pkg/apis/certificates/install
+  - 1.4/pkg/apis/certificates/v1alpha1
+  - 1.4/pkg/apis/componentconfig
+  - 1.4/pkg/apis/componentconfig/install
+  - 1.4/pkg/apis/componentconfig/v1alpha1
+  - 1.4/pkg/apis/extensions
+  - 1.4/pkg/apis/extensions/install
+  - 1.4/pkg/apis/extensions/v1beta1
+  - 1.4/pkg/apis/imagepolicy
+  - 1.4/pkg/apis/imagepolicy/install
+  - 1.4/pkg/apis/imagepolicy/v1alpha1
+  - 1.4/pkg/apis/policy
+  - 1.4/pkg/apis/policy/install
+  - 1.4/pkg/apis/policy/v1alpha1
+  - 1.4/pkg/apis/rbac
+  - 1.4/pkg/apis/rbac/install
+  - 1.4/pkg/apis/rbac/v1alpha1
+  - 1.4/pkg/apis/storage
+  - 1.4/pkg/apis/storage/install
+  - 1.4/pkg/apis/storage/v1beta1
+  - 1.4/pkg/auth/user
+  - 1.4/pkg/capabilities
+  - 1.4/pkg/conversion
+  - 1.4/pkg/conversion/queryparams
+  - 1.4/pkg/fields
+  - 1.4/pkg/kubelet/qos
+  - 1.4/pkg/kubelet/server/portforward
+  - 1.4/pkg/kubelet/types
+  - 1.4/pkg/labels
+  - 1.4/pkg/master/ports
+  - 1.4/pkg/runtime
+  - 1.4/pkg/runtime/serializer
+  - 1.4/pkg/runtime/serializer/json
+  - 1.4/pkg/runtime/serializer/protobuf
+  - 1.4/pkg/runtime/serializer/recognizer
+  - 1.4/pkg/runtime/serializer/streaming
+  - 1.4/pkg/runtime/serializer/versioning
+  - 1.4/pkg/security/apparmor
+  - 1.4/pkg/selection
+  - 1.4/pkg/third_party/forked/golang/json
+  - 1.4/pkg/third_party/forked/golang/reflect
+  - 1.4/pkg/types
+  - 1.4/pkg/util
+  - 1.4/pkg/util/clock
+  - 1.4/pkg/util/config
+  - 1.4/pkg/util/crypto
+  - 1.4/pkg/util/diff
+  - 1.4/pkg/util/errors
+  - 1.4/pkg/util/flowcontrol
+  - 1.4/pkg/util/framer
+  - 1.4/pkg/util/hash
+  - 1.4/pkg/util/homedir
+  - 1.4/pkg/util/httpstream
+  - 1.4/pkg/util/integer
+  - 1.4/pkg/util/intstr
+  - 1.4/pkg/util/json
+  - 1.4/pkg/util/labels
+  - 1.4/pkg/util/net
+  - 1.4/pkg/util/net/sets
+  - 1.4/pkg/util/parsers
+  - 1.4/pkg/util/rand
+  - 1.4/pkg/util/runtime
+  - 1.4/pkg/util/sets
+  - 1.4/pkg/util/strategicpatch
+  - 1.4/pkg/util/uuid
+  - 1.4/pkg/util/validation
+  - 1.4/pkg/util/validation/field
+  - 1.4/pkg/util/wait
+  - 1.4/pkg/util/yaml
+  - 1.4/pkg/version
+  - 1.4/pkg/watch
+  - 1.4/pkg/watch/versioned
+  - 1.4/rest
+  - 1.4/tools/clientcmd/api
+  - 1.4/tools/metrics
+  - 1.4/transport
 - name: k8s.io/kubernetes
-  version: 52492b4bff99ef3b8ca617d385a3ff0612f9402d
+  version: a9e9cf3b407c1d315686c452bdb918c719c3ea6e
   repo: https://github.com/openshift/kubernetes.git
   vcs: git
   subpackages:
@@ -440,6 +626,9 @@ imports:
   - pkg/apis/batch/install
   - pkg/apis/batch/v1
   - pkg/apis/batch/v2alpha1
+  - pkg/apis/certificates
+  - pkg/apis/certificates/install
+  - pkg/apis/certificates/v1alpha1
   - pkg/apis/componentconfig
   - pkg/apis/componentconfig/install
   - pkg/apis/componentconfig/v1alpha1
@@ -452,6 +641,9 @@ imports:
   - pkg/apis/rbac
   - pkg/apis/rbac/install
   - pkg/apis/rbac/v1alpha1
+  - pkg/apis/storage
+  - pkg/apis/storage/install
+  - pkg/apis/storage/v1beta1
   - pkg/auth/user
   - pkg/capabilities
   - pkg/client/metrics
@@ -468,7 +660,7 @@ imports:
   - pkg/conversion/queryparams
   - pkg/fields
   - pkg/kubelet/qos
-  - pkg/kubelet/qos/util
+  - pkg/kubelet/types
   - pkg/labels
   - pkg/master/ports
   - pkg/runtime
@@ -478,9 +670,13 @@ imports:
   - pkg/runtime/serializer/recognizer
   - pkg/runtime/serializer/streaming
   - pkg/runtime/serializer/versioning
+  - pkg/security/apparmor
   - pkg/securitycontextconstraints/util
+  - pkg/selection
   - pkg/types
   - pkg/util
+  - pkg/util/clock
+  - pkg/util/config
   - pkg/util/crypto
   - pkg/util/errors
   - pkg/util/flowcontrol
@@ -490,12 +686,14 @@ imports:
   - pkg/util/integer
   - pkg/util/intstr
   - pkg/util/json
+  - pkg/util/labels
   - pkg/util/net
   - pkg/util/net/sets
   - pkg/util/parsers
   - pkg/util/rand
   - pkg/util/runtime
   - pkg/util/sets
+  - pkg/util/uuid
   - pkg/util/validation
   - pkg/util/validation/field
   - pkg/util/wait
@@ -506,5 +704,5 @@ imports:
   - plugin/pkg/client/auth
   - plugin/pkg/client/auth/gcp
   - plugin/pkg/client/auth/oidc
-  - third_party/forked/reflect
+  - third_party/forked/golang/reflect
 testImports: []

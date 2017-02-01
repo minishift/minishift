@@ -13,7 +13,8 @@ provisioning VMs, and [OpenShift Origin](https://github.com/openshift/origin) fo
 - [Installation](#installation)
   - [Prerequisites](#prerequisites)
   - [Installing Minishift](#installing-minishift)
-    - [Installing with Homebrew](#installing-with-homebrew)
+    - [Manually](#manually)
+    - [With Homebrew](#with-homebrew)
 - [Quickstart](#quickstart)
   - [Starting Minishift](#starting-minishift)
   - [Deploying a sample application](#deploying-a-sample-application)
@@ -51,10 +52,8 @@ Make sure that the hypervisor is installed and enabled on your system before you
 
 **Important:**
 
-- KVM and xhyve might require specific installation and configuration steps.
+- KVM and xhyve require specific installation and configuration steps.
 For more information, see [docker machine drivers installation](./docs/docker-machine-drivers.md).
-- For most hypervisors, you must enable VT-x/AMD-v virtualization in the BIOS. However, if you want
-to use Hyper-V you must disable this.
 - It is recommended to use `Virtualbox 5.1.12` or later on Windows to avoid the issue
 [Error: getting state for host: machine does not exist](./docs/troubleshooting.md#error-getting-state-for-host-machine-does-not-exist)
 
@@ -63,31 +62,32 @@ If you encounter driver issues, see the [Troubleshooting](/docs/troubleshooting.
 <a name="installing-minishift"></a>
 ### Installing Minishift
 
+<a name="manually"></a>
+#### Manually
+
 1. Download the archive for your operating system from the Minishift [releases page](https://github.com/minishift/minishift/releases) and unpack it.
 1. Copy the contents of the directory to your preferred location.
-1. (Optional) Add the path to your _PATH_ environment variable.
+1. Add the `minishift` binary to your _PATH_ environment variable.
 
 **Note:**
 
 - On Windows operating system, due to issue [#236](https://github.com/minishift/minishift/issues/236), you need to execute the minishift binary
 from the drive containing your %USERPROFILE% directory.
-- Automatic update of the Minishift binary and the virtual machine ISO is currently disabled, due to the following issues:
-  - [#204](https://github.com/minishift/minishift/issues/204)
-  - [#178](https://github.com/minishift/minishift/issues/178)
-  - [#112](https://github.com/minishift/minishift/issues/112)
-  - [#192](https://github.com/minishift/minishift/issues/192)
+- Automatic update of the Minishift binary and the virtual machine ISO is currently disabled. See also issue [#204](https://github.com/minishift/minishift/issues/204)
 
-<a name="installing-with-homebrew"></a>
-#### Installing Minishift with Homebrew
+<a name="with-homebrew"></a>
+#### With Homebrew
 
-##### Stable
+**Stable**
+
 On OS X you can also use [Homebrew Cask](https://caskroom.github.io) to install the stable version of Minishift:
 
 ```sh
   $ brew cask install minishift
 ```
 
-##### Latest Beta
+**Latest Beta**
+
 If you want to install the latest beta version of Minishift you will need the homebrew-cask versions tap. After you install homebrew-cask, run the following command:
 
 ```sh
@@ -137,10 +137,10 @@ with the KVM hypervisor driver.
 
 1. Add the `oc` binary to the _PATH_ environment variable.
 
-        $ export PATH=$PATH:~/.minishift/cache/oc/v1.3.1
+        $ export PATH=$PATH:~/.minishift/cache/oc/v1.4.1
 
   **Note:** Depending on the operating system and the `oc` version, you might need
-  to use a different command to add the path to the _PATH_ environment variable.
+  to use a different command to add `oc` to the _PATH_ environment variable.
   To verify the `oc` version, check the contents of the `~/.minishift/cache/oc` directory.
 
 <a name="deploying-a-sample-application"></a>
@@ -199,11 +199,11 @@ docker ps
 
 The following documentation is available:
 
-* [Releases Notes](https://github.com/minishift/minishift/releases).
 * [Using Minishift](./docs/using.md)
 * [Command reference](./docs/minishift.md)
 * [Troubleshooting](./docs/troubleshooting.md)
 * [Installing docker-machine drivers](./docs/docker-machine-drivers.md)
+* [Release Notes](https://github.com/minishift/minishift/releases)
 * [Developing Minishift](./docs/developing.md)
 
 <a name="limitations"></a>

@@ -203,6 +203,7 @@ The following documentation is available:
 * [Command reference](./docs/minishift.md)
 * [Troubleshooting](./docs/troubleshooting.md)
 * [Installing docker-machine drivers](./docs/docker-machine-drivers.md)
+* [Roadmap](./ROADMAP.md)
 * [Release Notes](https://github.com/minishift/minishift/releases)
 * [Developing Minishift](./docs/developing.md)
 

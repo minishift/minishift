@@ -79,22 +79,21 @@ location and optionally ensure it is added to your _PATH_.
 ##### Stable
 On OS X you can also use [Homebrew Cask](https://caskroom.github.io) to install the stable version of Minishift:
 
-```sh
-  $ brew cask install minishift
-```
+
+    $ brew cask install minishift
+
 
 ##### Latest Beta
 If you want to install the latest beta version of Minishift you will need the homebrew-cask versions tap. After you install homebrew-cask, run the following command:
 
-```sh
-  $ brew tap caskroom/versions
-```
+
+    $ brew tap caskroom/versions
 
 You can now install the latest beta version of minishift.
 
-```sh
-  $ brew cask install minishift-beta
-```
+
+        $ brew cask install minishift-beta
+
 
 <a name="quickstart"></a>
 ## Quickstart

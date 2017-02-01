@@ -50,6 +50,12 @@ sudo systemctl start libvirtd
 curl -L https://github.com/dhiltgen/docker-machine-kvm/releases/download/v0.7.0/docker-machine-driver-kvm > /usr/local/bin/docker-machine-driver-kvm && \
 chmod +x /usr/local/bin/docker-machine-driver-kvm
 
+echo "================================================="
+
+echo $GH_TOKEN
+
+echo "================================================="
+
 # Install Go 1.7
 curl -LO https://storage.googleapis.com/golang/go1.7.linux-amd64.tar.gz
 tar -xf go1.7.linux-amd64.tar.gz

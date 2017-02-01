@@ -53,6 +53,11 @@ var assetSet = []struct {
 
 func TestGetAssetIdAndFilename(t *testing.T) {
 	for _, testAsset := range assetSet {
+		fmt.Println("====================================token=================================== ")
+		fmt.Println("fmt.Println(os.Getenv(\"GH_TOKEN\")): ", os.Getenv("GH_TOKEN"))
+		fmt.Println("fmt.Println(os.Getenv(\"MINISHIFT_GITHUB_API_TOKEN\")): ", os.Getenv("MINISHIFT_GITHUB_API_TOKEN"))
+		fmt.Println("====================================token=================================== ")
+
 		release, resp, err = gitHubClient.Repositories.GetReleaseByTag("openshift", "origin", testAsset.version)
 		if err != nil {
 			t.Fatal(err, "Could not get OpenShift release")
@@ -179,7 +184,7 @@ func Test_Download_Oc_1_4_1(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	if runtime.GOOS != "windows" {
 		expectedFilePermissions := "-rwxrwxrwx"
 		if fileInfo.Mode().String() != expectedFilePermissions {

@@ -45,7 +45,7 @@ import (
 
 const (
 	timeLayout  = time.RFC1123
-	githubOwner = "jimmidyson"
+	githubOwner = "minishift"
 	githubRepo  = "minishift"
 )
 

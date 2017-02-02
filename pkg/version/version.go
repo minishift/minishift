@@ -25,7 +25,7 @@ import (
 const VersionPrefix = "v"
 
 // The current version of minishift
-// This is a private field and should be set when compiling with --ldflags="-X github.com/jimmidyson/minishift/pkg/version.version=vX.Y.Z"
+// This is a private field and should be set when compiling with --ldflags="-X github.com/minishift/minishift/pkg/version.version=vX.Y.Z"
 var version = "v0.0.0-unset"
 
 func GetVersion() string {
@@ -37,7 +37,7 @@ func GetSemverVersion() (semver.Version, error) {
 }
 
 // The default version of OpenShift
-// This is a private field and should be set when compiling with --ldflags="-X github.com/jimmidyson/minishift/pkg/version.openshiftVersion=vX.Y.Z"
+// This is a private field and should be set when compiling with --ldflags="-X github.com/minishift/minishift/pkg/version.openshiftVersion=vX.Y.Z"
 var openshiftVersion = "v0.0.0-unset"
 var isoVersion = "v0.0.0-unset"
 

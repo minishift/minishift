@@ -113,6 +113,11 @@ func runStart(cmd *cobra.Command, args []string) {
 	libMachineClient := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 	defer libMachineClient.Close()
 
+	if _, err := shellCfgUnset(libMachineClient); err != nil {
+		glog.Errorln("Error unsetting existing docker environment variables:", err)
+		os.Exit(1)
+	}
+
 	config := cluster.MachineConfig{
 		MinikubeISO:      viper.GetString(isoURL),
 		Memory:           viper.GetInt(memory),

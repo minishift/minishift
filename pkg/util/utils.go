@@ -18,6 +18,7 @@ package util
 
 import (
 	"fmt"
+	"github.com/asaskevich/govalidator"
 	"io"
 	"os"
 	"strings"
@@ -65,6 +66,10 @@ func CanReadFile(path string) bool {
 
 func Retry(attempts int, callback func() error) (err error) {
 	return RetryAfter(attempts, callback, 0)
+}
+
+func ValidateProxyURI(uri string) bool {
+	return govalidator.IsURL(uri)
 }
 
 func RetryAfter(attempts int, callback func() error, d time.Duration) (err error) {

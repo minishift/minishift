@@ -109,8 +109,8 @@ Once you have started Minishift, follow these instructions to deploy a Hello Wor
 
         http://myapp-myproject.192.168.42.205.xip.io to pod port 8080-tcp (svc/myapp)
           dc/myapp deploys istag/myapp:latest <-
-            bc/myapp source builds https://github.com/Preeticp/os-sample-java-web on openshift/wildfly:latest
-              build #1 running for 4 minutes - 74cdd67: README added (Jorge Morales Pou <jorgemoralespou@users.noreply.github.com>)
+            bc/myapp source builds https://github.com/<GitHub username>/os-sample-java-web on openshift/wildfly:latest
+              build #1 running for 4 minutes - 74cdd67: README added (<username> <username@users.noreply.github.com>)
             deployment #1 waiting on image or update
 
         Warnings:

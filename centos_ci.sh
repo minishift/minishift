@@ -24,7 +24,7 @@ set -e
 # that might interest this worker.
 if [ -e "jenkins-env" ]; then
   cat jenkins-env \
-    | grep -E "(JENKINS_URL|GIT_BRANCH|GIT_COMMIT|BUILD_NUMBER|ghprbSourceBranch|ghprbActualCommit|BUILD_URL|ghprbPullId)=" \
+    | grep -E "(JENKINS_URL|GIT_BRANCH|GIT_COMMIT|BUILD_NUMBER|ghprbSourceBranch|ghprbActualCommit|BUILD_URL|ghprbPullId|GH_TOKEN)=" \
     | sed 's/^/export /g' \
     > ~/.jenkins-env
   source ~/.jenkins-env
@@ -76,8 +76,7 @@ mkdir /tmp/glide
 tar --directory=/tmp/glide -xvf glide-${GLIDE_TAG}-${GLIDE_OS_ARCH}.tar.gz
 export PATH=$PATH:/tmp/glide/${GLIDE_OS_ARCH}
 
-make clean
 # Test
-make test cross fmtcheck prerelease
+make clean test cross fmtcheck prerelease
 # Run integration test with 'kvm' driver
 VM_DRIVER=kvm make integration

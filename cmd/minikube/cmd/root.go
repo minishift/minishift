@@ -115,8 +115,8 @@ func setFlagsUsingViper() {
 
 func init() {
 	RootCmd.PersistentFlags().Bool(showLibmachineLogs, false, "Show logs from libmachine.")
-	RootCmd.PersistentFlags().String(username, "", "User name for the virtual machine.")
-	RootCmd.PersistentFlags().String(password, "", "Password for the virtual machine.")
+	RootCmd.PersistentFlags().String(username, "", "User name for the virtual machine registration.")
+	RootCmd.PersistentFlags().String(password, "", "Password for the virtual machine registration.")
 	RootCmd.AddCommand(configCmd.ConfigCmd)
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
 	logDir := pflag.Lookup("log_dir")

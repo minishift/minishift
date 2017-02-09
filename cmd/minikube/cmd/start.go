@@ -31,6 +31,7 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/cache"
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
 	"github.com/minishift/minishift/pkg/minishift/registration"
+	minishiftUtil "github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/version"
 	dockerhost "github.com/openshift/origin/pkg/bootstrap/docker/host"
@@ -62,6 +63,11 @@ const (
 	serverLogLevel    = "server-loglevel"
 	openshiftEnv      = "openshift-env"
 	metrics           = "metrics"
+
+	// Setting proxy
+	httpProxy   = "http-proxy"
+	httpsProxy  = "https-proxy"
+	noProxyList = "no-proxy"
 )
 
 var (
@@ -69,6 +75,7 @@ var (
 	insecureRegistry []string
 	registryMirror   []string
 	openShiftEnv     []string
+	shellProxyEnv    string
 )
 
 // startCmd represents the start command
@@ -91,6 +98,9 @@ var startFlagSet = flag.NewFlagSet(commandName, flag.ContinueOnError)
 // clusterUpFlagSet contains the command line switches which needs to be passed on to 'cluster up'
 var clusterUpFlagSet = flag.NewFlagSet(commandName, flag.ContinueOnError)
 
+// proxyFlagSet contains the command line switches for proxy
+var proxyFlagSet = flag.NewFlagSet(commandName, flag.ContinueOnError)
+
 // minishiftToClusterUp is a mapping between falg names used in minishift CLI and flag name as passed to 'cluster up'
 var minishiftToClusterUp = map[string]string{
 	"openshift-env": "env",
@@ -112,6 +122,12 @@ func SetMinishiftDir(newDir string) {
 func runStart(cmd *cobra.Command, args []string) {
 	libMachineClient := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 	defer libMachineClient.Close()
+
+	validateProxyArgs()
+
+	setDockerProxy()
+	setOcProxy()
+	setShellProxy()
 
 	config := cluster.MachineConfig{
 		MinikubeISO:      viper.GetString(isoURL),
@@ -141,6 +157,15 @@ func runStart(cmd *cobra.Command, args []string) {
 		glog.Errorln("Error starting the VM: ", err)
 		os.Exit(1)
 	}
+
+	// Set Proxy to as Shell Env
+	if viper.IsSet("http-proxy") || viper.IsSet("https-proxy") {
+		if err := minishiftUtil.SetProxyToShellEnv(host, shellProxyEnv); err != nil {
+			fmt.Printf("Error setting proxy to VM: %s", err)
+			os.Exit(1)
+		}
+	}
+
 	// Register Host VM
 	if err := registration.RegisterHostVM(host, RegistrationParameters); err != nil {
 		fmt.Printf("Error registering the VM: %s", err)
@@ -156,6 +181,56 @@ func runStart(cmd *cobra.Command, args []string) {
 	clusterUp(&config)
 }
 
+// Set Docker Proxy
+func setDockerProxy() {
+	if viper.IsSet(httpProxy) {
+		dockerEnv = append(dockerEnv, fmt.Sprintf("HTTP_PROXY=%s", viper.GetString(httpProxy)))
+	}
+	if viper.IsSet(httpsProxy) {
+		dockerEnv = append(dockerEnv, fmt.Sprintf("HTTPS_PROXY=%s", viper.GetString(httpsProxy)))
+	}
+	if viper.IsSet(noProxyList) {
+		dockerEnv = append(dockerEnv, fmt.Sprintf("NO_PROXY=%s,%s", updateNoProxyForDocker(),
+			viper.GetString(noProxyList)))
+	} else if viper.IsSet(httpProxy) || viper.IsSet(httpsProxy) {
+		dockerEnv = append(dockerEnv, fmt.Sprintf("NO_PROXY=%s", updateNoProxyForDocker()))
+	}
+
+}
+
+// Set OpenShiftProxy
+func setOcProxy() {
+	if viper.IsSet(httpProxy) {
+		clusterUpFlagSet.String(httpProxy, viper.GetString(httpProxy), "HTTP proxy to use for master and builds")
+	}
+	if viper.IsSet(httpsProxy) {
+		clusterUpFlagSet.String(httpsProxy, viper.GetString(httpsProxy), "HTTPS proxy to use for master and builds")
+	}
+	if viper.IsSet(noProxyList) {
+		clusterUpFlagSet.String(noProxyList, viper.GetString(noProxyList), "List of hosts or subnets for which a proxy shouldn't be use")
+	}
+}
+
+// Set shell proxy
+func setShellProxy() {
+	if viper.IsSet(httpProxy) {
+		shellProxyEnv += fmt.Sprintf("http_proxy=%s ", viper.GetString(httpProxy))
+	}
+	if viper.IsSet(httpsProxy) {
+		shellProxyEnv += fmt.Sprintf("https_proxy=%s ", viper.GetString(httpsProxy))
+	}
+	if viper.IsSet(noProxyList) {
+		shellProxyEnv += fmt.Sprintf("no_proxy=%s", viper.GetString(noProxyList))
+	} else if viper.IsSet(httpProxy) || viper.IsSet(httpsProxy) {
+		dockerEnv = append(dockerEnv, fmt.Sprintf("NO_PROXY=%s", updateNoProxyForDocker()))
+	}
+}
+
+// update default no-proxy for docker
+func updateNoProxyForDocker() string {
+	return "localhost,127.0.0.1,172.30.1.1"
+}
+
 // calculateDiskSizeInMB converts a human specified disk size like "1000MB" or "1GB" and converts it into Megabits
 func calculateDiskSizeInMB(humanReadableDiskSize string) int {
 	diskSize, err := units.FromHumanSize(humanReadableDiskSize)
@@ -169,9 +244,11 @@ func calculateDiskSizeInMB(humanReadableDiskSize string) int {
 func init() {
 	initStartFlags()
 	initClusterUpFlags()
+	initProxyFlags()
 
 	startCmd.Flags().AddFlagSet(startFlagSet)
 	startCmd.Flags().AddFlagSet(clusterUpFlagSet)
+	startCmd.Flags().AddFlagSet(proxyFlagSet)
 
 	viper.BindPFlags(startCmd.Flags())
 	RootCmd.AddCommand(startCmd)
@@ -208,6 +285,13 @@ func initClusterUpFlags() {
 	clusterUpFlagSet.Bool(metrics, false, "Install metrics (experimental)")
 }
 
+// initProxyFlags create the CLI flags which needs to be passed for proxy
+func initProxyFlags() {
+	proxyFlagSet.String(httpProxy, "", "HTTP proxy for virtual machine (In the format of http://<username>:<password>@<proxy_host>:<proxy_port>)")
+	proxyFlagSet.String(httpsProxy, "", "HTTPS proxy for virtual machine (In the format of https://<username>:<password>@<proxy_host>:<proxy_port>)")
+	proxyFlagSet.String(noProxyList, "", "List of hosts or subnets for which proxy should not be used.")
+}
+
 // clusterUp downloads and installs the oc binary in order to run 'cluster up'
 func clusterUp(config *cluster.MachineConfig) {
 	oc := cache.Oc{
@@ -235,6 +319,10 @@ func clusterUp(config *cluster.MachineConfig) {
 			if exists {
 				key = minishiftToClusterUp[key]
 			}
+			if !ocSupportFlag(cmdName, key) {
+				glog.Errorf("Flag %s is not supported for current oc verison", flag.Name)
+				os.Exit(1)
+			}
 			cmdArgs = append(cmdArgs, "--"+key)
 			cmdArgs = append(cmdArgs, value)
 		}
@@ -246,4 +334,31 @@ func clusterUp(config *cluster.MachineConfig) {
 		glog.Errorln("Error starting the cluster: ", err)
 		os.Exit(1)
 	}
+}
+
+func validateProxyArgs() {
+	if viper.IsSet(httpProxy) {
+		if !util.ValidateProxyURI(viper.GetString(httpProxy)) {
+			glog.Exitf("HTTP Proxy URL is not valid, Please check help message")
+		}
+	}
+	if viper.IsSet(httpsProxy) {
+		if !util.ValidateProxyURI(viper.GetString(httpsProxy)) {
+			glog.Exitf("HTTPS Proxy URL is not valid, Please check help message")
+		}
+	}
+}
+
+func ocSupportFlag(cmdName string, flag string) bool {
+	cmdArgs := []string{"cluster", "up", "-h"}
+	cmdOut, err := runner.Output(cmdName, cmdArgs...)
+	if err != nil {
+		glog.Errorf("Not able to get output of 'oc -h' Error: %s", err)
+		os.Exit(1)
+	}
+	ocCommandOptions := util.ParseOcHelpCommand(cmdOut)
+	if ocCommandOptions != nil {
+		return util.FlagExist(ocCommandOptions, flag)
+	}
+	return false
 }

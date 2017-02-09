@@ -25,11 +25,8 @@ import (
 )
 
 type RegistrationParameters struct {
-	Username      string
-	Password      string
-	Proxy         string
-	ProxyUser     string
-	ProxyPassword string
+	Username string
+	Password string
 }
 
 // Register host VM

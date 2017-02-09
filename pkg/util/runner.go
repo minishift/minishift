@@ -24,6 +24,7 @@ import (
 
 type Runner interface {
 	Run(string, ...string) error
+	Output(string, ...string) ([]byte, error)
 }
 
 type RealRunner struct{}
@@ -44,4 +45,16 @@ func (r RealRunner) Run(command string, args ...string) error {
 		return err
 	}
 	return nil
+}
+
+// the real runner for get the output as byte format
+func (r RealRunner) Output(command string, args ...string) ([]byte, error) {
+	var (
+		cmdOut []byte
+		err    error
+	)
+	if cmdOut, err = exec.Command(command, args...).Output(); err != nil {
+		return nil, err
+	}
+	return cmdOut, nil
 }

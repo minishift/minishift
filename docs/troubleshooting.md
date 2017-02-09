@@ -8,6 +8,7 @@ while using Minishift.
 - [KVM driver](#kvm-driver)
   - [Error creating new host: dial tcp: missing address](#error-creating-new-host-dial-tcp-missing-address)
   - [Failed to connect socket to '/var/run/libvirt/virtlogd-sock'](#failed-to-connect-socket-to-varrunlibvirtvirtlogd-sock)
+  - [Error starting the VM: ... operation failed: domain 'minishift' already exists ...](#error-starting-the-vm--operation-failed-domain-minishift-already-exists-)
 - [xhyve driver](#xhyve-driver)
   - [Error: could not create vmnet interface, permission denied or no entitlement](#error-could-not-create-vmnet-interface-permission-denied-or-no-entitlement)
 - [VirtualBox driver](#virtualbox-driver)
@@ -49,6 +50,17 @@ If `virtlogd` is not running, start and enable it to start on boot:
 ```
 systemctl start virtlogd
 systemctl enable virtlogd
+```
+
+<a name="error-starting-the-vm--operation-failed-domain-minishift-already-exists-"></a>
+### Error starting the VM: ... operation failed: domain 'minishift' already exists ...
+
+Check for existing VMs and remove them:
+
+```
+sudo virsh list --all
+sudo virsh destroy minishift
+sudo virsh undefine minishift
 ```
 
 <a name="xhyve-driver"></a>

@@ -99,3 +99,13 @@ If you are using Windows, the problem is likely to be either an outdated version
 of Virtual Box or you forgot to use `--vm-driver virtualbox` option when starting minishift.
 
 We recommend to use `Virtualbox >= 5.1.12` to avoid this issue.
+
+## oc login:  User "system" cannot ...
+
+You may succesfully login like this:
+```
+> oc login -u system -p admin
+Login successful.
+```
+and later find out that you have no rights!
+Indeed, the system account is `oc login -u system:admin` and it will NOT ask for a password, it will use the key in `~/.kube/config` (created during installation).

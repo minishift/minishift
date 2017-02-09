@@ -328,16 +328,7 @@ func setUp(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	SetMinishiftDir(testDir)
-
-	//os.MkdirAll(filepath.Join(testDir, "certs"), 0777)
-	//
-	//isoCacheDir := filepath.Join(testDir, "cache", "iso")
-	//os.MkdirAll(isoCacheDir, 0777)
-	//os.OpenFile(filepath.Join(isoCacheDir, "boot2docker.iso"), os.O_RDONLY | os.O_CREATE, 0666)
-	//
-	//machinesDir := filepath.Join(testDir, "machines", "minishift")
-	//os.MkdirAll(machinesDir, 0777)
+	constants.Minipath = testDir
 
 	client := http.DefaultClient
 	client.Transport = minitesting.NewMockRoundTripper()

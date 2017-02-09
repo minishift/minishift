@@ -113,11 +113,6 @@ func SetRunner(newRunner util.Runner) {
 	runner = newRunner
 }
 
-// TODO Figure out what I cannot use constants.Minipath in the test - http://stackoverflow.com/questions/37284423/glog-flag-redefined-error
-func SetMinishiftDir(newDir string) {
-	constants.Minipath = newDir
-}
-
 // runStart is executed as part of the start command
 func runStart(cmd *cobra.Command, args []string) {
 	libMachineClient := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))

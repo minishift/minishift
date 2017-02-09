@@ -23,8 +23,9 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
-	"github.com/minishift/minishift/pkg/minikube/tests"
 	"github.com/minishift/minishift/pkg/testing/cli"
+	"io/ioutil"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
 var configTests = []cli.TestOption{
@@ -77,9 +78,13 @@ var configTests = []cli.TestOption{
 
 func TestPreRunDirectories(t *testing.T) {
 	// Make sure we create the required directories.
-	tempDir := tests.MakeTempDir()
-	defer os.RemoveAll(tempDir)
+	testDir, err := ioutil.TempDir("", "minishift-test-start-cmd-")
+	if err != nil {
+		t.Error(err)
+	}
+	defer os.RemoveAll(testDir)
 
+	constants.Minipath = testDir
 	cli.RunCommand(RootCmd.PersistentPreRun)
 
 	for _, dir := range dirs {

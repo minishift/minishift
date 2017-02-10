@@ -347,7 +347,7 @@ func createHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 
 // GetHostDockerEnv gets the necessary docker env variables to allow the use of docker through minikube's vm
 func GetHostDockerEnv(api libmachine.API) (map[string]string, error) {
-	host, err := checkIfApiExistsAndLoad(api)
+	host, err := CheckIfApiExistsAndLoad(api)
 	if err != nil {
 		return nil, err
 	}
@@ -375,7 +375,7 @@ func GetHostDockerEnv(api libmachine.API) (map[string]string, error) {
 
 // GetHostLogs gets the openshift logs of the host VM.
 func GetHostLogs(api libmachine.API) (string, error) {
-	host, err := checkIfApiExistsAndLoad(api)
+	host, err := CheckIfApiExistsAndLoad(api)
 	if err != nil {
 		return "", err
 	}
@@ -386,7 +386,7 @@ func GetHostLogs(api libmachine.API) (string, error) {
 	return s, err
 }
 
-func checkIfApiExistsAndLoad(api libmachine.API) (*host.Host, error) {
+func CheckIfApiExistsAndLoad(api libmachine.API) (*host.Host, error) {
 	exists, err := api.Exists(constants.MachineName)
 	if err != nil {
 		return nil, err
@@ -403,7 +403,7 @@ func checkIfApiExistsAndLoad(api libmachine.API) (*host.Host, error) {
 }
 
 func CreateSSHShell(api libmachine.API, args []string) error {
-	host, err := checkIfApiExistsAndLoad(api)
+	host, err := CheckIfApiExistsAndLoad(api)
 	if err != nil {
 		return err
 	}
@@ -425,7 +425,7 @@ func CreateSSHShell(api libmachine.API, args []string) error {
 }
 
 func GetConsoleURL(api libmachine.API) (string, error) {
-	host, err := checkIfApiExistsAndLoad(api)
+	host, err := CheckIfApiExistsAndLoad(api)
 	if err != nil {
 		return "", err
 	}
@@ -439,7 +439,7 @@ func GetConsoleURL(api libmachine.API) (string, error) {
 }
 
 func GetHostIP(api libmachine.API) (string, error) {
-	host, err := checkIfApiExistsAndLoad(api)
+	host, err := CheckIfApiExistsAndLoad(api)
 	if err != nil {
 		return "", err
 	}
@@ -457,7 +457,7 @@ type ipPort struct {
 }
 
 func GetServiceURL(api libmachine.API, namespace, service string, t *template.Template) (string, error) {
-	host, err := checkIfApiExistsAndLoad(api)
+	host, err := CheckIfApiExistsAndLoad(api)
 	if err != nil {
 		return "", err
 	}
@@ -580,7 +580,7 @@ type ServiceURL struct {
 type ServiceURLs []ServiceURL
 
 func GetServiceURLs(api libmachine.API, namespace string, t *template.Template) (ServiceURLs, error) {
-	host, err := checkIfApiExistsAndLoad(api)
+	host, err := CheckIfApiExistsAndLoad(api)
 	if err != nil {
 		return nil, err
 	}

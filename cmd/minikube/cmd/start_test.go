@@ -134,7 +134,8 @@ func TestStartClusterUpNoFlags(t *testing.T) {
 
 	expectedArguments := []string{"cluster", "up", "--use-existing-config",
 		"--host-config-dir", hostConfigDirectory,
-		"--host-data-dir", hostDataDirectory}
+		"--host-data-dir", hostDataDirectory,
+		"--host-volumes-dir", hostVolumesDirectory}
 	for i, v := range testRunner.Args {
 		if v != expectedArguments[i] {
 			t.Errorf("Expected argument '%s'. Received '%s'", expectedArguments[i], v)
@@ -155,6 +156,7 @@ func TestStartClusterUpWithOverrideHostConfigDirFlag(t *testing.T) {
 	expectedArguments := []string{"cluster", "up", "--use-existing-config",
 		"--host-config-dir", "/var/tmp/foo",
 		"--host-data-dir", hostDataDirectory,
+		"--host-volumes-dir", hostVolumesDirectory,
 	}
 	assertCommandLineArguments(expectedArguments, t)
 }
@@ -172,6 +174,25 @@ func TestStartClusterUpWithOverrideHostDataDirFlag(t *testing.T) {
 	expectedArguments := []string{"cluster", "up", "--use-existing-config",
 		"--host-config-dir", hostConfigDirectory,
 		"--host-data-dir", "/var/tmp/foo",
+		"--host-volumes-dir", hostVolumesDirectory,
+	}
+	assertCommandLineArguments(expectedArguments, t)
+}
+
+func TestStartClusterUpWithOverrideHostVolumesDirFlag(t *testing.T) {
+	setUp(t)
+	defer os.RemoveAll(testDir)
+	defer minitesting.ResetDefaultRoundTripper()
+	defer SetRunner(util.RealRunner{})
+	defer viper.Reset()
+
+	viper.Set("host-volumes-dir", "/var/tmp/foo")
+	clusterUp(&testMachineConfig)
+
+	expectedArguments := []string{"cluster", "up", "--use-existing-config",
+		"--host-config-dir", hostConfigDirectory,
+		"--host-data-dir", hostDataDirectory,
+		"--host-volumes-dir", "/var/tmp/foo",
 	}
 	assertCommandLineArguments(expectedArguments, t)
 }
@@ -190,6 +211,7 @@ func TestStartClusterUpWithFlag(t *testing.T) {
 	expectedArguments := []string{"cluster", "up", "--use-existing-config",
 		"--host-config-dir", hostConfigDirectory,
 		"--host-data-dir", hostDataDirectory,
+		"--host-volumes-dir", hostVolumesDirectory,
 		"--public-hostname", "foobar",
 		"--skip-registry-check", "true"}
 	assertCommandLineArguments(expectedArguments, t)
@@ -242,6 +264,7 @@ func TestClusterUpWithProxyFlag(t *testing.T) {
 	expectedArguments := []string{"cluster", "up", "--use-existing-config",
 		"--host-config-dir", hostConfigDirectory,
 		"--host-data-dir", hostDataDirectory,
+		"--host-volumes-dir", hostVolumesDirectory,
 		"--http-proxy", "http://localhost:3128",
 		"--https-proxy", "https://localhost:3128",
 		"--no-proxy", "10.0.0.1"}
@@ -262,6 +285,7 @@ func TestStartClusterUpWithOpenShiftEnv(t *testing.T) {
 	expectedArguments := []string{"cluster", "up", "--use-existing-config",
 		"--host-config-dir", hostConfigDirectory,
 		"--host-data-dir", hostDataDirectory,
+		"--host-volumes-dir", hostVolumesDirectory,
 		"--env", "HTTP_PROXY=http://localhost:3128,HTTP_PROXY_USER=foo,HTTP_PROXY_PASS=bar"}
 	assertCommandLineArguments(expectedArguments, t)
 }
@@ -324,6 +348,7 @@ func setUp(t *testing.T) {
 	// Set default value for host config and data
 	viper.Set("host-config-dir", hostConfigDirectory)
 	viper.Set("host-data-dir", hostDataDirectory)
+	viper.Set("host-volumes-dir", hostVolumesDirectory)
 
 	provision.SetDetector(&tests.MockDetector{&tests.MockProvisioner{Provisioned: true}})
 }

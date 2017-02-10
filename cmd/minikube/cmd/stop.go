@@ -21,11 +21,8 @@ import (
 	"os"
 
 	"github.com/docker/machine/libmachine"
-	"github.com/docker/machine/libmachine/drivers"
-	"github.com/docker/machine/libmachine/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
-	"github.com/minishift/minishift/pkg/minishift/registration"
 	"github.com/spf13/cobra"
 )
 
@@ -39,20 +36,6 @@ VM but does not delete any associated files. To start the cluster again, use the
 		fmt.Println("Stopping local OpenShift cluster...")
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()
-
-		host, err := api.Load(constants.MachineName)
-		if err != nil {
-			fmt.Println("Error occurred while stopping the VM: ", err)
-			os.Exit(1)
-		}
-
-		if !drivers.MachineInState(host.Driver, state.Stopped)() {
-			// Unregister Host VM
-			if err := registration.UnregisterHostVM(host, RegistrationParameters); err != nil {
-				fmt.Printf("Error unregistring the VM: %s", err)
-				os.Exit(1)
-			}
-		}
 
 		if err := cluster.StopHost(api); err != nil {
 			fmt.Println("Error stopping cluster: ", err)

@@ -29,9 +29,9 @@ import (
 	"github.com/spf13/viper"
 
 	configCmd "github.com/minishift/minishift/cmd/minikube/cmd/config"
+	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/config"
 	"github.com/minishift/minishift/pkg/minikube/constants"
-	"github.com/minishift/minishift/pkg/minishift/registration"
 )
 
 var dirs = [...]string{
@@ -51,10 +51,6 @@ const (
 	showLibmachineLogs = "show-libmachine-logs"
 	username           = "username"
 	password           = "password"
-)
-
-var (
-	RegistrationParameters = new(registration.RegistrationParameters)
 )
 
 var viperWhiteList = []string{
@@ -153,8 +149,8 @@ func setupViper() {
 }
 
 func setRegistrationParameters() {
-	RegistrationParameters.Username = viper.GetString("username")
-	RegistrationParameters.Password = viper.GetString("password")
+	cluster.RegistrationParameters.Username = viper.GetString("username")
+	cluster.RegistrationParameters.Password = viper.GetString("password")
 }
 
 func ensureConfigFileExists(configPath string) {

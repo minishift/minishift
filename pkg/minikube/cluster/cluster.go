@@ -37,13 +37,13 @@ import (
 	"github.com/docker/machine/libmachine/host"
 	"github.com/docker/machine/libmachine/state"
 	"github.com/golang/glog"
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minishift/registration"
+	"github.com/minishift/minishift/pkg/util"
 	pb "gopkg.in/cheggaaa/pb.v1"
 	kubeapi "k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/client/unversioned"
 	"k8s.io/kubernetes/pkg/client/unversioned/clientcmd"
-
-	"github.com/minishift/minishift/pkg/minikube/constants"
-	"github.com/minishift/minishift/pkg/util"
 )
 
 var (
@@ -101,6 +101,11 @@ func StartHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 	if err := h.ConfigureAuth(); err != nil {
 		return nil, fmt.Errorf("Error configuring authorization on host: %s", err)
 	}
+
+	if err := registration.RegisterHostVM(h, RegistrationParameters); err != nil {
+		return nil, fmt.Errorf("Error registering the VM: %s", err)
+	}
+
 	return h, nil
 }
 
@@ -110,6 +115,11 @@ func StopHost(api libmachine.API) error {
 	if err != nil {
 		return err
 	}
+
+	if err = unregister(host); err != nil {
+		return err
+	}
+
 	if err := host.Stop(); err != nil {
 		return err
 	}
@@ -122,10 +132,25 @@ func DeleteHost(api libmachine.API) error {
 	if err != nil {
 		return err
 	}
+
+	if err = unregister(host); err != nil {
+		return err
+	}
+
 	m := util.MultiError{}
 	m.Collect(host.Driver.Remove())
 	m.Collect(api.Remove(constants.MachineName))
 	return m.ToError()
+}
+
+// Un-register host VM
+func unregister(host *host.Host) error {
+	if drivers.MachineInState(host.Driver, state.Running)() {
+		if err := registration.UnregisterHostVM(host, RegistrationParameters); err != nil {
+			return fmt.Errorf("Error unregistring the VM: %s", err)
+		}
+	}
+	return nil
 }
 
 // GetHostStatus gets the status of the host VM.
@@ -312,6 +337,11 @@ func createHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 	if err := api.Save(h); err != nil {
 		return nil, fmt.Errorf("Error attempting to save store: %s", err)
 	}
+
+	if err := registration.RegisterHostVM(h, RegistrationParameters); err != nil {
+		return nil, fmt.Errorf("Error registering the VM: %s", err)
+	}
+
 	return h, nil
 }
 

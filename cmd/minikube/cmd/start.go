@@ -30,7 +30,6 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/cache"
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
-	"github.com/minishift/minishift/pkg/minishift/registration"
 	minishiftUtil "github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/version"
@@ -164,12 +163,6 @@ func runStart(cmd *cobra.Command, args []string) {
 			fmt.Printf("Error setting proxy to VM: %s", err)
 			os.Exit(1)
 		}
-	}
-
-	// Register Host VM
-	if err := registration.RegisterHostVM(host, RegistrationParameters); err != nil {
-		fmt.Printf("Error registering the VM: %s", err)
-		os.Exit(1)
 	}
 
 	// Making sure the required Docker environment variables are set to make 'cluster up' work

@@ -42,6 +42,7 @@ func RegisterHostVM(host *host.Host, param *RegistrationParameters) error {
 	}
 
 	if registrator != nil {
+		fmt.Println("Registering machine using subscription-manager")
 		if param.Username == "" || param.Password == "" {
 			return errors.New("This virutal machine requires registration. " +
 				"Credentials must either be passed via the environment variables " +

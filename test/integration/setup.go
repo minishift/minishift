@@ -19,15 +19,15 @@ limitations under the License.
 package integration
 
 import (
-	"testing"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 	"io/ioutil"
 	"os"
-	"github.com/minishift/minishift/pkg/minikube/constants"
+	"testing"
 )
 
 func setUp(t *testing.T) string {
 	testDir, err := ioutil.TempDir("", "minishift-integration-test-")
-	if(err != nil) {
+	if err != nil {
 		t.Fatalf("Failed to create temp directory '%s'", testDir)
 	}
 	os.Setenv(constants.MiniShiftHomeEnv, testDir)

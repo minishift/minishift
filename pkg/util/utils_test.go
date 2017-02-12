@@ -61,11 +61,11 @@ func TestRetry(t *testing.T) {
 }
 
 func TestValidateProxyURI(t *testing.T) {
-	urlList := map[string]bool {
-		"http://foo.com:3128": true,
-		"htt://foo.com:3128": false,
-		"http://127.0.0.1:3128": true,
-		"http://foo:bar@test.com:324": true,
+	urlList := map[string]bool{
+		"http://foo.com:3128":          true,
+		"htt://foo.com:3128":           false,
+		"http://127.0.0.1:3128":        true,
+		"http://foo:bar@test.com:324":  true,
 		"https://foo:bar@test.com:454": true,
 		"https://foo:b@r@test.com:454": true,
 	}

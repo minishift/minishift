@@ -17,14 +17,14 @@ limitations under the License.
 package cli
 
 import (
-	"strings"
-	"testing"
-	"os"
+	"bytes"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"bytes"
+	"os"
+	"strings"
+	"testing"
 )
 
 type TestOption struct {
@@ -96,8 +96,6 @@ func InitTestConfig(config string) error {
 	return viper.ReadConfig(r)
 }
 
-
 func getEnvVarName(name string) string {
 	return constants.MiniShiftEnvPrefix + "_" + strings.ToUpper(name)
 }
-

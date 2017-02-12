@@ -17,13 +17,13 @@ limitations under the License.
 package cache
 
 import (
+	"github.com/minishift/minishift/pkg/minikube/constants"
 	minitesting "github.com/minishift/minishift/pkg/testing"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
 	"testing"
-	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
 var testDir string

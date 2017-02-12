@@ -17,9 +17,9 @@ limitations under the License.
 package cluster
 
 import (
-	"testing"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"path/filepath"
+	"testing"
 )
 
 func TestRemoteBoot2DockerURL(t *testing.T) {
@@ -27,7 +27,7 @@ func TestRemoteBoot2DockerURL(t *testing.T) {
 		MinikubeISO: "http://github.com/fake/boot2docker.iso",
 	}
 
-	isoPath:= filepath.Join(constants.Minipath, "cache", "iso", filepath.Base(machineConfig.MinikubeISO))
+	isoPath := filepath.Join(constants.Minipath, "cache", "iso", filepath.Base(machineConfig.MinikubeISO))
 	expectedURL := "file://" + filepath.ToSlash(isoPath)
 	url := machineConfig.GetISOFileURI()
 

@@ -19,11 +19,11 @@ limitations under the License.
 package integration
 
 import (
+	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/test/integration/util"
+	"os"
 	"strings"
 	"testing"
-	"os"
-	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
 func TestClusterSSH(t *testing.T) {
@@ -41,7 +41,7 @@ func TestClusterSSH(t *testing.T) {
 	runner.EnsureRunning()
 
 	expectedStr := "hello"
-	sshCmdOutput := runner.RunCommand("ssh echo " + expectedStr, true)
+	sshCmdOutput := runner.RunCommand("ssh echo "+expectedStr, true)
 	if !strings.Contains(sshCmdOutput, expectedStr) {
 		t.Fatalf("Expected output from ssh to be: %s. Output was: %s", expectedStr, sshCmdOutput)
 	}

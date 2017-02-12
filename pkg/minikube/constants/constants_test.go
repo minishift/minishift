@@ -17,16 +17,16 @@ limitations under the License.
 package constants
 
 import (
-	"testing"
-        "github.com/minishift/minishift/pkg/minishift/util"
+	"github.com/minishift/minishift/pkg/minishift/util"
 	"os"
 	"path/filepath"
+	"testing"
 )
 
 func TestDefaultMinishiftHome(t *testing.T) {
 	os.Unsetenv("MINISHIFT_HOME")
 	expectedMiniPath := filepath.Join(util.HomeDir(), ".minishift")
-	actualMiniPath :=  getMinishiftHomeDir()
+	actualMiniPath := getMinishiftHomeDir()
 	if actualMiniPath != expectedMiniPath {
 		t.Fatalf("Expected Minishift home directory : '%s' Got: '%s'", expectedMiniPath, actualMiniPath)
 	}

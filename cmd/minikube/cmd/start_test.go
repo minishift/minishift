@@ -20,6 +20,7 @@ import (
 	minitesting "github.com/minishift/minishift/pkg/testing"
 	"testing"
 
+	"fmt"
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
@@ -30,7 +31,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"fmt"
 )
 
 var (
@@ -142,7 +142,7 @@ func TestStartClusterUpNoFlags(t *testing.T) {
 	}
 }
 
-func TestStartClusterUpWithOverrideHostConfigDirFlag(t *testing.T){
+func TestStartClusterUpWithOverrideHostConfigDirFlag(t *testing.T) {
 	setUp(t)
 	defer os.RemoveAll(testDir)
 	defer minitesting.ResetDefaultRoundTripper()
@@ -159,7 +159,7 @@ func TestStartClusterUpWithOverrideHostConfigDirFlag(t *testing.T){
 	assertCommandLineArguments(expectedArguments, t)
 }
 
-func TestStartClusterUpWithOverrideHostDataDirFlag(t *testing.T){
+func TestStartClusterUpWithOverrideHostDataDirFlag(t *testing.T) {
 	setUp(t)
 	defer os.RemoveAll(testDir)
 	defer minitesting.ResetDefaultRoundTripper()

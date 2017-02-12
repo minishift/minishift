@@ -17,19 +17,19 @@ limitations under the License.
 package cluster
 
 import (
-	"testing"
-	"reflect"
-	"path/filepath"
-	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/docker/machine/drivers/hyperv"
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	"path/filepath"
+	"reflect"
+	"testing"
 )
 
 var machineConfig = MachineConfig{
 	MinikubeISO: "https://github.com/fake/boot2docker.iso",
-	Memory: 2048,
-	CPUs: 2,
-	DiskSize: 10000,
-	VMDriver: "hyperv",
+	Memory:      2048,
+	CPUs:        2,
+	DiskSize:    10000,
+	VMDriver:    "hyperv",
 }
 
 func TestCreateHypervHostGeneratesCorrectIsoUrl(t *testing.T) {

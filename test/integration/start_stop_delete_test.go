@@ -20,12 +20,12 @@ package integration
 
 import (
 	"net"
+	"os"
 	"strings"
 	"testing"
-	"os"
 
-	"github.com/minishift/minishift/test/integration/util"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/test/integration/util"
 )
 
 func TestStartStop(t *testing.T) {

@@ -17,10 +17,10 @@ limitations under the License.
 package cmd
 
 import (
-	"testing"
-	"os"
 	"io/ioutil"
+	"os"
 	"strings"
+	"testing"
 )
 
 func TestDisplayConsoleInMachineReadable(t *testing.T) {

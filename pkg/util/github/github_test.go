@@ -17,6 +17,7 @@ limitations under the License.
 package github
 
 import (
+	"fmt"
 	"github.com/google/go-github/github"
 	minitesting "github.com/minishift/minishift/pkg/testing"
 	minishiftos "github.com/minishift/minishift/pkg/util/os"
@@ -24,10 +25,9 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"testing"
-	"fmt"
-	"strings"
 	"runtime"
+	"strings"
+	"testing"
 )
 
 var (
@@ -179,7 +179,7 @@ func Test_Download_Oc_1_4_1(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	if runtime.GOOS != "windows" {
 		expectedFilePermissions := "-rwxrwxrwx"
 		if fileInfo.Mode().String() != expectedFilePermissions {

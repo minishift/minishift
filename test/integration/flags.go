@@ -22,8 +22,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"testing"
 	"runtime"
+	"testing"
 )
 
 func TestMain(m *testing.M) {

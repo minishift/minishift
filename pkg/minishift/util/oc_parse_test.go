@@ -75,7 +75,7 @@ on the host.
 
 Use "oc options" for a list of global command-line options (applies to all commands).`)
 
-	expectedOptions = []string {"create-machine", "docker-machine", "env",
+	expectedOptions = []string{"create-machine", "docker-machine", "env",
 		"forward-ports", "host-config-dir", "host-data-dir", "host-volumes-dir",
 		"image", "logging", "metrics", "public-hostname", "routing-suffix", "server-loglevel",
 		"skip-registry-check", "use-existing-config", "version"}
@@ -87,7 +87,7 @@ func TestParseOcHelpCommand(t *testing.T) {
 }
 
 func TestFlagExist(t *testing.T) {
-	if ! FlagExist(expectedOptions, "image") {
+	if !FlagExist(expectedOptions, "image") {
 		t.Fatal("image flag exist but returned false")
 	}
 

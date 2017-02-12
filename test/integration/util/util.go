@@ -75,7 +75,7 @@ func (m *MinishiftRunner) SetEnvFromEnvCmdOutput(dockerEnvVars string) error {
 	seenEnvVar := false
 	for _, line := range lines {
 		fmt.Println(line)
-		if strings.HasPrefix("export ", line)  {
+		if strings.HasPrefix("export ", line) {
 			line = strings.TrimPrefix(line, "export ")
 		}
 		if _, err := fmt.Sscanf(line, "export %s=\"%s\"", &envKey, &envVal); err != nil {
@@ -123,4 +123,3 @@ func (k *OcRunner) RunCommand(args []string) (stdout []byte, err error) {
 	// TODO implement (HF)
 	return nil, err
 }
-

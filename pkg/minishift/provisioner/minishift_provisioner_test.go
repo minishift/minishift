@@ -17,14 +17,14 @@ limitations under the License.
 package provisioner
 
 import (
-	"testing"
+	"bytes"
 	"github.com/docker/machine/drivers/fakedriver"
 	"github.com/docker/machine/libmachine/auth"
 	"github.com/docker/machine/libmachine/engine"
+	"github.com/docker/machine/libmachine/provision"
 	"github.com/docker/machine/libmachine/provision/provisiontest"
 	"github.com/docker/machine/libmachine/swarm"
-	"github.com/docker/machine/libmachine/provision"
-	"bytes"
+	"testing"
 	"text/template"
 )
 
@@ -54,7 +54,7 @@ func TestRhelImage(t *testing.T) {
 		VersionID: "7.3",
 	}
 	p.SetOsReleaseInfo(info)
-	if ! p.GetRedhatRelease() {
+	if !p.GetRedhatRelease() {
 		t.Fatal("Provisioner should detect RHEL")
 	}
 }
@@ -74,10 +74,10 @@ func TestCentOSImage(t *testing.T) {
 
 func parseTemplate(t *testing.T, p *MinishiftProvisioner, engineConfigTemplate string) (*provision.DockerOptions, bytes.Buffer) {
 	var (
-		engineCfg  bytes.Buffer
+		engineCfg bytes.Buffer
 	)
 	dockerOptions, err := p.GenerateDockerOptions(22)
-	if err !=nil {
+	if err != nil {
 		t.Fatal("Provisioner should Generate Docker Options")
 	}
 
@@ -113,7 +113,7 @@ func TestMinishiftProvisionerGenerateDockerOptionsForRHEL(t *testing.T) {
 
 func TestMinishiftProvisionerGenerateDockerOptionsForCentOS(t *testing.T) {
 	var (
-		engineCfg  bytes.Buffer
+		engineCfg bytes.Buffer
 	)
 	p := NewMinishiftProvisioner("", &fakedriver.Driver{})
 	info := &provision.OsRelease{

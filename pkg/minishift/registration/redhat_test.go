@@ -17,11 +17,11 @@ limitations under the License.
 package registration
 
 import (
+	"fmt"
 	"github.com/docker/machine/libmachine/drivers"
+	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/pkg/minikube/tests"
 	"testing"
-	"github.com/docker/machine/libmachine/provision"
-	"fmt"
 )
 
 var (
@@ -34,7 +34,7 @@ var (
 	expectedCMDUnregistration = "sudo subscription-manager unregister"
 )
 
-func setup(t *testing.T) (registrator Registrator){
+func setup(t *testing.T) (registrator Registrator) {
 	s, _ := tests.NewSSHServer()
 	s.CommandToOutput = make(map[string]string)
 	s.CommandToOutput["sudo subscription-manager version"] = `server type: This system is currently not registered.`
@@ -60,7 +60,7 @@ func TestRedHatRegistratorCompatibleWithDistribution(t *testing.T) {
 	registrator := setup(t)
 	info := &provision.OsRelease{
 		Name:      "Red Hat Enterprise Linux Server",
-		ID: 	   "rhel",
+		ID:        "rhel",
 		VersionID: "7.3",
 	}
 	if !registrator.CompatibleWithDistribution(info) {
@@ -72,7 +72,7 @@ func TestRedHatRegistratorNotCompatibleWithDistribution(t *testing.T) {
 	registrator := setup(t)
 	info := &provision.OsRelease{
 		Name:      "CentOS",
-		ID: 	   "centos",
+		ID:        "centos",
 		VersionID: "7.3",
 	}
 	if registrator.CompatibleWithDistribution(info) {
@@ -101,7 +101,7 @@ func TestRedHatRegistratorRegister(t *testing.T) {
 	if err := registrator.Register(param); err != nil {
 		t.Fatal("Distribution should able to register")
 	} else {
-		if _, ok := s.Commands[expectedCMDRegistration]; !ok{
+		if _, ok := s.Commands[expectedCMDRegistration]; !ok {
 			t.Fatalf("Expected command: %s", expectedCMDRegistration)
 		}
 	}
@@ -129,7 +129,7 @@ func TestRedHatRegistratorUnregister(t *testing.T) {
 	if err := registrator.Unregister(param); err != nil {
 		t.Fatal("Distribution should be able to unregister")
 	} else {
-		if _, ok := s.Commands[expectedCMDUnregistration]; !ok{
+		if _, ok := s.Commands[expectedCMDUnregistration]; !ok {
 			t.Fatalf("Expected command: %s", expectedCMDUnregistration)
 		}
 	}

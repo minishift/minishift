@@ -17,14 +17,14 @@ limitations under the License.
 package provisioner
 
 import (
-	"testing"
-	"reflect"
+	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/pkg/minikube/tests"
-	"github.com/docker/machine/libmachine/drivers"
+	"reflect"
+	"testing"
 )
 
-func TestMinishiftProvisionerSelected(t *testing.T){
+func TestMinishiftProvisionerSelected(t *testing.T) {
 	s, _ := tests.NewSSHServer()
 	s.CommandToOutput = make(map[string]string)
 	s.CommandToOutput["cat /etc/os-release"] = `NAME="CentOS Linux"
@@ -76,7 +76,7 @@ VARIANT_VERSION="1.0.0-alpha.1"
 
 }
 
-func TestDefaultCentOSProvisionerSelected(t *testing.T){
+func TestDefaultCentOSProvisionerSelected(t *testing.T) {
 	s, _ := tests.NewSSHServer()
 	s.CommandToOutput = make(map[string]string)
 	s.CommandToOutput["cat /etc/os-release"] = `NAME="CentOS Linux"

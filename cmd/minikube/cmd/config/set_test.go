@@ -17,11 +17,11 @@ limitations under the License.
 package config
 
 import (
-	"testing"
-	"io/ioutil"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"testing"
 )
 
 func TestNotFound(t *testing.T) {

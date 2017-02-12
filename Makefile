@@ -30,8 +30,8 @@ LDFLAGS := -X $(REPOPATH)/pkg/version.version=$(VERSION) \
 	-X $(REPOPATH)/pkg/version.openshiftVersion=$(OPENSHIFT_VERSION) -s -w -extldflags '-static'
 
 GOFILES := go list  -f '{{join .Deps "\n"}}' ./cmd/minikube/ | grep $(REPOPATH) | xargs go list -f '{{ range $$file := .GoFiles }} {{$$.Dir}}/{{$$file}}{{"\n"}}{{end}}'
-GOFILES_NO_VENDOR := $(GOFILES) | grep -v /vendor
 PACKAGES := go list ./... | grep -v /vendor
+SOURCE_DIRS = cmd pkg test
 
 $(GOPATH)/bin/minishift$(IS_EXE): $(BUILD_DIR)/$(GOOS)-$(GOARCH)/minishift$(IS_EXE)
 	cp $(BUILD_DIR)/$(GOOS)-$(GOARCH)/minishift$(IS_EXE) $(GOPATH)/bin/minishift$(IS_EXE)
@@ -92,8 +92,8 @@ integration: $(BUILD_DIR)/$(GOOS)-$(GOARCH)/minishift$(IS_EXE)
 
 .PHONY: fmt
 fmt:
-	@gofmt -l -w $(shell $(GOFILES_NO_VENDOR))
+	@gofmt -l -w $(SOURCE_DIRS)
 
 .PHONY: fmtcheck
 fmtcheck:
-	@test -z $(shell gofmt -l -s $(shell $(GOFILES_NO_VENDOR)) | tee /dev/stderr) || echo "[WARN] Fix formatting issues with 'make fmt'"
+	@gofmt -l -s $(SOURCE_DIRS) | read; if [ $$? == 0 ]; then echo "gofmt check failed for:"; gofmt -l -s $(SOURCE_DIRS); exit 1; fi

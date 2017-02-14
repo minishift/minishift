@@ -127,6 +127,10 @@ This section contains a brief demo of Minishift and the provisioned OpenShift cl
 For details on the usage of Minishift refer to the [Using Minishift](/docs/using.md) guide.
 The interaction with OpenShift is via the command line tool _oc_ which is copied to your host.
 
+For more information about the OpenShift cluster architecture,
+see [Architecture Overview](https://docs.openshift.org/latest/architecture/index.html) in the
+OpenShift documentation.
+
 The following steps describe how to get started with Minishift on a GNU/Linux operating system
 with the KVM hypervisor driver.
 
@@ -163,6 +167,9 @@ with the KVM hypervisor driver.
   to use a different command to add `oc` to the _PATH_ environment variable.
   To verify the `oc` version, check the contents of the `~/.minishift/cache/oc` directory.
 
+For more information about interacting with OpenShift with the command-line interface and
+the Web console, see [Interacting with OpenShift](./docs/using.md#interacting-with-openshift)
+
 <a name="deploying-a-sample-application"></a>
 ### Deploying a sample application
 
@@ -193,6 +200,10 @@ To deploy the Node.js sample application from the command-line:
         $ minishift stop
         Stopping local OpenShift cluster...
         Stopping "minishift"...
+
+For more information about creating applications in OpenShift,
+see [Creating New Applications](https://docs.openshift.org/latest/dev_guide/application_lifecycle/new_app.html) in
+the OpenShift documentation.
 
 <a name="reusing-the-docker-daemon"></a>
 ### Reusing the Docker daemon

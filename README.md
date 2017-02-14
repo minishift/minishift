@@ -100,6 +100,12 @@ You can now install the latest beta version of minishift.
   $ brew cask install minishift-beta
 ```
 
+### Un-installing Minishift
+
+.1 Try to delete the Minishift VM: `minishift delete`
+.1 Remove the folders: `~/.minishift` and `~/.kube`
+.1 Check that there are no remaining Minishift VM. Use KVM (virsh), VirtualBox or Xhyve depending on your driver.
+
 <a name="quickstart"></a>
 ## Quickstart
 

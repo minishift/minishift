@@ -117,7 +117,7 @@ You can now install the latest beta version of minishift.
         $ rm -rf ~/.minishift
         $ rm -rf ~/.kube
 
-1. Last but not least, use your hypervisor management tool to conform that there are no remaining
+1. Last but not least, use your hypervisor management tool to confirm that there are no remaining
    artifacts related to the Minishift VM (eg use `virsh` in the KVM case).
 
 <a name="quickstart"></a>

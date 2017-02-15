@@ -122,6 +122,8 @@ func runStart(cmd *cobra.Command, args []string) {
 	libMachineClient := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 	defer libMachineClient.Close()
 
+	validateOpenshiftVersion()
+
 	validateProxyArgs()
 
 	setDockerProxy()
@@ -326,6 +328,16 @@ func clusterUp(config *cluster.MachineConfig) {
 		// TODO glog is probably not right here. Need some sort of logging wrapper
 		glog.Errorln("Error starting the cluster: ", err)
 		os.Exit(1)
+	}
+}
+
+func validateOpenshiftVersion() {
+	if viper.IsSet(openshiftVersion) {
+		if !util.ValidateOpenshiftMinVersion(viper.GetString(openshiftVersion)) {
+			fmt.Printf("Minishift does not support Openshift version %s. "+
+				"You need to use a version >= 1.3.1\n", viper.GetString(openshiftVersion))
+			os.Exit(1)
+		}
 	}
 }
 

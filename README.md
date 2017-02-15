@@ -246,7 +246,7 @@ Minishift is an open-source project dedicated to developing and supporting Minis
 The code base is forked from the [Minikube](https://github.com/kubernetes/minikube) project.
 
 Contributions, questions, and comments are all welcomed and encouraged! Minishift
-developers hang out on IRC in the #openshift-dev channel on Freenode.
+developers hang out on IRC in the #minishift channel on Freenode.
 
 If you want to contribute, make sure to follow the [contribution guidelines](CONTRIBUTING.md)
 when you open issues or submit pull requests.

@@ -1,10 +1,10 @@
-hash: 6c46de8510c27a5b6b56122ac96feda1ad9651b9f6a1ec89bd4ed1bbf272e9fd
-updated: 2017-02-07T11:55:45.327429678+05:30
+hash: 46fc49d480280fcc65a75b549f3b15078b0bf5a76f5220e50faf54386a23c6e8
+updated: 2017-02-14T13:26:16.96813836+05:30
 imports:
 - name: github.com/asaskevich/govalidator
   version: 7b3beb6df3c42abd3509abfc3bcacc0fbfb7c877
 - name: github.com/blang/semver
-  version: 31b736133b98f26d5e078ec9eb591666edfd091f
+  version: b38d23b8782a487059e8fc8773e9a5b228a77cb6
 - name: github.com/coreos/go-oidc
   version: 5cf2aa52da8c574d3aa4458f471ad6ae2240fe6b
   subpackages:
@@ -109,7 +109,7 @@ imports:
   - sockets
   - tlsconfig
 - name: github.com/docker/go-units
-  version: 0bbddae09c5a5419a8c6dcdd7ff90da3d450393b
+  version: 0dadbb0345b35ec7ef35e228dabb8de89a65bf52
 - name: github.com/docker/machine
   version: 15fd4c70403bab784d91031af02d9e169ce66412
   subpackages:
@@ -255,7 +255,7 @@ imports:
   - validate
   - version
 - name: github.com/google/go-github
-  version: 27c7c32b6d369610435bd2ad7b4d8554f235eb01
+  version: 30a21ee1a3839fb4a408efe331f226b73faac379
   subpackages:
   - github
 - name: github.com/google/go-querystring
@@ -291,7 +291,7 @@ imports:
 - name: github.com/juju/ratelimit
   version: 77ed1c8a01217656d2080ad51981f6e99adaa177
 - name: github.com/kardianos/osext
-  version: c2c54e542fb797ad986b31721e1baedf214ca413
+  version: 9b883c5eb462dd5cb1b0a7a104fe86bc6b9bd391
 - name: github.com/magiconair/properties
   version: b3b15ef068fd0b17ddf408a23669f20811d194d2
 - name: github.com/mattn/go-runewidth
@@ -366,7 +366,7 @@ imports:
 - name: github.com/pelletier/go-buffruneio
   version: df1e16fde7fc330a0ca68167c23bf7ed6ac31d6d
 - name: github.com/pelletier/go-toml
-  version: d1fa2118c12c44e4f5004da216d1efad10cb4924
+  version: c9506ee96398e7571356462217b9e24d6a628d71
 - name: github.com/pkg/browser
   version: 8189194c9f158043d6d45a0b939a47a924ea4b13
 - name: github.com/pkg/errors
@@ -388,7 +388,7 @@ imports:
 - name: github.com/spf13/cast
   version: d1139bab1c07d5ad390a65e7305876b3c1a8370b
 - name: github.com/spf13/cobra
-  version: 35136c09d8da66b901337c6e86fd8e88a1a255bd
+  version: b5d8e8f46a2f829f755b6e33b454e25c61c935e1
   subpackages:
   - doc
 - name: github.com/spf13/jwalterweatherman
@@ -402,7 +402,7 @@ imports:
   subpackages:
   - codec
 - name: github.com/xeipuuv/gojsonschema
-  version: f06f290571ce81ab347174c6f7ad2e1865af41a7
+  version: 6b67b3fab74d992bd07f72550006ab2c6907c416
 - name: golang.org/x/crypto
   version: beef0f4390813b96e8e68fd78570396d0f4751fc
   subpackages:
@@ -464,7 +464,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/yaml.v2
-  version: a83829b6f1293c91addabc89d0571c246397bbf4
+  version: a3f3340b5840cee44f372bddb5880fcbc419b46a
 - name: k8s.io/client-go
   version: d72c0e162789e1bbb33c33cfa26858a1375efe01
   subpackages:

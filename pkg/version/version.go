@@ -45,10 +45,6 @@ func GetOpenShiftVersion() string {
 	return openshiftVersion
 }
 
-func GetOpenShiftSemverVersion() (semver.Version, error) {
-	return semver.Make(strings.TrimPrefix(GetOpenShiftVersion(), VersionPrefix))
-}
-
 func GetIsoVersion() string {
 	return isoVersion
 }

@@ -21,7 +21,7 @@ import (
 	"io"
 
 	"github.com/google/go-github/github"
-
+	"github.com/minishift/minishift/pkg/util"
 	githubutil "github.com/minishift/minishift/pkg/util/github"
 	"github.com/pkg/errors"
 )
@@ -42,7 +42,9 @@ func PrintOpenShiftVersions(output io.Writer) {
 	fmt.Fprint(output, "The following OpenShift versions are available: \n")
 
 	for _, version := range versions {
-		fmt.Fprintf(output, "\t- %s\n", *version.TagName)
+		if util.ValidateOpenshiftMinVersion(*version.TagName) {
+			fmt.Fprintf(output, "\t- %s\n", *version.TagName)
+		}
 	}
 }
 

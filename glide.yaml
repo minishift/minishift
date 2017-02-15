@@ -39,6 +39,7 @@ import:
   version: 382f87b929b84ce13e9c8a375a4b217f224e6c65
 - package: github.com/xeipuuv/gojsonschema
 - package: github.com/blang/semver
+  version: 3.5.0
 - package: github.com/docker/go-units
 - package: github.com/pkg/errors
   version: ^0.8.0

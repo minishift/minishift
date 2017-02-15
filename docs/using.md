@@ -16,6 +16,7 @@ overview of different components and services.
   - [Unsetting persistent configuration values](#unsetting-persistent-configuration-values)
 - [Interacting with OpenShift](#interacting-with-openshift)
   - [OpenShift client binary \(oc\)](#openshift-client-binary-oc)
+  - [Login](#login)
   - [Console](#console)
   - [Services](#services)
 - [Mounted host folders](#mounted-host-folders)
@@ -126,7 +127,7 @@ can be used:
 The `minishift start` command creates an OpenShift instance using the
 [cluster up](https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md) approach.
 For this purpose it copies the _oc_ binary onto  your host. You find it under
-`~/.minishift/cache/oc/\<OpenShift version\>/oc`. You can add this binary to your `PATH` variable
+`~/.minishift/cache/oc/<OpenShift version>/oc`. You can add this binary to your `PATH`
 in order to use `oc`, eg:
 
     $ export PATH=$PATH:~/.minishift/cache/oc/v1.3.1
@@ -134,12 +135,35 @@ in order to use `oc`, eg:
 In future versions we will provide a command which will assist in setting up the `PATH`. Also
 see Github issue [#142](https://github.com/minishift/minishift/issues/142).
 
-#### Login
+To get an intro to _oc_ usage, refer to the [Get Started with the CLI](https://docs.openshift.com/enterprise/3.2/cli_reference/get_started_cli.html)
+documentation in the OpenShift docs.
 
-To login as administrator, use the system account: `oc login -u system:admin`. It will NOT ask for a password, it uses the key in `~/.kube/config` (created during installation).
+<a name="login"></a>
+### Login
 
-**Note:** If you type `oc login -u system -p admin` (or whatever username/password), the result will always be `Login successful.` but you will have no particular rights.
+Per default _cluster up_ uses an [AllowAllPasswordIdentityProvider](https://docs.openshift.org/latest/install_config/configuring_authentication.html#AllowAllPasswordIdentityProvider)
+for authentication against the local cluster. This means any non-empty username and password can
+be used to login to the local cluster. The recommended username and password are
+developer/developer, since it also has a default project _myproject_ set up.
 
+To login as administrator, use the system account:
+
+```shell
+$ oc login -u system:admin
+```
+
+In this case [client certificates](https://docs.openshift.com/enterprise/3.2/architecture/additional_concepts/authentication.html#api-authentication)
+are used which are stored in `~/.kube/config`. _cluster up_ will install
+the appropriate certificates as part of the bootstrap.
+
+**Note:** If you type `oc login -u system -p admin`, you will get logged in, but not as administrator,
+but rather as unprivileged user with no particular rights.
+
+To view the currently available login contexts, run:
+
+```
+$ oc config view
+```
 
 <a name="console"></a>
 ### Console
@@ -148,7 +172,7 @@ To access the [OpenShift console](https://docs.openshift.org/latest/architecture
 run this command in a shell after starting Minishift to get the address:
 
 ```shell
-minishift console
+$ minishift console
 ```
 
 <a name="services"></a>
@@ -157,7 +181,7 @@ minishift console
 To access a service exposed via a node port, run this command in a shell after starting Minishift to get the address:
 
 ```shell
-minishift service [-n NAMESPACE] [--url] NAME
+$ minishift service [-n NAMESPACE] [--url] NAME
 ```
 
 <a name="mounted-host-folders"></a>

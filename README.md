@@ -15,6 +15,7 @@ provisioning VMs, and [OpenShift Origin](https://github.com/openshift/origin) fo
   - [Installing Minishift](#installing-minishift)
     - [Manually](#manually)
     - [With Homebrew](#with-homebrew)
+  - [Un-installing Minishift](#un-installing-minishift)
 - [Quickstart](#quickstart)
   - [Starting Minishift](#starting-minishift)
   - [Deploying a sample application](#deploying-a-sample-application)
@@ -100,11 +101,24 @@ You can now install the latest beta version of minishift.
   $ brew cask install minishift-beta
 ```
 
+<a name="un-installing-minishift"></a>
 ### Un-installing Minishift
 
-1. Try to delete the Minishift VM: `minishift delete`
-1. Remove the folders: `~/.minishift` and `~/.kube`
-1. Check that there are no remaining Minishift VM. Use KVM (virsh), VirtualBox ... depending on your driver.
+1. Shutdown Minishift VM and delete any VM specific files:
+
+        $ minishift delete
+
+   This will remove everything under `MINISHIFT_HOME/.minishift/machines/minishift`.
+   Other cached data and the [persistent configuration](./docs/using.md#persistent-configuration) will
+   be kept.
+1. If you want to remove Minishift completely, you also need to remove everything under `MINISHIFT_HOME`
+   (default `~/.minishift`) and `~/.kube`:
+
+        $ rm -rf ~/.minishift
+        $ rm -rf ~/.kube
+
+1. Last but not least, use your hypervisor management tool to conform that there are no remaining
+   artifacts related to the Minishift VM (eg use `virsh` in the KVM case).
 
 <a name="quickstart"></a>
 ## Quickstart

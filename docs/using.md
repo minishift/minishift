@@ -138,7 +138,7 @@ see Github issue [#142](https://github.com/minishift/minishift/issues/142).
 
 To login as administrator, use the system account: `oc login -u system:admin`. It will NOT ask for a password, it uses the key in `~/.kube/config` (created during installation).
 
-**Note:** If you type `oc login -u system -p admin` (or whatever username/password). The result will always be `Login successful.` but you will have no particular rights.
+**Note:** If you type `oc login -u system -p admin` (or whatever username/password), the result will always be `Login successful.` but you will have no particular rights.
 
 
 <a name="console"></a>

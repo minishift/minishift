@@ -21,7 +21,7 @@ import (
 
 	"bytes"
 	"github.com/minishift/minishift/pkg/minikube/constants"
-	"github.com/minishift/minishift/pkg/minishift/util"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/viper"
 	"io"
 	"io/ioutil"
@@ -38,7 +38,7 @@ func Test_unknown_patch_target_aborts_command(t *testing.T) {
 	setup(t)
 	defer tearDown()
 
-	util.RegisterExitHandler(createExitHandlerFunc(t, 1, unknownPatchTargetError))
+	atexit.RegisterExitHandler(createExitHandlerFunc(t, 1, unknownPatchTargetError))
 
 	target = "foo"
 	runPatch(nil, nil)
@@ -48,7 +48,7 @@ func Test_patch_cannot_be_empty(t *testing.T) {
 	setup(t)
 	defer tearDown()
 
-	util.RegisterExitHandler(createExitHandlerFunc(t, 1, emptyPatchError))
+	atexit.RegisterExitHandler(createExitHandlerFunc(t, 1, emptyPatchError))
 
 	target = "master"
 	patch = ""
@@ -59,7 +59,7 @@ func Test_patch_needs_to_be_valid_JSON(t *testing.T) {
 	setup(t)
 	defer tearDown()
 
-	util.RegisterExitHandler(createExitHandlerFunc(t, 1, invalidJSONError))
+	atexit.RegisterExitHandler(createExitHandlerFunc(t, 1, invalidJSONError))
 
 	target = "master"
 	patch = "foo"
@@ -70,7 +70,7 @@ func Test_patch_commands_needs_existing_vm(t *testing.T) {
 	setup(t)
 	defer tearDown()
 
-	util.RegisterExitHandler(createExitHandlerFunc(t, 1, nonExistentMachineError))
+	atexit.RegisterExitHandler(createExitHandlerFunc(t, 1, nonExistentMachineError))
 
 	target = "master"
 	patch = "{\"corsAllowedOrigins\": \"*\"}"
@@ -102,7 +102,7 @@ func tearDown() {
 	os.RemoveAll(testDir)
 	resetOriginalFileHandle()
 	viper.Reset()
-	util.ClearExitHandler()
+	atexit.ClearExitHandler()
 }
 
 func createExitHandlerFunc(t *testing.T, expectedExitCode int, expectedErrorMessage string) func(int) int {

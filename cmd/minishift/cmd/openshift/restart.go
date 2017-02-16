@@ -19,7 +19,6 @@ package openshift
 import (
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"
-	"os"
 
 	"fmt"
 	"github.com/docker/machine/libmachine"
@@ -28,7 +27,7 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/docker"
 	"github.com/minishift/minishift/pkg/minishift/openshift"
-	"github.com/minishift/minishift/pkg/minishift/util"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
 )
 
 var restartCmd = &cobra.Command{
@@ -49,7 +48,7 @@ func runRestart(cmd *cobra.Command, args []string) {
 	host, err := cluster.CheckIfApiExistsAndLoad(api)
 	if err != nil {
 		fmt.Println(nonExistentMachineError)
-		util.Exit(1)
+		atexit.Exit(1)
 	}
 
 	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
@@ -57,6 +56,6 @@ func runRestart(cmd *cobra.Command, args []string) {
 	_, err = openshift.RestartOpenShift(dockerCommander)
 	if err != nil {
 		glog.Errorln("Error restarting OpenShift cluster: ", err)
-		os.Exit(1)
+		atexit.Exit(1)
 	}
 }

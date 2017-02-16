@@ -29,7 +29,7 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/docker"
 	"github.com/minishift/minishift/pkg/minishift/openshift"
-	"github.com/minishift/minishift/pkg/minishift/util"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
 )
 
 const (
@@ -63,7 +63,7 @@ func runPatch(cmd *cobra.Command, args []string) {
 	patchTarget := determineTarget(target)
 	if patchTarget == openshift.UNKNOWN {
 		fmt.Println(unknownPatchTargetError)
-		util.Exit(1)
+		atexit.Exit(1)
 	}
 
 	validatePatch(patch)
@@ -74,13 +74,13 @@ func runPatch(cmd *cobra.Command, args []string) {
 	host, err := cluster.CheckIfApiExistsAndLoad(api)
 	if err != nil {
 		fmt.Println(nonExistentMachineError)
-		util.Exit(1)
+		atexit.Exit(1)
 	}
 
 	ip, err := host.Driver.GetIP()
 	if err != nil {
 		fmt.Println(unableToRetrieveIpError)
-		util.Exit(1)
+		atexit.Exit(1)
 	}
 	patchTarget.SetIp(ip)
 
@@ -90,7 +90,7 @@ func runPatch(cmd *cobra.Command, args []string) {
 	_, err = openshift.Patch(patchTarget, patch, dockerCommander)
 	if err != nil {
 		glog.Errorln("Error patching OpenShift configuration: ", err)
-		util.Exit(1)
+		atexit.Exit(1)
 	}
 }
 
@@ -108,12 +108,12 @@ func determineTarget(target string) openshift.OpenShiftPatchTarget {
 func validatePatch(patch string) {
 	if len(patch) == 0 {
 		fmt.Println(emptyPatchError)
-		util.Exit(1)
+		atexit.Exit(1)
 	}
 
 	if !isJSON(patch) {
 		fmt.Println(invalidJSONError)
-		util.Exit(1)
+		atexit.Exit(1)
 	}
 
 }

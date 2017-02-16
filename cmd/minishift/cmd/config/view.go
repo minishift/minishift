@@ -25,6 +25,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
 )
 
 var configViewFormat string
@@ -42,7 +43,7 @@ var configViewCmd = &cobra.Command{
 		err := configView()
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
+			atexit.Exit(1)
 		}
 	},
 }
@@ -66,13 +67,13 @@ func configView() error {
 		tmpl, err := template.New("view").Parse(configViewFormat)
 		if err != nil {
 			glog.Errorln("Error creating view template:", err)
-			os.Exit(1)
+			atexit.Exit(1)
 		}
 		viewTmplt := ConfigViewTemplate{k, v}
 		err = tmpl.Execute(os.Stdout, viewTmplt)
 		if err != nil {
 			glog.Errorln("Error executing view template:", err)
-			os.Exit(1)
+			atexit.Exit(1)
 		}
 	}
 	return nil

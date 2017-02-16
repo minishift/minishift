@@ -24,6 +24,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/pkg/browser"
 	"github.com/spf13/cobra"
 )
@@ -65,7 +66,7 @@ func getHostUrl(api *libmachine.Client) string {
 	url, err := cluster.GetConsoleURL(api)
 	if err != nil {
 		glog.Errorln("Cannot access the OpenShift console. Verify that Minishift is running. Error: ", err)
-		os.Exit(1)
+		atexit.Exit(1)
 	}
 	return url
 }

@@ -17,7 +17,7 @@ limitations under the License.
 package openshift
 
 import (
-	"github.com/minishift/minishift/pkg/minishift/util"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"testing"
 )
 
@@ -25,7 +25,7 @@ func Test_restart_command_needs_existing_vm(t *testing.T) {
 	setup(t)
 	defer tearDown()
 
-	util.RegisterExitHandler(createExitHandlerFunc(t, 1, nonExistentMachineError))
+	atexit.RegisterExitHandler(createExitHandlerFunc(t, 1, nonExistentMachineError))
 
 	runRestart(nil, nil)
 }

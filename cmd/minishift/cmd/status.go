@@ -26,6 +26,7 @@ import (
 
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
 )
 
 // statusCmd represents the status command
@@ -39,7 +40,7 @@ var statusCmd = &cobra.Command{
 		s, err := cluster.GetHostStatus(api)
 		if err != nil {
 			glog.Errorln("Error getting cluster status:", err)
-			os.Exit(1)
+			atexit.Exit(1)
 		}
 		fmt.Fprintln(os.Stdout, s)
 	},

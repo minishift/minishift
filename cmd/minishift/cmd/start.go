@@ -33,6 +33,7 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
 	minishiftUtil "github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/util"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/minishift/minishift/pkg/version"
 	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
@@ -152,14 +153,14 @@ func runStart(cmd *cobra.Command, args []string) {
 	err := util.Retry(3, start)
 	if err != nil {
 		glog.Errorln("Error starting the VM: ", err)
-		os.Exit(1)
+		atexit.Exit(1)
 	}
 
 	// Set Proxy to as Shell Env
 	if viper.IsSet("http-proxy") || viper.IsSet("https-proxy") {
 		if err := minishiftUtil.SetProxyToShellEnv(host, shellProxyEnv); err != nil {
 			fmt.Printf("Error setting proxy to VM: %s", err)
-			os.Exit(1)
+			atexit.Exit(1)
 		}
 	}
 
@@ -174,7 +175,7 @@ func runStart(cmd *cobra.Command, args []string) {
 	err = clusterup.EnsureHostDirectoriesExist(libMachineClient, hostDirs)
 	if err != nil {
 		glog.Errorln("Error creating required host directories: ", err)
-		os.Exit(1)
+		atexit.Exit(1)
 	}
 
 	clusterUp(&config)
@@ -300,7 +301,7 @@ func clusterUp(config *cluster.MachineConfig) {
 	err := oc.EnsureIsCached()
 	if err != nil {
 		glog.Errorln("Error starting the cluster: ", err)
-		os.Exit(1)
+		atexit.Exit(1)
 	}
 
 	cmdName := filepath.Join(oc.GetCacheFilepath(), constants.OC_BINARY_NAME)
@@ -321,7 +322,7 @@ func clusterUp(config *cluster.MachineConfig) {
 			}
 			if !ocSupportFlag(cmdName, key) {
 				glog.Errorf("Flag %s is not supported for oc version %s. Use 'openshift-version' flag to select a different version of OpenShift.", flag.Name, config.OpenShiftVersion)
-				os.Exit(1)
+				atexit.Exit(1)
 			}
 			cmdArgs = append(cmdArgs, "--"+key)
 			cmdArgs = append(cmdArgs, value)
@@ -332,7 +333,7 @@ func clusterUp(config *cluster.MachineConfig) {
 	if err != nil {
 		// TODO glog is probably not right here. Need some sort of logging wrapper
 		glog.Errorln("Error starting the cluster: ", err)
-		os.Exit(1)
+		atexit.Exit(1)
 	}
 }
 
@@ -341,7 +342,7 @@ func validateOpenshiftVersion() {
 		if !util.ValidateOpenshiftMinVersion(viper.GetString(openshiftVersion)) {
 			fmt.Printf("Minishift does not support Openshift version %s. "+
 				"You need to use a version >= 1.3.1.", viper.GetString(openshiftVersion))
-			os.Exit(1)
+			atexit.Exit(1)
 		}
 	}
 }
@@ -364,7 +365,7 @@ func ocSupportFlag(cmdName string, flag string) bool {
 	cmdOut, err := runner.Output(cmdName, cmdArgs...)
 	if err != nil {
 		glog.Errorf("Not able to get output of 'oc -h' Error: %s", err)
-		os.Exit(1)
+		atexit.Exit(1)
 	}
 	ocCommandOptions := minishiftUtil.ParseOcHelpCommand(cmdOut)
 	if ocCommandOptions != nil {

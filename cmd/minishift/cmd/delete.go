@@ -18,11 +18,11 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/docker/machine/libmachine"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
 
@@ -38,7 +38,7 @@ var deleteCmd = &cobra.Command{
 
 		if err := cluster.DeleteHost(api); err != nil {
 			fmt.Println("Error deleting the VM: ", err)
-			os.Exit(1)
+			atexit.Exit(1)
 		}
 		fmt.Println("Minishift VM deleted.")
 	},

@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
 
@@ -30,7 +31,7 @@ var configUnsetCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
 			fmt.Fprintf(os.Stdout, "usage: minishift config unset PROPERTY_NAME")
-			os.Exit(1)
+			atexit.Exit(1)
 		}
 		err := unset(args[0])
 		if err != nil {

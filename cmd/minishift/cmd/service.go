@@ -28,6 +28,7 @@ import (
 
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
 )
 
 var (
@@ -47,14 +48,14 @@ var serviceCmd = &cobra.Command{
 		t, err := template.New("serviceURL").Parse(serviceURLFormat)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "The URL format specified in the --format option is not valid: \n\n", err)
-			os.Exit(1)
+			atexit.Exit(1)
 		}
 		serviceURLTemplate = t
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 || len(args) > 1 {
 			fmt.Fprintln(os.Stderr, "You must specify the name of the service.")
-			os.Exit(1)
+			atexit.Exit(1)
 		}
 
 		service := args[0]
@@ -68,7 +69,7 @@ var serviceCmd = &cobra.Command{
 			if _, ok := err.(cluster.MissingNodePortError); !ok {
 				fmt.Fprintln(os.Stderr, "Verify that Minishift is running and that the correct namespace is specified in the -n option.")
 			}
-			os.Exit(1)
+			atexit.Exit(1)
 		}
 
 		if https {

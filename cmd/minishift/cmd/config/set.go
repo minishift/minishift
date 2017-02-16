@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
 
@@ -31,12 +32,12 @@ These values can be overwritten by flags or environment variables at runtime.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 2 {
 			fmt.Fprintln(os.Stderr, "usage: minishift config set PROPERTY_NAME PROPERTY_VALUE")
-			os.Exit(1)
+			atexit.Exit(1)
 		}
 		err := set(args[0], args[1])
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
+			atexit.Exit(1)
 		}
 	},
 }

@@ -18,11 +18,11 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/docker/machine/libmachine"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
 
@@ -39,7 +39,7 @@ VM but does not delete any associated files. To start the cluster again, use the
 
 		if err := cluster.StopHost(api); err != nil {
 			fmt.Println("Error stopping cluster: ", err)
-			os.Exit(1)
+			atexit.Exit(1)
 		}
 		fmt.Println("Cluster stopped.")
 	},

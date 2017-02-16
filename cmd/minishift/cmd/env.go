@@ -31,6 +31,7 @@ import (
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/shell"
 	"github.com/golang/glog"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
 
@@ -240,13 +241,13 @@ var dockerEnvCmd = &cobra.Command{
 			shellCfg, err = shellCfgUnset(api)
 			if err != nil {
 				glog.Errorln("Error unsetting environment variables:", err)
-				os.Exit(1)
+				atexit.Exit(1)
 			}
 		} else {
 			shellCfg, err = shellCfgSet(api)
 			if err != nil {
 				glog.Errorln("Error setting environment variables:", err)
-				os.Exit(1)
+				atexit.Exit(1)
 			}
 		}
 

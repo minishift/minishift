@@ -24,6 +24,7 @@ import (
 	"github.com/docker/machine/libmachine"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
 
@@ -38,7 +39,7 @@ var logsCmd = &cobra.Command{
 		s, err := cluster.GetHostLogs(api)
 		if err != nil {
 			log.Println("Error getting logs:", err)
-			os.Exit(1)
+			atexit.Exit(1)
 		}
 		fmt.Fprintln(os.Stdout, s)
 	},

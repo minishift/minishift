@@ -27,6 +27,7 @@ import (
 
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
 )
 
 var serviceListNamespace string
@@ -43,7 +44,7 @@ var serviceListCmd = &cobra.Command{
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			fmt.Fprintln(os.Stderr, "Check that Minishift is running and that the correct namespace is specified in the -n option if it is required.")
-			os.Exit(1)
+			atexit.Exit(1)
 		}
 
 		var data [][]string

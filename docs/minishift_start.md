@@ -21,7 +21,7 @@ minishift start
       --host-config-dir string          Location of the OpenShift configuration on the Docker host. (default "/var/lib/minishift/openshift.local.config")
       --host-data-dir string            Location of the OpenShift data on the Docker host. If not specified, etcd data will not be persisted on the host. (default "/var/lib/minishift/hostdata")
       --host-only-cidr string           The CIDR to be used for the minishift VM. (Only supported with VirtualBox driver.) (default "192.168.99.1/24")
-      --host-volumes-dir string         Location of the OpenShift volumes on the Docker host. (default "/var/lib/origin/openshift.local.volumes")
+      --host-volumes-dir string         Location of the OpenShift volumes on the Docker host. (default "/var/lib/minishift/openshift.local.volumes")
       --http-proxy string               HTTP proxy for virtual machine (In the format of http://<username>:<password>@<proxy_host>:<proxy_port>)
       --https-proxy string              HTTPS proxy for virtual machine (In the format of https://<username>:<password>@<proxy_host>:<proxy_port>)
       --insecure-registry stringSlice   Non-secure Docker registries to pass to the Docker daemon. (default [172.30.0.0/16])

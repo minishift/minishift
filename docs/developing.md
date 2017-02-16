@@ -21,6 +21,7 @@ The following paragraphs describe how to build and release Minishift.
     - [Integration Tests](#integration-tests)
   - [Formatting the source](#formatting-the-source)
   - [Cleaning all](#cleaning-all)
+- [CI Setup](#ci-setup)
 - [Releasing Minishift](#releasing-minishift)
   - [Prerequisites](#prerequisites-1)
   - [Cutting the release](#cutting-the-release)
@@ -213,6 +214,20 @@ To remove all generated artifacts and installed dependencies, run:
 
     $ make clean
 
+
+<a name="ci-setup"></a>
+## CI Setup
+
+Minishift uses several CI build servers. Amongst it [CentOS CI](https://ci.centos.org/).
+At the moment CentOS CI builds incoming pull requests and archives the build artifacts.
+You can find the CentOS CI Jenkins job for Minishift [here](https://ci.centos.org/job/minishift/).
+
+On a successful build of a pull request, the artifacts can be found at
+[artifacts.ci.centos.org/minishift/minishift/pr/\<PR ID\>](http://artifacts.ci.centos.org/minishift/minishift/pr/).
+
+For more information about CentOS CI, check out its [Wiki](https://wiki.centos.org/QaWiki/CI) to
+know more about CentOS CI.
+
 <a name="releasing-minishift"></a>
 ## Releasing Minishift
 
@@ -231,3 +246,5 @@ To remove all generated artifacts and installed dependencies, run:
 * Create binaries and upload them to GitHub (this will also tag the release):
 
         $ make release
+
+

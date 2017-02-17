@@ -19,6 +19,7 @@ overview of different components and services.
   - [Login](#login)
   - [Console](#console)
   - [Services](#services)
+- [HTTP/HTTPS Proxies](#httphttps-proxies)
 - [Mounted host folders](#mounted-host-folders)
 - [Networking](#networking)
 - [Persistent volumes](#persistent-volumes)
@@ -183,6 +184,40 @@ To access a service exposed via a node port, run this command in a shell after s
 ```shell
 $ minishift service [-n NAMESPACE] [--url] NAME
 ```
+
+<a name="httphttps-proxies"></a>
+## HTTP/HTTPS Proxies
+
+If you are behind a HTTP/HTTPS proxy, you need to supply proxy options to allow
+Docker and OpenShift to work properly. To do this, pass the required flags during
+`minishift start`.
+
+For example:
+
+```shell
+$ minishift start --http-proxy http://YOURPROXY:PORT --https-proxy https://YOURPROXY:PORT
+```
+
+ In an authenticated proxy environment, the `proxy_user` and `proxy_password` should be part of proxy URI.
+
+```shell
+ $ minishift start --http-proxy http://<proxy_username>:<proxy_password>@YOURPROXY:PORT \
+                   --https-proxy https://<proxy_username>:<proxy_password>YOURPROXY:PORT
+```
+
+There is also `--no-proxy` which allows you to specify a comma-separated list of hosts which
+should not be proxied. For a list of all available options refer to the
+[synopsis](./minishift_start.md) of the `start` command.
+
+Using the proxy options will transparently configure the Docker daemon as well as OpenShift to
+use the specified proxies. It will also set the `http-proxy`, `https-proxy` and `no-proxy`
+environment variables in the global profile configuration of the VM. This way these variables are
+set when you for example [ssh](./minishift_ssh.md) into the VM.
+
+**Note:** Using the proxy options requires that you run with an OpenShift version >=1.5.0-alpha.2.
+Use the `openshift-version` option to request a specific version of OpenShift. You can list
+all Minishift compatible OpenShift versions via
+[`minishift get-openshift-versions`](./minishift_get-openshift-versions.md).
 
 <a name="mounted-host-folders"></a>
 ## Mounted host folders

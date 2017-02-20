@@ -10,11 +10,12 @@ overview of different components and services.
   - [Stopping OpenShift](#stopping-openshift)
   - [Deleting OpenShift](#deleting-openshift)
   - [Updating OpenShift configuration](#updating-openshift-configuration)
-- [Environment variables](#environment-variables)
-- [Persistent configuration](#persistent-configuration)
-  - [Configuration options precedence](#configuration-options-precedence)
-  - [Setting persistent configuration values](#setting-persistent-configuration-values)
-  - [Unsetting persistent configuration values](#unsetting-persistent-configuration-values)
+- [Minishift runtime options](#minishift-runtime-options)
+  - [Flags](#flags)
+  - [Environment variables](#environment-variables)
+  - [Persistent configuration](#persistent-configuration)
+    - [Setting persistent configuration values](#setting-persistent-configuration-values)
+    - [Unsetting persistent configuration values](#unsetting-persistent-configuration-values)
 - [Interacting with OpenShift](#interacting-with-openshift)
   - [OpenShift client binary \(oc\)](#openshift-client-binary-oc)
   - [Login](#login)
@@ -36,20 +37,20 @@ This section contains information about basic virtual machine and OpenShift mana
 <a name="starting-openshift"></a>
 ### Starting OpenShift
 
-The [minishift start](./minishift_start.md) command is used to start your OpenShift instance.
+The [`minishift start`](./minishift_start.md) command is used to start your OpenShift instance.
 This command creates and configures a virtual machine that runs a single-node OpenShift instance.
 
 <a name="stopping-openshift"></a>
 ### Stopping OpenShift
 
-The [minishift stop](./minishift_stop.md) command is used to stop your OpenShift instance.
+The [`minishift stop`](./minishift_stop.md) command is used to stop your OpenShift instance.
 This command shuts down the Minishift virtual machine, but preserves the cluster state.
 Starting Minishift again will restore the cluster, allowing you to continue work from where you left-off.
 
 <a name="deleting-openshift"></a>
 ### Deleting OpenShift
 
-The [minishift delete](./minishift_delete.md) command is used to delete the OpenShift instance.
+The [`minishift delete`](./minishift_delete.md) command is used to delete the OpenShift instance.
 This command shuts down and deletes the Minishift virtual machine. No data or state is preserved.
 
 <a name="updating-openshift-configuration"></a>
@@ -68,7 +69,7 @@ For displaying the node configuration, you can specify the `target` flag.
 For more details about the `view` command refer its [synopsis](./minishift_openshift_config_view.md).
 
 Let's look at [Cross-origin resource sharing](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) (CORS) as an example for patching the OpenShift master configuration.
-Per default OpenShift will only allow cross origin resource requests from the IP of the
+Per default, OpenShift will only allow cross origin resource requests from the IP of the
 cluster as well as localhost. This is specified via the `corsAllowedOrigins` property in the
 master configuration
 [master-config.yaml](https://docs.openshift.com/enterprise/3.0/admin_guide/master_node_configuration.html#master-configuration-files). To change this value and allow
@@ -78,57 +79,66 @@ cross origin requests from all domains, one can execute:
 $  minishift openshift config set --patch '{"corsAllowedOrigins": [".*"]}'
 ```
 
-Per default the master configuration is targeted, but you can also path the node config
+Per default, the master configuration is targeted, but you can also path the node config
 by specifying the `target` flag. For more details about the
 `set` command refer to its [synopsis](./minishift_openshift_config_set.md).
 
 **Note:** OpenShift will be restarted after applying the patch.
 
+<a name="minishift-runtime-options"></a>
+## Minishift runtime options
+
+The runtime behavior of Minishift can be controlled through flags, environment variables, and persistent configuration options, as discussed in the following sections.
+
+The following precedence order is applied to control the behavior of Minishift. Each item in the following list takes precedence over
+the item below it:
+
+1. Use a command line flag as specified in the [Flags](flags) section.
+1. Set environment variable as described in the [Environment variables](#environment-variables) section.
+1. Use persistent configuration option as described in the [Persistent configuration](#persistent-configuration) section.
+1. Accept the default value as defined by Minishift.
+
+
+<a name="flags"></a>
+### Flags
+
+You can use command line flags with Minishift to specify options and direct its behavior. This has the highest precedence. Almost all commands have flags, however different commands take different flags. Some of the commonly used command line flags of the `minishift start` command are `cpus`, `memory` or `vm-driver`.
+
 <a name="environment-variables"></a>
-## Environment variables
+### Environment variables
 
-Minishift allows you to specify command line flags you commonly use via environment variables.
-To do so, apply the following rules to the flag you want to set via an environment variable.
+Minishift allows you to specify command line flags you commonly use through environment variables.
+To do so, apply the following rules to the flag you want to set as an environment variable.
 
-* Apply `MINISHIFT_` as a prefix to your environment variable, for example the `vm-driver` flag
-  of the [start](./minishift_start.md) command becomes `MINISHIFT_vm-driver`.
-* Uppercase the flag, `MINISHIFT_vm-driver` becomes `MINISHIFT_VM-DRIVER`.
-* Last but not least, replace `-` with `_`, `MINISHIFT_VM-DRIVER` becomes `MINISHIFT_VM_DRIVER`
+1. Apply `MINISHIFT_` as a prefix to the flag you want to set as an environment variable. For example, the `vm-driver` flag
+  of the [`minishift start`](./minishift_start.md) command becomes `MINISHIFT_vm-driver`.
+1. Use uppercase for the flag, so `MINISHIFT_vm-driver` in the above example becomes `MINISHIFT_VM-DRIVER`.
+1. Finally, replace `-` with `_`, so `MINISHIFT_VM-DRIVER` becomes `MINISHIFT_VM_DRIVER`.
 
-Another common example might be the URL of the ISO to be used. Usually you specify it via
-`iso-url` of the [start](./minishift_start.md) command. Applying the rules from above, you can
-also specify this URL by setting the environment variable `MINISHIFT_ISO_URL`.
+Environment variables can be used to replace any option of any Minishift command. A common example is the URL of the ISO to be used. Usually you specify it with the
+`iso-url` flag of the [`minishift start`](./minishift_start.md) command. Applying the above rules, you can
+also specify this URL by setting the environment variable as `MINISHIFT_ISO_URL`.
 
-**Note:** There is also the `MINISHIFT_HOME` environment variable. Per default Minishift places all
-its runtime state into `~/.minishift`. Using `MINISHIFT_HOME`, you can choose a different directory
-as Minishift's home directory. This is currently experimental and semantics might change in
+**Note:** You can also use the `MINISHIFT_HOME` environment variable, to choose a different home directory for Minishift. Per default, Minishift places all
+its runtime state into `~/.minishift`.
+ This is currently experimental and semantics might change in
 future releases.
 
 <a name="persistent-configuration"></a>
-## Persistent configuration
+### Persistent configuration
 
-Minishift also maintains a configuration file (`$MINISHIFT_HOME/config/config.json`) which can be
-used to set commonly used command-line flags persistently. For example `cpus`, `memory` or `vm-driver`.
-For a full set of supported configuration options refer to the synopsis of the
-[config](./minishift_config.md) sub-command.
+Using persistent configuration allows you to control Minishift's behavior without specifying actual command line flags, similar to the way you use [environment variables](#environment-variables).
 
-<a name="configuration-options-precedence"></a>
-### Configuration options precedence
+Minishift maintains a configuration file `$MINISHIFT_HOME/config/config.json` which can be
+used to set commonly used command line flags persistently.
 
-Using persistent configuration allows you to control Minishift's behavior without specifying actual command
-line flags, similar as using [environment variables](#environment-variables).
-Note that the following precedence order applies. Each item in the list beloew takes precedence over
-the item below it:
-
-* flag as specified via the command line
-* environment variable as described in the [environment variables](#environment-variables) section
-* persistent configuration option as described in this section
-* default value as defined by Minishift
+**Note:** Persistent configuration can only be applied to the set of supported configuration options listed in the synopsis of the
+[`minishift config`](./minishift_config.md) sub-command, unlike environment variables which can be used to replace any option of any command, .
 
 <a name="setting-persistent-configuration-values"></a>
-### Setting persistent configuration values
+#### Setting persistent configuration values
 
-The easiest way to change a persistent configuration options, is via the
+The easiest way to change a persistent configuration option, is with the
 [`config set`](./minishift_config_set.md) sub-command. For example:
 
     # Set default memory 4096 MB
@@ -139,13 +149,13 @@ To view persistent configuration values, you can use the [`view`](./minishift_co
     $ minishift config view
     - memory: 4096
 
-Alternatively one can just display a single value via the [`get`](./minishift_config_get.md) sub-command:
+Alternatively one can just display a single value with the [`get`](./minishift_config_get.md) sub-command:
 
     $ minishift config get memory
     4096
 
 <a name="unsetting-persistent-configuration-values"></a>
-### Unsetting persistent configuration values
+#### Unsetting persistent configuration values
 
 To remove a persistent configuration option, the [`unset`](./minishift_config_unset.md) sub-command
 can be used:
@@ -160,17 +170,18 @@ can be used:
 
 The `minishift start` command creates an OpenShift instance using the
 [cluster up](https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md) approach.
-For this purpose it copies the _oc_ binary onto  your host. You find it under
-`~/.minishift/cache/oc/<OpenShift version>/oc`. You can add this binary to your `PATH`
-in order to use `oc`, eg:
 
-    $ export PATH=$PATH:~/.minishift/cache/oc/v1.3.1
+For this purpose it copies the `oc` binary onto  your host. You find it under
+`~/.minishift/cache/oc/\<OpenShift version\>/oc`. You can add this binary to your `PATH` variable
+in order to use `oc`, for example:
 
-In future versions we will provide a command which will assist in setting up the `PATH`. Also
-see Github issue [#142](https://github.com/minishift/minishift/issues/142).
+    $ export PATH=$PATH:~/.minishift/cache/oc/v1.4.1
 
-To get an intro to _oc_ usage, refer to the [Get Started with the CLI](https://docs.openshift.com/enterprise/3.2/cli_reference/get_started_cli.html)
-documentation in the OpenShift docs.
+In future versions we will provide a command to assist in setting up the `PATH`.
+See Github issue [#142](https://github.com/minishift/minishift/issues/142).
+
+For an introduction to `oc` usage, refer to the [Get Started with the CLI](https://docs.openshift.com/enterprise/3.2/cli_reference/get_started_cli.html)
+section in the OpenShift documentation.
 
 <a name="login"></a>
 ### Login
@@ -212,7 +223,7 @@ $ minishift console
 <a name="services"></a>
 ### Services
 
-To access a service exposed via a node port, run this command in a shell after starting Minishift to get the address:
+To access a service exposed with a node port, run this command in a shell after starting Minishift to get the address:
 
 ```shell
 $ minishift service [-n NAMESPACE] [--url] NAME
@@ -238,7 +249,7 @@ $ minishift start --http-proxy http://YOURPROXY:PORT --https-proxy https://YOURP
                    --https-proxy https://<proxy_username>:<proxy_password>YOURPROXY:PORT
 ```
 
-There is also `--no-proxy` which allows you to specify a comma-separated list of hosts which
+You can also use `--no-proxy` to specify a comma-separated list of hosts which
 should not be proxied. For a list of all available options refer to the
 [synopsis](./minishift_start.md) of the `start` command.
 
@@ -278,7 +289,7 @@ with the `minishift ip` command.
 Minishift supports [PersistentVolumes](https://docs.openshift.org/latest/dev_guide/persistent_volumes.html)
 of type `hostPath`. These PersistentVolumes are mapped to a directory inside the Minishift VM.
 
-The MiniShift VM boots into a tmpfs, so most directories will not be persisted across reboots (`minishift stop`).
+The MiniShift VM boots into a tmpfs, so most directories will not be persisted across reboots (for example, when you use `minishift stop`).
 However, MiniShift is configured to persist files stored under the following host directories:
 
 * `/data`

@@ -19,6 +19,7 @@ package registration
 import (
 	"errors"
 	"fmt"
+
 	"github.com/docker/machine/libmachine/log"
 	"github.com/docker/machine/libmachine/provision"
 )

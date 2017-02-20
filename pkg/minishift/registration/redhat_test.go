@@ -18,16 +18,21 @@ package registration
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/pkg/minikube/tests"
-	"testing"
 )
 
 var (
 	param = &RegistrationParameters{
-		Username: "foo",
-		Password: "foo",
+		Username:        "foo",
+		Password:        "foo",
+		ProxyUsername:   "foo",
+		ProxyPassword:   "foo",
+		ProxyServer:     "foo",
+		ProxyServerPort: "foo",
 	}
 	expectedCMDRegistration = fmt.Sprintf("sudo subscription-manager register --auto-attach --username %s --password %s ",
 		param.Username, param.Password)

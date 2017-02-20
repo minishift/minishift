@@ -18,8 +18,9 @@ package registration
 
 import (
 	"fmt"
-	"github.com/docker/machine/libmachine/provision"
 	"strings"
+
+	"github.com/docker/machine/libmachine/provision"
 )
 
 func init() {
@@ -54,11 +55,31 @@ func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) er
 		return err
 	} else {
 		if strings.Contains(output, "not registered") {
-			subscriptionCommand := fmt.Sprintf("sudo subscription-manager register --auto-attach "+
-				"--username %s "+
-				"--password %s ", param.Username, param.Password)
-			if _, err := registrator.SSHCommand(subscriptionCommand); err != nil {
-				return err
+
+			//Configure subscription-manager for proxy enviornments
+			if param.ProxyServer != "" {
+				configCommand := fmt.Sprintf("sudo subscription-manager config ")
+				configCommand = configCommand +
+					fmt.Sprintf("--server.proxy_hostname %s "+
+						"--server.proxy_port %s ", param.ProxyServer, param.ProxyServerPort)
+				if param.ProxyUsername != "" {
+					configCommand = configCommand +
+						fmt.Sprintf("--server.proxy_user %s ", param.ProxyUsername)
+					if param.Password != "" {
+						configCommand = configCommand +
+							fmt.Sprintf("--server.proxy_password %s ", param.ProxyPassword)
+					}
+				}
+				if _, err := registrator.SSHCommand(configCommand); err != nil {
+					return err
+				}
+
+				subscriptionCommand := fmt.Sprintf("sudo subscription-manager register --auto-attach "+
+					"--username %s "+
+					"--password %s ", param.Username, param.Password)
+				if _, err := registrator.SSHCommand(subscriptionCommand); err != nil {
+					return err
+				}
 			}
 		}
 	}

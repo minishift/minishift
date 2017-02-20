@@ -126,6 +126,7 @@ func runStart(cmd *cobra.Command, args []string) {
 	setDockerProxy()
 	setOcProxy()
 	setShellProxy()
+	SetRegistrationProxyParameters()
 
 	config := cluster.MachineConfig{
 		MinikubeISO:      viper.GetString(isoURL),
@@ -229,6 +230,35 @@ func setShellProxy() {
 // update default no-proxy for docker
 func updateNoProxyForDocker() string {
 	return "localhost,127.0.0.1,172.30.1.1"
+}
+
+//Update RegistrationProxyParameters with proxy information
+func SetRegistrationProxyParameters() {
+	var proxyUri string
+
+	if viper.IsSet("https-proxy") {
+		proxyUri = viper.GetString(httpsProxy)
+	} else if viper.IsSet("http-proxy") {
+		proxyUri = viper.GetString(httpProxy)
+	}
+
+	if proxyUri != "" {
+		proxyUriSlice, err := minishiftUtil.ParseProxyUri(proxyUri)
+		if err != nil {
+			glog.Errorf("Not able to parse the proxy URI: %s\n", err)
+			atexit.Exit(1)
+		}
+
+		cluster.RegistrationParameters.ProxyServer = proxyUriSlice[0]
+		cluster.RegistrationParameters.ProxyServerPort = proxyUriSlice[1]
+
+		if proxyUriSlice[2] != "" {
+			cluster.RegistrationParameters.ProxyUsername = proxyUriSlice[2]
+		}
+		if proxyUriSlice[3] != "" {
+			cluster.RegistrationParameters.ProxyPassword = proxyUriSlice[3]
+		}
+	}
 }
 
 // calculateDiskSizeInMB converts a human specified disk size like "1000MB" or "1GB" and converts it into Megabits

@@ -18,6 +18,7 @@ package registration
 
 import (
 	"fmt"
+
 	"github.com/docker/machine/libmachine/host"
 	"github.com/docker/machine/libmachine/log"
 	"github.com/docker/machine/libmachine/provision"
@@ -25,8 +26,12 @@ import (
 )
 
 type RegistrationParameters struct {
-	Username string
-	Password string
+	Username        string
+	Password        string
+	ProxyUsername   string
+	ProxyPassword   string
+	ProxyServer     string
+	ProxyServerPort string
 }
 
 // Register host VM
@@ -49,6 +54,7 @@ func RegisterHostVM(host *host.Host, param *RegistrationParameters) error {
 				"MINISHIFT_USERNAME and MINISHIFT_PASSWORD " +
 				" or the --username and --password flags\n")
 		}
+
 		if err := registrator.Register(param); err != nil {
 			return err
 		}

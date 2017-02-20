@@ -243,9 +243,7 @@ should not be proxied. For a list of all available options refer to the
 [synopsis](./minishift_start.md) of the `start` command.
 
 Using the proxy options will transparently configure the Docker daemon as well as OpenShift to
-use the specified proxies. It will also set the `http-proxy`, `https-proxy` and `no-proxy`
-environment variables in the global profile configuration of the VM. This way these variables are
-set when you for example [ssh](./minishift_ssh.md) into the VM.
+use the specified proxies.
 
 **Note:** Using the proxy options requires that you run with an OpenShift version >=1.5.0-alpha.2.
 Use the `openshift-version` option to request a specific version of OpenShift. You can list

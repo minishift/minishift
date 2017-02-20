@@ -83,10 +83,19 @@ VM_DRIVER=kvm make integration
 
 # On reaching successfully at this point, upload artifacts
 PASS=$(echo $CICO_API_KEY | cut -d'-' -f1-2)
-mkdir -p $JOB_NAME/pr/$ghprbPullId
-cp -r out/* $JOB_NAME/pr/$ghprbPullId/
-# http://stackoverflow.com/a/22908437/1120530 using --relative
-RSYNC_PASSWORD=$PASS rsync -a --relative $JOB_NAME/pr/$ghprbPullId minishift@artifacts.ci.centos.org::minishift/
+
+echo "$GIT_BRANCH"
 
 set +x
-echo "Find Artifacts here http://artifacts.ci.centos.org/minishift/minishift/pr/$ghprbPullId ."
+# For PR build, GIT_BRANCH is set to branch name other than origin/master
+if [[ "$GIT_BRANCH" -eq "origin/master" ]]; then
+  # http://stackoverflow.com/a/22908437/1120530
+  RSYNC_PASSWORD=$PASS rsync -a --rsync-path="mkdir -p $JOB_NAME/master/$BUILD_NUMBER/ && rsync" \
+                       out/* minishift@artifacts.ci.centos.org::minishift/$JOB_NAME/master/$BUILD_NUMBER/
+  echo "Find Artifacts here http://artifacts.ci.centos.org/minishift/minishift/master/$BUILD_NUMBER ."
+else
+  # http://stackoverflow.com/a/22908437/1120530
+  RSYNC_PASSWORD=$PASS rsync -a --rsync-path="mkdir -p $JOB_NAME/pr/$ghprbPullId/ && rsync" \
+                       out/* minishift@artifacts.ci.centos.org::minishift/$JOB_NAME/pr/$ghprbPullId/
+  echo "Find Artifacts here http://artifacts.ci.centos.org/minishift/minishift/pr/$ghprbPullId ."
+fi

@@ -24,7 +24,7 @@ set -e
 # that might interest this worker.
 if [ -e "jenkins-env" ]; then
   cat jenkins-env \
-    | grep -E "(JENKINS_URL|GIT_BRANCH|GIT_COMMIT|BUILD_NUMBER|ghprbSourceBranch|ghprbActualCommit|BUILD_URL|ghprbPullId|GH_TOKEN)=" \
+    | grep -E "(JENKINS_URL|GIT_BRANCH|GIT_COMMIT|BUILD_NUMBER|ghprbSourceBranch|ghprbActualCommit|BUILD_URL|ghprbPullId|GH_TOKEN|JOB_NAME|CICO_API_KEY)=" \
     | sed 's/^/export /g' \
     > ~/.jenkins-env
   source ~/.jenkins-env
@@ -80,3 +80,13 @@ export PATH=$PATH:/tmp/glide/${GLIDE_OS_ARCH}
 make clean test cross fmtcheck prerelease
 # Run integration test with 'kvm' driver
 VM_DRIVER=kvm make integration
+
+# On reaching successfully at this point, upload artifacts
+PASS=$(echo $CICO_API_KEY | cut -d'-' -f1-2)
+mkdir -p $JOB_NAME/pr/$ghprbPullId
+cp -r out/* $JOB_NAME/pr/$ghprbPullId/
+# http://stackoverflow.com/a/22908437/1120530 using --relative
+RSYNC_PASSWORD=$PASS rsync -a --relative $JOB_NAME/pr/$ghprbPullId minishift@artifacts.ci.centos.org::minishift/
+
+set +x
+echo "Find Artifacts here http://artifacts.ci.centos.org/minishift/minishift/pr/$ghprbPullId ."

@@ -18,8 +18,10 @@ package main
 
 import (
 	"github.com/minishift/minishift/cmd/minishift/cmd"
+	"github.com/minishift/minishift/pkg/minikube/machine"
 )
 
 func main() {
+	machine.StartDriver()
 	cmd.Execute()
 }

@@ -13,6 +13,8 @@ while using Minishift.
   - [Error: could not create vmnet interface, permission denied or no entitlement](#error-could-not-create-vmnet-interface-permission-denied-or-no-entitlement)
 - [VirtualBox driver](#virtualbox-driver)
   - [Error: getting state for host: machine does not exist](#error-getting-state-for-host-machine-does-not-exist)
+- [Users and authentication](#users-authentication)
+  - [Some special characters cause passwords to fail](#some-special-characters-cause-passwords-to-fail)
 
 <!-- /MarkdownTOC -->
 
@@ -99,3 +101,14 @@ If you are using Windows, the problem is likely to be either an outdated version
 of Virtual Box or you forgot to use `--vm-driver virtualbox` option when starting minishift.
 
 We recommend to use `Virtualbox >= 5.1.12` to avoid this issue.
+
+<a name="users-authentication"></a>
+## Users and authentication
+
+### Some special characters cause passwords to fail
+
+Depending on your operating system and shell environment, certain special characters
+can trigger variable interpolation and therefore cause passwords to fail.
+
+Workaround: When creating and entering passwords, wrap the string with single quotes in
+the following format: '&lt;password>'

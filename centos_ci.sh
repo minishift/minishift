@@ -88,12 +88,12 @@ set +x
 # For PR build, GIT_BRANCH is set to branch name other than origin/master
 if [[ "$GIT_BRANCH" = "origin/master" ]]; then
   # http://stackoverflow.com/a/22908437/1120530
-  RSYNC_PASSWORD=$PASS rsync -a --rsync-path="mkdir -p $JOB_NAME/master/$BUILD_NUMBER/ && rsync" \
-                       out/* minishift@artifacts.ci.centos.org::minishift/$JOB_NAME/master/$BUILD_NUMBER/
+  RSYNC_PASSWORD=$PASS rsync -a --rsync-path="mkdir -p minishift/master/$BUILD_NUMBER/ && rsync" \
+                       out/* minishift@artifacts.ci.centos.org::minishift/minishift/master/$BUILD_NUMBER/
   echo "Find Artifacts here http://artifacts.ci.centos.org/minishift/minishift/master/$BUILD_NUMBER ."
 else
   # http://stackoverflow.com/a/22908437/1120530
-  RSYNC_PASSWORD=$PASS rsync -a --rsync-path="mkdir -p $JOB_NAME/pr/$ghprbPullId/ && rsync" \
-                       out/* minishift@artifacts.ci.centos.org::minishift/$JOB_NAME/pr/$ghprbPullId/
+  RSYNC_PASSWORD=$PASS rsync -a --rsync-path="mkdir -p minishift/pr/$ghprbPullId/ && rsync" \
+                       out/* minishift@artifacts.ci.centos.org::minishift/minishift/pr/$ghprbPullId/
   echo "Find Artifacts here http://artifacts.ci.centos.org/minishift/minishift/pr/$ghprbPullId ."
 fi

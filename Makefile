@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-VERSION = 1.0.0-beta.3
+VERSION = 1.0.0-beta.4
 OPENSHIFT_VERSION = v1.4.1
 ISO_VERSION = v1.0.1
 

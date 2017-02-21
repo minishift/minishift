@@ -219,11 +219,14 @@ To remove all generated artifacts and installed dependencies, run:
 ## CI Setup
 
 Minishift uses several CI build servers. Amongst it [CentOS CI](https://ci.centos.org/).
-At the moment CentOS CI builds incoming pull requests and archives the build artifacts.
+It builds incoming pull requests and any push to master alongwith archiving the build artifacts.
 You can find the CentOS CI Jenkins job for Minishift [here](https://ci.centos.org/job/minishift/).
 
-On a successful build of a pull request, the artifacts can be found at
+The artifacts on a successful build of a pull request can be found at
 [artifacts.ci.centos.org/minishift/minishift/pr/\<PR ID\>](http://artifacts.ci.centos.org/minishift/minishift/pr/).
+
+And, the artifacts on successful build of any push to master can be found at
+[artifacts.ci.centos.org/minishift/minishift/master/\<BUILD ID\>](http://artifacts.ci.centos.org/minishift/minishift/master/).
 
 For more information about CentOS CI, check out its [Wiki](https://wiki.centos.org/QaWiki/CI) to
 know more about CentOS CI.

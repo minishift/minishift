@@ -33,7 +33,13 @@ var (
 // Parses the proxy URI and will return  ["proxy_hostname", "proxy_port", "user", "password"]
 // For unauthenticated proxy server it will return ["proxy_hostname:proxy_port", "user"]
 // Or ["proxy_hostname:proxy_port"] depending upon the URI
-func ParseProxyUri(proxyUri string) ([]string, error) {
+func ParseProxyUri(proxyUri string) (string, string, string, string, error) {
+	var (
+		server     string
+		serverPort string
+		user       string
+		password   string
+	)
 	if matched, err = regexp.MatchString("http://", proxyUri); matched {
 		proxyUri = strings.TrimPrefix(proxyUri, "http://")
 	} else if matched, err = regexp.MatchString("https://", proxyUri); matched {
@@ -42,7 +48,7 @@ func ParseProxyUri(proxyUri string) ([]string, error) {
 
 	if err != nil {
 		glog.Errorf("Error starting the VM: %s. Retrying.\n", err)
-		return nil, err
+		return server, serverPort, user, password, err
 	}
 
 	// Get rid of the trailing "/" if any
@@ -56,14 +62,18 @@ func ParseProxyUri(proxyUri string) ([]string, error) {
 	if index != -1 {
 		proxyUserInfo := strings.TrimSuffix(proxyUri[0:index+1], "@")
 		proxyUserInfoSlice = strings.Split(proxyUserInfo, ":")
+		if len(proxyUserInfoSlice) > 1 {
+			user = proxyUserInfoSlice[0]
+			password = proxyUserInfoSlice[1]
+		} else {
+			user = proxyUserInfoSlice[0]
+		}
 	}
 
 	proxyUrl := proxyUri[index+1:]
 	proxyUrlSlice := strings.Split(proxyUrl, ":")
+	server = proxyUrlSlice[0]
+	serverPort = proxyUrlSlice[1]
 
-	if proxyUserInfoSlice != nil {
-		proxyUriSlice = append(proxyUrlSlice, proxyUserInfoSlice...)
-		return proxyUriSlice, nil
-	}
-	return proxyUrlSlice, nil
+	return server, serverPort, user, password, nil
 }

@@ -243,20 +243,25 @@ func SetRegistrationProxyParameters() {
 	}
 
 	if proxyUri != "" {
-		proxyUriSlice, err := minishiftUtil.ParseProxyUri(proxyUri)
+		server, serverPort, user, password, err := minishiftUtil.ParseProxyUri(proxyUri)
 		if err != nil {
 			glog.Errorf("Not able to parse the proxy URI: %s\n", err)
 			atexit.Exit(1)
 		}
 
-		cluster.RegistrationParameters.ProxyServer = proxyUriSlice[0]
-		cluster.RegistrationParameters.ProxyServerPort = proxyUriSlice[1]
-
-		if proxyUriSlice[2] != "" {
-			cluster.RegistrationParameters.ProxyUsername = proxyUriSlice[2]
+		if server != "" {
+			cluster.RegistrationParameters.ProxyServer = server
 		}
-		if proxyUriSlice[3] != "" {
-			cluster.RegistrationParameters.ProxyPassword = proxyUriSlice[3]
+		if serverPort != "" {
+			cluster.RegistrationParameters.ProxyServerPort = serverPort
+		}
+
+		if user != "" {
+			cluster.RegistrationParameters.ProxyUsername = user
+		}
+
+		if password != "" {
+			cluster.RegistrationParameters.ProxyPassword = password
 		}
 	}
 }

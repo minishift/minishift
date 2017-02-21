@@ -23,7 +23,8 @@ import (
 func TestParseProxyUriWithHttpProxy(t *testing.T) {
 	proxyUri := "http://fedora:fedora123@xyz.com:3128"
 	expected := []string{"xyz.com", "3128", "fedora", "fedora123"}
-	result, _ := ParseProxyUri(proxyUri)
+	server, serverPort, user, password, _ := ParseProxyUri(proxyUri)
+	result := []string{server, serverPort, user, password}
 	for i := range expected {
 		if expected[i] != result[i] {
 			t.Errorf("Result: %s, Expected: %s", result, expected)
@@ -34,7 +35,8 @@ func TestParseProxyUriWithHttpProxy(t *testing.T) {
 func TestParseProxyUriWithHttpsProxy(t *testing.T) {
 	proxyUri := "https://fedora:fedora123@xyz.com:3128"
 	expected := []string{"xyz.com", "3128", "fedora", "fedora123"}
-	result, _ := ParseProxyUri(proxyUri)
+	server, serverPort, user, password, _ := ParseProxyUri(proxyUri)
+	result := []string{server, serverPort, user, password}
 	for i := range expected {
 		if expected[i] != result[i] {
 			t.Errorf("Result: %s, Expected: %s", result, expected)
@@ -45,7 +47,8 @@ func TestParseProxyUriWithHttpsProxy(t *testing.T) {
 func TestParseProxyUriWithHttpUnauthenticatedProxy(t *testing.T) {
 	proxyUri := "http://xyz.com:3128"
 	expected := []string{"xyz.com", "3128"}
-	result, _ := ParseProxyUri(proxyUri)
+	server, serverPort, _, _, _ := ParseProxyUri(proxyUri)
+	result := []string{server, serverPort}
 	for i := range expected {
 		if expected[i] != result[i] {
 			t.Errorf("Result: %s, Expected: %s", result, expected)
@@ -56,7 +59,8 @@ func TestParseProxyUriWithHttpUnauthenticatedProxy(t *testing.T) {
 func TestParseProxyUriWithHttpUnauthenticatedProxyWithUser(t *testing.T) {
 	proxyUri := "https://fedora@xyz.com:3128"
 	expected := []string{"xyz.com", "3128", "fedora"}
-	result, _ := ParseProxyUri(proxyUri)
+	server, serverPort, user, _, _ := ParseProxyUri(proxyUri)
+	result := []string{server, serverPort, user}
 	for i := range expected {
 		if expected[i] != result[i] {
 			t.Errorf("Result: %s, Expected: %s", result, expected)
@@ -67,7 +71,8 @@ func TestParseProxyUriWithHttpUnauthenticatedProxyWithUser(t *testing.T) {
 func TestParseProxyUriWithSpecialCharacterInPassword(t *testing.T) {
 	proxyUri := "http://fedora:fedora@@123@xyz.com:3128/"
 	expected := []string{"xyz.com", "3128", "fedora", "fedora@@123"}
-	result, _ := ParseProxyUri(proxyUri)
+	server, serverPort, user, password, _ := ParseProxyUri(proxyUri)
+	result := []string{server, serverPort, user, password}
 	for i := range expected {
 		if expected[i] != result[i] {
 			t.Errorf("Result: %s, Expected: %s", result, expected)

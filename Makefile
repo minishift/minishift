@@ -92,7 +92,7 @@ integration: $(BUILD_DIR)/$(GOOS)-$(GOARCH)/minishift$(IS_EXE)
 
 .PHONY: fmt
 fmt:
-	@gofmt -l -w $(SOURCE_DIRS)
+	@gofmt -l -s -w $(SOURCE_DIRS)
 
 .PHONY: fmtcheck
 fmtcheck:

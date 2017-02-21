@@ -23,7 +23,7 @@ install:
 
 build_script:
 - glide --tmp C:\tmp install -v
-- make cross test
+- make cross test fmtcheck
 
 artifacts:
   - path: out\linux-amd64\minishift

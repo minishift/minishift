@@ -22,7 +22,7 @@ dependencies:
 ## Customize test commands
 test:
     override:
-        - make test cross:
+        - make test cross fmtcheck prerelease:
                 pwd:
                     ../src/github.com/minishift/minishift
 

@@ -14,7 +14,7 @@
 
 VERSION = 1.0.0-beta.3
 OPENSHIFT_VERSION = v1.4.1
-ISO_VERSION = v1.0.0
+ISO_VERSION = v1.0.1
 
 GOOS ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)

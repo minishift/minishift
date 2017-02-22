@@ -94,7 +94,7 @@ The runtime behavior of Minishift can be controlled through flags, environment v
 The following precedence order is applied to control the behavior of Minishift. Each item in the following list takes precedence over
 the item below it:
 
-1. Use a command line flag as specified in the [Flags](flags) section.
+1. Use a command line flag as specified in the [Flags](#flags) section.
 1. Set environment variable as described in the [Environment variables](#environment-variables) section.
 1. Use persistent configuration option as described in the [Persistent configuration](#persistent-configuration) section.
 1. Accept the default value as defined by Minishift.

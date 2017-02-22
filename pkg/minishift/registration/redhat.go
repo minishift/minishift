@@ -73,13 +73,12 @@ func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) er
 				if _, err := registrator.SSHCommand(configCommand); err != nil {
 					return err
 				}
-
-				subscriptionCommand := fmt.Sprintf("sudo subscription-manager register --auto-attach "+
-					"--username %s "+
-					"--password %s ", param.Username, param.Password)
-				if _, err := registrator.SSHCommand(subscriptionCommand); err != nil {
-					return err
-				}
+			}
+			subscriptionCommand := fmt.Sprintf("sudo subscription-manager register --auto-attach "+
+				"--username %s "+
+				"--password %s ", param.Username, param.Password)
+			if _, err := registrator.SSHCommand(subscriptionCommand); err != nil {
+				return err
 			}
 		}
 	}

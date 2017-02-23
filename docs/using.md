@@ -276,40 +276,46 @@ These are not configurable at the moment and are different for each driver and t
 | VMWare Fusion | OSX | /Users | /Users |
 | Xhyve | OSX | /Users | /Users |
 
-**Note:** Host folder sharing is not implemented in the KVM and Hyper-V driver yet. You can however
-[mount a CIFS-based shared folder](mounting-custom-shared-folders) inside the virtual machine.
+**Note:** Host folder sharing is not implemented in the KVM and Hyper-V driver. You can
+[mount a CIFS-based shared folder](mounting-custom-shared-folders) inside the virtual machine instead.
 
 <a name="mounting-custom-shared-folders"></a>
 ### Mounting custom shared folders
-Both the Boot2Docker and the CentOS image come with `cifs-utils` installed, which allow you to mount CIFS-based shared
-folders inside the virtual machine. For instance, on Windows 10 the `C:\Users` folder is shared and only needs a locally
-authenticated users. The following commands would allow you to mount this folder.
+The Boot2Docker and the CentOS image include `cifs-utils`, which allows you to mount CIFS-based shared
+folders inside the virtual machine. For example, on Windows 10 the `C:\Users` folder is shared and only needs locally
+authenticated users. The following procedure describes how to mount this folder.
 
-First you would need to find the local IP address that is in the same segment as the network your Minishift instance is
-on:
-```powershell
-$ Get-NetIPAddress | Format-Table
-```
+1. Find the local IP address from the same network segment as your Minishift instance.
 
-After this you can use the following command to create a mountpoint and mount the share.
-```powershell
-$ minishift ssh "sudo mkdir -p /Users"
-$ minishift ssh "sudo mount -t cifs //[machine-ip]/Users /Users -o username=[username],password=[password],domain=$env:computername
-```
+   ```powershell
+   $ Get-NetIPAddress | Format-Table
+   ```
 
-If no error follows, the mount succeeded. You can verify if this mounted correctly with:
-```
-$ minishift ssh "ls -al /Users"
-```
+1. Create a mountpoint and mount the shared folder.
 
-This should show a folder with the authenticated username.
+   ```powershell
+   $ minishift ssh "sudo mkdir -p /Users"
+   $ minishift ssh "sudo mount -t cifs //[machine-ip]/Users /Users -o username=[username],password=[password],domain=$env:computername
+   ```
 
-**Note:** If you mount the folder this way, you might run into issues when your password contains a `$` sign, as these
-are used by PowerShell as variables and get replaced. In that case, you can use `'` (single-quotes) instead and replace
-the value of `$env:computername` with the content of this variable.
+   If no error appears, the mount succeeded.
 
-If your Windows account is tied to a Microsoft Account, you have to use the account as the email address you use for
-this. Eg. `jpillow@amigas.us`. The domain value, which contains the computername, is in that case is essential.
+1. Verify the share mount.
+
+   ```
+   $ minishift ssh "ls -al /Users"
+   ```
+
+   A successful mount will show a folder with the authenticated user name.
+
+**Note:**
+
+- If you use this method to mount the folder, you might encounter issues if your password string
+  contains a `$` sign, because this is used by PowerShell as a variables to be replaced. You can use `'` (single quotes)
+  instead and replace the value of `$env:computername` with the contents of this variable.
+
+- If your Windows account is linked to a Microsoft account, you must use the full Microsoft account email address to
+  authenticate, for example `jpillow@amigas.us`. This ensures that the domain value that contains the computer name is provided.
 
 <a name="networking"></a>
 ## Networking

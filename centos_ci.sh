@@ -24,7 +24,7 @@ set -e
 # that might interest this worker.
 if [ -e "jenkins-env" ]; then
   cat jenkins-env \
-    | grep -E "(JENKINS_URL|GIT_BRANCH|GIT_COMMIT|BUILD_NUMBER|ghprbSourceBranch|ghprbActualCommit|BUILD_URL|ghprbPullId|GH_TOKEN|JOB_NAME|CICO_API_KEY)=" \
+    | grep -E "(JENKINS_URL|GIT_BRANCH|GIT_COMMIT|BUILD_NUMBER|ghprbSourceBranch|ghprbActualCommit|BUILD_URL|ghprbPullId|GH_TOKEN|CICO_API_KEY)=" \
     | sed 's/^/export /g' \
     > ~/.jenkins-env
   source ~/.jenkins-env
@@ -87,13 +87,15 @@ PASS=$(echo $CICO_API_KEY | cut -d'-' -f1-2)
 set +x
 # For PR build, GIT_BRANCH is set to branch name other than origin/master
 if [[ "$GIT_BRANCH" = "origin/master" ]]; then
-  # http://stackoverflow.com/a/22908437/1120530
-  RSYNC_PASSWORD=$PASS rsync -a --rsync-path="mkdir -p minishift/master/$BUILD_NUMBER/ && rsync" \
-                       out/* minishift@artifacts.ci.centos.org::minishift/minishift/master/$BUILD_NUMBER/
+  # http://stackoverflow.com/a/22908437/1120530; Using --relative as --rsync-path not working
+  mkdir -p minishift/master/$BUILD_NUMBER/
+  cp -r out/* minishift/master/$BUILD_NUMBER/
+  RSYNC_PASSWORD=$PASS rsync -a --relative minishift/master/$BUILD_NUMBER/ minishift@artifacts.ci.centos.org::minishift/
   echo "Find Artifacts here http://artifacts.ci.centos.org/minishift/minishift/master/$BUILD_NUMBER ."
 else
-  # http://stackoverflow.com/a/22908437/1120530
-  RSYNC_PASSWORD=$PASS rsync -a --rsync-path="mkdir -p minishift/pr/$ghprbPullId/ && rsync" \
-                       out/* minishift@artifacts.ci.centos.org::minishift/minishift/pr/$ghprbPullId/
+  # http://stackoverflow.com/a/22908437/1120530; Using --relative as --rsync-path not working
+  mkdir -p minishift/pr/$ghprbPullId/
+  cp -r out/* minishift/pr/$ghprbPullId/
+  RSYNC_PASSWORD=$PASS rsync -a --relative minishift/pr/$ghprbPullId/ minishift@artifacts.ci.centos.org::minishift/
   echo "Find Artifacts here http://artifacts.ci.centos.org/minishift/minishift/pr/$ghprbPullId ."
 fi

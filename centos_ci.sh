@@ -79,7 +79,7 @@ export PATH=$PATH:/tmp/glide/${GLIDE_OS_ARCH}
 # Test
 make clean test cross fmtcheck prerelease
 # Run integration test with 'kvm' driver
-VM_DRIVER=kvm make integration
+MINISHIFT_VM_DRIVER=kvm make integration
 
 # On reaching successfully at this point, upload artifacts
 PASS=$(echo $CICO_API_KEY | cut -d'-' -f1-2)

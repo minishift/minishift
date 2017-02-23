@@ -2,27 +2,20 @@
 
 ## Filing issues
 
-File issues using the standard Github issue tracker for the repo.
+File issues using the standard [Github issue tracker](https://github.com/minishift/minishift/issues) for the repository.
+Before you submit a new issue, we recommend that you search the list of issues to see if anyone already submitted a similar issue.
 
-## How to become a contributor and submit your own code
+## Contributing patches
 
-### Contributor License Agreements
+Thank you for your contributions! Please follow this process to submit a patch:
 
-We'd love to accept your patches! Before we can take them, we have to jump a couple of legal hurdles.
+1. Create an issue describing your proposed change to the repository.
+1. The repository owners will triage and respond to your issue promptly.
+1. Fork the repository and create a topic branch.
+1. Refer to the [developer document](./docs/developing.md) for guidelines and tips on how to build and test Minishift.
+1. Submit a pull request with the proposed changes.
 
-Please fill out either the individual or corporate Contributor License Agreement (CLA).
+## Questions?
 
-  * If you are an individual writing original source code and you're sure you own the intellectual property, then you'll need to sign an [individual CLA](http://code.google.com/legal/individual-cla-v1.0.html).
-  * If you work for a company that wants to allow you to contribute your work, then you'll need to sign a [corporate CLA](http://code.google.com/legal/corporate-cla-v1.0.html).
-
-Follow either of the two links above to access the appropriate CLA and instructions for how to sign and return it. Once we receive it, we'll be able to accept your pull requests.
-
-***NOTE***: Only original source code from you and other people that have signed the CLA can be accepted into the main repository.
-
-### Contributing A Patch
-
-1. Submit an issue describing your proposed change to the repo in question.
-1. The repo owner will respond to your issue promptly.
-1. If your proposed change is accepted, and you haven't already done so, sign a Contributor License Agreement (see details above).
-1. Fork the desired repo, develop and test your code changes.
-1. Submit a pull request.
+If you run into issues or have any questions about contributions, feel free to ping the Minishift
+developers on IRC at the #minishift channel on freenode.

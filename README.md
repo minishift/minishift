@@ -109,7 +109,7 @@ You can now install the latest beta version of minishift.
         $ minishift delete
 
    This command deletes everything in the `MINISHIFT_HOME/.minishift/machines/minishift` directory.
-   Other cached data and the [persistent configuration](./docs/using.md#persistent-configuration) are not removed.
+   Other cached data and the [persistent configuration](./docs/managing-minishift.md#persistent-configuration) are not removed.
 
 1. To completely uninstall Minishift, delete everything in the `MINISHIFT_HOME` directory
    (default `~/.minishift`) and `~/.kube`:
@@ -124,8 +124,9 @@ You can now install the latest beta version of minishift.
 ## Quickstart
 
 This section contains a brief demo of Minishift and the provisioned OpenShift cluster.
-For details on the usage of Minishift refer to the [Using Minishift](/docs/using.md) guide.
-The interaction with OpenShift is via the command line tool _oc_ which is copied to your host.
+For details on the usage of Minishift refer to the [Managing Minishift](/docs/managing-minishift.md) topic.
+
+The interaction with OpenShift is via the command line tool _oc_ which is copied to your host. For more information on how Minishift can assist you in interacting with and configuring your local OpenShift instance refer to the [Interacting with OpenShift](/docs/interacting-with-minishift.md) topic.
 
 For more information about the OpenShift cluster architecture,
 see [Architecture Overview](https://docs.openshift.org/latest/architecture/index.html) in the
@@ -168,7 +169,7 @@ with the KVM hypervisor driver.
   To verify the `oc` version, check the contents of the `~/.minishift/cache/oc` directory.
 
 For more information about interacting with OpenShift with the command-line interface and
-the Web console, see [Interacting with OpenShift](./docs/using.md#interacting-with-openshift)
+the Web console, refer to the [Interacting with OpenShift](./docs/interacting-with-openshift.md) topic.
 
 <a name="deploying-a-sample-application"></a>
 ### Deploying a sample application
@@ -230,7 +231,8 @@ docker ps
 
 The following documentation is available:
 
-* [Using Minishift](./docs/using.md)
+* [Managing Minishift](./docs/managing-minishift.md)
+* [Interacting with OpenShift](./docs/interacting-with-openshift)
 * [Command reference](./docs/minishift.md)
 * [Troubleshooting](./docs/troubleshooting.md)
 * [Installing docker-machine drivers](./docs/docker-machine-drivers.md)

@@ -48,7 +48,7 @@ func TestConfigOnFileExists(t *testing.T) {
 
 	filePath := filepath.Join(testDir, "fake-machine.json")
 	expectedOcPath := filepath.Join(testDir, "fakeOc")
-	cfg := &InstanceConfig{
+	cfg := &InstanceConfigType{
 		FilePath: filePath,
 		OcPath:   expectedOcPath,
 	}
@@ -75,7 +75,7 @@ func TestWrite(t *testing.T) {
 	cfg.Write()
 
 	// read config file and verify content
-	var testCfg *InstanceConfig
+	var testCfg *InstanceConfigType
 	raw, err := ioutil.ReadFile(path)
 	if err != nil {
 		t.Errorf("Error reading config file %s", path)

@@ -80,7 +80,8 @@ var configTests = []cli.TestOption{
 func TestPreRunDirectories(t *testing.T) {
 	// Make sure we create the required directories.
 	testDir, err := ioutil.TempDir("", "minishift-test-start-cmd-")
-	// Need to create since MACHINE_NAME.json get created in root command
+	// Need to create since Minishift config get created in root command
+	os.Mkdir(filepath.Join(testDir, "config"), 0755)
 	os.Mkdir(filepath.Join(testDir, "machines"), 0755)
 	if err != nil {
 		t.Error(err)

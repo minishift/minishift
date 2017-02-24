@@ -22,17 +22,19 @@ import (
 	"os"
 )
 
-var Config *InstanceConfig
+var InstanceConfig *InstanceConfigType
 
-type InstanceConfig struct {
+type InstanceConfigType struct {
 	FilePath string `json:"-"`
 	OcPath   string
+
+	HostFolders []HostFolder
 }
 
 // Create new object with data if file exists or
 // Create json file and return object if doesn't exists
-func NewInstanceConfig(path string) (*InstanceConfig, error) {
-	cfg := new(InstanceConfig)
+func NewInstanceConfig(path string) (*InstanceConfigType, error) {
+	cfg := &InstanceConfigType{HostFolders: []HostFolder{}}
 	cfg.FilePath = path
 
 	// Check json file existence
@@ -50,7 +52,7 @@ func NewInstanceConfig(path string) (*InstanceConfig, error) {
 	return cfg, nil
 }
 
-func (cfg *InstanceConfig) Write() error {
+func (cfg *InstanceConfigType) Write() error {
 	jsonData, err := json.MarshalIndent(cfg, "", "\t")
 	if err != nil {
 		return err
@@ -63,7 +65,7 @@ func (cfg *InstanceConfig) Write() error {
 	return nil
 }
 
-func (cfg *InstanceConfig) Delete() error {
+func (cfg *InstanceConfigType) Delete() error {
 	if err := os.Remove(cfg.FilePath); err != nil {
 		return err
 	}
@@ -71,7 +73,7 @@ func (cfg *InstanceConfig) Delete() error {
 	return nil
 }
 
-func (cfg *InstanceConfig) read() error {
+func (cfg *InstanceConfigType) read() error {
 	raw, err := ioutil.ReadFile(cfg.FilePath)
 	if err != nil {
 		return err

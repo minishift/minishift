@@ -19,7 +19,7 @@ package openshift
 import (
 	"fmt"
 	"github.com/minishift/minishift/pkg/minikube/constants"
-	instanceState "github.com/minishift/minishift/pkg/minishift/config"
+	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/util"
 	"strings"
 )
@@ -31,7 +31,7 @@ var (
 
 // Add developer user to cluster sudoers
 func AddSudoersRoleForUser(user string) error {
-	cmdName := instanceState.Config.OcPath
+	cmdName := minishiftConfig.InstanceConfig.OcPath
 	cmdArgs := []string{"login", "-u", "system:admin"}
 	if _, err := runner.Output(cmdName, cmdArgs...); err != nil {
 		return err
@@ -50,7 +50,7 @@ func AddSudoersRoleForUser(user string) error {
 
 // Add Current Profile Context
 func AddContextForProfile(profile string, ip string, username string, namespace string) error {
-	cmdName := instanceState.Config.OcPath
+	cmdName := minishiftConfig.InstanceConfig.OcPath
 	ip = strings.Replace(ip, ".", "-", -1)
 	cmdArgs := []string{"config", "set-context", profile,
 		fmt.Sprintf("--cluster=%s:%d", ip, constants.APIServerPort),

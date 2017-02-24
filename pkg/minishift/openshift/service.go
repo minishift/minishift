@@ -59,7 +59,7 @@ func GetServiceURL(service, namespace string, https bool) (string, error) {
 
 	cmdArgText := fmt.Sprintf("get route/%s -n %s --config=%s %s", service, namespace, systemKubeConfigPath, URLCustomCol)
 	tokens := strings.Split(cmdArgText, " ")
-	cmdName := instanceState.Config.OcPath
+	cmdName := instanceState.InstanceConfig.OcPath
 	cmdOut, err := runner.Output(cmdName, tokens...)
 	if err != nil {
 		return "", errors.New(fmt.Sprintf("No service with name '%s' defined in namespace '%s'", service, namespace))
@@ -137,7 +137,7 @@ func getValidNamespaces(serviceListNamespace string) ([]string, error) {
 func getServiceURLsOutput(namespace string) (string, error) {
 	cmdArgText := fmt.Sprintf("get route -n %s --config=%s %s", namespace, systemKubeConfigPath, URLsCustomCol)
 	tokens := strings.Split(cmdArgText, " ")
-	cmdName := instanceState.Config.OcPath
+	cmdName := instanceState.InstanceConfig.OcPath
 	cmdOut, err := runner.Output(cmdName, tokens...)
 	if err != nil {
 		return "", err
@@ -180,7 +180,7 @@ func emptyFilter(data []string) []string {
 func getProjects() ([]string, error) {
 	cmdArgText := fmt.Sprintf("get projects --config=%s %s", systemKubeConfigPath, ProjectsCustomCol)
 	tokens := strings.Split(cmdArgText, " ")
-	cmdName := instanceState.Config.OcPath
+	cmdName := instanceState.InstanceConfig.OcPath
 	cmdOut, err := runner.Output(cmdName, tokens...)
 	if err != nil {
 		return []string{}, err

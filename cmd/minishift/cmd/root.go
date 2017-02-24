@@ -25,10 +25,11 @@ import (
 	"github.com/docker/machine/libmachine/log"
 	"github.com/golang/glog"
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
+	hostfolderCmd "github.com/minishift/minishift/cmd/minishift/cmd/hostfolder"
 	openShiftCmd "github.com/minishift/minishift/cmd/minishift/cmd/openshift"
 	"github.com/minishift/minishift/pkg/minikube/config"
 	"github.com/minishift/minishift/pkg/minikube/constants"
-	instanceState "github.com/minishift/minishift/pkg/minishift/config"
+	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -74,9 +75,18 @@ var RootCmd = &cobra.Command{
 
 		ensureConfigFileExists(constants.ConfigFile)
 
+		// Create all instances config
+		allInstanceConfigPath := filepath.Join(constants.Minipath, "config", "allinstances.json")
+		minishiftConfig.AllInstancesConfig, err = minishiftConfig.NewAllInstancesConfig(allInstanceConfigPath)
+
+		if err != nil {
+			glog.Errorln("Error creating config for all instances: ", err)
+			atexit.Exit(1)
+		}
+
 		// Create MACHINE_NAME.json
-		jsonDataPath := filepath.Join(constants.Minipath, "machines", constants.MachineName+".json")
-		instanceState.Config, err = instanceState.NewInstanceConfig(jsonDataPath)
+		instanceConfigPath := filepath.Join(constants.Minipath, "machines", constants.MachineName+".json")
+		minishiftConfig.InstanceConfig, err = minishiftConfig.NewInstanceConfig(instanceConfigPath)
 
 		if err != nil {
 			glog.Errorln("Error creating config for VM: ", err)
@@ -123,6 +133,8 @@ func init() {
 	RootCmd.PersistentFlags().Bool(showLibmachineLogs, false, "Show logs from libmachine.")
 	RootCmd.AddCommand(configCmd.ConfigCmd)
 	RootCmd.AddCommand(openShiftCmd.OpenShiftConfigCmd)
+	RootCmd.AddCommand(hostfolderCmd.HostfolderCmd)
+
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
 	logDir := pflag.Lookup("log_dir")
 	if !logDir.Changed {

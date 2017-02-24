@@ -100,6 +100,14 @@ var settings []Setting = []Setting{
 		callbacks:   []setFn{RequiresRestartMsg},
 	},
 	{
+		name: "hostfolders-automount",
+		set:  SetBool,
+	},
+	{
+		name: "hostfolders-mountpath",
+		set:  SetString,
+	},
+	{
 		name: config.WantUpdateNotification,
 		set:  SetBool,
 	},

@@ -136,8 +136,8 @@ func (m *MinishiftRunner) CheckStatus(desired string) bool {
 
 func NewOcRunner() *OcRunner {
 	jsonDataPath := filepath.Join(os.Getenv(constants.MiniShiftHomeEnv), "machines", constants.MachineName+".json")
-	instanceState.Config, _ = instanceState.NewInstanceConfig(jsonDataPath)
-	p := instanceState.Config.OcPath
+	instanceState.InstanceConfig, _ = instanceState.NewInstanceConfig(jsonDataPath)
+	p := instanceState.InstanceConfig.OcPath
 	return &OcRunner{CommandPath: p}
 }
 

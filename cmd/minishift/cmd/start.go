@@ -23,6 +23,7 @@ import (
 
 	units "github.com/docker/go-units"
 	"github.com/docker/machine/libmachine"
+	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/host"
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/golang/glog"
@@ -31,6 +32,7 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/cache"
 	"github.com/minishift/minishift/pkg/minishift/clusterup"
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
+	"github.com/minishift/minishift/pkg/minishift/hostfolder"
 	"github.com/minishift/minishift/pkg/minishift/openshift"
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
 	minishiftUtil "github.com/minishift/minishift/pkg/minishift/util"
@@ -187,10 +189,18 @@ func runStart(cmd *cobra.Command, args []string) {
 		atexit.Exit(1)
 	}
 
+	automountHostfolders(host.Driver)
+
 	clusterUp(&config, ip)
 	if err := openshift.AddSudoersRoleForUser("developer"); err != nil {
 		glog.Errorln("Error adding developer user to sudoers", err)
 		atexit.Exit(1)
+	}
+}
+
+func automountHostfolders(driver drivers.Driver) {
+	if hostfolder.IsAutoMount() && hostfolder.IsHostfoldersDefined(false) {
+		hostfolder.MountHostfolders(driver)
 	}
 }
 

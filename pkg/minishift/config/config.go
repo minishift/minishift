@@ -27,12 +27,14 @@ var Config *InstanceConfig
 type InstanceConfig struct {
 	FilePath string `json:"-"`
 	OcPath   string
+
+	HostFolders []HostFolder
 }
 
 // Create new object with data if file exists or
 // Create json file and return object if doesn't exists
 func NewInstanceConfig(path string) (*InstanceConfig, error) {
-	cfg := new(InstanceConfig)
+	cfg := &InstanceConfig{HostFolders: []HostFolder{}}
 	cfg.FilePath = path
 
 	// Check json file existence

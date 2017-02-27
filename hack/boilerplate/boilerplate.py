@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2016 Red Hat, Inc.
+# Copyright 2015 The Kubernetes Authors All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,7 +54,6 @@ def file_passes(filename, refs, regexs):
         f = open(filename, 'r')
     except:
         return False
-
     data = f.read()
     f.close()
 
@@ -93,6 +92,18 @@ def file_passes(filename, refs, regexs):
     p = regexs["date"]
     for i, d in enumerate(data):
         (data[i], found) = p.subn('YEAR', d)
+        if found != 0:
+            break
+
+    p = regexs["kubernetes_copyright"]
+    for i, d in enumerate(data):
+        (data[i], found) = p.subn('COPYRIGHTHOLDER', d)
+        if found != 0:
+            break
+
+    p = regexs["redhat_copyright"]
+    for i, d in enumerate(data):
+        (data[i], found) = p.subn('COPYRIGHTHOLDER', d)
         if found != 0:
             break
 
@@ -155,6 +166,10 @@ def get_regexs():
     regexs["go_build_constraints"] = re.compile(r"^(// \+build.*\n)+\n", re.MULTILINE)
     # strip #!.* from shell scripts
     regexs["shebang"] = re.compile(r"^(#!.*\n)\n*", re.MULTILINE)
+    # Search for Kubernetes copyright notice
+    regexs["kubernetes_copyright"] = re.compile(r"(Copyright YEAR The Kubernetes Authors All rights reserved)\n*", re.MULTILINE)
+    # Search for Red Hat copyright notice
+    regexs["redhat_copyright"] = re.compile(r"(Copyright \(C\) YEAR Red Hat, Inc)\n*", re.MULTILINE)
     return regexs
 
 def main():

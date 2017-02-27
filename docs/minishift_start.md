@@ -31,11 +31,13 @@ minishift start
       --no-proxy string                 List of hosts or subnets for which proxy should not be used.
   -e, --openshift-env stringSlice       Specify key-value pairs of environment variables to set on the OpenShift container.
       --openshift-version string        The OpenShift version to run, eg. v1.4.1 (default "v1.4.1")
+      --password string                 Password for the virtual machine registration.
       --public-hostname string          Public hostname of the OpenShift cluster.
       --registry-mirror stringSlice     Registry mirrors to pass to the Docker daemon.
       --routing-suffix string           Default suffix for the server routes.
       --server-loglevel int             Log level for the OpenShift server.
       --skip-registry-check             Skip the Docker daemon registry check.
+      --username string                 Username for the virtual machine registration.
       --vm-driver string                The driver to use for the Minishift VM. Possible values: [virtualbox vmwarefusion kvm xhyve hyperv] (default "kvm")
 ```
 
@@ -46,10 +48,8 @@ minishift start
       --log_backtrace_at traceLocation   when logging hits line file:N, emit a stack trace (default :0)
       --log_dir string                   If non-empty, write log files in this directory (default "")
       --logtostderr                      log to standard error instead of files
-      --password string                  Password for the virtual machine registration.
       --show-libmachine-logs             Show logs from libmachine.
       --stderrthreshold severity         logs at or above this threshold go to stderr (default 2)
-      --username string                  User name for the virtual machine registration.
   -v, --v Level                          log level for V logs
       --vmodule moduleSpec               comma-separated list of pattern=N settings for file-filtered logging
 ```

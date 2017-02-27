@@ -24,6 +24,7 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // stopCmd represents the stop command
@@ -32,19 +33,29 @@ var stopCmd = &cobra.Command{
 	Short: "Stops the running local OpenShift cluster.",
 	Long: `Stops the running local OpenShift cluster. This command stops the Minishift
 VM but does not delete any associated files. To start the cluster again, use the 'minishift start' command.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Stopping local OpenShift cluster...")
-		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
-		defer api.Close()
+	Run: runStop,
+}
 
-		if err := cluster.StopHost(api); err != nil {
-			fmt.Println("Error stopping cluster: ", err)
-			atexit.Exit(1)
-		}
-		fmt.Println("Cluster stopped.")
-	},
+func runStop(cmd *cobra.Command, args []string) {
+	fmt.Println("Stopping local OpenShift cluster...")
+	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+	defer api.Close()
+
+	setSubcriptionManagerParameters()
+
+	if err := cluster.StopHost(api); err != nil {
+		fmt.Println("Error stopping cluster: ", err)
+		atexit.Exit(1)
+	}
+	fmt.Println("Cluster stopped.")
 }
 
 func init() {
+	stopCmd.Flags().String(username, "", "Username for the virtual machine unregistration.")
+	stopCmd.Flags().String(password, "", "Password for the virtual machine unregistration.")
+
+	stopCmd.Flags().AddFlagSet(subscriptionManagerFlagSet)
+
+	viper.BindPFlags(stopCmd.Flags())
 	RootCmd.AddCommand(stopCmd)
 }

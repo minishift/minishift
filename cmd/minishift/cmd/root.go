@@ -26,7 +26,6 @@ import (
 	"github.com/golang/glog"
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
 	openShiftCmd "github.com/minishift/minishift/cmd/minishift/cmd/openshift"
-	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/config"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
@@ -50,8 +49,6 @@ var dirs = [...]string{
 
 const (
 	showLibmachineLogs = "show-libmachine-logs"
-	username           = "username"
-	password           = "password"
 )
 
 var viperWhiteList = []string{
@@ -112,8 +109,6 @@ func setFlagsUsingViper() {
 
 func init() {
 	RootCmd.PersistentFlags().Bool(showLibmachineLogs, false, "Show logs from libmachine.")
-	RootCmd.PersistentFlags().String(username, "", "User name for the virtual machine registration.")
-	RootCmd.PersistentFlags().String(password, "", "Password for the virtual machine registration.")
 	RootCmd.AddCommand(configCmd.ConfigCmd)
 	RootCmd.AddCommand(openShiftCmd.OpenShiftConfigCmd)
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
@@ -147,12 +142,6 @@ func setupViper() {
 	viper.SetDefault(config.WantUpdateNotification, true)
 	viper.SetDefault(config.ReminderWaitPeriodInHours, 24)
 	setFlagsUsingViper()
-	setRegistrationParameters()
-}
-
-func setRegistrationParameters() {
-	cluster.RegistrationParameters.Username = viper.GetString("username")
-	cluster.RegistrationParameters.Password = viper.GetString("password")
 }
 
 func ensureConfigFileExists(configPath string) {

@@ -24,6 +24,7 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // deleteCmd represents the delete command
@@ -31,19 +32,29 @@ var deleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Deletes the Minishift VM.",
 	Long:  `Deletes the Minishift VM, including the local OpenShift cluster and all associated files.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Deleting the Minishift VM...")
-		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
-		defer api.Close()
+	Run:   runDelete,
+}
 
-		if err := cluster.DeleteHost(api); err != nil {
-			fmt.Println("Error deleting the VM: ", err)
-			atexit.Exit(1)
-		}
-		fmt.Println("Minishift VM deleted.")
-	},
+func runDelete(cmd *cobra.Command, args []string) {
+	fmt.Println("Deleting the Minishift VM...")
+	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+	defer api.Close()
+
+	setSubcriptionManagerParameters()
+
+	if err := cluster.DeleteHost(api); err != nil {
+		fmt.Println("Error deleting the VM: ", err)
+		atexit.Exit(1)
+	}
+	fmt.Println("Minishift VM deleted.")
 }
 
 func init() {
+	deleteCmd.Flags().String(username, "", "Username for the virtual machine unregistration.")
+	deleteCmd.Flags().String(password, "", "Password for the virtual machine unregistration.")
+
+	deleteCmd.Flags().AddFlagSet(subscriptionManagerFlagSet)
+
+	viper.BindPFlags(deleteCmd.Flags())
 	RootCmd.AddCommand(deleteCmd)
 }

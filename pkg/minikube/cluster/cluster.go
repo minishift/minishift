@@ -39,6 +39,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/registration"
+	minishiftUtil "github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/util"
 	pb "gopkg.in/cheggaaa/pb.v1"
 	kubeapi "k8s.io/kubernetes/pkg/api"
@@ -192,6 +193,7 @@ type MachineConfig struct {
 	RegistryMirror   []string
 	HostOnlyCIDR     string // Only used by the virtualbox driver
 	OpenShiftVersion string
+	ShellProxyEnv    string // Only used for proxy purpose
 }
 
 func engineOptions(config MachineConfig) *engine.Options {
@@ -336,6 +338,12 @@ func createHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 
 	if err := api.Save(h); err != nil {
 		return nil, fmt.Errorf("Error attempting to save store: %s", err)
+	}
+
+	if config.ShellProxyEnv != "" {
+		if err := minishiftUtil.SetProxyToShellEnv(h, config.ShellProxyEnv); err != nil {
+			return nil, fmt.Errorf("Error setting proxy to VM: %s", err)
+		}
 	}
 
 	if err := registration.RegisterHostVM(h, RegistrationParameters); err != nil {

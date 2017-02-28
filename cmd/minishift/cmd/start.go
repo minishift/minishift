@@ -133,7 +133,6 @@ func runStart(cmd *cobra.Command, args []string) {
 	setDockerProxy()
 	setOcProxy()
 	setShellProxy()
-	SetRegistrationProxyParameters()
 	setSubcriptionManagerParameters()
 
 	config := cluster.MachineConfig{
@@ -147,6 +146,7 @@ func runStart(cmd *cobra.Command, args []string) {
 		RegistryMirror:   registryMirror,
 		HostOnlyCIDR:     viper.GetString(hostOnlyCIDR),
 		OpenShiftVersion: viper.GetString(openshiftVersion),
+		ShellProxyEnv:    shellProxyEnv,
 	}
 
 	fmt.Printf("Starting local OpenShift cluster using '%s' hypervisor...\n", config.VMDriver)
@@ -163,14 +163,6 @@ func runStart(cmd *cobra.Command, args []string) {
 	if err != nil {
 		glog.Errorln("Error starting the VM: ", err)
 		atexit.Exit(1)
-	}
-
-	// Set Proxy to as Shell Env
-	if viper.IsSet("http-proxy") || viper.IsSet("https-proxy") {
-		if err := minishiftUtil.SetProxyToShellEnv(host, shellProxyEnv); err != nil {
-			fmt.Printf("Error setting proxy to VM: %s", err)
-			atexit.Exit(1)
-		}
 	}
 
 	// Making sure the required Docker environment variables are set to make 'cluster up' work
@@ -238,40 +230,6 @@ func setShellProxy() {
 // update default no-proxy for docker
 func updateNoProxyForDocker() string {
 	return "localhost,127.0.0.1,172.30.1.1"
-}
-
-//Update RegistrationProxyParameters with proxy information
-func SetRegistrationProxyParameters() {
-	var proxyUri string
-
-	if viper.IsSet("https-proxy") {
-		proxyUri = viper.GetString(httpsProxy)
-	} else if viper.IsSet("http-proxy") {
-		proxyUri = viper.GetString(httpProxy)
-	}
-
-	if proxyUri != "" {
-		server, serverPort, user, password, err := minishiftUtil.ParseProxyUri(proxyUri)
-		if err != nil {
-			glog.Errorf("Not able to parse the proxy URI: %s\n", err)
-			atexit.Exit(1)
-		}
-
-		if server != "" {
-			cluster.RegistrationParameters.ProxyServer = server
-		}
-		if serverPort != "" {
-			cluster.RegistrationParameters.ProxyServerPort = serverPort
-		}
-
-		if user != "" {
-			cluster.RegistrationParameters.ProxyUsername = user
-		}
-
-		if password != "" {
-			cluster.RegistrationParameters.ProxyPassword = password
-		}
-	}
 }
 
 // calculateDiskSizeInMB converts a human specified disk size like "1000MB" or "1GB" and converts it into Megabits

@@ -40,8 +40,6 @@ func runDelete(cmd *cobra.Command, args []string) {
 	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 	defer api.Close()
 
-	setSubcriptionManagerParameters()
-
 	if err := cluster.DeleteHost(api); err != nil {
 		fmt.Println("Error deleting the VM: ", err)
 		atexit.Exit(1)
@@ -50,11 +48,6 @@ func runDelete(cmd *cobra.Command, args []string) {
 }
 
 func init() {
-	deleteCmd.Flags().String(username, "", "Username for the virtual machine unregistration.")
-	deleteCmd.Flags().String(password, "", "Password for the virtual machine unregistration.")
-
-	deleteCmd.Flags().AddFlagSet(subscriptionManagerFlagSet)
-
 	viper.BindPFlags(deleteCmd.Flags())
 	RootCmd.AddCommand(deleteCmd)
 }

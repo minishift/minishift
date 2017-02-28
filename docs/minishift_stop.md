@@ -12,13 +12,6 @@ VM but does not delete any associated files. To start the cluster again, use the
 minishift stop
 ```
 
-### Options
-
-```
-      --password string   Password for the virtual machine unregistration.
-      --username string   Username for the virtual machine unregistration.
-```
-
 ### Options inherited from parent commands
 
 ```

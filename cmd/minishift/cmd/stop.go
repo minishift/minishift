@@ -41,8 +41,6 @@ func runStop(cmd *cobra.Command, args []string) {
 	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 	defer api.Close()
 
-	setSubcriptionManagerParameters()
-
 	if err := cluster.StopHost(api); err != nil {
 		fmt.Println("Error stopping cluster: ", err)
 		atexit.Exit(1)
@@ -51,11 +49,6 @@ func runStop(cmd *cobra.Command, args []string) {
 }
 
 func init() {
-	stopCmd.Flags().String(username, "", "Username for the virtual machine unregistration.")
-	stopCmd.Flags().String(password, "", "Password for the virtual machine unregistration.")
-
-	stopCmd.Flags().AddFlagSet(subscriptionManagerFlagSet)
-
 	viper.BindPFlags(stopCmd.Flags())
 	RootCmd.AddCommand(stopCmd)
 }

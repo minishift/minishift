@@ -11,13 +11,6 @@ Deletes the Minishift VM, including the local OpenShift cluster and all associat
 minishift delete
 ```
 
-### Options
-
-```
-      --password string   Password for the virtual machine unregistration.
-      --username string   Username for the virtual machine unregistration.
-```
-
 ### Options inherited from parent commands
 
 ```

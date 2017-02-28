@@ -43,7 +43,7 @@ func (registrator *RedHatRegistrator) CompatibleWithDistribution(osReleaseInfo *
 	if osReleaseInfo.ID != "rhel" {
 		return false
 	}
-	if _, err := registrator.SSHCommand("sudo subscription-manager version"); err != nil {
+	if _, err := registrator.SSHCommand("sudo -E subscription-manager version"); err != nil {
 		return false
 	} else {
 		return true
@@ -51,30 +51,11 @@ func (registrator *RedHatRegistrator) CompatibleWithDistribution(osReleaseInfo *
 }
 
 func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) error {
-	if output, err := registrator.SSHCommand("sudo subscription-manager version"); err != nil {
+	if output, err := registrator.SSHCommand("sudo -E subscription-manager version"); err != nil {
 		return err
 	} else {
 		if strings.Contains(output, "not registered") {
-
-			//Configure subscription-manager for proxy enviornments
-			if param.ProxyServer != "" {
-				configCommand := fmt.Sprintf("sudo subscription-manager config ")
-				configCommand = configCommand +
-					fmt.Sprintf("--server.proxy_hostname %s "+
-						"--server.proxy_port %s ", param.ProxyServer, param.ProxyServerPort)
-				if param.ProxyUsername != "" {
-					configCommand = configCommand +
-						fmt.Sprintf("--server.proxy_user %s ", param.ProxyUsername)
-					if param.Password != "" {
-						configCommand = configCommand +
-							fmt.Sprintf("--server.proxy_password %s ", param.ProxyPassword)
-					}
-				}
-				if _, err := registrator.SSHCommand(configCommand); err != nil {
-					return err
-				}
-			}
-			subscriptionCommand := fmt.Sprintf("sudo subscription-manager register --auto-attach "+
+			subscriptionCommand := fmt.Sprintf("sudo -E subscription-manager register --auto-attach "+
 				"--username %s "+
 				"--password %s ", param.Username, param.Password)
 			if _, err := registrator.SSHCommand(subscriptionCommand); err != nil {
@@ -86,12 +67,12 @@ func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) er
 }
 
 func (registrator *RedHatRegistrator) Unregister(param *RegistrationParameters) error {
-	if output, err := registrator.SSHCommand("sudo subscription-manager version"); err != nil {
+	if output, err := registrator.SSHCommand("sudo -E subscription-manager version"); err != nil {
 		return err
 	} else {
 		if !strings.Contains(output, "not registered") {
 			if _, err := registrator.SSHCommand(
-				"sudo subscription-manager unregister"); err != nil {
+				"sudo -E subscription-manager unregister"); err != nil {
 				return err
 			}
 		}

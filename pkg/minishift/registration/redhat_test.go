@@ -27,22 +27,18 @@ import (
 
 var (
 	param = &RegistrationParameters{
-		Username:        "foo",
-		Password:        "foo",
-		ProxyUsername:   "foo",
-		ProxyPassword:   "foo",
-		ProxyServer:     "foo",
-		ProxyServerPort: "foo",
+		Username: "foo",
+		Password: "foo",
 	}
-	expectedCMDRegistration = fmt.Sprintf("sudo subscription-manager register --auto-attach --username %s --password %s ",
+	expectedCMDRegistration = fmt.Sprintf("sudo -E subscription-manager register --auto-attach --username %s --password %s ",
 		param.Username, param.Password)
-	expectedCMDUnregistration = "sudo subscription-manager unregister"
+	expectedCMDUnregistration = "sudo -E subscription-manager unregister"
 )
 
 func setup(t *testing.T) (registrator Registrator) {
 	s, _ := tests.NewSSHServer()
 	s.CommandToOutput = make(map[string]string)
-	s.CommandToOutput["sudo subscription-manager version"] = `server type: This system is currently not registered.`
+	s.CommandToOutput["sudo -E subscription-manager version"] = `server type: This system is currently not registered.`
 	port, err := s.Start()
 	if err != nil {
 		t.Fatalf("Error starting ssh server: %s", err)
@@ -102,7 +98,7 @@ func TestRedHatRegistratorRegister(t *testing.T) {
 	commander := provision.GenericSSHCommander{Driver: d}
 	registrator := NewRedHatRegistrator(commander)
 
-	s.CommandToOutput["sudo subscription-manager version"] = `server type: This system is currently not registered.`
+	s.CommandToOutput["sudo -E subscription-manager version"] = `server type: This system is currently not registered.`
 	if err := registrator.Register(param); err != nil {
 		t.Fatal("Distribution should able to register")
 	} else {
@@ -130,7 +126,7 @@ func TestRedHatRegistratorUnregister(t *testing.T) {
 	commander := provision.GenericSSHCommander{Driver: d}
 	registrator := NewRedHatRegistrator(commander)
 
-	s.CommandToOutput["sudo subscription-manager version"] = `server type: RedHat Subscription Management`
+	s.CommandToOutput["sudo -E subscription-manager version"] = `server type: RedHat Subscription Management`
 	if err := registrator.Unregister(param); err != nil {
 		t.Fatal("Distribution should be able to unregister")
 	} else {

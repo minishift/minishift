@@ -1,6 +1,8 @@
 language: go
+
 go:
 - 1.7.1
+
 install:
 - mkdir /home/travis/gopath/bin
 - mkdir /home/travis/gopath/pkg
@@ -15,5 +17,9 @@ install:
 - mkdir /tmp/glide
 - tar --directory=/tmp/glide -xvf /tmp/glide.tar.gz
 - export PATH=$PATH:/tmp/glide/${GLIDE_OS_ARCH}
+
 script:
 - make cross test fmtcheck prerelease
+
+notifications:
+  irc: "irc.freenode.net#minishift"

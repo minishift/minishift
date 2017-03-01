@@ -65,6 +65,9 @@ var (
 func Client() *github.Client {
 	once.Do(func() {
 		token := getToken()
+		fmt.Println("====================================token=================================== ")
+		fmt.Println("token", token)
+		fmt.Println("====================================token=================================== ")
 		var tc *http.Client
 		if len(token) > 0 {
 			ts := oauth2.StaticTokenSource(

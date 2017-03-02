@@ -25,5 +25,5 @@ minishift openshift restart
 ```
 
 ### SEE ALSO
-* [minishift openshift](minishift_openshift.md)	 - Modifies an OpenShift master configuration resource.
+* [minishift openshift](minishift_openshift.md)	 - Interact with an Openshift Cluster
 

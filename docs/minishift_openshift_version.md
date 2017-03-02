@@ -1,14 +1,14 @@
-## minishift openshift
+## minishift openshift version
 
-Interact with an Openshift Cluster
+Gets the list of OpenShift versions available for Minishift.
 
 ### Synopsis
 
 
-Interact with an Openshift cluster, check available versions and modify master config resources
+Gets the list of OpenShift versions available for Minishift.
 
 ```
-minishift openshift SUBCOMMAND [flags]
+minishift openshift version
 ```
 
 ### Options inherited from parent commands
@@ -25,9 +25,5 @@ minishift openshift SUBCOMMAND [flags]
 ```
 
 ### SEE ALSO
-* [minishift](minishift.md)	 - Minishift is a tool for application development in local OpenShift clusters.
-* [minishift openshift config](minishift_openshift_config.md)	 - Displays or patches OpenShift configuration.
-* [minishift openshift list-version](minishift_openshift_list-version.md)	 - Gets the list of OpenShift versions available for Minishift.
-* [minishift openshift restart](minishift_openshift_restart.md)	 - Restarts the OpenShift cluster.
-* [minishift openshift service](minishift_openshift_service.md)	 - Prints the URL for the specified service to the console.
+* [minishift openshift](minishift_openshift.md)	 - Interact with an Openshift Cluster
 

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cmd
+package openshift
 
 import (
 	"fmt"
@@ -89,5 +89,5 @@ func init() {
 	serviceCmd.Flags().BoolVar(&serviceURLMode, "url", false, "Access the service in the command-line console instead of the default browser.")
 	serviceCmd.PersistentFlags().StringVar(&serviceURLFormat, "format", "http://{{.IP}}:{{.Port}}", "The URL format of the service.")
 	serviceCmd.Flags().BoolVar(&https, "https", false, "Access the service with HTTPS instead of HTTP.")
-	RootCmd.AddCommand(serviceCmd)
+	OpenShiftConfigCmd.AddCommand(serviceCmd)
 }

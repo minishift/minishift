@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cmd
+package openshift
 
 import (
 	"os"
@@ -25,7 +25,7 @@ import (
 
 // getVersionsCmd represents the ip command
 var getVersionsCmd = &cobra.Command{
-	Use:   "get-openshift-versions",
+	Use:   "list-version",
 	Short: "Gets the list of OpenShift versions available for Minishift.",
 	Long:  `Gets the list of OpenShift versions available for Minishift.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -34,5 +34,5 @@ var getVersionsCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(getVersionsCmd)
+	OpenShiftConfigCmd.AddCommand(getVersionsCmd)
 }

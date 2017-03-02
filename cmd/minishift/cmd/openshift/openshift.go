@@ -22,8 +22,8 @@ import (
 
 var OpenShiftConfigCmd = &cobra.Command{
 	Use:   "openshift SUBCOMMAND [flags]",
-	Short: "Modifies an OpenShift master configuration resource.",
-	Long:  "Modifies an OpenShift master configuration resource.",
+	Short: "Interact with an Openshift Cluster",
+	Long:  "Interact with an Openshift cluster, check available versions and modify master config resources",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

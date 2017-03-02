@@ -9,6 +9,7 @@ Minishift creates a virtual machine (VM) and provisions a local, single-node Ope
   - [Login](#login)
   - [Console](#console)
   - [Services](#services)
+  - [Logs](#logs)
 - [Updating OpenShift configuration](#updating-openshift-configuration)
 - [Persistent volumes](#persistent-volumes)
 
@@ -83,7 +84,16 @@ $ minishift console
 To access a service exposed with a node port, run this command in a shell after starting Minishift to get the address:
 
 ```shell
-$ minishift service [-n NAMESPACE] [--url] NAME
+$ minishift openshift service [-n NAMESPACE] [--url] NAME
+```
+
+<a name="logs"></a>
+### Logs
+
+To access OpenShift logs, run the `logs` command after starting Minishift:
+
+```shell
+$ minishift logs
 ```
 
 <a name="updating-openshift-configuration"></a>

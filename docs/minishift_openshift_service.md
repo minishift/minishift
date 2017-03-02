@@ -1,14 +1,23 @@
-## minishift openshift
+## minishift openshift service
 
-Interact with an Openshift Cluster
+Prints the URL for the specified service to the console.
 
 ### Synopsis
 
 
-Interact with an Openshift cluster, check available versions and modify master config resources
+Prints the URL for the specified service to the console.
 
 ```
-minishift openshift SUBCOMMAND [flags]
+minishift openshift service [flags] SERVICE
+```
+
+### Options
+
+```
+      --format string      The URL format of the service. (default "http://{{.IP}}:{{.Port}}")
+      --https              Access the service with HTTPS instead of HTTP.
+  -n, --namespace string   The namespace of the service. (default "default")
+      --url                Access the service in the command-line console instead of the default browser.
 ```
 
 ### Options inherited from parent commands
@@ -25,9 +34,6 @@ minishift openshift SUBCOMMAND [flags]
 ```
 
 ### SEE ALSO
-* [minishift](minishift.md)	 - Minishift is a tool for application development in local OpenShift clusters.
-* [minishift openshift config](minishift_openshift_config.md)	 - Displays or patches OpenShift configuration.
-* [minishift openshift list-versions](minishift_openshift_list-versions.md)	 - Gets the list of OpenShift versions available for Minishift.
-* [minishift openshift restart](minishift_openshift_restart.md)	 - Restarts the OpenShift cluster.
-* [minishift openshift service](minishift_openshift_service.md)	 - Prints the URL for the specified service to the console.
+* [minishift openshift](minishift_openshift.md)	 - Interact with an Openshift Cluster
+* [minishift openshift service list](minishift_openshift_service_list.md)	 - Gets the URLs of the services in your local cluster.
 

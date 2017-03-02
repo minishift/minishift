@@ -99,33 +99,48 @@ $ minishift logs
 <a name="updating-openshift-configuration"></a>
 ## Updating OpenShift configuration
 
-  Once OpenShift is running, you can view and change the master and
-  node configuration of your OpenShift cluster.
+Once OpenShift is running, you can view and change the master and
+node configuration of your OpenShift cluster.
 
-  You can view the current OpenShift master configuration (_master-config.yaml_) via:
+You can view the current OpenShift master configuration (_master-config.yaml_) via:
 
-  ```shell
-  $ minishift openshift config view
-  ```
+```shell
+$ minishift openshift config view
+```
 
-  For displaying the node configuration, you can specify the `target` flag.
-  For more details about the `view` command refer to its [synopsis](./minishift_openshift_config_view.md).
+For displaying the node configuration, you can specify the `target` flag.
+For more details about the `view` command refer to its [synopsis](./minishift_openshift_config_view.md).
 
-  Let's look at [Cross-origin resource sharing](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) (CORS) as an example for patching the OpenShift master configuration.
-  Per default, OpenShift will only allow cross origin resource requests from the IP of the
-  cluster as well as localhost. This is specified via the `corsAllowedOrigins` property in the
-  [master configuration](https://docs.openshift.com/enterprise/3.0/admin_guide/master_node_configuration.html#master-configuration-files) (_master-config.yaml_). To change this value and allow
-  cross origin requests from all domains, one can execute:
+Let's look at [Cross-origin resource sharing](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) (CORS) as an example for patching the OpenShift master configuration.
+Per default, OpenShift will only allow cross origin resource requests from the IP of the
+cluster as well as localhost. This is specified via the `corsAllowedOrigins` property in the
+[master configuration](https://docs.openshift.com/enterprise/3.0/admin_guide/master_node_configuration.html#master-configuration-files) (_master-config.yaml_). To change this value and allow
+cross origin requests from all domains, one can execute:
 
-  ```
-  $  minishift openshift config set --patch '{"corsAllowedOrigins": [".*"]}'
-  ```
+```
+$  minishift openshift config set --patch '{"corsAllowedOrigins": [".*"]}'
+```
 
-  Per default, the master configuration is targeted, but you can also path the node config
-  by specifying the `target` flag. For more details about the
-  `set` command refer to its [synopsis](./minishift_openshift_config_set.md).
+Per default, the master configuration is targeted, but you can also patch the node configuration
+by specifying the `target` flag. For more details about the
+`set` command refer to its [synopsis](./minishift_openshift_config_set.md).
 
-  **Note:** OpenShift will be restarted after applying the patch.
+A second use case for the `openshift config` command is the ability to change OpenShift's routing suffix.
+If you use a static routing suffix, you can just specify the `routing-suffix` flag as part of the
+[`start`](./minishift_start.md) command. However, per default Minishift uses a dynamic routing prefix
+based on [nip.io](http://nip.io/). In this case the VM's IP is part of the routing suffix, for example
+_192.168.99.103.nip.io_. There is an alternative to nip.io called [xip.io](http://xip.io/). It is
+based on the same principles. In case you are experiencing issues with nip.io, you can switch to
+xip.io using the `openshift config` command:
+
+```
+$ minishift openshift config set --patch '{"routingConfig": {"subdomain": "192.168.99.103.xip.io"}}'
+```
+
+You need to replace the IP in the above command with the IP of your VM, which you
+can obtain via the [`ip`](./minishift_ip.md) command.
+
+**Note:** OpenShift will be transparently restarted after applying the patch.
 
 <a name="persistent-volumes"></a>
 ## Persistent volumes

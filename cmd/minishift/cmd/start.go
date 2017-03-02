@@ -179,7 +179,13 @@ func runStart(cmd *cobra.Command, args []string) {
 		atexit.Exit(1)
 	}
 
-	clusterUp(&config)
+	ip, err := host.Driver.GetIP()
+	if err != nil {
+		glog.Errorln("Error determining host ip", err)
+		atexit.Exit(1)
+	}
+
+	clusterUp(&config, ip)
 }
 
 // Set Docker Proxy
@@ -302,7 +308,7 @@ func initSubscriptionManagerFlags() {
 }
 
 // clusterUp downloads and installs the oc binary in order to run 'cluster up'
-func clusterUp(config *cluster.MachineConfig) {
+func clusterUp(config *cluster.MachineConfig, ip string) {
 	oc := cache.Oc{
 		OpenShiftVersion:  config.OpenShiftVersion,
 		MinishiftCacheDir: filepath.Join(constants.Minipath, "cache"),
@@ -320,6 +326,8 @@ func clusterUp(config *cluster.MachineConfig) {
 	viper.Set(hostConfigDir, viper.GetString(hostConfigDir))
 	viper.Set(hostDataDir, viper.GetString(hostDataDir))
 	viper.Set(hostVolumesDir, viper.GetString(hostVolumesDir))
+
+	setDefaultRoutingPrefix(ip)
 
 	clusterUpFlagSet.VisitAll(func(flag *flag.Flag) {
 		if viper.IsSet(flag.Name) {
@@ -343,6 +351,13 @@ func clusterUp(config *cluster.MachineConfig) {
 		// TODO glog is probably not right here. Need some sort of logging wrapper
 		glog.Errorln("Error starting the cluster: ", err)
 		atexit.Exit(1)
+	}
+}
+
+func setDefaultRoutingPrefix(ip string) {
+	// prefer nip.io over xip.io. See GitHub issue #501
+	if !viper.IsSet(routingSuffix) {
+		viper.Set(routingSuffix, ip+".nip.io")
 	}
 }
 

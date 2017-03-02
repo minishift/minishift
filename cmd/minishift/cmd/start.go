@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	units "github.com/docker/go-units"
 	"github.com/docker/machine/libmachine"
@@ -188,6 +189,7 @@ func runStart(cmd *cobra.Command, args []string) {
 	}
 
 	clusterUp(&config)
+	setMinishiftContext(&config, host)
 }
 
 // Set Docker Proxy
@@ -345,17 +347,7 @@ func initSubscriptionManagerFlags() {
 
 // clusterUp downloads and installs the oc binary in order to run 'cluster up'
 func clusterUp(config *cluster.MachineConfig) {
-	oc := cache.Oc{
-		OpenShiftVersion:  config.OpenShiftVersion,
-		MinishiftCacheDir: filepath.Join(constants.Minipath, "cache"),
-	}
-	err := oc.EnsureIsCached()
-	if err != nil {
-		glog.Errorln("Error starting the cluster: ", err)
-		atexit.Exit(1)
-	}
-
-	cmdName := filepath.Join(oc.GetCacheFilepath(), constants.OC_BINARY_NAME)
+	cmdName := ocCommand(config)
 	cmdArgs := []string{"cluster", "up", "--use-existing-config"}
 
 	// Set default value for host config, data and volumes
@@ -380,10 +372,52 @@ func clusterUp(config *cluster.MachineConfig) {
 		}
 	})
 
-	err = runner.Run(cmdName, cmdArgs...)
+	err := runner.Run(cmdName, cmdArgs...)
 	if err != nil {
 		// TODO glog is probably not right here. Need some sort of logging wrapper
 		glog.Errorln("Error starting the cluster: ", err)
+		atexit.Exit(1)
+	}
+}
+
+// Check for existing cache for oc binary and return oc binary path
+func ocCommand(config *cluster.MachineConfig) string {
+	oc := cache.Oc{
+		OpenShiftVersion:  config.OpenShiftVersion,
+		MinishiftCacheDir: filepath.Join(constants.Minipath, "cache"),
+	}
+	err := oc.EnsureIsCached()
+	if err != nil {
+		glog.Errorln("Error starting the cluster: ", err)
+		atexit.Exit(1)
+	}
+
+	cmdName := filepath.Join(oc.GetCacheFilepath(), constants.OC_BINARY_NAME)
+	return cmdName
+}
+
+// set Minishift current-context as "minishift"
+// https://docs.openshift.com/enterprise/3.0/cli_reference/manage_cli_profiles.html (set-context section)
+func setMinishiftContext(config *cluster.MachineConfig, host *host.Host) {
+	cmdName := ocCommand(config)
+	ip, _ := host.Driver.GetIP()
+	ip = strings.Replace(ip, ".", "-", -1)
+	cmdArgs := []string{"config", "set-context", "minishift",
+		fmt.Sprintf("--cluster=%s:%s", ip, constants.APIServerPort),
+		fmt.Sprintf("--user=developer/%s:%s", ip, constants.APIServerPort),
+		"--namespace=myproject"}
+
+	err := runner.Run(cmdName, cmdArgs...)
+	if err != nil {
+		glog.Errorln("Error setting minishift context: ", err)
+		atexit.Exit(1)
+	}
+
+	cmdArgs = []string{"config", "use-context", "minishift"}
+
+	err = runner.Run(cmdName, cmdArgs...)
+	if err != nil {
+		glog.Errorln("Error using minishift context: ", err)
 		atexit.Exit(1)
 	}
 }

@@ -1,90 +1,56 @@
-# Using Minishift
+# Managing Minishift
 
 The following sections describe different aspects of using Minishift and provide an
 overview of different components and services.
 
 <!-- MarkdownTOC -->
 
-- [Managing your OpenShift instance](#managing-your-openshift-instance)
-  - [Starting OpenShift](#starting-openshift)
-  - [Stopping OpenShift](#stopping-openshift)
-  - [Deleting OpenShift](#deleting-openshift)
-  - [Updating OpenShift configuration](#updating-openshift-configuration)
+- [Managing Minishift](#managing-minishift)
+  - [Minishift start](#minishift start)
+  - [Minishift stop](#minishift-stop)
+  - [Minishift delete](#minishift-delete)
 - [Minishift runtime options](#minishift-runtime-options)
   - [Flags](#flags)
   - [Environment variables](#environment-variables)
   - [Persistent configuration](#persistent-configuration)
     - [Setting persistent configuration values](#setting-persistent-configuration-values)
     - [Unsetting persistent configuration values](#unsetting-persistent-configuration-values)
-- [Interacting with OpenShift](#interacting-with-openshift)
-  - [OpenShift client binary \(oc\)](#openshift-client-binary-oc)
-  - [Login](#login)
-  - [Console](#console)
-  - [Services](#services)
 - [HTTP/HTTPS Proxies](#httphttps-proxies)
 - [Mounted host folders](#mounted-host-folders)
   - [Mounting custom shared folders](#mounting-custom-shared-folders)
 - [Networking](#networking)
-- [Persistent volumes](#persistent-volumes)
-- [Private container registries](#private-container-registries)
 
 <!-- /MarkdownTOC -->
 
-<a name="managing-your-openshift-instance"></a>
-## Managing your OpenShift instance
+<a name="managing-minishift"></a>
+## Managing Minishift
 
-This section contains information about basic virtual machine and OpenShift management operations.
+When you use Minishift, you interact with two distinct components, both of which are managed by Minishift:
+- the virtual machine (VM) created by Minishift and
+- the OpenShift instance provisioned by Minishift within the VM.
 
-<a name="starting-openshift"></a>
-### Starting OpenShift
+The following sections, in this topic, contain information about managing the Minishift VM. For details on using Minishift to manage your local OpenShift instance refer to the [Interacting with your local OpenShift](./interacting-with-openshift.md) topic.
 
-The [`minishift start`](./minishift_start.md) command is used to start your OpenShift instance.
-This command creates and configures a virtual machine that runs a single-node OpenShift instance.
+<a name="minishift-start"></a>
+### Minishift start
 
-<a name="stopping-openshift"></a>
-### Stopping OpenShift
+The [`minishift start`](./minishift_start.md) command creates and configures the Minishift VM and provisions a local, single-node OpenShift instance within the VM.
+
+It also copies the `oc` binary to your host so that you can interact with OpenShift either through the `oc` command line tool or through the web console which can be accessed through the URL provided in the output of the `minishift start` command. For detailed information about accessing the console, refer to the Console section of the [Interacting with your local OpenShift](./interacting-with-openshift.md) topic.
+
+<a name="minishift-stop"></a>
+### Minishift stop
 
 The [`minishift stop`](./minishift_stop.md) command is used to stop your OpenShift instance.
-This command shuts down the Minishift virtual machine, but preserves the cluster state.
-Starting Minishift again will restore the cluster, allowing you to continue work from where you left-off.
+This command shuts down the Minishift VM, but preserves the OpenShift cluster state.
 
-<a name="deleting-openshift"></a>
-### Deleting OpenShift
+Starting Minishift again will restore the OpenShift cluster, allowing you to continue work from where you left-off. However, note that on re-start one needs to repeat the same parameters as used in the original start command. Efforts to further refine this experience are on, see github issue [#179](https://github.com/minishift/minishift/issues/179)
+
+<a name="minishift-delete"></a>
+### Minishift delete
 
 The [`minishift delete`](./minishift_delete.md) command is used to delete the OpenShift instance.
-This command shuts down and deletes the Minishift virtual machine. No data or state is preserved.
-
-<a name="updating-openshift-configuration"></a>
-### Updating OpenShift configuration
-
-Once you have [started](#starting-openshift) OpenShift, you can view and change the master and
-node configuration of your OpenShift cluster.
-
-You can view the current OpenShift master configuration (_master-config.yaml_) via:
-
-```shell
-$ minishift openshift config view
-```
-
-For displaying the node configuration, you can specify the `target` flag.
-For more details about the `view` command refer its [synopsis](./minishift_openshift_config_view.md).
-
-Let's look at [Cross-origin resource sharing](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) (CORS) as an example for patching the OpenShift master configuration.
-Per default, OpenShift will only allow cross origin resource requests from the IP of the
-cluster as well as localhost. This is specified via the `corsAllowedOrigins` property in the
-master configuration
-[master-config.yaml](https://docs.openshift.com/enterprise/3.0/admin_guide/master_node_configuration.html#master-configuration-files). To change this value and allow
-cross origin requests from all domains, one can execute:
-
-```
-$  minishift openshift config set --patch '{"corsAllowedOrigins": [".*"]}'
-```
-
-Per default, the master configuration is targeted, but you can also path the node config
-by specifying the `target` flag. For more details about the
-`set` command refer to its [synopsis](./minishift_openshift_config_set.md).
-
-**Note:** OpenShift will be restarted after applying the patch.
+This command shuts down and deletes the Minishift VM. No data or state is preserved.
 
 <a name="minishift-runtime-options"></a>
 ## Minishift runtime options
@@ -134,7 +100,7 @@ Minishift maintains a configuration file `$MINISHIFT_HOME/config/config.json` wh
 used to set commonly used command line flags persistently.
 
 **Note:** Persistent configuration can only be applied to the set of supported configuration options listed in the synopsis of the
-[`minishift config`](./minishift_config.md) sub-command, unlike environment variables which can be used to replace any option of any command, .
+[`minishift config`](./minishift_config.md) sub-command, unlike environment variables which can be used to replace any option of any command.
 
 <a name="setting-persistent-configuration-values"></a>
 #### Setting persistent configuration values
@@ -162,73 +128,6 @@ To remove a persistent configuration option, the [`unset`](./minishift_config_un
 can be used:
 
     $ minishift config unset memory
-
-<a name="interacting-with-openshift"></a>
-## Interacting with OpenShift
-
-<a name="openshift-client-binary-oc"></a>
-### OpenShift client binary (oc)
-
-The `minishift start` command creates an OpenShift instance using the
-[cluster up](https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md) approach.
-
-For this purpose it copies the `oc` binary onto  your host. You find it under
-`~/.minishift/cache/oc/\<OpenShift version\>/oc`. You can add this binary to your `PATH` variable
-in order to use `oc`, for example:
-
-    $ export PATH=$PATH:~/.minishift/cache/oc/v1.4.1
-
-In future versions we will provide a command to assist in setting up the `PATH`.
-See Github issue [#142](https://github.com/minishift/minishift/issues/142).
-
-For an introduction to `oc` usage, refer to the [Get Started with the CLI](https://docs.openshift.com/enterprise/3.2/cli_reference/get_started_cli.html)
-section in the OpenShift documentation.
-
-<a name="login"></a>
-### Login
-
-Per default _cluster up_ uses an [AllowAllPasswordIdentityProvider](https://docs.openshift.org/latest/install_config/configuring_authentication.html#AllowAllPasswordIdentityProvider)
-for authentication against the local cluster. This means any non-empty username and password can
-be used to login to the local cluster. The recommended username and password are
-developer/developer, since it also has a default project _myproject_ set up.
-
-To login as administrator, use the system account:
-
-```shell
-$ oc login -u system:admin
-```
-
-In this case [client certificates](https://docs.openshift.com/enterprise/3.2/architecture/additional_concepts/authentication.html#api-authentication)
-are used which are stored in `~/.kube/config`. _cluster up_ will install
-the appropriate certificates as part of the bootstrap.
-
-**Note:** If you type `oc login -u system -p admin`, you will get logged in, but not as administrator,
-but rather as unprivileged user with no particular rights.
-
-To view the currently available login contexts, run:
-
-```
-$ oc config view
-```
-
-<a name="console"></a>
-### Console
-
-To access the [OpenShift console](https://docs.openshift.org/latest/architecture/infrastructure_components/web_console.html),
-run this command in a shell after starting Minishift to get the address:
-
-```shell
-$ minishift console
-```
-
-<a name="services"></a>
-### Services
-
-To access a service exposed with a node port, run this command in a shell after starting Minishift to get the address:
-
-```shell
-$ minishift service [-n NAMESPACE] [--url] NAME
-```
 
 <a name="httphttps-proxies"></a>
 ## HTTP/HTTPS Proxies
@@ -277,12 +176,13 @@ These are not configurable at the moment and are different for each driver and t
 | Xhyve | OSX | /Users | /Users |
 
 **Note:** Host folder sharing is not implemented in the KVM and Hyper-V driver. You can
-[mount a CIFS-based shared folder](mounting-custom-shared-folders) inside the virtual machine instead.
+[mount a CIFS-based shared folder](mounting-custom-shared-folders) inside the VM instead.
 
 <a name="mounting-custom-shared-folders"></a>
 ### Mounting custom shared folders
+
 The Boot2Docker and the CentOS image include `cifs-utils`, which allows you to mount CIFS-based shared
-folders inside the virtual machine. For example, on Windows 10 the `C:\Users` folder is shared and only needs locally
+folders inside the VM. For example, on Windows 10 the `C:\Users` folder is shared and only needs locally
 authenticated users. The following procedure describes how to mount this folder.
 
 1. Find the local IP address from the same network segment as your Minishift instance.
@@ -311,7 +211,7 @@ authenticated users. The following procedure describes how to mount this folder.
 **Note:**
 
 - If you use this method to mount the folder, you might encounter issues if your password string
-  contains a `$` sign, because this is used by PowerShell as a variables to be replaced. You can use `'` (single quotes)
+  contains a `$` sign, because this is used by PowerShell as a variable to be replaced. You can use `'` (single quotes)
   instead and replace the value of `$env:computername` with the contents of this variable.
 
 - If your Windows account is linked to a Microsoft account, you must use the full Microsoft account email address to
@@ -322,41 +222,3 @@ authenticated users. The following procedure describes how to mount this folder.
 
 The Minishift VM is exposed to the host system via a host-only IP address, that can be obtained
 with the `minishift ip` command.
-
-<a name="persistent-volumes"></a>
-## Persistent volumes
-
-Minishift supports [PersistentVolumes](https://docs.openshift.org/latest/dev_guide/persistent_volumes.html)
-of type `hostPath`. These PersistentVolumes are mapped to a directory inside the Minishift VM.
-
-The MiniShift VM boots into a tmpfs, so most directories will not be persisted across reboots (for example, when you use `minishift stop`).
-However, MiniShift is configured to persist files stored under the following host directories:
-
-* `/data`
-* `/var/lib/minishift`
-* `/var/lib/docker`
-
-Here is an example PersistentVolume config to persist data in the `/data` directory:
-
-```yaml
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: pv0001
-spec:
-  accessModes:
-    - ReadWriteOnce
-  capacity:
-    storage: 5Gi
-  hostPath:
-    path: /data/pv0001/
-```
-
-<a name="private-container-registries"></a>
-## Private container registries
-
-To access a private container registry, follow the steps on [this page](http://kubernetes.io/docs/user-guide/images/).
-
-We recommend you to use ImagePullSecrets, but if you would like to configure access on the
-Minishift VM you can place the `.dockercfg` in the `/home/docker` directory or the `config.json`
-in the `/home/docker/.docker` directory.

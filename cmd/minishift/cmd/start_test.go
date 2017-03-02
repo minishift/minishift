@@ -117,6 +117,7 @@ var testRunner *RecordingRunner
 var testMachineConfig = cluster.MachineConfig{
 	OpenShiftVersion: "v1.3.1",
 }
+var testIp = "192.168.99.42"
 
 func TestStartClusterUpNoFlags(t *testing.T) {
 	setUp(t)
@@ -125,7 +126,7 @@ func TestStartClusterUpNoFlags(t *testing.T) {
 	defer SetRunner(util.RealRunner{})
 	defer viper.Reset()
 
-	clusterUp(&testMachineConfig)
+	clusterUp(&testMachineConfig, testIp)
 
 	expectedOc := filepath.Join(testDir, "cache", "oc", testMachineConfig.OpenShiftVersion, constants.OC_BINARY_NAME)
 	if testRunner.Cmd != expectedOc {
@@ -135,7 +136,9 @@ func TestStartClusterUpNoFlags(t *testing.T) {
 	expectedArguments := []string{"cluster", "up", "--use-existing-config",
 		"--host-config-dir", hostConfigDirectory,
 		"--host-data-dir", hostDataDirectory,
-		"--host-volumes-dir", hostVolumesDirectory}
+		"--host-volumes-dir", hostVolumesDirectory,
+		"--routing-suffix", testIp + ".nip.io",
+	}
 	for i, v := range testRunner.Args {
 		if v != expectedArguments[i] {
 			t.Errorf("Expected argument '%s'. Received '%s'", expectedArguments[i], v)
@@ -151,12 +154,13 @@ func TestStartClusterUpWithOverrideHostConfigDirFlag(t *testing.T) {
 	defer viper.Reset()
 
 	viper.Set("host-config-dir", "/var/tmp/foo")
-	clusterUp(&testMachineConfig)
+	clusterUp(&testMachineConfig, testIp)
 
 	expectedArguments := []string{"cluster", "up", "--use-existing-config",
 		"--host-config-dir", "/var/tmp/foo",
 		"--host-data-dir", hostDataDirectory,
 		"--host-volumes-dir", hostVolumesDirectory,
+		"--routing-suffix", testIp + ".nip.io",
 	}
 	assertCommandLineArguments(expectedArguments, t)
 }
@@ -169,12 +173,13 @@ func TestStartClusterUpWithOverrideHostDataDirFlag(t *testing.T) {
 	defer viper.Reset()
 
 	viper.Set("host-data-dir", "/var/tmp/foo")
-	clusterUp(&testMachineConfig)
+	clusterUp(&testMachineConfig, testIp)
 
 	expectedArguments := []string{"cluster", "up", "--use-existing-config",
 		"--host-config-dir", hostConfigDirectory,
 		"--host-data-dir", "/var/tmp/foo",
 		"--host-volumes-dir", hostVolumesDirectory,
+		"--routing-suffix", testIp + ".nip.io",
 	}
 	assertCommandLineArguments(expectedArguments, t)
 }
@@ -187,12 +192,13 @@ func TestStartClusterUpWithOverrideHostVolumesDirFlag(t *testing.T) {
 	defer viper.Reset()
 
 	viper.Set("host-volumes-dir", "/var/tmp/foo")
-	clusterUp(&testMachineConfig)
+	clusterUp(&testMachineConfig, testIp)
 
 	expectedArguments := []string{"cluster", "up", "--use-existing-config",
 		"--host-config-dir", hostConfigDirectory,
 		"--host-data-dir", hostDataDirectory,
 		"--host-volumes-dir", "/var/tmp/foo",
+		"--routing-suffix", testIp + ".nip.io",
 	}
 	assertCommandLineArguments(expectedArguments, t)
 }
@@ -206,13 +212,14 @@ func TestStartClusterUpWithFlag(t *testing.T) {
 
 	viper.Set("public-hostname", "foobar")
 	viper.Set("skip-registry-check", "true")
-	clusterUp(&testMachineConfig)
+	clusterUp(&testMachineConfig, testIp)
 
 	expectedArguments := []string{"cluster", "up", "--use-existing-config",
 		"--host-config-dir", hostConfigDirectory,
 		"--host-data-dir", hostDataDirectory,
 		"--host-volumes-dir", hostVolumesDirectory,
 		"--public-hostname", "foobar",
+		"--routing-suffix", testIp + ".nip.io",
 		"--skip-registry-check", "true"}
 	assertCommandLineArguments(expectedArguments, t)
 }
@@ -259,7 +266,7 @@ func TestClusterUpWithProxyFlag(t *testing.T) {
 
 	setOcProxy()
 
-	clusterUp(&testMachineConfig)
+	clusterUp(&testMachineConfig, testIp)
 
 	expectedArguments := []string{"cluster", "up", "--use-existing-config",
 		"--host-config-dir", hostConfigDirectory,
@@ -267,7 +274,9 @@ func TestClusterUpWithProxyFlag(t *testing.T) {
 		"--host-volumes-dir", hostVolumesDirectory,
 		"--http-proxy", "http://localhost:3128",
 		"--https-proxy", "https://localhost:3128",
-		"--no-proxy", "10.0.0.1"}
+		"--no-proxy", "10.0.0.1",
+		"--routing-suffix", testIp + ".nip.io",
+	}
 	assertCommandLineArguments(expectedArguments, t)
 
 }
@@ -280,14 +289,39 @@ func TestStartClusterUpWithOpenShiftEnv(t *testing.T) {
 	defer viper.Reset()
 
 	viper.Set("openshift-env", "HTTP_PROXY=http://localhost:3128,HTTP_PROXY_USER=foo,HTTP_PROXY_PASS=bar")
-	clusterUp(&testMachineConfig)
+	clusterUp(&testMachineConfig, testIp)
 
 	expectedArguments := []string{"cluster", "up", "--use-existing-config",
 		"--host-config-dir", hostConfigDirectory,
 		"--host-data-dir", hostDataDirectory,
 		"--host-volumes-dir", hostVolumesDirectory,
-		"--env", "HTTP_PROXY=http://localhost:3128,HTTP_PROXY_USER=foo,HTTP_PROXY_PASS=bar"}
+		"--env", "HTTP_PROXY=http://localhost:3128,HTTP_PROXY_USER=foo,HTTP_PROXY_PASS=bar",
+		"--routing-suffix", testIp + ".nip.io",
+	}
 	assertCommandLineArguments(expectedArguments, t)
+}
+
+func TestNoExplicitRouteSuffixDefaultsToNip(t *testing.T) {
+	defer viper.Reset()
+	setDefaultRoutingPrefix(testIp)
+
+	expectedRoutingSuffix := testIp + ".nip.io"
+	if viper.Get(routingSuffix) != expectedRoutingSuffix {
+		t.Fatalf("Expected argument '%s'. Received '%s'", expectedRoutingSuffix, viper.Get(routingSuffix))
+	}
+}
+
+func TestExplicitRouteSuffixGetApplied(t *testing.T) {
+	explicitRoutingSuffix := "acme.com"
+
+	viper.Set(routingSuffix, explicitRoutingSuffix)
+	defer viper.Reset()
+
+	setDefaultRoutingPrefix(testIp)
+
+	if viper.Get(routingSuffix) != explicitRoutingSuffix {
+		t.Fatalf("Expected argument '%s'. Received '%s'", explicitRoutingSuffix, viper.Get(routingSuffix))
+	}
 }
 
 func assertCompareSlice(expectedArguments []string, recievedArguments []string, t *testing.T) {

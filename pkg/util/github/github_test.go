@@ -52,6 +52,8 @@ var assetSet = []struct {
 }
 
 func TestGetAssetIdAndFilename(t *testing.T) {
+	EnsureGitHubApiAccessTokenSet(t)
+
 	for _, testAsset := range assetSet {
 		release, resp, err = gitHubClient.Repositories.GetReleaseByTag("openshift", "origin", testAsset.version)
 		if err != nil {
@@ -75,6 +77,8 @@ func TestGetAssetIdAndFilename(t *testing.T) {
 }
 
 func TestDownloadOc(t *testing.T) {
+	EnsureGitHubApiAccessTokenSet(t)
+
 	client := http.DefaultClient
 	client.Transport = minitesting.NewMockRoundTripper()
 	defer minitesting.ResetDefaultRoundTripper()
@@ -120,6 +124,8 @@ func TestDownloadOc(t *testing.T) {
 }
 
 func TestInvalidVersion(t *testing.T) {
+	EnsureGitHubApiAccessTokenSet(t)
+
 	testDir, err := ioutil.TempDir("", "minishift-test-")
 	if err != nil {
 		t.Fatal(err)
@@ -139,6 +145,8 @@ func TestInvalidVersion(t *testing.T) {
 }
 
 func TestInvalidBinaryFormat(t *testing.T) {
+	EnsureGitHubApiAccessTokenSet(t)
+
 	testDir, err := ioutil.TempDir("", "minishift-test-")
 	if err != nil {
 		t.Fatal(err)
@@ -158,6 +166,8 @@ func TestInvalidBinaryFormat(t *testing.T) {
 
 // See https://github.com/minishift/minishift/issues/331
 func Test_Download_Oc_1_4_1(t *testing.T) {
+	EnsureGitHubApiAccessTokenSet(t)
+
 	client := http.DefaultClient
 	client.Transport = minitesting.NewMockRoundTripper()
 	defer minitesting.ResetDefaultRoundTripper()
@@ -190,5 +200,12 @@ func Test_Download_Oc_1_4_1(t *testing.T) {
 	err = os.Remove(expectedBinaryPath)
 	if err != nil {
 		t.Fatalf("Unable to delete %s", expectedBinaryPath)
+	}
+}
+
+func EnsureGitHubApiAccessTokenSet(t *testing.T) {
+	if GetGitHubApiToken() == "" {
+		t.Skip("Skipping GitHub API based test, because no access token is defined in the environment.\n " +
+			"To run this test check https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/ and set for example MINISHIFT_GITHUB_API_TOKEN (see github.go).")
 	}
 }

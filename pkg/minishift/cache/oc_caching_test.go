@@ -19,6 +19,7 @@ package cache
 import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minitesting "github.com/minishift/minishift/pkg/testing"
+	githubutils "github.com/minishift/minishift/pkg/util/github"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -52,6 +53,7 @@ func TestIsCached(t *testing.T) {
 }
 
 func TestCacheOc(t *testing.T) {
+	EnsureGitHubApiAccessTokenSet(t)
 	setUp(t)
 	defer os.RemoveAll(testDir) // clean up
 
@@ -75,4 +77,11 @@ func setUp(t *testing.T) {
 		t.Error()
 	}
 	testOc = Oc{"v1.3.1", filepath.Join(testDir, "cache")}
+}
+
+func EnsureGitHubApiAccessTokenSet(t *testing.T) {
+	if githubutils.GetGitHubApiToken() == "" {
+		t.Skip("Skipping GitHub API based test, because no access token is defined in the environment.\n " +
+			"To run this test check https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/ and set for example MINISHIFT_GITHUB_API_TOKEN (see github.go).")
+	}
 }

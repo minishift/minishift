@@ -23,7 +23,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"os"
 	"testing"
 
 	"github.com/google/go-github/github"
@@ -46,6 +45,8 @@ func (h *URLHandlerCorrect) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func TestGetVersionsCorrect(t *testing.T) {
+	EnsureGitHubApiAccessTokenSet(t)
+
 	// test that the version is correctly parsed if returned if valid JSON is returned the url endpoint
 	version0 := "0.0.0"
 	version1 := "1.0.0"
@@ -55,7 +56,6 @@ func TestGetVersionsCorrect(t *testing.T) {
 	server := httptest.NewServer(handler)
 
 	parsedUrl, _ := url.Parse(server.URL)
-	os.Clearenv()
 	githubClient := githubutils.Client()
 	githubClient.BaseURL = parsedUrl
 	githubClient.UploadURL = parsedUrl
@@ -76,12 +76,13 @@ func (h *URLHandlerNone) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func TestGetVersionsNone(t *testing.T) {
+	EnsureGitHubApiAccessTokenSet(t)
+
 	// test that an error is returned if nothing is returned at the url endpoint
 	handler := &URLHandlerNone{}
 	server := httptest.NewServer(handler)
 
 	parsedUrl, _ := url.Parse(server.URL)
-	os.Clearenv()
 	githubClient := githubutils.Client()
 	githubClient.BaseURL = parsedUrl
 	githubClient.UploadURL = parsedUrl
@@ -100,12 +101,13 @@ func (h *URLHandlerMalformed) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 }
 
 func TestGetVersionsMalformed(t *testing.T) {
+	EnsureGitHubApiAccessTokenSet(t)
+
 	// test that an error is returned if malformed JSON is at the url endpoint
 	handler := &URLHandlerMalformed{}
 	server := httptest.NewServer(handler)
 
 	parsedUrl, _ := url.Parse(server.URL)
-	os.Clearenv()
 	githubClient := githubutils.Client()
 	githubClient.BaseURL = parsedUrl
 	githubClient.UploadURL = parsedUrl
@@ -117,13 +119,14 @@ func TestGetVersionsMalformed(t *testing.T) {
 }
 
 func TestPrintOpenShiftVersions(t *testing.T) {
+	EnsureGitHubApiAccessTokenSet(t)
+
 	// test that no openshift version text is printed if there are no versions being served
 	// TODO(aprindle) or should this be an error?!?!
 	handlerNone := &URLHandlerNone{}
 	server := httptest.NewServer(handlerNone)
 
 	parsedUrl, _ := url.Parse(server.URL)
-	os.Clearenv()
 	githubClient := githubutils.Client()
 	githubClient.BaseURL = parsedUrl
 	githubClient.UploadURL = parsedUrl
@@ -151,5 +154,12 @@ func TestPrintOpenShiftVersions(t *testing.T) {
 	if len(outputBuffer.String()) == 0 {
 		t.Fatalf("Expected PrintOpenShiftVersion to output %d versions from the current URL but the output was [%s]",
 			2, outputBuffer.String()) //TODO(aprindle) change the 2
+	}
+}
+
+func EnsureGitHubApiAccessTokenSet(t *testing.T) {
+	if githubutils.GetGitHubApiToken() == "" {
+		t.Skip("Skipping GitHub API based test, because no access token is defined in the environment.\n " +
+			"To run this test check https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/ and set for example MINISHIFT_GITHUB_API_TOKEN (see github.go).")
 	}
 }

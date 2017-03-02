@@ -84,7 +84,7 @@ clean:
 
 .PHONY: test
 test: vendor $(GOPATH)/src/$(ORG)
-	@go test $(shell $(PACKAGES))
+	@go test -v $(shell $(PACKAGES))
 
 .PHONY: integration
 integration: $(BUILD_DIR)/$(GOOS)-$(GOARCH)/minishift$(IS_EXE)

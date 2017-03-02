@@ -58,13 +58,12 @@ const (
 
 var (
 	client *github.Client
-
-	once sync.Once
+	once   sync.Once
 )
 
 func Client() *github.Client {
 	once.Do(func() {
-		token := getToken()
+		token := GetGitHubApiToken()
 		var tc *http.Client
 		if len(token) > 0 {
 			ts := oauth2.StaticTokenSource(
@@ -79,7 +78,7 @@ func Client() *github.Client {
 
 var tokenEnvVars = []string{"MINISHIFT_GITHUB_API_TOKEN", "HOMEBREW_GITHUB_API_TOKEN", "GH_TOKEN"}
 
-func getToken() string {
+func GetGitHubApiToken() string {
 	for _, envVar := range tokenEnvVars {
 		token := os.Getenv(envVar)
 		if len(token) > 0 {

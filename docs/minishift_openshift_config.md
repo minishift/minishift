@@ -25,7 +25,7 @@ minishift openshift config SUBCOMMAND [flags]
 ```
 
 ### SEE ALSO
-* [minishift openshift](minishift_openshift.md)	 - Modifies an OpenShift master configuration resource.
+* [minishift openshift](minishift_openshift.md)	 - Interact with an Openshift Cluster
 * [minishift openshift config set](minishift_openshift_config_set.md)	 - Updates the specified OpenShift configuration resource with the specified patch.
 * [minishift openshift config view](minishift_openshift_config_view.md)	 - Displays the specified OpenShift configuration resource.
 

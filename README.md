@@ -126,7 +126,7 @@ You can now install the latest beta version of minishift.
 This section contains a brief demo of Minishift and the provisioned OpenShift cluster.
 For details on the usage of Minishift refer to the [Managing Minishift](/docs/managing-minishift.md) topic.
 
-The interaction with OpenShift is via the command line tool _oc_ which is copied to your host. For more information on how Minishift can assist you in interacting with and configuring your local OpenShift instance refer to the [Interacting with OpenShift](/docs/interacting-with-minishift.md) topic.
+The interaction with OpenShift is via the command line tool _oc_ which is copied to your host. For more information on how Minishift can assist you in interacting with and configuring your local OpenShift instance refer to the [Interacting with OpenShift](/docs/interacting-with-openshift.md) topic.
 
 For more information about the OpenShift cluster architecture,
 see [Architecture Overview](https://docs.openshift.org/latest/architecture/index.html) in the

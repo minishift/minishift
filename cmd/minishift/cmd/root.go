@@ -28,10 +28,12 @@ import (
 	openShiftCmd "github.com/minishift/minishift/cmd/minishift/cmd/openshift"
 	"github.com/minishift/minishift/pkg/minikube/config"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"path/filepath"
 )
 
 var dirs = [...]string{
@@ -63,6 +65,7 @@ var RootCmd = &cobra.Command{
 	Short: "Minishift is a tool for application development in local OpenShift clusters.",
 	Long:  `Minishift is a command-line tool that provisions and manages single-node OpenShift clusters optimized for development workflows.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		var err error
 		for _, path := range dirs {
 			if err := os.MkdirAll(path, 0777); err != nil {
 				glog.Exitf("Error creating minishift directory: %s", err)
@@ -70,6 +73,15 @@ var RootCmd = &cobra.Command{
 		}
 
 		ensureConfigFileExists(constants.ConfigFile)
+
+		// Create MACHINE_NAME.json
+		jsonDataPath := filepath.Join(constants.Minipath, "machines", constants.MachineName+".json")
+		instanceState.Config, err = instanceState.NewInstanceConfig(jsonDataPath)
+
+		if err != nil {
+			glog.Errorln("Error creating config for VM: ", err)
+			atexit.Exit(1)
+		}
 
 		shouldShowLibmachineLogs := viper.GetBool(showLibmachineLogs)
 		if glog.V(3) {

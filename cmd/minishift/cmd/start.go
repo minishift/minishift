@@ -30,6 +30,7 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/cache"
 	"github.com/minishift/minishift/pkg/minishift/clusterup"
+	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
 	minishiftUtil "github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/util"
@@ -313,9 +314,15 @@ func clusterUp(config *cluster.MachineConfig, ip string) {
 		OpenShiftVersion:  config.OpenShiftVersion,
 		MinishiftCacheDir: filepath.Join(constants.Minipath, "cache"),
 	}
-	err := oc.EnsureIsCached()
-	if err != nil {
+	if err := oc.EnsureIsCached(); err != nil {
 		glog.Errorln("Error starting the cluster: ", err)
+		atexit.Exit(1)
+	}
+
+	// Update MACHINE_NAME.json for oc path
+	instanceState.Config.OcPath = filepath.Join(oc.GetCacheFilepath(), constants.OC_BINARY_NAME)
+	if err := instanceState.Config.Write(); err != nil {
+		glog.Errorln("Error updating oc path in config of VM: ", err)
 		atexit.Exit(1)
 	}
 
@@ -346,7 +353,7 @@ func clusterUp(config *cluster.MachineConfig, ip string) {
 		}
 	})
 
-	err = runner.Run(cmdName, cmdArgs...)
+	err := runner.Run(cmdName, cmdArgs...)
 	if err != nil {
 		// TODO glog is probably not right here. Need some sort of logging wrapper
 		glog.Errorln("Error starting the cluster: ", err)

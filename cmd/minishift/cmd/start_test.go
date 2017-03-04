@@ -25,6 +25,7 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minikube/tests"
+	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/spf13/viper"
 	"io/ioutil"
@@ -362,6 +363,16 @@ func setUp(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
+	// Need to create instanceState.Config since it is being used in clusterUp.
+	// TODO: Need to separate clusterUp with oc installation
+	machinesDirPath := filepath.Join(testDir, "machines")
+	os.Mkdir(machinesDirPath, 0755)
+	instanceState.Config, err = instanceState.NewInstanceConfig(filepath.Join(machinesDirPath, "fake-machines.json"))
+	if err != nil {
+		t.Error(err)
+	}
+
 	constants.Minipath = testDir
 
 	client := http.DefaultClient

@@ -218,7 +218,7 @@ func createVirtualboxHost(config MachineConfig) drivers.Driver {
 func (m *MachineConfig) CacheMinikubeISOFromURL() error {
 	fmt.Println(fmt.Sprintf("Downloading ISO '%s'", m.MinikubeISO))
 
-	// store the miniube-iso inside the .minikube dir
+	// store the iso inside the MINISHIFT_HOME dir
 	response, err := http.Get(m.MinikubeISO)
 	if err != nil {
 		return err
@@ -253,8 +253,6 @@ func (m *MachineConfig) CacheMinikubeISOFromURL() error {
 }
 
 func (m *MachineConfig) ShouldCacheMinikubeISO() bool {
-	// store the miniube-iso inside the .minikube dir
-
 	urlObj, err := url.Parse(m.MinikubeISO)
 	if err != nil {
 		return false

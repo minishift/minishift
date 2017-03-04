@@ -22,6 +22,7 @@ import (
 	"github.com/docker/machine/libmachine"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -44,6 +45,12 @@ func runDelete(cmd *cobra.Command, args []string) {
 		fmt.Println("Error deleting the VM: ", err)
 		atexit.Exit(1)
 	}
+
+	if err := instanceState.Config.Delete(); err != nil {
+		fmt.Println("Error deleting config for VM: ", err)
+		atexit.Exit(1)
+	}
+
 	fmt.Println("Minishift VM deleted.")
 }
 

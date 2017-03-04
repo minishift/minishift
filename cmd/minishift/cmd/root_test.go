@@ -26,6 +26,7 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/testing/cli"
 	"io/ioutil"
+	"path/filepath"
 )
 
 var configTests = []cli.TestOption{
@@ -79,6 +80,8 @@ var configTests = []cli.TestOption{
 func TestPreRunDirectories(t *testing.T) {
 	// Make sure we create the required directories.
 	testDir, err := ioutil.TempDir("", "minishift-test-start-cmd-")
+	// Need to create since MACHINE_NAME.json get created in root command
+	os.Mkdir(filepath.Join(testDir, "machines"), 0755)
 	if err != nil {
 		t.Error(err)
 	}

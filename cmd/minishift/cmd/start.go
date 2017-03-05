@@ -30,6 +30,7 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/cache"
 	"github.com/minishift/minishift/pkg/minishift/clusterup"
+	"github.com/minishift/minishift/pkg/minishift/minishiftdata"
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
 	minishiftUtil "github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/util"
@@ -80,6 +81,7 @@ var (
 	registryMirror   []string
 	openShiftEnv     []string
 	shellProxyEnv    string
+	machinesDirPath  string
 )
 
 // startCmd represents the start command
@@ -125,6 +127,8 @@ func SetRunner(newRunner util.Runner) {
 func runStart(cmd *cobra.Command, args []string) {
 	libMachineClient := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 	defer libMachineClient.Close()
+
+	machinesDirPath = libMachineClient.GetMachinesDir()
 
 	validateOpenshiftVersion()
 
@@ -179,7 +183,18 @@ func runStart(cmd *cobra.Command, args []string) {
 		atexit.Exit(1)
 	}
 
-	clusterUp(&config)
+	oc, err := clusterUp(&config)
+	if err != nil {
+		glog.Errorln("Error starting the cluster: ", err)
+		atexit.Exit(1)
+	}
+
+	// Update minishift-data.json for oc path
+	minishiftData, err := minishiftdata.Create(machinesDirPath)
+	minishiftData.OcPath = filepath.Join(oc.GetCacheFilepath(), constants.OC_BINARY_NAME)
+	if err = minishiftdata.WriteMinishiftData(minishiftData); err != nil {
+		glog.Warningf("Error updating oc path in minishift-data.json file: ", err)
+	}
 }
 
 // Set Docker Proxy
@@ -302,13 +317,12 @@ func initSubscriptionManagerFlags() {
 }
 
 // clusterUp downloads and installs the oc binary in order to run 'cluster up'
-func clusterUp(config *cluster.MachineConfig) {
-	oc := cache.Oc{
+func clusterUp(config *cluster.MachineConfig) (*cache.Oc, error) {
+	oc := &cache.Oc{
 		OpenShiftVersion:  config.OpenShiftVersion,
 		MinishiftCacheDir: filepath.Join(constants.Minipath, "cache"),
 	}
-	err := oc.EnsureIsCached()
-	if err != nil {
+	if err := oc.EnsureIsCached(); err != nil {
 		glog.Errorln("Error starting the cluster: ", err)
 		atexit.Exit(1)
 	}
@@ -338,12 +352,13 @@ func clusterUp(config *cluster.MachineConfig) {
 		}
 	})
 
-	err = runner.Run(cmdName, cmdArgs...)
+	err := runner.Run(cmdName, cmdArgs...)
 	if err != nil {
 		// TODO glog is probably not right here. Need some sort of logging wrapper
 		glog.Errorln("Error starting the cluster: ", err)
 		atexit.Exit(1)
 	}
+	return oc, nil
 }
 
 func validateOpenshiftVersion() {

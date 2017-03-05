@@ -38,6 +38,7 @@ import (
 	"github.com/docker/machine/libmachine/state"
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minishift/minishiftdata"
 	"github.com/minishift/minishift/pkg/minishift/registration"
 	minishiftUtil "github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/util"
@@ -218,7 +219,7 @@ func createVirtualboxHost(config MachineConfig) drivers.Driver {
 func (m *MachineConfig) CacheMinikubeISOFromURL() error {
 	fmt.Println(fmt.Sprintf("Downloading ISO '%s'", m.MinikubeISO))
 
-	// store the miniube-iso inside the .minikube dir
+	// store the iso inside the .minishift/cache/iso dir
 	response, err := http.Get(m.MinikubeISO)
 	if err != nil {
 		return err
@@ -253,8 +254,6 @@ func (m *MachineConfig) CacheMinikubeISOFromURL() error {
 }
 
 func (m *MachineConfig) ShouldCacheMinikubeISO() bool {
-	// store the miniube-iso inside the .minikube dir
-
 	urlObj, err := url.Parse(m.MinikubeISO)
 	if err != nil {
 		return false
@@ -338,6 +337,12 @@ func createHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 
 	if err := api.Save(h); err != nil {
 		return nil, fmt.Errorf("Error attempting to save store: %s", err)
+	}
+
+	// Create minishift-data.json
+	_, err = minishiftdata.Create(api.GetMachinesDir())
+	if err != nil {
+		return nil, fmt.Errorf("Error creating minishift-data.json: %s", err)
 	}
 
 	if config.ShellProxyEnv != "" {

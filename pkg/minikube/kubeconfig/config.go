@@ -26,7 +26,7 @@ import (
 	"path/filepath"
 )
 
-// Mock kubeconfig Data types
+// kubeconfig Data types
 type ClusterType struct {
 	Cluster map[string]string `yaml:"cluster"`
 	Name    string            `yaml:"name"`

@@ -9,12 +9,8 @@ include::minishift/variables.adoc[]
 :toc-title:
 :toclevels: 1
 
-toc::[]
-
 [[welcome-minishift]]
-== Welcome to Minishift
-
-Welcome to Minishift version {minishift-version}!
+== Welcome to Minishift {minishift-version}!
 
 Minishift is a tool that helps you run OpenShift locally by running a single-node OpenShift
 cluster inside a VM.
@@ -24,14 +20,5 @@ extend Minishift:
 
 - link:./getting-started/index{outfilesuffix}[Getting started]
 - link:./using/index{outfilesuffix}[Using Minishift]
-- link:./developing/index{outfilesuffix}[Developing Minishift]
 - link:./command-ref/minishift{outfilesuffix}[Command reference]
-
-[[more-resources]]
-== Additional resources
-
-Check out the link:https://github.com/minishift/minishift/releases[Minishift releases] page for the
-latest release notes and download information.
-
-Join the Minishift community! Learn about the project and how to contribute
-at the link:https://github.com/minishift/minishift#minishift[Minishift project on GitHub].
+- link:./developing/index{outfilesuffix}[Contributing]

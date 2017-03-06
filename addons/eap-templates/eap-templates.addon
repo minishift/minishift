@@ -1,0 +1,5 @@
+# Name: eap
+# Description: Imports EAP templates
+
+oc create -f eap64-basic-s2i.json -n openshift
+oc create -f eap64-mysql-persistent-s2i.json -n openshift

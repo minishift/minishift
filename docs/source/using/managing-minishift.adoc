@@ -7,17 +7,13 @@
 
 toc::[]
 
-
-The following sections describe different aspects of using Minishift and
-provide an overview of different components and services.
-
 [[managing-minishift-intro]]
 == Managing Minishift
 
-When you use Minishift, you interact with two components that are managed by Minishift:
+When you use Minishift, you interact with two components:
 
-- virtual machine (VM) created by Minishift
-- OpenShift cluster provisioned by Minishift within the VM
+- a virtual machine (VM) created by Minishift
+- the OpenShift cluster provisioned by Minishift within the VM
 
 The following sections contain information about managing the Minishift VM.
 For details about using Minishift to manage your local OpenShift cluster,
@@ -54,8 +50,8 @@ the GitHub issue https://github.com/minishift/minishift/issues/179[#179].
 The link:../command-ref/minishift_delete{outfilesuffix}[`minishift delete`] command deletes the OpenShift cluster,
 and also shuts down and deletes the Minishift VM. No data or state are preserved.
 
-[[minishift-runtime-options]]
-== Minishift runtime options
+[[runtime-options]]
+== Runtime options
 
 The runtime behavior of Minishift can be controlled through flags,
 environment variables, and persistent configuration options.
@@ -130,6 +126,7 @@ command.
 The easiest way to change a persistent configuration option is with
 the link:../command-ref/minishift_config_set{outfilesuffix}[`config set`] sub-command. For example:
 
+[source,sh]
 ----
 # Set default memory 4096 MB
 $ minishift config set memory 4096
@@ -138,6 +135,7 @@ $ minishift config set memory 4096
 To view all persistent configuration values, you can use the
 link:../command-ref/minishift_config_view{outfilesuffix}[`view`] sub-command:
 
+[source,sh]
 ----
 $ minishift config view
 - memory: 4096
@@ -146,6 +144,7 @@ $ minishift config view
 Alternatively, you can display a single value with the
 link:../command-ref/minishift_config_get{outfilesuffix}[`get`] sub-command:
 
+[source,sh]
 ----
 $ minishift config get memory
 4096
@@ -157,9 +156,227 @@ $ minishift config get memory
 To remove a persistent configuration option, you can use the
 link:../command-ref/minishift_config_unset{outfilesuffix}[`unset`] sub-command. For example:
 
+[source,sh]
 ----
 $ minishift config unset memory
 ----
+
+[[addons]]
+== Addons
+
+Minishift allows to configure the vanilla OpenShift setup as provided by _cluster up_ via a so called
+addon mechanism.
+
+Addons are directories, containing at least one text file with the _addon_ extension. There can be other
+resource files, for example JSON template files, in the directory as well, but only one _addon_ file
+is allowed.
+
+An example addon can be seen in <<example-anyuid-addon>>.
+
+[[example-anyuid-addon]]
+.Example of anyuid addon defintion
+----
+# Name: anyuid // <1>
+# Description: Allows authenticated users to run images under a non pre-allocated UID // <2>
+# Url: https://access.redhat.com/documentation/en-us/openshift_enterprise/3.2/html/cluster_administration/admin-guide-manage-scc <3>
+
+oc adm policy add-scc-to-group anyuid system:authenticated <4>
+----
+<1> Defines the mandatory name of the addon.
+<2> Provides the mandatory description of the addon.
+<3> Additional meta data and comments which are ignored by Minishift
+<4> Actual addon command. In this case an execution of the _oc_ binary. See <<section-addon-commands>>
+for a full list of supported addon commands.
+
+As we can see in <<example-anyuid-addon>> each addon contains some meta information
+as well as a list of commands which will be executed.
+
+NOTE: Comment lines can be inserted at anywhere in the file and need to start with the '#' character.
+
+Enabled addons (see <<section-enabling-disabling-addons>>) will then be applied during
+link:../command-ref/minishift_start{outfilesuffix}[`minishift start`], right after the initial
+cluster up provisioning has successfully completed.
+
+[[section-addon-commands]]
+=== Addon commands
+
+Now that we have seen how an addon looks like, let's look at the command types an addon file can
+contain and what one can do with them. At the moment there are five command types which form a sort
+of mini DSL for addons.
+
+ssh::
+An addon command which start with _ssh_, allows you to run any command within the Minishift managed VM.
+This is comparable to running link:../command-ref/minishift_ssh{outfilesuffix}[`minishift ssh`] and
+then executing any sort of command on the VM.
+oc::
+An addon command which start with _oc_, uses the _oc_ binary cached on your host to execute the
+specified `oc` command. This equivalent to running `oc --as system:admin ...` from the command line.
++
+NOTE: The oc command is executed as _system:admin_
+openshift::
+An addon command which start with _openshift_, allows you to run the `openshift` binary within
+the container running OpenShift. This means any file parameters or other system specific parameters
+need be matching the environment of the container, not your host.
+docker::
+An addon command which start with _docker_, executes a `docker` command against the Docker daemon
+within the Minishift VM. This is the same daemon on which the OpenShift single node cluster is
+running as well. This is comparable to running `eval $(minishift docker-env)` on your host and
+then executing any `docker` command. See also
+link:../command-ref/minishift_docker-env{outfilesuffix}[`minishift docker-env`].
+sleep::
+An addon command which start with _sleep_, waits for the specified number of seconds. This can be
+useful where it is known that for example an `oc` command takes a few seconds before a certain
+resource can be queried.
+
+NOTE: Trying to add a command not listed above will create an error when the addon gets parsed.
+
+==== Variable interpolation
+
+Minishift also allows the use of variables as part of the supported commands.
+Variables have the from _#{<variable-name>}_. <<example-addon-variable>>
+shows how the routing suffix can be interpolated into a _openshift_ command
+to create a new certificate as part of securing the OpenShift registry.
+
+[[example-addon-variable]]
+.Example for the use of the routing-suffix variable
+[source,sh]
+----
+$ openshift admin ca create-server-cert \
+  --signer-cert=/var/lib/origin/openshift.local.config/master/ca.crt \
+  --signer-key=/var/lib/origin/openshift.local.config/master/ca.key \
+  --signer-serial=/var/lib/origin/openshift.local.config/master/ca.serial.txt \
+  --hostnames='docker-registry-default.#{routing-suffix},docker-registry.default.svc.cluster.local,172.30.1.1' \
+  --cert=/etc/secrets/registry.crt \
+  --key=/etc/secrets/registry.key
+----
+
+<<table-supported-addon-variables>> shows the currently supported variables
+which are available for interpolation.
+
+[[table-supported-addon-variables]]
+.Supported addon variables
+|===
+|Variable |Description
+
+|ip
+|The IP of the Minishift VM
+
+|routing-suffix
+|The OpenShift routing suffix for application
+|===
+
+=== Built-in addons
+
+Minishift provides a set of built-in addons which offer some common OpenShift customization
+useful for development. To install these built-in addons run:
+
+[[example-install-default-addons]]
+[source,sh]
+----
+$ minishift addons install --defaults
+----
+
+This command will extract the built-in addons into the addon installation directory
+(`$MINISHIFT_HOME/addons`). To view the list of installed addons, you can then run:
+
+[[example-list-addons]]
+[source,sh]
+----
+$ minishift addons list --verbose=true
+----
+
+This will print a list of installed addons. You should at least see the _anyuid_ addon listed.
+This is an important addon which allows you to run images which do not use a pre-allocated UID.
+This is per default not allowed in OpensShift.
+
+<<section-enabling-disabling-addons>> will show you how you can for example enable or disable
+the _anyuid_ addon.
+
+[[section-enabling-disabling-addons]]
+=== Enabling and disabling addons
+
+Addons are enabled and disabled with the
+link:../command-ref/minishift_addons_enable{outfilesuffix}[`minishift addons enable`] resp. the
+link:../command-ref/minishift_addons_disable{outfilesuffix}[`minishift addons disable`] command.
+<<example-enable-anyuid>> and <<example-disable-anyuid>> show how this looks like for the
+_anyuid_ addon.
+
+[[example-enable-anyuid]]
+.Enabling the anyuid addon
+[source,sh]
+----
+$ minishift addons enable anyuid
+----
+
+[[example-disable-anyuid]]
+.Disabling the anyuid addon
+[source,sh]
+----
+$ minishift addons disable anyuid
+----
+
+==== Addon priorities
+
+As part of the enabling an addon, one can also specify a priority as seen in
+<<example-enable-registry-priority>>.
+
+[[example-enable-registry-priority]]
+.Enabling the registry addon with priority
+[source,sh]
+----
+$ minishift addons enable --priority=5
+----
+
+Priority determines the order in which addons are getting applied. Per default a addon has
+the priority 0. Addons with a lower priority get applied first. For example:
+
+[[example-priority-list]]
+.Example of list command with explicit priorities
+[source,sh]
+----
+$ minishift addons list
+- anyuid         : enabled    P(0)
+- registry       : enabled    P(5)
+- eap            : enabled    P(10)
+----
+
+In <<example-priority-list>> three addons are enabled - anyuid, registry and eap with the respective
+priorities of 0, 5 and 10. This means anyuid gets applied first, followed by registry and lastly
+the eap addon gets applied.
+
+NOTE: If two addons have the same priority the order in which they are getting applied is not
+determined.
+
+=== Writing custom addons
+
+To write a custom addon you should create a directory and within it create at least one
+text file with the extension _.addon_, for example `admin-role.addon`.
+
+This file needs to contain the _Name_ and _Description_ metadata as well as the commands
+you want to be executed as part of the addon. <<example-admin-role>> shows how this could
+look like.
+
+[[example-admin-role]]
+.Giving developer user cluster-admin privileges
+----
+# Name: admin-role
+# Description: Gives the developer user cluster-admin privileges
+
+oc adm policy add-role-to-user cluster-admin developer
+----
+
+Once you have your addon defined, you can install it via:
+
+[[example-install-custom-addon]]
+.Installing a custom addon
+[source,sh]
+----
+$ minishift addons install <path to addon directory>
+----
+
+NOTE: You can also edit your addon directly in the Minishift addon install directory
+`$MINISHIFT_HOME/addons`. Be aware that if there is an error in the addon it won't appear
+in any of the _addons_ commands nor will it be applied during the `minishift start` process.
 
 [[http-s-proxies]]
 == HTTP/HTTPS Proxies
@@ -170,6 +387,7 @@ flags during `minishift start`.
 
 For example:
 
+[source,sh]
 ----
 $ minishift start --http-proxy http://YOURPROXY:PORT --https-proxy https://YOURPROXY:PORT
 ----
@@ -177,6 +395,7 @@ $ minishift start --http-proxy http://YOURPROXY:PORT --https-proxy https://YOURP
 In an authenticated proxy environment, the `proxy_user` and
 `proxy_password` must be a part of proxy URI.
 
+[source,sh]
 ----
  $ minishift start --http-proxy http://<proxy_username>:<proxy_password>@YOURPROXY:PORT \
                    --https-proxy https://<proxy_username>:<proxy_password>YOURPROXY:PORT
@@ -195,7 +414,7 @@ all Minishift-compatible OpenShift versions with
 the link:../command-ref/minishift_openshift_list-versions{outfilesuffix}[`minishift openshift list-versions`] command.
 
 [[mounted-host-folders]]
-== Mounted host folders
+== Host folders
 
 Some drivers mount a host folder within the VM so that you can share files between the VM and the host.
 These folders are not currently configurable, and are different for each driver and OS that you use.
@@ -242,6 +461,7 @@ $ Get-NetIPAddress | Format-Table`
 
 .  Create a mountpoint and mount the shared folder.
 +
+[source,sh]
 ----
 $ minishift ssh "sudo mkdir -p /Users"
 $ minishift ssh "sudo mount -t cifs //[machine-ip]/Users /Users -o username=[username],password=[password],domain=$env:computername
@@ -251,6 +471,7 @@ If no error appears, the mount succeeded.
 
 .  Verify the share mount.
 +
+[source,sh]
 ----
 $ minishift ssh "ls -al /Users"
 ----
@@ -288,6 +509,7 @@ address from the same network segment as your Minishift instance.
 
 .  Create a mountpoint and mount the shared folder.
 +
+[source,sh]
 ----
 $ minishift ssh "sudo mkdir -p /Users/<username>"
 $ minishift ssh "sudo chown -R docker /Users"
@@ -297,6 +519,7 @@ $ sshfs <username>@<IP>:/Users/<username>/ /Users
 
 . Verify the share mount.
 +
+[source,sh]
 ----
 $ minishift ssh "ls -al /Users/<username>"
 ----

@@ -9,7 +9,13 @@ toc::[]
 
 This section contains information about how to contribute to various aspects of the project.
 
+== Minishfit community
+
+Join the Minishift community! Learn about the project and how to contribute.
+
 - link:../developing/developing{outfilesuffix}[Developing Minishift]
 - link:../developing/ci{outfilesuffix}[Minishift CI]
 - link:../developing/writing-docs{outfilesuffix}[Writing documentation]
 - link:../developing/releasing{outfilesuffix}[Releasing Minishift]
+
+If you have more questions join us on Freenode IRC #minishift.

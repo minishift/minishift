@@ -1,3 +1,7 @@
+// Need to add 'minishift' prefix to keep Asciibinder happy. This fails on local build
+// https://github.com/redhataccess/ascii_binder/issues/60
+include::minishift/variables.adoc[]
+
 [[quickstart]]
 = Quickstart
 :icons:
@@ -58,8 +62,9 @@ reference].
 
 .  Add the `oc` binary to the _PATH_ environment variable.
 +
+[subs="verbatim,attributes"]
 ----
-$ export PATH=$PATH:~/.minishift/cache/oc/v1.4.1
+$ export PATH=$PATH:~/.minishift/cache/oc/{openshift-version}
 ----
 +
 NOTE: Depending on the operating system and the `oc` version, you

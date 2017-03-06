@@ -24,11 +24,18 @@ import (
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"
 
-	"github.com/minishift/minishift/pkg/minikube/constants"
+	"bytes"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
+	"sort"
+	"strings"
+)
+
+const (
+	DefaultConfigViewFormat = "- {{.ConfigKey | printf \"%-21s\"}}: {{.ConfigValue}}\n"
 )
 
 var configViewFormat string
+var excludedConfigKeys = make(map[string]interface{})
 
 type ConfigViewTemplate struct {
 	ConfigKey   string
@@ -49,12 +56,10 @@ var configViewCmd = &cobra.Command{
 }
 
 func init() {
-	configViewCmd.Flags().StringVar(&configViewFormat, "format", constants.DefaultConfigViewFormat,
+	excludedConfigKeys["addons"] = true
+	configViewCmd.Flags().StringVar(&configViewFormat, "format", DefaultConfigViewFormat,
 		`Go template format to apply to the configuration file. For more information about Go templates, see: https://golang.org/pkg/text/template/
 		For the list of configurable variables for the template, see the struct values section of ConfigViewTemplate at: https://godoc.org/github.com/minishift/minishift/cmd/minishift/cmd/config#ConfigViewTemplate`)
-}
-
-func init() {
 	ConfigCmd.AddCommand(configViewCmd)
 }
 
@@ -63,18 +68,30 @@ func configView() error {
 	if err != nil {
 		return err
 	}
+	var buffer bytes.Buffer
 	for k, v := range cfg {
+		_, excluded := excludedConfigKeys[k]
+		if excluded {
+			continue
+		}
+
 		tmpl, err := template.New("view").Parse(configViewFormat)
 		if err != nil {
 			glog.Errorln("Error creating view template:", err)
 			atexit.Exit(1)
 		}
 		viewTmplt := ConfigViewTemplate{k, v}
-		err = tmpl.Execute(os.Stdout, viewTmplt)
+		err = tmpl.Execute(&buffer, viewTmplt)
 		if err != nil {
 			glog.Errorln("Error executing view template:", err)
 			atexit.Exit(1)
 		}
 	}
+
+	lines := strings.Split(buffer.String(), "\n")
+	// remove empy line at end
+	lines = lines[:len(lines)-1]
+	sort.Strings(lines)
+	fmt.Print(strings.Join(lines, "\n"))
 	return nil
 }

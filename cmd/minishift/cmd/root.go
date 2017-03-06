@@ -24,6 +24,7 @@ import (
 
 	"github.com/docker/machine/libmachine/log"
 	"github.com/golang/glog"
+	"github.com/minishift/minishift/cmd/minishift/cmd/addon"
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
 	openShiftCmd "github.com/minishift/minishift/cmd/minishift/cmd/openshift"
 	"github.com/minishift/minishift/pkg/minikube/config"
@@ -42,11 +43,11 @@ var dirs = [...]string{
 	constants.MakeMiniPath("machines"),
 	constants.MakeMiniPath("cache"),
 	constants.MakeMiniPath("cache", "iso"),
+	constants.MakeMiniPath("cache", "oc"),
 	constants.MakeMiniPath("config"),
-	constants.MakeMiniPath("cache", "openshift"),
+	constants.MakeMiniPath("addons"),
 	constants.MakeMiniPath("logs"),
-	constants.TmpFilePath,
-	constants.OcCachePath,
+	constants.MakeMiniPath("tmp"),
 }
 
 const (
@@ -123,6 +124,7 @@ func init() {
 	RootCmd.PersistentFlags().Bool(showLibmachineLogs, false, "Show logs from libmachine.")
 	RootCmd.AddCommand(configCmd.ConfigCmd)
 	RootCmd.AddCommand(openShiftCmd.OpenShiftConfigCmd)
+	RootCmd.AddCommand(addon.AddonsCmd)
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
 	logDir := pflag.Lookup("log_dir")
 	if !logDir.Changed {

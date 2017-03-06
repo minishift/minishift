@@ -12,57 +12,73 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Various versions - Minishift, default OpenShift, default B2D ISO
 MINISHIFT_VERSION = 1.0.0-beta.5
 OPENSHIFT_VERSION = v1.4.1
 ISO_VERSION = v1.0.2
 
+# Go and compliation related variables
+BUILD_DIR ?= out
+
 GOOS ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)
-BUILD_DIR ?= ./out
 ORG := github.com/minishift
 REPOPATH ?= $(ORG)/minishift
 ifeq ($(GOOS),windows)
 	IS_EXE := .exe
 endif
 MINISHIFT_BINARY ?= $(GOPATH)/bin/minishift$(IS_EXE)
+PACKAGES := go list ./... | grep -v /vendor
+SOURCE_DIRS = cmd pkg test
 
+# Linker flags
 VERSION_VARIABLES := -X $(REPOPATH)/pkg/version.version=$(MINISHIFT_VERSION) \
 	-X $(REPOPATH)/pkg/version.isoVersion=$(ISO_VERSION) \
 	-X $(REPOPATH)/pkg/version.openshiftVersion=$(OPENSHIFT_VERSION)
 LDFLAGS := $(VERSION_VARIABLES) -s -w -extldflags '-static'
 
-PACKAGES := go list ./... | grep -v /vendor
-SOURCE_DIRS = cmd pkg test
-DOCS_SYNOPISIS_DIR = ./docs/source/_tmp
+# Setup for go-bindata to include binary assets
+ADDON_ASSETS = $(CURDIR)/addons
+ADDON_BINDATA_DIR = $(CURDIR)/$(BUILD_DIR)/bindata
+ADDON_ASSET_FILE = $(ADDON_BINDATA_DIR)/addon_assets.go
 
+# Setup for the docs tasks
 ifeq ($(GOOS),windows)
 	UID := 1000
 else
 	UID = $(shell id -u)
 endif
+DOCS_SYNOPISIS_DIR = docs/source/_tmp
 
+# Start of the actual build targets
 
 .PHONY: $(GOPATH)/bin/minishift$(IS_EXE)
-$(GOPATH)/bin/minishift$(IS_EXE): vendor
-	go install -ldflags="$(VERSION_VARIABLES)" ./cmd/minishift
-
+$(GOPATH)/bin/minishift$(IS_EXE): vendor $(ADDON_ASSET_FILE)
+	go install -pkgdir=$(ADDON_BINDATA_DIR) -ldflags="$(VERSION_VARIABLES)" ./cmd/minishift
 vendor:
 	glide install -v
+
+$(ADDON_ASSET_FILE): $(GOPATH)/bin/go-bindata vendor
+	@mkdir -p $(ADDON_BINDATA_DIR)
+	go-bindata $(GO_BINDATA_DEBUG) -prefix $(ADDON_ASSETS) -o $(ADDON_ASSET_FILE) -pkg bindata $(ADDON_ASSETS)/...
 
 $(BUILD_DIR)/$(GOOS)-$(GOARCH):
 	mkdir -p $(BUILD_DIR)/$(GOOS)-$(GOARCH)
 
-$(BUILD_DIR)/darwin-amd64/minishift: vendor $(BUILD_DIR)/$(GOOS)-$(GOARCH)
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/darwin-amd64/minishift ./cmd/minishift
+$(BUILD_DIR)/darwin-amd64/minishift: vendor $(ADDON_ASSET_FILE) $(BUILD_DIR)/$(GOOS)-$(GOARCH)
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build -pkgdir=$(ADDON_BINDATA_DIR) --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/darwin-amd64/minishift ./cmd/minishift
 
-$(BUILD_DIR)/linux-amd64/minishift: vendor $(BUILD_DIR)/$(GOOS)-$(GOARCH)
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/linux-amd64/minishift ./cmd/minishift
+$(BUILD_DIR)/linux-amd64/minishift: vendor $(ADDON_ASSET_FILE) $(BUILD_DIR)/$(GOOS)-$(GOARCH)
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -pkgdir=$(ADDON_BINDATA_DIR) --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/linux-amd64/minishift ./cmd/minishift
 
-$(BUILD_DIR)/windows-amd64/minishift.exe: vendor $(BUILD_DIR)/$(GOOS)-$(GOARCH)
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/windows-amd64/minishift.exe ./cmd/minishift
+$(BUILD_DIR)/windows-amd64/minishift.exe: vendor $(ADDON_ASSET_FILE) $(BUILD_DIR)/$(GOOS)-$(GOARCH)
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build -pkgdir=$(ADDON_BINDATA_DIR) --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/windows-amd64/minishift.exe ./cmd/minishift
 
 $(GOPATH)/bin/gh-release:
-	go get github.com/progrium/gh-release
+	go get -u github.com/progrium/gh-release/...
+
+$(GOPATH)/bin/go-bindata:
+	go get -u github.com/jteeuwen/go-bindata/...
 
 .PHONY: prerelease
 prerelease:
@@ -122,7 +138,7 @@ clean:
 	rm -f  $(DOCS_SYNOPISIS_DIR)/*.md
 
 .PHONY: test
-test: vendor
+test: vendor $(ADDON_ASSET_FILE)
 	@go test -v $(shell $(PACKAGES))
 
 .PHONY: integration

@@ -47,21 +47,15 @@ const (
 	DefaultDiskSize = "20g"
 )
 
+var KubeConfigPath = filepath.Join(Minipath, "machines", MachineName+"_kubeconfig")
+
 var isoVersion = version.GetIsoVersion()
 var isoName = "minishift-b2d.iso"
 var githubProject = "https://github.com/minishift/minishift-b2d-iso"
 
 var DefaultIsoUrl = githubProject + "/releases/download/" + isoVersion + "/" + isoName
 
-const (
-	DefaultConfigViewFormat = "- {{.ConfigKey}}: {{.ConfigValue}}\n"
-	RemoteOpenShiftCAPath   = "/var/lib/minishift/openshift.local.config/master/ca.crt"
-)
-
 var ConfigFile = MakeMiniPath("config", "config.json")
-
-var TmpFilePath = MakeMiniPath("tmp")
-var OcCachePath = MakeMiniPath("cache", "oc")
 
 // MakeMiniPath is a utility to calculate a relative path to our directory.
 func MakeMiniPath(fileName ...string) string {

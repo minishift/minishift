@@ -34,6 +34,8 @@ type configFile interface {
 }
 
 type setFn func(string, string) error
+
+// TODO - Issue #177 Rename MinikubeConfig to MinishiftConfig
 type MinikubeConfig map[string]interface{}
 
 type Setting struct {

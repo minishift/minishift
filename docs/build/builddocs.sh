@@ -17,7 +17,7 @@ fi
 }
 
 function show-help() {
-echo "Usage: docker run -ti [-v \"\$PWD\"/docs:/tmp/docs] $HOSTNAME COMMAND
+echo "Usage: docker run -ti [-v \"\$PWD\"/docs:/tmp/docs:Z] $HOSTNAME COMMAND
 
 Build Minishift docs using Asciibinder and serve them at http://$(get-ip):8080
 

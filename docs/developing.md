@@ -192,7 +192,11 @@ Run `go test --help` to read more about test options.
 <a name="integration-tests"></a>
 #### Integration Tests
 
-\<WIP\> - see also GitHub issue [#135](https://github.com/minishift/minishift/issues/135)
+Integration are using [`godog`](https://github.com/DATA-DOG/godog), which uses Gherkin (Cucumber) to define testcases.
+The testcases are defined in `test/integration/*.feature`, and can be run with:
+
+    $ make integration
+
 
 <a name="formatting-the-source"></a>
 ### Formatting the source

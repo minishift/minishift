@@ -24,33 +24,49 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"testing"
+
+	"bytes"
+	"syscall"
 )
 
 type MinishiftRunner struct {
-	T          *testing.T
-	BinaryPath string
-	Args       string
+	CommandPath string
+	CommandArgs string
 }
 
-func (m *MinishiftRunner) RunCommand(command string, checkError bool) string {
+func (m *MinishiftRunner) RunCommand(command string) (stdOut string, stdErr string, exitCode int) {
 	commandArr := strings.Split(command, " ")
-	path, _ := filepath.Abs(m.BinaryPath)
+	path, _ := filepath.Abs(m.CommandPath)
 	cmd := exec.Command(path, commandArr...)
-	stdout, err := cmd.Output()
 
-	if checkError && err != nil {
+	var outbuf, errbuf bytes.Buffer
+	cmd.Stdout = &outbuf
+	cmd.Stderr = &errbuf
+
+	err := cmd.Run()
+	stdOut = outbuf.String()
+	stdErr = errbuf.String()
+
+	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
-			m.T.Fatalf("Error running command: %s %s. Output: %s", command, exitError.Stderr, stdout)
+			ws := exitError.Sys().(syscall.WaitStatus)
+			exitCode = ws.ExitStatus()
 		} else {
-			m.T.Fatalf("Error running command: %s %s. Output: %s", command, err, stdout)
+			if stdErr == "" {
+				stdErr = err.Error()
+			}
+			exitCode = 1 // unable to get error code
 		}
+	} else {
+		ws := cmd.ProcessState.Sys().(syscall.WaitStatus)
+		exitCode = ws.ExitStatus()
 	}
-	return string(stdout)
+
+	return
 }
 
 func (m *MinishiftRunner) Start() {
-	m.RunCommand(fmt.Sprintf("start %s", m.Args), true)
+	m.RunCommand(fmt.Sprintf("start %s", m.CommandArgs))
 }
 
 func (m *MinishiftRunner) EnsureRunning() {
@@ -65,7 +81,7 @@ func (m *MinishiftRunner) IsRunning() bool {
 }
 
 func (m *MinishiftRunner) EnsureDeleted() {
-	m.RunCommand("delete", false)
+	m.RunCommand("delete")
 	m.CheckStatus("Does Not Exist")
 }
 
@@ -91,27 +107,21 @@ func (m *MinishiftRunner) SetEnvFromEnvCmdOutput(dockerEnvVars string) error {
 }
 
 func (m *MinishiftRunner) GetStatus() string {
-	return strings.Trim(m.RunCommand("status", true), " \n")
+	cmdOut, _, _ := m.RunCommand("status")
+	return strings.Trim(cmdOut, " \n")
 }
 
-func (m *MinishiftRunner) CheckStatus(desired string) {
-	s := m.GetStatus()
-	if s != desired {
-		m.T.Fatalf("Machine is in the wrong state: %s, expected  %s", s, desired)
-	}
+func (m *MinishiftRunner) CheckStatus(desired string) bool {
+	return m.GetStatus() == desired
 }
 
 type OcRunner struct {
-	T          *testing.T
-	BinaryPath string
+	CommandPath string
 }
 
-func NewOcRunner(t *testing.T) *OcRunner {
-	p, err := exec.LookPath("kubectl")
-	if err != nil {
-		t.Fatal("Couldn't find kubectl on path.")
-	}
-	return &OcRunner{BinaryPath: p, T: t}
+func NewOcRunner() *OcRunner {
+	p, _ := exec.LookPath("oc")
+	return &OcRunner{CommandPath: p}
 }
 
 func (k *OcRunner) RunCommandParseOutput(args []string, outputObj interface{}) error {

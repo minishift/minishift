@@ -11,6 +11,8 @@ Minishift creates a virtual machine (VM) and provisions a local, single-node Ope
   - [Services](#services)
   - [Logs](#logs)
 - [Updating OpenShift configuration](#updating-openshift-configuration)
+  - [Example: Configuring cross-origin resource sharing](#example-configuring-cross-origin-resource-sharing)
+  - [Example: Changing the OpenShift routing suffix](#example-changing-the-openshift-routing-suffix)
 - [Persistent volumes](#persistent-volumes)
 
 <!-- /MarkdownTOC -->
@@ -99,48 +101,58 @@ $ minishift logs
 <a name="updating-openshift-configuration"></a>
 ## Updating OpenShift configuration
 
-Once OpenShift is running, you can view and change the master and
-node configuration of your OpenShift cluster.
+While OpenShift is running, you can view and change the master or the node configuration of your cluster.
 
-You can view the current OpenShift master configuration (_master-config.yaml_) via:
+To view the current OpenShift master configuration (_master-config.yaml_), run the following command:
 
 ```shell
 $ minishift openshift config view
 ```
 
-For displaying the node configuration, you can specify the `target` flag.
-For more details about the `view` command refer to its [synopsis](./minishift_openshift_config_view.md).
+To show the node configuration instead of the master configuration, specify the `target` flag.
 
-Let's look at [Cross-origin resource sharing](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) (CORS) as an example for patching the OpenShift master configuration.
-Per default, OpenShift will only allow cross origin resource requests from the IP of the
-cluster as well as localhost. This is specified via the `corsAllowedOrigins` property in the
-[master configuration](https://docs.openshift.com/enterprise/3.0/admin_guide/master_node_configuration.html#master-configuration-files) (_master-config.yaml_). To change this value and allow
-cross origin requests from all domains, one can execute:
+For details about the `view` command, see the [synopsis](./minishift_openshift_config_view.md) command reference.
+
+**Note:** After you update the OpenShift configuration, OpenShift will transparently restart.
+
+<a name="example-configuring-cross-origin-resource-sharing"></a>
+### Example: Configuring cross-origin resource sharing
+
+In this example, you configure [cross-origin resource sharing](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) (CORS)
+by updating the OpenShift master configuration to allow additional IP addresses to request resources.
+
+By default, OpenShift only allows cross-origin resource requests from the IP address of the
+cluster or from localhost. This setting is stored in the `corsAllowedOrigins` property of the
+[master configuration](https://docs.openshift.com/enterprise/3.0/admin_guide/master_node_configuration.html#master-configuration-files) (_master-config.yaml_).
+
+To change the property value and allow cross-origin requests from all domains,
+run the following command:
 
 ```
 $  minishift openshift config set --patch '{"corsAllowedOrigins": [".*"]}'
 ```
 
-Per default, the master configuration is targeted, but you can also patch the node configuration
-by specifying the `target` flag. For more details about the
-`set` command refer to its [synopsis](./minishift_openshift_config_set.md).
+<a name="example-changing-the-openshift-routing-suffix"></a>
+### Example: Changing the OpenShift routing suffix
 
-A second use case for the `openshift config` command is the ability to change OpenShift's routing suffix.
-If you use a static routing suffix, you can just specify the `routing-suffix` flag as part of the
-[`start`](./minishift_start.md) command. However, per default Minishift uses a dynamic routing prefix
-based on [nip.io](http://nip.io/). In this case the VM's IP is part of the routing suffix, for example
-_192.168.99.103.nip.io_. There is an alternative to nip.io called [xip.io](http://xip.io/). It is
-based on the same principles. In case you are experiencing issues with nip.io, you can switch to
-xip.io using the `openshift config` command:
+In this example, you change the OpenShift routing suffix in the master configuration.
+
+If you use a static routing suffix, you can set the `routing-suffix` flag as part of the
+[`start`](./minishift_start.md) command. By default, Minishift uses a dynamic routing prefix
+based on [nip.io](http://nip.io/), in which the IP address of the VM is a part of the routing suffix,
+for example _192.168.99.103.nip.io_.
+
+If you experience issues with `nip.io`, you can use [xip.io](http://xip.io/), which is
+based on the same principles.
+
+To set the routing suffix to `xip.io`, run the following command:
 
 ```
-$ minishift openshift config set --patch '{"routingConfig": {"subdomain": "192.168.99.103.xip.io"}}'
+$ minishift openshift config set --patch '{"routingConfig": {"subdomain": "<IP-ADDRESS>.xip.io"}}'
 ```
 
-You need to replace the IP in the above command with the IP of your VM, which you
-can obtain via the [`ip`](./minishift_ip.md) command.
-
-**Note:** OpenShift will be transparently restarted after applying the patch.
+Make sure to replace _\<IP-ADDRESS\>_ in the above example with the IP address of your Minishift VM.
+You can retrieve the IP address by running the [`ip`](./minishift_ip.md) command.
 
 <a name="persistent-volumes"></a>
 ## Persistent volumes

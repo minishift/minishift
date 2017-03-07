@@ -53,6 +53,15 @@ If `virtlogd` is not running, start and enable it to start on boot:
 systemctl start virtlogd
 systemctl enable virtlogd
 ```
+### Error starting the VM: ... operation failed: domain 'minishift' already exists ...
+
+Check for existing VMs and remove them:
+
+```
+sudo virsh list --all
+sudo virsh destroy minishift
+sudo virsh undefine minishift
+```
 
 <a name="error-starting-the-vm--operation-failed-domain-minishift-already-exists-"></a>
 ### Error starting the VM: ... operation failed: domain 'minishift' already exists ...

@@ -21,6 +21,7 @@ The following paragraphs describe how to build and release Minishift.
     - [Integration Tests](#integration-tests)
   - [Formatting the source](#formatting-the-source)
   - [Cleaning all](#cleaning-all)
+  - [Building Minishift Documentation](#building-minishift-documentation)
 - [CI Setup](#ci-setup)
 - [Releasing Minishift](#releasing-minishift)
   - [Prerequisites](#prerequisites-1)
@@ -213,6 +214,26 @@ Or you can let violations be corrected directly:
 To remove all generated artifacts and installed dependencies, run:
 
     $ make clean
+
+
+<a name="building-minishift-documentation"></a>
+### Building Minishift Documentation
+
+Minishift documentation is built using a Docker container that provides all tools necessary for the various format conversions, HTML building, and serving of the final content. To build the image from which the container can be run, use the `Dockerfile` located in `minishift/docs/build`.
+
+Build the image:
+
+    $ cd minishift/docs/build
+    $ docker build -t <image-name> .
+
+Run the image to show basic usage help:
+
+    $ docker run <image-name>
+
+Run the image to build the documentation:
+
+    $ cd minishift/
+    $ docker run -tiv "$PWD"/docs:/tmp/docs:Z <container-id> build
 
 
 <a name="ci-setup"></a>

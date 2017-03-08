@@ -66,6 +66,22 @@ func (m *Minishift) shouldHaveAValidIPAddress() error {
 	return nil
 }
 
+func (m *Minishift) executingOcCommand(command string) error {
+	ocRunner := m.runner.GetOcRunner()
+	if ocRunner == nil {
+		return fmt.Errorf("Minishift is not Running")
+	}
+	cmdOut, cmdErr, cmdExit := ocRunner.RunCommand(command)
+	lastCommandOutput = CommandOutput{
+		command,
+		cmdOut,
+		cmdErr,
+		cmdExit,
+	}
+
+	return nil
+}
+
 func (m *Minishift) executingCommand(command string) error {
 	// TODO: there must be smarter way to destruct
 	cmdOut, cmdErr, cmdExit := m.runner.RunCommand(command)
@@ -146,6 +162,7 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`Minishift should have state "([^"]*)"`, m.shouldHaveState)
 	s.Step(`Minishift should have a valid IP address`, m.shouldHaveAValidIPAddress)
 	s.Step(`executing "minishift ([^"]*)"`, m.executingCommand)
+	s.Step(`executing "oc ([^"]*)`, m.executingOcCommand)
 	s.Step(`([^"]*) should contain ([^"]*)`, m.commandReturnShouldContain)
 	s.Step(`([^"]*) should contain`, m.commandReturnShouldContainContent)
 	s.Step(`([^"]*) should equal ([^"]*)`, m.commandReturnShouldEqual)
@@ -154,7 +171,7 @@ func FeatureContext(s *godog.Suite) {
 
 	s.BeforeScenario(func(interface{}) {
 		testDir := setUp()
-		os.RemoveAll(testDir)
+		fmt.Println("Running Integration test in : ", testDir)
 	})
 
 	s.AfterScenario(func(interface{}, error) {

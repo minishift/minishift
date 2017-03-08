@@ -15,6 +15,8 @@ while using Minishift.
   - [Error: getting state for host: machine does not exist](#error-getting-state-for-host-machine-does-not-exist)
 - [Users and authentication](#users-authentication)
   - [Some special characters cause passwords to fail](#some-special-characters-cause-passwords-to-fail)
+- [Snapshots with virsh](#snapshots-with-virsh)
+  - [`minishift delete` fails to undefine snapshots of running instances](#minishift-delete-fails-to-undefine-snapshots-of-running-instances)
 
 <!-- /MarkdownTOC -->
 
@@ -41,7 +43,7 @@ systemctl enable libvirtd
 <a name="failed-to-connect-socket-to-varrunlibvirtvirtlogd-sock"></a>
 ### Failed to connect socket to '/var/run/libvirt/virtlogd-sock'
 
-The problem is likely to be that the `virtlogd` service not running, you can check it with
+The problem is likely to be that the `virtlogd` service is not running, you can check it with
 
 ```
 systemctl status virtlogd
@@ -97,14 +99,15 @@ manually but this is very **risky**.
 <a name="error-getting-state-for-host-machine-does-not-exist"></a>
 ### Error: getting state for host: machine does not exist
 
-If you are using Windows, the problem is likely to be either an outdated version
-of Virtual Box or you forgot to use `--vm-driver virtualbox` option when starting minishift.
+If you use Windows, ensure that you used the `--vm-driver virtualbox` flag with the `minishift start` command. Alternatively, the problem is likely to be an outdated version
+of Virtual Box.
 
-We recommend to use `Virtualbox >= 5.1.12` to avoid this issue.
+It is recommended to use `Virtualbox >= 5.1.12` to avoid this issue.
 
 <a name="users-authentication"></a>
 ## Users and authentication
 
+<a name="some-special-characters-cause-passwords-to-fail"></a>
 ### Some special characters cause passwords to fail
 
 Depending on your operating system and shell environment, certain special characters
@@ -112,3 +115,38 @@ can trigger variable interpolation and therefore cause passwords to fail.
 
 Workaround: When creating and entering passwords, wrap the string with single quotes in
 the following format: '&lt;password>'
+
+<a name="snapshots-with-virsh"></a>
+## Snapshots with virsh
+
+<a name="minishift-delete-fails-to-undefine-snapshots-of-running-instances"></a>
+
+### `minishift delete` fails to undefine snapshots of running instances, made using virsh on KVM/libvirt.
+
+If you use virsh on KVM/libvirt to create snapshots in your development workflow, using `minishift delete` to delete the snapshots, along with the VM, returns an error:
+
+    $ minishift delete
+    Deleting the Minishift VM...
+    Error deleting the VM:  [Code-55] [Domain-10] Requested operation is not valid: cannot delete inactive domain with 4 snapshots
+
+Workaround: The snapshots are stored in `~/.minishift/machines`, but the definitions are stored in `var/lib/libvirt/qemu/snapshot/minishift`.
+
+To delete the snapshots you need to:
+
+1. Delete the definitions using:
+
+        $ sudo virsh snapshot-delete --metadata minishift <snapshot-name>
+
+1. Undefine the Minishift domain using:
+
+        $ sudo virsh undefine minishift
+
+**Note:** In case the above step does not resolve the issue, you can also use the following command to delete the snapshots:
+
+    $ rm -rf ~/.minishift/machines
+
+You can now do `minishft delete` to delete the VM and restart Minishift.
+
+It is recommended to avoid use of metadata when you create snapshots as follows:
+
+    $ sudo virsh snapshot-create-as --domain vm1 overlay1 --diskspec vda,file=/export/overlay1.qcow2 --disk-only --atomic --no-metadata

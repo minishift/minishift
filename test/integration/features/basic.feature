@@ -8,6 +8,17 @@ Feature: Basic
      Then Minishift should have state "Running"
       And Minishift should have a valid IP address
 
+     # Check if developer have sudo permission then oc should output as below with other
+     # cluster roles
+     # sudoer   /sudoer   developer
+     When executing "oc --as system:admin get clusterrolebindings"
+     Then stderr should be empty
+     And  exitcode should equal 0
+     And  stdout should contain
+     """
+     sudoer
+     """
+
      When executing "minishift ssh echo hello"
      Then stderr should be empty
       And exitcode should equal 0

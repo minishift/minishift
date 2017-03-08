@@ -31,6 +31,7 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/cache"
 	"github.com/minishift/minishift/pkg/minishift/clusterup"
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
+	"github.com/minishift/minishift/pkg/minishift/openshift"
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
 	minishiftUtil "github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/util"
@@ -187,6 +188,10 @@ func runStart(cmd *cobra.Command, args []string) {
 	}
 
 	clusterUp(&config, ip)
+	if err := openshift.AddSudoersRoleForUser("developer"); err != nil {
+		glog.Errorln("Error adding developer user to sudoers", err)
+		atexit.Exit(1)
+	}
 }
 
 // Set Docker Proxy

@@ -13,6 +13,7 @@ Minishift creates a virtual machine (VM) and provisions a local, single-node Ope
 - [Updating OpenShift configuration](#updating-openshift-configuration)
 - [Persistent volumes](#persistent-volumes)
 
+
 <!-- /MarkdownTOC -->
 
 <a name="interacting-with-openshift"></a>
@@ -42,7 +43,8 @@ topic in the OpenShift documentation.
 Per default, _cluster up_ uses an [AllowAllPasswordIdentityProvider](https://docs.openshift.org/latest/install_config/configuring_authentication.html#AllowAllPasswordIdentityProvider)
 for authentication against the local cluster. This means any non-empty username and password can
 be used to login to the local cluster. The recommended username and password are
-developer/developer, since it also has a default project _myproject_ set up.
+developer/developer, since it also has a default project _myproject_ set up and [impersonate](https://docs.openshift.org/latest/architecture/additional_concepts/authentication.html#authentication-impersonation) 
+on administrator so admin commands can be run using `--as system:admin` parameter.
 
 To login as administrator, use the system account:
 

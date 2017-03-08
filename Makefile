@@ -32,6 +32,7 @@ LDFLAGS := -X $(REPOPATH)/pkg/version.version=$(VERSION) \
 GOFILES := go list  -f '{{join .Deps "\n"}}' ./cmd/minishift/ | grep $(REPOPATH) | xargs go list -f '{{ range $$file := .GoFiles }} {{$$.Dir}}/{{$$file}}{{"\n"}}{{end}}'
 PACKAGES := go list ./... | grep -v /vendor
 SOURCE_DIRS = cmd pkg test
+DOCS_SYNOPISIS_DIR = ./docs/source/_tmp
 
 $(GOPATH)/bin/minishift$(IS_EXE): $(BUILD_DIR)/$(GOOS)-$(GOARCH)/minishift$(IS_EXE)
 	cp $(BUILD_DIR)/$(GOOS)-$(GOARCH)/minishift$(IS_EXE) $(GOPATH)/bin/minishift$(IS_EXE)
@@ -55,13 +56,27 @@ $(GOPATH)/bin/gh-release: $(GOPATH)/src/$(ORG)
 	go get github.com/progrium/gh-release
 
 .PHONY: prerelease
-prerelease: $(GOPATH)/src/$(ORG)
+prerelease:
 	./prerelease.sh
 
-.PHONY: gendocs
-gendocs: $(GOPATH)/src/$(ORG) $(shell find cmd)
-	# https://github.com/golang/go/issues/15038#issuecomment-207631885 ( CGO_ENABLED=0 )
-	cd $(GOPATH)/src/$(REPOPATH) && CGO_ENABLED=0 go run -ldflags="$(LDFLAGS)" -tags gendocs gen_help_text.go
+.PHONY: build_docs_container
+build_docs_container:
+	cd docs && docker build -t minishift/docs .
+
+.PHONY: gen_docs
+gen_docs: synopsis_docs build_docs_container
+	cd docs && docker run -tiv $(shell pwd)/docs:/docs:Z minishift/docs gen
+
+.PHONY: serve_docs
+serve_docs: synopsis_docs build_docs_container
+	cd docs && docker run -p 35729:35729 -p 4567:4567 -tiv $(shell pwd)/docs:/docs:Z minishift/docs serve[--watcher-force-polling]
+
+$(DOCS_SYNOPISIS_DIR)/*.md: vendor
+	@# https://github.com/golang/go/issues/15038#issuecomment-207631885 ( CGO_ENABLED=0 )
+	DOCS_SYNOPISIS_DIR=$(DOCS_SYNOPISIS_DIR) CGO_ENABLED=0 go run -ldflags="$(LDFLAGS)" -tags gendocs gen_help_text.go
+
+.PHONY: synopsis_docs
+synopsis_docs: $(DOCS_SYNOPISIS_DIR)/*.md
 
 .PHONY: release
 release: clean fmtcheck test prerelease $(GOPATH)/bin/gh-release cross
@@ -81,6 +96,7 @@ clean:
 	rm -rf $(BUILD_DIR)
 	rm -rf release
 	rm -rf vendor
+	rm -f  $(DOCS_SYNOPISIS_DIR)/*.md
 
 .PHONY: test
 test: vendor $(GOPATH)/src/$(ORG)

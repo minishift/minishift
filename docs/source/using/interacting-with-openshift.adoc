@@ -1,0 +1,229 @@
+:toc: left
+
+[[interacting-with-your-openshift-cluster]]
+= Interacting with your OpenShift cluster
+
+Minishift creates a virtual machine (VM) and provisions a local,
+single-node OpenShift cluster within this VM. The following sections
+describe how Minishift can assist you in interacting with and
+configuring your local OpenShift instance. For details about managing
+the Minishift VM refer to the link:./managing-minishift.html[Managing
+Minishift] section.
+
+[[interacting-with-openshift]]
+== Interacting with OpenShift
+
+[[openshift-client-binary-oc]]
+=== OpenShift client binary (oc)
+
+The `minishift start` command creates an OpenShift instance using the
+https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md[cluster
+up] approach.
+
+For this purpose it copies the `oc` binary onto your host. You find it under
+`~/.minishift/cache/oc/\<OpenShift version\>/oc`. You can add this
+binary to your `PATH` variable in order to use `oc`, for example:
+
+----
+$ export PATH=$PATH:~/.minishift/cache/oc/v1.4.1
+----
+
+In future versions we will provide a command to assist in setting up the
+`PATH`.
+See GitHub issue
+https://github.com/minishift/minishift/issues/142[#142].
+
+For an introduction to `oc` usage, refer to the
+https://docs.openshift.com/enterprise/3.2/cli_reference/get_started_cli.html[Get
+Started with the CLI]
+topic in the OpenShift documentation.
+
+[[login]]
+=== Login
+
+Per default, _cluster up_ uses an
+https://docs.openshift.org/latest/install_config/configuring_authentication.html#AllowAllPasswordIdentityProvider[AllowAllPasswordIdentityProvider]
+for authentication against the local cluster. This means any non-empty
+username and password can
+be used to login to the local cluster. The recommended username and
+password are
+developer/developer, since it has a default project _myproject_ set up
+and also can
+https://docs.openshift.org/latest/architecture/additional_concepts/authentication.html#authentication-impersonation[impersonate]
+the administrator. This allows to run admin commands using the
+`--as system:admin` parameter.
+
+To login as administrator, use the system account:
+
+----
+$ oc login -u system:admin
+----
+
+In this case
+https://docs.openshift.com/enterprise/3.2/architecture/additional_concepts/authentication.html#api-authentication[client
+certificates]
+are used which are stored in `~/.kube/config`. _cluster up_ will
+install
+the appropriate certificates as part of the bootstrap.
+
+*Note:* If you type `oc login -u system -p admin`, you will get logged
+in, but not as an administrator,
+but rather as an unprivileged user with no particular rights.
+
+To view the currently available login contexts, run:
+
+----
+$ oc config view
+----
+
+[[console]]
+=== Console
+
+To access the
+https://docs.openshift.org/latest/architecture/infrastructure_components/web_console.html[OpenShift
+console],
+you can run this command in a shell after starting Minishift to get the
+URL address:
+
+----
+$ minishift console --url
+----
+
+Alternatively, after starting Minishift, you can use the command below
+to directly open the console in a browser:
+
+----
+$ minishift console
+----
+
+[[services]]
+=== Services
+
+To access a service exposed with a node port, run this command in a
+shell after starting Minishift to get the address:
+
+----
+$ minishift openshift service [-n NAMESPACE] [--url] NAME
+----
+
+[[logs]]
+=== Logs
+
+To access OpenShift logs, run the `logs` command after starting
+Minishift:
+
+----
+$ minishift logs
+----
+
+[[updating-openshift-configuration]]
+== Updating OpenShift configuration
+
+While OpenShift is running, you can view and change the master or the
+node configuration of your cluster.
+
+To view the current OpenShift master configuration
+(_master-config.yaml_), run the following command:
+
+----
+$ minishift openshift config view
+----
+
+To show the node configuration instead of the master configuration,
+specify the `target` flag.
+
+For details about the `view` command, see the
+link:../command-ref/minishift_openshift_config_view.html[synopsis]
+command reference.
+
+*Note:* After you update the OpenShift configuration, OpenShift will
+transparently restart.
+
+[[example-configuring-cross-origin-resource-sharing]]
+=== Example: Configuring cross-origin resource sharing
+
+In this example, you configure
+https://en.wikipedia.org/wiki/Cross-origin_resource_sharing[cross-origin
+resource sharing] (CORS)
+by updating the OpenShift master configuration to allow additional IP
+addresses to request resources.
+
+By default, OpenShift only allows cross-origin resource requests from
+the IP address of the
+cluster or from localhost. This setting is stored in the
+`corsAllowedOrigins` property of the
+https://docs.openshift.com/enterprise/3.0/admin_guide/master_node_configuration.html#master-configuration-files[master
+configuration] (_master-config.yaml_).
+
+To change the property value and allow cross-origin requests from all
+domains, run the following command:
+
+----
+$  minishift openshift config set --patch '{"corsAllowedOrigins": [".*"]}'
+----
+
+[[example-changing-the-openshift-routing-suffix]]
+=== Example: Changing the OpenShift routing suffix
+
+In this example, you change the OpenShift routing suffix in the master
+configuration.
+
+If you use a static routing suffix, you can set the `routing-suffix`
+flag as part of the
+link:../command-ref/minishift_start.html[`start`] command. By default,
+Minishift uses a dynamic routing prefix
+based on http://nip.io/[nip.io], in which the IP address of the VM is a
+part of the routing suffix,
+for example _192.168.99.103.nip.io_.
+
+If you experience issues with `nip.io`, you can use
+http://xip.io/[xip.io], which is
+based on the same principles.
+
+To set the routing suffix to `xip.io`, run the following command:
+
+----
+$ minishift openshift config set --patch '{"routingConfig": {"subdomain": "<IP-ADDRESS>.xip.io"}}'
+----
+
+Make sure to replace _\_ in the above example with the IP address of
+your Minishift VM.
+You can retrieve the IP address by running the
+link:../command-ref/minishift_ip.html[`ip`] command.
+
+[[persistent-volumes]]
+== Persistent volumes
+
+Minishift supports
+https://docs.openshift.org/latest/dev_guide/persistent_volumes.html[PersistentVolumes]
+of type `hostPath`. These PersistentVolumes are mapped to a directory
+inside the Minishift VM.
+
+The MiniShift VM boots into a tmpfs, so most directories will not be
+persisted across reboots (for example, when you use `minishift stop`).
+However, MiniShift is configured to persist OpenShift specific
+configuration files and docker files stored under the following host
+directories respectively:
+
+* `/var/lib/minishift`
+* `/var/lib/docker`
+
+Here is an example PersistentVolume config to persist data in the
+`/var/lib/minishift` directory:
+
+----
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 5Gi
+  hostPath:
+    path: /var/lib/minishift/pv
+----
+
+Efforts to let the user configure persistent-volumes are on, see GitHub
+issue https://github.com/minishift/minishift/issues/389[#389]

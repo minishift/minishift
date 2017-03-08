@@ -19,9 +19,10 @@ package main
 import (
 	"github.com/minishift/minishift/cmd/minishift/cmd"
 	"github.com/spf13/cobra/doc"
+	"os"
 )
 
 func main() {
 	cmd.RootCmd.DisableAutoGenTag = true
-	doc.GenMarkdownTree(cmd.RootCmd, "./docs")
+	doc.GenMarkdownTree(cmd.RootCmd, os.Getenv("DOCS_SYNOPISIS_DIR"))
 }

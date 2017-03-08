@@ -45,7 +45,7 @@ host OS, you have the choice of the following hypervisors:
 * OS X
     * [xhyve](https://github.com/mist64/xhyve) (default), [VirtualBox](https://www.virtualbox.org/wiki/Downloads) or [VMware Fusion](https://www.vmware.com/products/fusion)
 * GNU/Linux
-    * [KVM](./docs/docker-machine-drivers.md#kvm-driver) (default) or [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
+    * [KVM](https://minishift.io/docs/docker-machine-drivers.html#kvm-driver) (default) or [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 * Windows
     * [Hyper-V](https://technet.microsoft.com/en-us/library/mt169373.aspx) (default) or [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 
@@ -54,11 +54,11 @@ Make sure that the hypervisor is installed and enabled on your system before you
 **Important:**
 
 - KVM and xhyve require specific installation and configuration steps.
-For more information, see [docker machine drivers installation](./docs/docker-machine-drivers.md).
+For more information, see [docker machine drivers installation](https://minishift.io/docs/docker-machine-drivers.html).
 - It is recommended to use `Virtualbox 5.1.12` or later on Windows to avoid the issue
-[Error: getting state for host: machine does not exist](./docs/troubleshooting.md#error-getting-state-for-host-machine-does-not-exist)
+[Error: getting state for host: machine does not exist](https://minishift.io/docs/troubleshooting.html#error-getting-state-for-host-machine-does-not-exist)
 
-If you encounter driver issues, see the [Troubleshooting](/docs/troubleshooting.md) guide.
+If you encounter driver issues, see the [Troubleshooting](https://minishift.io/docs/troubleshooting.html) guide.
 
 <a name="installing-minishift"></a>
 ### Installing Minishift
@@ -109,7 +109,7 @@ You can now install the latest beta version of minishift.
         $ minishift delete
 
    This command deletes everything in the `MINISHIFT_HOME/.minishift/machines/minishift` directory.
-   Other cached data and the [persistent configuration](./docs/managing-minishift.md#persistent-configuration) are not removed.
+   Other cached data and the [persistent configuration](https://minishift.io/docs/managing-minishift.html#persistent-configuration) are not removed.
 
 1. To completely uninstall Minishift, delete everything in the `MINISHIFT_HOME` directory
    (default `~/.minishift`) and `~/.kube`:
@@ -124,9 +124,9 @@ You can now install the latest beta version of minishift.
 ## Quickstart
 
 This section contains a brief demo of Minishift and the provisioned OpenShift cluster.
-For details on the usage of Minishift refer to the [Managing Minishift](/docs/managing-minishift.md) topic.
+For details on the usage of Minishift refer to the [Managing Minishift](https://minishift.io/docs/managing-minishift.html) topic.
 
-The interaction with OpenShift is via the command line tool _oc_ which is copied to your host. For more information on how Minishift can assist you in interacting with and configuring your local OpenShift instance refer to the [Interacting with OpenShift](/docs/interacting-with-openshift.md) topic.
+The interaction with OpenShift is via the command line tool _oc_ which is copied to your host. For more information on how Minishift can assist you in interacting with and configuring your local OpenShift instance refer to the [Interacting with OpenShift](https://minishift.io/docs/interacting-with-openshift.html) topic.
 
 For more information about the OpenShift cluster architecture,
 see [Architecture Overview](https://docs.openshift.org/latest/architecture/index.html) in the
@@ -158,7 +158,7 @@ with the KVM hypervisor driver.
 
   - The IP is dynamically generated for each OpenShift cluster. To check the IP, run the `minishift ip` command.
   - By default Minishift uses the driver most relevant to the host OS. To use a different driver, set the `--vm-driver` flag in `minishift start`. For example, to use VirtualBox instead of KVM on GNU/Linux operating systems, run `minishift start --vm-driver=virtualbox`. For more information about `minishift start` options,
-  see the [minishift start command reference](/docs/minishift_start.md).
+  see the [minishift start command reference](https://minishift.io/docs/minishift_start.md).
 
 1. Add the `oc` binary to the _PATH_ environment variable.
 
@@ -169,7 +169,7 @@ with the KVM hypervisor driver.
   To verify the `oc` version, check the contents of the `~/.minishift/cache/oc` directory.
 
 For more information about interacting with OpenShift with the command-line interface and
-the Web console, refer to the [Interacting with OpenShift](./docs/interacting-with-openshift.md) topic.
+the Web console, refer to the [Interacting with OpenShift](https://minishift.io/docs/interacting-with-openshift.html) topic.
 
 <a name="deploying-a-sample-application"></a>
 ### Deploying a sample application
@@ -214,7 +214,7 @@ for pure Docker use-cases as well.
 By using the same docker daemon as Minishift, you can speed up your local experiments.
 
 To be able to work with the docker daemon on your Mac or GNU/Linux host use the
-[`docker-env command`](./docs/minishift_docker-env.md) in your shell:
+[`docker-env command`](https://minishift.io/docs/minishift_docker-env.html) in your shell:
 
 ```
 eval $(minishift docker-env)
@@ -231,14 +231,14 @@ docker ps
 
 The following documentation is available:
 
-* [Managing Minishift](./docs/managing-minishift.md)
-* [Interacting with OpenShift](./docs/interacting-with-openshift.md)
-* [Command reference](./docs/minishift.md)
-* [Troubleshooting](./docs/troubleshooting.md)
-* [Installing docker-machine drivers](./docs/docker-machine-drivers.md)
+* [Managing Minishift](https://minishift.io/docs/managing-minishift.html)
+* [Interacting with OpenShift](https://minishift.io/docs/interacting-with-openshift.html)
+* [Command reference](https://minishift.io/docs/minishift.html)
+* [Troubleshooting](https://minishift.io/docs/troubleshooting.html)
+* [Installing docker-machine drivers](https://minishift.io/docs/docker-machine-drivers.html)
 * [Roadmap](./ROADMAP.md)
 * [Release Notes](https://github.com/minishift/minishift/releases)
-* [Developing Minishift](./docs/developing.md)
+* [Developing Minishift](https://minishift.io/docs/developing.html)
 
 <a name="limitations"></a>
 ## Limitations

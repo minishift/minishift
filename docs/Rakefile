@@ -1,0 +1,66 @@
+require 'bundler'
+task :default => :gen
+
+MARKDOWN_FILES = Rake::FileList.new("source/_tmp/*.md")
+GENERATED_ADOC = "source/command-ref"
+ADOC_FILES = Rake::FileList.new do |list|
+	MARKDOWN_FILES.each do |f|
+        adoc = f.ext(".adoc")
+        adoc = File.split(adoc)[1]
+        adoc = File.join(GENERATED_ADOC, adoc)
+		list.add(adoc)
+	end
+end
+
+task :init do
+	mkdir_p GENERATED_ADOC
+end
+
+task :clean do
+	rm "#{GENERATED_ADOC}/*"
+end
+
+desc 'Convert the generated command synopsis files from Markdown to Asciidoc'
+task :markdown_to_asciidoc => ADOC_FILES
+rule ".adoc" => ->(f){source_for_adoc(f)} do |t|
+	adoc_file = File.join(GENERATED_ADOC, File.basename(t.name, ".md"))
+	sh "pandoc --atx-headers --to=asciidoc --output=#{adoc_file} #{t.source}"
+	adoc_content = File.read(adoc_file)
+  	adoc_new = adoc_content.gsub(/\.md\[/, "{outfilesuffix}[")
+    File.open(adoc_file, "w") {|file| file.puts adoc_new }
+end
+
+desc 'Generate the site'
+task :gen => :markdown_to_asciidoc do
+	sh "bundle exec middleman build"
+end
+
+desc 'Serve the site'
+task :serve, [:server_args] => :markdown_to_asciidoc do |t, args|
+  if args[:server_args].nil? then
+  	sh "bundle exec middleman server"
+  else
+  	sh "bundle exec middleman server #{args[:server_args]}"
+  end
+end
+
+def source_for_adoc(adoc_file)
+  MARKDOWN_FILES.detect do |f|
+  	markdown_source = f.ext('')
+  	markdown_source = File.split(markdown_source)[1]
+
+    adoc_target = adoc_file.ext('')
+    adoc_target = File.split(adoc_target)[1]
+
+  	markdown_source == adoc_target
+  end
+end
+
+def createAdocTargetFiles
+
+	MARKDOWN_FILES.each do |f|
+		p "#{f}"
+	end
+end
+
+

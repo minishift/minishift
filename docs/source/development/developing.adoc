@@ -1,0 +1,300 @@
+:toc: left
+
+[[developing-minishift]]
+= Developing Minishift
+
+The following paragraphs describe how to build and release Minishift.
+
+== Prerequisites
+
+* Git
+* A recent Go distribution (>1.7)
+
+*Note*: You should be able to develop on Minishift on any OS - Linux, OS
+X or Windows. The latter has some gotchas to be aware about, but this
+guide tries to point them out to you.
+
+== Setting up the developing environment
+
+=== Creating the Go workspace
+
+In case you are new to Go development or you have not done though for
+some other reason, we highly recommend to setup a default Go
+https://golang.org/doc/code.html#Workspaces[workspace]. Even though it
+might need some getting used to for many, the idea is to have a single
+workspace for all Go development. Create the following directories in
+the base directory you want to use, eg _$HOME/work_:
+
+* src (contains Go source files)
+* pkg (contains package objects)
+* bin (contains executable commands)
+
+Then point the _GOPATH_ variable to this directory:
+
+----
+$ export GOPATH=$HOME/work
+----
+
+And add the workspace _bin_ directory to your PATH:
+
+----
+$ export PATH=$PATH:$GOPATH/bin
+----
+
+*Note*: The same applies for Windows users, but one uses the UI to set
+the environment variables or makes use of _setx_.
+
+=== Cloning the repository
+
+Next you want to get the Minishift sources:
+
+----
+$ cd $GOPATH/src
+$ git clone https://github.com/minishift/minishift.git github.com/minishift/minishift
+----
+
+=== Using an IDE
+
+You are basically free to use whatever editor fancies you, however, most
+of the core maintainers of Minishift use Intellij's
+https://www.jetbrains.com/idea/[Idea] with its latest Go plugin. Not
+only does it index your whole workspace and allows for easy navigation
+of the sources, but it also integrates with the Go debugger
+https://github.com/derekparker/delve[Delve]. You find instructions on
+how to setup Idea
+http://hadihariri.com/2015/09/30/setting-up-go-on-intellij/[here].
+
+== Managing dependencies
+
+Minishift uses https://github.com/Masterminds/glide[Glide] for
+dependency management.
+
+=== Installing Glide
+
+Before being able to use Glide you need to install it via:
+
+----
+$ go get github.com/Masterminds/glide
+----
+
+This will install the _glide_ binary into _$GOPATH/bin_. Make sure to
+have a Glide version _>=0.12.3_.
+
+=== Bootstrapping dependencies
+
+After a clean checkout or after a `make clean`, there won't be a
+_vendor_ directory containing the needed Minishift dependencies. You
+first need to install them via Glide:
+
+----
+$ make vendor
+----
+
+or by calling the underlying Glide command directly:
+
+----
+$ glide install -v
+----
+
+*Note*: On Windows you might get problems with too long pathnames in
+some of the dependencies. To work around this problem you can use a non
+default tmp directory for Glide which will shorten the total path
+lengths:
+
+----
+$ mkdir c:\tmp
+$ glide --tmp C:\tmp install -v
+----
+
+=== Updating dependencies
+
+If your work requires a change to the dependencies, edit _glide.yaml_
+adding or changing the dependency list as needed. Next remove
+_glide.lock_ and re-create the vendor directory by
+link:#bootstrapping-dependencies[bootstrapping] it. Glide will recognize
+that there is no lock file and recalculate the required dependencies.
+Once complete, there will be an updated _glide.lock_ file which you then
+check in together with the updated _glide.yaml_.
+
+Double check everything still compiles with the new lock file in place.
+
+== Building Minishift
+
+=== Building the Minishift binary
+
+The following command will create a platform specific binary and copy it
+to _$GOPATH/bin_.
+
+----
+$ make
+----
+
+*Note*: using `make cross` you can cross-compile for other platforms.
+
+=== Running the Minishift binary
+
+Starting the OpenShift cluster using your built minishift binary:
+
+----
+$ minishift start
+----
+
+The above command will execute _$GOPATH/bin/minishift_, provided you
+have set set up your Go workspace as described
+link:#creating-the-go-workspace[above].
+
+You can also execute the binaries directly from the _out_ directory of
+the checkout. You will find the binary, depending on your OS, in:
+
+* _out/darwin-amd64_
+* _out/linux-amd64_
+* _out/windows-amd64_
+
+For more minishift commands and flags refer to its link:./minishift.md[synopsis].
+
+=== Running Tests
+
+==== Unit Tests
+
+Unit tests get run on Travis before code is merged. To run as part of a
+development cycle:
+
+----
+$ make test
+----
+
+To run specific tests, use one of the following approach:
+
+* Run tests within entire package
++
+----
+# Eg: go test -v ./cmd/minikube/cmd
+$ go test -v <relative path of package>
+----
+* Run a single test
++
+----
+$ go test -v <relative path of package> -run <Testcase Name>
+----
+* Run tests matching pattern
++
+----
+$go test -v <relative path of package> -run "Test<Regex pattern to match tests>"
+----
+
+Run `go test --help` to read more about test options.
+
+==== Integration Tests
+
+Integration are using https://github.com/DATA-DOG/godog[`godog`], which
+uses Gherkin (Cucumber) to define testcases. The testcases are defined
+in `test/integration/*.feature`, and can be run with:
+
+----
+$ make integration
+----
+
+=== Formatting the source
+
+Minishift adheres to the Go formatting
+https://golang.org/doc/effective_go.html#formatting[guidelines]. Wrongly
+formatted code won't pass the CI builds. You can check which of your
+files are violating the guidelines via:
+
+----
+$ make fmtcheck
+----
+
+Or you can let violations be corrected directly:
+
+----
+$ make fmt
+----
+
+=== Cleaning all
+
+To remove all generated artifacts and installed dependencies, run:
+
+----
+$ make clean
+----
+
+=== Building Minishift Documentation
+
+Minishift documentation is located in the `docs` sub-folder. The
+documentation is a mix of generated
+https://en.wikipedia.org/wiki/Markdown[Markdown] files and manually
+maintained https://en.wikipedia.org/wiki/AsciiDoc[Asciidoc] files.
+
+Per default the documentation is build in a Docker container. This way
+you avoid having to install all required dependencies on your
+development machine. All you need is a running Docker daemon. In case
+you don't have one, use Minishift itself. See (TODO reference to the
+Minishift as Docker daemon from README. Needs to be extracted).
+
+To build the Docker image, run:
+
+----
+$ make build_docs_container
+----
+
+To generate the documentation into the directory `docs/build`, run:
+
+----
+$ make gen_docs
+----
+
+To build and serve the documentation for editing, run:
+
+----
+$ make serve_docs
+----
+
+The latter will start the https://middlemanapp.com[Middleman] server on
+port 4567. You can access the rendered documentation by browsing to
+http://<IP of Docker daemon>:4567.
+
+=== Deploying Minishift Documentation
+
+TBD
+
+== CI Setup
+
+Minishift uses several CI build servers. Amongst it
+https://ci.centos.org/[CentOS CI]. It builds incoming pull requests and
+any pushes to master. Is also archives build artifacts of successful
+builds. You can find the CentOS CI Jenkins job for Minishift
+https://ci.centos.org/job/minishift/[here].
+
+The artifacts of a successful pull request build can be found at
+http://artifacts.ci.centos.org/minishift/minishift/pr/[artifacts.ci.centos.org/minishift/minishift/pr/<PR
+ID>].
+
+Artifacts of a successful master build can be found at
+http://artifacts.ci.centos.org/minishift/minishift/master/[artifacts.ci.centos.org/minishift/minishift/master/<BUILD
+ID>].
+
+For more information about CentOS CI, check out its
+https://wiki.centos.org/QaWiki/CI[Wiki] to know more about CentOS CI.
+
+== Releasing Minishift
+
+=== Prerequisites
+
+* A
+https://help.github.com/articles/creating-an-access-token-for-command-line-use[GitHub
+personal access token] defined in your environment as
+GITHUB_ACCESS_TOKEN
+
+=== Cutting the release
+
+* Bump the Minishift version in the link:../Makefile[Makefile]
+* Run `make gendocs` to rebuild the docs
+* Commit and push your changes with a message of the form "cut v1.0.0"
+* Create binaries and upload them to GitHub (this will also tag the
+release):
++
+----
+$ make release
+----
+

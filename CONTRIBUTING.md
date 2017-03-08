@@ -12,7 +12,7 @@ Thank you for your contributions! Please follow this process to submit a patch:
 1. Create an issue describing your proposed change to the repository.
 1. The repository owners will triage and respond to your issue promptly.
 1. Fork the repository and create a topic branch.
-1. Refer to the [developer document](./docs/developing.md) for guidelines and tips on how to build and test Minishift.
+1. Refer to the [developer document](https://minishift.io/docs/developing.html) for guidelines and tips on how to build and test Minishift.
 1. Submit a pull request with the proposed changes.
 
 ## Questions?

@@ -52,7 +52,7 @@ Without further ado:
 * HTTP Proxy Support ~~[#90](https://github.com/minishift/minishift/issues/90)~~
 * Consistent host folder mounting [#316](https://github.com/minishift/minishift/issues/316), [#317](https://github.com/minishift/minishift/issues/317)
 * Exposure of the OpenShift registry [#254](https://github.com/minishift/minishift/issues/254)
-* Ability to configure/patch OpenShift's master and node configuration [#276](https://github.com/minishift/minishift/issues/276)
+* Ability to configure/patch OpenShift's master and node configuration ~~[#276](https://github.com/minishift/minishift/issues/276)~~
 * Ability to customize cluster (eg add templates, imagestreams, etc) [#177](https://github.com/minishift/minishift/issues/177)
 
 <a name="minishift-110"></a>

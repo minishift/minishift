@@ -27,6 +27,9 @@ import (
 
 	"bytes"
 	"syscall"
+
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 )
 
 type MinishiftRunner struct {
@@ -34,9 +37,13 @@ type MinishiftRunner struct {
 	CommandArgs string
 }
 
-func (m *MinishiftRunner) RunCommand(command string) (stdOut string, stdErr string, exitCode int) {
+type OcRunner struct {
+	CommandPath string
+}
+
+func runCommand(command string, commandPath string) (stdOut string, stdErr string, exitCode int) {
 	commandArr := strings.Split(command, " ")
-	path, _ := filepath.Abs(m.CommandPath)
+	path, _ := filepath.Abs(commandPath)
 	cmd := exec.Command(path, commandArr...)
 
 	var outbuf, errbuf bytes.Buffer
@@ -65,6 +72,11 @@ func (m *MinishiftRunner) RunCommand(command string) (stdOut string, stdErr stri
 	return
 }
 
+func (m *MinishiftRunner) RunCommand(command string) (stdOut string, stdErr string, exitCode int) {
+	stdOut, stdErr, exitCode = runCommand(command, m.CommandPath)
+	return
+}
+
 func (m *MinishiftRunner) Start() {
 	m.RunCommand(fmt.Sprintf("start %s", m.CommandArgs))
 }
@@ -78,6 +90,13 @@ func (m *MinishiftRunner) EnsureRunning() {
 
 func (m *MinishiftRunner) IsRunning() bool {
 	return m.GetStatus() == "Running"
+}
+
+func (m *MinishiftRunner) GetOcRunner() *OcRunner {
+	if m.IsRunning() {
+		return NewOcRunner()
+	}
+	return nil
 }
 
 func (m *MinishiftRunner) EnsureDeleted() {
@@ -115,12 +134,10 @@ func (m *MinishiftRunner) CheckStatus(desired string) bool {
 	return m.GetStatus() == desired
 }
 
-type OcRunner struct {
-	CommandPath string
-}
-
 func NewOcRunner() *OcRunner {
-	p, _ := exec.LookPath("oc")
+	jsonDataPath := filepath.Join(os.Getenv(constants.MiniShiftHomeEnv), "machines", constants.MachineName+".json")
+	instanceState.Config, _ = instanceState.NewInstanceConfig(jsonDataPath)
+	p := instanceState.Config.OcPath
 	return &OcRunner{CommandPath: p}
 }
 
@@ -129,7 +146,7 @@ func (k *OcRunner) RunCommandParseOutput(args []string, outputObj interface{}) e
 	return nil
 }
 
-func (k *OcRunner) RunCommand(args []string) (stdout []byte, err error) {
-	// TODO implement (HF)
-	return nil, err
+func (k *OcRunner) RunCommand(command string) (stdOut string, stdErr string, exitCode int) {
+	stdOut, stdErr, exitCode = runCommand(command, k.CommandPath)
+	return
 }

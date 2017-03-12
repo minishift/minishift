@@ -17,9 +17,10 @@ limitations under the License.
 package main
 
 import (
+	"os"
+
 	"github.com/minishift/minishift/cmd/minishift/cmd"
 	"github.com/spf13/cobra/doc"
-	"os"
 )
 
 func main() {

@@ -33,6 +33,17 @@ In future versions we will provide a command to assist in setting up the
 See GitHub issue
 https://github.com/minishift/minishift/issues/142[#142].
 
+As part of the `minishift start` command there is also a `minishift`
+https://docs.openshift.org/latest/cli_reference/manage_cli_profiles.html[oc context] created.
+This context contains the configuration to communicate with your OpenShift cluster.
+
+Minishift activates this context automatcally, but if you need to switch back to it after,
+for example logging into another OpenShift instance, you can run:
+
+----
+$ oc config use-context minishift
+----
+
 For an introduction to `oc` usage, refer to the
 https://docs.openshift.com/enterprise/3.2/cli_reference/get_started_cli.html[Get
 Started with the CLI]

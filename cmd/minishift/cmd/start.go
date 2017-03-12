@@ -192,6 +192,10 @@ func runStart(cmd *cobra.Command, args []string) {
 		glog.Errorln("Error adding developer user to sudoers", err)
 		atexit.Exit(1)
 	}
+	if err := openshift.AddContextForProfile(constants.MachineName, ip, "developer", "myproject"); err != nil {
+		glog.Errorln("Error adding OpenShift Context", err)
+		atexit.Exit(1)
+	}
 }
 
 // Set Docker Proxy

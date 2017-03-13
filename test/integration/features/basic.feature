@@ -7,6 +7,7 @@ Feature: Basic
     Given executing "minishift start --docker-env=FOO=BAR --docker-env=BAZ=BAT"
      Then Minishift should have state "Running"
       And Minishift should have a valid IP address
+      And Minishift should have instance config file created
 
      # Check if developer have sudo permission then oc should output as below with other
      # cluster roles

@@ -18,6 +18,8 @@ overview of different components and services.
 - [HTTP/HTTPS Proxies](#httphttps-proxies)
 - [Mounted host folders](#mounted-host-folders)
   - [Mounting custom shared folders](#mounting-custom-shared-folders)
+    - [CIFS](#cifs)
+    - [SSHFS](#sshfs)
 - [Networking](#networking)
 
 <!-- /MarkdownTOC -->
@@ -176,13 +178,25 @@ These are not configurable at the moment and are different for each driver and t
 | Xhyve | OSX | /Users | /Users |
 
 **Note:** Host folder sharing is not implemented in the KVM and Hyper-V driver. You can
-[mount a CIFS-based shared folder](mounting-custom-shared-folders) inside the VM instead.
+[mount a CIFS-based shared folder](#mounting-custom-shared-folders) inside the VM instead.
 
 <a name="mounting-custom-shared-folders"></a>
 ### Mounting custom shared folders
 
-The Boot2Docker and the CentOS image include `cifs-utils`, which allows you to mount CIFS-based shared
-folders inside the VM. For example, on Windows 10 the `C:\Users` folder is shared and only needs locally
+The Minishift [Boot2Docker](https://github.com/minishift/minishift-b2d-iso) ISO as well as the
+Minishift [CentOS](https://github.com/minishift/minishift-centos-iso) ISO include `cifs-utils` and
+`fuse-sshfs`. This allows you to mount host folders using [CIFS](https://en.wikipedia.org/wiki/Server_Message_Block)
+or [SSHFS](https://en.wikipedia.org/wiki/SSHFS).
+
+**Note:** When you use the Boot2Docker ISO along with the VirtualBox driver, VirtualBox
+guest additions are automatically enabled and occupy the _/Users_ mountpoint as shown in the following examples.
+In this case you will need to use a different mountpoint.
+
+<a name="cifs"></a>
+#### CIFS
+
+An example for CIFS-based sharing is the mount of `C:\Users` on a Windows host into the Minishift VM.
+On Windows 10 the `C:\Users` folder is shared per default and only needs locally
 authenticated users. The following procedure describes how to mount this folder.
 
 1. Find the local IP address from the same network segment as your Minishift instance.
@@ -216,6 +230,38 @@ authenticated users. The following procedure describes how to mount this folder.
 
 - If your Windows account is linked to a Microsoft account, you must use the full Microsoft account email address to
   authenticate, for example `jpillow@amigas.us`. This ensures that the domain value that contains the computer name is provided.
+
+
+<a name="sshfs"></a>
+#### SSHFS
+
+You can use SSHFS based host folder mounts when you have a SSH daemon running on your host.
+Mostly, this prerequisite is met by default on Linux and OS X. Most Linux distributions have a SSH daemon
+installed per default. If not, follow the instructions for your specific distribution to install one.
+OS X also has a built-in SSH server. To use it, make sure _Remote Login_ is enabled under
+_System Preferences > Sharing_.
+
+On Windows you should consider using a [CIFS based](#cifs)
+mount first, but if you want to try SSHFS, you can install [OpenSSH for Windows](https://winscp.net/eng/docs/guide_windows_openssh_server).
+
+1. Similar to the [CIFS](#cifs) example, you need the IP address from which your host is reachable
+from within the VM. Run `ifconfig` (or `Get-NetIPAddress` on Windows) to determine the local IP
+address from the same network segment as your Minishift instance.
+
+1. Create a mountpoint and mount the shared folder.
+
+   ```
+   $ minishift ssh "sudo mkdir -p /Users/<username>"
+   $ minishift ssh "sudo chown -R docker /Users"
+   $ minishift ssh
+   $ sshfs <username>@<IP>:/Users/<username>/ /Users
+   ```
+
+1. Verify the share mount.
+
+   ```
+   $ minishift ssh "ls -al /Users/<username>"
+   ```
 
 <a name="networking"></a>
 ## Networking

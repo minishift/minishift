@@ -25,7 +25,7 @@ minishift start
       --http-proxy string               HTTP proxy for virtual machine (In the format of http://<username>:<password>@<proxy_host>:<proxy_port>)
       --https-proxy string              HTTPS proxy for virtual machine (In the format of https://<username>:<password>@<proxy_host>:<proxy_port>)
       --insecure-registry stringSlice   Non-secure Docker registries to pass to the Docker daemon. (default [172.30.0.0/16])
-      --iso-url string                  Location of the minishift ISO. (default "https://github.com/minishift/minishift-b2d-iso/releases/download/v1.0.1/minishift-b2d.iso")
+      --iso-url string                  Location of the minishift ISO. (default "https://github.com/minishift/minishift-b2d-iso/releases/download/v1.0.2/minishift-b2d.iso")
       --memory int                      Amount of RAM to allocate to the Minishift VM. (default 2048)
       --metrics                         Install metrics (experimental)
       --no-proxy string                 List of hosts or subnets for which proxy should not be used.

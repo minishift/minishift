@@ -159,7 +159,7 @@ func FeatureContext(s *godog.Suite) {
 
 	m := &Minishift{runner: runner}
 
-	s.Step(`Minishift should have state "([^"]*)"`, m.shouldHaveState)
+	s.Step(`Minishift (?:has|should have) state "([^"]*)"`, m.shouldHaveState)
 	s.Step(`Minishift should have a valid IP address`, m.shouldHaveAValidIPAddress)
 	s.Step(`executing "minishift ([^"]*)"`, m.executingCommand)
 	s.Step(`executing "oc ([^"]*)`, m.executingOcCommand)
@@ -169,15 +169,14 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`([^"]*) should equal`, m.commandReturnShouldEqualContent)
 	s.Step(`([^"]*) should be empty`, m.commandReturnShouldBeEmpty)
 
-	s.BeforeScenario(func(interface{}) {
+	s.BeforeSuite(func() {
 		testDir := setUp()
 		fmt.Println("Running Integration test in : ", testDir)
 	})
 
-	s.AfterScenario(func(interface{}, error) {
+	s.AfterSuite(func() {
 		m.runner.EnsureDeleted()
 	})
-
 }
 
 func TestMain(m *testing.M) {

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-VERSION = 1.0.0-beta.5
+MINISHIFT_VERSION = 1.0.0-beta.5
 OPENSHIFT_VERSION = v1.4.1
 ISO_VERSION = v1.0.2
 
@@ -25,13 +25,14 @@ ifeq ($(GOOS),windows)
 	IS_EXE := .exe
 endif
 
-LDFLAGS := -X $(REPOPATH)/pkg/version.version=$(VERSION) \
+LDFLAGS := -X $(REPOPATH)/pkg/version.version=$(MINISHIFT_VERSION) \
 	-X $(REPOPATH)/pkg/version.isoVersion=$(ISO_VERSION) \
 	-X $(REPOPATH)/pkg/version.openshiftVersion=$(OPENSHIFT_VERSION) -s -w -extldflags '-static'
 
 PACKAGES := go list ./... | grep -v /vendor
 SOURCE_DIRS = cmd pkg test
 DOCS_SYNOPISIS_DIR = ./docs/source/_tmp
+DOCS_BUILD_DIR = ./docs/build
 
 .PHONY: $(GOPATH)/bin/minishift$(IS_EXE)
 $(GOPATH)/bin/minishift$(IS_EXE): vendor
@@ -68,13 +69,17 @@ prerelease:
 build_docs_container:
 	cd docs && docker build -t minishift/docs .
 
+.PHONY: gen_adoc_tar
+gen_adoc_tar: synopsis_docs build_docs_container
+	cd docs && docker run -e MINISHIFT_VERSION=$(MINISHIFT_VERSION) -tiv $(shell pwd)/docs:/docs:Z minishift/docs clean adoc_tar
+
 .PHONY: gen_docs
 gen_docs: synopsis_docs build_docs_container
-	cd docs && docker run -tiv $(shell pwd)/docs:/docs:Z minishift/docs gen
+	cd docs && docker run -e MINISHIFT_VERSION=$(MINISHIFT_VERSION) -tiv $(shell pwd)/docs:/docs:Z minishift/docs gen
 
 .PHONY: serve_docs
 serve_docs: synopsis_docs build_docs_container
-	cd docs && docker run -p 35729:35729 -p 4567:4567 -tiv $(shell pwd)/docs:/docs:Z minishift/docs serve[--watcher-force-polling]
+	cd docs && docker run -e MINISHIFT_VERSION=$(MINISHIFT_VERSION) -p 35729:35729 -p 4567:4567 -tiv $(shell pwd)/docs:/docs:Z minishift/docs serve[--watcher-force-polling]
 
 $(DOCS_SYNOPISIS_DIR)/*.md: vendor
 	@# https://github.com/golang/go/issues/15038#issuecomment-207631885 ( CGO_ENABLED=0 )
@@ -86,11 +91,11 @@ synopsis_docs: $(DOCS_SYNOPISIS_DIR)/*.md
 .PHONY: release
 release: clean fmtcheck test prerelease $(GOPATH)/bin/gh-release cross
 	mkdir -p release
-	gnutar -zcf release/minishift-$(VERSION)-darwin-amd64.tgz LICENSE README.md -C $(BUILD_DIR)/darwin-amd64 minishift
-	gnutar -zcf release/minishift-$(VERSION)-linux-amd64.tgz LICENSE README.md -C $(BUILD_DIR)/linux-amd64 minishift
-	zip -j release/minishift-$(VERSION)-windows-amd64.zip LICENSE README.md $(BUILD_DIR)/windows-amd64/minishift.exe
+	gnutar -zcf release/minishift-$(MINISHIFT_VERSION)-darwin-amd64.tgz LICENSE README.md -C $(BUILD_DIR)/darwin-amd64 minishift
+	gnutar -zcf release/minishift-$(MINISHIFT_VERSION)-linux-amd64.tgz LICENSE README.md -C $(BUILD_DIR)/linux-amd64 minishift
+	zip -j release/minishift-$(MINISHIFT_VERSION)-windows-amd64.zip LICENSE README.md $(BUILD_DIR)/windows-amd64/minishift.exe
 	gh-release checksums sha256
-	gh-release create minishift/minishift $(VERSION) master v$(VERSION)
+	gh-release create minishift/minishift $(MINISHIFT_VERSION) master v$(MINISHIFT_VERSION)
 
 .PHONY: cross
 cross: $(BUILD_DIR)/darwin-amd64/minishift $(BUILD_DIR)/linux-amd64/minishift $(BUILD_DIR)/windows-amd64/minishift.exe
@@ -101,6 +106,7 @@ clean:
 	rm -rf $(BUILD_DIR)
 	rm -rf release
 	rm -rf vendor
+	rm -rf $(DOCS_BUILD_DIR)
 	rm -f  $(DOCS_SYNOPISIS_DIR)/*.md
 
 .PHONY: test

@@ -1,0 +1,26 @@
+---
+Name: Minishift
+Dir: minishift
+Distros: openshift-*
+Topics:
+  - Name: Overview
+    File: overview
+  - Name: Using
+    Dir: using
+    Topics:
+      - Name: Managing Minishift
+        File: managing-minishift
+      - Name: Interacting with Openshift
+        File: interacting-with-openshift
+      - Name: Docker Machine Drivers
+        File: docker-machine-drivers
+      - Name: Troubleshooting
+        File: troubleshooting
+  - Name: Development
+    Dir: development
+    Topics:
+      - Name: Developing Minishift
+        File: developing
+  - Name: Command reference
+    Dir: command-ref
+    Topics:

@@ -18,16 +18,12 @@ package openshift
 
 import (
 	"fmt"
-	"os"
 
-	"github.com/docker/machine/libmachine"
+	"github.com/minishift/minishift/pkg/minishift/openshift"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
-	"k8s.io/kubernetes/pkg/api/v1"
-
-	"github.com/minishift/minishift/pkg/minikube/cluster"
-	"github.com/minishift/minishift/pkg/minikube/constants"
-	"github.com/minishift/minishift/pkg/util/os/atexit"
+	"os"
 )
 
 var serviceListNamespace string
@@ -38,18 +34,15 @@ var serviceListCmd = &cobra.Command{
 	Short: "Gets the URLs of the services in your local cluster.",
 	Long:  `Gets the URLs of the services in your local cluster.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
-		defer api.Close()
-		serviceURLs, err := cluster.GetServiceURLs(api, serviceListNamespace, serviceURLTemplate)
+		urls, err := openshift.GetServiceURLs(serviceListNamespace)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
-			fmt.Fprintln(os.Stderr, "Check that Minishift is running and that the correct namespace is specified in the -n option if it is required.")
 			atexit.Exit(1)
 		}
 
 		var data [][]string
-		for _, serviceURL := range serviceURLs {
-			data = append(data, []string{serviceURL.Namespace, serviceURL.Name, serviceURL.URL})
+		for _, url := range urls {
+			data = append(data, []string{url.Namespace, url.Name, url.URL})
 		}
 
 		table := tablewriter.NewWriter(os.Stdout)
@@ -62,6 +55,6 @@ var serviceListCmd = &cobra.Command{
 }
 
 func init() {
-	serviceListCmd.Flags().StringVarP(&serviceListNamespace, "namespace", "n", v1.NamespaceAll, "The namespace of the services.")
+	serviceListCmd.Flags().StringVarP(&serviceListNamespace, "namespace", "n", "default", "The namespace of the services.")
 	serviceCmd.AddCommand(serviceListCmd)
 }

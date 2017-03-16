@@ -199,7 +199,7 @@ To deploy the Node.js sample application from the command-line:
 
 1. Access the app:
 
-        $ curl http://nodejs-ex-myproject.192.168.99.128.nip.io
+        $ minishift openshift service nodejs-ex -n myproject
 
 1. To stop Minishift, use:
 

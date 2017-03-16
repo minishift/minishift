@@ -17,87 +17,97 @@ limitations under the License.
 package kubeconfig
 
 import (
+	"errors"
 	"fmt"
+	"github.com/minishift/minishift/pkg/minishift/util"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-
-	"github.com/golang/glog"
-	"k8s.io/kubernetes/pkg/client/unversioned/clientcmd/api"
-	"k8s.io/kubernetes/pkg/client/unversioned/clientcmd/api/latest"
-	"k8s.io/kubernetes/pkg/runtime"
 )
 
-// ReadConfigOrNew retrieves Kubernetes client configuration from a file.
-// If no files exists, an empty configuration is returned.
-func ReadConfigOrNew(filename string) (*api.Config, error) {
-	data, err := ioutil.ReadFile(filename)
-	if os.IsNotExist(err) {
-		return api.NewConfig(), nil
-	} else if err != nil {
-		return nil, err
-	}
-
-	// decode config, empty if no bytes
-	config, err := decode(data)
-	if err != nil {
-		return nil, fmt.Errorf("Cannot read config: %v", err)
-	}
-
-	// initialize nil maps
-	if config.AuthInfos == nil {
-		config.AuthInfos = map[string]*api.AuthInfo{}
-	}
-	if config.Clusters == nil {
-		config.Clusters = map[string]*api.Cluster{}
-	}
-	if config.Contexts == nil {
-		config.Contexts = map[string]*api.Context{}
-	}
-
-	return config, nil
+// Mock kubeconfig Data types
+type ClusterType struct {
+	Cluster map[string]string `yaml:"cluster"`
+	Name    string            `yaml:"name"`
 }
 
-// WriteConfig encodes the configuration and writes it to the given file.
-// If the file exists, it's contents will be overwritten.
-func WriteConfig(config *api.Config, filename string) error {
-	if config == nil {
-		glog.Errorf("Cannot write to '%s': Config must not be nil.", filename)
-	}
+type ContextType struct {
+	Context map[string]string `yaml:"context"`
+	Name    string            `yaml:"name"`
+}
 
-	// encode config to YAML
-	data, err := runtime.Encode(latest.Codec, config)
+type UserType struct {
+	User map[string]string `yaml:"user"`
+	Name string            `yaml:"name"`
+}
+
+type SystemKubeConfig struct {
+	ApiVersion     string        `yaml:"apiVersion"`
+	Clusters       []ClusterType `yaml:"clusters"`
+	Contexts       []ContextType `yaml:"contexts"`
+	CurrentContext string        `yaml:"current-context"`
+	Users          []UserType    `yaml:"users"`
+}
+
+func GetConfigPath() string {
+	var configPath = filepath.Join(util.HomeDir(), ".kube", "config")
+	if os.Getenv("KUBECONFIG") != "" {
+		configPath = os.Getenv("KUBECONFIG")
+	}
+	return configPath
+}
+
+// Cache system admin entries to be used to run oc commands
+func CacheSystemAdminEntries(systemEntriesConfigPath, clusterName string) error {
+	config, err := Read(GetConfigPath())
 	if err != nil {
-		return fmt.Errorf("Cannot write to '%s': Error encoding config: %v", filename, err)
+		return errors.New(fmt.Sprintf("Error reading config file %s", systemEntriesConfigPath))
 	}
 
-	// create parent dir if doesn't exist
-	dir := filepath.Dir(filename)
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		if err = os.MkdirAll(dir, 0755); err != nil {
-			return err
+	targetConfig := SystemKubeConfig{ApiVersion: "v1"}
+	for k, v := range config.Clusters {
+		if v.Name == clusterName {
+			targetConfig.Clusters = append(targetConfig.Clusters, config.Clusters[k])
+			break
 		}
 	}
 
-	// write with restricted permissions
-	if err := ioutil.WriteFile(filename, data, 0600); err != nil {
+	targetConfig.CurrentContext = fmt.Sprintf("default/%s/system:admin", clusterName)
+	for k, v := range config.Contexts {
+		if v.Name == targetConfig.CurrentContext {
+			targetConfig.Contexts = append(targetConfig.Contexts, config.Contexts[k])
+			break
+		}
+	}
+
+	userName := fmt.Sprintf("system:admin/%s", clusterName)
+	for k, v := range config.Users {
+		if v.Name == userName {
+			targetConfig.Users = append(targetConfig.Users, config.Users[k])
+			break
+		}
+	}
+
+	yamlData, err := yaml.Marshal(&targetConfig)
+	if err != nil {
+		return errors.New("Error marshalling system kubeconfig entries")
+	}
+	// Write to machines/<MACHINE_NAME>_kubeconfig
+	if err = ioutil.WriteFile(systemEntriesConfigPath, yamlData, 0644); err != nil {
 		return err
 	}
+
 	return nil
 }
 
-// decode reads a Config object from bytes.
-// Returns empty config if no bytes.
-func decode(data []byte) (*api.Config, error) {
-	// if no data, return empty config
-	if len(data) == 0 {
-		return api.NewConfig(), nil
-	}
-
-	config, _, err := latest.Codec.Decode(data, nil, nil)
+func Read(configPath string) (SystemKubeConfig, error) {
+	config := SystemKubeConfig{}
+	data, _ := ioutil.ReadFile(configPath)
+	err := yaml.Unmarshal([]byte(data), &config)
 	if err != nil {
-		return nil, err
+		return config, err
 	}
 
-	return config.(*api.Config), nil
+	return config, nil
 }

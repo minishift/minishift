@@ -18,15 +18,16 @@ package openshift
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/util"
+	"strings"
 )
 
 // runner executes commands on the host
-var runner util.Runner = &util.RealRunner{}
+var (
+	runner util.Runner = &util.RealRunner{}
+)
 
 // Add developer user to cluster sudoers
 func AddSudoersRoleForUser(user string) error {
@@ -62,7 +63,6 @@ func AddContextForProfile(profile string, ip string, username string, namespace 
 	}
 
 	cmdArgs = []string{"config", "use-context", profile}
-
 	if _, err := runner.Output(cmdName, cmdArgs...); err != nil {
 		return err
 	}

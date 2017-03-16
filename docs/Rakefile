@@ -1,46 +1,82 @@
 require 'bundler'
+
 task :default => :gen
 
-MARKDOWN_FILES = Rake::FileList.new("source/_tmp/*.md")
-GENERATED_ADOC = "source/command-ref"
+BUILD_DIR          = "build"
+MARKDOWN_FILES     = Rake::FileList.new("source/_tmp/*.md")
+TOPIC_MAP          = "#{BUILD_DIR}/_topic_map.yml"
+ADOC_VARIABLES     = "#{BUILD_DIR}/variables.adoc"
+GENERATED_ADOC_DIR = "source/command-ref"
 ADOC_FILES = Rake::FileList.new do |list|
 	MARKDOWN_FILES.each do |f|
         adoc = f.ext(".adoc")
         adoc = File.split(adoc)[1]
-        adoc = File.join(GENERATED_ADOC, adoc)
+        adoc = File.join(GENERATED_ADOC_DIR, adoc)
 		list.add(adoc)
 	end
 end
 
 task :init do
-	mkdir_p GENERATED_ADOC
+  mkdir_p BUILD_DIR
 end
 
 task :clean do
-	rm "#{GENERATED_ADOC}/*"
+  rm_f Rake::FileList.new("#{GENERATED_ADOC_DIR}/*.adoc")
+  rm_rf BUILD_DIR
+end
+
+file TOPIC_MAP => [:init, 'source/_topic_map.yml'] do
+  if Dir.glob("#{GENERATED_ADOC_DIR}/*.adoc").empty? then
+    cp 'source/_topic_map.yml', TOPIC_MAP
+  end
 end
 
 desc 'Convert the generated command synopsis files from Markdown to Asciidoc'
-task :markdown_to_asciidoc => ADOC_FILES
+task :markdown_to_asciidoc => [TOPIC_MAP, :asciidoc]
+task :asciidoc => ADOC_FILES
 rule ".adoc" => ->(f){source_for_adoc(f)} do |t|
-	adoc_file = File.join(GENERATED_ADOC, File.basename(t.name, ".md"))
+	# convert markdown to asciidoc
+  base_name = File.basename(t.name, ".adoc")
+  adoc_file = File.join(GENERATED_ADOC_DIR, "#{base_name}.adoc" )
 	sh "pandoc --atx-headers --to=asciidoc --output=#{adoc_file} #{t.source}"
-	adoc_content = File.read(adoc_file)
-  	adoc_new = adoc_content.gsub(/\.md\[/, "{outfilesuffix}[")
-    File.open(adoc_file, "w") {|file| file.puts adoc_new }
+
+  # adjust links in generated asciidoc
+  adoc_content = File.read(adoc_file)
+  adoc_new = adoc_content.gsub(/\.md\[/, "{outfilesuffix}[")
+  File.open(adoc_file, "w") {|file| file.puts adoc_new }
+
+  # update topic map
+  File.open(TOPIC_MAP, "a") do |file|
+    file.puts "      - Name: #{base_name.gsub('_',' ')}"
+    file.puts "        File: #{base_name}"
+  end
 end
 
-desc 'Generate the site'
-task :gen => :markdown_to_asciidoc do
+desc 'Generate site'
+task :gen => [:init, :markdown_to_asciidoc, :adoc_variables] do
 	sh "bundle exec middleman build"
 end
 
-desc 'Serve the site'
-task :serve, [:server_args] => :markdown_to_asciidoc do |t, args|
+desc 'Serve site'
+task :serve, [:server_args] => [:init, :markdown_to_asciidoc, :adoc_variables] do |t, args|
   if args[:server_args].nil? then
   	sh "bundle exec middleman server"
   else
   	sh "bundle exec middleman server #{args[:server_args]}"
+  end
+end
+
+desc 'Create adoc tar bundle'
+task :adoc_tar => [:init, :adoc_variables, :markdown_to_asciidoc] do
+  file_list = FileList.new('source/**/*.adoc', TOPIC_MAP, ADOC_VARIABLES)
+  sh "tar -cvf #{BUILD_DIR}/minishift-adoc.tar #{file_list}"
+end
+
+desc 'Create adoc variables'
+task :adoc_variables => :init do
+  minishift_version = ENV['MINISHIFT_VERSION'] || 'unset'
+  File.open(ADOC_VARIABLES, "w+") do |f|
+    f.write(":minishift-version: #{minishift_version}")
   end
 end
 
@@ -57,7 +93,6 @@ def source_for_adoc(adoc_file)
 end
 
 def createAdocTargetFiles
-
 	MARKDOWN_FILES.each do |f|
 		p "#{f}"
 	end

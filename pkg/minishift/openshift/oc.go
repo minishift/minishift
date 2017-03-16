@@ -18,15 +18,25 @@ package openshift
 
 import (
 	"fmt"
-	"strings"
-
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/util"
+	"path/filepath"
+	"strings"
 )
 
 // runner executes commands on the host
-var runner util.Runner = &util.RealRunner{}
+var (
+	runner util.Runner = &util.RealRunner{}
+)
+
+var (
+	systemKubeConfigPath string
+)
+
+func init() {
+	systemKubeConfigPath = filepath.Join(constants.Minipath, "machines", constants.MachineName+"_kubeconfig")
+}
 
 // Add developer user to cluster sudoers
 func AddSudoersRoleForUser(user string) error {
@@ -62,9 +72,22 @@ func AddContextForProfile(profile string, ip string, username string, namespace 
 	}
 
 	cmdArgs = []string{"config", "use-context", profile}
-
 	if _, err := runner.Output(cmdName, cmdArgs...); err != nil {
 		return err
 	}
 	return nil
+}
+
+// Get all projects a user belongs to
+func getProjects() ([]string, error) {
+	cmdArgText := fmt.Sprintf("get projects --config=%s %s", systemKubeConfigPath, ProjectsCustomCol)
+	tokens := strings.Split(cmdArgText, " ")
+	cmdName := instanceState.Config.OcPath
+	cmdOut, err := runner.Output(cmdName, tokens...)
+	if err != nil {
+		return []string{}, err
+	}
+
+	contents := strings.Split(byteArrayToString(cmdOut), "\n")
+	return emptyFilter(contents[1:]), nil
 }

@@ -17,191 +17,55 @@ limitations under the License.
 package kubeconfig
 
 import (
+	"fmt"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
-	"path/filepath"
-	"strconv"
+	"strings"
 	"testing"
-
-	"github.com/minishift/minishift/pkg/minikube/constants"
-	"k8s.io/kubernetes/pkg/client/unversioned/clientcmd/api"
 )
 
-func TestEmptyConfig(t *testing.T) {
-	tmp := tempFile(t, []byte{})
-	defer os.Remove(tmp)
+var (
+	testKubeConfigPath   string
+	testSystemConfigPath string
+)
 
-	cfg, err := ReadConfigOrNew(tmp)
-	if err != nil {
-		t.Fatalf("Cannot read config: %v", err)
-	}
+func TestCacheSystemAdminEntries(t *testing.T) {
+	setUp()
+	defer tearDown(t)
+	testSystemConfig := SystemKubeConfig{}
 
-	if len(cfg.AuthInfos) != 0 {
-		t.Fail()
-	}
+	CacheSystemAdminEntries(testSystemConfigPath, "10-168-99-100:8443")
 
-	if len(cfg.Clusters) != 0 {
-		t.Fail()
-	}
+	// read test kube config
+	data, _ := ioutil.ReadFile(testKubeConfigPath)
+	kubeData := string(data)
 
-	if len(cfg.Contexts) != 0 {
-		t.Fail()
-	}
+	// read test system config
+	data, _ = ioutil.ReadFile(testSystemConfigPath)
+	yaml.Unmarshal([]byte(data), &testSystemConfig)
+
+	// verify entries
+	strings.Contains(kubeData, testSystemConfig.Users[0].Name)
+	strings.Contains(kubeData, testSystemConfig.Users[0].User["client-certificate-data"])
+	strings.Contains(kubeData, testSystemConfig.Clusters[0].Name)
+	strings.Contains(kubeData, testSystemConfig.Clusters[0].Cluster["certificate-authority-data"])
+	strings.Contains(kubeData, testSystemConfig.Clusters[0].Cluster["server"])
+	strings.Contains(kubeData, testSystemConfig.Contexts[0].Name)
+	strings.Contains(kubeData, testSystemConfig.Contexts[0].Context["cluster"])
+	strings.Contains(kubeData, testSystemConfig.Contexts[0].Context["user"])
 }
 
-func TestNewConfig(t *testing.T) {
-	dir, err := ioutil.TempDir("", ".kube")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dir)
+func setUp() {
+	workingDir, _ := os.Getwd()
+	testKubeConfigPath = fmt.Sprintf("%s/test_kube_config", workingDir)
 
-	// setup minikube config
-	expected := api.NewConfig()
-	minikubeConfig(expected)
-
-	// write actual
-	filename := filepath.Join(dir, "config")
-	err = WriteConfig(expected, filename)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	actual, err := ReadConfigOrNew(filename)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !configEquals(actual, expected) {
-		t.Fatal("Configurations do not match.")
-	}
+	os.Setenv("KUBECONFIG", testKubeConfigPath)
+	testSystemConfigPath = workingDir + "/test_systemconfig"
 }
 
-// tempFile creates a temporary with the provided bytes as its contents.
-// The caller is responsible for deleting file after use.
-func tempFile(t *testing.T, data []byte) string {
-	tmp, err := ioutil.TempFile("", "kubeconfig")
-	if err != nil {
-		t.Fatal(err)
+func tearDown(t *testing.T) {
+	if err := os.Remove(testSystemConfigPath); err != nil {
+		t.Fatalf("Error delete file %s", testSystemConfigPath)
 	}
-
-	if len(data) > 0 {
-		if _, err := tmp.Write(data); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err := tmp.Close(); err != nil {
-		t.Fatal(err)
-	}
-
-	return tmp.Name()
-}
-
-// minikubeConfig returns a config that reasonably approximates a localkube cluster
-func minikubeConfig(config *api.Config) {
-	// cluster
-	clusterName := "minikube"
-	cluster := api.NewCluster()
-	cluster.Server = "https://192.168.99.100:" + strconv.Itoa(constants.APIServerPort)
-	cluster.CertificateAuthority = "/home/tux/.minikube/apiserver.crt"
-	config.Clusters[clusterName] = cluster
-
-	// user
-	userName := "minikube"
-	user := api.NewAuthInfo()
-	user.ClientCertificate = "/home/tux/.minikube/apiserver.crt"
-	user.ClientKey = "/home/tux/.minikube/apiserver.key"
-	config.AuthInfos[userName] = user
-
-	// context
-	contextName := "minikube"
-	context := api.NewContext()
-	context.Cluster = clusterName
-	context.AuthInfo = userName
-	config.Contexts[contextName] = context
-
-	config.CurrentContext = contextName
-}
-
-// configEquals checks if configs are identical
-func configEquals(a, b *api.Config) bool {
-	if a.Kind != b.Kind {
-		return false
-	}
-
-	if a.APIVersion != b.APIVersion {
-		return false
-	}
-
-	if a.Preferences.Colors != b.Preferences.Colors {
-		return false
-	}
-	if len(a.Extensions) != len(b.Extensions) {
-		return false
-	}
-
-	// clusters
-	if len(a.Clusters) != len(b.Clusters) {
-		return false
-	}
-	for k, aCluster := range a.Clusters {
-		bCluster, exists := b.Clusters[k]
-		if !exists {
-			return false
-		}
-
-		if aCluster.LocationOfOrigin != bCluster.LocationOfOrigin ||
-			aCluster.Server != bCluster.Server ||
-			aCluster.APIVersion != bCluster.APIVersion ||
-			aCluster.InsecureSkipTLSVerify != bCluster.InsecureSkipTLSVerify ||
-			aCluster.CertificateAuthority != bCluster.CertificateAuthority ||
-			len(aCluster.CertificateAuthorityData) != len(bCluster.CertificateAuthorityData) ||
-			len(aCluster.Extensions) != len(bCluster.Extensions) {
-			return false
-		}
-	}
-
-	// users
-	if len(a.AuthInfos) != len(b.AuthInfos) {
-		return false
-	}
-	for k, aAuth := range a.AuthInfos {
-		bAuth, exists := b.AuthInfos[k]
-		if !exists {
-			return false
-		}
-		if aAuth.LocationOfOrigin != bAuth.LocationOfOrigin ||
-			aAuth.ClientCertificate != bAuth.ClientCertificate ||
-			len(aAuth.ClientCertificateData) != len(bAuth.ClientCertificateData) ||
-			aAuth.ClientKey != bAuth.ClientKey ||
-			len(aAuth.ClientKeyData) != len(bAuth.ClientKeyData) ||
-			aAuth.Token != bAuth.Token ||
-			aAuth.Username != bAuth.Username ||
-			aAuth.Password != bAuth.Password ||
-			len(aAuth.Extensions) != len(bAuth.Extensions) {
-			return false
-		}
-
-	}
-
-	// contexts
-	if len(a.Contexts) != len(b.Contexts) {
-		return false
-	}
-	for k, aContext := range a.Contexts {
-		bContext, exists := b.Contexts[k]
-		if !exists {
-			return false
-		}
-		if aContext.LocationOfOrigin != bContext.LocationOfOrigin ||
-			aContext.Cluster != bContext.Cluster ||
-			aContext.AuthInfo != bContext.AuthInfo ||
-			aContext.Namespace != bContext.Namespace ||
-			len(aContext.Extensions) != len(aContext.Extensions) {
-			return false
-		}
-
-	}
-	return true
 }

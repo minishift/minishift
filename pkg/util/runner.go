@@ -53,7 +53,7 @@ func (r RealRunner) Output(command string, args ...string) ([]byte, error) {
 		cmdOut []byte
 		err    error
 	)
-	if cmdOut, err = exec.Command(command, args...).Output(); err != nil {
+	if cmdOut, err = exec.Command(command, args...).CombinedOutput(); err != nil {
 		return nil, err
 	}
 	return cmdOut, nil

@@ -15,9 +15,9 @@ Feature: Basic
      Then stderr should be empty
       And exitcode should equal 0
       And stdout should contain
-     """
-     sudoer
-     """
+      """
+      sudoer
+      """
 
   Scenario: A 'minishift' context is created for 'oc' usage
     After a successful Minishift start the user's current context is 'minishift'
@@ -25,9 +25,9 @@ Feature: Basic
     Then stderr should be empty
      And exitcode should equal 0
      And stdout should contain
-    """
-    minishift
-    """
+     """
+     minishift
+     """
 
   Scenario: User can switch the current 'oc' context and return to 'minishift' context
     Given executing "oc config set-context dummy"
@@ -39,9 +39,9 @@ Feature: Basic
      Then stderr should be empty
       And exitcode should equal 0
       And stdout should contain
-    """
-    minishift
-    """
+      """
+      minishift
+      """
 
   Scenario: User is able to do ssh into Minishift VM
     Given Minishift has state "Running"

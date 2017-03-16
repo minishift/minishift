@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -97,7 +98,6 @@ func (m *Minishift) executingCommand(command string) error {
 }
 
 func compareExpectedWithActualContains(expected string, actual string) error {
-
 	if !strings.Contains(actual, expected) {
 		return fmt.Errorf("Output did not match. Expected: %s, Actual: %s", expected, actual)
 	}
@@ -106,9 +106,17 @@ func compareExpectedWithActualContains(expected string, actual string) error {
 }
 
 func compareExpectedWithActualEquals(expected string, actual string) error {
-
 	if actual != expected {
 		return fmt.Errorf("Output did not match. Expected: %s, Actual: %s", expected, actual)
+	}
+
+	return nil
+}
+
+func findExpectedMatchInActual(expectedMatch, actual string) error {
+	r, _ := regexp.Compile(expectedMatch)
+	if !r.MatchString(actual) {
+		return fmt.Errorf("Actual output %s doesn't contain match %s", actual, expectedMatch)
 	}
 
 	return nil
@@ -149,6 +157,10 @@ func (m *Minishift) commandReturnShouldBeEmpty(commandField string) error {
 	return compareExpectedWithActualEquals("", selectFieldFromLastOutput(commandField))
 }
 
+func (m *Minishift) commandReturnShouldMatch(commandField string, expectedMatch string) error {
+	return findExpectedMatchInActual(expectedMatch, selectFieldFromLastOutput(commandField))
+}
+
 func FeatureContext(s *godog.Suite) {
 	var givenArgs = flag.String("minishift-args", "", "Arguments to pass to minishift")
 	var givenPath = flag.String("binary", fmt.Sprintf("../../out/%s-amd64/minishift", runtime.GOOS), "Path to minishift binary")
@@ -161,13 +173,14 @@ func FeatureContext(s *godog.Suite) {
 
 	s.Step(`Minishift (?:has|should have) state "([^"]*)"`, m.shouldHaveState)
 	s.Step(`Minishift should have a valid IP address`, m.shouldHaveAValidIPAddress)
-	s.Step(`executing "minishift ([^"]*)"`, m.executingCommand)
-	s.Step(`executing "oc ([^"]*)`, m.executingOcCommand)
+	s.Step(`execut[es|ing]+ "minishift ([^"]*)"`, m.executingCommand)
+	s.Step(`execut[es|ing]+ "oc ([^"]*)`, m.executingOcCommand)
 	s.Step(`([^"]*) should contain ([^"]*)`, m.commandReturnShouldContain)
 	s.Step(`([^"]*) should contain`, m.commandReturnShouldContainContent)
 	s.Step(`([^"]*) should equal ([^"]*)`, m.commandReturnShouldEqual)
 	s.Step(`([^"]*) should equal`, m.commandReturnShouldEqualContent)
 	s.Step(`([^"]*) should be empty`, m.commandReturnShouldBeEmpty)
+	s.Step(`([^"]*) should match /([^"]*)/`, m.commandReturnShouldMatch)
 
 	s.BeforeSuite(func() {
 		testDir := setUp()

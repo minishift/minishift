@@ -19,39 +19,25 @@ package openshift
 import (
 	"fmt"
 	"os"
-	"strings"
-	"text/template"
 
-	"github.com/docker/machine/libmachine"
 	"github.com/pkg/browser"
 	"github.com/spf13/cobra"
 
-	"github.com/minishift/minishift/pkg/minikube/cluster"
-	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minishift/openshift"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 )
 
 var (
-	namespace          string
-	serviceURLMode     bool
-	serviceURLFormat   string
-	serviceURLTemplate *template.Template
-	https              bool
+	namespace string
+	urlMode   bool
+	https     bool
 )
 
 // serviceCmd represents the service command
 var serviceCmd = &cobra.Command{
 	Use:   "service [flags] SERVICE",
-	Short: "Prints the URL for the specified service to the console.",
-	Long:  `Prints the URL for the specified service to the console.`,
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		t, err := template.New("serviceURL").Parse(serviceURLFormat)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "The URL format specified in the --format option is not valid: \n\n", err)
-			atexit.Exit(1)
-		}
-		serviceURLTemplate = t
-	},
+	Short: "Open the URL for the specified service in the browser.",
+	Long:  `Open the URL for the specified service in the browser.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 || len(args) > 1 {
 			fmt.Fprintln(os.Stderr, "You must specify the name of the service.")
@@ -60,22 +46,13 @@ var serviceCmd = &cobra.Command{
 
 		service := args[0]
 
-		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
-		defer api.Close()
-
-		url, err := cluster.GetServiceURL(api, namespace, service, serviceURLTemplate)
+		url, err := openshift.GetServiceURL(service, namespace, https)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
-			if _, ok := err.(cluster.MissingNodePortError); !ok {
-				fmt.Fprintln(os.Stderr, "Verify that Minishift is running and that the correct namespace is specified in the -n option.")
-			}
 			atexit.Exit(1)
 		}
 
-		if https {
-			url = strings.Replace(url, "http", "https", 1)
-		}
-		if serviceURLMode {
+		if urlMode {
 			fmt.Fprintln(os.Stdout, url)
 		} else {
 			fmt.Fprintln(os.Stdout, "Opening the service "+namespace+"/"+service+" in the default browser...")
@@ -85,9 +62,8 @@ var serviceCmd = &cobra.Command{
 }
 
 func init() {
-	serviceCmd.Flags().StringVarP(&namespace, "namespace", "n", "default", "The namespace of the service.")
-	serviceCmd.Flags().BoolVar(&serviceURLMode, "url", false, "Access the service in the command-line console instead of the default browser.")
-	serviceCmd.PersistentFlags().StringVar(&serviceURLFormat, "format", "http://{{.IP}}:{{.Port}}", "The URL format of the service.")
+	serviceCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "The namespace of the service.")
+	serviceCmd.Flags().BoolVar(&urlMode, "url", false, "Access the service in the command-line console instead of the default browser.")
 	serviceCmd.Flags().BoolVar(&https, "https", false, "Access the service with HTTPS instead of HTTP.")
 	OpenShiftConfigCmd.AddCommand(serviceCmd)
 }

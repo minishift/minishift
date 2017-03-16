@@ -17,8 +17,13 @@ limitations under the License.
 package openshift
 
 import (
+	"encoding/json"
+	"errors"
+	"fmt"
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/util"
+	routeApi "github.com/openshift/origin/pkg/route/api"
+	"strings"
 )
 
 // runner executes commands on the host
@@ -41,4 +46,48 @@ func AddSudoersRoleForUser(user string) error {
 		return err
 	}
 	return nil
+}
+
+// Get the route for service
+func GetServiceURL(service, namespace string, https bool) (string, error) {
+	urlScheme := "http://"
+	if https {
+		urlScheme = "https://"
+	}
+
+	cmdName := instanceState.Config.OcPath
+	cmdArgText := fmt.Sprintf("get route/%s", service)
+	if !isProjectExists(namespace) {
+		return "", errors.New(fmt.Sprintf("Namespace %s doesn't exits", namespace))
+	}
+	if namespace != "" {
+		cmdArgText = cmdArgText + " -n " + namespace
+	}
+
+	// json filter
+	cmdArgText += " -o json"
+	cmdOut, err := runner.Output(cmdName, strings.Split(cmdArgText, " ")...)
+	if err != nil {
+		return "", err
+	}
+
+	var route routeApi.Route
+	json.Unmarshal(cmdOut, &route)
+
+	return urlScheme + route.Spec.Host, nil
+}
+
+// Check whether project exists or not
+func isProjectExists(project string) bool {
+	if project == "" {
+		return true
+	}
+
+	cmdName := instanceState.Config.OcPath
+	cmdArgs := []string{"get", "projects", project}
+	_, err := runner.Output(cmdName, cmdArgs...)
+	if err != nil {
+		return false
+	}
+	return true
 }

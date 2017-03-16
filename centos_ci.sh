@@ -76,7 +76,6 @@ mkdir /tmp/glide
 tar --directory=/tmp/glide -xvf glide-${GLIDE_TAG}-${GLIDE_OS_ARCH}.tar.gz
 export PATH=$PATH:/tmp/glide/${GLIDE_OS_ARCH}
 
-# Test
 make clean test cross fmtcheck prerelease
 # Run integration test with 'kvm' driver
 MINISHIFT_VM_DRIVER=kvm make integration

@@ -29,13 +29,13 @@ LDFLAGS := -X $(REPOPATH)/pkg/version.version=$(VERSION) \
 	-X $(REPOPATH)/pkg/version.isoVersion=$(ISO_VERSION) \
 	-X $(REPOPATH)/pkg/version.openshiftVersion=$(OPENSHIFT_VERSION) -s -w -extldflags '-static'
 
-GOFILES := go list  -f '{{join .Deps "\n"}}' ./cmd/minishift/ | grep $(REPOPATH) | xargs go list -f '{{ range $$file := .GoFiles }} {{$$.Dir}}/{{$$file}}{{"\n"}}{{end}}'
 PACKAGES := go list ./... | grep -v /vendor
 SOURCE_DIRS = cmd pkg test
 DOCS_SYNOPISIS_DIR = ./docs/source/_tmp
 
-$(GOPATH)/bin/minishift$(IS_EXE): $(BUILD_DIR)/$(GOOS)-$(GOARCH)/minishift$(IS_EXE)
-	cp $(BUILD_DIR)/$(GOOS)-$(GOARCH)/minishift$(IS_EXE) $(GOPATH)/bin/minishift$(IS_EXE)
+.PHONY: $(GOPATH)/bin/minishift$(IS_EXE)
+$(GOPATH)/bin/minishift$(IS_EXE): vendor
+	go install -ldflags="$(LDFLAGS)" ./cmd/minishift
 
 vendor:
 	glide install -v
@@ -43,21 +43,26 @@ vendor:
 $(BUILD_DIR)/$(GOOS)-$(GOARCH):
 	mkdir -p $(BUILD_DIR)/$(GOOS)-$(GOARCH)
 
-$(BUILD_DIR)/darwin-amd64/minishift: vendor $(GOPATH)/src/$(ORG) $(BUILD_DIR)/$(GOOS)-$(GOARCH) $(shell $(GOFILES))
+$(BUILD_DIR)/darwin-amd64/minishift: vendor $(BUILD_DIR)/$(GOOS)-$(GOARCH)
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/darwin-amd64/minishift ./cmd/minishift
 
-$(BUILD_DIR)/linux-amd64/minishift: vendor $(GOPATH)/src/$(ORG) $(BUILD_DIR)/$(GOOS)-$(GOARCH) $(shell $(GOFILES))
+$(BUILD_DIR)/linux-amd64/minishift: vendor $(BUILD_DIR)/$(GOOS)-$(GOARCH)
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/linux-amd64/minishift ./cmd/minishift
 
-$(BUILD_DIR)/windows-amd64/minishift.exe: vendor $(GOPATH)/src/$(ORG) $(BUILD_DIR)/$(GOOS)-$(GOARCH) $(shell $(GOFILES))
+$(BUILD_DIR)/windows-amd64/minishift.exe: vendor $(BUILD_DIR)/$(GOOS)-$(GOARCH)
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/windows-amd64/minishift.exe ./cmd/minishift
 
-$(GOPATH)/bin/gh-release: $(GOPATH)/src/$(ORG)
+$(GOPATH)/bin/gh-release:
 	go get github.com/progrium/gh-release
 
 .PHONY: prerelease
 prerelease:
-	./prerelease.sh
+	$(eval files = $(shell ./hack/boilerplate/boilerplate.py --rootdir . --boilerplate-dir ./hack/boilerplate | grep -v vendor))
+	@if test "$(files)" != ""; then \
+		echo "The following files don't pass the boilerplate checks:"; \
+		echo $(files); \
+		exit 1; \
+	fi
 
 .PHONY: build_docs_container
 build_docs_container:
@@ -99,7 +104,7 @@ clean:
 	rm -f  $(DOCS_SYNOPISIS_DIR)/*.md
 
 .PHONY: test
-test: vendor $(GOPATH)/src/$(ORG)
+test: vendor
 	@go test -v $(shell $(PACKAGES))
 
 .PHONY: integration

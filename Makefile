@@ -24,6 +24,7 @@ REPOPATH ?= $(ORG)/minishift
 ifeq ($(GOOS),windows)
 	IS_EXE := .exe
 endif
+MINISHIFT_BINARY ?= $(GOPATH)/bin/minishift$(IS_EXE)
 
 LDFLAGS := -X $(REPOPATH)/pkg/version.version=$(MINISHIFT_VERSION) \
 	-X $(REPOPATH)/pkg/version.isoVersion=$(ISO_VERSION) \
@@ -114,8 +115,8 @@ test: vendor
 	@go test -v $(shell $(PACKAGES))
 
 .PHONY: integration
-integration: $(BUILD_DIR)/$(GOOS)-$(GOARCH)/minishift$(IS_EXE)
-	go test -timeout 3600s $(REPOPATH)/test/integration --tags=integration -v
+integration: $(MINISHIFT_BINARY)
+	go test -timeout 3600s $(REPOPATH)/test/integration --tags=integration -v -args --binary $(MINISHIFT_BINARY)
 
 .PHONY: fmt
 fmt:

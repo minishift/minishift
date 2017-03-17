@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"runtime"
 	"strconv"
 	"strings"
 	"testing"
@@ -151,7 +150,8 @@ func (m *Minishift) commandReturnShouldBeEmpty(commandField string) error {
 
 func FeatureContext(s *godog.Suite) {
 	var givenArgs = flag.String("minishift-args", "", "Arguments to pass to minishift")
-	var givenPath = flag.String("binary", fmt.Sprintf("../../out/%s-amd64/minishift", runtime.GOOS), "Path to minishift binary")
+	var givenPath = flag.String("binary", "", "Path to minishift binary")
+	flag.Parse()
 
 	runner := util.MinishiftRunner{
 		CommandArgs: *givenArgs,
@@ -171,7 +171,8 @@ func FeatureContext(s *godog.Suite) {
 
 	s.BeforeSuite(func() {
 		testDir := setUp()
-		fmt.Println("Running Integration test in : ", testDir)
+		fmt.Println("Running Integration test in: ", testDir)
+		fmt.Println("using binary: ", *givenPath)
 	})
 
 	s.AfterSuite(func() {

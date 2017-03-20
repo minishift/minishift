@@ -69,7 +69,7 @@ cd $GOPATH/src/github.com/minishift/minishift
 
 # Setup Glide ("curl https://glide.sh/get | sh" not working due to https://github.com/Masterminds/glide/issues/708)
 GLIDE_OS_ARCH=`go env GOHOSTOS`-`go env GOHOSTARCH`
-GLIDE_TAG=$(curl -s https://glide.sh/version)
+GLIDE_TAG=v0.12.3
 GLIDE_LATEST_RELEASE_URL="https://github.com/Masterminds/glide/releases/download/${GLIDE_TAG}/glide-${GLIDE_TAG}-${GLIDE_OS_ARCH}.tar.gz"
 curl -LO ${GLIDE_LATEST_RELEASE_URL}
 mkdir /tmp/glide

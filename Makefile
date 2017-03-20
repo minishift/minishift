@@ -26,9 +26,10 @@ ifeq ($(GOOS),windows)
 endif
 MINISHIFT_BINARY ?= $(GOPATH)/bin/minishift$(IS_EXE)
 
-LDFLAGS := -X $(REPOPATH)/pkg/version.version=$(MINISHIFT_VERSION) \
+VERSION_VARIABLES := -X $(REPOPATH)/pkg/version.version=$(MINISHIFT_VERSION) \
 	-X $(REPOPATH)/pkg/version.isoVersion=$(ISO_VERSION) \
-	-X $(REPOPATH)/pkg/version.openshiftVersion=$(OPENSHIFT_VERSION) -s -w -extldflags '-static'
+	-X $(REPOPATH)/pkg/version.openshiftVersion=$(OPENSHIFT_VERSION)
+LDFLAGS := $(VERSION_VARIABLES) -s -w -extldflags '-static'
 
 PACKAGES := go list ./... | grep -v /vendor
 SOURCE_DIRS = cmd pkg test
@@ -37,7 +38,7 @@ DOCS_BUILD_DIR = ./docs/build
 
 .PHONY: $(GOPATH)/bin/minishift$(IS_EXE)
 $(GOPATH)/bin/minishift$(IS_EXE): vendor
-	go install -ldflags="$(LDFLAGS)" ./cmd/minishift
+	go install -ldflags="$(VERSION_VARIABLES)" ./cmd/minishift
 
 vendor:
 	glide install -v

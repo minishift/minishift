@@ -39,26 +39,31 @@ provisioning VMs, and [OpenShift Origin](https://github.com/openshift/origin) fo
 <a name="prerequisites"></a>
 ### Prerequisites
 
-Minishift requires a hypervisor to run the virtual machine containing OpenShift. Depending on your
-host OS, you have the choice of the following hypervisors:
+Minishift requires a hypervisor to start the virtual machine containing OpenShift.
+Make sure that the hypervisor of your choice is installed and enabled on your system before you
+install Minishift.
 
-* OS X
-    * [xhyve](https://github.com/mist64/xhyve) (default), [VirtualBox](https://www.virtualbox.org/wiki/Downloads) or [VMware Fusion](https://www.vmware.com/products/fusion)
-* GNU/Linux
-    * [KVM](https://minishift.io/docs/docker-machine-drivers.html#kvm-driver) (default) or [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
-* Windows
-    * [Hyper-V](https://technet.microsoft.com/en-us/library/mt169373.aspx) (default) or [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
+Depending on your host OS, you have the choice of the following hypervisors:
 
-Make sure that the hypervisor is installed and enabled on your system before you install Minishift.
+* **OS X:** [xhyve](https://github.com/mist64/xhyve) (default), [VirtualBox](https://www.virtualbox.org/wiki/Downloads) or [VMware Fusion](https://www.vmware.com/products/fusion)
 
-**Important:**
+    **Note:** xhyve requires specific installation and configuration steps as mentioned in the [docker machine drivers installation](https://minishift.io/docs/docker-machine-drivers.html#xhyve-driver) section.
 
-- KVM and xhyve require specific installation and configuration steps.
-For more information, see [docker machine drivers installation](https://minishift.io/docs/docker-machine-drivers.html).
-- It is recommended to use `Virtualbox 5.1.12` or later on Windows to avoid the issue
-[Error: getting state for host: machine does not exist](https://minishift.io/docs/troubleshooting.html#error-getting-state-for-host-machine-does-not-exist)
+* **GNU/Linux:** [KVM](https://minishift.io/docs/docker-machine-drivers.html#kvm-driver) (default) or [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 
-If you encounter driver issues, see the [Troubleshooting](https://minishift.io/docs/troubleshooting.html) guide.
+    **Note:** KVM requires specific installation and configuration steps as mentioned in the [docker machine drivers installation](https://minishift.io/docs/docker-machine-drivers.html#kvm-driver) section.
+
+* **Windows:** [Hyper-V](https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v) (default) or [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
+
+    **Note:**
+    - To enable Hyper-V ensure that, after you [install Hyper-V](https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v), you also [add a Virtual
+Switch](https://msdn.microsoft.com/en-us/virtualization/hyperv_on_windows/quick_start/walkthrough_virtual_switch) using the Hyper-V Manager.
+Make sure that you pair the virtual switch with
+a _network card (wired or wireless) that is connected to the  network_.
+    - It is recommended to use `Virtualbox 5.1.12` or later on Windows to avoid the issue -
+[Error: getting state for host: machine does not exist](https://minishift.io/docs/troubleshooting.html#error-getting-state-for-host-machine-does-not-exist).
+
+If you encounter issues related to the hypervisor, see the [Troubleshooting](https://minishift.io/docs/troubleshooting.html) guide.
 
 <a name="installing-minishift"></a>
 ### Installing Minishift

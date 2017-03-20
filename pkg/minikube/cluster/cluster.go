@@ -17,7 +17,6 @@ limitations under the License.
 package cluster
 
 import (
-	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -27,7 +26,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"text/template"
 	"time"
 
 	"github.com/docker/machine/drivers/virtualbox"
@@ -42,9 +40,6 @@ import (
 	minishiftUtil "github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/util"
 	pb "gopkg.in/cheggaaa/pb.v1"
-	kubeapi "k8s.io/kubernetes/pkg/api"
-	"k8s.io/kubernetes/pkg/client/unversioned"
-	"k8s.io/kubernetes/pkg/client/unversioned/clientcmd"
 )
 
 var (
@@ -54,10 +49,6 @@ var (
 
 const (
 	fileScheme = "file"
-
-	serviceAPIAnnotationsPrefix = "api.service.kubernetes.io/"
-	serviceAPIAnnotationScheme  = serviceAPIAnnotationsPrefix + "scheme"
-	serviceAPIAnnotationPath    = serviceAPIAnnotationsPrefix + "path"
 )
 
 //This init function is used to set the logtostderr variable to false so that INFO level log info does not clutter the CLI
@@ -462,165 +453,8 @@ type ipPort struct {
 	Port int
 }
 
-func GetServiceURL(api libmachine.API, namespace, service string, t *template.Template) (string, error) {
-	host, err := CheckIfApiExistsAndLoad(api)
-	if err != nil {
-		return "", err
-	}
-
-	ip, err := host.Driver.GetIP()
-	if err != nil {
-		return "", err
-	}
-
-	client, err := getKubernetesClient()
-	if err != nil {
-		return "", err
-	}
-
-	return getServiceURLWithClient(client, ip, namespace, service, t)
-}
-
-func getServiceURLWithClient(client *unversioned.Client, ip, namespace, service string, t *template.Template) (string, error) {
-	port, err := getServicePort(client, namespace, service)
-	if err != nil {
-		return "", err
-	}
-
-	var doc bytes.Buffer
-	err = t.Execute(&doc, ipPort{ip, port})
-	if err != nil {
-		return "", err
-	}
-
-	u, err := url.Parse(doc.String())
-	if err != nil {
-		return "", err
-	}
-
-	annotations, err := getServiceAnnotations(client, namespace, service)
-	if err != nil {
-		return "", err
-	}
-
-	if scheme, ok := annotations[serviceAPIAnnotationScheme]; ok {
-		u.Scheme = scheme
-	}
-	if path, ok := annotations[serviceAPIAnnotationPath]; ok && len(u.Path) == 0 {
-		u.Path = path
-	}
-
-	return u.String(), nil
-}
-
-type serviceGetter interface {
-	Get(name string) (*kubeapi.Service, error)
-	List(kubeapi.ListOptions) (*kubeapi.ServiceList, error)
-}
-
-func getServicePort(client *unversioned.Client, namespace, service string) (int, error) {
-	services := getKubernetesServicesWithNamespace(client, namespace)
-	return getServicePortFromServiceGetter(services, service)
-}
-
-type MissingNodePortError struct {
-	service *kubeapi.Service
-}
-
-func (e MissingNodePortError) Error() string {
-	return fmt.Sprintf("Service %s/%s does not have a node port. To assign a port automatically, the service type must be NodePort or LoadBalancer, but this service is of type %s.", e.service.Namespace, e.service.Name, e.service.Spec.Type)
-}
-
-func getServiceFromServiceGetter(services serviceGetter, service string) (*kubeapi.Service, error) {
-	svc, err := services.Get(service)
-	if err != nil {
-		return nil, fmt.Errorf("Error getting %s service: %s", service, err)
-	}
-	return svc, nil
-}
-
-func getServicePortFromServiceGetter(services serviceGetter, service string) (int, error) {
-	svc, err := getServiceFromServiceGetter(services, service)
-	if err != nil {
-		return 0, err
-	}
-	nodePort := 0
-	if len(svc.Spec.Ports) > 0 {
-		nodePort = int(svc.Spec.Ports[0].NodePort)
-	}
-	if nodePort == 0 {
-		return 0, MissingNodePortError{svc}
-	}
-	return nodePort, nil
-}
-
-func getKubernetesClient() (*unversioned.Client, error) {
-	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
-	configOverrides := &clientcmd.ConfigOverrides{}
-	kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, configOverrides)
-	config, err := kubeConfig.ClientConfig()
-	if err != nil {
-		return nil, fmt.Errorf("Error creating kubeConfig: %s", err)
-	}
-	return unversioned.New(config)
-}
-
-func getKubernetesServicesWithNamespace(client *unversioned.Client, namespace string) serviceGetter {
-	return client.Services(namespace)
-}
-
-func getServiceAnnotations(client *unversioned.Client, namespace, service string) (map[string]string, error) {
-	svc, err := getServiceFromServiceGetter(getKubernetesServicesWithNamespace(client, namespace), service)
-	if err != nil {
-		return nil, fmt.Errorf("Error getting %s service: %s", service, err)
-	}
-	return svc.ObjectMeta.Annotations, nil
-}
-
 type ServiceURL struct {
 	Namespace string
 	Name      string
 	URL       string
-}
-
-type ServiceURLs []ServiceURL
-
-func GetServiceURLs(api libmachine.API, namespace string, t *template.Template) (ServiceURLs, error) {
-	host, err := CheckIfApiExistsAndLoad(api)
-	if err != nil {
-		return nil, err
-	}
-
-	ip, err := host.Driver.GetIP()
-	if err != nil {
-		return nil, err
-	}
-
-	client, err := getKubernetesClient()
-	if err != nil {
-		return nil, err
-	}
-
-	getter := getKubernetesServicesWithNamespace(client, namespace)
-
-	svcs, err := getter.List(kubeapi.ListOptions{})
-	if err != nil {
-		return nil, err
-	}
-
-	var serviceURLs []ServiceURL
-
-	for _, svc := range svcs.Items {
-		url, err := getServiceURLWithClient(client, ip, svc.Namespace, svc.Name, t)
-		if err != nil {
-			if _, ok := err.(MissingNodePortError); ok {
-				serviceURLs = append(serviceURLs, ServiceURL{Namespace: svc.Namespace, Name: svc.Name, URL: "No node port"})
-				continue
-			}
-			return nil, err
-		}
-		serviceURLs = append(serviceURLs, ServiceURL{Namespace: svc.Namespace, Name: svc.Name, URL: url})
-	}
-
-	return serviceURLs, nil
 }

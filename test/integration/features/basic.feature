@@ -10,9 +10,7 @@ Feature: Basic
       And Minishift should have a valid IP address
 
   Scenario: OpenShift developer account has sudo permissions
-     Check if developer have sudo permission then oc should output as below with other
-     cluster roles
-     sudoer   /sudoer   developer
+     The 'developer' user should be configured with the sudoer role after starting Minishift
      When executing "oc --as system:admin get clusterrolebindings"
      Then stderr should be empty
       And exitcode should equal 0
@@ -21,9 +19,8 @@ Feature: Basic
      sudoer
      """
 
-  Scenario: Current Context should be minishift
-    Check the context is set as per profile
-    In our case profile is minishift
+  Scenario: A 'minishift' context is created for 'oc' usage
+    After a successful Minishift start the user's current context is 'minishift'
     When executing "oc config current-context"
     Then stderr should be empty
      And exitcode should equal 0
@@ -32,35 +29,21 @@ Feature: Basic
     minishift
     """
 
-  Scenario: Create a dummy context
-    When executing "oc config set-context dummy"
-    Then stderr should be empty
-     And exitcode should equal 0
-
-  Scenario: Switch to dummy context
-    When executing "oc config use-context dummy"
-    Then stderr should be empty
-     And exitcode should equal 0
-
-  Scenario: Check project info for dummy context
-    When executing "oc project -q"
-    Then exitcode should equal 1
-
-  Scenario: Switch context to minishift
-    When executing "oc config use-context minishift"
-    Then stderr should be empty
-     And exitcode should equal 0
-
-  Scenario: Check project info for minishift context
-    When executing "oc project -q"
-    Then stderr should be empty
-     And exitcode should equal 0
-     And stdout should contain
+  Scenario: User can switch the current 'oc' context and return to 'minishift' context
+    Given executing "oc config set-context dummy"
+      And executing "oc config use-context dummy"
+     When executing "oc project -q"
+     Then exitcode should equal 1
+     When executing "oc config use-context minishift"
+      And executing "oc config current-context"
+     Then stderr should be empty
+      And exitcode should equal 0
+      And stdout should contain
     """
-    myproject
+    minishift
     """
 
-  Scenario: User is able to do ssh into machine via Minishift
+  Scenario: User is able to do ssh into Minishift VM
     Given Minishift has state "Running"
      When executing "minishift ssh echo hello"
      Then stderr should be empty

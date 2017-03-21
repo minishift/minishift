@@ -17,6 +17,10 @@ limitations under the License.
 package openshift
 
 import (
+	"fmt"
+	"strings"
+
+	"github.com/minishift/minishift/pkg/minikube/constants"
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/util"
 )
@@ -37,6 +41,28 @@ func AddSudoersRoleForUser(user string) error {
 		return err
 	}
 	cmdArgs = []string{"login", "-u", user}
+	if _, err := runner.Output(cmdName, cmdArgs...); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Add Current Profile Context
+func AddContextForProfile(profile string, ip string, username string, namespace string) error {
+	cmdName := instanceState.Config.OcPath
+	ip = strings.Replace(ip, ".", "-", -1)
+	cmdArgs := []string{"config", "set-context", profile,
+		fmt.Sprintf("--cluster=%s:%d", ip, constants.APIServerPort),
+		fmt.Sprintf("--user=%s/%s:%d", username, ip, constants.APIServerPort),
+		fmt.Sprintf("--namespace=%s", namespace),
+	}
+
+	if _, err := runner.Output(cmdName, cmdArgs...); err != nil {
+		return err
+	}
+
+	cmdArgs = []string{"config", "use-context", profile}
+
 	if _, err := runner.Output(cmdName, cmdArgs...); err != nil {
 		return err
 	}

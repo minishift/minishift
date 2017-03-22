@@ -1,0 +1,55 @@
+[[writing-minishift-docs]]
+= Writing and publishing Minishift documentation
+:icons:
+:toc: macro
+:toc-title:
+:toclevels: 1
+
+toc::[]
+
+This section contains information about contributing to the Minishift documentation.
+
+[[authoring-docs]]
+== Writing and editing content
+
+TBD
+
+[[building-minishift-docs]]
+== Building Minishift Documentation
+
+Minishift documentation is located in the `docs` sub-folder. The
+documentation is a mix of generated
+https://en.wikipedia.org/wiki/Markdown[Markdown] files and manually
+maintained https://en.wikipedia.org/wiki/AsciiDoc[Asciidoc] files.
+
+Per default the documentation is build in a Docker container. This way
+you avoid having to install all required dependencies on your
+development machine. All you need is a running Docker daemon. In case
+you don't have one, use Minishift itself. See (TODO reference to the
+Minishift as Docker daemon from README. Needs to be extracted).
+
+To build the Docker image, run:
+
+----
+$ make build_docs_container
+----
+
+To generate the documentation into the directory `docs/build`, run:
+
+----
+$ make gen_docs
+----
+
+To build and serve the documentation for editing, run:
+
+----
+$ make serve_docs
+----
+
+The latter will start the https://middlemanapp.com[Middleman] server on
+port 4567. You can access the rendered documentation by browsing to
+http://<IP of Docker daemon>:4567.
+
+== Deploying Minishift Documentation
+
+TBD

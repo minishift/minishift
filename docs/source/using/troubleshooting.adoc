@@ -1,45 +1,53 @@
-:toc: left
-
 [[troubleshooting]]
-= Troubleshooting
+= Troubleshooting Minishift
+:icons:
+:toc: macro
+:toc-title:
+:toclevels: 1
+
+toc::[]
 
 This section contains solutions to common problems that you might
 encounter while using Minishift.
 
+[[troubleshooting-kvm]]
 == KVM driver
 
+[[dial-tcp-missing-address]]
 === Error creating new host: dial tcp: missing address
 
-The problem is likely to be that the `libvirtd` service is not running,
-you can check it with
+The problem is likely that the `libvirtd` service is not running. You can check this
+with the following command:
 
 ----
 $ systemctl status libvirtd
 ----
 
-If `libvirtd` is not running, start and enable it to start on boot:
+If `libvirtd` is not running, start it and enable it to start on boot:
 
 ----
 $ systemctl start libvirtd
 $ systemctl enable libvirtd
 ----
 
+[[fail-connect-socket]]
 === Failed to connect socket to '/var/run/libvirt/virtlogd-sock'
 
-The problem is likely to be that the `virtlogd` service is not running,
-you can check it with
+The problem is likely that the `virtlogd` service is not running.
+You can check this with the following command:
 
 ----
 $ systemctl status virtlogd
 ----
 
-If `virtlogd` is not running, start and enable it to start on boot:
+If `virtlogd` is not running, start it and enable it to start on boot:
 
 ----
 $ systemctl start virtlogd
 $ systemctl enable virtlogd
 ----
 
+[[domain-minishift-already-exists]]
 === Error starting the VM: ... operation failed: domain 'minishift' already exists ...
 
 Check for existing VMs and remove them:
@@ -50,19 +58,21 @@ $ sudo virsh destroy minishift
 $ sudo virsh undefine minishift
 ----
 
+[[troubleshooting-xhyve]]
 == xhyve driver
 
+[[create-vmnet-interface-permission]]
 === Error: could not create vmnet interface, permission denied or no entitlement
 
-The problem is likely to be that the xhyve driver is not able to clean
-up vmnet when a VM is removed. vmnet.framework decides the IP based on
-following files:
+The problem is likely that the xhyve driver is not able to clean
+up `vmnet` when a VM is removed. `vmnet.framework` determines the IP address
+based on the following files:
 
 * _/var/db/dhcpd_leases_
 * _/Library/Preferences/SystemConfiguration/com.apple.vmnet.plist_
 
-Reset the `minishift` specific IP database and make sure you remove
-`minishift` entry section from `dhcpd_leases` file. Finally, reboot your
+Reset the `minishift`-specific IP database, make sure to remove the
+`minishift` entry section from the `dhcpd_leases` file, and reboot your
 system.
 
 ----
@@ -75,21 +85,25 @@ system.
 }
 ----
 
-*Note:* You can completely reset IP database by removing both the files
+NOTE: You can completely reset the IP database by removing the files
 manually but this is very *risky*.
 
+[[troubleshooting-vbox]]
 == VirtualBox driver
 
+[[machine-doesnt-exist]]
 === Error: getting state for host: machine does not exist
 
-If you use Windows, ensure that you used the `--vm-driver virtualbox`
-flag with the `minishift start` command. Alternatively, the problem is
-likely to be an outdated version of Virtual Box.
+If you use Windows, make sure that you set the `--vm-driver virtualbox`
+flag in the `minishift start` command. Alternatively, the problem might be
+an outdated version of VirtualBox.
 
-It is recommended to use `Virtualbox >= 5.1.12` to avoid this issue.
+To avoid this issue, it is recommended to use VirtualBox 5.1.12 or later.
 
+[[troubleshooting-authentication]]
 == Users and authentication
 
+[[special-characters-passwords]]
 === Some special characters cause passwords to fail
 
 Depending on your operating system and shell environment, certain
@@ -97,17 +111,17 @@ special characters can trigger variable interpolation and therefore
 cause passwords to fail.
 
 Workaround: When creating and entering passwords, wrap the string with
-single quotes in the following format: '<password>'
+single quotes in the following format: `<password>`
 
+[[troubleshooting-snapshots]]
 == Snapshots with virsh
 
-[[minishift-delete-fails-to-undefine-snapshots-of-running-instances-made-using-virsh-on-kvmlibvirt.]]
-=== `minishift delete` fails to undefine snapshots of running instances,
-made using virsh on KVM/libvirt.
+[[minishift-delete-fails-undefine-snapshots]]
+=== `minishift delete` fails to undefine snapshots of running instances made using virsh on KVM/libvirt
 
-If you use virsh on KVM/libvirt to create snapshots in your development
-workflow, using `minishift delete` to delete the snapshots, along with
-the VM, returns an error:
+If you use `virsh` on KVM/libvirt to create snapshots in your development
+workflow, and then use `minishift delete` to delete the snapshots along with
+the VM, you might encounter the following error:
 
 ----
 $ minishift delete
@@ -115,33 +129,37 @@ Deleting the Minishift VM...
 Error deleting the VM:  [Code-55] [Domain-10] Requested operation is not valid: cannot delete inactive domain with 4 snapshots
 ----
 
-Workaround: The snapshots are stored in `~/.minishift/machines`, but the
+Cause: The snapshots are stored in `~/.minishift/machines`, but the
 definitions are stored in `var/lib/libvirt/qemu/snapshot/minishift`.
 
-To delete the snapshots you need to:
+Workaround: To delete the snapshots you need to perform the following steps.
 
-1.  Delete the definitions using:
+.  Delete the definitions.
 +
 ----
 $ sudo virsh snapshot-delete --metadata minishift <snapshot-name>
 ----
-2.  Undefine the Minishift domain using:
+
+.  Undefine the Minishift domain.
 +
 ----
 $ sudo virsh undefine minishift
 ----
 
-*Note:* In case the above step does not resolve the issue, you can also
+You can now run `minishft delete` to delete the VM and restart Minishift.
+
+[NOTE]
+====
+In case the above steps do not resolve the issue, you can also
 use the following command to delete the snapshots:
 
 ----
 $ rm -rf ~/.minishift/machines
 ----
+====
 
-You can now do `minishft delete` to delete the VM and restart Minishift.
-
-It is recommended to avoid use of metadata when you create snapshots as
-follows:
+It is recommended to avoid using metadata when you create snapshots. To make sure of
+this, you can specify the `--no-metadata` flat. For example:
 
 ----
 $ sudo virsh snapshot-create-as --domain vm1 overlay1 --diskspec vda,file=/export/overlay1.qcow2 --disk-only --atomic --no-metadata

@@ -1,161 +1,150 @@
-:toc: left
-
 [[managing-minishift]]
 = Managing Minishift
+:icons:
+:toc: macro
+:toc-title:
+:toclevels: 1
+
+toc::[]
+
 
 The following sections describe different aspects of using Minishift and
 provide an overview of different components and services.
 
-[[managing-minishift-1]]
+[[managing-minishift-intro]]
 == Managing Minishift
 
-When you use Minishift, you interact with two distinct components, both
-of which are managed by Minishift:
+When you use Minishift, you interact with two components that are managed by Minishift:
 
-* the virtual machine (VM) created by Minishift and
-* the OpenShift instance provisioned by Minishift within the VM.
+- virtual machine (VM) created by Minishift
+- OpenShift cluster provisioned by Minishift within the VM
 
-The following sections, in this topic, contain information about
-managing the Minishift VM. For details on using Minishift to manage your
-local OpenShift instance refer to the
-link:./interacting-with-openshift.md[Interacting with your local
-OpenShift] topic.
+The following sections contain information about managing the Minishift VM.
+For details about using Minishift to manage your local OpenShift cluster,
+see the link:../using/interacting-with-openshift{outfilesuffix}[Interacting with OpenShift] section.
 
-[[minishift-start]]
+[[minishift-start-intro]]
 === Minishift start
 
-The link:./minishift_start.md[`minishift start`] command creates and
+The link:../command-ref/minishift_start{outfilesuffix}[`minishift start`] command creates and
 configures the Minishift VM and provisions a local, single-node
 OpenShift instance within the VM.
 
-It also copies the `oc` binary to your host so that you can interact
-with OpenShift either through the `oc` command line tool or through the
-web console which can be accessed through the URL provided in the output
-of the `minishift start` command. For detailed information about
-accessing the console, refer to the Console section of the
-link:./interacting-with-openshift.md[Interacting with your local
-OpenShift] topic.
+The command also copies the `oc` binary to your host so that you can interact
+with OpenShift through the `oc` command line tool or through the Web console,
+which can be accessed through the URL provided in the output
+of the `minishift start` command.
 
-[[minishift-stop]]
+[[minishift-stop-intro]]
 === Minishift stop
 
-The link:./minishift_stop.md[`minishift stop`] command is used to stop
-your OpenShift instance.
-This command shuts down the Minishift VM, but preserves the OpenShift
-cluster state.
+The link:../command-ref/minishift_stop{outfilesuffix}[`minishift stop`] command stops your OpenShift cluster and
+shuts down the Minishift VM, but preserves the OpenShift cluster state.
 
 Starting Minishift again will restore the OpenShift cluster, allowing
-you to continue work from where you left-off. However, note that on
-re-start one needs to repeat the same parameters as used in the original
-start command. Efforts to further refine this experience are on, see
-GitHub issue https://github.com/minishift/minishift/issues/179[#179]
+you to continue working from the last session. However, you must enter the same
+parameters that you used in the original start command.
 
-[[minishift-delete]]
+Efforts to further refine this experience are in progress. For details, see
+the GitHub issue https://github.com/minishift/minishift/issues/179[#179].
+
+[[minishift-delete-intro]]
 === Minishift delete
 
-The link:./minishift_delete.md[`minishift delete`] command is used to
-delete the OpenShift instance.
-This command shuts down and deletes the Minishift VM. No data or state
-is preserved.
+The link:../command-ref/minishift_delete{outfilesuffix}[`minishift delete`] command deletes the OpenShift cluster,
+and also shuts down and deletes the Minishift VM. No data or state are preserved.
 
 [[minishift-runtime-options]]
 == Minishift runtime options
 
 The runtime behavior of Minishift can be controlled through flags,
-environment variables, and persistent configuration options, as
-discussed in the following sections.
+environment variables, and persistent configuration options.
 
 The following precedence order is applied to control the behavior of
-Minishift. Each item in the following list takes precedence over
-the item below it:
+Minishift. Each action in the following list takes precedence over
+the action below it:
 
-1.  Use a command line flag as specified in the link:#flags[Flags]
-section.
-2.  Set environment variable as described in the
+.  Use command-line flags as specified in the link:#flags[Flags] section.
+.  Set environment variables as described in the
 link:#environment-variables[Environment variables] section.
-3.  Use persistent configuration option as described in the
+.  Use persistent configuration options as described in the
 link:#persistent-configuration[Persistent configuration] section.
-4.  Accept the default value as defined by Minishift.
+.  Accept the default value as defined by Minishift.
 
 [[flags]]
 === Flags
 
 You can use command line flags with Minishift to specify options and
 direct its behavior. This has the highest precedence. Almost all
-commands have flags, however different commands take different flags.
+commands have flags, although different commands might have different flags.
 Some of the commonly used command line flags of the `minishift start`
 command are `cpus`, `memory` or `vm-driver`.
 
 [[environment-variables]]
 === Environment variables
 
-Minishift allows you to specify command line flags you commonly use
+Minishift allows you to specify command-line flags you commonly use
 through environment variables.
 To do so, apply the following rules to the flag you want to set as an
 environment variable.
 
-1.  Apply `MINISHIFT_` as a prefix to the flag you want to set as an
+.  Apply `MINISHIFT_` as a prefix to the flag you want to set as an
 environment variable. For example, the `vm-driver` flag
- of the link:./minishift_start.md[`minishift start`] command becomes
+ of the link:../command-ref/minishift_start{outfilesuffix}[`minishift start`] command becomes
 `MINISHIFT_vm-driver`.
-2.  Use uppercase for the flag, so `MINISHIFT_vm-driver` in the above
+.  Use uppercase characters for the flag, so `MINISHIFT_vm-driver` in the above
 example becomes `MINISHIFT_VM-DRIVER`.
-3.  Finally, replace `-` with `_`, so `MINISHIFT_VM-DRIVER` becomes
-`MINISHIFT_VM_DRIVER`.
+.  Replace `-` with `_`, so `MINISHIFT_VM-DRIVER` becomes `MINISHIFT_VM_DRIVER`.
 
 Environment variables can be used to replace any option of any Minishift
-command. A common example is the URL of the ISO to be used. Usually you
-specify it with the
-`iso-url` flag of the link:./minishift_start.md[`minishift start`]
-command. Applying the above rules, you can
-also specify this URL by setting the environment variable as
-`MINISHIFT_ISO_URL`.
+command. A common example is the URL of the ISO to be used. Usually, you
+specify it with the `iso-url` flag of the `minishift start` command.
+Applying the above rules, you can also specify this URL by setting the environment
+variable as `MINISHIFT_ISO_URL`.
 
-*Note:* You can also use the `MINISHIFT_HOME` environment variable, to
-choose a different home directory for Minishift. Per default, Minishift
-places all
-its runtime state into `~/.minishift`.
-This is currently experimental and semantics might change in
-future releases.
+NOTE: You can also use the `MINISHIFT_HOME` environment variable, to
+choose a different home directory for Minishift. By default, Minishift
+places all runtime state into `~/.minishift`. This environment variable is
+currently experimental and semantics might change in future releases.
 
 [[persistent-configuration]]
 === Persistent configuration
 
-Using persistent configuration allows you to control Minishift's
+Using persistent configuration allows you to control the Minishift
 behavior without specifying actual command line flags, similar to the
 way you use link:#environment-variables[environment variables].
 
-Minishift maintains a configuration file
-`$MINISHIFT_HOME/config/config.json` which can be
-used to set commonly used command line flags persistently.
+Minishift maintains a configuration file in
+`$MINISHIFT_HOME/config/config.json`. This file can be
+used to set commonly-used command-line flags persistently.
 
-*Note:* Persistent configuration can only be applied to the set of
-supported configuration options listed in the synopsis of the
-link:./minishift_config.md[`minishift config`] sub-command, unlike
-environment variables which can be used to replace any option of any
+NOTE: Persistent configuration can only be applied to the set of
+supported configuration options that are listed in the synopsis of the
+link:./minishift_config.html[`minishift config`] sub-command, unlike
+environment variables that can be used to replace any option of any
 command.
 
 [[setting-persistent-configuration-values]]
 ==== Setting persistent configuration values
 
-The easiest way to change a persistent configuration option, is with
-the link:./minishift_config_set.md[`config set`] sub-command. For example:
+The easiest way to change a persistent configuration option is with
+the link:../command-ref/minishift_config_set{outfilesuffix}[`config set`] sub-command. For example:
 
 ----
 # Set default memory 4096 MB
 $ minishift config set memory 4096
 ----
 
-To view persistent configuration values, you can use the
-link:./minishift_config_view.md[`view`] sub-command:
+To view all persistent configuration values, you can use the
+link:../command-ref/minishift_config_view{outfilesuffix}[`view`] sub-command:
 
 ----
 $ minishift config view
 - memory: 4096
 ----
 
-Alternatively one can just display a single value with the
-link:./minishift_config_get.md[`get`] sub-command:
+Alternatively, you can display a single value with the
+link:../command-ref/minishift_config_get{outfilesuffix}[`get`] sub-command:
 
 ----
 $ minishift config get memory
@@ -165,15 +154,14 @@ $ minishift config get memory
 [[unsetting-persistent-configuration-values]]
 ==== Unsetting persistent configuration values
 
-To remove a persistent configuration option, the
-link:./minishift_config_unset.md[`unset`] sub-command
-can be used:
+To remove a persistent configuration option, you can use the
+link:../command-ref/minishift_config_unset{outfilesuffix}[`unset`] sub-command. For example:
 
 ----
 $ minishift config unset memory
 ----
 
-[[httphttps-proxies]]
+[[http-s-proxies]]
 == HTTP/HTTPS Proxies
 
 If you are behind a HTTP/HTTPS proxy, you need to supply proxy options
@@ -187,37 +175,30 @@ $ minishift start --http-proxy http://YOURPROXY:PORT --https-proxy https://YOURP
 ----
 
 In an authenticated proxy environment, the `proxy_user` and
-`proxy_password` should be part of proxy URI.
+`proxy_password` must be a part of proxy URI.
 
 ----
  $ minishift start --http-proxy http://<proxy_username>:<proxy_password>@YOURPROXY:PORT \
                    --https-proxy https://<proxy_username>:<proxy_password>YOURPROXY:PORT
 ----
 
-You can also use `--no-proxy` to specify a comma-separated list of hosts
-which
-should not be proxied. For a list of all available options refer to
-the
-link:./minishift_start.md[synopsis] of the `start` command.
+You can also use the `--no-proxy` flag to specify a comma-separated list of hosts
+that should not be proxied. For a list of all available options, see the
+link:../command-ref/minishift_start{outfilesuffix}[synopsis] of the `start` command.
 
 Using the proxy options will transparently configure the Docker daemon
-as well as OpenShift to
-use the specified proxies.
+and OpenShift to use the specified proxies.
 
-*Note:* Using the proxy options requires that you run with an OpenShift
-version >=1.5.0-alpha.2.
-Use the `openshift-version` option to request a specific version of
-OpenShift. You can list
-all Minishift compatible OpenShift versions via
-link:./minishift_get-openshift-versions.md[`minishift get-openshift-versions`].
+NOTE: Using the proxy options requires that you run OpenShift version 1.5.0-alpha.2 or later.
+Use the `openshift-version` option to request a specific version of OpenShift. You can list
+all Minishift-compatible OpenShift versions with
+the link:../command-ref/minishift_get-openshift-versions{outfilesuffix}[`minishift get-openshift-versions`] command.
 
 [[mounted-host-folders]]
 == Mounted host folders
 
-Some drivers will mount a host folder within the VM so that you can
-easily share files between the VM and the host.
-These are not configurable at the moment and are different for each
-driver and the OS that you use.
+Some drivers mount a host folder within the VM so that you can share files between the VM and the host.
+These folders are not currently configurable, and are different for each driver and OS that you use.
 
 [cols=",,,",options="header",]
 |========================================
@@ -229,99 +210,99 @@ driver and the OS that you use.
 |Xhyve |OSX |/Users |/Users
 |========================================
 
-*Note:* Host folder sharing is not implemented in the KVM and Hyper-V
-driver. You can
-link:#mounting-custom-shared-folders[mount a CIFS-based shared folder]
-inside the VM instead.
+NOTE: Host folder sharing is not implemented in the KVM and Hyper-V driver. You can
+link:#mounting-custom-shared-folders[mount a CIFS-based shared folder] inside the VM instead.
 
 [[mounting-custom-shared-folders]]
 === Mounting custom shared folders
 
-The Minishift
-https://github.com/minishift/minishift-b2d-iso[Boot2Docker] ISO as well
-as the
-Minishift https://github.com/minishift/minishift-centos-iso[CentOS] ISO
-include `cifs-utils` and
-`fuse-sshfs`. This allows you to mount host folders using
+The Minishift https://github.com/minishift/minishift-b2d-iso[Boot2Docker] ISO and the
+Minishift https://github.com/minishift/minishift-centos-iso[CentOS] ISO include `cifs-utils`
+and `fuse-sshfs`. These tools allows you to mount host folders using
 https://en.wikipedia.org/wiki/Server_Message_Block[CIFS]
 or https://en.wikipedia.org/wiki/SSHFS[SSHFS].
 
-*Note:* When you use the Boot2Docker ISO along with the VirtualBox
-driver, VirtualBox
-guest additions are automatically enabled and occupy the _/Users_
-mountpoint as shown in the following examples.
-In this case you will need to use a different mountpoint.
+NOTE: When you use the Boot2Docker ISO along with the VirtualBox driver, VirtualBox
+guest additions are automatically enabled and occupy the _/Users_ mountpoint as
+shown in the following examples. In this case you need to use a different mountpoint.
 
-[[cifs]]
-==== CIFS
+[[cifs-folder-mount]]
+==== Mounting folders with CIFS
 
-An example for CIFS-based sharing is the mount of `C:\Users` on a Windows host
-into the Minishift VM.
-On Windows 10 the `C:\Users` folder is shared per default and only needs locally
-authenticated users. The following procedure describes how to mount this
-folder.
+In this example, you use CIFS-based sharing to mount `C:\Users` on a Windows host
+into the Minishift VM. On Windows 10, the `C:\Users` folder is shared by default
+and only needs locally-authenticated users.
 
 .  Find the local IP address from the same network segment as your
 Minishift instance.
 +
-`$ Get-NetIPAddress | Format-Table`
+----
+$ Get-NetIPAddress | Format-Table`
+----
 
 .  Create a mountpoint and mount the shared folder.
 +
-`$ minishift ssh "sudo mkdir -p /Users"    $ minishift ssh "sudo mount -t cifs //[machine-ip]/Users /Users -o username=[username],password=[password],domain=$env:computername`
+----
+$ minishift ssh "sudo mkdir -p /Users"
+$ minishift ssh "sudo mount -t cifs //[machine-ip]/Users /Users -o username=[username],password=[password],domain=$env:computername
+----
 +
 If no error appears, the mount succeeded.
+
 .  Verify the share mount.
 +
-`$ minishift ssh "ls -al /Users"`
-
+----
+$ minishift ssh "ls -al /Users"
+----
 A successful mount will show a folder with the authenticated user name.
 
-*Note:*
+[NOTE]
+====
+- If you use this method to mount the folder, you might encounter issues
+if your password string contains a `$` sign, because this is used by PowerShell
+as a variable to be replaced. You can use `'` (single quotes) instead and
+replace the value of `$env:computername` with the contents of this variable.
 
-* If you use this method to mount the folder, you might encounter issues
-if your password string
- contains a `$` sign, because this is used by PowerShell as a variable
-to be replaced. You can use `'` (single quotes)
- instead and replace the value of `$env:computername` with the contents
-of this variable.
-* If your Windows account is linked to a Microsoft account, you must use
-the full Microsoft account email address to
- authenticate, for example `jpillow@amigas.us`. This ensures that the
-domain value that contains the computer name is provided.
+- If your Windows account is linked to a Microsoft account, you must use
+the full Microsoft account email address to authenticate, your Microsoft account password,
+and the domain name of your machine that contains your computername parameter.
+====
 
-[[sshfs]]
-==== SSHFS
+[[sshfs-folder-mount]]
+==== Mounting folders with SSHFS
 
-You can use SSHFS based host folder mounts when you have a SSH daemon
-running on your host.
-Mostly, this prerequisite is met by default on Linux and OS X. Most
-Linux distributions have a SSH daemon
-installed per default. If not, follow the instructions for your specific
-distribution to install one.
-OS X also has a built-in SSH server. To use it, make sure _Remote Login_
-is enabled under
-_System Preferences > Sharing_.
+You can use SSHFS-based host folder mounts when you have an SSH daemon
+running on your host. Normally, this prerequisite is met by default on Linux and Mac OS X.
 
-On Windows you should consider using a link:#cifs[CIFS based]
-mount first, but if you want to try SSHFS, you can install
-https://winscp.net/eng/docs/guide_windows_openssh_server[OpenSSH for
-Windows].
+Most Linux distributions have an SSH daemon installed. If not, follow the instructions
+for your specific distribution to install an SSH daemon. Mac OS X also has a built-in
+SSH server. To use it, make sure that _Remote Login_ is enabled in _System Preferences > Sharing_.
 
-. Similar to the link:#cifs[CIFS] example, you need the IP address
-from which your host is reachable
-from within the VM. Run `ifconfig` (or `Get-NetIPAddress` on Windows) to
-determine the local IP
+On Windows, it is recommended to use link:#cifs-folder-mount[CIFS-based mount], but if
+you want to try SSHFS you can install https://winscp.net/eng/docs/guide_windows_openssh_server[OpenSSH for Windows].
+
+The following procedure shows an example of how to mount folders with SSHFS.
+
+. Run `ifconfig` (or `Get-NetIPAddress` on Windows) to determine the local IP
 address from the same network segment as your Minishift instance.
+
 .  Create a mountpoint and mount the shared folder.
 +
-`$ minishift ssh "sudo mkdir -p /Users/<username>"    $ minishift ssh "sudo chown -R docker /Users"    $ minishift ssh    $ sshfs <username>@<IP>:/Users/<username>/ /Users`
+----
+$ minishift ssh "sudo mkdir -p /Users/<username>"
+$ minishift ssh "sudo chown -R docker /Users"
+$ minishift ssh
+$ sshfs <username>@<IP>:/Users/<username>/ /Users
+----
+
 . Verify the share mount.
 +
-`$ minishift ssh "ls -al /Users/<username>"`
+----
+$ minishift ssh "ls -al /Users/<username>"
+----
 
 [[networking]]
 == Networking
 
-The Minishift VM is exposed to the host system via a host-only IP
-address, that can be obtained with the `minishift ip` command.
+The Minishift VM is exposed to the host system with a host-only IP address that
+can be obtained with the `minishift ip` command.

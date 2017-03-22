@@ -1,0 +1,37 @@
+// Need to add 'minishift' prefix to keep Asciibinder happy. This fails on local build
+// https://github.com/redhataccess/ascii_binder/issues/60
+include::minishift/variables.adoc[]
+
+[[minishift-index]]
+= Minishift
+:icons:
+:toc: macro
+:toc-title:
+:toclevels: 1
+
+toc::[]
+
+[[welcome-minishift]]
+== Welcome to Minishift
+
+Welcome to Minishift version {minishift-version}!
+
+Minishift is a tool that helps you run OpenShift locally by running a single-node OpenShift
+cluster inside a VM. You can try out OpenShift or develop with it, day-to-day, on your local host.
+
+This documentation library contains the following sections to help you get started with, use, and
+extend Minishift:
+
+- link:../getting-started/index{outfilesuffix}[Getting started with Minishift]
+- link:../using/index{outfilesuffix}[Using Minishift]
+- link:../developing/index{outfilesuffix}[Developing Minishift]
+- link:../command-ref/minishift{outfilesuffix}[Command reference]
+
+[[more-resources]]
+== Additional resources
+
+Check out the link:https://github.com/minishift/minishift/releases[Minishift releases] page for the
+latest release notes and download information.
+
+Join the Minishift community! Learn about the project and how to contribute
+at the link:https://github.com/minishift/minishift#minishift[Minishift project on GitHub].

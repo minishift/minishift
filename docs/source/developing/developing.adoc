@@ -1,0 +1,284 @@
+[[developing-minishift]]
+= Developing Minishift
+:icons:
+:toc: macro
+:toc-title:
+:toclevels: 1
+
+toc::[]
+
+The following sections describe how to build and release Minishift.
+
+[[develop-prerequisites]]
+== Prerequisites
+
+- Git
+- A recent Go distribution (>1.7)
+
+NOTE: You should be able to develop on Minishift on any operating system, such as GNU/Linux,
+Mac OS X or Windows. The Windows operating system might require additional steps or
+have some limitations.
+
+[[set-up-dev-env]]
+== Setting up the development environment
+
+[[create-go-workspace]]
+=== Creating the Go workspace
+
+We highly recommend to setup a default Go https://golang.org/doc/code.html#Workspaces[workspace].
+Even though it might require an adjustment in your work processes, the goal is to have a single
+workspace for all Go development.
+
+. Create the following directories in the base directory you want to use, such as _$HOME/work_:
++
+/bin::
+Contains executable commands
+
+/pkg::
+Contains package objects
+
+/src::
+Contains Go source files
+
+. Add the path to the root workspacce directory to the _GOPATH_ environment
+variable. For example:
++
+----
+$ export GOPATH=$HOME/work
+----
+
+. Add the workspace _bin_ directory to the _PATH_ environment variable:
++
+----
+$ export PATH=$PATH:$GOPATH/bin
+----
+
+NOTE: On Windows operating systems, you use the UI or use _setx_ to set the environment variables.
+
+[[cloning-repository]]
+=== Cloning the repository
+
+Get the Minishift sources from GitHub.
+
+----
+$ cd $GOPATH/src
+$ git clone https://github.com/minishift/minishift.git github.com/minishift/minishift
+----
+
+[[using-ide]]
+=== Using an IDE
+
+You can use any editor you want. However, most of the core maintainers of Minishift use Intellij
+https://www.jetbrains.com/idea/[IDEA] with the latest Go plugin. This IDE indexes your
+whole workspace and allows for easy navigation of the sources, and also integrates
+with the Go debugger https://github.com/derekparker/delve[Delve].
+
+For instructions on setting up IDEA, see http://hadihariri.com/2015/09/30/setting-up-go-on-intellij/[Setting up Go on IntelliJ].
+
+[[manage-dependencies]]
+== Managing dependencies
+
+Minishift uses https://github.com/Masterminds/glide[Glide] for dependency management.
+
+[[install-glide]]
+=== Installing Glide
+
+Before you can use Glide you need to download and install it from GitHub:
+
+----
+$ go get github.com/Masterminds/glide
+----
+
+This will install the _glide_ binary into _$GOPATH/bin_. Make sure to use Glide version _0.12.3_ or later.
+
+[[bootstrap-dependencies]]
+=== Bootstrapping dependencies
+
+After a clean checkout or after a `make clean`, there won't be a _vendor_ directory
+containing the needed Minishift dependencies.
+
+To install the dependencies, you can run the following command:
+
+----
+$ make vendor
+----
+
+This command calls and runs Glide. Alternatively, you can run the Glide command directly.
+
+----
+$ glide install -v
+----
+
+[NOTE]
+====
+On Windows you might encounter errors because some of the dependency path names are too long.
+Workaround: Use a non-default `tmp` directory for Glide to shorten the path length.
+
+----
+$ mkdir c:\tmp
+$ glide --tmp C:\tmp install -v
+----
+====
+
+[[update-dependencies]]
+=== Updating dependencies
+
+If your work requires a change to the dependencies, you need to incorporate the updated
+information to the Glide files.
+
+. Edit the _glide.yaml_ file to change the dependency list as needed.
+
+. Delete the _glide.lock_ file and re-create the vendor directory by link:#bootstrapping-dependencies[bootstrapping] it. Glide will recognize
+that there is no lock file and recalculate the required dependencies.
+
+. Check-in the updated _glide.lock_ file and the updated _glide.yaml_.
+
+. Test that everything still compiles with the new lock file in place.
+
+[[build-minishift]]
+== Building Minishift
+
+[[build-minishift-binary]]
+=== Building the Minishift binary
+
+Run the following command to create a platform-specific binary and copy it
+to _$GOPATH/bin_.
+
+----
+$ make
+----
+
+NOTE: Use `make cross` to cross-compile for other platforms.
+
+[[run-minishift-binary]]
+=== Running the Minishift binary
+
+Start the OpenShift cluster with your built minishift binary:
+
+----
+$ minishift start
+----
+
+This command will run Minishift from _$GOPATH/bin/minishift_, if you set up your Go
+workspace as described in the link:#creating-the-go-workspace[Creating the Go workspace] section.
+
+You can also execute the binaries directly from the _out_ directory of
+the checkout. Depending on your operating system, the binary is in one of the following
+directories:
+
+* _out/darwin-amd64_
+* _out/linux-amd64_
+* _out/windows-amd64_
+
+For more minishift commands and flags, see the link:../command-ref/minishift{outfilesuffix}[Minishift command reference] documentation.
+
+[[testing-minishift]]
+=== Testing Minishift
+
+[[unit-tests]]
+==== Unit Tests
+
+Unit tests run on Travis before code is merged. To run tests during the development cycle:
+
+----
+$ make test
+----
+
+To run specific tests, use one of the following methods:
+
+- Run all tests on a single package.
++
+----
+# Eg: go test -v ./cmd/minikube/cmd
+$ go test -v <relative path of package>
+----
+- Run a single test on a single package.
++
+----
+$ go test -v <relative path of package> -run <Testcase Name>
+----
+- Run tests that match a pattern.
++
+----
+$go test -v <relative path of package> -run "Test<Regex pattern to match tests>"
+----
+
+For more information about test options, run the `go test --help` command and review the documentation.
+
+[[integration-tests]]
+==== Integration Tests
+
+Integration tests utilize https://github.com/DATA-DOG/godog[`godog`], which uses Gherkin (Cucumber)
+to define test cases. The test cases are defined in `test/integration/*.feature`, and can be run with:
+
+----
+$ make integration
+----
+
+[[format-source]]
+=== Formatting the source
+
+Minishift adheres to the Go formatting https://golang.org/doc/effective_go.html#formatting[guidelines].
+Code with incorrect formatting will fail the the CI builds. You can check whether any of your
+files violate the guidelines with the following command:
+
+----
+$ make fmtcheck
+----
+
+You can correct the formatting errors yourself ot instruct the violations to be corrected automatically
+with the following command:
+
+----
+$ make fmt
+----
+
+[[clean-workspace]]
+=== Cleaning the workspace
+
+To remove all generated artifacts and installed dependencies, run the following command:
+
+----
+$ make clean
+----
+
+[[ci-setup]]
+== CI setup
+
+Minishift uses several CI build servers, including https://ci.centos.org/[CentOS CI]. The server
+builds incoming pull requests and pushes to master. Is also archives build artifacts of successful
+builds.
+
+You can find the CentOS CI Jenkins job for Minishift https://ci.centos.org/job/minishift/[here].
+
+The artifacts of a successful pull request build can be found at
+http://artifacts.ci.centos.org/minishift/minishift/pr/[artifacts.ci.centos.org/minishift/minishift/pr/<PRID>].
+
+Artifacts of a successful master build can be found at
+http://artifacts.ci.centos.org/minishift/minishift/master/[artifacts.ci.centos.org/minishift/minishift/master/<BUILDID>].
+
+For more information about CentOS CI, see the https://wiki.centos.org/QaWiki/CI[CentOS CI] documentation.
+
+[[release-minishift]]
+== Releasing Minishift
+
+[[release-prereqs]]
+=== Prerequisites
+
+You must have a https://help.github.com/articles/creating-an-access-token-for-command-line-use[GitHub personal access token]
+defined in your environment as _GITHUB_ACCESS_TOKEN_.
+
+[[cut-release]]
+=== Cutting the release
+
+. Bump the Minishift version in the link:../Makefile[Makefile]
+
+. Run `make gendocs` to rebuild the docs
+
+. Commit and push your changes with a message of the form "cut v1.0.0"
+
+. Create binaries and upload them to GitHub (this will also tag the release):
++
+----
+$ make release
+----

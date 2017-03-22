@@ -1,0 +1,14 @@
+[[developing-index]]
+= Developing Minishift
+:icons:
+:toc: macro
+:toc-title:
+:toclevels: 1
+
+toc::[]
+
+This section contains information about how to extend, build, and release Minishift, and
+how to contribute to various aspects of the project.
+
+- link:../developing/developing{outfilesuffix}[Developing Minishift]
+- link:../developing/writing-docs{outfilesuffix}[Writing and publishing documentation]

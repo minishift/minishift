@@ -218,18 +218,26 @@ When running OpenShift in a single VM, it is recommended to reuse the Docker dae
 for pure Docker use-cases as well.
 By using the same docker daemon as Minishift, you can speed up your local experiments.
 
-To be able to work with the docker daemon on your Mac or GNU/Linux host use the
-[`docker-env command`](https://minishift.io/docs/minishift_docker-env.html) in your shell:
+1. Make sure that you have the Docker client binary installed on your machine. For information about
+specific binary installations for your operating system, see the [Docker installation page](https://docs.docker.com/engine/installation/).
+
+1. Start Minishift with the [`minishift start`](https://minishift.io/docs/minishift_start.html) command.
+
+1. Use the [`minishift docker-env`](https://minishift.io/docs/minishift_docker-env.html) command
+to export the environment variables that are required to reuse the daemon.
 
 ```
 eval $(minishift docker-env)
 ```
 
 You should now be able to use _docker_ on the command line of your host, talking to the docker daemon
-inside the Minishift VM:
+inside the Minishift VM. To test the connection, run the following command:
+
 ```
 docker ps
 ```
+
+If successful, the shell will print a list of running containers.
 
 <a name="documentation"></a>
 ## Documentation

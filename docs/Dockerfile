@@ -16,12 +16,21 @@ FROM ruby:2.4
 
 RUN apt-get update && apt-get install -y pandoc
 
+ARG uid
+ENV UID=${uid:-1000}
+
+RUN groupadd -r docs && useradd -g docs -u $UID docs
+RUN mkdir -p /home/docs
+RUN chown docs:docs /home/docs
+
+# From here we run everything as dev user
+USER docs
+
 ADD Gemfile .
 ADD Gemfile.lock .
 RUN /bin/bash -l -c "bundle install;"
 
-RUN mkdir /docs
-WORKDIR /docs
+WORKDIR /home/docs
 
 EXPOSE 35729:35729
 EXPOSE 4567:4567

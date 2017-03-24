@@ -7,8 +7,9 @@
 
 toc::[]
 
-This section contains information about how to extend, build, and release Minishift, and
-how to contribute to various aspects of the project.
+This section contains information about how to contribute to various aspects of the project.
 
 - link:../developing/developing{outfilesuffix}[Developing Minishift]
-- link:../developing/writing-docs{outfilesuffix}[Writing and publishing documentation]
+- link:../developing/ci{outfilesuffix}[Minishift CI]
+- link:../developing/writing-docs{outfilesuffix}[Writing documentation]
+- link:../developing/releasing{outfilesuffix}[Releasing Minishift]

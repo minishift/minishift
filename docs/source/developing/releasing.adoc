@@ -1,0 +1,34 @@
+[[developing-minishift]]
+= Releasing Minishift
+:icons:
+:toc: macro
+:toc-title:
+:toclevels: 1
+
+toc::[]
+
+The following sections describe how to release Minishift.
+
+[[release-minishift]]
+= Releasing Minishift
+
+[[release-prereqs]]
+== Prerequisites
+
+You must have a https://help.github.com/articles/creating-an-access-token-for-command-line-use[GitHub personal access token]
+defined in your environment as _GITHUB_ACCESS_TOKEN_.
+
+[[cut-release]]
+== Cutting the release
+
+. Bump the Minishift version in the link:../Makefile[Makefile]
+
+. Run `make gendocs` to rebuild the docs
+
+. Commit and push your changes with a message of the form "cut v1.0.0"
+
+. Create binaries and upload them to GitHub (this will also tag the release):
++
+----
+$ make release
+----

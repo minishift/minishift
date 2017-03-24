@@ -22,10 +22,10 @@ cluster inside a VM. You can try out OpenShift or develop with it, day-to-day, o
 This documentation library contains the following sections to help you get started with, use, and
 extend Minishift:
 
-- link:../getting-started/index{outfilesuffix}[Getting started with Minishift]
-- link:../using/index{outfilesuffix}[Using Minishift]
-- link:../developing/index{outfilesuffix}[Developing Minishift]
-- link:../command-ref/minishift{outfilesuffix}[Command reference]
+- link:./getting-started/index{outfilesuffix}[Getting started with Minishift]
+- link:./using/index{outfilesuffix}[Using Minishift]
+- link:./developing/index{outfilesuffix}[Developing Minishift]
+- link:./command-ref/minishift{outfilesuffix}[Command reference]
 
 [[more-resources]]
 == Additional resources

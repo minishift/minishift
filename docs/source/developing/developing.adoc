@@ -7,7 +7,7 @@
 
 toc::[]
 
-The following sections describe how to build and release Minishift.
+The following sections describe how to build and test Minishift.
 
 [[develop-prerequisites]]
 == Prerequisites
@@ -76,7 +76,7 @@ with the Go debugger https://github.com/derekparker/delve[Delve].
 For instructions on setting up IDEA, see http://hadihariri.com/2015/09/30/setting-up-go-on-intellij/[Setting up Go on IntelliJ].
 
 [[manage-dependencies]]
-== Managing dependencies
+== Dependency management
 
 Minishift uses https://github.com/Masterminds/glide[Glide] for dependency management.
 
@@ -240,45 +240,4 @@ To remove all generated artifacts and installed dependencies, run the following 
 
 ----
 $ make clean
-----
-
-[[ci-setup]]
-== CI setup
-
-Minishift uses several CI build servers, including https://ci.centos.org/[CentOS CI]. The server
-builds incoming pull requests and pushes to master. Is also archives build artifacts of successful
-builds.
-
-You can find the CentOS CI Jenkins job for Minishift https://ci.centos.org/job/minishift/[here].
-
-The artifacts of a successful pull request build can be found at
-http://artifacts.ci.centos.org/minishift/minishift/pr/[artifacts.ci.centos.org/minishift/minishift/pr/<PRID>].
-
-Artifacts of a successful master build can be found at
-http://artifacts.ci.centos.org/minishift/minishift/master/[artifacts.ci.centos.org/minishift/minishift/master/<BUILDID>].
-
-For more information about CentOS CI, see the https://wiki.centos.org/QaWiki/CI[CentOS CI] documentation.
-
-[[release-minishift]]
-== Releasing Minishift
-
-[[release-prereqs]]
-=== Prerequisites
-
-You must have a https://help.github.com/articles/creating-an-access-token-for-command-line-use[GitHub personal access token]
-defined in your environment as _GITHUB_ACCESS_TOKEN_.
-
-[[cut-release]]
-=== Cutting the release
-
-. Bump the Minishift version in the link:../Makefile[Makefile]
-
-. Run `make gendocs` to rebuild the docs
-
-. Commit and push your changes with a message of the form "cut v1.0.0"
-
-. Create binaries and upload them to GitHub (this will also tag the release):
-+
-----
-$ make release
 ----

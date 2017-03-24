@@ -8,11 +8,15 @@ Topics:
   - Name: Getting Started
     Dir: getting-started
     Topics:
+      - Name: Overview
+        File: index
       - Name: Installing Docker Machine drivers
         File: docker-machine-drivers
   - Name: Using Minishift
     Dir: using
     Topics:
+      - Name: Overview
+        File: index
       - Name: Managing Minishift
         File: managing-minishift
       - Name: Interacting with Openshift
@@ -22,6 +26,8 @@ Topics:
   - Name: Developing Minishift
     Dir: developing
     Topics:
+      - Name: Overview
+        File: index
       - Name: Developing Minishift
         File: developing
   - Name: Command Reference

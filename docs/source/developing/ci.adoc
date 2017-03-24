@@ -1,0 +1,27 @@
+[[developing-minishift]]
+= Minishift CI
+:icons:
+:toc: macro
+:toc-title:
+:toclevels: 1
+
+toc::[]
+
+The following sections describes the various CI setups Minishift utilizes.
+
+[[ci-setup]]
+== CentOS CI
+
+Minishift uses several CI build servers, including https://ci.centos.org/[CentOS CI]. The server
+builds incoming pull requests and pushes to master. It also archives build artifacts of successful
+builds.
+
+You can find the CentOS CI Jenkins job for Minishift https://ci.centos.org/job/minishift/[here].
+
+The artifacts of a successful pull request build can be found at
+http://artifacts.ci.centos.org/minishift/minishift/pr/[artifacts.ci.centos.org/minishift/minishift/pr/<PRID>].
+
+Artifacts of a successful master build can be found at
+http://artifacts.ci.centos.org/minishift/minishift/master/[artifacts.ci.centos.org/minishift/minishift/master/<BUILDID>].
+
+For more information about CentOS CI, see the https://wiki.centos.org/QaWiki/CI[CentOS CI] documentation.

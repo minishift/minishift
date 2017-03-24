@@ -9,39 +9,37 @@ toc::[]
 
 This section contains information about contributing to the Minishift documentation.
 
-[[authoring-docs]]
-== Writing and editing content
-
-TBD
-
-[[building-minishift-docs]]
-== Building Minishift Documentation
+[[section-building-minishift-docs]]
+== Building Minishift documentation
 
 Minishift documentation is located in the `docs` sub-folder. The
 documentation is a mix of generated
 https://en.wikipedia.org/wiki/Markdown[Markdown] files and manually
 maintained https://en.wikipedia.org/wiki/AsciiDoc[Asciidoc] files.
 
-Per default the documentation is build in a Docker container. This way
-you avoid having to install all required dependencies on your
+Per default the documentation is built in a Docker container. This way
+you avoid having to install all the required dependencies on your
 development machine. All you need is a running Docker daemon. In case
-you don't have one, use Minishift itself. See (TODO reference to the
-Minishift as Docker daemon from README. Needs to be extracted).
+you don't have one, use Minishift itself. For further information refer to
+link:../command-ref/minishift_docker-env{outfilesuffix}[`minishift docker-env`].
 
 To build the Docker image, run:
 
+[source,sh]
 ----
 $ make build_docs_container
 ----
 
 To generate the documentation into the directory `docs/build`, run:
 
+[source,sh]
 ----
 $ make gen_docs
 ----
 
 To build and serve the documentation for editing, run:
 
+[source,sh]
 ----
 $ make serve_docs
 ----
@@ -50,6 +48,52 @@ The latter will start the https://middlemanapp.com[Middleman] server on
 port 4567. You can access the rendered documentation by browsing to
 http://<IP of Docker daemon>:4567.
 
-== Deploying Minishift Documentation
+[[section-deploying-minishift-docs]]
+== Deploying Minishift documentation
 
-TBD
+The Minishift documentation is deployed on _docs.openshift.org_ under
+link:https://docs.openshift.org/minishift[https://docs.openshift.org/minishift].
+
+To integrate with the _docs.openshift.org_ we deliver a tarball containing
+the Minishift asciidoc files as well as some link:http://www.asciibinder.org/[AsciiBinder]
+meta data.
+
+This tarball can be built using:
+
+[source,sh]
+----
+$ make gen_adoc_tar
+----
+
+Once the build completes there will be a _minishift-adoc.tar_ in the _docs/build_ directory
+of your checkout.
+
+How this tarball is integrated into the docs.openshift.org site build is described in
+<<section-building-openshift-docs>>.
+
+[[section-building-openshift-docs]]
+=== Building OpenShift documentation
+
+To start with you need a checkout of the link:https://github.com/openshift/openshift-docs.git[openshift-docs]
+GitHub repository. You need all the tooling to build openshift-docs. Refer to
+link:https://github.com/openshift/openshift-docs/blob/master/contributing_to_docs/tools_and_setup.adoc[Install and set up the tools and software] which is part of the openshift-docs repository.
+
+Once you can successfully run `rake build` in your openshift-docs checkout, you can integrate the
+Minishift documentation.
+
+Start with building the documentation tarball as described in <<section-deploying-minishift-docs>>,
+then follow these steps (assuming you are in the directory of your openshift-docs checkout):
+
+[source,sh]
+----
+$ mkdir minishift
+$ cd minishift
+$ cp <path to tarball> .
+$ tar -xvf minishift-adoc.tar --strip 1
+$ cat _topic_map.yml >> ../_topic_map.yml
+$ cd ..
+$ rake build
+----
+
+If the build completes successfully, the site is available under _preview/openshift-origin/latest/welcome/index.html_.
+

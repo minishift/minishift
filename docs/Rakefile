@@ -43,6 +43,8 @@ rule ".adoc" => ->(f){source_for_adoc(f)} do |t|
   # adjust links in generated asciidoc
   adoc_content = File.read(adoc_file)
   adoc_new = adoc_content.gsub(/\.md\[/, "{outfilesuffix}[")
+  # adjust header levels
+  adoc_new = adoc_new.gsub(/^=/, "")
   File.open(adoc_file, "w") {|file| file.puts adoc_new }
 
   # update topic map

@@ -34,7 +34,13 @@ LDFLAGS := $(VERSION_VARIABLES) -s -w -extldflags '-static'
 PACKAGES := go list ./... | grep -v /vendor
 SOURCE_DIRS = cmd pkg test
 DOCS_SYNOPISIS_DIR = ./docs/source/_tmp
-DOCS_BUILD_DIR = ./docs/build
+
+ifeq ($(GOOS),windows)
+	UID := 1000
+else
+	UID = $(shell id -u)
+endif
+
 
 .PHONY: $(GOPATH)/bin/minishift$(IS_EXE)
 $(GOPATH)/bin/minishift$(IS_EXE): vendor
@@ -69,19 +75,23 @@ prerelease:
 
 .PHONY: build_docs_container
 build_docs_container:
-	cd docs && docker build -t minishift/docs .
+	cd docs && docker build --build-arg uid=$(UID) -t minishift/docs .
 
 .PHONY: gen_adoc_tar
 gen_adoc_tar: synopsis_docs build_docs_container
-	cd docs && docker run -e MINISHIFT_VERSION=$(MINISHIFT_VERSION) -tiv $(shell pwd)/docs:/docs:Z minishift/docs clean adoc_tar
+	cd docs && docker run -e MINISHIFT_VERSION=$(MINISHIFT_VERSION) -tiv $(shell pwd)/docs:/home/docs:Z minishift/docs clean adoc_tar
 
 .PHONY: gen_docs
 gen_docs: synopsis_docs build_docs_container
-	cd docs && docker run -e MINISHIFT_VERSION=$(MINISHIFT_VERSION) -tiv $(shell pwd)/docs:/docs:Z minishift/docs gen
+	cd docs && docker run -e MINISHIFT_VERSION=$(MINISHIFT_VERSION) -tiv $(shell pwd)/docs:/home/docs:Z minishift/docs gen
+
+.PHONY: clean_docs
+clean_docs: build_docs_container
+	cd docs && docker run -e MINISHIFT_VERSION=$(MINISHIFT_VERSION) -tiv $(shell pwd)/docs:/home/docs:Z minishift/docs clean
 
 .PHONY: serve_docs
 serve_docs: synopsis_docs build_docs_container
-	cd docs && docker run -e MINISHIFT_VERSION=$(MINISHIFT_VERSION) -p 35729:35729 -p 4567:4567 -tiv $(shell pwd)/docs:/docs:Z minishift/docs serve[--watcher-force-polling]
+	cd docs && docker run -e MINISHIFT_VERSION=$(MINISHIFT_VERSION) -p 35729:35729 -p 4567:4567 -tiv $(shell pwd)/docs:/home/docs:Z minishift/docs serve[--watcher-force-polling]
 
 $(DOCS_SYNOPISIS_DIR)/*.md: vendor
 	@# https://github.com/golang/go/issues/15038#issuecomment-207631885 ( CGO_ENABLED=0 )

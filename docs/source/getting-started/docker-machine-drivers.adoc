@@ -101,12 +101,45 @@ $ sudo chown root:wheel $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/doc
 $ sudo chmod u+s $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
 ----
 
-For more information, see the GitHub documentation of the https://github.com/zchee/docker-machine-driver-xhyve#install[xhyve driver].
+For more information, see the GitHub documentation for the https://github.com/zchee/docker-machine-driver-xhyve#install[xhyve driver].
 
 [[manual-install]]
 === Manual install
 
+The `docker-machine-driver-xhyve` binary can be downloaded to any one of the following directories:
+
+-  The `/usr/local/bin/docker-machine-driver-xhyve` directory.
+- A directory already on your _PATH_ environment variable.
+- A custom directory which has to be added to your _PATH_ environment variable.
++
+[NOTE]
+====
+The `docker-machine-driver-xhyve` binary has to be added to your _PATH_ environment variable for it to work.
+====
+
+The following steps explain the installation of the `docker-machine-driver-xhyve` binary to the `/usr/local/bin/docker-machine-driver-xhyve` directory.
+
 To manually install the xhyve driver, run the following commands:
+
+. Download the `docker-machine-driver-xhyve` binary using:
++
+----
+$ sudo curl -L  https://github.com/zchee/docker-machine-driver-xhyve/releases/download/v0.3.1/docker-machine-driver-xhyve -o /usr/local/bin/docker-machine-driver-xhyve
+----
+
+. Enable root access for the `docker-machine-driver-xhyve` binary and add it to the default wheel group:
++
+----
+$ sudo chown root:wheel /usr/local/bin/docker-machine-driver-xhyve
+----
+
+. Set owner User ID (SUID) for the binary as follows:
++
+----
+$ sudo chmod u+s /usr/local/bin/docker-machine-driver-xhyve
+----
+
+Note that, in case the `docker-machine-driver-xhyve` binary fails to work, you could also manually compile and install it as follows:
 
 ----
 $ go get -u -d github.com/zchee/docker-machine-driver-xhyve
@@ -119,3 +152,5 @@ $ make install
 $ sudo chown root:wheel /usr/local/bin/docker-machine-driver-xhyve
 $ sudo chmod u+s /usr/local/bin/docker-machine-driver-xhyve
 ----
+
+For more information, see the GitHub documentation for the https://github.com/zchee/docker-machine-driver-xhyve#install[xhyve driver].

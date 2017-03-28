@@ -18,10 +18,12 @@ package cmd
 
 import (
 	"fmt"
+	"net"
 
 	"github.com/docker/machine/libmachine"
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minishift/util"
 
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
@@ -49,6 +51,36 @@ var ipCmd = &cobra.Command{
 	},
 }
 
+var hostIpCmd = &cobra.Command{
+	Use:   "hostip",
+	Short: "Gets the IP addresses of the host machine.",
+	Long:  `Gets the IP addresses of the host machine and prints it to standard output.`,
+	Run: func(cmd *cobra.Command, args []string) {
+
+		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+		defer api.Close()
+		host, err := api.Load(constants.MachineName)
+		if err != nil {
+			glog.Errorln("Error getting IP: ", err)
+			atexit.Exit(1)
+		}
+
+		// TODO: too much logic
+		instanceip, _ := host.Driver.GetIP()
+
+		for _, hostaddr := range util.HostIPs() {
+
+			if util.NetworkContains(hostaddr, instanceip) {
+				hostip, _, _ := net.ParseCIDR(hostaddr)
+				if util.IsIPReachable(host.Driver, hostip.String(), false) {
+					println(hostip.String())
+				}
+			}
+		}
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(ipCmd)
+	RootCmd.AddCommand(hostIpCmd)
 }

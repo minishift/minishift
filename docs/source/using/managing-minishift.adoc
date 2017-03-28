@@ -192,7 +192,7 @@ and OpenShift to use the specified proxies.
 NOTE: Using the proxy options requires that you run OpenShift version 1.5.0-alpha.2 or later.
 Use the `openshift-version` option to request a specific version of OpenShift. You can list
 all Minishift-compatible OpenShift versions with
-the link:../command-ref/minishift_get-openshift-versions{outfilesuffix}[`minishift get-openshift-versions`] command.
+the link:../command-ref/minishift_openshift_list-versions{outfilesuffix}[`minishift openshift list-versions`] command.
 
 [[mounted-host-folders]]
 == Mounted host folders

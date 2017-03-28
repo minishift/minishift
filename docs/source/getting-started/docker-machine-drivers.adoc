@@ -106,20 +106,12 @@ For more information, see the GitHub documentation for the https://github.com/zc
 [[manual-install]]
 === Manual install
 
-The `docker-machine-driver-xhyve` binary can be downloaded to any one of the following directories:
+To manually install the xhyve driver, you need to download and install the
+`docker-machine-driver-xhyve` binary and place it in a directory which is on your _PATH_.
+`/usr/local/bin` is most likely a good choice, since it is the default installation
+directory for Docker Machine binaries.
 
--  The `/usr/local/bin/docker-machine-driver-xhyve` directory.
-- A directory already on your _PATH_ environment variable.
-- A custom directory which has to be added to your _PATH_ environment variable.
-+
-[NOTE]
-====
-The `docker-machine-driver-xhyve` binary has to be added to your _PATH_ environment variable for it to work.
-====
-
-The following steps explain the installation of the `docker-machine-driver-xhyve` binary to the `/usr/local/bin/docker-machine-driver-xhyve` directory.
-
-To manually install the xhyve driver, run the following commands:
+The following steps explain the installation of the `docker-machine-driver-xhyve` binary to the `/usr/local/bin/` directory:
 
 . Download the `docker-machine-driver-xhyve` binary using:
 +
@@ -139,7 +131,11 @@ $ sudo chown root:wheel /usr/local/bin/docker-machine-driver-xhyve
 $ sudo chmod u+s /usr/local/bin/docker-machine-driver-xhyve
 ----
 
-Note that, in case the `docker-machine-driver-xhyve` binary fails to work, you could also manually compile and install it as follows:
+[NOTE]
+====
+The downloaded `docker-machine-driver-xhyve` binaries are compiled against a specific
+version of OS X. It is possible that the driver fails to work after an OS X version
+upgrade. In this case you can try to compile the driver from source:
 
 ----
 $ go get -u -d github.com/zchee/docker-machine-driver-xhyve
@@ -153,4 +149,5 @@ $ sudo chown root:wheel /usr/local/bin/docker-machine-driver-xhyve
 $ sudo chmod u+s /usr/local/bin/docker-machine-driver-xhyve
 ----
 
-For more information, see the GitHub documentation for the https://github.com/zchee/docker-machine-driver-xhyve#install[xhyve driver].
+For more information, refer to the https://github.com/zchee/docker-machine-driver-xhyve#install[xhyve driver] documentation on GitHub.
+====

@@ -28,6 +28,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minikube/kubeconfig"
 	"github.com/minishift/minishift/pkg/minishift/cache"
 	"github.com/minishift/minishift/pkg/minishift/clusterup"
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
@@ -40,6 +41,7 @@ import (
 	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"strings"
 )
 
 const (
@@ -188,6 +190,14 @@ func runStart(cmd *cobra.Command, args []string) {
 	}
 
 	clusterUp(&config, ip)
+
+	configPath := filepath.Join(constants.Minipath, "machines", constants.MachineName+"_kubeconfig")
+	// cache system:admin kube config entries
+	if err := kubeconfig.CacheSystemAdminEntries(configPath, getConfigClusterName(ip, constants.APIServerPort)); err != nil {
+		glog.Errorln("Error adding developer user to sudoers", err)
+		atexit.Exit(1)
+	}
+
 	if err := openshift.AddSudoersRoleForUser("developer"); err != nil {
 		glog.Errorln("Error adding developer user to sudoers", err)
 		atexit.Exit(1)
@@ -417,4 +427,8 @@ func ocSupportFlag(cmdName string, flag string) bool {
 func setSubcriptionManagerParameters() {
 	cluster.RegistrationParameters.Username = viper.GetString("username")
 	cluster.RegistrationParameters.Password = viper.GetString("password")
+}
+
+func getConfigClusterName(ip string, port int) string {
+	return fmt.Sprintf("%s:%d", strings.Replace(ip, ".", "-", -1), port)
 }

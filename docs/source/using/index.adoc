@@ -12,4 +12,5 @@ troubleshooting common tasks to interact with your OpenShift cluster.
 
 - link:../using/managing-minishift{outfilesuffix}[Managing Minishift]
 - link:../using/interacting-with-openshift{outfilesuffix}[Interacting with OpenShift]
+- link:../using/reusing-docker-daemon{outfilesuffix}[Reusing the Docker daemon]
 - link:../using/troubleshooting{outfilesuffix}[Troubleshooting Minishift]

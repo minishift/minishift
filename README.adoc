@@ -1,0 +1,76 @@
+[[minishift-readme]]
+= Minishift
+:icons:
+:toc: macro
+:toc-title:
+:toclevels: 1
+
+toc::[]
+
+Minishift is a tool that helps you run OpenShift locally by running a
+single-node OpenShift cluster inside a VM. You can try out OpenShift or
+develop with it, day-to-day, on your local host.
+
+Minishift uses https://github.com/docker/machine/tree/master/libmachine[libmachine] for
+provisioning VMs, and https://github.com/openshift/origin[OpenShift Origin] for running the cluster.
+
+https://travis-ci.org/minishift/minishift[image:https://secure.travis-ci.org/minishift/minishift.png[Build Status]]
+https://ci.appveyor.com/project/hferentschik/minishift-o61ou/branch/master[image:https://ci.appveyor.com/api/projects/status/6wyv1cpd588cm4ce/branch/master?svg=true[Build status]]
+https://circleci.com/gh/minishift/minishift/tree/master[image:https://circleci.com/gh/minishift/minishift/tree/master.svg?style=svg[Build status]]
+https://ci.centos.org/job/minishift/[image:https://ci.centos.org/buildStatus/icon?job=minishift[Build Status]]
+
+''''
+
+[[get-started-readme]]
+== Get started
+
+To download the latest version of Minishift and to view the release notes,
+go to the https://github.com/minishift/minishift/releases[Minishift releases page]
+
+Minishift requires a hypervisor to start the virtual machine containing OpenShift.
+Make sure that the hypervisor of your choice is installed and enabled on your system
+before you install Minishift.
+
+For detailed installation instructions, see the link:../getting-started/installing{outfilesuffix}[Installing Minishift] section.
+
+[[documentation]]
+== Documentation
+
+The following documentation is available:
+
+* https://minishift.io/docs/managing-minishift.html[Managing Minishift]
+* https://minishift.io/docs/interacting-with-openshift.html[Interacting with OpenShift]
+* https://minishift.io/docs/minishift.html[Command reference]
+* https://minishift.io/docs/troubleshooting.html[Troubleshooting]
+* https://minishift.io/docs/docker-machine-drivers.html[Installing docker-machine drivers]
+* link:./ROADMAP.md[Roadmap]
+* https://github.com/minishift/minishift/releases[Release Notes]
+* https://minishift.io/docs/developing.html[Developing Minishift]
+
+[[limitations-readme]]
+== Limitations
+
+The following features are not supported in Minishift.
+
+- Features that require a Cloud Provider, such as:
+  - LoadBalancers
+  - PersistentVolumes
+  - Ingress
+- Features that require multiple nodes, such as advanced scheduling
+policies
+- Alternate runtimes such as `rkt`
+
+[[community-readme]]
+== Community
+
+Minishift is an open-source project dedicated to developing and
+supporting Minishift. The code base is forked from the
+https://github.com/kubernetes/minikube[Minikube] project.
+
+Contributions, questions, and comments are all welcomed and encouraged!
+Minishift developers hang out on IRC in the #minishift channel on
+Freenode.
+
+If you want to contribute, make sure to follow the
+link:CONTRIBUTING.md[contribution guidelines] when you open issues or
+submit pull requests.

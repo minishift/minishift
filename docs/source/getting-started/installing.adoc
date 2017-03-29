@@ -1,0 +1,128 @@
+[[installing-minishift]]
+= Installing Minishift
+:icons:
+:toc: macro
+:toc-title:
+:toclevels: 1
+
+toc::[]
+
+The following section describes how to install Minishift and the required dependencies.
+
+[[install-prerequisites]]
+== Prerequisites
+
+Minishift requires a hypervisor to start the virtual machine containing
+OpenShift. Make sure that the hypervisor of your choice is installed and
+enabled on your system before you install Minishift.
+
+Depending on your host OS, you have the choice of the following
+hypervisors:
+
+Mac OS X::
+- https://github.com/mist64/xhyve[xhyve] (default)
+- https://www.virtualbox.org/wiki/Downloads[VirtualBox]
+- https://www.vmware.com/products/fusion[VMware Fusion]
++
+NOTE: xhyve requires specific installation and configuration steps that are described
+in the link:../getting-started/docker-machine-drivers{outfilesuffix}[Installing Docker machine drivers] section.
+
+GNU/Linux::
+- https://minishift.io/docs/docker-machine-drivers.html#kvm-driver[KVM] (default)
+- https://www.virtualbox.org/wiki/Downloads[VirtualBox]
++
+NOTE: KVM requires specific installation and configuration steps that are described
+in the link:../getting-started/docker-machine-drivers{outfilesuffix}[Installing Docker machine drivers] section.
+
+Windows::
+- https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v[Hyper-V] (default)
++
+NOTE: To enable Hyper-V ensure that, after you
+https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v[install Hyper-V], you also
+https://msdn.microsoft.com/en-us/virtualization/hyperv_on_windows/quick_start/walkthrough_virtual_switch[add a Virtual Switch]
+using the Hyper-V Manager. Make sure that you pair the virtual switch
+with a __network card (wired or wireless) that is connected to the network__.
+
+- https://www.virtualbox.org/wiki/Downloads[VirtualBox]
++
+NOTE: It is recommended to use `Virtualbox 5.1.12` or later on Windows to avoid the issue
+link:../using/troubleshooting{outfilesuffix}#machine-doesnt-exist[Error: getting state for host: machine does not exist].
+
+If you encounter issues related to the hypervisor, see
+the link:../using/troubleshooting{outfilesuffix}[Troubleshooting] section.
+
+[[installing-instructions]]
+== Installing Minishift
+
+[[manual-install]]
+=== Manually
+
+.  Download the archive for your operating system from the https://github.com/minishift/minishift/releases[Minishift releases page]
+and unpack it.
+.  Copy the contents of the directory to your preferred location.
+.  Add the `minishift` binary to your _PATH_ environment variable.
+
+[NOTE]
+====
+- On Windows operating system, due to issue
+https://github.com/minishift/minishift/issues/236[#236], you need to
+execute the minishift binary from the drive containing your `%USERPROFILE%` directory.
+- Automatic update of the Minishift binary and the virtual machine ISO
+is currently disabled. See also issue
+https://github.com/minishift/minishift/issues/204[#204]
+====
+
+[[homebrew-install]]
+=== With Homebrew
+
+[[homebrew-stable-install]]
+==== Stable
+
+On OS X you can also use https://caskroom.github.io[Homebrew Cask] to
+install the stable version of Minishift:
+
+----
+  $ brew cask install minishift
+----
+
+[[homebrew-latest-install]]
+==== Latest Beta
+
+If you want to install the latest beta version of Minishift you will
+need the homebrew-cask versions tap. After you install `homebrew-cask`,
+run the following command:
+
+----
+  $ brew tap caskroom/versions
+----
+
+You can now install the latest beta version of Minishift.
+
+----
+  $ brew cask install minishift-beta
+----
+
+[[uninstall-instructions]]
+== Uninstalling Minishift
+
+.  Delete the Minishift VM and any VM-specific files.
++
+----
+$ minishift delete
+----
++
+This command deletes everything in the
+`MINISHIFT_HOME/.minishift/machines/minishift` directory. Other cached data and
+the https://minishift.io/docs/managing-minishift.html#persistent-configuration[persistent configuration] are not removed.
+
+.  To completely uninstall Minishift, delete everything in the
+`MINISHIFT_HOME` directory (default `~/.minishift`) and `~/.kube`:
++
+----
+$ rm -rf ~/.minishift
+$ rm -rf ~/.kube
+----
+
+.  With your hypervisor management tool, confirm that there are no
+remaining artifacts related to the Minishift VM. For example, if you use
+KVM, you need to run the `virsh` command.

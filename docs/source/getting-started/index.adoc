@@ -11,3 +11,5 @@ This section contains information about preparing for and installing Minishift,
 quickstart steps, and sample application deployment.
 
 - link:../getting-started/docker-machine-drivers{outfilesuffix}[Installing Docker machine drivers]
+- link:../getting-started/installing{outfilesuffix}[Installing Minishift]
+- link:../getting-started/quickstart{outfilesuffix}[Quickstart]

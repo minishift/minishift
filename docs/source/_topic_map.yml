@@ -12,6 +12,10 @@ Topics:
         File: index
       - Name: Installing Docker Machine drivers
         File: docker-machine-drivers
+      - Name: Installing Minishift
+        File: installing
+      - Name: Quickstart
+        File: quickstart
   - Name: Using Minishift
     Dir: using
     Topics:
@@ -21,6 +25,8 @@ Topics:
         File: managing-minishift
       - Name: Interacting with Openshift
         File: interacting-with-openshift
+      - Name: Reusing the Docker daemon
+        File: reusing-docker-daemon
       - Name: Troubleshooting Minishift
         File: troubleshooting
   - Name: Developing Minishift

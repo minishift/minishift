@@ -1,4 +1,4 @@
-[[developing-minishift]]
+[[release-minishift]]
 = Releasing Minishift
 :icons:
 :toc: macro
@@ -8,9 +8,6 @@
 toc::[]
 
 The following sections describe how to release Minishift.
-
-[[release-minishift]]
-= Releasing Minishift
 
 [[release-prereqs]]
 == Prerequisites

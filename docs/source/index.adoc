@@ -17,12 +17,12 @@ toc::[]
 Welcome to Minishift version {minishift-version}!
 
 Minishift is a tool that helps you run OpenShift locally by running a single-node OpenShift
-cluster inside a VM. You can try out OpenShift or develop with it, day-to-day, on your local host.
+cluster inside a VM.
 
 This documentation library contains the following sections to help you get started with, use, and
 extend Minishift:
 
-- link:./getting-started/index{outfilesuffix}[Getting started with Minishift]
+- link:./getting-started/index{outfilesuffix}[Getting started]
 - link:./using/index{outfilesuffix}[Using Minishift]
 - link:./developing/index{outfilesuffix}[Developing Minishift]
 - link:./command-ref/minishift{outfilesuffix}[Command reference]

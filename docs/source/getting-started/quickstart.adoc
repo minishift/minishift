@@ -72,7 +72,7 @@ command-line interface and the Web console, see the
 link:../using/interacting-with-openshift{outfilesuffix}[Interacting with OpenShift] section.
 
 [[deploy-sample-app]]
-== Deploying a sample application
+== Deploying an application
 
 OpenShift provides various sample applications, such as templates,
 builder applications, and quickstarts. The following steps describe how

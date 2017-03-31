@@ -5,9 +5,7 @@
 :toc-title:
 :toclevels: 1
 
-toc::[]
-
-When running OpenShift in a single VM, it is recommended to reuse the
+When running OpenShift in a single VM, you can reuse the
 Docker daemon that Minishift uses for pure Docker use-cases as well. By
 using the same docker daemon as Minishift, you can speed up your local
 experiments.
@@ -23,7 +21,7 @@ https://docs.docker.com/engine/installation/[Docker installation] site.
 to export the environment variables that are required to reuse the daemon.
 +
 ----
-eval $(minishift docker-env)
+$ eval $(minishift docker-env)
 ----
 +
 You should now be able to use _docker_ on the command line of your host,
@@ -32,7 +30,7 @@ talking to the docker daemon inside the Minishift VM.
 .  To test the connection, run the following command:
 +
 ----
-docker ps
+$ docker ps
 ----
 +
 If successful, the shell will print a list of running containers.

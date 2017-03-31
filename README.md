@@ -21,6 +21,7 @@ provisioning VMs, and [OpenShift Origin](https://github.com/openshift/origin) fo
   - [Deploying a sample application](#deploying-a-sample-application)
   - [Reusing the Docker daemon](#reusing-the-docker-daemon)
 - [Documentation](#documentation)
+- [Using Minishift with a HTTP/HTTPS Proxy](#using-minishift-with-a-proxy)
 - [Limitations](#limitations)
 - [Community](#community)
 
@@ -252,6 +253,26 @@ The following documentation is available:
 * [Roadmap](./ROADMAP.md)
 * [Release Notes](https://github.com/minishift/minishift/releases)
 * [Developing Minishift](https://minishift.io/docs/developing.html)
+
+<a name="using-minishift-with-a-proxy"></a>
+## Using Minishift with a HTTP/HTTPS Proxy
+
+If you are behind a HTTP/HTTPS proxy, you may need to supply proxy options.
+To do this, pass the required flags during `minishift start`.
+
+For example:
+
+```shell
+$ minishift start --http-proxy http://YOURPROXY:PORT \
+                 --https-proxy https://YOURPROXY:PORT
+```
+
+ In an authenticated proxy environment, the `proxy_user` and `proxy_password` should be part of proxy URI.
+ 
+```shell
+ $ minishift start --http-proxy http://<proxy_username>:<proxy_password>@YOURPROXY:PORT \
+                  --https-proxy https://<proxy_username>:<proxy_password>YOURPROXY:PORT
+```
 
 <a name="limitations"></a>
 ## Limitations

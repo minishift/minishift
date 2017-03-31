@@ -25,13 +25,13 @@ import (
 
 var (
 	// This is the internalIP the the API server and other components communicate on.
-	internalIP             = net.ParseIP(util.DefaultServiceClusterIP)
+	internalIP             = net.ParseIP(DefaultServiceClusterIP)
 	RegistrationParameters = new(registration.RegistrationParameters)
 )
 
 func GenerateCerts(pub, priv string, ip net.IP) error {
 	ips := []net.IP{ip, internalIP}
-	if err := util.GenerateSelfSignedCert(pub, priv, ips, util.GetAlternateDNS(util.DefaultDNSDomain)); err != nil {
+	if err := util.GenerateSelfSignedCert(pub, priv, ips, GetAlternateDNS(DefaultDNSDomain)); err != nil {
 		return err
 	}
 	return nil

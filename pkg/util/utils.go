@@ -19,8 +19,6 @@ package util
 import (
 	"fmt"
 	"github.com/asaskevich/govalidator"
-	"github.com/blang/semver"
-	"github.com/minishift/minishift/pkg/minikube/constants"
 	"io"
 	"os"
 	"strings"
@@ -72,15 +70,6 @@ func Retry(attempts int, callback func() error) (err error) {
 
 func ValidateProxyURI(uri string) bool {
 	return govalidator.IsURL(uri)
-}
-
-func ValidateOpenshiftMinVersion(ver string) bool {
-	v, _ := semver.Parse(strings.TrimPrefix(ver, constants.VersionPrefix))
-	r, _ := semver.ParseRange(constants.MinSupportedOpenshiftVersion)
-	if r(v) {
-		return true
-	}
-	return false
 }
 
 func RetryAfter(attempts int, callback func() error, d time.Duration) (err error) {

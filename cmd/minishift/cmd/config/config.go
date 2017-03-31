@@ -35,12 +35,11 @@ type configFile interface {
 
 type setFn func(string, string) error
 
-// TODO - Issue #177 Rename MinikubeConfig to MinishiftConfig
-type MinikubeConfig map[string]interface{}
+type MinishiftConfig map[string]interface{}
 
 type Setting struct {
 	name        string
-	set         func(MinikubeConfig, string, string) error
+	set         func(MinishiftConfig, string, string) error
 	validations []setFn
 	callbacks   []setFn
 }
@@ -140,7 +139,7 @@ func configurableFields() string {
 }
 
 // ReadConfig reads in the JSON minishift config
-func ReadConfig() (MinikubeConfig, error) {
+func ReadConfig() (MinishiftConfig, error) {
 	f, err := os.Open(constants.ConfigFile)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -148,7 +147,7 @@ func ReadConfig() (MinikubeConfig, error) {
 		}
 		return nil, fmt.Errorf("Cannot open file %s: %s", constants.ConfigFile, err)
 	}
-	var m MinikubeConfig
+	var m MinishiftConfig
 	m, err = decode(f)
 	if err != nil {
 		return nil, fmt.Errorf("Cannot decode config %s: %s", constants.ConfigFile, err)
@@ -158,7 +157,7 @@ func ReadConfig() (MinikubeConfig, error) {
 }
 
 // Writes a minikube config to the JSON file
-func WriteConfig(m MinikubeConfig) error {
+func WriteConfig(m MinishiftConfig) error {
 	f, err := os.Create(constants.ConfigFile)
 	if err != nil {
 		return fmt.Errorf("Cannot create file %s: %s", constants.ConfigFile, err)
@@ -171,13 +170,13 @@ func WriteConfig(m MinikubeConfig) error {
 	return nil
 }
 
-func decode(r io.Reader) (MinikubeConfig, error) {
-	var data MinikubeConfig
+func decode(r io.Reader) (MinishiftConfig, error) {
+	var data MinishiftConfig
 	err := json.NewDecoder(r).Decode(&data)
 	return data, err
 }
 
-func encode(w io.Writer, m MinikubeConfig) error {
+func encode(w io.Writer, m MinishiftConfig) error {
 	b, err := json.MarshalIndent(m, "", "    ")
 	if err != nil {
 		return err

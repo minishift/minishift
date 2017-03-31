@@ -421,7 +421,7 @@ func setDefaultRoutingPrefix(ip string) {
 
 func validateOpenshiftVersion() {
 	if viper.IsSet(openshiftVersion) {
-		if !util.ValidateOpenshiftMinVersion(viper.GetString(openshiftVersion)) {
+		if !minishiftUtil.ValidateOpenshiftMinVersion(viper.GetString(openshiftVersion)) {
 			fmt.Printf("Minishift does not support Openshift version %s. "+
 				"You need to use a version >= 1.3.1.", viper.GetString(openshiftVersion))
 			atexit.Exit(1)

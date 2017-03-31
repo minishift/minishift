@@ -19,7 +19,7 @@ package openshift
 import (
 	"os"
 
-	"github.com/minishift/minishift/pkg/minikube/openshiftversions"
+	"github.com/minishift/minishift/pkg/minishift/openshift/version"
 	"github.com/spf13/cobra"
 )
 
@@ -29,7 +29,7 @@ var getVersionsCmd = &cobra.Command{
 	Short: "Gets the list of OpenShift versions available for Minishift.",
 	Long:  `Gets the list of OpenShift versions available for Minishift.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		openshiftversions.PrintOpenShiftVersionsFromGitHub(os.Stdout)
+		version.PrintOpenShiftVersionsFromGitHub(os.Stdout)
 	},
 }
 

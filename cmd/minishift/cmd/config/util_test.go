@@ -18,7 +18,7 @@ package config
 
 import "testing"
 
-var minikubeConfig = MinikubeConfig{
+var minikubeConfig = MinishiftConfig{
 	"vm-driver":            "kvm",
 	"cpus":                 12,
 	"show-libmachine-logs": true,

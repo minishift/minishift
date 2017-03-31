@@ -48,12 +48,12 @@ func findSetting(name string) (Setting, error) {
 
 // Set Functions
 
-func SetString(m MinikubeConfig, name string, val string) error {
+func SetString(m MinishiftConfig, name string, val string) error {
 	m[name] = val
 	return nil
 }
 
-func SetInt(m MinikubeConfig, name string, val string) error {
+func SetInt(m MinishiftConfig, name string, val string) error {
 	i, err := strconv.Atoi(val)
 	if err != nil {
 		return err
@@ -62,7 +62,7 @@ func SetInt(m MinikubeConfig, name string, val string) error {
 	return nil
 }
 
-func SetBool(m MinikubeConfig, name string, val string) error {
+func SetBool(m MinishiftConfig, name string, val string) error {
 	b, err := strconv.ParseBool(val)
 	if err != nil {
 		return err

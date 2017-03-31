@@ -14,14 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package openshiftversions
+package version
 
 import (
 	"fmt"
 	"io"
 
 	"github.com/google/go-github/github"
-	"github.com/minishift/minishift/pkg/util"
+	"github.com/minishift/minishift/pkg/minishift/util"
 	githubutil "github.com/minishift/minishift/pkg/util/github"
 	"github.com/pkg/errors"
 )

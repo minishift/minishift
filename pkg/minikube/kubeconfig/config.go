@@ -19,7 +19,7 @@ package kubeconfig
 import (
 	"errors"
 	"fmt"
-	"github.com/minishift/minishift/pkg/minishift/util"
+	"github.com/minishift/minishift/pkg/util"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"

@@ -17,7 +17,7 @@ limitations under the License.
 package constants
 
 import (
-	"github.com/minishift/minishift/pkg/minishift/util"
+	"github.com/minishift/minishift/pkg/util"
 	"os"
 	"path/filepath"
 	"testing"

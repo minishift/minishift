@@ -16,8 +16,6 @@ limitations under the License.
 
 package filehelper
 
-// TODO - Issue #177 sort out util packages
-
 import (
 	"errors"
 	"io"

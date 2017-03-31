@@ -365,8 +365,6 @@ func setUp(t *testing.T) {
 		t.Error(err)
 	}
 
-	// Need to create instanceState.Config since it is being used in clusterUp.
-	// TODO: Need to separate clusterUp with oc installation
 	machinesDirPath := filepath.Join(testDir, "machines")
 	os.Mkdir(machinesDirPath, 0755)
 	instanceState.InstanceConfig, err = instanceState.NewInstanceConfig(filepath.Join(machinesDirPath, "fake-machines.json"))

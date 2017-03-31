@@ -17,48 +17,113 @@ limitations under the License.
 package version
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/minishift/minishift/pkg/util"
 	"io"
-
-	"github.com/google/go-github/github"
-	"github.com/minishift/minishift/pkg/minishift/util"
-	githubutil "github.com/minishift/minishift/pkg/util/github"
-	"github.com/pkg/errors"
+	"net/http"
+	"sort"
+	"strings"
+	"time"
 )
 
-const githubOwner = "openshift"
-const githubRepo = "origin"
-
-func PrintOpenShiftVersionsFromGitHub(output io.Writer) {
-	PrintOpenShiftVersions(output)
+type ImageTags struct {
+	Count    int         `json:"count"`
+	Next     string      `json:"next"`
+	Previous interface{} `json:"previous"`
+	Results  []Results   `json:"results"`
 }
 
-func PrintOpenShiftVersions(output io.Writer) {
-	versions, err := getVersions()
+type Results struct {
+	Name        string      `json:"name"`
+	FullSize    int         `json:"full_size"`
+	Images      []ImageInfo `json:"images"`
+	ID          int         `json:"id"`
+	Repository  int         `json:"repository"`
+	Creator     int         `json:"creator"`
+	LastUpdater int         `json:"last_updater"`
+	LastUpdated time.Time   `json:"last_updated"`
+	ImageID     interface{} `json:"image_id"`
+	V2          bool        `json:"v2"`
+}
+
+type ImageInfo struct {
+	Size         int         `json:"size"`
+	Architecture string      `json:"architecture"`
+	Variant      interface{} `json:"variant"`
+	Features     interface{} `json:"features"`
+	Os           interface{} `json:"os"`
+	OsVersion    interface{} `json:"os_version"`
+	OsFeatures   interface{} `json:"os_features"`
+}
+
+func PrintDownStreamVersions(output io.Writer, minSupportedVersion string) {
+	resp, err := getResponseBody("https://registry.access.redhat.com/v1/repositories/openshift3/ose/tags")
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println("Error Occured", err)
+		return
+	}
+	defer resp.Body.Close()
+	decoder := json.NewDecoder(resp.Body)
+	var data map[string]string
+	err = decoder.Decode(&data)
+	if err != nil {
+		fmt.Printf("%T\n%s\n%#v\n", err, err, err)
 		return
 	}
 	fmt.Fprint(output, "The following OpenShift versions are available: \n")
-
-	for _, version := range versions {
-		if util.ValidateOpenshiftMinVersion(*version.TagName) {
-			fmt.Fprintf(output, "\t- %s\n", *version.TagName)
+	var tagsList []string
+	for version := range data {
+		if util.VersionOrdinal(version) >= util.VersionOrdinal(minSupportedVersion) {
+			if strings.Contains(version, "latest") {
+				continue
+			}
+			if strings.Contains(version, "-") {
+				continue
+			}
+			tagsList = append(tagsList, version)
 		}
+	}
+	sort.Strings(tagsList)
+	for _, tag := range tagsList {
+		fmt.Fprintf(output, "\t- %s\n", tag)
 	}
 }
 
-func getVersions() ([]*github.RepositoryRelease, error) {
-	client := githubutil.Client()
+func PrintUpStreamVersions(output io.Writer, minSupportedVersion string) {
+	resp, err := getResponseBody("https://registry.hub.docker.com/v2/repositories/openshift/origin/tags/")
+	if err != nil {
+		fmt.Fprintf(output, "Error Occured %s", err)
+		return
+	}
+	defer resp.Body.Close()
+	decoder := json.NewDecoder(resp.Body)
+	var data ImageTags
+	err = decoder.Decode(&data)
+	if err != nil {
+		fmt.Printf("%T\n%s\n%#v\n", err, err, err)
+		return
+	}
+	fmt.Fprint(output, "The following OpenShift versions are available: \n")
+	var tagsList []string
+	for _, imageinfo := range data.Results {
+		if strings.Contains(imageinfo.Name, "latest") {
+			continue
+		}
+		if util.VersionOrdinal(imageinfo.Name) >= util.VersionOrdinal(minSupportedVersion) {
+			tagsList = append(tagsList, imageinfo.Name)
+		}
+	}
+	sort.Strings(tagsList)
+	for _, tag := range tagsList {
+		fmt.Fprintf(output, "\t- %s\n", tag)
+	}
+}
 
-	releases, resp, err := client.Repositories.ListReleases(githubOwner, githubRepo, nil)
+func getResponseBody(url string) (resp *http.Response, err error) {
+	resp, err = http.Get(url)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
-
-	if len(releases) == 0 {
-		return nil, errors.New("There are no OpenShift versions available.")
-	}
-	return releases, nil
+	return resp, nil
 }

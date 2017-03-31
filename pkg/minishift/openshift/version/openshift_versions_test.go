@@ -17,149 +17,67 @@ limitations under the License.
 package version
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"net/http/httptest"
-	"net/url"
+	"io/ioutil"
+	"os"
+	"strings"
 	"testing"
-
-	"github.com/google/go-github/github"
-
-	githubutils "github.com/minishift/minishift/pkg/util/github"
 )
 
-type URLHandlerCorrect struct {
-	Releases []*github.RepositoryRelease
-}
-
-func (h *URLHandlerCorrect) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	b, err := json.Marshal(h.Releases)
+func TestPrintUpStreamVersions(t *testing.T) {
+	testDir, err := ioutil.TempDir("", "minishift-config-")
 	if err != nil {
-		fmt.Println(err)
-		return
+		t.Error()
 	}
-	w.Header().Set("Content-Type", "application/javascript")
-	fmt.Fprintf(w, string(b))
-}
+	defer os.RemoveAll(testDir)
 
-func TestGetVersionsCorrect(t *testing.T) {
-	EnsureGitHubApiAccessTokenSet(t)
-
-	// test that the version is correctly parsed if returned if valid JSON is returned the url endpoint
-	version0 := "0.0.0"
-	version1 := "1.0.0"
-	handler := &URLHandlerCorrect{
-		Releases: []*github.RepositoryRelease{{TagName: &version0}, {TagName: &version1}},
-	}
-	server := httptest.NewServer(handler)
-
-	parsedUrl, _ := url.Parse(server.URL)
-	githubClient := githubutils.Client()
-	githubClient.BaseURL = parsedUrl
-	githubClient.UploadURL = parsedUrl
-
-	releases, err := getVersions()
+	f, err := os.Create(testDir + "out.txt")
 	if err != nil {
-		t.Fatalf(err.Error())
+		t.Fatal("Error creating test file", err)
 	}
-	if len(releases) != 2 { // TODO(aprindle) change to len(handler....)
-		//Check values here as well?  Write eq method?
-		t.Fatalf("Expected two OpenShift releases, received instead %s", len(releases))
+	defer f.Close()
+
+	os.Stdout = f
+	PrintUpStreamVersions(f, "v1.5.0-rc.0")
+	if _, err := f.Seek(0, 0); err != nil {
+		t.Fatal("Error setting offset back", err)
 	}
-}
 
-type URLHandlerNone struct{}
-
-func (h *URLHandlerNone) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-}
-
-func TestGetVersionsNone(t *testing.T) {
-	EnsureGitHubApiAccessTokenSet(t)
-
-	// test that an error is returned if nothing is returned at the url endpoint
-	handler := &URLHandlerNone{}
-	server := httptest.NewServer(handler)
-
-	parsedUrl, _ := url.Parse(server.URL)
-	githubClient := githubutils.Client()
-	githubClient.BaseURL = parsedUrl
-	githubClient.UploadURL = parsedUrl
-
-	_, err := getVersions()
-	if err == nil {
-		t.Fatal("No OpenShift versions returned from URL but no error reported.")
+	data, err := ioutil.ReadAll(f)
+	if err != nil {
+		t.Fatal("Error reading file", err)
+	}
+	actualStdout := string(data)
+	if strings.Contains(actualStdout, "v1.5.0-alpha.3") {
+		t.Fatalf("Shouldn't Contain v1.5.0-alpha.3 in\n %s", actualStdout)
 	}
 }
 
-type URLHandlerMalformed struct{}
-
-func (h *URLHandlerMalformed) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/javascript")
-	fmt.Fprint(w, "Malformed JSON")
-}
-
-func TestGetVersionsMalformed(t *testing.T) {
-	EnsureGitHubApiAccessTokenSet(t)
-
-	// test that an error is returned if malformed JSON is at the url endpoint
-	handler := &URLHandlerMalformed{}
-	server := httptest.NewServer(handler)
-
-	parsedUrl, _ := url.Parse(server.URL)
-	githubClient := githubutils.Client()
-	githubClient.BaseURL = parsedUrl
-	githubClient.UploadURL = parsedUrl
-
-	_, err := getVersions()
-	if err == nil {
-		t.Fatal("Malformed version value returned from URL but no error reported.")
+func TestPrintDownStreamVersions(t *testing.T) {
+	testDir, err := ioutil.TempDir("", "minishift-config-")
+	if err != nil {
+		t.Error()
 	}
-}
+	defer os.RemoveAll(testDir)
 
-func TestPrintOpenShiftVersions(t *testing.T) {
-	EnsureGitHubApiAccessTokenSet(t)
+	f, err := os.Create(testDir + "out.txt")
+	if err != nil {
+		t.Fatal("Error creating test file", err)
+	}
+	defer f.Close()
 
-	// test that no openshift version text is printed if there are no versions being served
-	// TODO(aprindle) or should this be an error?!?!
-	handlerNone := &URLHandlerNone{}
-	server := httptest.NewServer(handlerNone)
-
-	parsedUrl, _ := url.Parse(server.URL)
-	githubClient := githubutils.Client()
-	githubClient.BaseURL = parsedUrl
-	githubClient.UploadURL = parsedUrl
-
-	var outputBuffer bytes.Buffer
-	PrintOpenShiftVersions(&outputBuffer)
-	if len(outputBuffer.String()) != 0 {
-		t.Fatalf("Expected no output from PrintOpenShiftVersions because no versions exist at the current URL but the output was [%s]", outputBuffer.String())
+	os.Stdout = f
+	PrintUpStreamVersions(f, "v3.4.1.10")
+	if _, err := f.Seek(0, 0); err != nil {
+		t.Fatal("Error setting offset back", err)
 	}
 
-	// test that update text is printed if the latest version is greater than the current version
-	// k8sVersionsFromURL = "100.0.0-dev"
-	version0 := "0.0.0"
-	version1 := "1.0.0"
-	handlerCorrect := &URLHandlerCorrect{
-		Releases: []*github.RepositoryRelease{{TagName: &version0}, {TagName: &version1}},
+	data, err := ioutil.ReadAll(f)
+	if err != nil {
+		t.Fatal("Error reading file", err)
 	}
-	server = httptest.NewServer(handlerCorrect)
 
-	parsedUrl, _ = url.Parse(server.URL)
-	githubClient.BaseURL = parsedUrl
-	githubClient.UploadURL = parsedUrl
-
-	PrintOpenShiftVersions(&outputBuffer)
-	if len(outputBuffer.String()) == 0 {
-		t.Fatalf("Expected PrintOpenShiftVersion to output %d versions from the current URL but the output was [%s]",
-			2, outputBuffer.String()) //TODO(aprindle) change the 2
-	}
-}
-
-func EnsureGitHubApiAccessTokenSet(t *testing.T) {
-	if githubutils.GetGitHubApiToken() == "" {
-		t.Skip("Skipping GitHub API based test, because no access token is defined in the environment.\n " +
-			"To run this test check https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/ and set for example MINISHIFT_GITHUB_API_TOKEN (see github.go).")
+	actualStdout := string(data)
+	if strings.Contains(actualStdout, "v3.4.1.10") {
+		t.Fatalf("Shouldn't Contain v3.4.1.10 in\n %s", actualStdout)
 	}
 }

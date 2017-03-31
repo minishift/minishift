@@ -141,11 +141,6 @@ func NewOcRunner() *OcRunner {
 	return &OcRunner{CommandPath: p}
 }
 
-func (k *OcRunner) RunCommandParseOutput(args []string, outputObj interface{}) error {
-	// TODO implement (HF)
-	return nil
-}
-
 func (k *OcRunner) RunCommand(command string) (stdOut string, stdErr string, exitCode int) {
 	stdOut, stdErr, exitCode = runCommand(command, k.CommandPath)
 	return

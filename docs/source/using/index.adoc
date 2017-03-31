@@ -7,8 +7,8 @@
 
 toc::[]
 
-This section contains information about managing your Minishift VM and performing and
-troubleshooting common tasks to interact with your OpenShift cluster.
+This section describes how to manage your Minishift VM and interact with your
+OpenShift cluster. It also helps troubleshooting common issues.
 
 - link:../using/managing-minishift{outfilesuffix}[Managing Minishift]
 - link:../using/interacting-with-openshift{outfilesuffix}[Interacting with OpenShift]

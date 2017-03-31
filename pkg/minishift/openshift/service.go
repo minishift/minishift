@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
+	"github.com/minishift/minishift/pkg/util"
 	"github.com/pkg/errors"
 	"path/filepath"
 	"regexp"
@@ -28,6 +29,7 @@ import (
 
 var (
 	systemKubeConfigPath string
+	runner               util.Runner = &util.RealRunner{}
 )
 
 func init() {

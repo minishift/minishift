@@ -28,6 +28,7 @@ import (
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/spf13/viper"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -101,10 +102,10 @@ type RecordingRunner struct {
 	Args []string
 }
 
-func (r *RecordingRunner) Run(command string, args ...string) error {
-	r.Cmd = command
-	r.Args = args
-	return nil
+func (r *RecordingRunner) Run(stdOut io.Writer, stdErr io.Writer, commandPath string, arg ...string) int {
+	r.Cmd = commandPath
+	r.Args = arg
+	return 0
 }
 
 func (r *RecordingRunner) Output(command string, args ...string) ([]byte, error) {

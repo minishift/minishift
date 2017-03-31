@@ -26,13 +26,14 @@ import (
 	"github.com/docker/machine/libmachine/host"
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/golang/glog"
+	"github.com/minishift/minishift/cmd/minishift/cmd/addon"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minikube/kubeconfig"
 	"github.com/minishift/minishift/pkg/minishift/cache"
 	"github.com/minishift/minishift/pkg/minishift/clusterup"
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
-	"github.com/minishift/minishift/pkg/minishift/openshift"
+	"github.com/minishift/minishift/pkg/minishift/oc"
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
 	minishiftUtil "github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/util"
@@ -131,7 +132,6 @@ func runStart(cmd *cobra.Command, args []string) {
 	defer libMachineClient.Close()
 
 	validateOpenshiftVersion()
-
 	validateProxyArgs()
 
 	setDockerProxy()
@@ -191,19 +191,41 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	clusterUp(&config, ip)
 
-	configPath := filepath.Join(constants.Minipath, "machines", constants.MachineName+"_kubeconfig")
-	// cache system:admin kube config entries
-	if err := kubeconfig.CacheSystemAdminEntries(configPath, getConfigClusterName(ip, constants.APIServerPort)); err != nil {
-		glog.Errorln("Error adding developer user to sudoers", err)
+	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
+	postClusterUp(constants.MachineName, ip, constants.APIServerPort, viper.GetString(routingSuffix), instanceState.Config.OcPath, constants.KubeConfigPath, "developer", "myproject", sshCommander)
+}
+
+// postClusterUp runs the Minishift specific provisioning after cluster up has run
+func postClusterUp(machineName string, ip string, port int, routingSuffix string, ocPath string, kubeConfigPath string, user string, project string, sshCommander provision.SSHCommander) {
+	if err := kubeconfig.CacheSystemAdminEntries(kubeConfigPath, getConfigClusterName(ip, port)); err != nil {
+		glog.Errorln("Error creating Minishift kubeconfig", err)
 		atexit.Exit(1)
 	}
 
-	if err := openshift.AddSudoersRoleForUser("developer"); err != nil {
-		glog.Errorln("Error adding developer user to sudoers", err)
+	ocRunner, err := oc.NewOcRunner(ocPath, kubeConfigPath)
+	if err != nil {
+		glog.Errorln("Error configuring OpenShift", err)
 		atexit.Exit(1)
 	}
-	if err := openshift.AddContextForProfile(constants.MachineName, ip, "developer", "myproject"); err != nil {
-		glog.Errorln("Error adding OpenShift Context", err)
+
+	if err := ocRunner.AddSudoerRoleForUser(user); err != nil {
+		glog.Error(fmt.Sprintf("Error giving %s sudoer privileges", user))
+		atexit.Exit(1)
+	}
+
+	if err := ocRunner.AddCliContext(machineName, ip, user, project); err != nil {
+		glog.Errorln("Error adding OpenShift context")
+		atexit.Exit(1)
+	}
+
+	applyAddOns(ip, routingSuffix, ocPath, kubeConfigPath, sshCommander)
+}
+
+func applyAddOns(ip string, routingSuffix string, ocPath string, kubeConfigPath string, sshCommander provision.SSHCommander) {
+	addOnManager := addon.GetAddOnManager()
+	err := addOnManager.Apply(addon.GetExecutionContext(ip, routingSuffix, ocPath, kubeConfigPath, sshCommander))
+	if err != nil {
+		glog.Errorln("Error executing addon commands", err)
 		atexit.Exit(1)
 	}
 }
@@ -372,10 +394,10 @@ func clusterUp(config *cluster.MachineConfig, ip string) {
 		}
 	})
 
-	err := runner.Run(cmdName, cmdArgs...)
-	if err != nil {
+	exitCode := runner.Run(os.Stdout, os.Stderr, cmdName, cmdArgs...)
+	if exitCode != 0 {
 		// TODO glog is probably not right here. Need some sort of logging wrapper
-		glog.Errorln("Error starting the cluster: ", err)
+		glog.Errorln("Error starting the cluster.")
 		atexit.Exit(1)
 	}
 }

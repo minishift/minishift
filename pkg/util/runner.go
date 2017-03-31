@@ -17,35 +17,18 @@ limitations under the License.
 package util
 
 import (
-	"fmt"
-	"os"
+	"io"
 	"os/exec"
+	"path/filepath"
+	"syscall"
 )
 
 type Runner interface {
-	Run(string, ...string) error
+	Run(stdOut io.Writer, stdErr io.Writer, commandPath string, args ...string) int
 	Output(string, ...string) ([]byte, error)
 }
 
 type RealRunner struct{}
-
-// the real runner for the actual program, actually execs the command
-func (r RealRunner) Run(command string, args ...string) error {
-	fmt.Println(fmt.Sprintf("Provisioning OpenShift via '%s %s'", command, args))
-	cmd := exec.Command(command, args...)
-	cmd.Stdout = os.Stdout
-
-	err := cmd.Start()
-	if err != nil {
-		return err
-	}
-
-	err = cmd.Wait()
-	if err != nil {
-		return err
-	}
-	return nil
-}
 
 // the real runner for get the output as byte format
 func (r RealRunner) Output(command string, args ...string) ([]byte, error) {
@@ -53,8 +36,34 @@ func (r RealRunner) Output(command string, args ...string) ([]byte, error) {
 		cmdOut []byte
 		err    error
 	)
+
 	if cmdOut, err = exec.Command(command, args...).CombinedOutput(); err != nil {
 		return nil, err
 	}
 	return cmdOut, nil
+}
+
+func (r RealRunner) Run(stdOut io.Writer, stdErr io.Writer, commandPath string, args ...string) int {
+	path, _ := filepath.Abs(commandPath)
+	cmd := exec.Command(path, args...)
+
+	cmd.Stdout = stdOut
+	cmd.Stderr = stdErr
+
+	err := cmd.Run()
+
+	var exitCode int
+	if err != nil {
+		exitError, ok := err.(*exec.ExitError)
+		if ok {
+			ws := exitError.Sys().(syscall.WaitStatus)
+			exitCode = ws.ExitStatus()
+		} else {
+			exitCode = 1 // unable to get error code
+		}
+	} else {
+		ws := cmd.ProcessState.Sys().(syscall.WaitStatus)
+		exitCode = ws.ExitStatus()
+	}
+	return exitCode
 }

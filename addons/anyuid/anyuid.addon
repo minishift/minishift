@@ -1,0 +1,5 @@
+# Name: anyuid
+# Description: Allows authenticated users to run images under a non pre-allocated UID
+# Url: https://access.redhat.com/documentation/en-us/openshift_enterprise/3.2/html/cluster_administration/admin-guide-manage-scc
+
+oc adm policy add-scc-to-group anyuid system:authenticated

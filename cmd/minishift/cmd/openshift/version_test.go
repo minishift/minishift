@@ -17,22 +17,15 @@ limitations under the License.
 package openshift
 
 import (
-	openshiftVersions "github.com/minishift/minishift/pkg/minishift/openshift/version"
-	"github.com/minishift/minishift/pkg/version"
-	"github.com/spf13/cobra"
-	"os"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
+	"testing"
 )
 
-// getVersionsCmd represents the ip command
-var getVersionsCmd = &cobra.Command{
-	Use:   "list",
-	Short: "Gets the list of OpenShift versions available for Minishift.",
-	Long:  `Gets the list of OpenShift versions available for Minishift.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		openshiftVersions.PrintUpStreamVersions(os.Stdout, version.GetOpenShiftVersion())
-	},
-}
+func TestVersionCommandNeedsExistingVm(t *testing.T) {
+	setup(t)
+	defer tearDown()
 
-func init() {
-	versionCmd.AddCommand(getVersionsCmd)
+	atexit.RegisterExitHandler(createExitHandlerFunc(t, 1, nonExistentMachineError))
+
+	runVersion(nil, nil)
 }

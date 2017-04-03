@@ -164,6 +164,8 @@ $ minishift config unset memory
 [[addons]]
 == Addons
 
+NOTE: This feature is still considered experimental and may change in future releases.
+
 Minishift allows to configure the vanilla OpenShift setup as provided by _cluster up_ via a so called
 addon mechanism.
 

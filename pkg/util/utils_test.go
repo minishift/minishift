@@ -94,3 +94,9 @@ Error 2`
 		t.Fatalf("Unexpected error: %s", err)
 	}
 }
+
+func TestVersionOrdinal(t *testing.T) {
+	if VersionOrdinal("v3.4.1.10") < VersionOrdinal("v3.4.1.2") {
+		t.Fatalf("Expected 'false' Got 'true'")
+	}
+}

@@ -17,14 +17,20 @@ limitations under the License.
 package util
 
 import (
+	"fmt"
 	"github.com/blang/semver"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"strings"
 )
 
-func ValidateOpenshiftMinVersion(ver string) bool {
+func ValidateOpenshiftMinVersion(ver string, minVersion string) bool {
 	v, _ := semver.Parse(strings.TrimPrefix(ver, constants.VersionPrefix))
-	r, _ := semver.ParseRange(constants.MinSupportedOpenshiftVersion)
+	minSupportedVersion := strings.TrimPrefix(minVersion, constants.VersionPrefix)
+	r, err := semver.ParseRange(fmt.Sprintf(">=%s", minSupportedVersion))
+	if err != nil {
+		fmt.Println("Not able to parse version info", err)
+		return false
+	}
 	if r(v) {
 		return true
 	}

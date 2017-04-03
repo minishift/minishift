@@ -17,6 +17,9 @@ documentation is a mix of generated
 https://en.wikipedia.org/wiki/Markdown[Markdown] files and manually
 maintained https://en.wikipedia.org/wiki/AsciiDoc[Asciidoc] files.
 
+If you are adding a new file to the doumentation please update 
+the `_topic_map.yml`  present in the root of `docs/source` sub-folder.
+
 Per default the documentation is built in a Docker container. This way
 you avoid having to install all the required dependencies on your
 development machine. All you need is a running Docker daemon. In case

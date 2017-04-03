@@ -13,4 +13,5 @@ OpenShift cluster. It also helps troubleshooting common issues.
 - link:../using/managing-minishift{outfilesuffix}[Managing Minishift]
 - link:../using/interacting-with-openshift{outfilesuffix}[Interacting with OpenShift]
 - link:../using/reusing-docker-daemon{outfilesuffix}[Reusing the Docker daemon]
+- link:../using/accessing-the-openshift-docker-registry{outfilesuffix}[Accessing the OpenShift Docker Registry]
 - link:../using/troubleshooting{outfilesuffix}[Troubleshooting Minishift]

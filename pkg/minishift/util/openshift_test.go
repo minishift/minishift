@@ -23,11 +23,13 @@ func TestValidateOpenshiftMinVersion(t *testing.T) {
 		"v1.1.0":         false,
 		"v1.2.2":         false,
 		"v1.2.3-beta":    false,
-		"v1.3.1":         true,
-		"v1.3.5-alpha":   true,
-		"v1.4.1":         true,
-		"v1.5.0-alpha.0": true,
-		"v1.5.1-beta.0":  true,
+		"v1.3.1":         false,
+		"v1.3.5-alpha":   false,
+		"v1.4.1":         false,
+		"v1.5.0-alpha.0": false,
+		"v1.5.1-beta.0":  false,
+		"v1.5.0-rc.0":    true,
+		"v1.5.0":         true,
 		"v1.6.0":         true,
 	}
 	for ver, val := range verList {

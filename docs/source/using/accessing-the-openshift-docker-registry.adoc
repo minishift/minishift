@@ -1,0 +1,53 @@
+[[accessing-the-openshift-docker-registry]]
+= Accessing the OpenShift Docker Registry
+:icons:
+:toc: macro
+:toc-title:
+:toclevels: 1
+
+toc::[]
+
+[[openshift-docker-registry-intro]]
+== Overview
+
+OpenShift provides an integrated docker registry which can be used for local development as well.
+
+This helps the local development as the images present in registry can be used for applications running in OpenShift. Refer to the link:../using/accessing-the-openshift-docker-registry{outfilesuffix}#staging-app-with-openshift-registry[Staging your application with the OpenShift registry] to know more.
+
+
+[[login-to-openshift-docker-registry]]
+=== Login to the docker registry
+
+. Start minishift and add the `oc` binary to the PATH. Refer link:../getting-started/quickstart{outfilesuffix}[Minishift quickstart] for details.
+
+. Get the docker registry information in the form of `host:port`.
+
+ $ minishift openshift registry
+
+. Make sure your shell is configured to  link:../using/reusing-docker-daemon{outfilesuffix}[reuse the Minishift docker daemon].
+
+. Login to the docker registry
+
+ $ docker login -u developer -p `oc whoami -t` 172.30.1.1:5000
+
+[[staging-app-with-openshift-registry]]
+=== Staging your application with the OpenShift registry
+
+The following example shows how to deploy an OpenShift application directly from a locally built docker image.
+
+In this example, OpenShift project "myproject" is used as it is automatically created and available for use after `minishift start`.
+
+. Build the docker image as usual.
+
+. Tag the image against the OpenShift registry.
+
+ $ docker tag my-app 172.30.1.1:5000/myproject/my-app
+
+. Push the image to the registry to create an image stream with the same name as the application.
+
+ $ docker push 172.30.1.1:5000/myproject/my-app
+
+. Create an application from the image stream and expose the image.
+
+ $ oc new-app --image-stream=my-app --name=my-app
+ $ oc expose service my-app

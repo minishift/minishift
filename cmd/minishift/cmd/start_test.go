@@ -117,7 +117,7 @@ func (r *RecordingRunner) Output(command string, args ...string) ([]byte, error)
 var testDir string
 var testRunner *RecordingRunner
 var testMachineConfig = cluster.MachineConfig{
-	OpenShiftVersion: "v1.3.1",
+	OpenShiftVersion: "v1.5.0-rc.0",
 }
 var testIp = "192.168.99.42"
 

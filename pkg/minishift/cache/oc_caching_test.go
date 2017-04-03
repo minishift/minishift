@@ -34,7 +34,7 @@ func TestIsCached(t *testing.T) {
 	setUp(t)
 	defer os.RemoveAll(testDir)
 
-	ocDir := filepath.Join(testDir, "cache", "oc", "v1.3.1")
+	ocDir := filepath.Join(testDir, "cache", "oc", "v1.5.0-rc.0")
 	os.MkdirAll(ocDir, os.ModePerm)
 
 	if testOc.isCached() != false {
@@ -61,7 +61,7 @@ func TestCacheOc(t *testing.T) {
 	client.Transport = minitesting.NewMockRoundTripper()
 	defer minitesting.ResetDefaultRoundTripper()
 
-	ocDir := filepath.Join(testDir, "cache", "oc", "v1.3.1")
+	ocDir := filepath.Join(testDir, "cache", "oc", "v1.5.0-rc.0")
 	os.MkdirAll(ocDir, os.ModePerm)
 
 	err := testOc.cacheOc()
@@ -76,7 +76,7 @@ func setUp(t *testing.T) {
 	if err != nil {
 		t.Error()
 	}
-	testOc = Oc{"v1.3.1", filepath.Join(testDir, "cache")}
+	testOc = Oc{"v1.5.0-rc.0", filepath.Join(testDir, "cache")}
 }
 
 func EnsureGitHubApiAccessTokenSet(t *testing.T) {

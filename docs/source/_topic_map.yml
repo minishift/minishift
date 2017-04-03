@@ -33,6 +33,8 @@ Topics:
         File: docker-daemon
       - Name: Troubleshooting Minishift
         File: troubleshooting
+      - Name: Accessing the OpenShift docker registry
+        File: accessing-the-openshift-docker-registry
   - Name: Developing Minishift
     Dir: developing
     Topics:

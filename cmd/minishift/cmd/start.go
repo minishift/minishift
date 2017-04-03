@@ -423,7 +423,7 @@ func validateOpenshiftVersion() {
 	if viper.IsSet(openshiftVersion) {
 		if !minishiftUtil.ValidateOpenshiftMinVersion(viper.GetString(openshiftVersion)) {
 			fmt.Printf("Minishift does not support Openshift version %s. "+
-				"You need to use a version >= 1.3.1.", viper.GetString(openshiftVersion))
+				"You need to use a version >= v1.5.0-rc.0.", viper.GetString(openshiftVersion))
 			atexit.Exit(1)
 		}
 	}

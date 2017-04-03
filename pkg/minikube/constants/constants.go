@@ -38,7 +38,7 @@ const MiniShiftEnvPrefix = "MINISHIFT"
 // MiniShiftHomeEnv is the environment variable used to change the Minishift home directory
 const MiniShiftHomeEnv = "MINISHIFT_HOME"
 
-const MinSupportedOpenshiftVersion = ">=1.3.1"
+const MinSupportedOpenshiftVersion = ">=1.5.0-rc.0"
 const VersionPrefix = "v"
 
 const (

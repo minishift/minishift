@@ -2,6 +2,7 @@
 // https://github.com/redhataccess/ascii_binder/issues/60
 include::minishift/variables.adoc[]
 
+
 [[interacting-with-openshift]]
 = Interacting with OpenShift
 :icons:
@@ -13,7 +14,7 @@ toc::[]
 
 Minishift creates a virtual machine (VM) and provisions a local,
 single-node OpenShift cluster in this VM. The following sections
-describe how Minishift can assist you with interacting with and
+describe how Minishift can assist you in interacting with and
 configuring your local OpenShift instance.
 
 For details about managing the Minishift VM, see the link:../using/managing-minishift{outfilesuffix}[Managing Minishift] section.
@@ -24,9 +25,9 @@ For details about managing the Minishift VM, see the link:../using/managing-mini
 The `minishift start` command creates an OpenShift instance using the
 https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md[cluster up] approach.
 
-For this purpose it copies the `oc` binary onto your host. Provided you
-are using the default version of OpenShift, you find it under
-`~/.minishift/cache/oc/{openshift-version}/oc`. You can add this
+For this purpose it copies the `oc` binary onto your host. You will find it under
+`~/.minishift/cache/oc/{openshift-version}/oc` provided you
+use the default version of OpenShift. You can add this
 binary to your `PATH` variable in order to use `oc`, for example:
 
 [subs="verbatim,attributes"]
@@ -42,8 +43,8 @@ As part of the `minishift start` command there is also a `minishift`
 https://docs.openshift.org/latest/cli_reference/manage_cli_profiles.html[oc context] created.
 This context contains the configuration to communicate with your OpenShift cluster.
 
-Minishift activates this context automatcally, but if you need to switch back to it after,
-for example logging into another OpenShift instance, you can run:
+Minishift activates this context automatically, but if you need to switch back to it after
+for example, logging into another OpenShift instance, you can run:
 
 ----
 $ oc config use-context minishift
@@ -58,11 +59,11 @@ topic in the OpenShift documentation.
 
 By default, _cluster up_ uses
 https://docs.openshift.org/latest/install_config/configuring_authentication.html#AllowAllPasswordIdentityProvider[AllowAllPasswordIdentityProvider]
-to authoenticate against the local cluster. This means any non-empty user name and password can
+to authenticate against the local cluster. This means any non-empty user name and password can
 be used to login to the local cluster. The recommended user name and password combination is
 developer/developer, because it already has a default project _myproject_ and also can
 https://docs.openshift.org/latest/architecture/additional_concepts/authentication.html#authentication-impersonation[impersonate]
-the administrator user. This allows to run admin commands using the `--as system:admin` parameter.
+the administrator user. This allows to run administrator commands using the `--as system:admin` parameter.
 
 To login as administrator, use the system account:
 
@@ -159,6 +160,23 @@ To change the property value and allow cross-origin requests from all domains, r
 ----
 $  minishift openshift config set --patch '{"corsAllowedOrigins": [".*"]}'
 ----
+
+[NOTE]
+====
+If you get the error `The specified patch need to be a valid JSON.` when you run the above command,
+you need to modify the above command depending on your Operating System,
+your shell environment and its interpolation behavior.
+
+For example, if you use PowerShell on Windows 10 modify the above command to:
+....
+$  .\minishift.exe --% openshift config set --patch "{\"routingConfig\": {\"subdomain\": \"192.168.99.101.nip.io\"}}"
+....
+
+If you use Command Prompt you may need to use:
+....
+minishift.exe openshift config set --patch "{\"routingConfig\": {\"subdomain\": \"192.168.99.101.nip.io\"}}"
+....
+====
 
 [[example-change-openshift-routing-suffix]]
 === Example: Changing the OpenShift routing suffix

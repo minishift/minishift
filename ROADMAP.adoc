@@ -1,0 +1,77 @@
+[[minishift-roadmap]]
+= Minishift Roadmap
+:icons:
+:toc: macro
+:toc-title:
+:toclevels: 1
+
+toc::[]
+
+[[vision]]
+== Vision
+
+*Run OpenShift locally.*
+
+Minishift's goal is to become the default choice for running a
+single-node OpenShift cluster on your local host. Either for evaluation
+purposes or for ongoing development.
+
+Due to the fact that Minishift builds on OpenShift
+https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md[cluster up],
+Minishift's focus lies on providing more value to the basic
+_cluster up_ provisioning. This includes virtual machine creation and
+management, making it easier to configure OpenShift in precisely the way
+you want and providing useful shortcut commands for making your work
+easier.
+
+[[issue-tracking]]
+== Issue tracking
+
+The Minishift team currently uses the GitHub
+https://github.com/minishift/minishift/issues[issue tracker] to plan its
+work. Issues are generally categorized into __tasks__, _bugs_ and
+__features__. Looking at the latter,
+__https://github.com/minishift/minishift/issues?q=is%3Aissue+is%3Aopen+label%3Akind%2Ffeature[features]__,
+is probably the best way to get an overview where Minishift is heading.
+
+[[upcoming-versions]]
+== Upcoming versions
+
+The following sections give a high level overview of the envisioned
+features and how they fit into upcoming releases. Of course this is
+subject to change and actual version names might change as well, because
+http://semver.org/[semantic versioning] is used to determine the final
+version name of a given release.
+
+[[minishift-100]]
+=== Minishift 1.0.0
+
+- [x] Ability to select the OpenShift version of the cluster https://github.com/minishift/minishift/issues/316[#141]
+- [x] HTTP Proxy Support https://github.com/minishift/minishift/issues/90[#90]
+- [ ] Consistent host folder mounting https://github.com/minishift/minishift/issues/316[#316], https://github.com/minishift/minishift/issues/317[#317]
+- [x] Exposure of the OpenShift registry https://github.com/minishift/minishift/issues/254[#254]
+- [x] Ability to configure/patch OpenShift's master and node configuration https://github.com/minishift/minishift/issues/276[#276]
+- [x] Ability to customize cluster (for example, adding templates and imagestreams) https://github.com/minishift/minishift/issues/177[#177]
+- [x] Add 'minishift' context https://github.com/minishift/minishift/issues/359[#359]
+
+[[minishift-110]]
+=== Minishift 1.1.0
+
+- [ ] Add 'minishift login' command https://github.com/minishift/minishift/issues/349[#349]
+- [ ] Add persistence volume management command(s) https://github.com/minishift/minishift/issues/389[#389]
+- [ ] Ability to provide and use custom a host- and domain-name https://github.com/minishift/minishift/issues/201[#201]
+- [ ] Ability to manage users https://github.com/minishift/minishift/issues/390[#390]
+- [ ] Ability interactively select OpenShift version https://github.com/minishift/minishift/issues/197[#197]
+
+[[minishift-120]]
+=== Minishift 1.2.0
+
+- [ ] Ability to use you own certificates for the cluster https://github.com/minishift/minishift/issues/391[#391]
+- [ ] Ability on running on existing Docker daemon https://github.com/minishift/minishift/issues/392[#392]
+- [ ] Bundle custom libmachine drivers into Minishift https://github.com/minishift/minishift/issues/217[#217]
+- [ ] Ability to pack&go your current Minishift configuration https://github.com/minishift/minishift/issues/397[#397]
+
+[[minishift-200]]
+=== Minishift 2.0.0
+
+- [ ] Ability to create and manage multiple clusters https://github.com/minishift/minishift/issues/177[#126]

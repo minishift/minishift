@@ -36,6 +36,12 @@ Topics:
         File: index
       - Name: Developing Minishift
         File: developing
+      - Name: Minishift CI
+        File: ci
+      - Name: Writing documentation
+        File: writing-docs
+      - Name: Releasing Minishift
+        File: releasing
   - Name: Command Reference
     Dir: command-ref
     Topics:

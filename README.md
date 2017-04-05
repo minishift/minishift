@@ -249,7 +249,7 @@ The following documentation is available:
 * [Command reference](https://minishift.io/docs/minishift.html)
 * [Troubleshooting](https://minishift.io/docs/troubleshooting.html)
 * [Installing docker-machine drivers](https://minishift.io/docs/docker-machine-drivers.html)
-* [Roadmap](./ROADMAP.md)
+* [Roadmap](./ROADMAP.adoc)
 * [Release Notes](https://github.com/minishift/minishift/releases)
 * [Developing Minishift](https://minishift.io/docs/developing.html)
 

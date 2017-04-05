@@ -163,7 +163,7 @@ with the KVM hypervisor driver.
 
   - The IP is dynamically generated for each OpenShift cluster. To check the IP, run the `minishift ip` command.
   - By default Minishift uses the driver most relevant to the host OS. To use a different driver, set the `--vm-driver` flag in `minishift start`. For example, to use VirtualBox instead of KVM on GNU/Linux operating systems, run `minishift start --vm-driver=virtualbox`. For more information about `minishift start` options,
-  see the [minishift start command reference](https://minishift.io/docs/minishift_start.md).
+  see the [minishift start command reference](https://minishift.io/docs/minishift_start.html).
 
 1. Add the `oc` binary to the _PATH_ environment variable.
 

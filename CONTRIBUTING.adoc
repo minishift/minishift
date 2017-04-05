@@ -20,7 +20,7 @@ patch:
 .  The repository owners will triage and respond to your issue
 promptly.
 .  Fork the repository and create a topic branch.
-.  Refer to the https://minishift.io/docs/developing.html[developer document]
+.  Refer to the https://docs.openshift.org/latest/minishift/developing/developing.html[developer document]
 for guidelines and tips on how to build and test Minishift.
 .  Submit a pull request with the proposed changes.
 

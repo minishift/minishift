@@ -18,11 +18,12 @@ package util
 
 import (
 	"fmt"
-	"github.com/asaskevich/govalidator"
 	"io"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/asaskevich/govalidator"
 )
 
 // Until endlessly loops the provided function until a message is received on the done channel.
@@ -105,6 +106,16 @@ func (m MultiError) ToError() error {
 		errStrings = append(errStrings, err.Error())
 	}
 	return fmt.Errorf(strings.Join(errStrings, "\n"))
+}
+
+// EscapeStringForSSHUse will parse string and replace
+// shell special characters with escape
+func EscapeStringForSSHUse(s string) string {
+	r := strings.NewReplacer("$", "\\$",
+		`"`, `\"`,
+		"`", "\\`",
+		`\`, `\\`)
+	return r.Replace(s)
 }
 
 func VersionOrdinal(version string) string {

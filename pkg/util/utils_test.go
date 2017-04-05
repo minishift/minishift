@@ -60,6 +60,19 @@ func TestRetry(t *testing.T) {
 
 }
 
+func TestEscapeStringForSSHUse(t *testing.T) {
+	experimentstring := map[string]string{
+		`Pa"ssw\ord$$`: `Pa\"ssw\\ord\$\$`,
+		`Password`:     `Password`,
+		"Passwo`rd":    "Passwo\\`rd",
+	}
+	for pass, expected := range experimentstring {
+		if EscapeStringForSSHUse(pass) != expected {
+			t.Fatalf("Expected '%s' Got '%s'", expected, EscapeStringForSSHUse(pass))
+		}
+	}
+}
+
 func TestValidateProxyURI(t *testing.T) {
 	urlList := map[string]bool{
 		"http://foo.com:3128":          true,

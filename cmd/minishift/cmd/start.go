@@ -21,6 +21,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"strings"
+
 	units "github.com/docker/go-units"
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/drivers"
@@ -44,7 +46,6 @@ import (
 	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"strings"
 )
 
 const (
@@ -458,8 +459,8 @@ func ocSupportFlag(cmdName string, flag string) bool {
 }
 
 func setSubcriptionManagerParameters() {
-	cluster.RegistrationParameters.Username = viper.GetString("username")
-	cluster.RegistrationParameters.Password = viper.GetString("password")
+	cluster.RegistrationParameters.Username = viper.GetString(username)
+	cluster.RegistrationParameters.Password = util.EscapeStringForSSHUse(viper.GetString(password))
 }
 
 func getConfigClusterName(ip string, port int) string {

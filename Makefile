@@ -82,7 +82,7 @@ $(GOPATH)/bin/go-bindata:
 
 .PHONY: prerelease
 prerelease:
-	$(eval files = $(shell ./hack/boilerplate/boilerplate.py --rootdir . --boilerplate-dir ./hack/boilerplate | grep -v vendor))
+	$(eval files = $(shell ./scripts/boilerplate/boilerplate.py --rootdir . --boilerplate-dir ./scripts/boilerplate | grep -v vendor))
 	@if test "$(files)" != ""; then \
 		echo "The following files don't pass the boilerplate checks:"; \
 		echo $(files); \

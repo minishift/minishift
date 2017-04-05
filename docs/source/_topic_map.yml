@@ -25,8 +25,8 @@ Topics:
         File: managing-minishift
       - Name: Interacting with Openshift
         File: interacting-with-openshift
-      - Name: Reusing the Docker daemon
-        File: reusing-docker-daemon
+      - Name: Minishift Docker daemon
+        File: docker-daemon
       - Name: Troubleshooting Minishift
         File: troubleshooting
   - Name: Developing Minishift

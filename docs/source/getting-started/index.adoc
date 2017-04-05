@@ -1,11 +1,6 @@
 [[getting-started-index]]
 = Getting started with Minishift
 :icons:
-:toc: macro
-:toc-title:
-:toclevels: 1
-
-toc::[]
 
 This section contains information about installing Minishift, quickstart steps, and sample
 application deployment.

@@ -7,6 +7,9 @@
 
 toc::[]
 
+[[writing-docs-overview]]
+== Overview
+
 This section contains information about contributing to the Minishift documentation.
 
 [[section-building-minishift-docs]]
@@ -96,4 +99,3 @@ $ rake build
 ----
 
 If the build completes successfully, the site is available under _preview/openshift-origin/latest/welcome/index.html_.
-

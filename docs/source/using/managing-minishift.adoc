@@ -7,8 +7,8 @@
 
 toc::[]
 
-[[managing-minishift-intro]]
-== Managing Minishift
+[[managing-minishift-overview]]
+== Overview
 
 When you use Minishift, you interact with two components:
 

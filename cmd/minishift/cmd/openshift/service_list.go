@@ -55,6 +55,6 @@ var serviceListCmd = &cobra.Command{
 }
 
 func init() {
-	serviceListCmd.Flags().StringVarP(&serviceListNamespace, "namespace", "n", "default", "The namespace of the services.")
+	serviceListCmd.Flags().StringVarP(&serviceListNamespace, "namespace", "n", "", "The namespace of the services.")
 	serviceCmd.AddCommand(serviceListCmd)
 }

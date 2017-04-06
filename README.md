@@ -274,5 +274,5 @@ The code base is forked from the [Minikube](https://github.com/kubernetes/miniku
 Contributions, questions, and comments are all welcomed and encouraged! Minishift
 developers hang out on IRC in the #minishift channel on Freenode.
 
-If you want to contribute, make sure to follow the [contribution guidelines](CONTRIBUTING.md)
+If you want to contribute, make sure to follow the [contribution guidelines](CONTRIBUTING.adoc)
 when you open issues or submit pull requests.

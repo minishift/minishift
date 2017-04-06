@@ -1,9 +1,14 @@
-[[reusing-docker-daemon]]
-= Reusing the Docker daemon
+[[minishift-docker-daemon]]
+= Minishift Docker daemon
 :icons:
 :toc: macro
 :toc-title:
 :toclevels: 1
+
+toc::[]
+
+[[reusing-docker-daemon]]
+== Reusing the Docker daemon
 
 When running OpenShift in a single VM, you can reuse the
 Docker daemon that Minishift uses for pure Docker use-cases as well. By

@@ -7,6 +7,9 @@
 
 toc::[]
 
+[[ci-overview]]
+== Overview
+
 The following sections describes the various CI setups Minishift utilizes.
 
 [[ci-setup]]

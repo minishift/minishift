@@ -7,6 +7,9 @@
 
 toc::[]
 
+[[docker-machine-drivers-overview]]
+== Overview
+
 Minishift uses Docker Machine and its driver plugin architecture to
 provide a consistent way to manage the OpenShift VM. Minishift embeds
 VirtualBox and VMware Fusion drivers so no additional steps are required to use them.

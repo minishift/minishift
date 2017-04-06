@@ -34,6 +34,7 @@ import (
 )
 
 var lastCommandOutput CommandOutput
+var givenArgs, givenPath string
 
 type CommandOutput struct {
 	Command  string
@@ -149,13 +150,9 @@ func (m *Minishift) commandReturnShouldBeEmpty(commandField string) error {
 }
 
 func FeatureContext(s *godog.Suite) {
-	var givenArgs = flag.String("minishift-args", "", "Arguments to pass to minishift")
-	var givenPath = flag.String("binary", "", "Path to minishift binary")
-	flag.Parse()
-
 	runner := util.MinishiftRunner{
-		CommandArgs: *givenArgs,
-		CommandPath: *givenPath}
+		CommandArgs: givenArgs,
+		CommandPath: givenPath}
 
 	m := &Minishift{runner: runner}
 
@@ -171,8 +168,8 @@ func FeatureContext(s *godog.Suite) {
 
 	s.BeforeSuite(func() {
 		testDir := setUp()
-		fmt.Println("Running Integration test in: ", testDir)
-		fmt.Println("using binary: ", *givenPath)
+		fmt.Println("Running Integration test in:", testDir)
+		fmt.Println("using binary:", givenPath)
 	})
 
 	s.AfterSuite(func() {
@@ -181,11 +178,25 @@ func FeatureContext(s *godog.Suite) {
 }
 
 func TestMain(m *testing.M) {
+	flag.StringVar(&givenArgs, "minishift-args", "", "Arguments to pass to minishift")
+	flag.StringVar(&givenPath, "binary", "", "Path to minishift binary")
+	var godogFormat = flag.String("format", "progress", "Sets which format godog will use")
+	var godogTags = flag.String("tags", "", "Tags for godog test")
+	var godogShowStepDefinitions = flag.Bool("definitions", false, "")
+	var godogStopOnFailure = flag.Bool("stop-on-failure ", false, "Stop when failure is found")
+	var godogNoColors = flag.Bool("no-colors", false, "Disable colors in godog output")
+	var godogPaths = flag.String("paths", "./features", "")
+	flag.Parse()
+
 	status := godog.RunWithOptions("minishift", func(s *godog.Suite) {
 		FeatureContext(s)
 	}, godog.Options{
-		Format: "progress",
-		Paths:  []string{"features"},
+		Format:              *godogFormat,
+		Paths:               strings.Split(*godogPaths, ","),
+		Tags:                *godogTags,
+		ShowStepDefinitions: *godogShowStepDefinitions,
+		StopOnFailure:       *godogStopOnFailure,
+		NoColors:            *godogNoColors,
 	})
 
 	if st := m.Run(); st > status {

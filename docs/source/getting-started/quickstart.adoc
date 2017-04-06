@@ -11,6 +11,9 @@ include::minishift/variables.adoc[]
 
 toc::[]
 
+[[quickstart-overview]]
+== Overview
+
 This section contains a brief demo of Minishift and of the provisioned
 OpenShift cluster. For details on the usage of Minishift, see
 the link:../using/managing-minishift{outfilesuffix}[Managing Minishift] section.

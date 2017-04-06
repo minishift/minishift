@@ -1,11 +1,6 @@
 [[using-index]]
 = Using Minishift
 :icons:
-:toc: macro
-:toc-title:
-:toclevels: 1
-
-toc::[]
 
 This section describes how to manage your Minishift VM and interact with your
 OpenShift cluster. It also helps troubleshooting common issues.

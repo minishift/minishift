@@ -1,15 +1,6 @@
 [[developing-index]]
 = Developing Minishift
 :icons:
-:toc: macro
-:toc-title:
-:toclevels: 1
-
-toc::[]
-
-This section contains information about how to contribute to various aspects of the project.
-
-== Minishfit community
 
 Join the Minishift community! Learn about the project and how to contribute.
 

@@ -12,10 +12,12 @@ include::minishift/variables.adoc[]
 
 toc::[]
 
-Minishift creates a virtual machine (VM) and provisions a local,
-single-node OpenShift cluster in this VM. The following sections
-describe how Minishift can assist you in interacting with and
-configuring your local OpenShift instance.
+[[interacting-openshift-overview]]
+== Overview
+
+Minishift creates a virtual machine (VM) and provisions a local, single-node OpenShift
+cluster in this VM. The following sections describe how Minishift can assist you in
+interacting with and configuring your local OpenShift instance.
 
 For details about managing the Minishift VM, see the link:../using/managing-minishift{outfilesuffix}[Managing Minishift] section.
 

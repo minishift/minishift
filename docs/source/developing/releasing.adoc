@@ -7,25 +7,53 @@
 
 toc::[]
 
+[[releasing-overview]]
+== Overview
+
 The following sections describe how to release Minishift.
 
 [[release-prereqs]]
 == Prerequisites
 
-You must have a https://help.github.com/articles/creating-an-access-token-for-command-line-use[GitHub personal access token]
+* You must have a https://help.github.com/articles/creating-an-access-token-for-command-line-use[GitHub personal access token]
 defined in your environment as _GITHUB_ACCESS_TOKEN_.
+* You need _gnutar_ installed on your machine. See also GitHub issue link:https://github.com/minishift/minishift/issues/657[#657].
+
+== Preparing the GitHub milestone
+
+. Verify the milestone you want to release
+ * Move remaining open issues into the next milestone
+ * Review resolved/closed issues and make sure they are classified correctly
+ * Check and update the resolution of the issues. For example, issues with a merged pull
+   requests should be labeled as _resolution/done_
+. Close milestone
 
 [[cut-release]]
 == Cutting the release
 
-. Bump the Minishift version in the link:../Makefile[Makefile]
+. Bump the Minishift version in the link:https://github.com/minishift/minishift/blob/master/Makefile[Makefile]
 
-. Run `make gendocs` to rebuild the docs
-
-. Commit and push your changes with a message of the form "cut v1.0.0"
+. Commit and push your changes with a message of the form "Cut v1.0.0"
 
 . Create binaries and upload them to GitHub (this will also tag the release):
 +
 ----
 $ make release
+----
+
+== Post release
+
+As part of the release process we also send a release announcement and edit the GitHub
+release page.
+
+For the latter we usually add a categorized list of closed issues as well as some
+release highlights (most often taken from the release announcement).
+
+If you have the link:https://stedolan.github.io/jq/[jq] installed on your machine, you
+can use the link:https://github.com/minishift/minishift/blob/master/scripts/release/issue-list.sh[issue-list.sh] script to generate the markdown needed for adding the
+issue list, for example:
+
+----
+$ cd scripts/release
+$ issue-list.sh -r minishift -m 9
 ----

@@ -7,6 +7,9 @@
 
 toc::[]
 
+[[installing-overview]]
+== Overview
+
 The following section describes how to install Minishift and the required dependencies.
 
 [[install-prerequisites]]

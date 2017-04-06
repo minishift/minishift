@@ -21,7 +21,6 @@ import (
 	"os"
 
 	"github.com/docker/machine/libmachine"
-	"github.com/golang/glog"
 	"github.com/spf13/cobra"
 
 	"github.com/minishift/minishift/pkg/minikube/cluster"
@@ -39,8 +38,7 @@ var statusCmd = &cobra.Command{
 		defer api.Close()
 		s, err := cluster.GetHostStatus(api)
 		if err != nil {
-			glog.Errorln("Error getting cluster status:", err)
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error getting cluster status: %s", err.Error()))
 		}
 		fmt.Fprintln(os.Stdout, s)
 	},

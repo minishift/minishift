@@ -41,8 +41,7 @@ func init() {
 
 func runDisableAddon(cmd *cobra.Command, args []string) {
 	if len(args) == 0 {
-		fmt.Println(emptyDisableError)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, emptyDisableError)
 	}
 
 	addonName := args[0]
@@ -55,8 +54,7 @@ func runDisableAddon(cmd *cobra.Command, args []string) {
 
 	addOnConfig, err := addOnManager.Disable(addonName)
 	if err != nil {
-		fmt.Println(fmt.Sprintf("Unable to disable plugin %s: %s", addonName, err.Error()))
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to disable plugin %s: %s", addonName, err.Error()))
 	}
 
 	addOnConfigMap := getAddOnConfiguration()

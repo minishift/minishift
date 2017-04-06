@@ -18,14 +18,15 @@ package cli
 
 import (
 	"bytes"
-	"github.com/minishift/minishift/pkg/minikube/constants"
-	"github.com/minishift/minishift/pkg/util/os/atexit"
-	"github.com/spf13/viper"
 	"io"
 	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
+	"github.com/spf13/viper"
 )
 
 // SetupTmpMinishiftHome creates a tmp directory and points MINISHIFT_HOME to it.
@@ -41,26 +42,30 @@ func SetupTmpMinishiftHome(t *testing.T) string {
 	return testDir
 }
 
-// CaptureStdOut creates a pipe to capture standard output and returns the original handle to stdout as well
-// as a file handles for the created pipe.
-func CaptureStdOut(t *testing.T) (*os.File, *os.File, *os.File) {
+// CaptureStreamOut creates a pipe to capture standard output/Error and returns the original handle to stdout/stderr as well
+// as a file handles for the created pipe depend on expectedExitCode.
+func CaptureStreamOut(t *testing.T, expectedExitCode int) (*os.File, *os.File, *os.File, *os.File) {
 	origStdout := os.Stdout
+	origStderr := os.Stderr
 	r, w, err := os.Pipe()
 	if err != nil {
 		t.Error(err)
 	}
-	os.Stdout = w
-
-	return origStdout, w, r
+	if expectedExitCode == 0 {
+		os.Stdout = w
+	} else {
+		os.Stderr = w
+	}
+	return origStdout, origStderr, w, r
 }
 
-func CreateExitHandlerFunc(t *testing.T, stdOutWriter *os.File, stdOutReader *os.File, expectedExitCode int, expectedErrorMessage string) func(int) int {
+func CreateExitHandlerFunc(t *testing.T, streamWriter *os.File, streamReader *os.File, expectedExitCode int, expectedErrorMessage string) func(int) int {
 	var exitHandler func(int) int
 	exitHandler = func(code int) int {
-		stdOutWriter.Close()
+		streamWriter.Close()
 
 		var buffer bytes.Buffer
-		io.Copy(&buffer, stdOutReader)
+		io.Copy(&buffer, streamReader)
 
 		if !strings.HasPrefix(buffer.String(), expectedErrorMessage) {
 			t.Fatalf("Expected error '%s'. Got '%s'.", expectedErrorMessage, buffer.String())
@@ -75,13 +80,18 @@ func CreateExitHandlerFunc(t *testing.T, stdOutWriter *os.File, stdOutReader *os
 	return exitHandler
 }
 
-func TearDown(testDir string, origStdout *os.File) {
+func TearDown(testDir string, origStdout *os.File, origStderr *os.File) {
 	os.RemoveAll(testDir)
-	resetOriginalFileHandle(origStdout)
+	resetOriginalStdoutFileHandle(origStdout)
+	resetOriginalStderrFileHandle(origStderr)
 	viper.Reset()
 	atexit.ClearExitHandler()
 }
 
-func resetOriginalFileHandle(origStdout *os.File) {
+func resetOriginalStdoutFileHandle(origStdout *os.File) {
 	os.Stdout = origStdout
+}
+
+func resetOriginalStderrFileHandle(origStderr *os.File) {
+	os.Stderr = origStderr
 }

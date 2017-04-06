@@ -17,8 +17,6 @@ limitations under the License.
 package hostfolder
 
 import (
-	"github.com/golang/glog"
-
 	"github.com/docker/machine/libmachine"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	hostfolderActions "github.com/minishift/minishift/pkg/minishift/hostfolder"
@@ -35,15 +33,13 @@ var hostfolderListCmd = &cobra.Command{
 		defer api.Close()
 		host, err := api.Load(constants.MachineName)
 		if err != nil {
-			glog.Errorln("Error: ", err)
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, err.Error())
 		}
 
 		isRunning := isHostRunning(host.Driver)
 		err = hostfolderActions.List(host.Driver, isRunning)
 		if err != nil {
-			glog.Errorln("Error: ", err)
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, err.Error())
 		}
 	},
 }

@@ -19,20 +19,21 @@ package addon
 import (
 	"bytes"
 	"fmt"
-	"github.com/minishift/minishift/pkg/testing/cli"
-	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"io"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/minishift/minishift/pkg/testing/cli"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
 )
 
 func Test_addon_name_must_be_specified_for_enable_command(t *testing.T) {
 	tmpMinishiftHomeDir := cli.SetupTmpMinishiftHome(t)
-	origStdout, stdOutWriter, stdOutReader := cli.CaptureStdOut(t)
-	defer cli.TearDown(tmpMinishiftHomeDir, origStdout)
+	origStdout, origStderr, streamWriter, streamReader := cli.CaptureStreamOut(t, 1)
+	defer cli.TearDown(tmpMinishiftHomeDir, origStdout, origStderr)
 
-	atexit.RegisterExitHandler(cli.CreateExitHandlerFunc(t, stdOutWriter, stdOutReader, 1, emptyEnableError))
+	atexit.RegisterExitHandler(cli.CreateExitHandlerFunc(t, streamWriter, streamReader, 1, emptyEnableError))
 
 	runEnableAddon(nil, nil)
 }
@@ -41,15 +42,15 @@ func Test_unkown_name_for_enable_command_returns_error(t *testing.T) {
 	tmpMinishiftHomeDir := cli.SetupTmpMinishiftHome(t)
 	os.Mkdir(filepath.Join(tmpMinishiftHomeDir, "addons"), 0777)
 
-	origStdout, stdOutWriter, stdOutReader := cli.CaptureStdOut(t)
-	defer cli.TearDown(tmpMinishiftHomeDir, origStdout)
+	origStdout, origStderr, streamWriter, streamReader := cli.CaptureStreamOut(t, 0)
+	defer cli.TearDown(tmpMinishiftHomeDir, origStdout, origStderr)
 
 	testAddOnName := "foo"
 	runEnableAddon(nil, []string{testAddOnName})
 
-	stdOutWriter.Close()
+	streamWriter.Close()
 	var buffer bytes.Buffer
-	io.Copy(&buffer, stdOutReader)
+	io.Copy(&buffer, streamReader)
 
 	expectedOut := fmt.Sprintf(noAddOnToEnableMessage+"\n", testAddOnName)
 	if expectedOut != buffer.String() {

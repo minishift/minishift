@@ -18,15 +18,15 @@ package openshift
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/provision"
-	"github.com/golang/glog"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/docker"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 // version command represent current running openshift version and available one.
@@ -43,15 +43,13 @@ func runVersion(cmd *cobra.Command, args []string) {
 
 	host, err := cluster.CheckIfApiExistsAndLoad(api)
 	if err != nil {
-		fmt.Println(nonExistentMachineError)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, nonExistentMachineError)
 	}
 	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
 	dockerCommander := docker.NewVmDockerCommander(sshCommander)
 	version, err := dockerCommander.Exec(" ", "origin", "openshift", "version")
 	if err != nil {
-		glog.Errorln("Error restarting OpenShift cluster: ", err)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error restarting OpenShift cluster: %s", err.Error()))
 	}
 	fmt.Fprintln(os.Stdout, version)
 }

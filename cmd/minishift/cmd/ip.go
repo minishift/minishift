@@ -20,7 +20,6 @@ import (
 	"fmt"
 
 	"github.com/docker/machine/libmachine"
-	"github.com/golang/glog"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 
 	"github.com/minishift/minishift/pkg/util/os/atexit"
@@ -37,13 +36,11 @@ var ipCmd = &cobra.Command{
 		defer api.Close()
 		host, err := api.Load(constants.MachineName)
 		if err != nil {
-			glog.Errorln("Error getting IP: ", err)
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error getting IP: %s", err.Error()))
 		}
 		ip, err := host.Driver.GetIP()
 		if err != nil {
-			glog.Errorln("Error getting IP: ", err)
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error getting IP: %s", err.Error()))
 		}
 		fmt.Println(ip)
 	},

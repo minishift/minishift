@@ -20,13 +20,14 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/golang/glog"
+	"fmt"
+	"io"
+	"sort"
+
 	"github.com/minishift/minishift/pkg/minishift/addon"
 	"github.com/minishift/minishift/pkg/minishift/addon/manager"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
-	"io"
-	"sort"
 )
 
 var verbose bool
@@ -63,14 +64,12 @@ func init() {
 	var err error
 	defaultListTemplate, err = template.New("list").Parse(defaultAddonListFormat)
 	if err != nil {
-		glog.Errorln("Error creating list template:", err)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error creating list template: %s", err.Error()))
 	}
 
 	verboseListTemplate, err = template.New("list").Parse(verboseAddonListFormat)
 	if err != nil {
-		glog.Errorln("Error creating list template:", err)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error creating list template: %s", err.Error()))
 	}
 }
 
@@ -92,8 +91,7 @@ func printAddOnList(manager *manager.AddOnManager, writer io.Writer, template *t
 		addonTemplate := DisplayAddOn{addon.MetaData().Name(), addon.MetaData().Description(), stringFromStatus(addon.IsEnabled()), addon.GetPriority()}
 		err := template.Execute(writer, addonTemplate)
 		if err != nil {
-			glog.Errorln("Error executing template: ", err)
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error executing template: %s", err.Error()))
 		}
 	}
 }

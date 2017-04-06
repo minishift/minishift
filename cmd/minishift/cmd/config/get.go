@@ -30,8 +30,7 @@ var configGetCmd = &cobra.Command{
 	Long:  "Gets the value of a configuration property from the minishift configuration file. This value can be overwritten at runtime by flags or environmental variables.",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
-			fmt.Fprintln(os.Stderr, "usage: minishift config get PROPERTY_NAME")
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, "usage: minishift config get PROPERTY_NAME")
 		}
 
 		val, err := get(args[0])

@@ -17,8 +17,9 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/docker/machine/libmachine"
-	"github.com/golang/glog"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
@@ -35,8 +36,7 @@ var sshCmd = &cobra.Command{
 		defer api.Close()
 		err := cluster.CreateSSHShell(api, args)
 		if err != nil {
-			glog.Errorln("Cannot establish SSH connection to the VM: ", err)
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, fmt.Sprintf("Cannot establish SSH connection to the VM: %s", err.Error()))
 		}
 	},
 }

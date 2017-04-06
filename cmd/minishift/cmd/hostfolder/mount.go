@@ -18,8 +18,6 @@ package hostfolder
 
 import (
 	"fmt"
-	"github.com/golang/glog"
-	"os"
 
 	"github.com/docker/machine/libmachine"
 	"github.com/minishift/minishift/pkg/minikube/constants"
@@ -41,13 +39,11 @@ var hostfolderMountCmd = &cobra.Command{
 		defer api.Close()
 		host, err := api.Load(constants.MachineName)
 		if err != nil {
-			glog.Errorln("Error: ", err)
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, err.Error())
 		}
 
 		if !isHostRunning(host.Driver) {
-			fmt.Fprintln(os.Stderr, "Host is not running.")
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, "Host is not running.")
 		}
 
 		err = nil
@@ -55,15 +51,13 @@ var hostfolderMountCmd = &cobra.Command{
 			err = hostfolderActions.MountHostfolders(host.Driver)
 		} else {
 			if len(args) < 1 {
-				fmt.Fprintln(os.Stderr, "Usage: minishift hostfolder mount [HOSTFOLDER_NAME|--all]")
-				atexit.Exit(1)
+				atexit.ExitWithMessage(1, "Usage: minishift hostfolder mount [HOSTFOLDER_NAME|--all]")
 			}
 			err = hostfolderActions.Mount(host.Driver, args[0])
 		}
 
 		if err != nil {
-			glog.Errorln(err)
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error to mount host folder: %s", err.Error()))
 		}
 
 	},

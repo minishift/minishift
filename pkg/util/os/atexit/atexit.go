@@ -17,8 +17,10 @@ limitations under the License.
 package atexit
 
 import (
-	"github.com/golang/glog"
+	"fmt"
 	"os"
+
+	"github.com/golang/glog"
 )
 
 var exitHandlers = []func(code int) int{}
@@ -27,6 +29,16 @@ var exitHandlers = []func(code int) int{}
 func Exit(code int) {
 	code = runHandlers(code)
 	os.Exit(code)
+}
+
+// ExitWithMessage exit and print the error message.
+func ExitWithMessage(code int, msg string) {
+	if code == 0 {
+		fmt.Fprintln(os.Stdout, msg)
+	} else {
+		fmt.Fprintln(os.Stderr, msg)
+	}
+	Exit(code)
 }
 
 // Register registers an exit handler function which is run when Exit is called

@@ -17,9 +17,6 @@ limitations under the License.
 package config
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
@@ -31,13 +28,11 @@ var configSetCmd = &cobra.Command{
 These values can be overwritten by flags or environment variables at runtime.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 2 {
-			fmt.Fprintln(os.Stderr, "usage: minishift config set PROPERTY_NAME PROPERTY_VALUE")
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, "usage: minishift config set PROPERTY_NAME PROPERTY_VALUE")
 		}
 		err := set(args[0], args[1])
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, err.Error())
 		}
 	},
 }

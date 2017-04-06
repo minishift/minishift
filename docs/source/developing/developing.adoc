@@ -212,11 +212,39 @@ For more information about test options, run the `go test --help` command and re
 ==== Integration Tests
 
 Integration tests utilize https://github.com/DATA-DOG/godog[`godog`], which uses Gherkin (Cucumber)
-to define test cases. The test cases are defined in `test/integration/*.feature`, and can be run with:
+to define test cases. The test cases are defined in `test/integration/*.feature`. To execute them on binary created by `make build` you 
+can simply run:
 
 ----
 $ make integration
 ----
+
+To run integration tests on minishift binary in different location you can use `MINISHIFT_BINARY` argument:
+
+----
+$ make integration MINISHIFT_BINARY=<path-to-custom-binary>
+----
+
+Additional properties for Godog runner can be specified with `GODOG_OPTS` argument. Following options are available:
+
+- `tags`: when used only scenarios and features containing at least one of selected tags will be executed.
+- `paths`: defines paths to different feature files or folders containing feature files. This can be used to run feature files
+outside of `test/integration/features` folder.
+- `format`:  you can change format of Godog's output, for example you can use `pretty` format instead of native `progress`.
+- `stop-on-failure`: set to true to stop integration tests on failure.
+- `no-colors`: set to true to disable ansi colors of Godog's output.
+- `definitions`: set to true to print all available step definitions.
+
+For example to run integration tests on two specific feature files, using only `@basic` and `@openshift` tags and without ansi colors, 
+following command can be used:
+
+----
+$ make integration GODOG_OPTS="-paths ~/tests/custom.feature,~/my.feature -tags basic,openshift -no-colors true"
+----
+
+Please note that when multiple values are used for options in GODOG_OPTS, then those have to be separated with comma without a whitespace.
+While `-tags basic,openshift` will be parsed properly by make, from `-tags basic, openshift` only `@basic` tag will be used.  
+
 
 [[format-source]]
 === Formatting the source

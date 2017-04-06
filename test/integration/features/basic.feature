@@ -1,3 +1,4 @@
+@basic
 Feature: Basic
   In order to use Minishift
   As a user

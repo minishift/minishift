@@ -17,13 +17,12 @@ limitations under the License.
 package openshift
 
 import (
-	"fmt"
+	"os"
 
 	"github.com/minishift/minishift/pkg/minishift/openshift"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 var serviceListNamespace string
@@ -36,8 +35,7 @@ var serviceListCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		urls, err := openshift.GetServiceURLs(serviceListNamespace)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, err.Error())
 		}
 
 		var data [][]string

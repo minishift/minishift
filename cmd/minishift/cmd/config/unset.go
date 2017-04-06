@@ -30,8 +30,7 @@ var configUnsetCmd = &cobra.Command{
 	Long:  "Clears the value of a configuration property in the Minishift configuration file. The value can be overwritten at runtime by flags or environment variables",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
-			fmt.Fprintf(os.Stdout, "usage: minishift config unset PROPERTY_NAME")
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, "usage: minishift config unset PROPERTY_NAME")
 		}
 		err := unset(args[0])
 		if err != nil {

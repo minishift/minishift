@@ -17,10 +17,10 @@ limitations under the License.
 package openshift
 
 import (
-	"github.com/golang/glog"
 	"github.com/spf13/cobra"
 
 	"fmt"
+
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
@@ -47,15 +47,13 @@ func runRestart(cmd *cobra.Command, args []string) {
 
 	host, err := cluster.CheckIfApiExistsAndLoad(api)
 	if err != nil {
-		fmt.Println(nonExistentMachineError)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, nonExistentMachineError)
 	}
 
 	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
 	dockerCommander := docker.NewVmDockerCommander(sshCommander)
 	_, err = openshift.RestartOpenShift(dockerCommander)
 	if err != nil {
-		glog.Errorln("Error restarting OpenShift cluster: ", err)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error restarting OpenShift cluster: %s", err.Error()))
 	}
 }

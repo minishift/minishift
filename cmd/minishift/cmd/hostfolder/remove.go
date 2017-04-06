@@ -17,10 +17,6 @@ limitations under the License.
 package hostfolder
 
 import (
-	"fmt"
-	"github.com/golang/glog"
-	"os"
-
 	hostfolderActions "github.com/minishift/minishift/pkg/minishift/hostfolder"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
@@ -32,14 +28,12 @@ var hostfolderRemoveCmd = &cobra.Command{
 	Long:  `Removes the specified host folder definition. This command does not remove the host folder or any data.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 1 {
-			fmt.Fprintln(os.Stderr, "Usage: minishift hostfolder remove HOSTFOLDER_NAME")
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, "Usage: minishift hostfolder remove HOSTFOLDER_NAME")
 		}
 
 		err := hostfolderActions.Remove(args[0])
 		if err != nil {
-			glog.Errorln(err)
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, err.Error())
 		}
 	},
 }

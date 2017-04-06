@@ -173,7 +173,7 @@ func runStart(cmd *cobra.Command, args []string) {
 	}
 	err = util.Retry(3, start)
 	if err != nil {
-		glog.Errorln("Error starting the VM: ", err)
+		fmt.Println("Error starting the VM: ", err)
 		atexit.Exit(1)
 	}
 
@@ -187,13 +187,13 @@ func runStart(cmd *cobra.Command, args []string) {
 	hostDirs := []string{viper.GetString(hostConfigDir), viper.GetString(hostDataDir), viper.GetString(hostVolumesDir)}
 	err = clusterup.EnsureHostDirectoriesExist(libMachineClient, hostDirs)
 	if err != nil {
-		glog.Errorln("Error creating required host directories: ", err)
+		fmt.Println("Error creating required host directories: ", err)
 		atexit.Exit(1)
 	}
 
 	ip, err := host.Driver.GetIP()
 	if err != nil {
-		glog.Errorln("Error determining host ip", err)
+		fmt.Println("Error determining host ip: ", err)
 		atexit.Exit(1)
 	}
 
@@ -210,23 +210,23 @@ func runStart(cmd *cobra.Command, args []string) {
 // postClusterUp runs the Minishift specific provisioning after cluster up has run
 func postClusterUp(machineName string, ip string, port int, routingSuffix string, ocPath string, kubeConfigPath string, user string, project string, sshCommander provision.SSHCommander) {
 	if err := kubeconfig.CacheSystemAdminEntries(kubeConfigPath, getConfigClusterName(ip, port)); err != nil {
-		glog.Errorln("Error creating Minishift kubeconfig", err)
+		fmt.Println("Error creating Minishift kubeconfig: ", err)
 		atexit.Exit(1)
 	}
 
 	ocRunner, err := oc.NewOcRunner(ocPath, kubeConfigPath)
 	if err != nil {
-		glog.Errorln("Error configuring OpenShift", err)
+		fmt.Println("Error configuring OpenShift: ", err)
 		atexit.Exit(1)
 	}
 
 	if err := ocRunner.AddSudoerRoleForUser(user); err != nil {
-		glog.Error(fmt.Sprintf("Error giving %s sudoer privileges", user))
+		glog.Error(fmt.Sprintf("Error giving %s sudoer privileges: ", user))
 		atexit.Exit(1)
 	}
 
 	if err := ocRunner.AddCliContext(machineName, ip, user, project); err != nil {
-		glog.Errorln("Error adding OpenShift context")
+		fmt.Println("Error adding OpenShift context: ", err)
 		atexit.Exit(1)
 	}
 
@@ -237,7 +237,7 @@ func applyAddOns(ip string, routingSuffix string, ocPath string, kubeConfigPath 
 	addOnManager := addon.GetAddOnManager()
 	err := addOnManager.Apply(addon.GetExecutionContext(ip, routingSuffix, ocPath, kubeConfigPath, sshCommander))
 	if err != nil {
-		glog.Errorln("Error executing addon commands", err)
+		fmt.Println("Error executing addon commands: ", err)
 		atexit.Exit(1)
 	}
 }
@@ -374,14 +374,14 @@ func clusterUp(config *cluster.MachineConfig, ip string) {
 		MinishiftCacheDir: filepath.Join(constants.Minipath, "cache"),
 	}
 	if err := oc.EnsureIsCached(); err != nil {
-		glog.Errorln("Error starting the cluster: ", err)
+		fmt.Println("Error starting the cluster: ", err)
 		atexit.Exit(1)
 	}
 
 	// Update MACHINE_NAME.json for oc path
 	minishiftConfig.InstanceConfig.OcPath = filepath.Join(oc.GetCacheFilepath(), constants.OC_BINARY_NAME)
 	if err := minishiftConfig.InstanceConfig.Write(); err != nil {
-		glog.Errorln("Error updating oc path in config of VM: ", err)
+		fmt.Println("Error updating oc path in config of VM: ", err)
 		atexit.Exit(1)
 	}
 
@@ -414,8 +414,8 @@ func clusterUp(config *cluster.MachineConfig, ip string) {
 
 	exitCode := runner.Run(os.Stdout, os.Stderr, cmdName, cmdArgs...)
 	if exitCode != 0 {
-		// TODO glog is probably not right here. Need some sort of logging wrapper
-		glog.Errorln("Error starting the cluster.")
+		// TODO Println is probably not right here. Need some sort of logging wrapper
+		fmt.Println("Error starting the cluster.")
 		atexit.Exit(1)
 	}
 }

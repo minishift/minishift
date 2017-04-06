@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/docker/machine/libmachine"
@@ -38,8 +37,7 @@ var logsCmd = &cobra.Command{
 		defer api.Close()
 		s, err := cluster.GetHostLogs(api)
 		if err != nil {
-			log.Println("Error getting logs:", err)
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error getting logs: %s", err.Error()))
 		}
 		fmt.Fprintln(os.Stdout, s)
 	},

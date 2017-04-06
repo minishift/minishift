@@ -17,15 +17,16 @@ limitations under the License.
 package addon
 
 import (
+	"fmt"
+	"reflect"
+
 	"github.com/docker/machine/libmachine/provision"
-	"github.com/golang/glog"
 	"github.com/minishift/minishift/cmd/minishift/cmd/config"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/addon"
 	"github.com/minishift/minishift/pkg/minishift/addon/command"
 	"github.com/minishift/minishift/pkg/minishift/addon/manager"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
-	"reflect"
 )
 
 const (
@@ -38,8 +39,7 @@ func GetAddOnManager() *manager.AddOnManager {
 	addOnConfigs := getAddOnConfiguration()
 	m, err := manager.NewAddOnManager(constants.MakeMiniPath("addons"), addOnConfigs)
 	if err != nil {
-		glog.Errorln("Unable to initialize the add-on manager.", err)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to initialize the add-on manager: %s", err.Error()))
 	}
 
 	return m
@@ -48,8 +48,7 @@ func GetAddOnManager() *manager.AddOnManager {
 func GetExecutionContext(ip string, routingSuffix string, ocPath string, kubeConfigPath string, sshCommander provision.SSHCommander) *command.ExecutionContext {
 	context, err := command.NewExecutionContext(ocPath, kubeConfigPath, sshCommander)
 	if err != nil {
-		glog.Errorln("Unable to initialize the execution context.", err)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to initialise execution context: %s", err.Error()))
 	}
 
 	context.AddToContext(ip_key, ip)
@@ -61,16 +60,14 @@ func GetExecutionContext(ip string, routingSuffix string, ocPath string, kubeCon
 func writeAddOnConfig(addOnConfigMap map[string]*addon.AddOnConfig) {
 	c, err := config.ReadConfig()
 	if err != nil {
-		glog.Errorln("Unable to read the Minishift configuration.", err)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to read the Minishift configuration: %s", err.Error()))
 	}
 
 	c[addOnConfigKey] = addOnConfigMap
 
 	err = config.WriteConfig(c)
 	if err != nil {
-		glog.Errorln("Unable to write the Minishift configuration.", err)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to write the Minishift configuration: %s", err.Error()))
 	}
 }
 
@@ -79,8 +76,7 @@ func writeAddOnConfig(addOnConfigMap map[string]*addon.AddOnConfig) {
 func getAddOnConfiguration() map[string]*addon.AddOnConfig {
 	c, err := config.ReadConfig()
 	if err != nil {
-		glog.Errorln("Unable to read the Minishift configuration.", err)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to read the Minishift configuration: %s", err.Error()))
 	}
 
 	var configSlice map[string]interface{}

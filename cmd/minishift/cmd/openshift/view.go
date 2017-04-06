@@ -17,12 +17,12 @@ limitations under the License.
 package openshift
 
 import (
-	"github.com/golang/glog"
 	"github.com/spf13/cobra"
 
 	"github.com/docker/machine/libmachine"
 
 	"fmt"
+
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
@@ -55,8 +55,7 @@ func init() {
 func runViewConfig(cmd *cobra.Command, args []string) {
 	configFileTarget := determineTarget(configTarget)
 	if configFileTarget == openshift.UNKNOWN {
-		fmt.Println(unknownConfigTargetError)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, unknownConfigTargetError)
 	}
 
 	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
@@ -64,14 +63,12 @@ func runViewConfig(cmd *cobra.Command, args []string) {
 
 	host, err := cluster.CheckIfApiExistsAndLoad(api)
 	if err != nil {
-		fmt.Println(nonExistentMachineError)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, nonExistentMachineError)
 	}
 
 	ip, err := host.Driver.GetIP()
 	if err != nil {
-		fmt.Println(unableToRetrieveIpError)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, unableToRetrieveIpError)
 	}
 	configFileTarget.SetIp(ip)
 
@@ -80,8 +77,7 @@ func runViewConfig(cmd *cobra.Command, args []string) {
 
 	out, err := openshift.ViewConfig(configFileTarget, dockerCommander)
 	if err != nil {
-		glog.Errorln("Unable to display OpenShift configuration: ", err)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to display OpenShift configuration: %s", err.Error()))
 	}
 
 	fmt.Println(out)

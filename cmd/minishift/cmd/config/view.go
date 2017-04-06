@@ -18,16 +18,15 @@ package config
 
 import (
 	"fmt"
-	"os"
 	"text/template"
 
-	"github.com/golang/glog"
 	"github.com/spf13/cobra"
 
 	"bytes"
-	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"sort"
 	"strings"
+
+	"github.com/minishift/minishift/pkg/util/os/atexit"
 )
 
 const (
@@ -49,8 +48,7 @@ var configViewCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		err := configView()
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, err.Error())
 		}
 	},
 }
@@ -77,14 +75,12 @@ func configView() error {
 
 		tmpl, err := template.New("view").Parse(configViewFormat)
 		if err != nil {
-			glog.Errorln("Error creating view template:", err)
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error creating view template: %s", err.Error()))
 		}
 		viewTmplt := ConfigViewTemplate{k, v}
 		err = tmpl.Execute(&buffer, viewTmplt)
 		if err != nil {
-			glog.Errorln("Error executing view template:", err)
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error executing view template: %s", err.Error()))
 		}
 	}
 

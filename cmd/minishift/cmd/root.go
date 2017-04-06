@@ -18,9 +18,12 @@ package cmd
 
 import (
 	goflag "flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"path/filepath"
 
 	"github.com/docker/machine/libmachine/log"
 	"github.com/golang/glog"
@@ -35,7 +38,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"path/filepath"
 )
 
 var dirs = [...]string{
@@ -81,8 +83,7 @@ var RootCmd = &cobra.Command{
 		minishiftConfig.AllInstancesConfig, err = minishiftConfig.NewAllInstancesConfig(allInstanceConfigPath)
 
 		if err != nil {
-			glog.Errorln("Error creating config for all instances: ", err)
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error creating config for all instances: %s", err.Error()))
 		}
 
 		// Create MACHINE_NAME.json
@@ -90,8 +91,7 @@ var RootCmd = &cobra.Command{
 		minishiftConfig.InstanceConfig, err = minishiftConfig.NewInstanceConfig(instanceConfigPath)
 
 		if err != nil {
-			glog.Errorln("Error creating config for VM: ", err)
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error creating config for VM: %s", err.Error()))
 		}
 
 		shouldShowLibmachineLogs := viper.GetBool(showLibmachineLogs)
@@ -109,7 +109,7 @@ var RootCmd = &cobra.Command{
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, err.Error())
 	}
 }
 

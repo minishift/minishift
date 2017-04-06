@@ -21,7 +21,6 @@ import (
 	"os"
 
 	"github.com/docker/machine/libmachine"
-	"github.com/golang/glog"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
@@ -65,8 +64,8 @@ func displayConsoleInMachineReadable(hostIP string, url string) {
 func getHostUrl(api *libmachine.Client) string {
 	url, err := cluster.GetConsoleURL(api)
 	if err != nil {
-		glog.Errorln("Cannot access the OpenShift console. Verify that Minishift is running. Error: ", err)
-		atexit.Exit(1)
+
+		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot access the OpenShift console. Verify that Minishift is running. Error: %s", err.Error()))
 	}
 	return url
 }
@@ -74,7 +73,7 @@ func getHostUrl(api *libmachine.Client) string {
 func getHostIp(api *libmachine.Client) string {
 	hostIP, err := cluster.GetHostIP(api)
 	if err != nil {
-		glog.Errorln("Cannot get Host IP. Verify that Minishift is running. Error: ", err)
+		fmt.Println("Cannot get Host IP. Verify that Minishift is running. Error: ", err)
 	}
 	return hostIP
 }

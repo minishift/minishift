@@ -15,9 +15,9 @@ The following section describes how to install Minishift and the required depend
 [[install-prerequisites]]
 == Prerequisites
 
-Minishift requires a hypervisor to start the virtual machine containing
-OpenShift. Make sure that the hypervisor of your choice is installed and
-enabled on your system before you install Minishift.
+Minishift requires a hypervisor to start the virtual machine on which the OpenShift cluster
+is provisioned. Make sure that the hypervisor of your choice is installed and enabled on
+your system before you start Minishift.
 
 Depending on your host OS, you have the choice of the following
 hypervisors:

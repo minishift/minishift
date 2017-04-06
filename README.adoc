@@ -30,9 +30,9 @@ https://ci.centos.org/job/minishift/[image:https://ci.centos.org/buildStatus/ico
 To download the latest binary and review release notes, see
 the https://github.com/minishift/minishift/releases[Minishift releases] page.
 
-Minishift requires a hypervisor to start the virtual machine containing
-OpenShift. Make sure that the hypervisor of your choice is installed and
-enabled on your system before you install Minishift.
+Minishift requires a hypervisor to start the virtual machine on which the OpenShift cluster
+is provisioned. Make sure that the hypervisor of your choice is installed and enabled on
+your system before you start Minishift.
 
 For detailed installation instructions for Minishift and the required dependencies, see
 the https://docs.openshift.org/latest/minishift/getting-started/index.html[Getting started] documentation.

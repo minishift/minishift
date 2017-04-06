@@ -18,8 +18,6 @@ package hostfolder
 
 import (
 	"fmt"
-	"github.com/golang/glog"
-	"os"
 	"runtime"
 
 	hostfolderActions "github.com/minishift/minishift/pkg/minishift/hostfolder"
@@ -44,15 +42,13 @@ var hostfolderAddCmd = &cobra.Command{
 			err = hostfolderActions.SetupUsers(true)
 		} else {
 			if len(args) < 1 {
-				fmt.Fprintln(os.Stderr, "Usage: minishift hostfolder add HOSTFOLDER_NAME")
-				atexit.Exit(1)
+				atexit.ExitWithMessage(1, "Usage: minishift hostfolder add HOSTFOLDER_NAME")
 			}
 			err = hostfolderActions.Add(args[0], !instanceOnly)
 		}
 
 		if err != nil {
-			glog.Errorln(err)
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, fmt.Sprintf("Failed to mount host folder: %s", err.Error()))
 		}
 	},
 }

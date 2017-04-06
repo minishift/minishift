@@ -17,17 +17,18 @@ limitations under the License.
 package addon
 
 import (
+	"testing"
+
 	"github.com/minishift/minishift/pkg/testing/cli"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
-	"testing"
 )
 
 func Test_view_commands_needs_existing_vm(t *testing.T) {
 	tmpMinishiftHomeDir := cli.SetupTmpMinishiftHome(t)
-	origStdout, stdOutWriter, stdOutReader := cli.CaptureStdOut(t)
-	defer cli.TearDown(tmpMinishiftHomeDir, origStdout)
+	origStdout, origStderr, streamWriter, streamReader := cli.CaptureStreamOut(t, 1)
+	defer cli.TearDown(tmpMinishiftHomeDir, origStdout, origStderr)
 
-	atexit.RegisterExitHandler(cli.CreateExitHandlerFunc(t, stdOutWriter, stdOutReader, 1, unspecifiedSourceError))
+	atexit.RegisterExitHandler(cli.CreateExitHandlerFunc(t, streamWriter, streamReader, 1, unspecifiedSourceError))
 
 	runInstallAddon(nil, nil)
 }

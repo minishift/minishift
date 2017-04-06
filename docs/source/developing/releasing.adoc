@@ -43,7 +43,7 @@ $ make release
 
 == Post release
 
-As part of the release process we also send an release announcement and edit the GitHub
+As part of the release process we also send a release announcement and edit the GitHub
 release page.
 
 For the latter we usually add a categorized list of closed issues as well as some
@@ -54,5 +54,6 @@ can use the link:https://github.com/minishift/minishift/blob/master/scripts/rele
 issue list, for example:
 
 ----
+$ cd scripts/release
 $ issue-list.sh -r minishift -m 9
 ----

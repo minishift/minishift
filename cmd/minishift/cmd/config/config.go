@@ -109,6 +109,10 @@ var settings []Setting = []Setting{
 		set:  SetString,
 	},
 	{
+		name: "hyperv-virtual-switch",
+		set:  SetString,
+	},
+	{
 		name: config.WantUpdateNotification,
 		set:  SetBool,
 	},

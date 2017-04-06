@@ -185,6 +185,7 @@ type MachineConfig struct {
 	HostOnlyCIDR     string // Only used by the virtualbox driver
 	OpenShiftVersion string
 	ShellProxyEnv    string // Only used for proxy purpose
+	HypervVirtualSwitch string // Hyper virtual switch name
 }
 
 func engineOptions(config MachineConfig) *engine.Options {

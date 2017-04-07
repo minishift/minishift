@@ -1,0 +1,81 @@
+/*
+Origin theme source file
+
+To build it:
+- clone the asciidoctor-stylesheet-factory repo
+- copy this theme file to the sass folder inside the repo
+- copy the settings file to the sass/settings file inside the repo
+- cd to the cloned repo
+- bundle install
+- compass compile
+- compiled stylesheet is in the stylesheets/ directory
+*/
+
+@import "fonts/overpass";
+@import "fonts/sourcecode";
+@import "settings/origin";
+@import "components/asciidoc";
+@import "components/awesome-icons";
+
+
+nav.global {
+	background: #222;
+	width: 100%;
+	height: 4em;
+
+	ul {
+		list-style-type: none;
+		margin: 0;
+	}
+	li {
+		display: inline-block;
+	}
+	a {
+		display: block;
+		padding: .5em 1em;
+		font-family: Overpass;
+		font-size: 1.1em;
+		color: white;
+
+		&:hover {
+			color: #ef2e32;
+		}
+		
+		img {
+			margin-top: .25em;
+			height: 2.75em;
+		
+		}
+	}
+}
+
+
+#header > h1 {
+	border: none;
+}
+
+#toc {
+	background: #eee;
+	border-right: none;
+
+	&.toc2 {
+		box-shadow: 1px 0 1px rgba(0,0,0,0.3);
+	}
+	
+}
+
+
+code {
+	font-family: source_code_pro;
+}
+
+.admonitionblock td.icon .icon-tip:before {
+	color: #cc6;
+	text-shadow: $icon-text-shadow;
+}
+
+#footer {
+	background-image: url('_images/panda.png');
+	background-position: right bottom;
+	background-repeat: no-repeat;
+}

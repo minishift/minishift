@@ -28,6 +28,8 @@ GEM
     fast_blank (1.0.0)
     fastimage (2.1.0)
     ffi (1.9.18)
+    font-awesome-middleman (4.2.1)
+      middleman-core (>= 3.0.0)
     haml (4.0.7)
       tilt
     hamster (3.0.0)
@@ -119,6 +121,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  font-awesome-middleman
   middleman (~> 4.2)
   middleman-asciidoc
   middleman-livereload (~> 3.4)

@@ -1,0 +1,68 @@
+@import "defaults";
+
+// Body
+
+$em-base: 16px;
+$primary-color: #006699;
+//$alert-color: lighten(#6d180b, 15%);
+$global-radius: 0;
+$body-font-family: "Helvetica Neue",Helvetica,"Liberation Sans",Arial,sans-serif;
+
+// Title
+$title-font-color: #222;
+
+// Headings
+$header-font-family: Overpass, sans-serif;
+//$header-font-weight: normal;
+$header-font-color: #222;
+$header-top-margin: 1em;
+//$subheader-font-color: darken($header-font-color, 15%);
+$sect-divider-size: 0;
+$sect-divider-style: solid;
+$sect-divider-color: #ddd;
+
+// Paragraphs
+
+// Inline Code
+
+// Code Blocks
+// *Recommended highlight.js themes: foundation
+
+$pre-font-size: 1em;
+$pre-font-family: source_code_pro, monospace, serif;
+$pre-bg: #eee;
+$pre-line-height: 1.4;
+$pre-border-size: 0;
+$pre-border-color: #ccc;
+$pre-border-style: solid;
+$pre-font-color: black;
+$pre-padding: .8em .8em .6em .8em;
+
+// Links
+
+//$anchor-text-decoration: underline;
+
+// Lists
+$list-side-margin: emCalc(24px);
+$definition-list-header-margin-bottom: emCalc(5px);
+$definition-list-margin-bottom: emCalc(20px);
+// FIXME need to account for nested definition list
+//$definition-list-content-margin-left: 0;
+
+// Blockquotes
+
+//$blockquote-font-color: lighten($body-font-color, 30%);
+//$blockquote-cite-font-size: inherit;
+//$blockquote-cite-font-color: darken($blockquote-font-color, 10%);
+
+// Tables
+
+$table-head-font-size: inherit;
+$table-row-font-size: inherit;
+$table-line-height: 1.4;
+
+//Icons
+$icon-text-shadow: none;
+
+//Images
+$thumb-box-shadow: none;

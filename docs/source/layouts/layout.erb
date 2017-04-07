@@ -1,19 +1,301 @@
-<!doctype html>
+<!DOCTYPE html>
+<!--[if IE 8]> <html class="ie8"> <![endif]-->
+<!--[if IE 9]> <html class="ie9"> <![endif]-->
+<!--[if gt IE 9]><!-->
 <html>
-  <head>
-    <meta content="IE=edge" http-equiv="X-UA-Compatible">
-    <meta charset="utf-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta content="IE=edge" http-equiv="X-UA-Compatible">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title><%= current_page.data.title %></title>
+  <link href="https://assets.openshift.net/content/subdomain.css" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/docs.css" rel="stylesheet" />
+  <link href="https://assets.openshift.net/content/subdomain/touch-icon-precomposed.png" rel="apple-touch-icon-precomposed" type="image/png">
+  <link href="https://assets.openshift.net/content/subdomain/favicon32x32.png" rel="shortcut icon" type="text/css">
+  <!--[if IE]><link rel="shortcut icon" href="https://assets.openshift.net/content/subdomain/favicon.ico"><![endif]-->
+  <!-- or, set /favicon.ico for IE10 win -->
+  <meta content="OpenShift" name="application-name">
+  <meta content="#000000" name="msapplication-TileColor">
+  <meta content="https://assets.openshift.net/content/subdomain/touch-icon-precomposed.png" name="msapplication-TileImage">
+  <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+    <script src="https://assets.openshift.net/content/html5shiv.js" type="text/javascript"></script>
+    <script src="https://assets.openshift.net/content/respond.js" type="text/javascript"></script>
+    <link href="https://assets.openshift.net/content/vendor/respond-js/respond-proxy.html" id="respond-proxy" rel="respond-proxy">
+    <link href="/images/respond.proxy.gif" id="respond-redirect" rel="respond-redirect">
+    <script src="/javascripts/respond.proxy.js" type="text/javascript"></script>
+  <![endif]-->
+  <script src="https://assets.openshift.net/content/modernizr.js" type="text/javascript"></script>
+  <script src="https://assets.openshift.net/content/subdomain.js" type="text/javascript"></script>
+  <script src="/javascripts/bootstrap-offcanvas.js" type="text/javascript"></script>
+  <script src="/javascripts/reformat-html.js" type="text/javascript"></script>
+<script>
+  window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+  ga('create', 'UA-40375612-1', 'openshift.org');
+  ga('set', 'forceSSL', true);
+  ga('send', 'pageview');
+</script>
+</head>
+<body>
+  <div class="navbar navbar-default navbar-openshift navbar-origin" role="navigation">
+  <div class="navbar-header">
+    <a class="navbar-brand origin" href="/"></a>
+  </div>
+</div>
+  <div class="container">
+    <p class="toggle-nav visible-xs pull-left">
+      <button class="btn btn-default btn-sm" type="button" data-toggle="offcanvas">Toggle nav</button>
+    </p>
 
-    <!-- Use title if it's in the page YAML frontmatter -->
-    <title><%= current_page.data.title || "Middleman" %></title>
+    <div class="row row-offcanvas row-offcanvas-left">
+      <div class="col-xs-8 col-sm-3 col-md-3 sidebar sidebar-offcanvas">
+        <div class="row-fluid">
 
-    <%= stylesheet_link_tag "site" %>
-    <%= javascript_include_tag "site" %>
-  </head>
+<script>
+  (function() {
+    var cx = '013769182564158614814:vdyz7waqya4';
+    var gcse = document.createElement('script');
+    gcse.type = 'text/javascript';
+    gcse.async = true;
+    gcse.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//cse.google.com/cse.js?cx=' + cx;
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(gcse, s);
+  })();
+</script>
+<gcse:search></gcse:search>
 
-  <body class="<%= page_classes %>">
-    <%= yield %>
-  </body>
+        </div>
+        <ul class="nav nav-sidebar">
+    <li class="nav-header">
+      <a class="" href="javascript:void(0);" data-toggle="collapse" data-target="#topicGroup11">
+        <span id="tgSpan11" class="fa fa-angle-down"></span>Minishift
+      </a>
+      <ul id="topicGroup11" class="collapse in list-unstyled">
+            <li><a class="" href="/index.html">Overview</a></li>
+            <li class="nav-header">
+              <a class="" href="javascript:void(0);" data-toggle="collapse" data-target="#topicSubGroup-11-1">
+                <span id="sgSpan-11-1" class="fa fa-caret-down"></span>&nbsp;Getting Started
+              </a>
+              <ul id="topicSubGroup-11-1" class="nav-tertiary list-unstyled collapse in">
+
+                  <li><a class="" href="/getting-started/index.html">Overview</a></li>
+
+                  <li><a class="" href="/getting-started/docker-machine-drivers.html">Installing Docker Machine drivers</a></li>
+
+                  <li><a class="" href="/getting-started/installing.html">Installing Minishift</a></li>
+
+                  <li><a class="" href="/getting-started/quickstart.html">Quickstart</a></li>
+              </ul>
+            </li>
+            <li class="nav-header">
+              <a class="" href="javascript:void(0);" data-toggle="collapse" data-target="#topicSubGroup-11-2">
+                <span id="sgSpan-11-2" class="fa fa-caret-right"></span>&nbsp;Using Minishift
+              </a>
+              <ul id="topicSubGroup-11-2" class="nav-tertiary list-unstyled collapse">
+
+                  <li><a class="" href="/using/index.html">Overview</a></li>
+
+                  <li><a class="" href="/using/managing-minishift.html">Managing Minishift</a></li>
+
+                  <li><a class="" href="/using/interacting-with-openshift.html">Interacting with Openshift</a></li>
+
+                  <li><a class="" href="/using/docker-daemon.html">Minishift Docker daemon</a></li>
+
+                  <li><a class="" href="/using/troubleshooting.html">Troubleshooting Minishift</a></li>
+              </ul>
+            </li>
+            <li class="nav-header">
+              <a class="" href="javascript:void(0);" data-toggle="collapse" data-target="#topicSubGroup-11-3">
+                <span id="sgSpan-11-3" class="fa fa-caret-right"></span>&nbsp;Developing Minishift
+              </a>
+              <ul id="topicSubGroup-11-3" class="nav-tertiary list-unstyled collapse">
+
+                  <li><a class="" href="/developing/index.html">Overview</a></li>
+
+                  <li><a class="" href="/developing/developing.html">Developing Minishift</a></li>
+
+                  <li><a class="" href="/developing/ci.html">Minishift CI</a></li>
+
+                  <li><a class="" href="/developing/writing-docs.html">Writing documentation</a></li>
+
+                  <li><a class="" href="/developing/releasing.html">Releasing Minishift</a></li>
+              </ul>
+            </li>
+            <li class="nav-header">
+              <a class="" href="javascript:void(0);" data-toggle="collapse" data-target="#topicSubGroup-11-4">
+                <span id="sgSpan-11-4" class="fa fa-caret-right"></span>&nbsp;Command Reference
+              </a>
+              <ul id="topicSubGroup-11-4" class="nav-tertiary list-unstyled collapse">
+
+                  <li><a class="" href="/command-ref/minishift.html">minishift</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_addons.html">minishift addons</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_addons_disable.html">minishift addons disable</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_addons_enable.html">minishift addons enable</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_addons_install.html">minishift addons install</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_addons_list.html">minishift addons list</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_config.html">minishift config</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_config_get.html">minishift config get</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_config_set.html">minishift config set</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_config_unset.html">minishift config unset</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_config_view.html">minishift config view</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_console.html">minishift console</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_delete.html">minishift delete</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_docker-env.html">minishift docker-env</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_hostfolder.html">minishift hostfolder</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_hostfolder_add.html">minishift hostfolder add</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_hostfolder_list.html">minishift hostfolder list</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_hostfolder_mount.html">minishift hostfolder mount</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_hostfolder_remove.html">minishift hostfolder remove</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_hostfolder_umount.html">minishift hostfolder umount</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_ip.html">minishift ip</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_logs.html">minishift logs</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_openshift.html">minishift openshift</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_openshift_config.html">minishift openshift config</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_openshift_config_set.html">minishift openshift config set</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_openshift_config_view.html">minishift openshift config view</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_openshift_restart.html">minishift openshift restart</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_openshift_service.html">minishift openshift service</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_openshift_service_list.html">minishift openshift service list</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_openshift_version.html">minishift openshift version</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_openshift_version_list.html">minishift openshift version list</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_ssh.html">minishift ssh</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_start.html">minishift start</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_status.html">minishift status</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_stop.html">minishift stop</a></li>
+
+                  <li><a class="" href="/command-ref/minishift_version.html">minishift version</a></li>
+              </ul>
+            </li>
+      </ul>
+    </li>
+</ul>
+      </div>
+      <div class="col-xs-12 col-sm-9 col-md-9 main">
+        <div class="page-header">
+          <h1><%= current_page.data.title %></h1>
+        </div>
+        <%= yield %>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript">
+    /*<![CDATA[*/
+    $(document).ready(function() {
+      $("[id^='topicGroup']").on('show.bs.collapse', function (event) {
+        if (!($(event.target).attr('id').match(/^topicSubGroup/))) {
+          $(this).parent().find("[id^='tgSpan']").toggleClass("fa-angle-right fa-angle-down");
+        }
+      });
+      $("[id^='topicGroup']").on('hide.bs.collapse', function (event) {
+        if (!($(event.target).attr('id').match(/^topicSubGroup/))) {
+          $(this).parent().find("[id^='tgSpan']").toggleClass("fa-angle-right fa-angle-down");
+        }
+      });
+      $("[id^='topicSubGroup']").on('show.bs.collapse', function () {
+        $(this).parent().find("[id^='sgSpan']").toggleClass("fa-caret-right fa-caret-down");
+      });
+      $("[id^='topicSubGroup']").on('hide.bs.collapse', function () {
+        $(this).parent().find("[id^='sgSpan']").toggleClass("fa-caret-right fa-caret-down");
+      });
+    });
+    /*]]>*/
+  </script>
+    <footer class="footer-origin-docs">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-12">
+        <div id="footer_social">
+          <a href="https://twitter.com/openshift" class="first">
+            <span>
+              <i class="fa fa-twitter-square fa-2x fa-inverse"></i>
+            </span>
+          </a>
+          <a href="https://github.com/openshift/origin">
+            <span>
+              <i class="fa fa-github fa-2x fa-inverse"></i>
+            </span>
+          </a>
+          <a href="https://plus.google.com/communities/114361859072744017486">
+            <span>
+              <i class="fa fa-google-plus-square fa-2x fa-inverse"></i>
+            </span>
+          </a>
+          <a href="https://www.facebook.com/openshift">
+            <span>
+              <i class="fa fa-facebook-square fa-2x fa-inverse"></i>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-12 col-sm-4">
+        <a id="footer_logo" href="https://www.redhat.com/">
+          <img alt="Red Hat" src="https://assets.openshift.net/app/assets/redhat.svg">
+        </a>
+      </div>
+      <div class="col-xs-12 col-sm-4 text-center">
+        <a id="powered_by_openshift" title="Powered by OpenShift Online with the DIY Cartridge" href="https://hub.openshift.com/quickstarts/92-do-it-yourself-0-1">
+          <img src="https://www.openshift.com/sites/default/files/images/powered-transparent-white.png" alt="Powered by OpenShift Online">
+        </a>
+      </div>
+      <div class="col-xs-12 col-sm-4 text-right">
+        <a id="built_with_asciibinder" title="Built with AsciiBinder docs management system" href="http://asciibinder.org/">
+          <img src="/images/asciibinder_web_logo.svg" alt="AsciiBinder">
+        </a>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="attribution">
+          <button type="button" class="btn btn-link" data-html="true" data-container="body" data-toggle="popover" data-placement="top" data-content="
+            '<a target='_blank' href='https://www.flickr.com/photos/eflon/3655695161/'>Spin</a>' by <a target='_blank' href='https://www.flickr.com/photos/eflon/'>eflon</a>,</br> used under <a target='_blank' href='https://creativecommons.org/licenses/by/2.0/'>CC BY 2.0</a> </br>Color tint added to original">
+            Image attribution
+          </button>
+        </div>
+      </div>
+    </div>
+    <script>
+    $(function () {
+      $('[data-toggle="popover"]').popover()
+    })
+    </script>
+  </div>
+</footer>
+</body>
 </html>

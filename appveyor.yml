@@ -15,7 +15,9 @@ install:
 - go version
 - go env
 # Install Glide and create a specific tmp path to avoid error with too long dir names
-- go get github.com/Masterminds/glide
+- ps: mkdir "$env:GOPATH\bin"
+- ps: wget 'https://github.com/Masterminds/glide/releases/download/v0.12.3/glide-v0.12.3-windows-amd64.zip' -OutFile "$env:GOPATH\bin\glide-v0.12.3-windows-amd64.zip"
+- ps: 7z.exe e "$env:GOPATH\bin\glide-v0.12.3-windows-amd64.zip" -o"$env:GOPATH\bin" glide.exe -r
 - set PATH=%PATH%;%GOPATH%\bin
 - mkdir c:\tmp
 # Use Chocolatey to install make

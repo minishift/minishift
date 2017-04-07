@@ -158,6 +158,11 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	fmt.Printf("Starting local OpenShift cluster using '%s' hypervisor...\n", config.VMDriver)
 
+	isRestart, err := libMachineClient.Exists(constants.MachineName)
+	if err != nil {
+		fmt.Println("Not able to get Machine state: ", err)
+	}
+
 	var host *host.Host
 	start := func() (err error) {
 		host, err = cluster.StartHost(libMachineClient, config)
@@ -166,7 +171,7 @@ func runStart(cmd *cobra.Command, args []string) {
 		}
 		return err
 	}
-	err := util.Retry(3, start)
+	err = util.Retry(3, start)
 	if err != nil {
 		glog.Errorln("Error starting the VM: ", err)
 		atexit.Exit(1)
@@ -195,9 +200,10 @@ func runStart(cmd *cobra.Command, args []string) {
 	automountHostfolders(host.Driver)
 
 	clusterUp(&config, ip)
-
-	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
-	postClusterUp(constants.MachineName, ip, constants.APIServerPort, viper.GetString(routingSuffix), minishiftConfig.InstanceConfig.OcPath, constants.KubeConfigPath, "developer", "myproject", sshCommander)
+	if !isRestart {
+		sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
+		postClusterUp(constants.MachineName, ip, constants.APIServerPort, viper.GetString(routingSuffix), minishiftConfig.InstanceConfig.OcPath, constants.KubeConfigPath, "developer", "myproject", sshCommander)
+	}
 }
 
 // postClusterUp runs the Minishift specific provisioning after cluster up has run

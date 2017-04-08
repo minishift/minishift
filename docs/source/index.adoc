@@ -1,6 +1,4 @@
-// Need to add 'minishift' prefix to keep Asciibinder happy. This fails on local build
-// https://github.com/redhataccess/ascii_binder/issues/60
-include::minishift/variables.adoc[]
+include::variables.adoc[]
 
 [[minishift-index]]
 = Minishift
@@ -20,5 +18,5 @@ extend Minishift:
 
 - link:./getting-started/index{outfilesuffix}[Getting started]
 - link:./using/index{outfilesuffix}[Using Minishift]
+- link:./developing/index{outfilesuffix}[Developing Minishift]
 - link:./command-ref/minishift{outfilesuffix}[Command reference]
-- link:./developing/index{outfilesuffix}[Contributing]

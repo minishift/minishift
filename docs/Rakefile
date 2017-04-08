@@ -1,11 +1,12 @@
 require 'bundler'
+require 'rubygems/package'
 
 task :default => :gen
 
 BUILD_DIR          = "build"
 MARKDOWN_FILES     = Rake::FileList.new("source/_tmp/*.md")
 TOPIC_MAP          = "#{BUILD_DIR}/_topic_map.yml"
-ADOC_VARIABLES     = "#{BUILD_DIR}/variables.adoc"
+ADOC_VARIABLES     = "source/variables.adoc"
 GENERATED_ADOC_DIR = "source/command-ref"
 ADOC_FILES = Rake::FileList.new do |list|
 	MARKDOWN_FILES.each do |f|
@@ -23,6 +24,7 @@ end
 task :clean do
   rm_f Rake::FileList.new("#{GENERATED_ADOC_DIR}/*.adoc")
   rm_rf BUILD_DIR
+  rm ADOC_VARIABLES
 end
 
 file TOPIC_MAP => [:init, 'source/_topic_map.yml'] do
@@ -71,7 +73,21 @@ end
 desc 'Create adoc tar bundle'
 task :adoc_tar => [:init, :adoc_variables, :markdown_to_asciidoc] do
   file_list = FileList.new('source/**/*.adoc', TOPIC_MAP, ADOC_VARIABLES)
-  sh "tar -cvf #{BUILD_DIR}/minishift-adoc.tar #{file_list}"
+  File.open("#{BUILD_DIR}/minishift-adoc.tar", "wb") do |file|
+    Gem::Package::TarWriter.new(file) do |tar|
+      file_list.each { |f|
+        tar.add_file(f, 0444) { |io|
+          if File.extname(f) == ".adoc" then
+            adoc_content = File.read(f)
+            adoc_content = adoc_content.gsub(/include::.*variables\.adoc\[\]/, "include::minishift/variables.adoc[]")
+            io.write(adoc_content)
+          else
+            io.write(File.read(f))
+          end
+        }
+      }
+    end
+  end
 end
 
 desc 'Create adoc variables'

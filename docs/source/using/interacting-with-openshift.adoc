@@ -1,7 +1,4 @@
-// Need to add 'minishift' prefix to keep Asciibinder happy. This fails on local build
-// https://github.com/redhataccess/ascii_binder/issues/60
-include::minishift/variables.adoc[]
-
+include::variables.adoc[]
 
 [[interacting-with-openshift]]
 = Interacting with OpenShift

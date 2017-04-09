@@ -110,7 +110,7 @@ clean_docs: build_docs_container
 serve_docs: synopsis_docs build_docs_container
 	cd docs && docker run -e OPENSHIFT_VERSION=$(OPENSHIFT_VERSION) -e MINISHIFT_VERSION=$(MINISHIFT_VERSION) -p 35729:35729 -p 4567:4567 -tiv $(shell pwd)/docs:/home/docs:Z minishift/docs serve[--watcher-force-polling]
 
-$(DOCS_SYNOPISIS_DIR)/*.md: vendor
+$(DOCS_SYNOPISIS_DIR)/*.md: vendor $(ADDON_ASSET_FILE)
 	@# https://github.com/golang/go/issues/15038#issuecomment-207631885 ( CGO_ENABLED=0 )
 	DOCS_SYNOPISIS_DIR=$(DOCS_SYNOPISIS_DIR) CGO_ENABLED=0 go run -ldflags="$(LDFLAGS)" -tags gendocs gen_help_text.go
 

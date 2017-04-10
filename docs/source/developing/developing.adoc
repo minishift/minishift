@@ -3,7 +3,7 @@
 :icons:
 :toc: macro
 :toc-title:
-:toclevels: 1
+:toclevels: 2
 
 toc::[]
 
@@ -175,11 +175,8 @@ directories:
 
 For more minishift commands and flags, see the link:../command-ref/minishift{outfilesuffix}[Minishift command reference] documentation.
 
-[[testing-minishift]]
-=== Testing Minishift
-
 [[unit-tests]]
-==== Unit Tests
+=== Running unit tests
 
 Unit tests run on Travis before code is merged. To run tests during the development cycle:
 
@@ -209,7 +206,7 @@ $go test -v <relative path of package> -run "Test<Regex pattern to match tests>"
 For more information about test options, run the `go test --help` command and review the documentation.
 
 [[integration-tests]]
-==== Integration Tests
+=== Running integration tests
 
 Integration tests utilize https://github.com/DATA-DOG/godog[`godog`], which uses Gherkin (Cucumber)
 to define test cases. The test cases are defined in `test/integration/*.feature`.
@@ -247,7 +244,7 @@ $ make integration GODOG_OPTS="-paths ~/tests/custom.feature,~/my.feature -tags 
 
 NOTE: When multiple values are used for options in GODOG_OPTS, then they have to be separated by a
 comma, without whitespace.
-While `-tags basic,openshift` will be parsed properly by make, the `-tags basic, openshift` will
+While `-tags basic,openshift` will be parsed properly by make, `-tags basic, openshift` will
 result in only `@basic` being used.
 
 [[format-source]]

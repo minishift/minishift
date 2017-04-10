@@ -116,6 +116,15 @@ cause passwords to fail.
 Workaround: When creating and entering passwords, wrap the string with
 single quotes in the following format: `<password>`
 
+NOTE: The characters `", $, ` and \` are still interpreted by the shell,
+even when you wrap the string with single quotes. If your password contain
+these special characters, make sure you escape them using the
+`backslash (\)` character.
+
+----
+Pass$$wd" => 'Pass\$\$d\"'
+----
+
 [[troubleshooting-snapshots]]
 == Snapshots with virsh
 

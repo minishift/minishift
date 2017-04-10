@@ -134,7 +134,6 @@ function prepare() {
 }
 
 function run_tests() {
-  cd $GOPATH/src/github.com/minishift/minishift
   make clean test cross fmtcheck prerelease
   # Run integration test with 'kvm' driver
   MINISHIFT_VM_DRIVER=kvm make integration
@@ -142,16 +141,54 @@ function run_tests() {
   echo "CICO: Tests ran successfully"
 }
 
+function install_docs_prerequisite_packages() {
+  # https://devops.profitbricks.com/tutorials/install-ruby-214-with-rvm-on-centos/
+  # Prerequisite packages
+  sudo yum install -y libyaml-devel readline-devel zlib-devel libffi-devel openssl-devel sqlite-devel
+  # Install RVM
+  gpg2 --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3
+  curl -L get.rvm.io | bash -s stable
+  source ~/.profile
+  # Install Ruby
+  rvm install ruby-2.2.5
+
+  echo "CICO: RVM and Ruby Installed"
+
+  gem install ascii_binder -v 0.1.9
+  echo "CICO: Ascii Binder Installed"
+}
+
+function build_openshift_origin_docs() {
+  git clone https://github.com/openshift/openshift-docs
+  cd openshift-docs
+  mkdir minishift
+  cd minishift
+  cp $1 .
+  tar -xvf minishift-adoc.tar --strip 1
+  cat _topic_map.yml >> ../_topic_map.yml
+  cd ..
+  rake build
+  cd ..
+}
+
 function artifacts_upload_on_pr_and_master_trigger() {
   set +x
   # For PR build, GIT_BRANCH is set to branch name other than origin/master
   if [[ "$GIT_BRANCH" = "origin/master" ]]; then
+    install_docs_prerequisite_packages;
+    make gen_adoc_tar
+    build_openshift_origin_docs $(pwd)/docs/build/minishift-adoc.tar;
+
     # http://stackoverflow.com/a/22908437/1120530; Using --relative as --rsync-path not working
     mkdir -p minishift/master/$BUILD_NUMBER/
     cp -r out/*-amd64 minishift/master/$BUILD_NUMBER/
+    # Copy the openshift-docs
+    cp -r openshift-docs/_preview/openshift-origin minishift/master/$BUILD_NUMBER/openshift-docs
     RSYNC_PASSWORD=$1 rsync -a --delete --relative minishift/master/$BUILD_NUMBER/ minishift@artifacts.ci.centos.org::minishift/
     echo "Find Artifacts here http://artifacts.ci.centos.org/minishift/minishift/master/$BUILD_NUMBER ."
+    echo "Minishift docs is hosted at http://artifacts.ci.centos.org/minishift/minishift/master/$BUILD_NUMBER/openshift-docs/latest/minishift/index.html ."
   else
+
     # http://stackoverflow.com/a/22908437/1120530; Using --relative as --rsync-path not working
     mkdir -p minishift/pr/$ghprbPullId/
     cp -r out/*-amd64 minishift/pr/$ghprbPullId/
@@ -161,7 +198,7 @@ function artifacts_upload_on_pr_and_master_trigger() {
 }
 
 function docs_tar_upload() {
-  set -x
+  set +x
 
   version=$(cat docs/build/variables.adoc | cut -d' ' -f2 | head -n1)
   mkdir -p minishift/docs/$version
@@ -191,6 +228,7 @@ else
   else
     setup_kvm_docker_machine_driver;
     prepare;
+    cd $GOPATH/src/github.com/minishift/minishift
     run_tests;
     artifacts_upload_on_pr_and_master_trigger $PASS;
   fi

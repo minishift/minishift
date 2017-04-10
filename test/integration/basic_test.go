@@ -30,7 +30,9 @@ import (
 	"github.com/DATA-DOG/godog"
 	"github.com/DATA-DOG/godog/gherkin"
 
+	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/test/integration/util"
+	"path/filepath"
 )
 
 var lastCommandOutput CommandOutput
@@ -61,6 +63,21 @@ func (m *Minishift) shouldHaveAValidIPAddress() error {
 	ip = strings.TrimRight(ip, "\n")
 	if net.ParseIP(ip) == nil {
 		return fmt.Errorf("IP command returned an invalid address: %s", ip)
+	}
+
+	return nil
+}
+
+func (m *Minishift) shouldHaveInstanceConfig() error {
+	machineHomeDir := os.Getenv(constants.MiniShiftHomeEnv)
+	instanceConfigFile := filepath.Join(machineHomeDir, "machines", "minishift.json")
+	if _, err := os.Stat(instanceConfigFile); os.IsNotExist(err) {
+		return fmt.Errorf("Config file %s should exist", instanceConfigFile)
+	}
+
+	ocPath := filepath.Join(machineHomeDir, "cache", "oc", util.OpenShiftVersion, "oc")
+	if !util.ConfigContain(instanceConfigFile, ocPath) {
+		return fmt.Errorf("Config file %s doesn't contain %s", instanceConfigFile, ocPath)
 	}
 
 	return nil
@@ -158,6 +175,7 @@ func FeatureContext(s *godog.Suite) {
 
 	s.Step(`Minishift (?:has|should have) state "([^"]*)"`, m.shouldHaveState)
 	s.Step(`Minishift should have a valid IP address`, m.shouldHaveAValidIPAddress)
+	s.Step(`Minishift should have instance config file created`, m.shouldHaveInstanceConfig)
 	s.Step(`executing "minishift ([^"]*)"`, m.executingCommand)
 	s.Step(`executing "oc ([^"]*)`, m.executingOcCommand)
 	s.Step(`([^"]*) should contain ([^"]*)`, m.commandReturnShouldContain)

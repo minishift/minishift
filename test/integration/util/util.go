@@ -30,6 +30,7 @@ import (
 
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
+	"io/ioutil"
 )
 
 type MinishiftRunner struct {
@@ -40,6 +41,10 @@ type MinishiftRunner struct {
 type OcRunner struct {
 	CommandPath string
 }
+
+const (
+	OpenShiftVersion = "v1.4.1" // Should match OPENSHIFT_VERSION in Makefile
+)
 
 func runCommand(command string, commandPath string) (stdOut string, stdErr string, exitCode int) {
 	commandArr := strings.Split(command, " ")
@@ -144,4 +149,10 @@ func NewOcRunner() *OcRunner {
 func (k *OcRunner) RunCommand(command string) (stdOut string, stdErr string, exitCode int) {
 	stdOut, stdErr, exitCode = runCommand(command, k.CommandPath)
 	return
+}
+
+// Other helper functions
+func ConfigContain(configFile, value string) bool {
+	content, _ := ioutil.ReadFile(configFile)
+	return strings.Contains(string(content), value)
 }

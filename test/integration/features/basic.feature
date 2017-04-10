@@ -9,6 +9,7 @@ Feature: Basic
      When executing "minishift start --docker-env=FOO=BAR --docker-env=BAZ=BAT"
      Then Minishift should have state "Running"
       And Minishift should have a valid IP address
+      And Minishift should have instance config file created
 
   Scenario: OpenShift developer account has sudo permissions
      The 'developer' user should be configured with the sudoer role after starting Minishift

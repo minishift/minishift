@@ -3,7 +3,7 @@
 :icons:
 :toc: macro
 :toc-title:
-:toclevels: 1
+:toclevels: 2
 
 toc::[]
 
@@ -13,37 +13,106 @@ toc::[]
 This section contains solutions to common problems that you might
 encounter while using Minishift.
 
-[[troubleshooting-kvm]]
-== KVM driver
+[[special-characters-passwords]]
+== Special characters cause passwords to fail
+
+Depending on your operating system and shell environment, certain
+special characters can trigger variable interpolation and therefore
+cause passwords to fail.
+
+Workaround: When creating and entering passwords, wrap the string with
+single quotes in the following format: `<password>`
+
+[[minishift-delete-fails-undefine-snapshots]]
+== Undefining virsh snapshots fail
+
+If you use `virsh` on KVM/libvirt to create snapshots in your development
+workflow, and then use `minishift delete` to delete the snapshots along with
+the VM, you might encounter the following error:
+
+[source,sh]
+----
+$ minishift delete
+Deleting the Minishift VM...
+Error deleting the VM:  [Code-55] [Domain-10] Requested operation is not valid: cannot delete inactive domain with 4 snapshots
+----
+
+Cause: The snapshots are stored in `~/.minishift/machines`, but the
+definitions are stored in `var/lib/libvirt/qemu/snapshot/minishift`.
+
+Workaround: To delete the snapshots you need to perform the following steps.
+
+.  Delete the definitions.
++
+
+[source,sh]
+----
+$ sudo virsh snapshot-delete --metadata minishift <snapshot-name>
+----
+
+.  Undefine the Minishift domain.
++
+
+[source,sh]
+----
+$ sudo virsh undefine minishift
+----
++
+
+You can now run `minishft delete` to delete the VM and restart Minishift.
++
+
+[NOTE]
+====
+In case the above steps do not resolve the issue, you can also
+use the following command to delete the snapshots:
+
+[source,sh]
+----
+$ rm -rf ~/.minishift/machines
+----
+====
+
+It is recommended to avoid using metadata when you create snapshots. To make sure of
+this, you can specify the `--no-metadata` flag. For example:
+
+[source,sh]
+----
+$ sudo virsh snapshot-create-as --domain vm1 overlay1 --diskspec vda,file=/export/overlay1.qcow2 --disk-only --atomic --no-metadata
+----
 
 [[dial-tcp-missing-address]]
-=== Error creating new host: dial tcp: missing address
+== KVM: Error creating new host: dial tcp: missing address
 
 The problem is likely that the `libvirtd` service is not running. You can check this
 with the following command:
 
+[source,sh]
 ----
 $ systemctl status libvirtd
 ----
 
 If `libvirtd` is not running, start it and enable it to start on boot:
 
+[source,sh]
 ----
 $ systemctl start libvirtd
 $ systemctl enable libvirtd
 ----
 
 [[fail-connect-socket]]
-=== Failed to connect socket to '/var/run/libvirt/virtlogd-sock'
+== KVM: Failed to connect socket to '/var/run/libvirt/virtlogd-sock'
 
 The problem is likely that the `virtlogd` service is not running.
 You can check this with the following command:
 
+[source,sh]
 ----
 $ systemctl status virtlogd
 ----
 
 If `virtlogd` is not running, start it and enable it to start on boot:
+[source,sh]
 
 ----
 $ systemctl start virtlogd
@@ -51,21 +120,47 @@ $ systemctl enable virtlogd
 ----
 
 [[domain-minishift-already-exists]]
-=== Error starting the VM: ... operation failed: domain 'minishift' already exists ...
+== KVM: Domain 'minishift' already exists...
 
-Check for existing VMs and remove them:
+If you try `minishift start` and hit the above error, ensure that you use `minishift delete` to delete the VMs created earlier by you.
+However if this fails and you wish to completely clean up Minishift and start fresh do the following:
 
+. Check if any existing Minishift VM are running:
++
+
+[source,sh]
 ----
 $ sudo virsh list --all
+----
+
+. If any Minishift VM is running, stop it:
++
+
+[source,sh]
+----
 $ sudo virsh destroy minishift
+----
+
+. Delete the VM:
++
+
+[source,sh]
+----
 $ sudo virsh undefine minishift
 ----
 
-[[troubleshooting-xhyve]]
-== xhyve driver
+. Delete the `.minishift/machines` directory using:
++
+
+[source,sh]
+----
+ $ rm -rf ~/.minishift/machines
+----
+
+In case all of this fails, you may want to link:../getting-started/installing{outfilesuffix}#uninstall-instructions[uninstall Minishift] and do a fresh install of Minishift.
 
 [[create-vmnet-interface-permission]]
-=== Error: could not create vmnet interface, permission denied or no entitlement
+== xhyve: Could not create vmnet interface
 
 The problem is likely that the xhyve driver is not able to clean
 up `vmnet` when a VM is removed. `vmnet.framework` determines the IP address
@@ -91,79 +186,11 @@ system.
 NOTE: You can completely reset the IP database by removing the files
 manually but this is very *risky*.
 
-[[troubleshooting-vbox]]
-== VirtualBox driver
-
 [[machine-doesnt-exist]]
-=== Error: getting state for host: machine does not exist
+== VirtualBox: Error machine does not exist
 
 If you use Windows, make sure that you set the `--vm-driver virtualbox`
 flag in the `minishift start` command. Alternatively, the problem might be
 an outdated version of VirtualBox.
 
 To avoid this issue, it is recommended to use VirtualBox 5.1.12 or later.
-
-[[troubleshooting-authentication]]
-== Users and authentication
-
-[[special-characters-passwords]]
-=== Some special characters cause passwords to fail
-
-Depending on your operating system and shell environment, certain
-special characters can trigger variable interpolation and therefore
-cause passwords to fail.
-
-Workaround: When creating and entering passwords, wrap the string with
-single quotes in the following format: `<password>`
-
-[[troubleshooting-snapshots]]
-== Snapshots with virsh
-
-[[minishift-delete-fails-undefine-snapshots]]
-=== `minishift delete` fails to undefine snapshots of running instances made using virsh on KVM/libvirt
-
-If you use `virsh` on KVM/libvirt to create snapshots in your development
-workflow, and then use `minishift delete` to delete the snapshots along with
-the VM, you might encounter the following error:
-
-----
-$ minishift delete
-Deleting the Minishift VM...
-Error deleting the VM:  [Code-55] [Domain-10] Requested operation is not valid: cannot delete inactive domain with 4 snapshots
-----
-
-Cause: The snapshots are stored in `~/.minishift/machines`, but the
-definitions are stored in `var/lib/libvirt/qemu/snapshot/minishift`.
-
-Workaround: To delete the snapshots you need to perform the following steps.
-
-.  Delete the definitions.
-+
-----
-$ sudo virsh snapshot-delete --metadata minishift <snapshot-name>
-----
-
-.  Undefine the Minishift domain.
-+
-----
-$ sudo virsh undefine minishift
-----
-
-You can now run `minishft delete` to delete the VM and restart Minishift.
-
-[NOTE]
-====
-In case the above steps do not resolve the issue, you can also
-use the following command to delete the snapshots:
-
-----
-$ rm -rf ~/.minishift/machines
-----
-====
-
-It is recommended to avoid using metadata when you create snapshots. To make sure of
-this, you can specify the `--no-metadata` flat. For example:
-
-----
-$ sudo virsh snapshot-create-as --domain vm1 overlay1 --diskspec vda,file=/export/overlay1.qcow2 --disk-only --atomic --no-metadata
-----

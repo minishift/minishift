@@ -40,16 +40,14 @@ var serviceCmd = &cobra.Command{
 	Long:  `Opens the URL for the specified service and namespace in the browser or prints it to the console. If no namespace is provided, 'default' is assumed.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 || len(args) > 1 {
-			fmt.Fprintln(os.Stderr, "You must specify the name of the service.")
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, "You must specify the name of the service.")
 		}
 
 		service := args[0]
 
 		url, err := openshift.GetServiceURL(service, namespace, https)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, err.Error())
 		}
 
 		if urlMode {

@@ -18,8 +18,6 @@ package hostfolder
 
 import (
 	"fmt"
-	"github.com/golang/glog"
-	"os"
 
 	"github.com/docker/machine/libmachine"
 	"github.com/minishift/minishift/pkg/minikube/constants"
@@ -34,27 +32,23 @@ var hostfolderUmountCmd = &cobra.Command{
 	Long:  `Unmount a host folder from the running cluster`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 1 {
-			fmt.Fprintln(os.Stderr, "Usage: minishift hostfolder umount HOSTFOLDER_NAME")
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, "Usage: minishift hostfolder umount HOSTFOLDER_NAME")
 		}
 
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()
 		host, err := api.Load(constants.MachineName)
 		if err != nil {
-			glog.Errorln("Error: ", err)
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, err.Error())
 		}
 
 		if !isHostRunning(host.Driver) {
-			fmt.Fprintln(os.Stderr, "Host is not running.")
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, "Host is not running.")
 		}
 
 		err = hostfolderActions.Umount(host.Driver, args[0])
 		if err != nil {
-			glog.Errorln(err)
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error to unmount host folder: %s", err.Error()))
 		}
 	},
 }

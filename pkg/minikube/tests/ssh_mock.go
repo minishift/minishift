@@ -24,7 +24,8 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/golang/glog"
+	"fmt"
+
 	"golang.org/x/crypto/ssh"
 )
 
@@ -104,7 +105,7 @@ func (s *SSHServer) Start() (int, error) {
 					//Note: string(req.Payload) adds additional characters to start of input, execRequest used to solve this issue
 					var cmd execRequest
 					if err := ssh.Unmarshal(req.Payload, &cmd); err != nil {
-						glog.Errorln("Unmarshall encountered error: %s", err)
+						fmt.Println("Unmarshall encountered error: ", err)
 						return
 					}
 					s.Commands[cmd.Command] = 1

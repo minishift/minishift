@@ -19,6 +19,8 @@ package cmd
 import (
 	"fmt"
 
+	"os"
+
 	"github.com/docker/machine/libmachine"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
@@ -27,7 +29,6 @@ import (
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
 )
 
 // deleteCmd represents the delete command
@@ -50,20 +51,17 @@ func runDelete(cmd *cobra.Command, args []string) {
 
 	fmt.Println("Deleting the Minishift VM...")
 	if err := cluster.DeleteHost(api); err != nil {
-		fmt.Println("Error deleting the VM: ", err)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting the VM: %s", err.Error()))
 	}
 
 	if err := minishiftConfig.InstanceConfig.Delete(); err != nil {
-		fmt.Println(fmt.Sprintf("Error deleting %s: ", minishiftConfig.InstanceConfig.FilePath), err)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, fmt.Sprintln(fmt.Sprintf("Error deleting %s: ", minishiftConfig.InstanceConfig.FilePath), err))
 	}
 
 	exists = filehelper.Exists(constants.KubeConfigPath)
 	if exists {
 		if err := os.Remove(constants.KubeConfigPath); err != nil {
-			fmt.Println(fmt.Sprintf("Error deleting '%s'", constants.KubeConfigPath))
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting '%s'", constants.KubeConfigPath))
 		}
 	}
 

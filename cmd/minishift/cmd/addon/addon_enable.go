@@ -18,6 +18,7 @@ package addon
 
 import (
 	"fmt"
+
 	"github.com/minishift/minishift/pkg/minishift/addon/manager"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
@@ -47,8 +48,7 @@ func init() {
 
 func runEnableAddon(cmd *cobra.Command, args []string) {
 	if len(args) == 0 {
-		fmt.Println(emptyEnableError)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, emptyEnableError)
 	}
 
 	addonName := args[0]
@@ -65,8 +65,7 @@ func runEnableAddon(cmd *cobra.Command, args []string) {
 func enableAddon(addOnManager *manager.AddOnManager, addonName string, priority int) {
 	addOnConfig, err := addOnManager.Enable(addonName, priority)
 	if err != nil {
-		fmt.Println(fmt.Sprintf("Unable to enable plugin %s: %s", addonName, err.Error()))
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to enable plugin %s: %s", addonName, err.Error()))
 	}
 
 	addOnConfigMap := getAddOnConfiguration()

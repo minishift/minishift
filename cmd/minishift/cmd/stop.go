@@ -43,7 +43,7 @@ func runStop(cmd *cobra.Command, args []string) {
 
 	if err := cluster.StopHost(api); err != nil {
 		fmt.Println("Error stopping cluster: ", err)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error stopping cluster: %s", err.Error()))
 	}
 	fmt.Println("Cluster stopped.")
 }

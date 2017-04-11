@@ -19,10 +19,11 @@ package addon
 import (
 	"fmt"
 
+	"strings"
+
 	"github.com/minishift/minishift/out/bindata"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 const (
@@ -64,16 +65,14 @@ func runInstallAddon(cmd *cobra.Command, args []string) {
 	}
 
 	if len(args) != 1 {
-		fmt.Println(unspecifiedSourceError)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, unspecifiedSourceError)
 	}
 
 	source := args[0]
 
 	addOnName, err := addOnManager.Install(source, force)
 	if err != nil {
-		fmt.Println(fmt.Sprintf(failedPluginInstallation, err.Error()))
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, fmt.Sprintf(failedPluginInstallation, err.Error()))
 	}
 
 	if enable {
@@ -86,8 +85,7 @@ func unpackAddons(dir string) {
 	for _, asset := range defaultAssets {
 		err := bindata.RestoreAssets(dir, asset)
 		if err != nil {
-			fmt.Println(fmt.Sprintf("Unable to install default addons: %s", err.Error()))
-			atexit.Exit(1)
+			atexit.ExitWithMessage(1, fmt.Sprintf("Unable to install default addons: %s", err.Error()))
 		}
 	}
 }

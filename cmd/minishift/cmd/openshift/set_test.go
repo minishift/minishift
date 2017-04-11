@@ -20,13 +20,14 @@ import (
 	"testing"
 
 	"bytes"
-	"github.com/minishift/minishift/pkg/minikube/constants"
-	"github.com/minishift/minishift/pkg/util/os/atexit"
-	"github.com/spf13/viper"
 	"io"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
+	"github.com/spf13/viper"
 )
 
 var testDir string
@@ -93,7 +94,7 @@ func setup(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	os.Stdout = w
+	os.Stderr = w
 
 	constants.Minipath = testDir
 }

@@ -17,13 +17,13 @@ limitations under the License.
 package openshift
 
 import (
-	"github.com/golang/glog"
 	"github.com/spf13/cobra"
 
 	"github.com/docker/machine/libmachine"
 
 	"encoding/json"
 	"fmt"
+
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
@@ -62,8 +62,7 @@ func init() {
 func runPatch(cmd *cobra.Command, args []string) {
 	patchTarget := determineTarget(target)
 	if patchTarget == openshift.UNKNOWN {
-		fmt.Println(unknownPatchTargetError)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, unknownPatchTargetError)
 	}
 
 	validatePatch(patch)
@@ -73,14 +72,12 @@ func runPatch(cmd *cobra.Command, args []string) {
 
 	host, err := cluster.CheckIfApiExistsAndLoad(api)
 	if err != nil {
-		fmt.Println(nonExistentMachineError)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, nonExistentMachineError)
 	}
 
 	ip, err := host.Driver.GetIP()
 	if err != nil {
-		fmt.Println(unableToRetrieveIpError)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, unableToRetrieveIpError)
 	}
 	patchTarget.SetIp(ip)
 
@@ -89,8 +86,7 @@ func runPatch(cmd *cobra.Command, args []string) {
 
 	_, err = openshift.Patch(patchTarget, patch, dockerCommander)
 	if err != nil {
-		glog.Errorln("Error patching OpenShift configuration: ", err)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error patching OpenShift configuration: %s", err.Error()))
 	}
 }
 
@@ -107,13 +103,11 @@ func determineTarget(target string) openshift.OpenShiftPatchTarget {
 
 func validatePatch(patch string) {
 	if len(patch) == 0 {
-		fmt.Println(emptyPatchError)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, emptyPatchError)
 	}
 
 	if !isJSON(patch) {
-		fmt.Println(invalidJSONError)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, invalidJSONError)
 	}
 
 }

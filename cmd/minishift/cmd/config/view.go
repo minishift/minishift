@@ -17,20 +17,19 @@ limitations under the License.
 package config
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+	"os"
+	"sort"
 	"text/template"
 
-	"github.com/spf13/cobra"
-
-	"bytes"
-	"sort"
-	"strings"
-
 	"github.com/minishift/minishift/pkg/util/os/atexit"
+	"github.com/spf13/cobra"
 )
 
 const (
-	DefaultConfigViewFormat = "- {{.ConfigKey | printf \"%-21s\"}}: {{.ConfigValue}}\n"
+	DefaultConfigViewFormat = "- {{.ConfigKey | printf \"%-21s\"}}: {{.ConfigValue}}"
 )
 
 var configViewFormat string
@@ -46,10 +45,15 @@ var configViewCmd = &cobra.Command{
 	Short: "Display the properties and values of the Minishift configuration file.",
 	Long:  "Display the properties and values of the Minishift configuration file. You can set the output format from one of the available Go templates.",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := configView()
+		cfg, err := ReadConfig()
 		if err != nil {
 			atexit.ExitWithMessage(1, err.Error())
 		}
+		template := determineTemplate(configViewFormat)
+		if err = configView(cfg, template, os.Stdout); err != nil {
+			atexit.ExitWithMessage(1, err.Error())
+		}
+
 	},
 }
 
@@ -61,33 +65,33 @@ func init() {
 	ConfigCmd.AddCommand(configViewCmd)
 }
 
-func configView() error {
-	cfg, err := ReadConfig()
+func determineTemplate(tempFormat string) (tmpl *template.Template) {
+	tmpl, err := template.New("view").Parse(tempFormat)
 	if err != nil {
-		return err
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error creating view template: %s", err.Error()))
 	}
-	var buffer bytes.Buffer
+	return tmpl
+}
+
+func configView(cfg MinishiftConfig, tmpl *template.Template, writer io.Writer) error {
+	var lines []string
 	for k, v := range cfg {
 		_, excluded := excludedConfigKeys[k]
 		if excluded {
 			continue
 		}
-
-		tmpl, err := template.New("view").Parse(configViewFormat)
-		if err != nil {
-			atexit.ExitWithMessage(1, fmt.Sprintf("Error creating view template: %s", err.Error()))
-		}
 		viewTmplt := ConfigViewTemplate{k, v}
-		err = tmpl.Execute(&buffer, viewTmplt)
-		if err != nil {
-			atexit.ExitWithMessage(1, fmt.Sprintf("Error executing view template: %s", err.Error()))
+		var buffer bytes.Buffer
+		if err := tmpl.Execute(&buffer, viewTmplt); err != nil {
+			return err
 		}
+		lines = append(lines, buffer.String())
+	}
+	sort.Strings(lines)
+
+	for _, line := range lines {
+		fmt.Fprintln(writer, line)
 	}
 
-	lines := strings.Split(buffer.String(), "\n")
-	// remove empy line at end
-	lines = lines[:len(lines)-1]
-	sort.Strings(lines)
-	fmt.Print(strings.Join(lines, "\n"))
 	return nil
 }

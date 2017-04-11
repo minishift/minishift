@@ -24,14 +24,14 @@ import (
 )
 
 const (
-	emptyDisableError       = "An addon name needs to be specified. Use `minishift addons list` to view installed addons."
-	noAddOnToDisableMessage = "No addon with name %s installed"
+	emptyDisableError       = "You must specify an add-on name. Use `minishift addons list` to view installed add-ons."
+	noAddOnToDisableMessage = "No add-on with the name %s is installed."
 )
 
 var addonsDisableCmd = &cobra.Command{
 	Use:   "disable ADDON_NAME",
-	Short: "Disables the specified addon.",
-	Long:  "Disables the specified addon from being run after cluster creation.",
+	Short: "Disables the specified add-on.",
+	Long:  "Disables the specified add-on and prevents applying the add-on the next time a cluster is created.",
 	Run:   runDisableAddon,
 }
 
@@ -55,7 +55,7 @@ func runDisableAddon(cmd *cobra.Command, args []string) {
 
 	addOnConfig, err := addOnManager.Disable(addonName)
 	if err != nil {
-		fmt.Println(fmt.Sprintf("Unable to disable plugin %s: %s", addonName, err.Error()))
+		fmt.Println(fmt.Sprintf("Unable to disable add-on %s: %s", addonName, err.Error()))
 		atexit.Exit(1)
 	}
 

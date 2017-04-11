@@ -51,13 +51,13 @@ type DisplayAddOn struct {
 
 var addonsListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "Lists all installed Minishift addons",
-	Long:  "Lists all installed Minishift addons as well as there current status (enabled/disabled)",
+	Short: "Lists all installed Minishift add-ons.",
+	Long:  "Lists all installed Minishift add-ons and their current status, such as enabled/disabled.",
 	Run:   runListCommand,
 }
 
 func init() {
-	addonsListCmd.Flags().BoolVar(&verbose, "verbose", false, "A more verbose format of the output including the addon description.")
+	addonsListCmd.Flags().BoolVar(&verbose, "verbose", false, "Prints the add-on list with a more verbose format of the output that includes the add-on description.")
 	AddonsCmd.AddCommand(addonsListCmd)
 
 	var err error

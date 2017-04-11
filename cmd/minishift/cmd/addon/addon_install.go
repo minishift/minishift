@@ -26,8 +26,8 @@ import (
 )
 
 const (
-	unspecifiedSourceError   = "You need to specify the source for the addon."
-	failedPluginInstallation = "Addon installation failed with error: %s"
+	unspecifiedSourceError   = "You need to specify the source for the add-on."
+	failedPluginInstallation = "Add-on installation failed with the error: %s"
 
 	forceFlag    = "force"
 	enableFlag   = "enable"
@@ -43,15 +43,15 @@ var (
 
 var addonsInstallCmd = &cobra.Command{
 	Use:   "install [SOURCE]",
-	Short: "Installs the specified addon",
-	Long:  "Verifies and installs the addon given by a file path",
+	Short: "Installs the specified add-on.",
+	Long:  "Installs the add-on from the specified file path and verifies the installation.",
 	Run:   runInstallAddon,
 }
 
 func init() {
-	addonsInstallCmd.Flags().BoolVar(&force, forceFlag, false, "Forces the installation of the addon even if the addon already has been installed before.")
-	addonsInstallCmd.Flags().BoolVar(&enable, enableFlag, false, "If set to true installs and enables the specified addon using the default priority.")
-	addonsInstallCmd.Flags().BoolVar(&defaults, defaultsFlag, false, "If set to true installs Minishift's default addons.")
+	addonsInstallCmd.Flags().BoolVar(&force, forceFlag, false, "Forces the installation of the add-on even if the add-on was previously installed.")
+	addonsInstallCmd.Flags().BoolVar(&enable, enableFlag, false, "If true, installs and enables the specified add-on with the default priority.")
+	addonsInstallCmd.Flags().BoolVar(&defaults, defaultsFlag, false, "If true, installs all Minishift default add-ons.")
 	AddonsCmd.AddCommand(addonsInstallCmd)
 }
 
@@ -59,7 +59,7 @@ func runInstallAddon(cmd *cobra.Command, args []string) {
 	addOnManager := GetAddOnManager()
 	if defaults {
 		unpackAddons(addOnManager.BaseDir())
-		fmt.Println(fmt.Sprintf("Default addons %s installed", strings.Join(defaultAssets, ", ")))
+		fmt.Println(fmt.Sprintf("Default add-ons %s installed", strings.Join(defaultAssets, ", ")))
 		return
 	}
 
@@ -86,7 +86,7 @@ func unpackAddons(dir string) {
 	for _, asset := range defaultAssets {
 		err := bindata.RestoreAssets(dir, asset)
 		if err != nil {
-			fmt.Println(fmt.Sprintf("Unable to install default addons: %s", err.Error()))
+			fmt.Println(fmt.Sprintf("Unable to install default add-ons: %s", err.Error()))
 			atexit.Exit(1)
 		}
 	}

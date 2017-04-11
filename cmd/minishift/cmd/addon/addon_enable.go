@@ -27,21 +27,21 @@ const (
 	priorityFlag   = "priority"
 	addOnConfigKey = "addons"
 
-	emptyEnableError       = "An addon name needs to be specified. Use `minishift addons list` to view installed addons."
-	noAddOnToEnableMessage = "No addon with name %s installed"
+	emptyEnableError       = "You must specify an add-on name. Use `minishift addons list` to view installed add-ons."
+	noAddOnToEnableMessage = "No add-on with the name %s is installed."
 )
 
 var priority int
 
 var addonsEnableCmd = &cobra.Command{
 	Use:   "enable ADDON_NAME",
-	Short: "Enables the specified addon.",
-	Long:  "Enables the specified addon to be run after cluster creation.",
+	Short: "Enables the specified add-on.",
+	Long:  "Enables the specified add-on and applies the add-on the next time a cluster is created.",
 	Run:   runEnableAddon,
 }
 
 func init() {
-	addonsEnableCmd.Flags().IntVar(&priority, priorityFlag, 0, "The priority of this addon during addon execution.")
+	addonsEnableCmd.Flags().IntVar(&priority, priorityFlag, 0, "The priority of the add-on when it is applied.")
 	AddonsCmd.AddCommand(addonsEnableCmd)
 }
 
@@ -65,7 +65,7 @@ func runEnableAddon(cmd *cobra.Command, args []string) {
 func enableAddon(addOnManager *manager.AddOnManager, addonName string, priority int) {
 	addOnConfig, err := addOnManager.Enable(addonName, priority)
 	if err != nil {
-		fmt.Println(fmt.Sprintf("Unable to enable plugin %s: %s", addonName, err.Error()))
+		fmt.Println(fmt.Sprintf("Unable to enable add-on %s: %s", addonName, err.Error()))
 		atexit.Exit(1)
 	}
 

@@ -23,7 +23,9 @@ Topics:
         File: index
       - Name: Managing Minishift
         File: managing-minishift
-      - Name: Interacting with Openshift
+      - Name: Add-ons
+        File: addons
+      - Name: Interacting with OpenShift
         File: interacting-with-openshift
       - Name: Minishift Docker daemon
         File: docker-daemon

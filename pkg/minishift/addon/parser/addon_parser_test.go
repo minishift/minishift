@@ -118,7 +118,7 @@ func Test_empty_lines_and_comments_in_content_are_ignored(t *testing.T) {
 	}
 }
 
-func Test_Addon_with_unknown_command_returns_error(t *testing.T) {
+func Test_addon_with_unknown_command_returns_error(t *testing.T) {
 	_, _, err := testParser.parseAddOnContent(strings.NewReader(addOnWithUnknownCommand))
 
 	if err == nil {

@@ -22,6 +22,7 @@ import (
 	"os"
 
 	"github.com/docker/machine/libmachine"
+	"github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
@@ -43,11 +44,7 @@ func runDelete(cmd *cobra.Command, args []string) {
 	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 	defer api.Close()
 
-	exists, _ := api.Exists(constants.MachineName)
-	if !exists {
-		fmt.Println("Currently no Minishift VM defined.")
-		return
-	}
+	util.ExitIfUndefined(api, constants.MachineName)
 
 	fmt.Println("Deleting the Minishift VM...")
 	if err := cluster.DeleteHost(api); err != nil {
@@ -58,7 +55,7 @@ func runDelete(cmd *cobra.Command, args []string) {
 		atexit.ExitWithMessage(1, fmt.Sprintln(fmt.Sprintf("Error deleting %s: ", minishiftConfig.InstanceConfig.FilePath), err))
 	}
 
-	exists = filehelper.Exists(constants.KubeConfigPath)
+	exists := filehelper.Exists(constants.KubeConfigPath)
 	if exists {
 		if err := os.Remove(constants.KubeConfigPath); err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting '%s'", constants.KubeConfigPath))

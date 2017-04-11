@@ -17,13 +17,12 @@ limitations under the License.
 package cli
 
 import (
-	"bytes"
-	"io"
 	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
 
+	"fmt"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/viper"
@@ -35,63 +34,57 @@ func SetupTmpMinishiftHome(t *testing.T) string {
 	var err error
 	testDir, err := ioutil.TempDir("", "minishift-test-addon-install-cmd-")
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	constants.Minipath = testDir
 
 	return testDir
 }
 
-// CaptureStreamOut creates a pipe to capture standard output/Error and returns the original handle to stdout/stderr as well
-// as a file handles for the created pipe depend on expectedExitCode.
-func CaptureStreamOut(t *testing.T, expectedExitCode int) (*os.File, *os.File, *os.File, *os.File) {
-	origStdout := os.Stdout
-	origStderr := os.Stderr
-	r, w, err := os.Pipe()
+// CreateTee splits the stdout and stderr in order to capture these streams into a buffer
+// during test execution. If silent is true, the original output streams are silenced.
+func CreateTee(t *testing.T, silent bool) *Tee {
+	tee, err := NewTee(silent)
 	if err != nil {
-		t.Error(err)
+		t.Fatalf("Unexpected error during setup: %s", err.Error())
 	}
-	if expectedExitCode == 0 {
-		os.Stdout = w
-	} else {
-		os.Stderr = w
-	}
-	return origStdout, origStderr, w, r
+	return tee
 }
 
-func CreateExitHandlerFunc(t *testing.T, streamWriter *os.File, streamReader *os.File, expectedExitCode int, expectedErrorMessage string) func(int) int {
-	var exitHandler func(int) int
-	exitHandler = func(code int) int {
-		streamWriter.Close()
+func CreateExitHandlerFunc(t *testing.T, tee *Tee, expectedExitCode int, expectedErrorMessage string) func(int) bool {
+	var exitHandler func(int) bool
+	exitHandler = func(code int) bool {
+		tee.Close()
 
-		var buffer bytes.Buffer
-		io.Copy(&buffer, streamReader)
+		var actualOutput string
+		if code == 0 {
+			actualOutput = tee.StdoutBuffer.String()
+		} else {
+			actualOutput = tee.StderrBuffer.String()
+		}
 
-		if !strings.HasPrefix(buffer.String(), expectedErrorMessage) {
-			t.Fatalf("Expected error '%s'. Got '%s'.", expectedErrorMessage, buffer.String())
+		if !strings.HasPrefix(actualOutput, expectedErrorMessage) {
+			t.Fatalf("Expected error '%s'. Got '%s'.", expectedErrorMessage, tee.StderrBuffer.String())
 		}
 
 		if code != expectedExitCode {
 			t.Fatalf("Expected exit code %d. Got %d.", expectedExitCode, code)
 		}
 
-		return 0
+		return true
 	}
 	return exitHandler
 }
 
-func TearDown(testDir string, origStdout *os.File, origStderr *os.File) {
+func TearDown(testDir string, tee *Tee) {
+	tee.Close()
 	os.RemoveAll(testDir)
-	resetOriginalStdoutFileHandle(origStdout)
-	resetOriginalStderrFileHandle(origStderr)
 	viper.Reset()
 	atexit.ClearExitHandler()
-}
-
-func resetOriginalStdoutFileHandle(origStdout *os.File) {
-	os.Stdout = origStdout
-}
-
-func resetOriginalStderrFileHandle(origStderr *os.File) {
-	os.Stderr = origStderr
+	if r := recover(); r != nil {
+		reason := fmt.Sprint(r)
+		if reason != atexit.ExitHandlerPanicMessage {
+			fmt.Println("Recovered from panic:", r)
+		}
+	}
 }

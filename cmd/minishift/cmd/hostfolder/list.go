@@ -18,6 +18,7 @@ package hostfolder
 
 import (
 	"github.com/docker/machine/libmachine"
+	"github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	hostfolderActions "github.com/minishift/minishift/pkg/minishift/hostfolder"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
@@ -31,12 +32,15 @@ var hostfolderListCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()
+
+		util.ExitIfUndefined(api, constants.MachineName)
+
 		host, err := api.Load(constants.MachineName)
 		if err != nil {
 			atexit.ExitWithMessage(1, err.Error())
 		}
 
-		isRunning := isHostRunning(host.Driver)
+		isRunning := util.IsHostRunning(host.Driver)
 		err = hostfolderActions.List(host.Driver, isRunning)
 		if err != nil {
 			atexit.ExitWithMessage(1, err.Error())

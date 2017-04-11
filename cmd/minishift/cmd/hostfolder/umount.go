@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/docker/machine/libmachine"
+	"github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	hostfolderActions "github.com/minishift/minishift/pkg/minishift/hostfolder"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
@@ -37,14 +38,15 @@ var hostfolderUmountCmd = &cobra.Command{
 
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()
+
+		util.ExitIfUndefined(api, constants.MachineName)
+
 		host, err := api.Load(constants.MachineName)
 		if err != nil {
 			atexit.ExitWithMessage(1, err.Error())
 		}
 
-		if !isHostRunning(host.Driver) {
-			atexit.ExitWithMessage(1, "Host is not running.")
-		}
+		util.ExitIfNotRunning(host.Driver)
 
 		err = hostfolderActions.Umount(host.Driver, args[0])
 		if err != nil {

@@ -17,26 +17,29 @@ limitations under the License.
 package openshift
 
 import (
+	"github.com/minishift/minishift/pkg/testing/cli"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"testing"
 )
 
 func Test_view_commands_needs_existing_vm(t *testing.T) {
-	setup(t)
-	defer tearDown()
+	tmpMinishiftHomeDir := cli.SetupTmpMinishiftHome(t)
+	tee := cli.CreateTee(t, true)
+	defer cli.TearDown(tmpMinishiftHomeDir, tee)
 
-	atexit.RegisterExitHandler(createExitHandlerFunc(t, 1, nonExistentMachineError))
+	atexit.RegisterExitHandler(cli.CreateExitHandlerFunc(t, tee, 1, nonExistentMachineError))
 
 	target = "master"
 	runViewConfig(nil, nil)
 }
 
 func Test_unknown_config_target_aborts_view_command(t *testing.T) {
-	setup(t)
-	defer tearDown()
+	tmpMinishiftHomeDir := cli.SetupTmpMinishiftHome(t)
+	tee := cli.CreateTee(t, true)
+	defer cli.TearDown(tmpMinishiftHomeDir, tee)
 
-	atexit.RegisterExitHandler(createExitHandlerFunc(t, 1, unknownPatchTargetError))
+	atexit.RegisterExitHandler(cli.CreateExitHandlerFunc(t, tee, 1, unknownConfigTargetError))
 
-	target = "foo"
+	configTarget = "foo"
 	runViewConfig(nil, nil)
 }

@@ -21,14 +21,18 @@ import (
 
 	"github.com/minishift/minishift/pkg/testing/cli"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
+	"os"
+	"path/filepath"
 )
 
-func Test_view_commands_needs_existing_vm(t *testing.T) {
+func Test_source_of_addon_must_be_specified(t *testing.T) {
 	tmpMinishiftHomeDir := cli.SetupTmpMinishiftHome(t)
-	origStdout, origStderr, streamWriter, streamReader := cli.CaptureStreamOut(t, 1)
-	defer cli.TearDown(tmpMinishiftHomeDir, origStdout, origStderr)
+	os.Mkdir(filepath.Join(tmpMinishiftHomeDir, "addons"), 0777)
 
-	atexit.RegisterExitHandler(cli.CreateExitHandlerFunc(t, streamWriter, streamReader, 1, unspecifiedSourceError))
+	tee := cli.CreateTee(t, true)
+	defer cli.TearDown(tmpMinishiftHomeDir, tee)
 
-	runInstallAddon(nil, nil)
+	atexit.RegisterExitHandler(cli.CreateExitHandlerFunc(t, tee, 1, unspecifiedSourceError))
+
+	runInstallAddon(nil, []string{})
 }

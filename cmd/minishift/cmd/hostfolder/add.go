@@ -34,8 +34,8 @@ var (
 
 var hostfolderAddCmd = &cobra.Command{
 	Use:   "add HOSTFOLDER_NAME",
-	Short: "Add a host folder definition",
-	Long:  `Add a host folder definition that can be mounted to a running cluster`,
+	Short: "Adds a host folder definition.",
+	Long:  `Adds a host folder definition. The defined host folder can be mounted to a running OpenShift cluster.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		var err error = nil
@@ -44,7 +44,7 @@ var hostfolderAddCmd = &cobra.Command{
 			err = hostfolderActions.SetupUsers(true)
 		} else {
 			if len(args) < 1 {
-				fmt.Fprintln(os.Stderr, "usage: minishift hostfolder add HOSTFOLDER_NAME")
+				fmt.Fprintln(os.Stderr, "Usage: minishift hostfolder add HOSTFOLDER_NAME")
 				atexit.Exit(1)
 			}
 			err = hostfolderActions.Add(args[0], !instanceOnly)
@@ -59,10 +59,10 @@ var hostfolderAddCmd = &cobra.Command{
 
 func init() {
 	HostfolderCmd.AddCommand(hostfolderAddCmd)
-	hostfolderAddCmd.Flags().BoolVarP(&instanceOnly, "instance-only", "", false, "Define host folder only for the current cluster instance.")
+	hostfolderAddCmd.Flags().BoolVarP(&instanceOnly, "instance-only", "", false, "Defines the host folder only for the current OpenShift cluster.")
 
 	// Windows-only
 	if runtime.GOOS == "windows" {
-		hostfolderAddCmd.Flags().BoolVarP(&usersShare, "users-share", "", false, "Define host folder for the Users share on a Windows host.")
+		hostfolderAddCmd.Flags().BoolVarP(&usersShare, "users-share", "", false, "Defines the shared Users folder as the host folder on a Windows host.")
 	}
 }

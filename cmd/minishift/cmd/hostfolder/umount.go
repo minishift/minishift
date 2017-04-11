@@ -30,8 +30,8 @@ import (
 
 var hostfolderUmountCmd = &cobra.Command{
 	Use:   "umount HOSTFOLDER_NAME",
-	Short: "Unmount a host folder from the running cluster",
-	Long:  `Unmount a host folder from the running cluster`,
+	Short: "Unmount a host folder from the running OpenShift cluster.",
+	Long:  `Unmount a host folder from the running OpenShift cluster. This command does not remove the host folder definition or the host folder itself.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 1 {
 			fmt.Fprintln(os.Stderr, "Usage: minishift hostfolder umount HOSTFOLDER_NAME")

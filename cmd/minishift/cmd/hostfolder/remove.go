@@ -28,11 +28,11 @@ import (
 
 var hostfolderRemoveCmd = &cobra.Command{
 	Use:   "remove HOSTFOLDER_NAME",
-	Short: "Remove a host folder definition",
-	Long:  `Remove a host folder definition`,
+	Short: "Removes the specified host folder definition.",
+	Long:  `Removes the specified host folder definition. This command does not remove the host folder or any data.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 1 {
-			fmt.Fprintln(os.Stderr, "usage: minishift hostfolder remove HOSTFOLDER_NAME")
+			fmt.Fprintln(os.Stderr, "Usage: minishift hostfolder remove HOSTFOLDER_NAME")
 			atexit.Exit(1)
 		}
 

@@ -29,8 +29,8 @@ func isHostRunning(driver drivers.Driver) bool {
 
 var HostfolderCmd = &cobra.Command{
 	Use:   "hostfolder SUBCOMMAND [flags]",
-	Short: "Manage and control host folders for use by the OpenShift cluster.",
-	Long:  `Manage and control host folders for use by the OpenShift cluster.`,
+	Short: "Manages host folders for use by the OpenShift cluster.",
+	Long:  `Manages host folders for use by the OpenShift cluster. Use the sub-commands to define, mount, unmount, and list host folders.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

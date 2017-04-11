@@ -28,8 +28,8 @@ import (
 
 var hostfolderListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List an overview of defined host folders",
-	Long:  `List an overview of defined host folders that can be mounted to a running cluster`,
+	Short: "Lists the defined host folders.",
+	Long:  `Lists an overview of the defined host folders that can be mounted to a running OpenShift cluster.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()

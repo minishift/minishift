@@ -22,8 +22,8 @@ import (
 
 var AddonsCmd = &cobra.Command{
 	Use:   "addons SUBCOMMAND [flags]",
-	Short: "Manage Minishift addons",
-	Long:  "Install, list, enable or disable Minishift addons",
+	Short: "Manages Minishift add-ons",
+	Long:  "Manages Minishift add-ons. You can install, list, enable or disable Minishift add-ons.",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

@@ -38,7 +38,7 @@ func GetAddOnManager() *manager.AddOnManager {
 	addOnConfigs := getAddOnConfiguration()
 	m, err := manager.NewAddOnManager(constants.MakeMiniPath("addons"), addOnConfigs)
 	if err != nil {
-		glog.Errorln("Unable to initialise addon manager.", err)
+		glog.Errorln("Unable to initialize the add-on manager.", err)
 		atexit.Exit(1)
 	}
 
@@ -48,7 +48,7 @@ func GetAddOnManager() *manager.AddOnManager {
 func GetExecutionContext(ip string, routingSuffix string, ocPath string, kubeConfigPath string, sshCommander provision.SSHCommander) *command.ExecutionContext {
 	context, err := command.NewExecutionContext(ocPath, kubeConfigPath, sshCommander)
 	if err != nil {
-		glog.Errorln("Unable to initialise execution context.", err)
+		glog.Errorln("Unable to initialize the execution context.", err)
 		atexit.Exit(1)
 	}
 
@@ -61,7 +61,7 @@ func GetExecutionContext(ip string, routingSuffix string, ocPath string, kubeCon
 func writeAddOnConfig(addOnConfigMap map[string]*addon.AddOnConfig) {
 	c, err := config.ReadConfig()
 	if err != nil {
-		glog.Errorln("Unable to read Minishift configuration.", err)
+		glog.Errorln("Unable to read the Minishift configuration.", err)
 		atexit.Exit(1)
 	}
 
@@ -69,7 +69,7 @@ func writeAddOnConfig(addOnConfigMap map[string]*addon.AddOnConfig) {
 
 	err = config.WriteConfig(c)
 	if err != nil {
-		glog.Errorln("Unable to write Minishift configuration.", err)
+		glog.Errorln("Unable to write the Minishift configuration.", err)
 		atexit.Exit(1)
 	}
 }
@@ -79,7 +79,7 @@ func writeAddOnConfig(addOnConfigMap map[string]*addon.AddOnConfig) {
 func getAddOnConfiguration() map[string]*addon.AddOnConfig {
 	c, err := config.ReadConfig()
 	if err != nil {
-		glog.Errorln("Unable to read Minishift configuration.", err)
+		glog.Errorln("Unable to read the Minishift configuration.", err)
 		atexit.Exit(1)
 	}
 

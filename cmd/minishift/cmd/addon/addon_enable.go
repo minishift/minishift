@@ -55,8 +55,7 @@ func runEnableAddon(cmd *cobra.Command, args []string) {
 	addOnManager := GetAddOnManager()
 
 	if !addOnManager.IsInstalled(addonName) {
-		fmt.Println(fmt.Sprintf(noAddOnToEnableMessage, addonName))
-		return
+		atexit.ExitWithMessage(0, fmt.Sprintf(noAddOnToEnableMessage, addonName))
 	}
 
 	enableAddon(addOnManager, addonName, priority)

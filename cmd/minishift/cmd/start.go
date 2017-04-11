@@ -30,6 +30,7 @@ import (
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/cmd/minishift/cmd/addon"
+	cmdutil "github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minikube/kubeconfig"
@@ -158,10 +159,7 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	fmt.Printf("Starting local OpenShift cluster using '%s' hypervisor...\n", config.VMDriver)
 
-	isRestart, err := libMachineClient.Exists(constants.MachineName)
-	if err != nil {
-		fmt.Println("Not able to get Machine state: ", err)
-	}
+	isRestart := cmdutil.VMExists(libMachineClient, constants.MachineName)
 
 	var host *host.Host
 	start := func() (err error) {
@@ -171,7 +169,7 @@ func runStart(cmd *cobra.Command, args []string) {
 		}
 		return err
 	}
-	err = util.Retry(3, start)
+	err := util.Retry(3, start)
 	if err != nil {
 		fmt.Println("Error starting the VM: ", err)
 		atexit.Exit(1)

@@ -18,14 +18,7 @@ package hostfolder
 
 import (
 	"github.com/spf13/cobra"
-
-	"github.com/docker/machine/libmachine/drivers"
-	"github.com/docker/machine/libmachine/state"
 )
-
-func isHostRunning(driver drivers.Driver) bool {
-	return drivers.MachineInState(driver, state.Running)()
-}
 
 var HostfolderCmd = &cobra.Command{
 	Use:   "hostfolder SUBCOMMAND [flags]",

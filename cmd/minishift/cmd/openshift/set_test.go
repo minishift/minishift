@@ -19,37 +19,28 @@ package openshift
 import (
 	"testing"
 
-	"bytes"
-	"io"
-	"io/ioutil"
-	"os"
-	"strings"
-
-	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
-	"github.com/spf13/viper"
+
+	"github.com/minishift/minishift/pkg/testing/cli"
 )
 
-var testDir string
-var r *os.File
-var w *os.File
-var origStdout *os.File
-
 func Test_unknown_patch_target_aborts_command(t *testing.T) {
-	setup(t)
-	defer tearDown()
+	tmpMinishiftHomeDir := cli.SetupTmpMinishiftHome(t)
+	tee := cli.CreateTee(t, true)
+	defer cli.TearDown(tmpMinishiftHomeDir, tee)
 
-	atexit.RegisterExitHandler(createExitHandlerFunc(t, 1, unknownPatchTargetError))
+	atexit.RegisterExitHandler(cli.CreateExitHandlerFunc(t, tee, 1, unknownPatchTargetError))
 
 	target = "foo"
 	runPatch(nil, nil)
 }
 
 func Test_patch_cannot_be_empty(t *testing.T) {
-	setup(t)
-	defer tearDown()
+	tmpMinishiftHomeDir := cli.SetupTmpMinishiftHome(t)
+	tee := cli.CreateTee(t, true)
+	defer cli.TearDown(tmpMinishiftHomeDir, tee)
 
-	atexit.RegisterExitHandler(createExitHandlerFunc(t, 1, emptyPatchError))
+	atexit.RegisterExitHandler(cli.CreateExitHandlerFunc(t, tee, 1, emptyPatchError))
 
 	target = "master"
 	patch = ""
@@ -57,10 +48,11 @@ func Test_patch_cannot_be_empty(t *testing.T) {
 }
 
 func Test_patch_needs_to_be_valid_JSON(t *testing.T) {
-	setup(t)
-	defer tearDown()
+	tmpMinishiftHomeDir := cli.SetupTmpMinishiftHome(t)
+	tee := cli.CreateTee(t, true)
+	defer cli.TearDown(tmpMinishiftHomeDir, tee)
 
-	atexit.RegisterExitHandler(createExitHandlerFunc(t, 1, invalidJSONError))
+	atexit.RegisterExitHandler(cli.CreateExitHandlerFunc(t, tee, 1, invalidJSONError))
 
 	target = "master"
 	patch = "foo"
@@ -68,60 +60,13 @@ func Test_patch_needs_to_be_valid_JSON(t *testing.T) {
 }
 
 func Test_patch_commands_needs_existing_vm(t *testing.T) {
-	setup(t)
-	defer tearDown()
+	tmpMinishiftHomeDir := cli.SetupTmpMinishiftHome(t)
+	tee := cli.CreateTee(t, true)
+	defer cli.TearDown(tmpMinishiftHomeDir, tee)
 
-	atexit.RegisterExitHandler(createExitHandlerFunc(t, 1, nonExistentMachineError))
+	atexit.RegisterExitHandler(cli.CreateExitHandlerFunc(t, tee, 1, nonExistentMachineError))
 
 	target = "master"
 	patch = "{\"corsAllowedOrigins\": \"*\"}"
 	runPatch(nil, nil)
-}
-
-func resetOriginalFileHandle() {
-	os.Stdout = origStdout
-}
-
-func setup(t *testing.T) {
-	var err error
-	testDir, err = ioutil.TempDir("", "minishift-test-patch-cmd-")
-	if err != nil {
-		t.Error(err)
-	}
-
-	origStdout = os.Stdout
-	r, w, err = os.Pipe()
-	if err != nil {
-		t.Error(err)
-	}
-	os.Stderr = w
-
-	constants.Minipath = testDir
-}
-
-func tearDown() {
-	os.RemoveAll(testDir)
-	resetOriginalFileHandle()
-	viper.Reset()
-	atexit.ClearExitHandler()
-}
-
-func createExitHandlerFunc(t *testing.T, expectedExitCode int, expectedErrorMessage string) func(int) int {
-	var exitHandler func(int) int
-	exitHandler = func(code int) int {
-		w.Close()
-		var buffer bytes.Buffer
-		io.Copy(&buffer, r)
-
-		if !strings.HasPrefix(buffer.String(), expectedErrorMessage) {
-			t.Fatalf("Expected error '%s'. Got '%s'.", expectedErrorMessage, buffer.String())
-		}
-
-		if code != expectedExitCode {
-			t.Fatalf("Expected exit code %d. Got %d.", expectedExitCode, code)
-		}
-
-		return 0
-	}
-	return exitHandler
 }

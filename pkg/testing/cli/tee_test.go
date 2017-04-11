@@ -1,5 +1,5 @@
 /*
-Copyright 2016 The Kubernetes Authors All rights reserved.
+Copyright (C) 2017 Red Hat, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,20 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package openshift
+package cli
 
 import (
-	"github.com/minishift/minishift/pkg/testing/cli"
-	"github.com/minishift/minishift/pkg/util/os/atexit"
+	"fmt"
+	"os"
 	"testing"
 )
 
-func Test_restart_command_needs_existing_vm(t *testing.T) {
-	tmpMinishiftHomeDir := cli.SetupTmpMinishiftHome(t)
-	tee := cli.CreateTee(t, true)
-	defer cli.TearDown(tmpMinishiftHomeDir, tee)
+func Test_tee_captures_stdout_and_stderr(t *testing.T) {
+	tee, err := NewTee(true)
+	if err != nil {
+		t.Fatalf("Unexpected error: %s", err.Error())
+	}
 
-	atexit.RegisterExitHandler(cli.CreateExitHandlerFunc(t, tee, 1, nonExistentMachineError))
+	fmt.Fprint(os.Stdout, "Hello")
+	fmt.Fprint(os.Stderr, "world!")
 
-	runRestart(nil, nil)
+	tee.Close()
+
+	if tee.StdoutBuffer.String() != "Hello" {
+		t.Fatalf("Wrong stdout capture: '%s'", tee.StdoutBuffer.String())
+	}
+
+	if tee.StderrBuffer.String() != "world!" {
+		t.Fatalf("Wrong stderr capture: '%s'", tee.StderrBuffer.String())
+	}
 }

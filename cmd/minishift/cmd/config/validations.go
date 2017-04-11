@@ -24,7 +24,9 @@ import (
 	"strconv"
 
 	units "github.com/docker/go-units"
+	"github.com/docker/machine/libmachine"
 
+	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
@@ -38,7 +40,19 @@ func IsValidDriver(string, driver string) error {
 }
 
 func RequiresRestartMsg(string, string) error {
-	fmt.Fprintln(os.Stdout, "To apply the changes, you must delete the current VM with `minishift delete` and start a new VM with `minishift start`.")
+	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+	defer api.Close()
+
+	_, err := cluster.CheckIfApiExistsAndLoad(api)
+	if err != nil {
+		fmt.Fprintln(os.Stdout, "No Minishift VM exists. Settings will be applied on next `minishift start`")
+	} else {
+		fmt.Fprintln(os.Stdout, "Settings are only applied when a new Minishift instance is created. "+
+			"You currently have an existing VM. "+
+			"To apply the changes, "+
+			"you must delete the current VM with `minishift delete` "+
+			"and start a new VM with `minishift start`.")
+	}
 	return nil
 }
 

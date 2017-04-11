@@ -34,11 +34,11 @@ oc adm policy add-scc-to-group anyuid system:authenticated <4>
 <2> (Required) Description of the add-on.
 <3> Additional metadata and comments that are ignored by Minishift.
 <4> Actual add-on command. In this case, the command executes the _oc_ binary. For the full
-list of the supported add-on commands, see the <<section-addon-commands>>.
+list of the supported add-on commands, see the <<addon-commands>> section.
 
 NOTE: Comment lines can be inserted at anywhere in the file. Comment lines must start with the '#' character.
 
-Enabled add-ons (see <<section-enabling-disabling-addons>>) are be applied during
+Enabled add-ons (see <<enabling-disabling-addons>>) are be applied during
 link:../command-ref/minishift_start{outfilesuffix}[`minishift start`], immediately after the initial
 cluster provisioning is successfully completed.
 
@@ -46,7 +46,7 @@ cluster provisioning is successfully completed.
 == Add-on commands
 
 This section describes the command types that an add-on file can contain and what the commands do.
-The following command types are available, which form a sort of mini-DSL for add-ons:
+The following command types are available forming a sort of mini-DSL for add-ons:
 
 ssh::
 If the add-on command starts with _ssh_, you can run any command within the Minishift-managed VM.
@@ -82,13 +82,12 @@ NOTE: Trying to add a command that is not listed will cause an error when the ad
 === Variable interpolation
 
 Minishift also allows the use of variables as part of the supported commands.
-Variables have the from _#{<variable-name>}_. <<example-addon-variable>>
+Variables have the from _#{<variable-name>}_. <<example-addon-routing-variable>>
 shows how the routing suffix can be interpolated into a _openshift_ command
 to create a new certificate as part of securing the OpenShift registry.
 
 [[example-addon-routing-variable]]
 .Example: Usage of the routing suffix variable
-
 ----
 $ openshift admin ca create-server-cert \
   --signer-cert=/var/lib/origin/openshift.local.config/master/ca.crt \

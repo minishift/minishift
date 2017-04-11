@@ -5,7 +5,7 @@ include::variables.adoc[]
 :icons:
 :toc: macro
 :toc-title:
-:toclevels: 1
+:toclevels: 2
 
 toc::[]
 
@@ -19,7 +19,7 @@ interacting with and configuring your local OpenShift instance.
 For details about managing the Minishift VM, see the link:../using/managing-minishift{outfilesuffix}[Managing Minishift] section.
 
 [[openshift-client-binary]]
-== OpenShift client binary (oc)
+== Using the OpenShift client binary (oc)
 
 The `minishift start` command creates an OpenShift instance using the
 https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md[cluster up] approach.

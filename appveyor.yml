@@ -24,7 +24,6 @@ install:
 - choco install make
 
 build_script:
-- glide --tmp C:\tmp install -v
 - make cross test fmtcheck
 
 artifacts:

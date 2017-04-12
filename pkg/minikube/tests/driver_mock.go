@@ -27,10 +27,15 @@ import (
 // MockDriver is a struct used to mock out libmachine.Driver
 type MockDriver struct {
 	drivers.BaseDriver
-	CurrentState state.State
-	RemoveError  bool
-	HostError    bool
-	Port         int
+	CurrentState   state.State
+	RemoveError    bool
+	HostError      bool
+	Port           int
+	Boot2DockerURL string
+}
+
+func (driver *MockDriver) DriverName() string {
+	return "test"
 }
 
 // Create creates a MockDriver instance
@@ -45,7 +50,14 @@ func (driver *MockDriver) GetIP() (string, error) {
 
 // GetCreateFlags returns the flags used to create a MockDriver
 func (driver *MockDriver) GetCreateFlags() []mcnflag.Flag {
-	return []mcnflag.Flag{}
+	return []mcnflag.Flag{
+		mcnflag.StringFlag{
+			EnvVar: "TEST_BOOT2DOCKER_URL",
+			Name:   "test-boot2docker-url",
+			Usage:  "The URL of the boot2docker image. Defaults to the latest available version",
+			Value:  "",
+		},
+	}
 }
 
 func (driver *MockDriver) GetSSHPort() (int, error) {
@@ -97,6 +109,7 @@ func (driver *MockDriver) Restart() error {
 
 // SetConfigFromFlags sets the machine config
 func (driver *MockDriver) SetConfigFromFlags(opts drivers.DriverOptions) error {
+	driver.Boot2DockerURL = opts.String(fmt.Sprintf("%s-boot2docker-url", driver.DriverName()))
 	return nil
 }
 

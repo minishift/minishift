@@ -22,12 +22,17 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
-func createHypervHost(config MachineConfig) drivers.Driver {
+func createHypervHost(config MachineConfig) (drivers.Driver, error) {
 	d := hyperv.NewDriver(constants.MachineName, constants.Minipath)
 	d.Boot2DockerURL = config.GetISOFileURI()
 	d.MemSize = config.Memory
 	d.CPU = config.CPUs
 	d.DiskSize = int(config.DiskSize)
 	d.SSHUser = "docker"
-	return d
+
+	if err := setDriverOptionsFromEnvironment(d); err != nil {
+		return nil, err
+	}
+
+	return d, nil
 }

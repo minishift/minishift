@@ -197,13 +197,18 @@ func engineOptions(config MachineConfig) *engine.Options {
 	return &o
 }
 
-func createVirtualboxHost(config MachineConfig) drivers.Driver {
+func createVirtualboxHost(config MachineConfig) (drivers.Driver, error) {
 	d := virtualbox.NewDriver(constants.MachineName, constants.Minipath)
 	d.Boot2DockerURL = config.GetISOFileURI()
 	d.Memory = config.Memory
 	d.CPU = config.CPUs
 	d.DiskSize = int(config.DiskSize)
-	return d
+
+	if err := setDriverOptionsFromEnvironment(d); err != nil {
+		return nil, err
+	}
+
+	return d, nil
 }
 
 func (m *MachineConfig) CacheMinikubeISOFromURL() error {
@@ -283,6 +288,7 @@ func (m *MachineConfig) IsMinikubeISOCached() bool {
 
 func createHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 	var driver interface{}
+	var err error
 
 	if config.ShouldCacheMinikubeISO() {
 		if err := config.CacheMinikubeISOFromURL(); err != nil {
@@ -292,17 +298,21 @@ func createHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 
 	switch config.VMDriver {
 	case "virtualbox":
-		driver = createVirtualboxHost(config)
+		driver, err = createVirtualboxHost(config)
 	case "vmwarefusion":
-		driver = createVMwareFusionHost(config)
+		driver, err = createVMwareFusionHost(config)
 	case "kvm":
-		driver = createKVMHost(config)
+		driver, err = createKVMHost(config)
 	case "xhyve":
-		driver = createXhyveHost(config)
+		driver, err = createXhyveHost(config)
 	case "hyperv":
-		driver = createHypervHost(config)
+		driver, err = createHypervHost(config)
 	default:
 		glog.Exitf("Unsupported driver: %s\n", config.VMDriver)
+	}
+
+	if err != nil {
+		return nil, err
 	}
 
 	data, err := json.Marshal(driver)

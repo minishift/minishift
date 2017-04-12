@@ -36,7 +36,7 @@ func TestCreateHypervHostGeneratesCorrectIsoUrl(t *testing.T) {
 	isoPath := filepath.Join(constants.Minipath, "cache", "iso", "boot2docker.iso")
 	expectedURL := "file://" + filepath.ToSlash(isoPath)
 
-	d := createHypervHost(machineConfig)
+	d, _ := createHypervHost(machineConfig)
 	expectedDriver := "*hyperv.Driver"
 
 	if reflect.TypeOf(d).String() != expectedDriver {

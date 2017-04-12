@@ -22,7 +22,7 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
-func createVMwareFusionHost(config MachineConfig) drivers.Driver {
+func createVMwareFusionHost(config MachineConfig) (drivers.Driver, error) {
 	d := vmwarefusion.NewDriver(constants.MachineName, constants.Minipath).(*vmwarefusion.Driver)
 	d.Boot2DockerURL = config.GetISOFileURI()
 	d.Memory = config.Memory
@@ -31,7 +31,12 @@ func createVMwareFusionHost(config MachineConfig) drivers.Driver {
 	// TODO(philips): push these defaults upstream to fixup this driver
 	d.SSHPort = 22
 	d.ISO = d.ResolveStorePath("boot2docker.iso")
-	return d
+
+	if err := setDriverOptionsFromEnvironment(d); err != nil {
+		return nil, err
+	}
+
+	return d, nil
 }
 
 type xhyveDriver struct {
@@ -51,8 +56,8 @@ type xhyveDriver struct {
 	Virtio9pFolder string
 }
 
-func createXhyveHost(config MachineConfig) *xhyveDriver {
-	return &xhyveDriver{
+func createXhyveHost(config MachineConfig) (*xhyveDriver, error) {
+	d := &xhyveDriver{
 		BaseDriver: &drivers.BaseDriver{
 			MachineName: constants.MachineName,
 			StorePath:   constants.Minipath,
@@ -65,4 +70,6 @@ func createXhyveHost(config MachineConfig) *xhyveDriver {
 		Virtio9pFolder: "/Users",
 		UUID:           "F4BB3F79-AB4E-4708-95CA-E32FBFCDEFD3",
 	}
+
+	return d, nil
 }

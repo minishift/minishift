@@ -20,6 +20,6 @@ package cluster
 
 import "github.com/docker/machine/libmachine/drivers"
 
-func createHypervHost(config MachineConfig) drivers.Driver {
+func createHypervHost(config MachineConfig) (drivers.Driver, error) {
 	panic("hyperv is not supported")
 }

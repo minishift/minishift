@@ -39,8 +39,8 @@ type kvmDriver struct {
 	IOMode         string
 }
 
-func createKVMHost(config MachineConfig) *kvmDriver {
-	return &kvmDriver{
+func createKVMHost(config MachineConfig) (*kvmDriver, error) {
+	d := &kvmDriver{
 		BaseDriver: &drivers.BaseDriver{
 			MachineName: constants.MachineName,
 			StorePath:   constants.Minipath,
@@ -56,4 +56,6 @@ func createKVMHost(config MachineConfig) *kvmDriver {
 		CacheMode:      "default",
 		IOMode:         "threads",
 	}
+
+	return d, nil
 }

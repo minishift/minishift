@@ -127,6 +127,7 @@ The easiest way to change a persistent configuration option is with
 the link:../command-ref/minishift_config_set{outfilesuffix}[`config set`] sub-command. For example:
 
 [listing.console]
+
 ----
 # Set default memory 4096 MB
 $ minishift config set memory 4096
@@ -136,6 +137,7 @@ To view all persistent configuration values, you can use the
 link:../command-ref/minishift_config_view{outfilesuffix}[`view`] sub-command:
 
 [listing.console]
+
 ----
 $ minishift config view
 - memory: 4096
@@ -145,6 +147,7 @@ Alternatively, you can display a single value with the
 link:../command-ref/minishift_config_get{outfilesuffix}[`get`] sub-command:
 
 [listing.console]
+
 ----
 $ minishift config get memory
 4096
@@ -157,11 +160,12 @@ To remove a persistent configuration option, you can use the
 link:../command-ref/minishift_config_unset{outfilesuffix}[`unset`] sub-command. For example:
 
 [listing.console]
+
 ----
 $ minishift config unset memory
 ----
 
-[[ersistent-volumes]]
+[[persistent-volumes]]
 == Persistent Volumes
 
 As part of the <<interacting-with-openshift#openshift-client-binary,cluster up>> provisioning
@@ -184,6 +188,7 @@ flags during `minishift start`.
 For example:
 
 [listing.console]
+
 ----
 $ minishift start --http-proxy http://YOURPROXY:PORT --https-proxy https://YOURPROXY:PORT
 ----
@@ -192,9 +197,10 @@ In an authenticated proxy environment, the `proxy_user` and
 `proxy_password` must be a part of proxy URI.
 
 [listing.console]
+
 ----
  $ minishift start --http-proxy http://<proxy_username>:<proxy_password>@YOURPROXY:PORT \
-                   --https-proxy https://<proxy_username>:<proxy_password>YOURPROXY:PORT
+                   --https-proxy https://<proxy_username>:<proxy_password>@YOURPROXY:PORT
 ----
 
 You can also use the `--no-proxy` flag to specify a comma-separated list of hosts
@@ -208,117 +214,6 @@ NOTE: Using the proxy options requires that you run OpenShift version 1.5.0-alph
 Use the `openshift-version` option to request a specific version of OpenShift. You can list
 all Minishift-compatible OpenShift versions with
 the link:../command-ref/minishift_openshift_list-versions{outfilesuffix}[`minishift openshift list-versions`] command.
-
-[[mounted-host-folders]]
-== Host folders
-
-Some drivers mount a host folder within the VM so that you can share files between the VM and the host.
-These folders are not currently configurable, and are different for each driver and OS that you use.
-
-[cols=",,,",options="header",]
-|========================================
-|Driver |OS |HostFolder |VM
-|Virtualbox |Linux |/home |/hosthome
-|Virtualbox |OSX |/Users |/Users
-|Virtualbox |Windows |C://Users |/c/Users
-|VMWare Fusion |OSX |/Users |/Users
-|Xhyve |OSX |/Users |/Users
-|========================================
-
-NOTE: Host folder sharing is not implemented in the KVM and Hyper-V driver. You can
-link:#mounting-custom-shared-folders[mount a CIFS-based shared folder] inside the VM instead.
-
-[[mounting-custom-shared-folders]]
-=== Mounting custom shared folders
-
-The Minishift https://github.com/minishift/minishift-b2d-iso[Boot2Docker] ISO and the
-Minishift https://github.com/minishift/minishift-centos-iso[CentOS] ISO include `cifs-utils`
-and `fuse-sshfs`. These tools allows you to mount host folders using
-https://en.wikipedia.org/wiki/Server_Message_Block[CIFS]
-or https://en.wikipedia.org/wiki/SSHFS[SSHFS].
-
-NOTE: When you use the Boot2Docker ISO along with the VirtualBox driver, VirtualBox
-guest additions are automatically enabled and occupy the _/Users_ mountpoint as
-shown in the following examples. In this case you need to use a different mountpoint.
-
-[[cifs-folder-mount]]
-==== Mounting folders with CIFS
-
-In this example, you use CIFS-based sharing to mount `C:\Users` on a Windows host
-into the Minishift VM. On Windows 10, the `C:\Users` folder is shared by default
-and only needs locally-authenticated users.
-
-.  Find the local IP address from the same network segment as your
-Minishift instance.
-+
-----
-$ Get-NetIPAddress | Format-Table`
-----
-
-.  Create a mountpoint and mount the shared folder.
-+
-[listing.console]
-----
-$ minishift ssh "sudo mkdir -p /Users"
-$ minishift ssh "sudo mount -t cifs //[machine-ip]/Users /Users -o username=[username],password=[password],domain=$env:computername
-----
-+
-If no error appears, the mount succeeded.
-
-.  Verify the share mount.
-+
-[listing.console]
-----
-$ minishift ssh "ls -al /Users"
-----
-A successful mount will show a folder with the authenticated user name.
-
-[NOTE]
-====
-- If you use this method to mount the folder, you might encounter issues
-if your password string contains a `$` sign, because this is used by PowerShell
-as a variable to be replaced. You can use `'` (single quotes) instead and
-replace the value of `$env:computername` with the contents of this variable.
-
-- If your Windows account is linked to a Microsoft account, you must use
-the full Microsoft account email address to authenticate, your Microsoft account password,
-and the domain name of your machine that contains your computername parameter.
-====
-
-[[sshfs-folder-mount]]
-==== Mounting folders with SSHFS
-
-You can use SSHFS-based host folder mounts when you have an SSH daemon
-running on your host. Normally, this prerequisite is met by default on Linux and Mac OS X.
-
-Most Linux distributions have an SSH daemon installed. If not, follow the instructions
-for your specific distribution to install an SSH daemon. Mac OS X also has a built-in
-SSH server. To use it, make sure that _Remote Login_ is enabled in _System Preferences > Sharing_.
-
-On Windows, it is recommended to use link:#cifs-folder-mount[CIFS-based mount], but if
-you want to try SSHFS you can install https://winscp.net/eng/docs/guide_windows_openssh_server[OpenSSH for Windows].
-
-The following procedure shows an example of how to mount folders with SSHFS.
-
-. Run `ifconfig` (or `Get-NetIPAddress` on Windows) to determine the local IP
-address from the same network segment as your Minishift instance.
-
-.  Create a mountpoint and mount the shared folder.
-+
-[listing.console]
-----
-$ minishift ssh "sudo mkdir -p /Users/<username>"
-$ minishift ssh "sudo chown -R docker /Users"
-$ minishift ssh
-$ sshfs <username>@<IP>:/Users/<username>/ /Users
-----
-
-. Verify the share mount.
-+
-[listing.console]
-----
-$ minishift ssh "ls -al /Users/<username>"
-----
 
 [[networking]]
 == Networking

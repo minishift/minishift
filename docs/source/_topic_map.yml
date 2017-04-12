@@ -25,6 +25,8 @@ Topics:
         File: managing-minishift
       - Name: Add-ons
         File: addons
+      - Name: Host Folders
+        File: mounting-host-folders
       - Name: Interacting with OpenShift
         File: interacting-with-openshift
       - Name: Minishift Docker daemon

@@ -8,5 +8,5 @@ OpenShift cluster. It also helps troubleshooting common issues.
 - link:../using/managing-minishift{outfilesuffix}[Managing Minishift]
 - link:../using/addons{outfilesuffix}[Minishift Add-ons]
 - link:../using/interacting-with-openshift{outfilesuffix}[Interacting with OpenShift]
-- link:../using/reusing-docker-daemon{outfilesuffix}[Minishift Docker daemon]
+- link:../using/docker-daemon{outfilesuffix}[Minishift Docker daemon]
 - link:../using/troubleshooting{outfilesuffix}[Troubleshooting Minishift]

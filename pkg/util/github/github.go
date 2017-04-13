@@ -125,7 +125,7 @@ func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minis
 		return errors.Wrap(err, fmt.Sprintf("Cannot download OpenShift release asset %d", assetID))
 	}
 	if len(url) > 0 {
-		glog.V(2).Infof("Downloading %s %s\n", binaryType.String(), *release.TagName)
+		fmt.Println(fmt.Sprintf("Downloading OpenShift binary '%s' version '%s'", binaryType.String(), *release.TagName))
 		httpResp, err := http.Get(url)
 		if err != nil {
 			return errors.Wrap(err, "Cannot download OpenShift release asset.")

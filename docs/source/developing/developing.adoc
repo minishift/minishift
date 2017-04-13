@@ -112,17 +112,6 @@ This command calls and runs Glide. Alternatively, you can run the Glide command 
 $ glide install -v
 ----
 
-[NOTE]
-====
-On Windows you might encounter errors because some of the dependency path names are too long. +
-Workaround: Use a non-default `tmp` directory for Glide to shorten the path length.
-
-----
-$ mkdir c:\tmp
-$ glide --tmp C:\tmp install -v
-----
-====
-
 [[update-dependencies]]
 === Updating dependencies
 

@@ -19,31 +19,27 @@ package command
 import (
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 )
 
-type OcCommand struct {
+type EchoCommand struct {
 	*defaultCommand
 }
 
-func NewOcCommand(command string) *OcCommand {
+func NewEchoCommand(command string) *EchoCommand {
 	defaultCommand := &defaultCommand{rawCommand: command}
-	ocCommand := &OcCommand{defaultCommand}
-	defaultCommand.fn = ocCommand.doExecute
-	return ocCommand
+	echoCommand := &EchoCommand{defaultCommand}
+	defaultCommand.fn = echoCommand.doExecute
+	return echoCommand
 }
 
-func (c *OcCommand) doExecute(ec *ExecutionContext) error {
-	// split off the actual 'oc' command. We are using our cached oc version to run oc commands
-	cmd := strings.Replace(c.rawCommand, "oc ", "", 1)
-	cmd = ec.Interpolate(cmd)
-	fmt.Println("-- " + cmd)
+func (c *EchoCommand) doExecute(ec *ExecutionContext) error {
+	// split off the actual 'echo' command. As we need to print rest of the string
+	cmd := strings.Replace(c.rawCommand, "echo ", "", 1)
 
-	commander := ec.GetOcCommander()
-	exitStatus := commander.Run(ec.Interpolate(cmd), os.Stdout, os.Stdin)
-	if exitStatus != 0 {
-		return errors.New(fmt.Sprintf("Error executing command %s.", c.String()))
+	_, err := fmt.Println(cmd)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Error executing command '%s':", err.Error()))
 	}
 
 	return nil

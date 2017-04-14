@@ -18,9 +18,10 @@ package parser
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/minishift/minishift/pkg/minishift/addon/command"
 	"github.com/pkg/errors"
-	"strings"
 )
 
 const (
@@ -29,6 +30,7 @@ const (
 	openShiftCommand = "openshift"
 	sleepCommand     = "sleep"
 	sshCommand       = "ssh"
+	echoCommand      = "echo"
 )
 
 type CommandHandler interface {
@@ -114,6 +116,17 @@ type SSHCommandHandler struct {
 func (c *SSHCommandHandler) Parse(s string) command.Command {
 	if strings.HasPrefix(s, sshCommand) {
 		return command.NewSshCommand(s)
+	}
+	return nil
+}
+
+type EchoCommandHandler struct {
+	*defaultCommandHandler
+}
+
+func (c *EchoCommandHandler) Parse(s string) command.Command {
+	if strings.HasPrefix(s, echoCommand) {
+		return command.NewEchoCommand(s)
 	}
 	return nil
 }

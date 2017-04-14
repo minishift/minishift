@@ -44,6 +44,15 @@ Feature: Basic
     minishift
     """
 
+  Scenario: Persistent volumes should be listed when minishift start
+    When executing "oc get pv --as system:admin -o=name"
+    Then stderr should be empty
+     And exitcode should equal 0
+     And stdout should contain
+     """
+     persistentvolume/pv0001
+     """
+
   Scenario: User is able to do ssh into Minishift VM
     Given Minishift has state "Running"
      When executing "minishift ssh echo hello"

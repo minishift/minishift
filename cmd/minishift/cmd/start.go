@@ -72,6 +72,7 @@ const (
 	serverLogLevel    = "server-loglevel"
 	openshiftEnv      = "openshift-env"
 	metrics           = "metrics"
+	hostPvDir         = "host-pv-dir"
 
 	// Setting proxy
 	httpProxy   = "http-proxy"
@@ -104,6 +105,7 @@ var (
 	hostConfigDirectory  = "/var/lib/minishift/openshift.local.config"
 	hostDataDirectory    = "/var/lib/minishift/hostdata"
 	hostVolumesDirectory = "/var/lib/minishift/openshift.local.volumes"
+	hostPvDirectory      = "/var/lib/minishift/openshift.local.pv"
 )
 
 // startFlagSet contains the minishift specific command line switches
@@ -346,6 +348,7 @@ func initClusterUpFlags() {
 	clusterUpFlagSet.String(hostConfigDir, hostConfigDirectory, "Location of the OpenShift configuration on the Docker host.")
 	clusterUpFlagSet.String(hostVolumesDir, hostVolumesDirectory, "Location of the OpenShift volumes on the Docker host.")
 	clusterUpFlagSet.String(hostDataDir, hostDataDirectory, "Location of the OpenShift data on the Docker host. If not specified, etcd data will not be persisted on the host.")
+	clusterUpFlagSet.String(hostPvDir, hostPvDirectory, "Directory on Docker host for OpenShift persistent volumes")
 	clusterUpFlagSet.Bool(forwardPorts, false, "Use Docker port forwarding to communicate with the origin container. Requires 'socat' locally.")
 	clusterUpFlagSet.Int(serverLogLevel, 0, "Log level for the OpenShift server.")
 	clusterUpFlagSet.StringSliceVarP(&openShiftEnv, openshiftEnv, "e", []string{}, "Specify key-value pairs of environment variables to set on the OpenShift container.")
@@ -390,6 +393,7 @@ func clusterUp(config *cluster.MachineConfig, ip string) {
 	viper.Set(hostConfigDir, viper.GetString(hostConfigDir))
 	viper.Set(hostDataDir, viper.GetString(hostDataDir))
 	viper.Set(hostVolumesDir, viper.GetString(hostVolumesDir))
+	viper.Set(hostPvDir, viper.GetString(hostPvDir))
 
 	setDefaultRoutingPrefix(ip)
 

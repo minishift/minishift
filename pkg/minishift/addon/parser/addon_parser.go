@@ -19,15 +19,16 @@ package parser
 import (
 	"bufio"
 	"fmt"
-	"github.com/minishift/minishift/pkg/minishift/addon"
-	"github.com/minishift/minishift/pkg/minishift/addon/command"
-	"github.com/minishift/minishift/pkg/util/filehelper"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/minishift/minishift/pkg/minishift/addon"
+	"github.com/minishift/minishift/pkg/minishift/addon/command"
+	"github.com/minishift/minishift/pkg/util/filehelper"
 )
 
 const (
@@ -59,6 +60,9 @@ func NewAddOnParser() *AddOnParser {
 
 	sshHandler := &SSHCommandHandler{&defaultCommandHandler{}}
 	sleepHandler.SetNext(sshHandler)
+
+	echoHandler := &EchoCommandHandler{&defaultCommandHandler{}}
+	sshHandler.SetNext(echoHandler)
 
 	parser.handler = ocHandler
 

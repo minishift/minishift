@@ -112,6 +112,10 @@ func SetupUsers(allInstances bool) error {
 	username := util.ReadInputFromStdin("Username")
 	password := util.ReadPasswordFromStdin("Password")
 	domain := util.ReadInputFromStdin("Domain")
+	password, err := util.EncryptText(password)
+	if err != nil {
+		return err
+	}
 
 	// We only store this record for credentials purpose
 	addToConfig(newCifsHostFolder(
@@ -137,6 +141,10 @@ func Add(name string, allInstances bool) error {
 	username := util.ReadInputFromStdin("Username")
 	password := util.ReadPasswordFromStdin("Password")
 	domain := util.ReadInputFromStdin("Domain")
+	password, err := util.EncryptText(password)
+	if err != nil {
+		return err
+	}
 
 	addToConfig(newCifsHostFolder(
 		name,
@@ -308,12 +316,17 @@ func mountCifsHostfolder(driver drivers.Driver, hostfolder *config.HostFolder) e
 		return errors.New("Host folder is unreachable")
 	}
 
+	password, err := util.DecryptText(hostfolder.Options["password"])
+	if err != nil {
+		return err
+	}
+
 	cmd := fmt.Sprintf(
 		"sudo mount -t cifs %s %s -o username=%s,password=%s",
 		hostfolder.Options["uncpath"],
 		hostfolder.Mountpoint(),
 		hostfolder.Options["username"],
-		hostfolder.Options["password"])
+		password)
 
 	if len(hostfolder.Options["domain"]) > 0 { // != ""
 		cmd = fmt.Sprintf("%s,domain=%s", cmd, hostfolder.Options["domain"])

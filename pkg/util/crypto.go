@@ -18,17 +18,27 @@ package util
 
 import (
 	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/base64"
 	"encoding/pem"
+	"errors"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"math/big"
 	"net"
 	"os"
 	"path/filepath"
 	"time"
+)
+
+var (
+	encryptionKey = []byte("&WeL0veMiniShift4Ever!GophersWin")
 )
 
 // You may also specify additional subject alt names (either ip or dns names) for the certificate
@@ -88,4 +98,45 @@ func GenerateSelfSignedCert(certPath, keyPath string, ips []net.IP, alternateDNS
 	}
 
 	return nil
+}
+
+// Encrypt string to base64 crypto using AES
+func EncryptText(text string) (string, error) {
+	plaintext := []byte(text)
+	block, err := aes.NewCipher(encryptionKey)
+	if err != nil {
+		panic(err)
+	}
+
+	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
+	iv := ciphertext[:aes.BlockSize]
+	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+		return "", err
+	}
+
+	stream := cipher.NewCFBEncrypter(block, iv)
+	stream.XORKeyStream(ciphertext[aes.BlockSize:], plaintext)
+
+	// convert to base64
+	return base64.URLEncoding.EncodeToString(ciphertext), nil
+}
+
+// Decrypt from base64 to decrypted string
+func DecryptText(cryptoText string) (string, error) {
+	ciphertext, _ := base64.URLEncoding.DecodeString(cryptoText)
+
+	block, err := aes.NewCipher(encryptionKey)
+	if err != nil {
+		return "", nil
+	}
+	if len(ciphertext) < aes.BlockSize {
+		return "", errors.New("Ciphertext too short")
+	}
+	iv := ciphertext[:aes.BlockSize]
+	ciphertext = ciphertext[aes.BlockSize:]
+
+	stream := cipher.NewCFBDecrypter(block, iv)
+	stream.XORKeyStream(ciphertext, ciphertext)
+
+	return fmt.Sprintf("%s", ciphertext), nil
 }

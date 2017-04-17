@@ -74,6 +74,16 @@ Feature: Basic
       export "BAZ=BAT"
       """
 
+  Scenario: Checking OpenShift registry
+    Given Minishift has state "Running"
+     When executing "minishift openshift registry"
+     Then stderr should be empty
+      And exitcode should equal 0
+      And stdout should contain
+      """
+      172.30.1.1:5000
+      """
+
   Scenario: Stopping Minishift
     Given Minishift has state "Running"
      When executing "minishift stop"

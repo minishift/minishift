@@ -44,16 +44,18 @@ func runDisableAddon(cmd *cobra.Command, args []string) {
 		atexit.ExitWithMessage(1, emptyDisableError)
 	}
 
-	addonName := args[0]
+	addOnName := args[0]
 	addOnManager := GetAddOnManager()
 
-	if !addOnManager.IsInstalled(addonName) {
-		atexit.ExitWithMessage(0, fmt.Sprintf(noAddOnToDisableMessage, addonName))
+	if !addOnManager.IsInstalled(addOnName) {
+		atexit.ExitWithMessage(0, fmt.Sprintf(noAddOnToDisableMessage, addOnName))
 	}
 
-	addOnConfig, err := addOnManager.Disable(addonName)
+	addOnConfig, err := addOnManager.Disable(addOnName)
 	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to disable add-on %s: %s", addonName, err.Error()))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to disable add-on %s: %s", addOnName, err.Error()))
+	} else {
+		fmt.Println(fmt.Sprintf("Addon '%s' disabled", addOnName))
 	}
 
 	addOnConfigMap := getAddOnConfiguration()

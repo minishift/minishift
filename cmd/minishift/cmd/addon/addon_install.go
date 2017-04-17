@@ -78,7 +78,7 @@ func runInstallAddon(cmd *cobra.Command, args []string) {
 	if enable {
 		enableAddon(addOnManager, addOnName, 0)
 	}
-	fmt.Println(fmt.Sprintf("Addon %s installed", addOnName))
+	fmt.Println(fmt.Sprintf("Addon '%s' installed", addOnName))
 }
 
 func unpackAddons(dir string) {

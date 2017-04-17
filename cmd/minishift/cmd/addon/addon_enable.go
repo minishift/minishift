@@ -61,10 +61,12 @@ func runEnableAddon(cmd *cobra.Command, args []string) {
 	enableAddon(addOnManager, addonName, priority)
 }
 
-func enableAddon(addOnManager *manager.AddOnManager, addonName string, priority int) {
-	addOnConfig, err := addOnManager.Enable(addonName, priority)
+func enableAddon(addOnManager *manager.AddOnManager, addOnName string, priority int) {
+	addOnConfig, err := addOnManager.Enable(addOnName, priority)
 	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to enable add-on %s: %s", addonName, err.Error()))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to enable add-on %s: %s", addOnName, err.Error()))
+	} else {
+		fmt.Println(fmt.Sprintf("Addon '%s' enabled", addOnName))
 	}
 
 	addOnConfigMap := getAddOnConfiguration()

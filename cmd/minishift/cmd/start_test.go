@@ -17,10 +17,17 @@ limitations under the License.
 package cmd
 
 import (
-	minitesting "github.com/minishift/minishift/pkg/testing"
 	"testing"
 
+	minitesting "github.com/minishift/minishift/pkg/testing"
+
 	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"os"
+	"path/filepath"
+
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
@@ -28,11 +35,6 @@ import (
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/spf13/viper"
-	"io"
-	"io/ioutil"
-	"net/http"
-	"os"
-	"path/filepath"
 )
 
 var (
@@ -138,6 +140,7 @@ func TestStartClusterUpNoFlags(t *testing.T) {
 	expectedArguments := []string{"cluster", "up", "--use-existing-config",
 		"--host-config-dir", hostConfigDirectory,
 		"--host-data-dir", hostDataDirectory,
+		"--host-pv-dir", hostPvDirectory,
 		"--host-volumes-dir", hostVolumesDirectory,
 		"--routing-suffix", testIp + ".nip.io",
 	}
@@ -161,6 +164,7 @@ func TestStartClusterUpWithOverrideHostConfigDirFlag(t *testing.T) {
 	expectedArguments := []string{"cluster", "up", "--use-existing-config",
 		"--host-config-dir", "/var/tmp/foo",
 		"--host-data-dir", hostDataDirectory,
+		"--host-pv-dir", hostPvDirectory,
 		"--host-volumes-dir", hostVolumesDirectory,
 		"--routing-suffix", testIp + ".nip.io",
 	}
@@ -180,6 +184,7 @@ func TestStartClusterUpWithOverrideHostDataDirFlag(t *testing.T) {
 	expectedArguments := []string{"cluster", "up", "--use-existing-config",
 		"--host-config-dir", hostConfigDirectory,
 		"--host-data-dir", "/var/tmp/foo",
+		"--host-pv-dir", hostPvDirectory,
 		"--host-volumes-dir", hostVolumesDirectory,
 		"--routing-suffix", testIp + ".nip.io",
 	}
@@ -199,7 +204,28 @@ func TestStartClusterUpWithOverrideHostVolumesDirFlag(t *testing.T) {
 	expectedArguments := []string{"cluster", "up", "--use-existing-config",
 		"--host-config-dir", hostConfigDirectory,
 		"--host-data-dir", hostDataDirectory,
+		"--host-pv-dir", hostPvDirectory,
 		"--host-volumes-dir", "/var/tmp/foo",
+		"--routing-suffix", testIp + ".nip.io",
+	}
+	assertCommandLineArguments(expectedArguments, t)
+}
+
+func TestStartClusterUpWithOverrideHostPvDirFlag(t *testing.T) {
+	setUp(t)
+	defer os.RemoveAll(testDir)
+	defer minitesting.ResetDefaultRoundTripper()
+	defer SetRunner(util.RealRunner{})
+	defer viper.Reset()
+
+	viper.Set("host-pv-dir", "/var/tmp/foo")
+	clusterUp(&testMachineConfig, testIp)
+
+	expectedArguments := []string{"cluster", "up", "--use-existing-config",
+		"--host-config-dir", hostConfigDirectory,
+		"--host-data-dir", hostDataDirectory,
+		"--host-pv-dir", "/var/tmp/foo",
+		"--host-volumes-dir", hostVolumesDirectory,
 		"--routing-suffix", testIp + ".nip.io",
 	}
 	assertCommandLineArguments(expectedArguments, t)
@@ -219,6 +245,7 @@ func TestStartClusterUpWithFlag(t *testing.T) {
 	expectedArguments := []string{"cluster", "up", "--use-existing-config",
 		"--host-config-dir", hostConfigDirectory,
 		"--host-data-dir", hostDataDirectory,
+		"--host-pv-dir", hostPvDirectory,
 		"--host-volumes-dir", hostVolumesDirectory,
 		"--public-hostname", "foobar",
 		"--routing-suffix", testIp + ".nip.io",
@@ -273,6 +300,7 @@ func TestClusterUpWithProxyFlag(t *testing.T) {
 	expectedArguments := []string{"cluster", "up", "--use-existing-config",
 		"--host-config-dir", hostConfigDirectory,
 		"--host-data-dir", hostDataDirectory,
+		"--host-pv-dir", hostPvDirectory,
 		"--host-volumes-dir", hostVolumesDirectory,
 		"--http-proxy", "http://localhost:3128",
 		"--https-proxy", "https://localhost:3128",
@@ -296,6 +324,7 @@ func TestStartClusterUpWithOpenShiftEnv(t *testing.T) {
 	expectedArguments := []string{"cluster", "up", "--use-existing-config",
 		"--host-config-dir", hostConfigDirectory,
 		"--host-data-dir", hostDataDirectory,
+		"--host-pv-dir", hostPvDirectory,
 		"--host-volumes-dir", hostVolumesDirectory,
 		"--env", "HTTP_PROXY=http://localhost:3128,HTTP_PROXY_USER=foo,HTTP_PROXY_PASS=bar",
 		"--routing-suffix", testIp + ".nip.io",
@@ -384,6 +413,7 @@ func setUp(t *testing.T) {
 	viper.Set("host-config-dir", hostConfigDirectory)
 	viper.Set("host-data-dir", hostDataDirectory)
 	viper.Set("host-volumes-dir", hostVolumesDirectory)
+	viper.Set("host-pv-dir", hostPvDirectory)
 
 	provision.SetDetector(&tests.MockDetector{&tests.MockProvisioner{Provisioned: true}})
 }

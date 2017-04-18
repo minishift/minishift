@@ -19,6 +19,7 @@ package tests
 import (
 	"fmt"
 
+	"errors"
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/mcnflag"
 	"github.com/docker/machine/libmachine/state"
@@ -27,10 +28,15 @@ import (
 // MockDriver is a struct used to mock out libmachine.Driver
 type MockDriver struct {
 	drivers.BaseDriver
-	CurrentState state.State
-	RemoveError  bool
-	HostError    bool
-	Port         int
+	CurrentState   state.State
+	RemoveError    bool
+	HostError      bool
+	Port           int
+	Boot2DockerURL string
+}
+
+func (driver *MockDriver) DriverName() string {
+	return "test"
 }
 
 // Create creates a MockDriver instance
@@ -45,7 +51,20 @@ func (driver *MockDriver) GetIP() (string, error) {
 
 // GetCreateFlags returns the flags used to create a MockDriver
 func (driver *MockDriver) GetCreateFlags() []mcnflag.Flag {
-	return []mcnflag.Flag{}
+	return []mcnflag.Flag{
+		mcnflag.StringFlag{
+			EnvVar: "TEST_BOOT2DOCKER_URL",
+			Name:   "test-boot2docker-url",
+			Usage:  "The URL of the boot2docker image. Defaults to the latest available version",
+			Value:  "",
+		},
+		mcnflag.IntFlag{
+			EnvVar: "TEST_CPU_COUNT",
+			Name:   "test-cpu-count",
+			Usage:  "The cpu count of the VM",
+			Value:  0,
+		},
+	}
 }
 
 func (driver *MockDriver) GetSSHPort() (int, error) {
@@ -55,7 +74,7 @@ func (driver *MockDriver) GetSSHPort() (int, error) {
 // GetSSHHostname returns the hostname for SSH
 func (driver *MockDriver) GetSSHHostname() (string, error) {
 	if driver.HostError {
-		return "", fmt.Errorf("Error getting host.")
+		return "", errors.New("Error getting host.")
 	}
 	return "localhost", nil
 }
@@ -84,7 +103,7 @@ func (driver *MockDriver) Kill() error {
 // Remove removes the machine
 func (driver *MockDriver) Remove() error {
 	if driver.RemoveError {
-		return fmt.Errorf("Error deleting machine.")
+		return errors.New("Error deleting machine.")
 	}
 	return nil
 }
@@ -97,6 +116,7 @@ func (driver *MockDriver) Restart() error {
 
 // SetConfigFromFlags sets the machine config
 func (driver *MockDriver) SetConfigFromFlags(opts drivers.DriverOptions) error {
+	driver.Boot2DockerURL = opts.String(fmt.Sprintf("%s-boot2docker-url", driver.DriverName()))
 	return nil
 }
 

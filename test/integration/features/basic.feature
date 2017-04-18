@@ -44,7 +44,7 @@ Feature: Basic
     minishift
     """
 
-  Scenario: Persistent volumes should be listed when minishift start
+  Scenario: User has a pre-configured set of persitence volumnes
     When executing "oc get pv --as system:admin -o=name"
     Then stderr should be empty
      And exitcode should equal 0

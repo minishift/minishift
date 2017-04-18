@@ -126,7 +126,7 @@ command.
 The easiest way to change a persistent configuration option is with
 the link:../command-ref/minishift_config_set{outfilesuffix}[`config set`] sub-command. For example:
 
-[source,sh]
+[listing.console]
 ----
 # Set default memory 4096 MB
 $ minishift config set memory 4096
@@ -135,7 +135,7 @@ $ minishift config set memory 4096
 To view all persistent configuration values, you can use the
 link:../command-ref/minishift_config_view{outfilesuffix}[`view`] sub-command:
 
-[source,sh]
+[listing.console]
 ----
 $ minishift config view
 - memory: 4096
@@ -144,7 +144,7 @@ $ minishift config view
 Alternatively, you can display a single value with the
 link:../command-ref/minishift_config_get{outfilesuffix}[`get`] sub-command:
 
-[source,sh]
+[listing.console]
 ----
 $ minishift config get memory
 4096
@@ -156,10 +156,23 @@ $ minishift config get memory
 To remove a persistent configuration option, you can use the
 link:../command-ref/minishift_config_unset{outfilesuffix}[`unset`] sub-command. For example:
 
-[source,sh]
+[listing.console]
 ----
 $ minishift config unset memory
 ----
+
+[[ersistent-volumes]]
+== Persistent Volumes
+
+As part of the <<interacting-with-openshift#openshift-client-binary,cluster up>> provisioning
+100 link:https://docs.openshift.org/latest/dev_guide/persistent_volumes.html[persistent volumes] are created
+for your OpenShift cluster. This allows applications to make
+link:https://docs.openshift.org/latest/dev_guide/persistent_volumes.html#persistent-volumes-claims-as-volumes-in-pods[persistent volumes claims]. The location of the persistent data is determined via the _host-pv-dir_ flag
+of the link:../command-ref/minishift_start{outfilesuffix}[`start`] command and defaults to
+_/var/lib/minishift/openshift.local.pv_ on the Minishift VM.
+
+TIP: By specifying a directory for _host-pv-dir_ which is backed by a <<mounted-host-folders,mounted host folder>>,
+you can get the persistent data of your application onto your host file system.
 
 [[http-s-proxies]]
 == HTTP/HTTPS Proxies
@@ -170,7 +183,7 @@ flags during `minishift start`.
 
 For example:
 
-[source,sh]
+[listing.console]
 ----
 $ minishift start --http-proxy http://YOURPROXY:PORT --https-proxy https://YOURPROXY:PORT
 ----
@@ -178,7 +191,7 @@ $ minishift start --http-proxy http://YOURPROXY:PORT --https-proxy https://YOURP
 In an authenticated proxy environment, the `proxy_user` and
 `proxy_password` must be a part of proxy URI.
 
-[source,sh]
+[listing.console]
 ----
  $ minishift start --http-proxy http://<proxy_username>:<proxy_password>@YOURPROXY:PORT \
                    --https-proxy https://<proxy_username>:<proxy_password>YOURPROXY:PORT
@@ -244,7 +257,7 @@ $ Get-NetIPAddress | Format-Table`
 
 .  Create a mountpoint and mount the shared folder.
 +
-[source,sh]
+[listing.console]
 ----
 $ minishift ssh "sudo mkdir -p /Users"
 $ minishift ssh "sudo mount -t cifs //[machine-ip]/Users /Users -o username=[username],password=[password],domain=$env:computername
@@ -254,7 +267,7 @@ If no error appears, the mount succeeded.
 
 .  Verify the share mount.
 +
-[source,sh]
+[listing.console]
 ----
 $ minishift ssh "ls -al /Users"
 ----
@@ -292,7 +305,7 @@ address from the same network segment as your Minishift instance.
 
 .  Create a mountpoint and mount the shared folder.
 +
-[source,sh]
+[listing.console]
 ----
 $ minishift ssh "sudo mkdir -p /Users/<username>"
 $ minishift ssh "sudo chown -R docker /Users"
@@ -302,7 +315,7 @@ $ sshfs <username>@<IP>:/Users/<username>/ /Users
 
 . Verify the share mount.
 +
-[source,sh]
+[listing.console]
 ----
 $ minishift ssh "ls -al /Users/<username>"
 ----

@@ -48,17 +48,17 @@ version name of a given release.
 
 - [x] Ability to select the OpenShift version of the cluster https://github.com/minishift/minishift/issues/316[#141]
 - [x] HTTP Proxy Support https://github.com/minishift/minishift/issues/90[#90]
-- [ ] Consistent host folder mounting https://github.com/minishift/minishift/issues/316[#316], https://github.com/minishift/minishift/issues/317[#317]
 - [x] Exposure of the OpenShift registry https://github.com/minishift/minishift/issues/254[#254]
 - [x] Ability to configure/patch OpenShift's master and node configuration https://github.com/minishift/minishift/issues/276[#276]
 - [x] Ability to customize cluster (for example, adding templates and imagestreams) https://github.com/minishift/minishift/issues/177[#177]
 - [x] Add 'minishift' context https://github.com/minishift/minishift/issues/359[#359]
+- [x] Enable ability to use persistent volumes https://github.com/minishift/minishift/issues/389[#389]
 
 [[minishift-110]]
 === Minishift 1.1.0
 
+- [ ] Implement host folder mounts using sshfs https://github.com/minishift/minishift/issues/316[#316], https://github.com/minishift/minishift/issues/317[#317]
 - [ ] Add 'minishift login' command https://github.com/minishift/minishift/issues/349[#349]
-- [ ] Add persistence volume management command(s) https://github.com/minishift/minishift/issues/389[#389]
 - [ ] Ability to provide and use custom a host- and domain-name https://github.com/minishift/minishift/issues/201[#201]
 - [ ] Ability to manage users https://github.com/minishift/minishift/issues/390[#390]
 - [ ] Ability interactively select OpenShift version https://github.com/minishift/minishift/issues/197[#197]

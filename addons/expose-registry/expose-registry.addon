@@ -2,22 +2,14 @@
 # Description: Exposes the OpenShift internal registry as route
 # URL: https://docs.openshift.org/latest/install_config/registry/securing_and_exposing_registry.html
 
-oc expose service docker-registry -n default
-openshift admin ca create-server-cert --signer-cert=/var/lib/origin/openshift.local.config/master/ca.crt --signer-key=/var/lib/origin/openshift.local.config/master/ca.key --signer-serial=/var/lib/origin/openshift.local.config/master/ca.serial.txt --hostnames='docker-registry-default.#{routing-suffix},docker-registry.default.svc.cluster.local,172.30.1.1' --cert=/etc/secrets/registry.crt --key=/etc/secrets/registry.key
-openshift cli secrets new registry-secret /etc/secrets/registry.crt /etc/secrets/registry.key
-openshift cli secrets link registry registry-secret
-openshift cli secrets link default  registry-secret
-openshift cli volume dc/docker-registry --add --type=secret --secret-name=registry-secret -m /etc/secrets
-openshift cli set env dc/docker-registry REGISTRY_HTTP_TLS_CERTIFICATE=/etc/secrets/registry.crt REGISTRY_HTTP_TLS_KEY=/etc/secrets/registry.key
+openshift admin ca create-server-cert --signer-cert=/var/lib/origin/openshift.local.config/master/ca.crt --signer-key=/var/lib/origin/openshift.local.config/master/ca.key --signer-serial=/var/lib/origin/openshift.local.config/master/ca.serial.txt --hostnames='docker-registry-default.#{routing-suffix},docker-registry-default.#{routing-suffix}:443,docker-registry.default.svc.cluster.local,172.30.1.1' --cert=/etc/secrets/registry.crt --key=/etc/secrets/registry.key
+openshift cli create route edge docker-registry --service=docker-registry --ca-cert=/var/lib/origin/openshift.local.config/master/ca.crt --cert=/etc/secrets/registry.crt --key=/etc/secrets/registry.key --hostname='docker-registry-default.#{routing-suffix}'
 
-openshift cli patch dc/docker-registry -p '{"spec": {"template": {"spec": {"containers":[{"name":"registry","livenessProbe":  {"httpGet": {"scheme":"HTTPS"}}}]}}}}'
-openshift cli patch dc/docker-registry -p '{"spec": {"template": {"spec": {"containers":[{"name":"registry","readinessProbe":  {"httpGet": {"scheme":"HTTPS"}}}]}}}}'
+ssh sudo mkdir -p /etc/docker/certs.d/docker-registry-default.#{routing-suffix}:443
+ssh sudo chown docker /etc/docker/certs.d/docker-registry-default.#{routing-suffix}:443
 
 ssh sudo mkdir -p /etc/docker/certs.d/docker-registry-default.#{routing-suffix}
 ssh sudo chown docker /etc/docker/certs.d/docker-registry-default.#{routing-suffix}
 
-ssh sudo mkdir -p /etc/docker/certs.d/172.30.1.1:5000
-ssh sudo chown docker /etc/docker/certs.d/172.30.1.1:5000
-
+docker cp origin:/var/lib/origin/openshift.local.config/master/ca.crt /etc/docker/certs.d/docker-registry-default.#{routing-suffix}:443/ca.crt
 docker cp origin:/var/lib/origin/openshift.local.config/master/ca.crt /etc/docker/certs.d/docker-registry-default.#{routing-suffix}/ca.crt
-docker cp origin:/var/lib/origin/openshift.local.config/master/ca.crt /etc/docker/certs.d/172.30.1.1:5000/ca.crt

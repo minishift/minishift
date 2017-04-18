@@ -3,7 +3,7 @@
 :icons:
 :toc: macro
 :toc-title:
-:toclevels: 1
+:toclevels: 2
 
 toc::[]
 
@@ -18,6 +18,9 @@ When you use Minishift, you interact with two components:
 The following sections contain information about managing the Minishift VM.
 For details about using Minishift to manage your local OpenShift cluster,
 see the link:../using/interacting-with-openshift{outfilesuffix}[Interacting with OpenShift] section.
+
+[[minishift-life-cycle]]
+== Minishift life-cycle
 
 [[minishift-start-intro]]
 === Minishift start
@@ -164,6 +167,29 @@ link:../command-ref/minishift_config_unset{outfilesuffix}[`unset`] sub-command. 
 ----
 $ minishift config unset memory
 ----
+
+[[driver-specific-environment-variables]]
+=== Driver specific environment variables
+
+You can also specify driver specific environment variables. Each
+docker-machine driver supports its own set of options and variables. A good starting point is the
+official docker-machine link:https://docs.docker.com/machine/drivers/[driver documentation].
+xhyve and KVM documentation is available under their respective GitHub repository
+link:https://github.com/zchee/docker-machine-driver-xhyve[docker-machine-driver-xhyve]
+and https://github.com/dhiltgen/docker-machine-kvm[docker-machine-kvm].
+
+To use driver specific options make sure to export the variable as defined in its driver documentation
+prior to calling link:../command-ref/minishift_start{outfilesuffix}[`minishift start`]. For example,
+xhyve's experimental NFS sharing can be enabled by executing:
+
+----
+$ export XHYVE_EXPERIMENTAL_NFS_SHARE=true
+$ minishift start --vm-driver xhyve
+----
+
+CAUTION: Driver specific options might overlap with values specified using Minishift
+specific flags and environment variables. Examples are boot2docker URL, memory size, cpu count, etc.
+In this case driver specific environment variables will override Minishift specific settings.
 
 [[persistent-volumes]]
 == Persistent Volumes

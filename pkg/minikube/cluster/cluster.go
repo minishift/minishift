@@ -17,7 +17,6 @@ limitations under the License.
 package cluster
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -28,6 +27,8 @@ import (
 	"strings"
 	"time"
 
+	"encoding/json"
+	"github.com/docker/machine/drivers/hyperv"
 	"github.com/docker/machine/drivers/virtualbox"
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/drivers"
@@ -39,6 +40,8 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/registration"
 	minishiftUtil "github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/util"
+	minishiftOs "github.com/minishift/minishift/pkg/util/os"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
 	pb "gopkg.in/cheggaaa/pb.v1"
 )
 
@@ -188,7 +191,6 @@ type MachineConfig struct {
 }
 
 func engineOptions(config MachineConfig) *engine.Options {
-
 	o := engine.Options{
 		Env:              config.DockerEnv,
 		InsecureRegistry: config.InsecureRegistry,
@@ -197,13 +199,15 @@ func engineOptions(config MachineConfig) *engine.Options {
 	return &o
 }
 
-func createVirtualboxHost(config MachineConfig) drivers.Driver {
-	d := virtualbox.NewDriver(constants.MachineName, constants.Minipath)
-	d.Boot2DockerURL = config.GetISOFileURI()
-	d.Memory = config.Memory
-	d.CPU = config.CPUs
-	d.DiskSize = int(config.DiskSize)
-	return d
+func createDriverOptions(driver drivers.Driver, explicitOptions map[string]interface{}) (drivers.DriverOptions, error) {
+	supportedFlags := driver.GetCreateFlags()
+
+	checkFlags, err := prepareDriverOptions(supportedFlags, explicitOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	return checkFlags, nil
 }
 
 func (m *MachineConfig) CacheMinikubeISOFromURL() error {
@@ -282,38 +286,31 @@ func (m *MachineConfig) IsMinikubeISOCached() bool {
 }
 
 func createHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
-	var driver interface{}
-
 	if config.ShouldCacheMinikubeISO() {
 		if err := config.CacheMinikubeISOFromURL(); err != nil {
 			return nil, err
 		}
 	}
 
-	switch config.VMDriver {
-	case "virtualbox":
-		driver = createVirtualboxHost(config)
-	case "vmwarefusion":
-		driver = createVMwareFusionHost(config)
-	case "kvm":
-		driver = createKVMHost(config)
-	case "xhyve":
-		driver = createXhyveHost(config)
-	case "hyperv":
-		driver = createHypervHost(config)
-	default:
-		glog.Exitf("Unsupported driver: %s\n", config.VMDriver)
-	}
-
-	data, err := json.Marshal(driver)
+	driverOptions, err := getDriverOptions(config)
 	if err != nil {
 		return nil, err
 	}
 
-	h, err := api.NewHost(config.VMDriver, data)
+	rawDriver, err := json.Marshal(&drivers.BaseDriver{
+		MachineName: constants.MachineName,
+		StorePath:   constants.Minipath,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("Error attempting to marshal bare driver data: %s", err)
+	}
+
+	h, err := api.NewHost(config.VMDriver, rawDriver)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating new host: %s", err)
 	}
+
+	h.Driver.SetConfigFromFlags(driverOptions)
 
 	h.HostOptions.AuthOptions.CertDir = constants.Minipath
 	h.HostOptions.AuthOptions.StorePath = constants.Minipath
@@ -340,6 +337,100 @@ func createHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 	}
 
 	return h, nil
+}
+
+func getDriverOptions(config MachineConfig) (drivers.DriverOptions, error) {
+	switch config.VMDriver {
+	case "virtualbox":
+		d := virtualbox.NewDriver(constants.MachineName, constants.Minipath)
+		machineConfigOptions := map[string]interface{}{
+			"virtualbox-boot2docker-url": config.GetISOFileURI(),
+			"virtualbox-memory":          config.Memory,
+			"virtualbox-cpu-count":       config.CPUs,
+			"virtualbox-disk-size":       config.DiskSize,
+			"virtualbox-hostonly-cidr":   config.HostOnlyCIDR,
+		}
+
+		return createDriverOptions(d, machineConfigOptions)
+	case "vmwarefusion":
+		if minishiftOs.CurrentOS() != minishiftOs.DARWIN {
+			atexit.ExitWithMessage(1, "vmwarefusion driver is only supported on macOS hosts.")
+		}
+
+		api := libmachine.NewClient(constants.MachineName, constants.Minipath)
+		h, err := api.NewHost("vmwarefusion", []byte("{}"))
+		if err != nil {
+			return nil, err
+		}
+
+		machineConfigOptions := map[string]interface{}{
+			"vmwarefusion-boot2docker-url": config.GetISOFileURI(),
+			"vmwarefusion-memory-size":     config.Memory,
+			"vmwarefusion-cpu-count":       config.CPUs,
+		}
+
+		return createDriverOptions(h.Driver, machineConfigOptions)
+	case "xhyve":
+		if minishiftOs.CurrentOS() != minishiftOs.DARWIN {
+			atexit.ExitWithMessage(1, "xhyve driver is only supported on macOS hosts.")
+		}
+
+		api := libmachine.NewClient(constants.MachineName, constants.Minipath)
+		h, err := api.NewHost("xhyve", []byte("{}"))
+		if err != nil {
+			return nil, err
+		}
+
+		machineConfigOptions := map[string]interface{}{
+			"xhyve-boot2docker-url": config.GetISOFileURI(),
+			"xhyve-memory-size":     config.Memory,
+			"xhyve-cpu-count":       config.CPUs,
+			"xhyve-disk-size":       config.DiskSize,
+			"xhyve-virtio-9p":       "true",
+			"xhyve-uuid":            "F4BB3F79-AB4E-4708-95CA-E32FBFCDEFD3",
+		}
+
+		return createDriverOptions(h.Driver, machineConfigOptions)
+	case "kvm":
+		if minishiftOs.CurrentOS() != minishiftOs.LINUX {
+			atexit.ExitWithMessage(1, "kvm driver is only supported on GNU/Linux hosts.")
+		}
+
+		api := libmachine.NewClient(constants.MachineName, constants.Minipath)
+		h, err := api.NewHost("kvm", []byte("{}"))
+		if err != nil {
+			return nil, err
+		}
+
+		machineConfigOptions := map[string]interface{}{
+			"kvm-boot2docker-url": config.GetISOFileURI(),
+			"kvm-memory":          config.Memory,
+			"kvm-cpu-count":       config.CPUs,
+			"kvm-disk-size":       config.DiskSize,
+			"kvm-network":         "default",
+			"kvm-cache-mode":      "default",
+			"kvm-io-mode":         "threads",
+		}
+
+		return createDriverOptions(h.Driver, machineConfigOptions)
+	case "hyperv":
+		if minishiftOs.CurrentOS() != minishiftOs.WINDOWS {
+			atexit.ExitWithMessage(1, "hyperv driver is only supported on Windows hosts.")
+		}
+
+		d := hyperv.NewDriver(constants.MachineName, constants.Minipath)
+		machineConfigOptions := map[string]interface{}{
+			"hyperv-boot2docker-url": config.GetISOFileURI(),
+			"hyperv-memory":          config.Memory,
+			"hyperv-cpu-count":       config.CPUs,
+			"hyperv-disk-size":       config.DiskSize,
+		}
+
+		return createDriverOptions(d, machineConfigOptions)
+	default:
+		atexit.ExitWithMessage(1, fmt.Sprintf("Unsupported driver: %s", config.VMDriver))
+	}
+	return nil, nil
 }
 
 // GetHostDockerEnv gets the necessary docker env variables to allow the use of docker through minikube's vm

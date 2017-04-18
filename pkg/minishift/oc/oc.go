@@ -21,6 +21,7 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/util"
 
+	"github.com/minishift/minishift/pkg/util/cmd"
 	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/pkg/errors"
 	"io"
@@ -53,7 +54,7 @@ func NewOcRunner(ocPath string, kubeConfigPath string) (*OcRunner, error) {
 }
 
 func (oc *OcRunner) Run(command string, stdOut io.Writer, stdErr io.Writer) int {
-	args := strings.Split(command, " ")
+	args := cmd.SplitCmdString(command)
 
 	// make sure we run with our copy of kube config to not influence the user
 	args = append([]string{fmt.Sprintf("--config=%s", oc.kubeConfigPath)}, args...)

@@ -38,7 +38,7 @@ func (c *OcCommand) doExecute(ec *ExecutionContext) error {
 	// split off the actual 'oc' command. We are using our cached oc version to run oc commands
 	cmd := strings.Replace(c.rawCommand, "oc ", "", 1)
 	cmd = ec.Interpolate(cmd)
-	fmt.Println("-- " + cmd)
+	fmt.Print(".")
 
 	commander := ec.GetOcCommander()
 	exitStatus := commander.Run(ec.Interpolate(cmd), os.Stdout, os.Stdin)

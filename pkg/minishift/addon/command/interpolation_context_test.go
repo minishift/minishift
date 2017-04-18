@@ -61,3 +61,24 @@ func Test_multiple_contexts(t *testing.T) {
 		t.Fatal(fmt.Sprintf("Expected command: %s. Got: %s.", expectedCmd, actualCmd))
 	}
 }
+
+func Test_adding_and_removing_context(t *testing.T) {
+	context := NewInterpolationContext()
+
+	context.AddToContext("foo", "bar")
+
+	expected := "bar"
+	actual := context.Interpolate("#{foo}")
+
+	if expected != actual {
+		t.Fatal(fmt.Sprintf("Expected: %s. Got: %s.", expected, actual))
+	}
+
+	context.RemoveFromContext("foo")
+
+	expected = "#{foo}"
+	actual = context.Interpolate("#{foo}")
+	if expected != actual {
+		t.Fatal(fmt.Sprintf("Expected: %s. Got: %s.", expected, actual))
+	}
+}

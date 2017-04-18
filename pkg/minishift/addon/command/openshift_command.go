@@ -38,7 +38,7 @@ func (c *OpenShiftCommand) doExecute(ec *ExecutionContext) error {
 	// split off the actual 'oc' command. We are using our cached oc version to run oc commands
 	cmd := strings.Replace(c.rawCommand, "openshift ", "", 1)
 	cmd = ec.Interpolate(cmd)
-	fmt.Println("-- " + cmd)
+	fmt.Print(".")
 
 	commander := ec.GetDockerCommander()
 	_, err := commander.Exec("-t", openshift.OPENSHIFT_CONTAINER_NAME, openshift.OPENSHIFT_EXEC, ec.Interpolate(cmd))

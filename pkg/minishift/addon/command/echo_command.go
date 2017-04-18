@@ -35,9 +35,10 @@ func NewEchoCommand(command string) *EchoCommand {
 
 func (c *EchoCommand) doExecute(ec *ExecutionContext) error {
 	// split off the actual 'echo' command. As we need to print rest of the string
-	cmd := strings.Replace(c.rawCommand, "echo ", "", 1)
+	echo := strings.Replace(c.rawCommand, "echo ", "", 1)
+	echo = ec.Interpolate(echo)
 
-	_, err := fmt.Println(cmd)
+	_, err := fmt.Print("\n  " + echo)
 	if err != nil {
 		return errors.New(fmt.Sprintf("Error executing command '%s':", err.Error()))
 	}

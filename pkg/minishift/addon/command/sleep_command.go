@@ -45,7 +45,7 @@ func (c *SleepCommand) doExecute(ec *ExecutionContext) error {
 		return err
 	}
 
-	fmt.Println("-- " + c.rawCommand)
+	fmt.Print(".")
 	time.Sleep(duration)
 	return nil
 }

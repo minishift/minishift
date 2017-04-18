@@ -71,6 +71,10 @@ running as well. This is similar to running `eval $(minishift docker-env)` on yo
 then executing any `docker` command. See also
 link:../command-ref/minishift_docker-env{outfilesuffix}[`minishift docker-env`].
 
+echo::
+If the add-on command starts with _echo_, the arguments following the _echo_ command are printed
+to the console. This can be used to provide additional feedback during add-on execution.
+
 sleep::
 If the add-on command starts with _sleep_, it waits for the specified number of seconds. This can be
 useful in cases where you know that a command such as `oc` might take a few seconds before a certain
@@ -111,6 +115,9 @@ which are available for interpolation.
 
 |routing-suffix
 |The OpenShift routing suffix for application
+
+|addon-name
+|The name of the current add-on
 |===
 
 [[default-addons]]

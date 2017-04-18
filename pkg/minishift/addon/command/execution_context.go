@@ -64,6 +64,10 @@ func (ec *ExecutionContext) AddToContext(key string, value string) error {
 	return ec.interpolationContext.AddToContext(key, value)
 }
 
+func (ec *ExecutionContext) RemoveFromContext(key string) error {
+	return ec.interpolationContext.RemoveFromContext(key)
+}
+
 func (ec *ExecutionContext) Interpolate(cmd string) string {
 	return ec.interpolationContext.Interpolate(cmd)
 }

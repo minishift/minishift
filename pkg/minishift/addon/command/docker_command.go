@@ -35,7 +35,7 @@ func NewDockerCommand(command string) *DockerCommand {
 func (c *DockerCommand) doExecute(ec *ExecutionContext) error {
 	commander := ec.GetDockerCommander()
 	cmd := ec.Interpolate(c.rawCommand)
-	fmt.Println("-- " + cmd)
+	fmt.Print(".")
 	_, err := commander.LocalExec(cmd)
 	if err != nil {
 		return errors.New(fmt.Sprintf("Error executing command '%s':", err.Error()))

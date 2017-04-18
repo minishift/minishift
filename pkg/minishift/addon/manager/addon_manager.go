@@ -168,7 +168,10 @@ func (m *AddOnManager) String() string {
 }
 
 func (m *AddOnManager) applyAddOn(addOn addon.AddOn, context *command.ExecutionContext) error {
-	fmt.Println(fmt.Sprintf("Applying addon %s:", addOn.MetaData().Name()))
+	fmt.Print(fmt.Sprintf("Applying addon %s:", addOn.MetaData().Name()))
+	context.AddToContext("addon-name", addOn.MetaData().Name())
+	defer context.RemoveFromContext("addon-name")
+
 	oldDir, err := os.Getwd()
 	if err != nil {
 		return errors.Wrap(err, "Unable to apply addon due to failing IO operation")
@@ -182,6 +185,7 @@ func (m *AddOnManager) applyAddOn(addOn addon.AddOn, context *command.ExecutionC
 			return err
 		}
 	}
+	fmt.Print("\n\n")
 	return nil
 }
 

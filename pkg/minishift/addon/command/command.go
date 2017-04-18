@@ -16,11 +16,6 @@ limitations under the License.
 
 package command
 
-import (
-	"fmt"
-	"time"
-)
-
 // Command defines a single command to be executes as part of an addon definition.
 // Minishift supports various types of commands as part of its addon DSL, eg oc, openshift or docker commands.
 type Command interface {
@@ -41,15 +36,10 @@ type defaultCommand struct {
 }
 
 func (c *defaultCommand) Execute(ec *ExecutionContext) error {
-	startingTime := time.Now().UTC()
 	err := c.fn(ec)
 	if err != nil {
 		return err
 	}
-	endingTime := time.Now().UTC()
-
-	var duration time.Duration = endingTime.Sub(startingTime)
-	fmt.Println(fmt.Sprintf("  [%v]", duration))
 	return nil
 }
 

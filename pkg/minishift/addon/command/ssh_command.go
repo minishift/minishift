@@ -36,7 +36,7 @@ func NewSshCommand(command string) *SSHCommand {
 func (c *SSHCommand) doExecute(ec *ExecutionContext) error {
 	cmd := strings.Replace(c.rawCommand, "ssh ", "", 1)
 	cmd = ec.Interpolate(cmd)
-	fmt.Println("-- " + cmd)
+	fmt.Print(".")
 
 	commander := ec.GetSSHCommander()
 	_, err := commander.SSHCommand(ec.Interpolate(cmd))

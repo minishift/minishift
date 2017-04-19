@@ -17,10 +17,11 @@ limitations under the License.
 package constants
 
 import (
-	"github.com/minishift/minishift/pkg/util"
-	"github.com/minishift/minishift/pkg/version"
 	"os"
 	"path/filepath"
+
+	"github.com/minishift/minishift/pkg/util"
+	"github.com/minishift/minishift/pkg/version"
 )
 
 // MachineName is the name to use for the VM.
@@ -39,6 +40,9 @@ const MiniShiftEnvPrefix = "MINISHIFT"
 const MiniShiftHomeEnv = "MINISHIFT_HOME"
 
 const VersionPrefix = "v"
+
+// Minimum Openshift supported version
+const MinOpenshiftSuportedVersion = "v1.4.1"
 
 const (
 	DefaultMemory   = 2048

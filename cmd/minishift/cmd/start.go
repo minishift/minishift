@@ -122,7 +122,8 @@ var subscriptionManagerFlagSet = flag.NewFlagSet(commandName, flag.ContinueOnErr
 
 // minishiftToClusterUp is a mapping between falg names used in minishift CLI and flag name as passed to 'cluster up'
 var minishiftToClusterUp = map[string]string{
-	"openshift-env": "env",
+	"openshift-env":     "env",
+	"openshift-version": "version",
 }
 
 // runner executes commands on the host
@@ -336,7 +337,6 @@ func initStartFlags() {
 	startFlagSet.StringArrayVar(&dockerEnv, "docker-env", nil, "Environment variables to pass to the Docker daemon. Use the format <key>=<value>.")
 	startFlagSet.StringSliceVar(&insecureRegistry, "insecure-registry", []string{"172.30.0.0/16"}, "Non-secure Docker registries to pass to the Docker daemon.")
 	startFlagSet.StringSliceVar(&registryMirror, "registry-mirror", nil, "Registry mirrors to pass to the Docker daemon.")
-	startFlagSet.String(openshiftVersion, version.GetOpenShiftVersion(), fmt.Sprintf("The OpenShift version to run, eg. %s", version.GetOpenShiftVersion()))
 }
 
 // initClusterUpFlags creates the CLI flags which needs to be passed on to 'oc cluster up'
@@ -353,6 +353,7 @@ func initClusterUpFlags() {
 	clusterUpFlagSet.Int(serverLogLevel, 0, "Log level for the OpenShift server.")
 	clusterUpFlagSet.StringSliceVarP(&openShiftEnv, openshiftEnv, "e", []string{}, "Specify key-value pairs of environment variables to set on the OpenShift container.")
 	clusterUpFlagSet.Bool(metrics, false, "Install metrics (experimental)")
+	clusterUpFlagSet.String(openshiftVersion, version.GetOpenShiftVersion(), fmt.Sprintf("The OpenShift version to run, eg. %s", version.GetOpenShiftVersion()))
 }
 
 // initProxyFlags create the CLI flags which needs to be passed for proxy
@@ -370,6 +371,9 @@ func initSubscriptionManagerFlags() {
 
 // clusterUp downloads and installs the oc binary in order to run 'cluster up'
 func clusterUp(config *cluster.MachineConfig, ip string) {
+	if !minishiftUtil.ValidateOpenshiftMinVersion(viper.GetString(openshiftVersion), version.GetOpenShiftVersion()) {
+		config.OpenShiftVersion = version.GetOpenShiftVersion()
+	}
 	oc := cache.Oc{
 		OpenShiftVersion:  config.OpenShiftVersion,
 		MinishiftCacheDir: filepath.Join(constants.Minipath, "cache"),
@@ -431,10 +435,10 @@ func setDefaultRoutingPrefix(ip string) {
 
 func validateOpenshiftVersion() {
 	if viper.IsSet(openshiftVersion) {
-		if !minishiftUtil.ValidateOpenshiftMinVersion(viper.GetString(openshiftVersion), version.GetOpenShiftVersion()) {
+		if !minishiftUtil.ValidateOpenshiftMinVersion(viper.GetString(openshiftVersion), constants.MinOpenshiftSuportedVersion) {
 			fmt.Printf("Minishift does not support Openshift version %s ."+
 				"You need to use a version >=%s\n", viper.GetString(openshiftVersion),
-				version.GetOpenShiftVersion())
+				constants.MinOpenshiftSuportedVersion)
 			atexit.Exit(1)
 		}
 	}

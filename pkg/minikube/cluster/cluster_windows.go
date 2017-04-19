@@ -26,6 +26,7 @@ func createHypervHost(config MachineConfig) drivers.Driver {
 	d := hyperv.NewDriver(constants.MachineName, constants.Minipath)
 	d.Boot2DockerURL = config.GetISOFileURI()
 	d.MemSize = config.Memory
+	d.VSwitch = config.HypervVirtualSwitch
 	d.CPU = config.CPUs
 	d.DiskSize = int(config.DiskSize)
 	d.SSHUser = "docker"

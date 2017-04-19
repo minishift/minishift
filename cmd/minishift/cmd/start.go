@@ -60,6 +60,7 @@ const (
 	vmDriver              = "vm-driver"
 	openshiftVersion      = "openshift-version"
 	hostOnlyCIDR          = "host-only-cidr"
+	hypervVirtualSwitch   = "hyperv-virtual-switch"
 
 	// cluster up
 	skipRegistryCheck = "skip-registry-check"
@@ -157,6 +158,7 @@ func runStart(cmd *cobra.Command, args []string) {
 		HostOnlyCIDR:     viper.GetString(hostOnlyCIDR),
 		OpenShiftVersion: viper.GetString(openshiftVersion),
 		ShellProxyEnv:    shellProxyEnv,
+		HypervVirtualSwitch: viper.GetString(hypervVirtualSwitch),
 	}
 
 	fmt.Printf("Starting local OpenShift cluster using '%s' hypervisor...\n", config.VMDriver)
@@ -337,6 +339,7 @@ func initStartFlags() {
 	startFlagSet.StringSliceVar(&insecureRegistry, "insecure-registry", []string{"172.30.0.0/16"}, "Non-secure Docker registries to pass to the Docker daemon.")
 	startFlagSet.StringSliceVar(&registryMirror, "registry-mirror", nil, "Registry mirrors to pass to the Docker daemon.")
 	startFlagSet.String(openshiftVersion, version.GetOpenShiftVersion(), fmt.Sprintf("The OpenShift version to run, eg. %s", version.GetOpenShiftVersion()))
+	startFlagSet.String(hypervVirtualSwitch, "", "The hyperv virtual switch name. Defaults to first found. (only supported with HyperV driver)")
 }
 
 // initClusterUpFlags creates the CLI flags which needs to be passed on to 'oc cluster up'

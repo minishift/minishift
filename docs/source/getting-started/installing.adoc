@@ -40,11 +40,17 @@ in the link:../getting-started/docker-machine-drivers{outfilesuffix}[Installing 
 Windows::
 - https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v[Hyper-V] (default)
 +
-NOTE: To enable Hyper-V ensure that, after you
+[NOTE]
+====
+- To use Minishift with Hyper-V ensure that, after you
 https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v[install Hyper-V], you also
 https://msdn.microsoft.com/en-us/virtualization/hyperv_on_windows/quick_start/walkthrough_virtual_switch[add a Virtual Switch]
-using the Hyper-V Manager. Make sure that you pair the virtual switch
+using the Hyper-V Manager.
+- Make sure that you pair the virtual switch
 with a __network card (wired or wireless) that is connected to the network__.
+- If you have multiple virtual switches , set the environment variable _HYPERV_VIRTUAL_SWITCH_ to the name of external virtual switch you want to use for Minishift. See also the section about setting
+link:../using/managing-minishift{outfilesuffix}#driver-specific-environment-variables[driver specific enviropnment variables].
+====
 
 - https://www.virtualbox.org/wiki/Downloads[VirtualBox]
 +

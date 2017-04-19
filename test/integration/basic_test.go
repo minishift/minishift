@@ -30,7 +30,9 @@ import (
 	"github.com/DATA-DOG/godog"
 	"github.com/DATA-DOG/godog/gherkin"
 
+	"errors"
 	"github.com/minishift/minishift/test/integration/util"
+	"time"
 )
 
 var lastCommandOutput CommandOutput
@@ -66,10 +68,25 @@ func (m *Minishift) shouldHaveAValidIPAddress() error {
 	return nil
 }
 
+func (m *Minishift) executingRetryingTimesWithWaitPeriodOfSeconds(command string, retry, sleep int) error {
+	for i := 0; i < retry; i++ {
+		err := m.executingOcCommand(command)
+		if err != nil {
+			return err
+		}
+		if lastCommandOutput.ExitCode == 0 {
+			break
+		}
+		time.Sleep(time.Duration(sleep) * time.Second)
+	}
+
+	return nil
+}
+
 func (m *Minishift) executingOcCommand(command string) error {
 	ocRunner := m.runner.GetOcRunner()
 	if ocRunner == nil {
-		return fmt.Errorf("Minishift is not Running")
+		return errors.New("Minishift is not Running")
 	}
 	cmdOut, cmdErr, cmdExit := ocRunner.RunCommand(command)
 	lastCommandOutput = CommandOutput{
@@ -159,6 +176,7 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`Minishift (?:has|should have) state "([^"]*)"`, m.shouldHaveState)
 	s.Step(`Minishift should have a valid IP address`, m.shouldHaveAValidIPAddress)
 	s.Step(`executing "minishift ([^"]*)"`, m.executingCommand)
+	s.Step(`executing "oc ([^"]*)" retrying (\d+) times with wait period of (\d+) seconds$`, m.executingRetryingTimesWithWaitPeriodOfSeconds)
 	s.Step(`executing "oc ([^"]*)`, m.executingOcCommand)
 	s.Step(`([^"]*) should contain ([^"]*)`, m.commandReturnShouldContain)
 	s.Step(`([^"]*) should contain`, m.commandReturnShouldContainContent)

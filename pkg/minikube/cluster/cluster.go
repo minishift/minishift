@@ -39,11 +39,13 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/registration"
 	minishiftUtil "github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/util"
+	"github.com/pkg/errors"
 	pb "gopkg.in/cheggaaa/pb.v1"
 )
 
 var (
 	logsCmd             = "docker logs origin"
+	logsCmdFollow       = "docker logs origin -f"
 	dockerAPIVersionCmd = "docker version --format '{{.Server.APIVersion}}'"
 )
 
@@ -371,16 +373,32 @@ func GetHostDockerEnv(api libmachine.API) (map[string]string, error) {
 }
 
 // GetHostLogs gets the openshift logs of the host VM.
-func GetHostLogs(api libmachine.API) (string, error) {
+// If follow is specified, it will tail the logs
+func GetHostLogs(api libmachine.API, follow bool) (string, error) {
 	host, err := CheckIfApiExistsAndLoad(api)
 	if err != nil {
 		return "", err
 	}
-	s, err := host.RunSSHCommand(logsCmd)
-	if err != nil {
+
+	if follow {
+		c, err := host.CreateSSHClient()
+		if err != nil {
+			return "", err
+		}
+
+		err = c.Shell(logsCmdFollow)
+		if err != nil {
+			return "", errors.Wrap(err, "Error creating ssh client")
+		}
+
 		return "", nil
 	}
-	return s, err
+
+	s, err := host.RunSSHCommand(logsCmd)
+	if err != nil {
+		return "", err
+	}
+	return s, nil
 }
 
 func CheckIfApiExistsAndLoad(api libmachine.API) (*host.Host, error) {

@@ -10,5 +10,5 @@ OpenShift cluster. It also helps troubleshooting common issues.
 - link:../using/mounting-host-folders{outfilesuffix}[Host Folders]
 - link:../using/interacting-with-openshift{outfilesuffix}[Interacting with OpenShift]
 - link:../using/docker-daemon{outfilesuffix}[Minishift Docker daemon]
-- link:../using/accessing-the-openshift-docker-registry{outfilesuffix}[Accessing the OpenShift Docker Registry]
+- link:../using/accessing-the-openshift-docker-registry{outfilesuffix}[Accessing the OpenShift Registry]
 - link:../using/troubleshooting{outfilesuffix}[Troubleshooting Minishift]

@@ -45,6 +45,12 @@ https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/e
 https://msdn.microsoft.com/en-us/virtualization/hyperv_on_windows/quick_start/walkthrough_virtual_switch[add a Virtual Switch]
 using the Hyper-V Manager. Make sure that you pair the virtual switch
 with a __network card (wired or wireless) that is connected to the network__.
+Minishift tries per default to use the first virtual switch it detects.
+This can lead to conflicts where this switch is used by another application.
+For example, in the case when https://docs.docker.com/docker-for-windows/install[Docker For Windows] is installed on the host.
+In this case the switch _DockerNAT_ is used by Docker for Windows and another switch needs to be created for Minishift.
+For the switch that is created for Minishift to work properly, you need to set the environment variable _HYPERV_VIRTUAL_SWITCH_ to the name of the switch.
+You can find more info in link:../using/managing-minishift{outfilesuffix}[Managing Minishift] page under _Driver specific environment variables_ section.
 
 - https://www.virtualbox.org/wiki/Downloads[VirtualBox]
 +

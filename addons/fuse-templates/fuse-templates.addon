@@ -1,0 +1,19 @@
+# Name: fuse
+# Description: Imports Fuse templates
+# Url: https://github.com/jboss-fuse/application-templates/tree/GA/quickstarts
+
+oc create -f fis-image-streams.json -n openshift
+oc create -f karaf2-camel-amq-template.json -n openshift
+oc create -f karaf2-camel-log-template.json -n openshift
+oc create -f karaf2-camel-rest-sql-template.json -n openshift
+oc create -f karaf2-cxf-rest-template.json -n openshift
+oc create -f spring-boot-camel-amq-template.json -n openshift
+oc create -f spring-boot-camel-config-template.json -n openshift
+oc create -f spring-boot-camel-drools-template.json -n openshift
+oc create -f spring-boot-camel-infinispan-template.json -n openshift
+oc create -f spring-boot-camel-rest-sql-template.json -n openshift
+oc create -f spring-boot-camel-teiid-template.json -n openshift
+oc create -f spring-boot-camel-template.json -n openshift
+oc create -f spring-boot-camel-xml-template.json -n openshift
+oc create -f spring-boot-cxf-jaxrs-template.json -n openshift
+oc create -f spring-boot-cxf-jaxws-template.json -n openshift

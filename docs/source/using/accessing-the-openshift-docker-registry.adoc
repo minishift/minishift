@@ -13,25 +13,25 @@ toc::[]
 OpenShift provides an integrated Docker registry which can be used for development as well.
 Images present in the registry can directly be used for applications, speeding up
 the local development work-flow.
-Refer to <<stage-app-with-openshift-registrygin>> to know more.
+Refer to <<stage-app-with-openshift-registry>> to know more.
 
 
 [[login-to-openshift-docker-registry]]
 == Registry login
 
 . Start Minishift and add the `oc` binary to the PATH. Refer link:../getting-started/quickstart{outfilesuffix}[Minishift quickstart] for details.
-. Make sure your shell is configured to  link:../using/reusing-docker-daemon{outfilesuffix}[reuse the Minishift docker daemon].
+. Make sure your shell is configured to  link:../using/docker-daemon{outfilesuffix}[reuse the Minishift docker daemon].
 . Login to the docker registry
 
  $ docker login -u developer -p $(oc whoami -t) $(minishift openshift registry)
 
-[[stage-app-with-openshift-registrygin]]
+[[stage-app-with-openshift-registry]]
 == Application deployment
 
 The following example shows how to deploy an OpenShift application directly from a locally built docker image.
 In this example, the OpenShift project _myproject_ is used, as it is automatically created by `minishift start`.
 
-. Make sure your shell is configured to  link:../using/reusing-docker-daemon{outfilesuffix}[reuse the Minishift docker daemon].
+. Make sure your shell is configured to  link:../using/docker-daemon{outfilesuffix}[reuse the Minishift docker daemon].
 . Build the docker image as usual.
 . Tag the image against the OpenShift registry.
 

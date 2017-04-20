@@ -200,7 +200,7 @@ function artifacts_upload_on_pr_and_master_trigger() {
 function docs_tar_upload() {
   set +x
 
-  version=$(cat docs/build/variables.adoc | cut -d' ' -f2 | head -n1)
+  version=$(cat docs/source/variables.adoc | cut -d' ' -f2 | head -n1)
   mkdir -p minishift/docs/$version
   cp docs/build/minishift-adoc.tar minishift/docs/$version/
   ln -s $(pwd)/minishift/docs/$version minishift/docs/latest

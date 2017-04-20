@@ -6,6 +6,7 @@ This section describes how to manage your Minishift VM and interact with your
 OpenShift cluster. It also helps troubleshooting common issues.
 
 - link:../using/managing-minishift{outfilesuffix}[Managing Minishift]
+- link:../using/proxies{outfilesuffix}[HTTP/HTTPS Proxies]
 - link:../using/addons{outfilesuffix}[Minishift Add-ons]
 - link:../using/mounting-host-folders{outfilesuffix}[Host Folders]
 - link:../using/interacting-with-openshift{outfilesuffix}[Interacting with OpenShift]

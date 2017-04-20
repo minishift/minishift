@@ -24,11 +24,51 @@ see the link:../using/interacting-with-openshift{outfilesuffix}[Interacting with
 For more information about the OpenShift cluster architecture, see
 https://docs.openshift.org/latest/architecture/index.html[Architecture Overview] in the OpenShift documentation.
 
-The following steps describe how to get started with Minishift on a
-GNU/Linux operating system with the KVM hypervisor driver.
+[[basic-commands]]
+== Basic Minishift commands
+
+[[minishift-start-command]]
+=== Minishift start
+
+The link:../command-ref/minishift_start{outfilesuffix}[`minishift start`] command creates and
+configures the Minishift VM and provisions a local, single-node
+OpenShift instance within the VM.
+
+The command also copies the `oc` binary to your host so that you can interact
+with OpenShift through the `oc` command line tool or through the Web console,
+which can be accessed through the URL provided in the output
+of the `minishift start` command.
+
+[[minishift-stop-command]]
+=== Minishift stop
+
+The link:../command-ref/minishift_stop{outfilesuffix}[`minishift stop`] command stops your OpenShift cluster and
+shuts down the Minishift VM, but preserves the OpenShift cluster state.
+
+Starting Minishift again will restore the OpenShift cluster, allowing
+you to continue working from the last session. However, you must enter the same
+parameters that you used in the original start command.
+
+Efforts to further refine this experience are in progress. For details, see
+the GitHub issue https://github.com/minishift/minishift/issues/179[#179].
+
+[[minishift-delete-command]]
+=== Minishift delete
+
+The link:../command-ref/minishift_delete{outfilesuffix}[`minishift delete`] command deletes the OpenShift cluster,
+and also shuts down and deletes the Minishift VM. No data or state are preserved.
+
+[[networking]]
+== Networking
+
+The Minishift VM is exposed to the host system with a host-only IP address that
+can be obtained with the `minishift ip` command.
 
 [[starting-minishift]]
 == Starting Minishift
+
+The following steps describe how to get started with Minishift on a
+GNU/Linux operating system with the KVM hypervisor driver.
 
 .  Run the `minishift start` command.
 +

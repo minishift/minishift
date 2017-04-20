@@ -10,7 +10,7 @@ Topics:
     Topics:
       - Name: Overview
         File: index
-      - Name: Installing Docker Machine drivers
+      - Name: Installing Docker Machine Drivers
         File: docker-machine-drivers
       - Name: Installing Minishift
         File: installing
@@ -23,17 +23,19 @@ Topics:
         File: index
       - Name: Managing Minishift
         File: managing-minishift
+      - Name: HTTP/HTTPS Proxies
+        File: proxies
       - Name: Add-ons
         File: addons
       - Name: Host Folders
         File: mounting-host-folders
       - Name: Interacting with OpenShift
         File: interacting-with-openshift
-      - Name: Minishift Docker daemon
+      - Name: Minishift Docker Daemon
         File: docker-daemon
       - Name: Troubleshooting Minishift
         File: troubleshooting
-      - Name: Accessing the OpenShift docker registry
+      - Name: Accessing the OpenShift Docker Registry
         File: accessing-the-openshift-docker-registry
   - Name: Developing Minishift
     Dir: developing
@@ -44,7 +46,7 @@ Topics:
         File: developing
       - Name: Minishift CI
         File: ci
-      - Name: Writing documentation
+      - Name: Writing Documentation
         File: writing-docs
       - Name: Releasing Minishift
         File: releasing

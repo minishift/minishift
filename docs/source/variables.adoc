@@ -1,2 +1,2 @@
-:minishift-version: unset
-:openshift-version: unset
+:minishift-version: 1.0.0-rc.1
+:openshift-version: v1.5.0-rc.0

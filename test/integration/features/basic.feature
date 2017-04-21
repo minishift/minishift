@@ -84,6 +84,69 @@ Feature: Basic
       172.30.1.1:5000
       """
 
+  # User can deploy the example Ruby application ruby-ex
+  Scenario: User can login to the server
+    When executing "oc login --username=developer --password=developer"
+    Then stderr should be empty
+     And exitcode should equal 0
+     And stdout should contain
+     """
+     Login successful
+     """
+  
+  Scenario: User can create new namespace ruby for application ruby-ex
+    When executing "oc new-project ruby"
+    Then stderr should be empty
+     And exitcode should equal 0
+     And stdout should contain
+     """
+     Now using project "ruby"
+     """
+  
+  Scenario: User can deploy application ruby-ex to namespace ruby 
+    When executing "oc new-app centos/ruby-22-centos7~https://github.com/openshift/ruby-ex.git"
+    Then stderr should be empty
+     And exitcode should equal 0
+     And stdout should contain
+     """
+     Success
+     """
+    When executing "oc rollout status deploymentconfig ruby-ex --watch"
+    Then stderr should be empty
+     And exitcode should equal 0
+     And stdout should contain
+     """
+     "ruby-ex-1" successfully rolled out
+     """
+  
+  Scenario: User can create route for ruby-ex to make it visiable outside of the cluster
+    When executing "oc expose svc/ruby-ex"
+    Then stderr should be empty
+     And exitcode should equal 0
+     And stdout should contain
+     """
+     exposed
+     """
+  
+  Scenario: User can delete namespace ruby
+    When executing "oc delete project ruby"
+    Then stderr should be empty
+     And exitcode should equal 0
+     And stdout should contain
+     """
+     "ruby" deleted
+     """
+  
+  Scenario: User can log out the session
+    When executing "oc logout"
+    Then stderr should be empty
+     And exitcode should equal 0
+     And stdout should contain
+     """
+     Logged "developer" out
+     """
+  # End of Ruby application ruby-ex deployment
+  
   Scenario: Stopping Minishift
     Given Minishift has state "Running"
      When executing "minishift stop"

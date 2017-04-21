@@ -1,2 +1,0 @@
-:minishift-version: unset
-:openshift-version: unset

@@ -30,7 +30,6 @@ If you use `virsh` on KVM/libvirt to create snapshots in your development
 workflow, and then use `minishift delete` to delete the snapshots along with
 the VM, you might encounter the following error:
 
-[source,sh]
 ----
 $ minishift delete
 Deleting the Minishift VM...
@@ -45,7 +44,6 @@ Workaround: To delete the snapshots you need to perform the following steps.
 .  Delete the definitions.
 +
 
-[source,sh]
 ----
 $ sudo virsh snapshot-delete --metadata minishift <snapshot-name>
 ----
@@ -53,7 +51,6 @@ $ sudo virsh snapshot-delete --metadata minishift <snapshot-name>
 .  Undefine the Minishift domain.
 +
 
-[source,sh]
 ----
 $ sudo virsh undefine minishift
 ----
@@ -67,7 +64,6 @@ You can now run `minishft delete` to delete the VM and restart Minishift.
 In case the above steps do not resolve the issue, you can also
 use the following command to delete the snapshots:
 
-[source,sh]
 ----
 $ rm -rf ~/.minishift/machines
 ----
@@ -76,7 +72,6 @@ $ rm -rf ~/.minishift/machines
 It is recommended to avoid using metadata when you create snapshots. To make sure of
 this, you can specify the `--no-metadata` flag. For example:
 
-[source,sh]
 ----
 $ sudo virsh snapshot-create-as --domain vm1 overlay1 --diskspec vda,file=/export/overlay1.qcow2 --disk-only --atomic --no-metadata
 ----
@@ -87,14 +82,12 @@ $ sudo virsh snapshot-create-as --domain vm1 overlay1 --diskspec vda,file=/expor
 The problem is likely that the `libvirtd` service is not running. You can check this
 with the following command:
 
-[source,sh]
 ----
 $ systemctl status libvirtd
 ----
 
 If `libvirtd` is not running, start it and enable it to start on boot:
 
-[source,sh]
 ----
 $ systemctl start libvirtd
 $ systemctl enable libvirtd
@@ -106,13 +99,11 @@ $ systemctl enable libvirtd
 The problem is likely that the `virtlogd` service is not running.
 You can check this with the following command:
 
-[source,sh]
 ----
 $ systemctl status virtlogd
 ----
 
 If `virtlogd` is not running, start it and enable it to start on boot:
-[source,sh]
 
 ----
 $ systemctl start virtlogd
@@ -128,7 +119,6 @@ However if this fails and you wish to completely clean up Minishift and start fr
 . Check if any existing Minishift VM are running:
 +
 
-[source,sh]
 ----
 $ sudo virsh list --all
 ----
@@ -136,7 +126,6 @@ $ sudo virsh list --all
 . If any Minishift VM is running, stop it:
 +
 
-[source,sh]
 ----
 $ sudo virsh destroy minishift
 ----
@@ -144,7 +133,6 @@ $ sudo virsh destroy minishift
 . Delete the VM:
 +
 
-[source,sh]
 ----
 $ sudo virsh undefine minishift
 ----
@@ -152,7 +140,6 @@ $ sudo virsh undefine minishift
 . Delete the `.minishift/machines` directory using:
 +
 
-[source,sh]
 ----
  $ rm -rf ~/.minishift/machines
 ----
@@ -194,3 +181,35 @@ flag in the `minishift start` command. Alternatively, the problem might be
 an outdated version of VirtualBox.
 
 To avoid this issue, it is recommended to use VirtualBox 5.1.12 or later.
+
+[[insufficient-privileges]]
+== Hyper-V: Hyper-V commands must be run as an Administrator
+
+If you run Minishift with Hyper-V on Windows as a normal user or as a user with Administrator privileges, you will encounter the following error:
+
+----
+Error starting the VM: Error creating the VM. Error with pre-create check: "Hyper-V commands must be run as an Administrator".
+----
+
+Workaround: To overcome this error you can either add yourself to the Hyper-V Administrators group, which is recommended, or run the shell in an elevated mode.
+
+If use PowerShell, you can add yourself to the Hyper-V Administrators group as follows:
+
+. As an administrator run the following command:
++
+----
+([adsi]”WinNT://./Hyper-V Administrators,group”).Add(“WinNT://$env:UserDomain/$env:Username,user”)
+----
+
+. Log off and log in for the change to take effect.
+
+You can also use the GUI to add yourself to the Hyper-V Administrators group as follows:
+
+. Click the *Start* button and choose *Computer Management*.
+. In the *Computer Management* window, select *Local Users And Groups* and then double click on *Groups*.
+. Double click on the *Hyper-V Administrators* group, the *Hyper-V Administrators Properties* dialog box is displayed.
+. Add your account to the Hyper-V Administrators group and log off and log in for the change to take effect.
+
+Now you can run the Hyper-V commands as a normal user.
+
+For more options for Hyper-V see https://blogs.msdn.microsoft.com/virtual_pc_guy/2010/09/28/creating-a-hyper-v-administrators-local-group-through-powershell[creating Hyper-V administrators local group].

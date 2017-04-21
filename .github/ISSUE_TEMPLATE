@@ -1,0 +1,29 @@
+<!--
+Thanks for showing interest in filing an issue!
+However, make sure that we do not have any duplicates already open. You can ensure
+this by searching the issue list here https://github.com/minishift/minishift/issues.
+-->
+
+**Minishift version** (use `minishift version`):
+
+
+**Environment**:
+- **OS** (e.g. from /etc/os-release):
+- **VM Driver** :
+- **Others**:
+
+**Debug Logs**: (Use `--show-libmachine-logs --v= 5` options)
+```
+Paste Here
+```
+
+**What happened**:
+
+
+**What you expected to happen**:
+
+
+**How to reproduce it** (as minimally and precisely as possible):
+
+
+**Anything else do we need to know**:

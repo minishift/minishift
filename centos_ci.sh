@@ -129,7 +129,6 @@ function prepare() {
   install_and_setup_golang;
   setup_repo;
   setup_glide;
-
   echo "CICO: Preparation complete"
 }
 
@@ -137,7 +136,6 @@ function run_tests() {
   make clean test cross fmtcheck prerelease
   # Run integration test with 'kvm' driver
   MINISHIFT_VM_DRIVER=kvm make integration
-
   echo "CICO: Tests ran successfully"
 }
 
@@ -149,9 +147,9 @@ function install_docs_prerequisite_packages() {
   gpg2 --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3
   curl -L get.rvm.io | bash -s stable
   source ~/.profile
+
   # Install Ruby
   rvm install ruby-2.2.5
-
   echo "CICO: RVM and Ruby Installed"
 
   gem install ascii_binder -v 0.1.9
@@ -179,20 +177,20 @@ function artifacts_upload_on_pr_and_master_trigger() {
     make gen_adoc_tar
     build_openshift_origin_docs $(pwd)/docs/build/minishift-adoc.tar;
 
-    # http://stackoverflow.com/a/22908437/1120530; Using --relative as --rsync-path not working
     mkdir -p minishift/master/$BUILD_NUMBER/
     cp -r out/*-amd64 minishift/master/$BUILD_NUMBER/
     # Copy the openshift-docs
     cp -r openshift-docs/_preview/openshift-origin minishift/master/$BUILD_NUMBER/openshift-docs
-    RSYNC_PASSWORD=$1 rsync -a --delete --relative minishift/master/$BUILD_NUMBER/ minishift@artifacts.ci.centos.org::minishift/
+    # http://stackoverflow.com/a/22908437/1120530; Using --relative as --rsync-path not working
+    RSYNC_PASSWORD=$1 rsync -av --delete --relative minishift/master/$BUILD_NUMBER/ minishift@artifacts.ci.centos.org::minishift/
     echo "Find Artifacts here http://artifacts.ci.centos.org/minishift/minishift/master/$BUILD_NUMBER ."
     echo "Minishift docs is hosted at http://artifacts.ci.centos.org/minishift/minishift/master/$BUILD_NUMBER/openshift-docs/latest/minishift/index.html ."
   else
 
-    # http://stackoverflow.com/a/22908437/1120530; Using --relative as --rsync-path not working
     mkdir -p minishift/pr/$ghprbPullId/
     cp -r out/*-amd64 minishift/pr/$ghprbPullId/
-    RSYNC_PASSWORD=$1 rsync -a --delete --relative minishift/pr/$ghprbPullId/ minishift@artifacts.ci.centos.org::minishift/
+    # http://stackoverflow.com/a/22908437/1120530; Using --relative as --rsync-path not working
+    RSYNC_PASSWORD=$1 rsync -av --delete --relative minishift/pr/$ghprbPullId/ minishift@artifacts.ci.centos.org::minishift/
     echo "Find Artifacts here http://artifacts.ci.centos.org/minishift/minishift/pr/$ghprbPullId ."
   fi
 }
@@ -201,12 +199,13 @@ function docs_tar_upload() {
   set +x
 
   version=$(cat docs/source/variables.adoc | cut -d' ' -f2 | head -n1)
-  mkdir -p minishift/docs/$version
+  LATEST=latest
+  mkdir -p minishift/docs/$version minishift/docs/$LATEST
   cp docs/build/minishift-adoc.tar minishift/docs/$version/
-  ln -s $(pwd)/minishift/docs/$version minishift/docs/latest
+  cp docs/build/minishift-adoc.tar minishift/docs/$LATEST/
   # http://stackoverflow.com/a/22908437/1120530; Using --relative as --rsync-path not working
-  RSYNC_PASSWORD=$1 rsync -aL --relative minishift/docs minishift@artifacts.ci.centos.org::minishift/
-  echo "Find docs tar here http://artifacts.ci.centos.org/minishift/minishift/docs/latest."
+  RSYNC_PASSWORD=$1 rsync -av --relative minishift/docs minishift@artifacts.ci.centos.org::minishift/
+  echo "Find docs tar here http://artifacts.ci.centos.org/minishift/minishift/docs/$LATEST."
 }
 
 if [[ "$UID" = 0 ]]; then

@@ -48,14 +48,14 @@ https://msdn.microsoft.com/en-us/virtualization/hyperv_on_windows/quick_start/wa
 using the Hyper-V Manager.
 - Make sure that you pair the virtual switch
 with a __network card (wired or wireless) that is connected to the network__.
-- If you have multiple virtual switches , set the environment variable _HYPERV_VIRTUAL_SWITCH_ to the name of external virtual switch you want to use for Minishift. See also the section about setting
-link:../using/managing-minishift{outfilesuffix}#driver-specific-environment-variables[driver specific enviropnment variables].
+- If you have multiple virtual switches , set the environment variable `HYPERV_VIRTUAL_SWITCH` to the name of the external virtual switch you want to use for Minishift. For further information see
+link:../using/managing-minishift{outfilesuffix}#driver-specific-environment-variables[setting driver specific environment variables].
 ====
 
 - https://www.virtualbox.org/wiki/Downloads[VirtualBox]
 +
 NOTE: It is recommended to use `Virtualbox 5.1.12` or later on Windows to avoid the issue
-link:../using/troubleshooting{outfilesuffix}#machine-doesnt-exist[Error: getting state for host: machine does not exist].
+link:../using/troubleshooting{outfilesuffix}#machine-doesnt-exist[Error: machine does not exist].
 
 If you encounter issues related to the hypervisor, see
 the link:../using/troubleshooting{outfilesuffix}[Troubleshooting] section.

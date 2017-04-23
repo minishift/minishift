@@ -58,7 +58,7 @@ end
 
 desc 'Generate site'
 task :gen => [:init, :markdown_to_asciidoc, :adoc_variables] do
-	sh "bundle exec middleman build"
+	sh "bundle exec middleman build --no-clean"
 end
 
 desc 'Serve site'

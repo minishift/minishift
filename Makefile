@@ -14,7 +14,7 @@
 
 # Various versions - Minishift, default OpenShift, default B2D ISO
 MINISHIFT_VERSION = 1.0.0-rc.2
-OPENSHIFT_VERSION = v1.5.0-rc.0
+OPENSHIFT_VERSION = v1.5.0
 ISO_VERSION = v1.0.2
 
 # Go and compliation related variables

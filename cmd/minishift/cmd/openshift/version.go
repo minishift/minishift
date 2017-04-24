@@ -55,5 +55,5 @@ func runVersion(cmd *cobra.Command, args []string) {
 }
 
 func init() {
-	OpenShiftConfigCmd.AddCommand(versionCmd)
+	OpenShiftCmd.AddCommand(versionCmd)
 }

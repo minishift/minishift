@@ -63,5 +63,5 @@ func init() {
 	serviceCmd.Flags().StringVarP(&namespace, "namespace", "n", "default", "The namespace of the service.")
 	serviceCmd.Flags().BoolVar(&urlMode, "url", false, "Access the service in the command-line console instead of the default browser.")
 	serviceCmd.Flags().BoolVar(&https, "https", false, "Access the service with HTTPS instead of HTTP.")
-	OpenShiftConfigCmd.AddCommand(serviceCmd)
+	OpenShiftCmd.AddCommand(serviceCmd)
 }

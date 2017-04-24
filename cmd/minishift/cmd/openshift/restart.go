@@ -38,7 +38,7 @@ var restartCmd = &cobra.Command{
 }
 
 func init() {
-	OpenShiftConfigCmd.AddCommand(restartCmd)
+	OpenShiftCmd.AddCommand(restartCmd)
 }
 
 func runRestart(cmd *cobra.Command, args []string) {

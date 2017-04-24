@@ -30,7 +30,7 @@ import (
 	"github.com/minishift/minishift/cmd/minishift/cmd/addon"
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
 	hostfolderCmd "github.com/minishift/minishift/cmd/minishift/cmd/hostfolder"
-	openShiftCmd "github.com/minishift/minishift/cmd/minishift/cmd/openshift"
+	cmdOpenshift "github.com/minishift/minishift/cmd/minishift/cmd/openshift"
 	"github.com/minishift/minishift/pkg/minikube/config"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
@@ -133,7 +133,7 @@ func setFlagsUsingViper() {
 func init() {
 	RootCmd.PersistentFlags().Bool(showLibmachineLogs, false, "Show logs from libmachine.")
 	RootCmd.AddCommand(configCmd.ConfigCmd)
-	RootCmd.AddCommand(openShiftCmd.OpenShiftConfigCmd)
+	RootCmd.AddCommand(cmdOpenshift.OpenShiftCmd)
 	RootCmd.AddCommand(hostfolderCmd.HostfolderCmd)
 	RootCmd.AddCommand(addon.AddonsCmd)
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)

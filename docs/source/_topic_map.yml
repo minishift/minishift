@@ -26,15 +26,15 @@ Topics:
       - Name: Add-ons
         File: addons
       - Name: Host Folders
-        File: mounting-host-folders
+        File: host-folders
       - Name: Interacting with OpenShift
         File: interacting-with-openshift
-      - Name: Minishift Docker daemon
+      - Name: Using the Minishift Docker daemon
         File: docker-daemon
-      - Name: Troubleshooting Minishift
-        File: troubleshooting
-      - Name: Accessing the OpenShift docker registry
+      - Name: Accessing the OpenShift Docker registry
         File: accessing-the-openshift-docker-registry
+      - Name: Troubleshooting
+        File: troubleshooting
   - Name: Developing Minishift
     Dir: developing
     Topics:

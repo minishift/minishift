@@ -24,16 +24,14 @@ This example shows the contents of the add-on text file, including the name and 
 additional metadata, and the actual commands to run.
 
 ----
-# Name: anyuid // <1>
-# Description: Allows authenticated users to run images under a non pre-allocated UID // <2>
-# Url: https://access.redhat.com/documentation/en-us/openshift_enterprise/3.2/html/cluster_administration/admin-guide-manage-scc <3>
+# Name: anyuid                                                                          // <1>
+# Description: Allows authenticated users to run images under a non pre-allocated UID   // <2>
 
-oc adm policy add-scc-to-group anyuid system:authenticated <4>
+oc adm policy add-scc-to-group anyuid system:authenticated                              // <3>
 ----
 <1> (Required) Name of the add-on.
 <2> (Required) Description of the add-on.
-<3> Additional metadata and comments that are ignored by Minishift.
-<4> Actual add-on command. In this case, the command executes the _oc_ binary. For the full
+<3> Actual add-on command. In this case, the command executes the _oc_ binary. For the full
 list of the supported add-on commands, see the <<addon-commands>> section.
 
 NOTE: Comment lines can be inserted at anywhere in the file. Comment lines must start with the '#' character.

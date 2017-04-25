@@ -217,6 +217,7 @@ The files that are persisted are stored in the following host directories:
 The following example shows persistent volume configuration to persist data
 in the `/var/lib/minishift` directory:
 
+[source, yaml]
 ----
 apiVersion: v1
 kind: PersistentVolume

@@ -22,7 +22,7 @@ see the link:../using/interacting-with-openshift{outfilesuffix}[Interacting with
 [[minishift-life-cycle]]
 == Minishift life-cycle
 
-[[minishift-start-intro]]
+[[minishift-start]]
 === Minishift start
 
 The link:../command-ref/minishift_start{outfilesuffix}[`minishift start`] command creates and
@@ -34,7 +34,7 @@ with OpenShift through the `oc` command line tool or through the Web console,
 which can be accessed through the URL provided in the output
 of the `minishift start` command.
 
-[[minishift-stop-intro]]
+[[minishift-stop]]
 === Minishift stop
 
 The link:../command-ref/minishift_stop{outfilesuffix}[`minishift stop`] command stops your OpenShift cluster and
@@ -47,7 +47,7 @@ parameters that you used in the original start command.
 Efforts to further refine this experience are in progress. For details, see
 the GitHub issue https://github.com/minishift/minishift/issues/179[#179].
 
-[[minishift-delete-intro]]
+[[minishift-delete]]
 === Minishift delete
 
 The link:../command-ref/minishift_delete{outfilesuffix}[`minishift delete`] command deletes the OpenShift cluster,

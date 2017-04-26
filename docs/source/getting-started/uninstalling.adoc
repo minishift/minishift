@@ -1,0 +1,37 @@
+[[uninstall-instructions]]
+= Uninstalling Minishift
+:icons:
+:toc: macro
+:toc-title:
+:toclevels: 1
+
+toc::[]
+
+[[uninstalling-overview]]
+== Overview
+This section describes how you can uninstall Minishift, and delete associated files.
+
+[[uninstall-instructions]]
+== Uninstalling Minishift
+
+.  Delete the Minishift VM and any VM-specific files.
++
+----
+$ minishift delete
+----
++
+This command deletes everything in the
+`MINISHIFT_HOME/.minishift/machines/minishift` directory. Other cached data and
+the https://minishift.io/docs/managing-minishift.html#persistent-configuration[persistent configuration] are not removed.
+
+.  To completely uninstall Minishift, delete everything in the
+`MINISHIFT_HOME` directory (default `~/.minishift`) and `~/.kube`:
++
+----
+$ rm -rf ~/.minishift
+$ rm -rf ~/.kube
+----
+
+.  With your hypervisor management tool, confirm that there are no
+remaining artifacts related to the Minishift VM. For example, if you use
+KVM, you need to run the `virsh` command.

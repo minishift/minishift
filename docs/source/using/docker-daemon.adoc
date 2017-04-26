@@ -15,22 +15,28 @@ By using the same docker daemon as Minishift, you can speed up your local develo
 
 In order to configure your console to reuse the Minishift Docker dameon, follow these steps:
 
-.  Make sure that you have the Docker client binary installed on your
+. Make sure that you have the Docker client binary installed on your
 machine. For information about specific binary installations for your
 operating system, see the
 https://docs.docker.com/engine/installation/[Docker installation] site.
 
-.  Start Minishift with the link:../command-ref/minishift_start{outfilesuffix}[`minishift start`] command.
+. Start Minishift with the link:../command-ref/minishift_start{outfilesuffix}[`minishift start`] command.
 
-.  Use the link:../command-ref/minishift_docker-env{outfilesuffix}[`minishift docker-env`] command
-to display the command you need to type into your console in order to configure your Docker client.
-The command will differ depending on OS and console type.
+. Use link:../command-ref/minishift_docker-env{outfilesuffix}[`minishift docker-env`]
+to display the command you need to type into your shell in order to configure your Docker client.
+The command output will differ depending on OS and shell type.
 +
 ----
 $ minishift docker-env
+export DOCKER_TLS_VERIFY="1"
+export DOCKER_HOST="tcp://192.168.99.101:2376"
+export DOCKER_CERT_PATH="/Users/john/.minishift/certs"
+export DOCKER_API_VERSION="1.24"
+# Run this command to configure your shell:
+# eval $(minishift docker-env)
 ----
-+
-.  Test the connection, running the following command:
+
+. Test the connection, running the following command:
 +
 ----
 $ docker ps

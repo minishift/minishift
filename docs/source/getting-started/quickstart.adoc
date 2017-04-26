@@ -30,7 +30,7 @@ GNU/Linux operating system with the KVM hypervisor driver.
 [[starting-minishift]]
 == Starting Minishift
 
-.  Run the `minishift start` command.
+. Run the `minishift start` command.
 +
 ----
 $ minishift start
@@ -61,17 +61,15 @@ https://minishift.io/docs/minishift_start.md[minishift start command
 reference].
 ====
 
-.  Add the `oc` binary to the _PATH_ environment variable.
+. Use link:../command-ref/minishift_oc-env{outfilesuffix}[`minishift oc-env`] to display the command you need to type into your shell in order to add the _oc_ binary to your PATH.
+The output of `oc-env` will differ depending on OS and shell type.
 +
-[subs="verbatim,attributes"]
 ----
-$ export PATH=$PATH:~/.minishift/cache/oc/{openshift-version}
+$ minishift oc-env
+export PATH="/Users/john/.minishift/cache/oc/v1.5.0:$PATH"
+# Run this command to configure your shell:
+# eval $(minishift oc-env)
 ----
-+
-NOTE: Depending on the operating system and the `oc` version, you
-might need to use a different command to add `oc` to the _PATH_
-environment variable. To verify the `oc` version, check the contents of
-the `~/.minishift/cache/oc` directory.
 
 For more information about interacting with OpenShift with the
 command-line interface and the Web console, see the

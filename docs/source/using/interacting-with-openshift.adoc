@@ -24,14 +24,15 @@ For details about managing the Minishift VM, see the link:../using/managing-mini
 The `minishift start` command creates an OpenShift instance using the
 https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md[cluster up] approach.
 
-For this purpose it copies the `oc` binary onto your host. You will find it under
-`~/.minishift/cache/oc/{openshift-version}/oc` provided you
-use the default version of OpenShift. You can add this
-binary to your `PATH` variable in order to use `oc`, for example:
+For this purpose it copies the `oc` binary onto your host. You will find it under `~/.minishift/cache/oc/{openshift-version}/oc`, provided you use Minishift's default version of OpenShift.
+You can add this binary to your `PATH` using link:../command-ref/minishift_oc-env{outfilesuffix}[`minishift oc-env`] which displays the command you need to type into your shell.
+The output of `oc-env` will differ depending on OS and shell type.
 
-[subs="verbatim,attributes"]
 ----
-$ export PATH=$PATH:~/.minishift/cache/oc/{openshift-version}
+$ minishift oc-env
+export PATH="/Users/john/.minishift/cache/oc/v1.5.0:$PATH"
+# Run this command to configure your shell:
+# eval $(minishift oc-env)
 ----
 
 In future versions we will provide a command to assist in setting up the

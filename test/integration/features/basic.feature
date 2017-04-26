@@ -44,14 +44,15 @@ Feature: Basic
     minishift
     """
 
-  Scenario: User has a pre-configured set of persitence volumnes
-    When executing "oc get pv --as system:admin -o=name" retrying 5 times with wait period of 3 seconds
-    Then stderr should be empty
-     And exitcode should equal 0
-     And stdout should contain
-     """
-     persistentvolume/pv0001
-     """
+#  Test disabled - see https://github.com/minishift/minishift/issues/837
+#  Scenario: User has a pre-configured set of persitence volumnes
+#    When executing "oc get pv --as system:admin -o=name" retrying 5 times with wait period of 3 seconds
+#    Then stderr should be empty
+#     And exitcode should equal 0
+#     And stdout should contain
+#     """
+#     persistentvolume/pv0001
+#     """
 
   Scenario: User is able to do ssh into Minishift VM
     Given Minishift has state "Running"

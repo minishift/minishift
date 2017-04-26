@@ -65,13 +65,8 @@ reference].
 +
 [subs="verbatim,attributes"]
 ----
-$ export PATH=$PATH:~/.minishift/cache/oc/{openshift-version}
+$ eval $(minishift oc-env)
 ----
-+
-NOTE: Depending on the operating system and the `oc` version, you
-might need to use a different command to add `oc` to the _PATH_
-environment variable. To verify the `oc` version, check the contents of
-the `~/.minishift/cache/oc` directory.
 
 For more information about interacting with OpenShift with the
 command-line interface and the Web console, see the

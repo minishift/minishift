@@ -22,26 +22,30 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
 	"text/template"
 
-	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 
 	"github.com/docker/machine/libmachine"
-	"github.com/docker/machine/libmachine/shell"
+	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
+	"github.com/minishift/minishift/pkg/util/shell"
 	"github.com/spf13/cobra"
+	"strings"
 )
 
 const (
 	envTmpl = `{{ .Prefix }}DOCKER_TLS_VERIFY{{ .Delimiter }}{{ .DockerTLSVerify }}{{ .Suffix }}{{ .Prefix }}DOCKER_HOST{{ .Delimiter }}{{ .DockerHost }}{{ .Suffix }}{{ .Prefix }}DOCKER_CERT_PATH{{ .Delimiter }}{{ .DockerCertPath }}{{ .Suffix }}{{ .Prefix }}DOCKER_API_VERSION{{ .Delimiter }}{{ .DockerAPIVersion }}{{ .Suffix }}{{ if .NoProxyVar }}{{ .Prefix }}{{ .NoProxyVar }}{{ .Delimiter }}{{ .NoProxyValue }}{{ .Suffix }}{{end}}{{ .UsageHint }}`
 )
 
-type ShellConfig struct {
-	Prefix           string
-	Delimiter        string
-	Suffix           string
+var (
+	noProxy    bool
+	forceShell string
+	unset      bool
+)
+
+type DockerShellConfig struct {
+	shell.ShellConfig
 	DockerCertPath   string
 	DockerHost       string
 	DockerTLSVerify  string
@@ -51,58 +55,27 @@ type ShellConfig struct {
 	NoProxyValue     string
 }
 
-var (
-	noProxy    bool
-	forceShell string
-	unset      bool
-)
-
-func generateUsageHint(userShell string) string {
-
-	cmd := ""
-	comment := "#"
-	commandLine := "minishift docker-env"
-
-	switch userShell {
-	case "fish":
-		cmd = fmt.Sprintf("eval (%s)", commandLine)
-	case "powershell":
-		cmd = fmt.Sprintf("& %s | Invoke-Expression", commandLine)
-	case "cmd":
-		cmd = fmt.Sprintf("\t@FOR /f \"tokens=*\" %%i IN ('%s') DO @%%i", commandLine)
-		comment = "REM"
-	case "emacs":
-		cmd = fmt.Sprintf("(with-temp-buffer (shell-command \"%s\" (current-buffer)) (eval-buffer))", commandLine)
-		comment = ";;"
-	default:
-		cmd = fmt.Sprintf("eval $(%s)", commandLine)
-	}
-
-	return fmt.Sprintf("%s Run this command to configure your shell: \n%s %s\n", comment, comment, cmd)
-}
-
-func shellCfgSet(api libmachine.API) (*ShellConfig, error) {
-
+func getConfigSet(api libmachine.API, forceShell string, noProxy bool) (*DockerShellConfig, error) {
 	envMap, err := cluster.GetHostDockerEnv(api)
 	if err != nil {
 		return nil, err
 	}
 
-	userShell, err := getShell(forceShell)
+	userShell, err := shell.GetShell(forceShell)
 	if err != nil {
 		return nil, err
 	}
 
-	shellCfg := &ShellConfig{
+	cmdLine := "minishift docker-env"
+	shellCfg := &DockerShellConfig{
 		DockerCertPath:   envMap["DOCKER_CERT_PATH"],
 		DockerHost:       envMap["DOCKER_HOST"],
 		DockerTLSVerify:  envMap["DOCKER_TLS_VERIFY"],
 		DockerAPIVersion: envMap["DOCKER_API_VERSION"],
-		UsageHint:        generateUsageHint(userShell),
+		UsageHint:        shell.GenerateUsageHint(userShell, cmdLine),
 	}
 
 	if noProxy {
-
 		host, err := api.Load(constants.MachineName)
 		if err != nil {
 			return nil, fmt.Errorf("Error getting IP: ", err)
@@ -113,7 +86,7 @@ func shellCfgSet(api libmachine.API) (*ShellConfig, error) {
 			return nil, fmt.Errorf("Error getting host IP: %s", err)
 		}
 
-		noProxyVar, noProxyValue := findNoProxyFromEnv()
+		noProxyVar, noProxyValue := shell.FindNoProxyFromEnv()
 
 		// add the docker host to the no_proxy list idempotently
 		switch {
@@ -129,96 +102,40 @@ func shellCfgSet(api libmachine.API) (*ShellConfig, error) {
 		shellCfg.NoProxyValue = noProxyValue
 	}
 
-	switch userShell {
-	case "fish":
-		shellCfg.Prefix = "set -gx "
-		shellCfg.Suffix = "\";\n"
-		shellCfg.Delimiter = " \""
-	case "powershell":
-		shellCfg.Prefix = "$Env:"
-		shellCfg.Suffix = "\"\n"
-		shellCfg.Delimiter = " = \""
-	case "cmd":
-		shellCfg.Prefix = "SET "
-		shellCfg.Suffix = "\n"
-		shellCfg.Delimiter = "="
-	case "emacs":
-		shellCfg.Prefix = "(setenv \""
-		shellCfg.Suffix = "\")\n"
-		shellCfg.Delimiter = "\" \""
-	default:
-		shellCfg.Prefix = "export "
-		shellCfg.Suffix = "\"\n"
-		shellCfg.Delimiter = "=\""
-	}
+	prefix, suffix, delimiter := shell.GetPrefixSuffixDelimiterForSet(userShell, false)
+	shellCfg.Prefix = prefix
+	shellCfg.Suffix = suffix
+	shellCfg.Delimiter = delimiter
 
 	return shellCfg, nil
 }
 
-func shellCfgUnset(api libmachine.API) (*ShellConfig, error) {
-
-	userShell, err := getShell(forceShell)
+func getConfigUnset(api libmachine.API, forceShell string, noProxy bool) (*DockerShellConfig, error) {
+	userShell, err := shell.GetShell(forceShell)
 	if err != nil {
 		return nil, err
 	}
 
-	shellCfg := &ShellConfig{
-		UsageHint: generateUsageHint(userShell),
+	cmdLine := "minishift docker-env"
+	shellCfg := &DockerShellConfig{
+		UsageHint: shell.GenerateUsageHint(userShell, cmdLine),
 	}
 
 	if noProxy {
-		shellCfg.NoProxyVar, shellCfg.NoProxyValue = findNoProxyFromEnv()
+		shellCfg.NoProxyVar, shellCfg.NoProxyValue = shell.FindNoProxyFromEnv()
 	}
 
-	switch userShell {
-	case "fish":
-		shellCfg.Prefix = "set -e "
-		shellCfg.Suffix = ";\n"
-		shellCfg.Delimiter = ""
-	case "powershell":
-		shellCfg.Prefix = `Remove-Item Env:\\`
-		shellCfg.Suffix = "\n"
-		shellCfg.Delimiter = ""
-	case "cmd":
-		shellCfg.Prefix = "SET "
-		shellCfg.Suffix = "\n"
-		shellCfg.Delimiter = "="
-	case "emacs":
-		shellCfg.Prefix = "(setenv \""
-		shellCfg.Suffix = ")\n"
-		shellCfg.Delimiter = "\" nil"
-	default:
-		shellCfg.Prefix = "unset "
-		shellCfg.Suffix = "\n"
-		shellCfg.Delimiter = ""
-	}
+	prefix, suffix, delimiter := shell.GetPrefixSuffixDelimiterForUnSet(userShell)
+	shellCfg.Prefix = prefix
+	shellCfg.Suffix = suffix
+	shellCfg.Delimiter = delimiter
 
 	return shellCfg, nil
 }
 
-func executeTemplateStdout(shellCfg *ShellConfig) error {
+func executeTemplateStdout(shellCfg *DockerShellConfig) error {
 	tmpl := template.Must(template.New("envConfig").Parse(envTmpl))
 	return tmpl.Execute(os.Stdout, shellCfg)
-}
-
-func getShell(userShell string) (string, error) {
-	if userShell != "" {
-		return userShell, nil
-	}
-	return shell.Detect()
-}
-
-func findNoProxyFromEnv() (string, string) {
-	// first check for an existing lower case no_proxy var
-	noProxyVar := "no_proxy"
-	noProxyValue := os.Getenv("no_proxy")
-
-	// otherwise default to allcaps HTTP_PROXY
-	if noProxyValue == "" {
-		noProxyVar = "NO_PROXY"
-		noProxyValue = os.Getenv("NO_PROXY")
-	}
-	return noProxyVar, noProxyValue
 }
 
 // envCmd represents the docker-env command
@@ -233,16 +150,16 @@ var dockerEnvCmd = &cobra.Command{
 
 		var (
 			err      error
-			shellCfg *ShellConfig
+			shellCfg *DockerShellConfig
 		)
 
 		if unset {
-			shellCfg, err = shellCfgUnset(api)
+			shellCfg, err = getConfigUnset(api, forceShell, noProxy)
 			if err != nil {
 				atexit.ExitWithMessage(1, fmt.Sprintf("Error unsetting environment variables: %s", err.Error()))
 			}
 		} else {
-			shellCfg, err = shellCfgSet(api)
+			shellCfg, err = getConfigSet(api, forceShell, noProxy)
 			if err != nil {
 				atexit.ExitWithMessage(1, fmt.Sprintf("Error setting environment variables: %s", err.Error()))
 			}

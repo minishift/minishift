@@ -35,5 +35,5 @@ var configCmd = &cobra.Command{
 }
 
 func init() {
-	OpenShiftConfigCmd.AddCommand(configCmd)
+	OpenShiftCmd.AddCommand(configCmd)
 }

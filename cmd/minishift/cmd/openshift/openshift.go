@@ -20,7 +20,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var OpenShiftConfigCmd = &cobra.Command{
+var OpenShiftCmd = &cobra.Command{
 	Use:   "openshift SUBCOMMAND [flags]",
 	Short: "Interact with an Openshift Cluster",
 	Long:  "Interact with an Openshift cluster, check available versions and modify master config resources",

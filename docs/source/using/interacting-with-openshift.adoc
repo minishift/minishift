@@ -31,7 +31,7 @@ binary to your `PATH` variable in order to use `oc`, for example:
 
 [subs="verbatim,attributes"]
 ----
-$ export PATH=$PATH:~/.minishift/cache/oc/{openshift-version}
+$ eval $(minishift oc-env)
 ----
 
 In future versions we will provide a command to assist in setting up the

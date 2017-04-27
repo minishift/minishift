@@ -56,5 +56,5 @@ var registryCmd = &cobra.Command{
 }
 
 func init() {
-	OpenShiftConfigCmd.AddCommand(registryCmd)
+	OpenShiftCmd.AddCommand(registryCmd)
 }

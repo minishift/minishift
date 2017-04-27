@@ -57,7 +57,7 @@ func (provisioner *MinishiftProvisioner) SetHostname(hostname string) error {
 		hostname,
 		hostname,
 	)); err != nil {
-		return err
+	    return err
 	}
 
 	// ubuntu/debian use 127.0.1.1 for non "localhost" loopback hostnames: https://www.debian.org/doc/manuals/debian-reference/ch05.en.html#_the_hostname_resolution

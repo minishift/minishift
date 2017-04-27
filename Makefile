@@ -152,4 +152,8 @@ fmt:
 
 .PHONY: fmtcheck
 fmtcheck:
-	@gofmt -l -s $(SOURCE_DIRS) | read; if [ $$? == 0 ]; then echo "gofmt check failed for:"; gofmt -l -s $(SOURCE_DIRS); exit 1; fi
+	@gofmt -l -s $(SOURCE_DIRS) | read; \
+	    if [ "$$?" = "0" ]; then \
+	       echo "gofmt check failed for:"; gofmt -l -s $(SOURCE_DIRS); \
+	       exit 1; \
+	    fi

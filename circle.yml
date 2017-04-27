@@ -16,8 +16,17 @@ dependencies:
     override:
         - go version
         - go env
-        # Install Glide and create a specific tmp path to avoid error with too long dir names
-        - go get github.com/Masterminds/glide
+        # Install Glide
+        - curl -sL ${GLIDE_LATEST_RELEASE_URL} -o /tmp/glide.tar.gz:
+            environment:
+                GLIDE_OS_ARCH: $(go env GOHOSTOS)-$(go env GOHOSTARCH)
+                GLIDE_TAG: v0.12.3
+                GLIDE_LATEST_RELEASE_URL: "https://github.com/Masterminds/glide/releases/download/${GLIDE_TAG}/glide-${GLIDE_TAG}-${GLIDE_OS_ARCH}.tar.gz"
+        - mkdir /tmp/glide
+        - tar --directory=/tmp/glide -xvf /tmp/glide.tar.gz
+        - mv /tmp/glide/${GLIDE_OS_ARCH}/glide $GOPATH/bin/:
+            environment:
+                GLIDE_OS_ARCH: $(go env GOHOSTOS)-$(go env GOHOSTARCH)
 
 ## Customize test commands
 test:

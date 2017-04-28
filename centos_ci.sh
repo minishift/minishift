@@ -174,7 +174,7 @@ function artifacts_upload_on_pr_and_master_trigger() {
   # For PR build, GIT_BRANCH is set to branch name other than origin/master
   if [[ "$GIT_BRANCH" = "origin/master" ]]; then
     install_docs_prerequisite_packages;
-    make gen_adoc_tar
+    make gen_adoc_tar IMAGE_UID=$(id -u)
     build_openshift_origin_docs $(pwd)/docs/build/minishift-adoc.tar;
 
     mkdir -p minishift/master/$BUILD_NUMBER/
@@ -222,7 +222,7 @@ else
   if [[ "$JOB_NAME" = "minishift-docs" ]]; then
     prepare;
     cd gopath/src/github.com/minishift/minishift
-    make gen_adoc_tar
+    make gen_adoc_tar IMAGE_UID=$(id -u)
     docs_tar_upload $PASS
   else
     setup_kvm_docker_machine_driver;

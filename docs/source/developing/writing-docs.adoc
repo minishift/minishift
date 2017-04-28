@@ -31,21 +31,40 @@ link:../command-ref/minishift_docker-env{outfilesuffix}[`minishift docker-env`].
 
 To build the Docker image, run:
 
-[source,sh]
 ----
 $ make build_docs_container
 ----
 
 To generate the documentation into the directory `docs/build`, run:
 
-[source,sh]
 ----
 $ make gen_docs
 ----
 
+[NOTE]
+====
+Your local checkout of the sources are going to be mounted into the container in order to built the docs.
+Depending on your UID on the host, you might see file permissions problems when trying to run _gen_docs_.
+This is caused by the fact, that the _docs_ user used within the container uses per default a UID of 1000.
+This might conflict with the user id of the mounted docs sources.
+Your output might look like:
+----
+$ make gen_docs
+mkdir -p build
+rake aborted!
+Errno::EACCES: Permission denied @ dir_s_mkdir - build
+----
+
+In this case you need to build the container with a different user id.
+This will ensure that the _docs_ user in the container will be able to create files and directories.
+
+----
+$ make build_docs_container IMAGE_UID=$(id -u)
+----
+====
+
 To build and serve the documentation for editing, run:
 
-[source,sh]
 ----
 $ make serve_docs
 ----
@@ -66,7 +85,6 @@ meta data.
 
 This tarball can be built using:
 
-[source,sh]
 ----
 $ make gen_adoc_tar
 ----
@@ -90,7 +108,6 @@ Minishift documentation.
 Start with building the documentation tarball as described in <<section-deploying-minishift-docs>>,
 then follow these steps (assuming you are in the directory of your openshift-docs checkout):
 
-[source,sh]
 ----
 $ mkdir minishift
 $ cd minishift

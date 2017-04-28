@@ -44,11 +44,7 @@ ADDON_BINDATA_DIR = $(CURDIR)/$(BUILD_DIR)/bindata
 ADDON_ASSET_FILE = $(ADDON_BINDATA_DIR)/addon_assets.go
 
 # Setup for the docs tasks
-ifeq ($(GOOS),windows)
-	UID := 1000
-else
-	UID = $(shell id -u)
-endif
+IMAGE_UID ?= 1000
 DOCS_SYNOPISIS_DIR = docs/source/_tmp
 
 # Start of the actual build targets
@@ -92,7 +88,7 @@ prerelease:
 
 .PHONY: build_docs_container
 build_docs_container:
-	cd docs && docker build --build-arg uid=$(UID) -t minishift/docs .
+	cd docs && docker build --build-arg uid=$(IMAGE_UID) -t minishift/docs .
 
 .PHONY: gen_adoc_tar
 gen_adoc_tar: synopsis_docs build_docs_container

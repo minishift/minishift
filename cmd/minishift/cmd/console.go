@@ -29,7 +29,7 @@ import (
 )
 
 var (
-	consoleURLMode  bool
+	consoleURLMode      bool
 	machineReadAble bool
 	machineDetails  = `HOST=%s
 PORT=%d

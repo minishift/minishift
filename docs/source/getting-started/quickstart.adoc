@@ -57,8 +57,7 @@ use a different driver, set the `--vm-driver` flag in `minishift start`.
 For example, to use VirtualBox instead of KVM on GNU/Linux operating
 systems, run `minishift start --vm-driver=virtualbox`. For more
 information about `minishift start` options, see the
-https://minishift.io/docs/minishift_start.md[minishift start command
-reference].
+link:../command-ref/minishift_start{outfilesuffix}[`minishift start`] command.
 ====
 
 . Use link:../command-ref/minishift_oc-env{outfilesuffix}[`minishift oc-env`] to display the command you need to type into your shell in order to add the _oc_ binary to your PATH.

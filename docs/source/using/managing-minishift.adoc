@@ -119,7 +119,7 @@ used to set commonly-used command-line flags persistently.
 
 NOTE: Persistent configuration can only be applied to the set of
 supported configuration options that are listed in the synopsis of the
-link:./minishift_config.html[`minishift config`] sub-command, unlike
+link:../command-ref/minishift_config{outfilesuffix}[`minishift config`] sub-command, unlike
 environment variables that can be used to replace any option of any
 command.
 

@@ -77,7 +77,7 @@ http://<IP of Docker daemon>:4567.
 == Deploying Minishift documentation
 
 The Minishift documentation is deployed on _docs.openshift.org_ under
-link:https://docs.openshift.org/minishift[https://docs.openshift.org/minishift].
+link:https://docs.openshift.org/latest/minishift/index.html[https://docs.openshift.org/latest/minishift/index.html].
 
 To integrate with the _docs.openshift.org_ we deliver a tarball containing
 the Minishift asciidoc files as well as some link:http://www.asciibinder.org/[AsciiBinder]

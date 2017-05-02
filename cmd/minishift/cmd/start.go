@@ -244,8 +244,7 @@ func postClusterUp(machineName string, ip string, port int, routingSuffix string
 func applyAddOns(addOnManager *manager.AddOnManager, ip string, routingSuffix string, ocPath string, kubeConfigPath string, sshCommander provision.SSHCommander) {
 	err := addOnManager.Apply(addon.GetExecutionContext(ip, routingSuffix, ocPath, kubeConfigPath, sshCommander))
 	if err != nil {
-		fmt.Println("Error executing addon commands: ", err)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, fmt.Sprint("Error executing addon commands: ", err))
 	}
 }
 
@@ -368,7 +367,7 @@ func updateNoProxyForDocker() string {
 func calculateDiskSizeInMB(humanReadableDiskSize string) int {
 	diskSize, err := units.FromHumanSize(humanReadableDiskSize)
 	if err != nil {
-		glog.Errorf("Disk size is not valid: %s", err)
+		atexit.ExitWithMessage(1, fmt.Sprintf("Disk size is not valid: %s", err))
 	}
 	return int(diskSize / units.MB)
 }
@@ -445,8 +444,7 @@ func clusterUp(config *cluster.MachineConfig, ip string) {
 		MinishiftCacheDir: filepath.Join(constants.Minipath, "cache"),
 	}
 	if err := oc.EnsureIsCached(); err != nil {
-		fmt.Println("Error starting the cluster: ", err)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, fmt.Sprintln("Error starting the cluster: ", err))
 	}
 
 	// Update MACHINE_NAME.json for oc path
@@ -476,8 +474,7 @@ func clusterUp(config *cluster.MachineConfig, ip string) {
 				key = minishiftToClusterUp[key]
 			}
 			if !ocSupportFlag(cmdName, key) {
-				glog.Errorf("Flag %s is not supported for oc version %s. Use 'openshift-version' flag to select a different version of OpenShift.", flag.Name, config.OpenShiftVersion)
-				atexit.Exit(1)
+				atexit.ExitWithMessage(1, fmt.Sprintf("Flag %s is not supported for oc version %s. Use 'openshift-version' flag to select a different version of OpenShift.", flag.Name, config.OpenShiftVersion))
 			}
 			cmdArgs = append(cmdArgs, "--"+key)
 			cmdArgs = append(cmdArgs, value)
@@ -486,9 +483,7 @@ func clusterUp(config *cluster.MachineConfig, ip string) {
 
 	exitCode := runner.Run(os.Stdout, os.Stderr, cmdName, cmdArgs...)
 	if exitCode != 0 {
-		// TODO Println is probably not right here. Need some sort of logging wrapper
-		fmt.Println("Error starting the cluster.")
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, "Error starting the cluster.")
 	}
 }
 
@@ -527,8 +522,7 @@ func ocSupportFlag(cmdName string, flag string) bool {
 	cmdArgs := []string{"cluster", "up", "-h"}
 	cmdOut, err := runner.Output(cmdName, cmdArgs...)
 	if err != nil {
-		glog.Errorf("Not able to get output of 'oc -h' Error: %s", err)
-		atexit.Exit(1)
+		atexit.ExitWithMessage(1, fmt.Sprintf("Not able to get output of 'oc -h' Error: %s", err))
 	}
 	ocCommandOptions := minishiftUtil.ParseOcHelpCommand(cmdOut)
 	if ocCommandOptions != nil {

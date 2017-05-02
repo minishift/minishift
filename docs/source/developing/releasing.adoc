@@ -41,6 +41,15 @@ defined in your environment as _GITHUB_ACCESS_TOKEN_.
 $ make release
 ----
 
+. Trigger documentation build.
+This will build link:http://artifacts.ci.centos.org/minishift/minishift/docs/latest/[minishift-adoc.tar] which is in turn consumed by docs.openshift.org.
+See also <<writing-docs#section-building-openshift-docs,Building OpenShift documentation>>.
++
+----
+$ export API_KEY=<api-key>
+$ curl -H "$(curl --user minishift:$API_KEY 'https://ci.centos.org//crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)')" -X POST https://ci.centos.org/job/minishift-docs/build --user "minishift:$API_KEY"
+----
+
 == Post release
 
 As part of the release process we also send a release announcement and edit the GitHub
@@ -55,5 +64,5 @@ issue list, for example:
 
 ----
 $ cd scripts/release
-$ issue-list.sh -r minishift -m 9
+$ ./issue-list.sh -r minishift -m 9
 ----

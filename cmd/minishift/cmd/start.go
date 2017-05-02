@@ -77,6 +77,7 @@ const (
 	openshiftEnv      = "openshift-env"
 	metrics           = "metrics"
 	hostPvDir         = "host-pv-dir"
+	logging           = "logging"
 
 	// Setting proxy
 	httpProxy   = "http-proxy"
@@ -417,6 +418,7 @@ func initClusterUpFlags() {
 	clusterUpFlagSet.Int(serverLogLevel, 0, "Log level for the OpenShift server.")
 	clusterUpFlagSet.StringSliceVarP(&openShiftEnv, openshiftEnv, "e", []string{}, "Specify key-value pairs of environment variables to set on the OpenShift container.")
 	clusterUpFlagSet.Bool(metrics, false, "Install metrics (experimental)")
+	clusterUpFlagSet.Bool(logging, false, "Install logging (experimental)")
 	clusterUpFlagSet.String(openshiftVersion, version.GetOpenShiftVersion(), fmt.Sprintf("The OpenShift version to run, eg. %s", version.GetOpenShiftVersion()))
 }
 

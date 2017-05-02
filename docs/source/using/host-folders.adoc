@@ -171,7 +171,7 @@ myshare    /mnt/sda1/myshare   //192.168.99.1/MYSHARE   N
 [[deleting-host-folders]]
 === Deleting host folders
 
-The link:../command-ref/minishift_hostfolder_delete{outfilesuffix}[`hostfolder delete`] command finally enabled you to remove a host folder definition:
+The link:../command-ref/minishift_hostfolder_remove{outfilesuffix}[`hostfolder remove`] command finally enabled you to remove a host folder definition:
 
 ----
 $ minishift hostfolder list

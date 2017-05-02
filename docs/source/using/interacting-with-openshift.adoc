@@ -35,10 +35,6 @@ export PATH="/Users/john/.minishift/cache/oc/v1.5.0:$PATH"
 # eval $(minishift oc-env)
 ----
 
-In future versions we will provide a command to assist in setting up the
-`PATH`.
-See GitHub issue https://github.com/minishift/minishift/issues/142[#142].
-
 As part of the `minishift start` command there is also a `minishift`
 https://docs.openshift.org/latest/cli_reference/manage_cli_profiles.html[oc context] created.
 This context contains the configuration to communicate with your OpenShift cluster.
@@ -199,39 +195,3 @@ $ minishift openshift config set --patch '{"routingConfig": {"subdomain": "<IP-A
 
 Make sure to replace `IP-ADDRESS` in the above example with the IP address of your Minishift VM.
 You can retrieve the IP address by running the link:../command-ref/minishift_ip{outfilesuffix}[`ip`] command.
-
-[[persistent-volumes]]
-== Persistent volumes
-
-Minishift supports https://docs.openshift.org/latest/dev_guide/persistent_volumes.html[PersistentVolumes]
-of type `hostPath`. These persisten volumes are mapped to a directory inside the Minishift VM.
-
-The MiniShift VM boots into a tmpfs, so most directories will not be persisted across
-reboots, for example if you use `minishift stop`. However, MiniShift is configured to
-persist OpenShift-specific configuration files and some Docker files.
-
-The files that are persisted are stored in the following host directories:
-
-- `/var/lib/minishift`
-- `/var/lib/docker`
-
-The following example shows persistent volume configuration to persist data
-in the `/var/lib/minishift` directory:
-
-[source, yaml]
-----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: pv
-spec:
-  accessModes:
-    - ReadWriteOnce
-  capacity:
-    storage: 5Gi
-  hostPath:
-    path: /var/lib/minishift/pv
-----
-
-User-configured persistent volumes are currently under development.
-See GitHub issue https://github.com/minishift/minishift/issues/389[#389].

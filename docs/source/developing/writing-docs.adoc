@@ -15,13 +15,10 @@ This section contains information about contributing to the Minishift documentat
 [[section-building-minishift-docs]]
 == Building Minishift documentation
 
-Minishift documentation is located in the `docs` sub-folder. The
-documentation is a mix of generated
-https://en.wikipedia.org/wiki/Markdown[Markdown] files and manually
-maintained https://en.wikipedia.org/wiki/AsciiDoc[Asciidoc] files.
+Minishift documentation is located in the `docs` sub-folder.
+The documentation is a mix of generated https://en.wikipedia.org/wiki/Markdown[Markdown] files and manually maintained https://en.wikipedia.org/wiki/AsciiDoc[Asciidoc] files.
 
-If you are adding a new file to the doumentation please update
- the `_topic_map.yml`  in the root of `docs/source` sub-folder.
+If you are adding a new file to the doumentation please update the `_topic_map.yml`  in the root of `docs/source` sub-folder.
 
 Per default the documentation is built in a Docker container. This way
 you avoid having to install all the required dependencies on your
@@ -69,19 +66,14 @@ To build and serve the documentation for editing, run:
 $ make serve_docs
 ----
 
-The latter will start the https://middlemanapp.com[Middleman] server on
-port 4567. You can access the rendered documentation by browsing to
-http://<IP of Docker daemon>:4567.
+The latter will start the https://middlemanapp.com[Middleman] server on port 4567.
+You can access the rendered documentation by browsing to http://<IP of Docker daemon>:4567.
 
 [[section-deploying-minishift-docs]]
 == Deploying Minishift documentation
 
-The Minishift documentation is deployed on _docs.openshift.org_ under
-link:https://docs.openshift.org/minishift[https://docs.openshift.org/minishift].
-
-To integrate with the _docs.openshift.org_ we deliver a tarball containing
-the Minishift asciidoc files as well as some link:http://www.asciibinder.org/[AsciiBinder]
-meta data.
+The Minishift documentation is deployed on _docs.openshift.org_.
+To integrate with this site we deliver a tarball containing the Minishift asciidoc files as well as some link:http://www.asciibinder.org/[AsciiBinder] meta data.
 
 This tarball can be built using:
 

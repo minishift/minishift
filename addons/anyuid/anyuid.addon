@@ -1,5 +1,10 @@
 # Name: anyuid
-# Description: Allows authenticated users to run images under a non pre-allocated UID
-# Url: https://access.redhat.com/documentation/en-us/openshift_enterprise/3.2/html/cluster_administration/admin-guide-manage-scc
+# Description: Changes the default security context constraints to allow pods to run as any user.
+# Url: https://docs.openshift.org/latest/creating_images/guidelines.html#openshift-origin-specific-guidelines
 
 oc adm policy add-scc-to-group anyuid system:authenticated
+
+echo  Add-on '#{addon-name}' changed the default security context constraints to allow pods to run as any user.
+echo  Per default OpenShift runs containers using an arbitrarily assigned user ID.
+echo  Refer to https://docs.openshift.org/latest/architecture/additional_concepts/authorization.html#security-context-constraints and
+echo  https://docs.openshift.org/latest/creating_images/guidelines.html#openshift-origin-specific-guidelines for more information.

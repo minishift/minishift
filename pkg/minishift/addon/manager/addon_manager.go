@@ -168,7 +168,7 @@ func (m *AddOnManager) String() string {
 }
 
 func (m *AddOnManager) applyAddOn(addOn addon.AddOn, context *command.ExecutionContext) error {
-	fmt.Print(fmt.Sprintf("Applying addon %s:", addOn.MetaData().Name()))
+	fmt.Print(fmt.Sprintf("-- Applying addon '%s':", addOn.MetaData().Name()))
 	context.AddToContext("addon-name", addOn.MetaData().Name())
 	defer context.RemoveFromContext("addon-name")
 

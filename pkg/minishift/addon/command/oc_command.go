@@ -19,6 +19,7 @@ package command
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 )
@@ -41,7 +42,7 @@ func (c *OcCommand) doExecute(ec *ExecutionContext) error {
 	fmt.Print(".")
 
 	commander := ec.GetOcCommander()
-	exitStatus := commander.Run(ec.Interpolate(cmd), os.Stdout, os.Stdin)
+	exitStatus := commander.Run(ec.Interpolate(cmd), ioutil.Discard, os.Stdin)
 	if exitStatus != 0 {
 		return errors.New(fmt.Sprintf("Error executing command %s.", c.String()))
 	}

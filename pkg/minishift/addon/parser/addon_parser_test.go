@@ -94,7 +94,7 @@ func Test_successful_parsing_of_addon_dir(t *testing.T) {
 		t.Fatalf("Unexpected addon name: '%s'. Expected '%s'", addOn.MetaData().Name(), expectedName)
 	}
 
-	expectedNumberOfCommands := 1
+	expectedNumberOfCommands := 5
 	if len(addOn.Commands()) != expectedNumberOfCommands {
 		t.Errorf("Unexpected number of commands. Found %d, but expected %d", len(addOn.Commands()), expectedNumberOfCommands)
 	}

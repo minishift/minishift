@@ -23,6 +23,7 @@ import (
 
 	"strings"
 
+	"bytes"
 	units "github.com/docker/go-units"
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/drivers"
@@ -34,6 +35,7 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minikube/kubeconfig"
+	"github.com/minishift/minishift/pkg/minishift/addon/manager"
 	"github.com/minishift/minishift/pkg/minishift/cache"
 	"github.com/minishift/minishift/pkg/minishift/clusterup"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
@@ -44,9 +46,11 @@ import (
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/minishift/minishift/pkg/version"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"time"
 )
 
 const (
@@ -185,7 +189,7 @@ func runStart(cmd *cobra.Command, args []string) {
 	}
 
 	//Create the host directories if not present
-	hostDirs := []string{viper.GetString(hostConfigDir), viper.GetString(hostDataDir), viper.GetString(hostVolumesDir)}
+	hostDirs := []string{viper.GetString(hostConfigDir), viper.GetString(hostDataDir), viper.GetString(hostVolumesDir), viper.GetString(hostPvDir)}
 	err = clusterup.EnsureHostDirectoriesExist(libMachineClient, hostDirs)
 	if err != nil {
 		fmt.Println("Error creating required host directories: ", err)
@@ -231,16 +235,76 @@ func postClusterUp(machineName string, ip string, port int, routingSuffix string
 		atexit.Exit(1)
 	}
 
-	applyAddOns(ip, routingSuffix, ocPath, kubeConfigPath, sshCommander)
+	addOnManager := addon.GetAddOnManager()
+	configurePersistentVolumes(addOnManager, sshCommander, ocRunner)
+	applyAddOns(addOnManager, ip, routingSuffix, ocPath, kubeConfigPath, sshCommander)
 }
 
-func applyAddOns(ip string, routingSuffix string, ocPath string, kubeConfigPath string, sshCommander provision.SSHCommander) {
-	addOnManager := addon.GetAddOnManager()
+func applyAddOns(addOnManager *manager.AddOnManager, ip string, routingSuffix string, ocPath string, kubeConfigPath string, sshCommander provision.SSHCommander) {
 	err := addOnManager.Apply(addon.GetExecutionContext(ip, routingSuffix, ocPath, kubeConfigPath, sshCommander))
 	if err != nil {
 		fmt.Println("Error executing addon commands: ", err)
 		atexit.Exit(1)
 	}
+}
+
+// TODO - persistent volume creation should really be fixed upstream, aka 'cluster up'. See https://github.com/openshift/origin/issues/14076 (HF)
+// configurePersistentVolumes makes sure that the default persistent volumes created by 'cluster up' have the right permissions - see https://github.com/minishift/minishift/issues/856
+func configurePersistentVolumes(addOnManager *manager.AddOnManager, sshCommander provision.SSHCommander, ocRunner *oc.OcRunner) error {
+	// don't apply this if anyuid is not enabled
+	anyuid := addOnManager.Get("anyuid")
+	if anyuid == nil || !anyuid.IsEnabled() {
+		return nil
+	}
+
+	fmt.Print("-- Waiting for persistent volumes to be created ... ")
+
+	hostPvDir := viper.GetString(hostPvDir)
+
+	var out, err *bytes.Buffer
+
+	// poll the status of the persistent-volume-setup job to determine when the persitent volume creates is completed
+	for {
+		out = new(bytes.Buffer)
+		err = new(bytes.Buffer)
+		exitStatus := ocRunner.Run("get job persistent-volume-setup -n default -o 'jsonpath={ .status.active }'", out, err)
+
+		if exitStatus != 0 || len(err.String()) > 0 {
+			return errors.New("Unable to monitor persistent volume creation")
+		}
+
+		if out.String() != "1" {
+			break
+		}
+
+		time.Sleep(1 * time.Second)
+	}
+
+	// verify the job succeeded
+	out = new(bytes.Buffer)
+	err = new(bytes.Buffer)
+	exitStatus := ocRunner.Run("get job persistent-volume-setup -n default -o 'jsonpath={ .status.succeeded }'", out, err)
+
+	if exitStatus != 0 || len(err.String()) > 0 || out.String() != "1" {
+		return errors.New("Persistent volume creation failed")
+	}
+
+	cmd := fmt.Sprintf("sudo chmod -R 777 %s/pv*", hostPvDir)
+	sshCommander.SSHCommand(cmd)
+
+	// if we have SELinux enabled we need to sort things out there as well
+	// 'cluster up' does this as well, but we do it here as well to have all required actions collected in one
+	// place, instead of relying on some implicit knowledge on what 'cluster up does (HF)
+	cmd = fmt.Sprintf("sudo which chcon; if [ $? -eq 0 ]; then chcon -R -t svirt_sandbox_file_t %s/*; fi", hostPvDir)
+	sshCommander.SSHCommand(cmd)
+
+	cmd = fmt.Sprintf("sudo which restorecon; if [ $? -eq 0 ]; then restorecon -R %s; fi", hostPvDir)
+	sshCommander.SSHCommand(cmd)
+
+	fmt.Println("OK")
+	fmt.Println()
+
+	return nil
 }
 
 func automountHostfolders(driver drivers.Driver) {

@@ -99,6 +99,18 @@ func (m *Minishift) executingOcCommand(command string) error {
 	return nil
 }
 
+func (m *Minishift) executingOcCommandSucceeds(command string) error {
+	err := m.executingOcCommand(command)
+	if err != nil {
+		return err
+	}
+	if lastCommandOutput.ExitCode != 0 || len(lastCommandOutput.StdErr) != 0 {
+		return fmt.Errorf("Command did not execute successfully. cmdExit: %d, cmdErr: %s", lastCommandOutput.ExitCode, lastCommandOutput.StdErr)
+	}
+
+	return nil
+}
+
 func (m *Minishift) executingCommand(command string) error {
 	// TODO: there must be smarter way to destruct
 	cmdOut, cmdErr, cmdExit := m.runner.RunCommand(command)
@@ -108,8 +120,19 @@ func (m *Minishift) executingCommand(command string) error {
 		cmdErr,
 		cmdExit,
 	}
-
 	// Beware: you are responsible to verify the lastCommandOutput!
+	return nil
+}
+
+func (m *Minishift) executingMinishiftCommandSucceeds(command string) error {
+	err := m.executingCommand(command)
+	if err != nil {
+		return err
+	}
+	if lastCommandOutput.ExitCode != 0 || len(lastCommandOutput.StdErr) != 0 {
+		return fmt.Errorf("Command did not execute successfully. cmdExit: %d, cmdErr: %s", lastCommandOutput.ExitCode, lastCommandOutput.StdErr)
+	}
+
 	return nil
 }
 
@@ -176,8 +199,10 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`Minishift (?:has|should have) state "([^"]*)"`, m.shouldHaveState)
 	s.Step(`Minishift should have a valid IP address`, m.shouldHaveAValidIPAddress)
 	s.Step(`executing "minishift ([^"]*)"`, m.executingCommand)
+	s.Step(`executing "minishift ([^"]*)" succeeds$`, m.executingMinishiftCommandSucceeds)
 	s.Step(`executing "oc ([^"]*)" retrying (\d+) times with wait period of (\d+) seconds$`, m.executingRetryingTimesWithWaitPeriodOfSeconds)
 	s.Step(`executing "oc ([^"]*)`, m.executingOcCommand)
+	s.Step(`executing "oc ([^"]*)" succeeds$`, m.executingOcCommandSucceeds)
 	s.Step(`([^"]*) should contain ([^"]*)`, m.commandReturnShouldContain)
 	s.Step(`([^"]*) should contain`, m.commandReturnShouldContainContent)
 	s.Step(`([^"]*) should equal ([^"]*)`, m.commandReturnShouldEqual)

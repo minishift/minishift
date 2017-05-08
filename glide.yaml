@@ -25,6 +25,7 @@ import:
   - libmachine/state
   - libmachine/swarm
 - package: github.com/google/go-github
+  version: 30a21ee1a3839fb4a408efe331f226b73faac379
   subpackages:
   - github
 - package: github.com/inconshreveable/go-update
@@ -44,7 +45,7 @@ import:
 - package: github.com/pkg/errors
   version: ^0.8.0
 - package: github.com/jteeuwen/go-bindata
-  version: ~3.0
+  version: v3.0.7
 - package: github.com/spf13/cobra
   subpackages:
   - doc

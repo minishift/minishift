@@ -19,9 +19,14 @@ limitations under the License.
 package integration
 
 import (
+	"crypto/tls"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net"
+	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -36,7 +41,7 @@ import (
 )
 
 var lastCommandOutput CommandOutput
-var givenArgs, givenPath string
+var givenArgs, givenPath, testDir string
 
 type CommandOutput struct {
 	Command  string
@@ -124,13 +129,60 @@ func (m *Minishift) executingCommand(command string) error {
 	return nil
 }
 
-func (m *Minishift) executingMinishiftCommandSucceeds(command string) error {
+func (m *Minishift) executingMinishiftCommandSucceeds(command, expectedResult string) error {
 	err := m.executingCommand(command)
 	if err != nil {
 		return err
 	}
-	if lastCommandOutput.ExitCode != 0 || len(lastCommandOutput.StdErr) != 0 {
-		return fmt.Errorf("Command did not execute successfully. cmdExit: %d, cmdErr: %s", lastCommandOutput.ExitCode, lastCommandOutput.StdErr)
+	success := (lastCommandOutput.ExitCode != 0 || len(lastCommandOutput.StdErr) != 0)
+	switch expectedResult {
+	case "succeeds":
+		if success {
+			return fmt.Errorf("Command did not execute successfully. cmdExit: %d, cmdErr: %s", lastCommandOutput.ExitCode, lastCommandOutput.StdErr)
+		}
+	case "fails":
+		if success {
+			return fmt.Errorf("Command executed successfully, however was expected to fail. cmdExit: %d, cmdErr: %s", lastCommandOutput.ExitCode, lastCommandOutput.StdErr)
+		}
+	default:
+		return fmt.Errorf("Expected result: %s not recognized, please use: 'fails' or 'succeeds'", expectedResult)
+	}
+	return nil
+}
+
+func (m *Minishift) commandReturnEquals(commandField, command, expected string) error {
+	m.executingCommand(command)
+	return compareExpectedWithActualEquals(expected+"\n", selectFieldFromLastOutput(commandField))
+}
+
+func (m *Minishift) commandReturnContains(commandField, command, expected string) error {
+	m.executingCommand(command)
+	return compareExpectedWithActualContains(expected, selectFieldFromLastOutput(commandField))
+}
+
+//  To get values of nested keys, use following dot formating in Scenarios: key.nestedKey
+//  If an array is expected, use following formating: [value1 value2 value3].
+func (m *Minishift) configContains(configPath, expectingResult, expectedKeyPath, expectedValue string) error {
+	data, err := ioutil.ReadFile(testDir + "/" + configPath)
+	if err != nil {
+		return fmt.Errorf("Cannot read config file")
+	}
+	var values map[string]interface{}
+	json.Unmarshal(data, &values)
+	actualValue := ""
+	keyPath := strings.Split(expectedKeyPath, ".")
+	for _, element := range keyPath {
+		switch value := values[element].(type) {
+		case map[string]interface{}:
+			values = value
+		case []interface{}, nil, string, float64:
+			actualValue = fmt.Sprintf("%v", value)
+		default:
+			return fmt.Errorf("Unexpected type in JSON config, not supported by testsuite")
+		}
+	}
+	if (expectingResult == "contains") && (actualValue != expectedValue) {
+		return fmt.Errorf("For key '%s' config contains unexpected value '%s'", expectedKeyPath, actualValue)
 	}
 
 	return nil
@@ -189,6 +241,70 @@ func (m *Minishift) commandReturnShouldBeEmpty(commandField string) error {
 	return compareExpectedWithActualEquals("", selectFieldFromLastOutput(commandField))
 }
 
+func (m *Minishift) shouldBeInValidFormat(commandField, format string) error {
+	result := selectFieldFromLastOutput(commandField)
+	result = strings.TrimRight(result, "\n")
+	switch format {
+	case "URL":
+		_, err := url.ParseRequestURI(result)
+		if err != nil {
+			return fmt.Errorf("Command did not returned URL in valid format: %s", result)
+		}
+	case "IP":
+		if net.ParseIP(result) == nil {
+			return fmt.Errorf("%s of previous command is not a valid IP address: %s", commandField, result)
+		}
+	default:
+		return fmt.Errorf("Format %s not implemented.", format)
+	}
+	return nil
+}
+
+func (m *Minishift) getHTTPResponse(partOfResponse, url, urlSuffix, assertion, expected string) error {
+	switch url {
+	case "OpenShift":
+		url = m.getOpenShiftUrl() + urlSuffix
+	}
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: transport}
+	response, err := client.Get(url)
+	if err != nil {
+		return fmt.Errorf("Server returned error on url: %s", url)
+	}
+	defer response.Body.Close()
+	var result string
+	switch partOfResponse {
+	case "body":
+		html, _ := ioutil.ReadAll(response.Body)
+		result = string(html[:])
+	case "status code":
+		result = fmt.Sprintf("%d", response.StatusCode)
+	default:
+		return fmt.Errorf("%s not implemented", partOfResponse)
+	}
+
+	switch assertion {
+	case "contains":
+		if !strings.Contains(result, expected) {
+			return fmt.Errorf("%s of reponse from %s does not contain expected string. Expected: %s, Actual: %s", partOfResponse, url, expected, result)
+		}
+	case "is equal to":
+		if result != expected {
+			return fmt.Errorf("%s of response from %s is not equal to expected string. Expected: %s, Actual: %s", partOfResponse, url, expected, result)
+		}
+	default:
+		return fmt.Errorf("Assertion type: %s is not implemented", assertion)
+	}
+	return nil
+}
+
+func (m *Minishift) getOpenShiftUrl() string {
+	cmdOut, _, _ := m.runner.RunCommand("console --url")
+	return strings.TrimRight(cmdOut, "\n")
+}
+
 func FeatureContext(s *godog.Suite) {
 	runner := util.MinishiftRunner{
 		CommandArgs: givenArgs,
@@ -199,8 +315,10 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`Minishift (?:has|should have) state "([^"]*)"`, m.shouldHaveState)
 	s.Step(`Minishift should have a valid IP address`, m.shouldHaveAValidIPAddress)
 	s.Step(`executing "minishift ([^"]*)"`, m.executingCommand)
-	s.Step(`executing "minishift ([^"]*)" succeeds$`, m.executingMinishiftCommandSucceeds)
+	s.Step(`executing "minishift ([^"]*)" (.*)$`, m.executingMinishiftCommandSucceeds)
 	s.Step(`executing "oc ([^"]*)" retrying (\d+) times with wait period of (\d+) seconds$`, m.executingRetryingTimesWithWaitPeriodOfSeconds)
+	s.Step(`([^"]*) of command "minishift ([^"]*)" is equal to "([^"]*)"`, m.commandReturnEquals)
+	s.Step(`([^"]*) of command "minishift ([^"]*)" contains "([^"]*)"`, m.commandReturnContains)
 	s.Step(`executing "oc ([^"]*)`, m.executingOcCommand)
 	s.Step(`executing "oc ([^"]*)" succeeds$`, m.executingOcCommandSucceeds)
 	s.Step(`([^"]*) should contain ([^"]*)`, m.commandReturnShouldContain)
@@ -208,9 +326,13 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`([^"]*) should equal ([^"]*)`, m.commandReturnShouldEqual)
 	s.Step(`([^"]*) should equal`, m.commandReturnShouldEqualContent)
 	s.Step(`([^"]*) should be empty`, m.commandReturnShouldBeEmpty)
+	s.Step(`([^"]*) should be valid ([^"]*)`, m.shouldBeInValidFormat)
+	s.Step(`(body|status code) of HTTP request to "([^"]*)" (?:|at "([^"]*)" )(contains|is equal to) "([^"]*)"`, m.getHTTPResponse)
+	s.Step(`JSON config file "([^"]*)" (contains|does not contain) key "(.*)" with value "(.*)"`, m.configContains)
+	s.Step(`JSON config file "([^"]*)" (contains|does not contain) key "(.*)"(.*)`, m.configContains)
 
 	s.BeforeSuite(func() {
-		testDir := setUp()
+		testDir = setUp()
 		fmt.Println("Running Integration test in:", testDir)
 		fmt.Println("using binary:", givenPath)
 	})

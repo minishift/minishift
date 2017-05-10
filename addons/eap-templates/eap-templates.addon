@@ -1,7 +1,0 @@
-# Name: eap
-# Description: Imports EAP templates
-# Url: https://github.com/jboss-openshift/application-templates/tree/ose-v1.3.5
-
-oc create -f eap70-basic-s2i.json -n openshift
-oc create -f eap70-mysql-persistent-s2i.json -n openshift
-oc create -f jboss-image-streams.json -n openshift

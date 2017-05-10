@@ -36,7 +36,7 @@ const (
 )
 
 var (
-	defaultAssets = []string{"anyuid", "admin-user"}
+	defaultAssets = []string{"anyuid", "admin-user", "xpaas"}
 	force         bool
 	enable        bool
 	defaults      bool

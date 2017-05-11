@@ -32,7 +32,7 @@ import (
 // It returns the path to this tmp directory
 func SetupTmpMinishiftHome(t *testing.T) string {
 	var err error
-	testDir, err := ioutil.TempDir("", "minishift-test-addon-install-cmd-")
+	testDir, err := ioutil.TempDir("", "minishift-tmp-test-dir-")
 	if err != nil {
 		t.Fatal(err)
 	}

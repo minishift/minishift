@@ -74,11 +74,13 @@ func runInstallAddon(cmd *cobra.Command, args []string) {
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf(failedPluginInstallation, err.Error()))
 	}
+	fmt.Println(fmt.Sprintf("Addon '%s' installed", addOnName))
 
 	if enable {
+		// need to get a new manager
+		addOnManager := GetAddOnManager()
 		enableAddon(addOnManager, addOnName, 0)
 	}
-	fmt.Println(fmt.Sprintf("Addon '%s' installed", addOnName))
 }
 
 func unpackAddons(dir string) {

@@ -111,10 +111,21 @@ func (m MultiError) ToError() error {
 // EscapeStringForSSHUse will parse string and replace
 // shell special characters with escape
 func EscapeStringForSSHUse(s string) string {
-	r := strings.NewReplacer("$", "\\$",
+	r := strings.NewReplacer(
+		"$", "\\$",
 		`"`, `\"`,
+		`'`, `\'`,
 		"`", "\\`",
-		`\`, `\\`)
+		`\`, `\\`,
+		`(`, `\(`,
+		`)`, `\)`,
+		`{`, `\{`,
+		`}`, `\}`,
+		`[`, `\[`,
+		`]`, `\]`,
+		` `, `\ `,
+	)
+
 	return r.Replace(s)
 }
 

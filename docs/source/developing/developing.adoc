@@ -262,3 +262,10 @@ To remove all generated artifacts and installed dependencies, run the following 
 ----
 $ make clean
 ----
+
+[[godoc]]
+== Godoc
+
+When developing on Minishift it is encouraged to use link:https://godoc.org/golang.org/x/tools/cmd/godoc[Godoc] to document the source code.
+You can find guidelines on how to use godoc in link:https://blog.golang.org/godoc-documenting-go-code[this blog post].
+You can browse the Minishift godoc documentation under link:https://godoc.org/github.com/minishift/minishift[https://godoc.org/github.com/minishift/minishift].

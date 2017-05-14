@@ -1,5 +1,5 @@
-hash: 5d59dfd8f054c339dc68ea8cfdddcf2ece039a79af7e24b6b8e026b1ae38d628
-updated: 2017-04-12T20:59:16.057480043+02:00
+hash: 6a0a130708f2016852df8585f50417d3396421a9c8854f35f59b6a524f079597
+updated: 2017-04-25T11:38:02.17820093+05:30
 imports:
 - name: github.com/asaskevich/govalidator
   version: 7b3beb6df3c42abd3509abfc3bcacc0fbfb7c877
@@ -58,7 +58,7 @@ imports:
   - libmachine/versioncmp
   - version
 - name: github.com/fsnotify/fsnotify
-  version: 3c39c22b2c7b0516d5f2553f1608e5d13cb19053
+  version: 4da3e2cfbabc9f751898f250b49f2439785783a1
 - name: github.com/golang/glog
   version: 335da9dda11408a34b64344f82e9c03779b71673
   repo: https://github.com/openshift/glog.git
@@ -76,7 +76,7 @@ imports:
   subpackages:
   - query
 - name: github.com/hashicorp/hcl
-  version: 372e8ddaa16fd67e371e9323807d056b799360af
+  version: 7fa7fff964d035e8a162cce3a164b3ad02ad651b
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -96,9 +96,9 @@ imports:
 - name: github.com/jteeuwen/go-bindata
   version: bbd0c6e271208dce66d8fda4bc536453cd27fc4a
 - name: github.com/kardianos/osext
-  version: 9b883c5eb462dd5cb1b0a7a104fe86bc6b9bd391
+  version: 9d302b58e975387d0b4d9be876622c86cefe64be
 - name: github.com/magiconair/properties
-  version: b3b15ef068fd0b17ddf408a23669f20811d194d2
+  version: 51463bfca2576e06c62a8504b5c0f06d61312647
 - name: github.com/mattn/go-runewidth
   version: 14207d285c6c197daabb5c9793d63e7af9ab2d50
 - name: github.com/mitchellh/mapstructure
@@ -106,39 +106,39 @@ imports:
 - name: github.com/olekukonko/tablewriter
   version: febf2d34b54a69ce7530036c7503b1c9fbfdf0bb
 - name: github.com/pborman/uuid
-  version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
+  version: 1b00554d822231195d1babd97ff4a781231955c9
 - name: github.com/pelletier/go-buffruneio
-  version: df1e16fde7fc330a0ca68167c23bf7ed6ac31d6d
+  version: c37440a7cf42ac63b919c752ca73a85067e05992
 - name: github.com/pelletier/go-toml
-  version: c9506ee96398e7571356462217b9e24d6a628d71
+  version: fe206efb84b2bc8e8cfafe6b4c1826622be969e3
 - name: github.com/pkg/browser
   version: 8189194c9f158043d6d45a0b939a47a924ea4b13
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
 - name: github.com/russross/blackfriday
-  version: 300106c228d52c8941d4b3de6054a6062a86dda3
+  version: b253417e1cb644d645a0a3bb1fa5034c8030127c
 - name: github.com/samalba/dockerclient
   version: f661dd4754aa5c52da85d04b5871ee0e11f4b59c
 - name: github.com/shurcooL/sanitized_anchor_name
-  version: 10ef21a441db47d8b13ebcc5fd2310f636973c77
+  version: 79c90efaf01eddc01945af5bc1797859189b830b
 - name: github.com/spf13/afero
-  version: 72b31426848c6ef12a7a8e216708cb0d1530f074
+  version: 9be650865eab0c12963d8753212f4f9c66cdcf12
   subpackages:
   - mem
 - name: github.com/spf13/cast
-  version: d1139bab1c07d5ad390a65e7305876b3c1a8370b
+  version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: b5d8e8f46a2f829f755b6e33b454e25c61c935e1
+  version: f4f10f6873175e78bb1503da7e78c260a7f3ef63
   subpackages:
   - doc
 - name: github.com/spf13/jwalterweatherman
   version: fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66
 - name: github.com/spf13/pflag
-  version: 9ff6c6923cfffbcd502984b8e0c80539a94968b7
+  version: 2300d0f8576fe575f71aaa5b9bbe4e1b0dc2eb51
 - name: github.com/spf13/viper
   version: 382f87b929b84ce13e9c8a375a4b217f224e6c65
 - name: github.com/xeipuuv/gojsonschema
-  version: 6b67b3fab74d992bd07f72550006ab2c6907c416
+  version: 20fdae500baa62c0de724a741df80b695c8ac756
 - name: golang.org/x/crypto
   version: beef0f4390813b96e8e68fd78570396d0f4751fc
   subpackages:
@@ -157,9 +157,10 @@ imports:
 - name: golang.org/x/sys
   version: d9157a9621b69ad1d8d77a1933590c416593f24f
   subpackages:
+  - unix
   - windows/registry
 - name: golang.org/x/text
-  version: ceefd2213ed29504fff30155163c8f59827734f3
+  version: a9a820217f98f7c8a207ec1e45a874e1fe12c478
   subpackages:
   - transform
   - unicode/norm
@@ -176,7 +177,7 @@ imports:
   - internal/urlfetch
   - urlfetch
 - name: gopkg.in/cheggaaa/pb.v1
-  version: d7e6ca3010b6f084d8056847f55d7f572f180678
+  version: b6229822fa186496fcbf34111237e7a9693c6971
 - name: gopkg.in/yaml.v2
-  version: a3f3340b5840cee44f372bddb5880fcbc419b46a
+  version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
 testImports: []

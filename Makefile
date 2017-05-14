@@ -50,12 +50,12 @@ DOCS_SYNOPISIS_DIR = docs/source/_tmp
 # Start of the actual build targets
 
 .PHONY: $(GOPATH)/bin/minishift$(IS_EXE)
-$(GOPATH)/bin/minishift$(IS_EXE): vendor $(ADDON_ASSET_FILE)
+$(GOPATH)/bin/minishift$(IS_EXE): $(ADDON_ASSET_FILE) vendor
 	go install -pkgdir=$(ADDON_BINDATA_DIR) -ldflags="$(VERSION_VARIABLES)" ./cmd/minishift
 vendor:
 	glide install -v
 
-$(ADDON_ASSET_FILE): $(GOPATH)/bin/go-bindata vendor
+$(ADDON_ASSET_FILE): $(GOPATH)/bin/go-bindata
 	@mkdir -p $(ADDON_BINDATA_DIR)
 	go-bindata $(GO_BINDATA_DEBUG) -prefix $(ADDON_ASSETS) -o $(ADDON_ASSET_FILE) -pkg bindata $(ADDON_ASSETS)/...
 

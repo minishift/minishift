@@ -26,7 +26,7 @@ function usage()
 
 function github_milestone()
 {
-  milestone_data="`curl -s https://api.github.com/repos/minishift/$repository/issues?milestone=$milestone\&state=open`"
+  milestone_data="`curl -s https://api.github.com/repos/minishift/$repository/issues?milestone=$milestone\&state=all`"
 
   csv_raw=`echo $milestone_data | jq --arg repo "$repository" '.[] | ";;;;;;;;;"
    + .title
@@ -56,7 +56,7 @@ function jira_milestone()
 
   csv_raw=`echo $milestone_data | jq --compact-output --arg milestone "$milestone" --arg repo "$repository" '.issues[] | ";;;;;;;;;"
    + .fields.summary
-   + ";"
+   + ";;"
    + $repo
    + ";"
    + $milestone

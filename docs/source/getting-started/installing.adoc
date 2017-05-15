@@ -31,7 +31,7 @@ NOTE: xhyve requires specific installation and configuration steps that are desc
 in the link:../getting-started/docker-machine-drivers{outfilesuffix}[Installing Docker machine drivers] section.
 
 GNU/Linux::
-- https://minishift.io/docs/docker-machine-drivers.html#kvm-driver[KVM] (default)
+- https://en.wikipedia.org/wiki/Kernel-based_Virtual_Machine[KVM] (default)
 - https://www.virtualbox.org/wiki/Downloads[VirtualBox]
 +
 NOTE: KVM requires specific installation and configuration steps that are described

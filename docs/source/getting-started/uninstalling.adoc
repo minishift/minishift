@@ -22,7 +22,7 @@ $ minishift delete
 +
 This command deletes everything in the
 `MINISHIFT_HOME/.minishift/machines/minishift` directory. Other cached data and
-the https://minishift.io/docs/managing-minishift.html#persistent-configuration[persistent configuration] are not removed.
+the link:../using/managing-minishift.html#persistent-configuration[persistent configuration] are not removed.
 
 .  To completely uninstall Minishift, delete everything in the
 `MINISHIFT_HOME` directory (default `~/.minishift`) and `~/.kube`:

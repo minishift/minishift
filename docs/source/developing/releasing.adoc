@@ -33,7 +33,7 @@ defined in your environment as _GITHUB_ACCESS_TOKEN_.
 
 . Bump the Minishift version in the link:https://github.com/minishift/minishift/blob/master/Makefile[Makefile]
 
-. Commit and push your changes with a message of the form "Cut v1.0.0"
+. Commit and push your changes with a message of the form "cut v1.0.0"
 
 . Create binaries and upload them to GitHub (this will also tag the release):
 +

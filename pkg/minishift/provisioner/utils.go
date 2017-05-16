@@ -50,6 +50,7 @@ ExecStart=/usr/bin/dockerd-current -H tcp://0.0.0.0:{{.DockerPort}} -H unix:///v
            --userland-proxy-path=/usr/libexec/docker/docker-proxy-current \
            --add-registry registry.access.redhat.com \
            --storage-driver {{.EngineOptions.StorageDriver}} --tlsverify --tlscacert {{.AuthOptions.CaCertRemotePath}} \
+           --storage-opt dm.fs=xfs --storage-opt dm.thinpooldev=/dev/mapper/minishift_vg-docker--pool --storage-opt dm.use_deferred_removal=true \
            --tlscert {{.AuthOptions.ServerCertRemotePath}} --tlskey {{.AuthOptions.ServerKeyRemotePath}} \
            {{ range .EngineOptions.Labels }}--label {{.}} {{ end }}{{ range .EngineOptions.InsecureRegistry }}--insecure-registry {{.}} {{ end }}{{ range .EngineOptions.RegistryMirror }}--registry-mirror {{.}} {{ end }}{{ range .EngineOptions.ArbitraryFlags }}--{{.}} {{ end }}
 ExecReload=/bin/kill -s HUP $MAINPID
@@ -86,6 +87,7 @@ ExecStart=/usr/bin/dockerd-current -H tcp://0.0.0.0:{{.DockerPort}} -H unix:///v
            --exec-opt native.cgroupdriver=systemd \
            --userland-proxy-path=/usr/libexec/docker/docker-proxy-current \
            --storage-driver {{.EngineOptions.StorageDriver}} --tlsverify --tlscacert {{.AuthOptions.CaCertRemotePath}} \
+           --storage-opt dm.fs=xfs --storage-opt dm.thinpooldev=/dev/mapper/minishift_vg-docker--pool --storage-opt dm.use_deferred_removal=true \
            --tlscert {{.AuthOptions.ServerCertRemotePath}} --tlskey {{.AuthOptions.ServerKeyRemotePath}} \
            {{ range .EngineOptions.Labels }}--label {{.}} {{ end }}{{ range .EngineOptions.InsecureRegistry }}--insecure-registry {{.}} {{ end }}{{ range .EngineOptions.RegistryMirror }}--registry-mirror {{.}} {{ end }}{{ range .EngineOptions.ArbitraryFlags }}--{{.}} {{ end }}
 ExecReload=/bin/kill -s HUP $MAINPID

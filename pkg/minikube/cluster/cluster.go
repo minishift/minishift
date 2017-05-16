@@ -186,7 +186,6 @@ type MachineConfig struct {
 	InsecureRegistry []string
 	RegistryMirror   []string
 	HostOnlyCIDR     string // Only used by the virtualbox driver
-	OpenShiftVersion string
 	ShellProxyEnv    string // Only used for proxy purpose
 }
 

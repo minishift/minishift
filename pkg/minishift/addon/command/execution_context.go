@@ -34,12 +34,7 @@ type ExecutionContext struct {
 }
 
 // NewExecutionContext creates a new execution context to be used with addon execution
-func NewExecutionContext(ocPath string, kubeConfigPath string, sshCommander provision.SSHCommander) (*ExecutionContext, error) {
-	ocRunner, err := oc.NewOcRunner(ocPath, kubeConfigPath)
-	if err != nil {
-		return nil, err
-	}
-
+func NewExecutionContext(ocRunner *oc.OcRunner, sshCommander provision.SSHCommander) (*ExecutionContext, error) {
 	dockerCommander := docker.NewVmDockerCommander(sshCommander)
 	context := NewInterpolationContext()
 	return &ExecutionContext{ocRunner: ocRunner, dockerCommander: dockerCommander, sshCommander: sshCommander, interpolationContext: context}, nil

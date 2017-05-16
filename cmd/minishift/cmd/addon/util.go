@@ -20,21 +20,14 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/cmd/minishift/cmd/config"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/addon"
-	"github.com/minishift/minishift/pkg/minishift/addon/command"
 	"github.com/minishift/minishift/pkg/minishift/addon/manager"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 )
 
-const (
-	ip_key             = "ip"
-	routing_suffix_key = "routing-suffix"
-)
-
-// getAddOnManager returns the addon manager
+// GetAddOnManager returns the addon manager
 func GetAddOnManager() *manager.AddOnManager {
 	addOnConfigs := getAddOnConfiguration()
 	m, err := manager.NewAddOnManager(constants.MakeMiniPath("addons"), addOnConfigs)
@@ -43,18 +36,6 @@ func GetAddOnManager() *manager.AddOnManager {
 	}
 
 	return m
-}
-
-func GetExecutionContext(ip string, routingSuffix string, ocPath string, kubeConfigPath string, sshCommander provision.SSHCommander) *command.ExecutionContext {
-	context, err := command.NewExecutionContext(ocPath, kubeConfigPath, sshCommander)
-	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to initialise execution context: %s", err.Error()))
-	}
-
-	context.AddToContext(ip_key, ip)
-	context.AddToContext(routing_suffix_key, routingSuffix)
-
-	return context
 }
 
 func writeAddOnConfig(addOnConfigMap map[string]*addon.AddOnConfig) {

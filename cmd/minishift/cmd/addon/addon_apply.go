@@ -23,7 +23,9 @@ import (
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minishift/clusterup"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
+	"github.com/minishift/minishift/pkg/minishift/oc"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -75,15 +77,20 @@ func runApplyAddon(cmd *cobra.Command, args []string) {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error getting IP: %s", err.Error()))
 	}
 
-	ocPath := minishiftConfig.InstanceConfig.OcPath
 	routingSuffix := viper.GetString(routingSuffix)
-	kubeConfigPath := constants.KubeConfigPath
 	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
+	ocRunner, err := oc.NewOcRunner(minishiftConfig.InstanceConfig.OcPath, constants.KubeConfigPath)
+	if err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error applying addon: %s", err.Error()))
+	}
 
 	for i := range args {
 		addonName := args[i]
 		addon := addOnManager.Get(addonName)
-		addonContext := GetExecutionContext(ip, routingSuffix, ocPath, kubeConfigPath, sshCommander)
+		addonContext, err := clusterup.GetExecutionContext(ip, routingSuffix, ocRunner, sshCommander)
+		if err != nil {
+			atexit.ExitWithMessage(1, fmt.Sprint("Error executing addon commands: ", err))
+		}
 		err = addOnManager.ApplyAddOn(addon, addonContext)
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprint("Error executing addon commands: ", err))

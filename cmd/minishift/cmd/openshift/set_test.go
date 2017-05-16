@@ -29,7 +29,7 @@ func Test_unknown_patch_target_aborts_command(t *testing.T) {
 	tee := cli.CreateTee(t, true)
 	defer cli.TearDown(tmpMinishiftHomeDir, tee)
 
-	atexit.RegisterExitHandler(cli.CreateExitHandlerFunc(t, tee, 1, unknownPatchTargetError))
+	atexit.RegisterExitHandler(cli.VerifyExitCodeAndMessage(t, tee, 1, unknownPatchTargetError))
 
 	target = "foo"
 	runPatch(nil, nil)
@@ -40,7 +40,7 @@ func Test_patch_cannot_be_empty(t *testing.T) {
 	tee := cli.CreateTee(t, true)
 	defer cli.TearDown(tmpMinishiftHomeDir, tee)
 
-	atexit.RegisterExitHandler(cli.CreateExitHandlerFunc(t, tee, 1, emptyPatchError))
+	atexit.RegisterExitHandler(cli.VerifyExitCodeAndMessage(t, tee, 1, emptyPatchError))
 
 	target = "master"
 	patch = ""
@@ -52,7 +52,7 @@ func Test_patch_needs_to_be_valid_JSON(t *testing.T) {
 	tee := cli.CreateTee(t, true)
 	defer cli.TearDown(tmpMinishiftHomeDir, tee)
 
-	atexit.RegisterExitHandler(cli.CreateExitHandlerFunc(t, tee, 1, invalidJSONError))
+	atexit.RegisterExitHandler(cli.VerifyExitCodeAndMessage(t, tee, 1, invalidJSONError))
 
 	target = "master"
 	patch = "foo"
@@ -64,7 +64,7 @@ func Test_patch_commands_needs_existing_vm(t *testing.T) {
 	tee := cli.CreateTee(t, true)
 	defer cli.TearDown(tmpMinishiftHomeDir, tee)
 
-	atexit.RegisterExitHandler(cli.CreateExitHandlerFunc(t, tee, 1, nonExistentMachineError))
+	atexit.RegisterExitHandler(cli.VerifyExitCodeAndMessage(t, tee, 1, nonExistentMachineError))
 
 	target = "master"
 	patch = "{\"corsAllowedOrigins\": \"*\"}"

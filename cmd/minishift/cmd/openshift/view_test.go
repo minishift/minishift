@@ -27,7 +27,7 @@ func Test_view_commands_needs_existing_vm(t *testing.T) {
 	tee := cli.CreateTee(t, true)
 	defer cli.TearDown(tmpMinishiftHomeDir, tee)
 
-	atexit.RegisterExitHandler(cli.CreateExitHandlerFunc(t, tee, 1, nonExistentMachineError))
+	atexit.RegisterExitHandler(cli.VerifyExitCodeAndMessage(t, tee, 1, nonExistentMachineError))
 
 	target = "master"
 	runViewConfig(nil, nil)
@@ -38,7 +38,7 @@ func Test_unknown_config_target_aborts_view_command(t *testing.T) {
 	tee := cli.CreateTee(t, true)
 	defer cli.TearDown(tmpMinishiftHomeDir, tee)
 
-	atexit.RegisterExitHandler(cli.CreateExitHandlerFunc(t, tee, 1, unknownConfigTargetError))
+	atexit.RegisterExitHandler(cli.VerifyExitCodeAndMessage(t, tee, 1, unknownConfigTargetError))
 
 	configTarget = "foo"
 	runViewConfig(nil, nil)

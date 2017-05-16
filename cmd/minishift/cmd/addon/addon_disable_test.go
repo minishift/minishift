@@ -31,7 +31,7 @@ func Test_addon_name_must_be_specified_for_disable_command(t *testing.T) {
 	tee := cli.CreateTee(t, true)
 	defer cli.TearDown(tmpMinishiftHomeDir, tee)
 
-	atexit.RegisterExitHandler(cli.CreateExitHandlerFunc(t, tee, 1, emptyDisableError))
+	atexit.RegisterExitHandler(cli.VerifyExitCodeAndMessage(t, tee, 1, emptyDisableError))
 
 	runDisableAddon(nil, nil)
 }
@@ -45,7 +45,7 @@ func Test_unknown_name_for_disable_command_returns_error(t *testing.T) {
 
 	testAddOnName := "foo"
 	expectedOut := fmt.Sprintf(noAddOnToDisableMessage+"\n", testAddOnName)
-	atexit.RegisterExitHandler(cli.CreateExitHandlerFunc(t, tee, 0, expectedOut))
+	atexit.RegisterExitHandler(cli.VerifyExitCodeAndMessage(t, tee, 0, expectedOut))
 
 	runDisableAddon(nil, []string{testAddOnName})
 

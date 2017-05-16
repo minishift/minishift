@@ -41,7 +41,7 @@ func Test_source_of_addon_must_be_specified(t *testing.T) {
 	tee := cli.CreateTee(t, true)
 	defer cli.TearDown(tmpMinishiftHomeDir, tee)
 
-	atexit.RegisterExitHandler(cli.CreateExitHandlerFunc(t, tee, 1, unspecifiedSourceError))
+	atexit.RegisterExitHandler(cli.VerifyExitCodeAndMessage(t, tee, 1, unspecifiedSourceError))
 
 	runInstallAddon(nil, []string{})
 }

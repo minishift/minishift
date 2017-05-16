@@ -21,10 +21,13 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/util"
 
+	"bytes"
 	"github.com/minishift/minishift/pkg/util/cmd"
 	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/pkg/errors"
 	"io"
+	"os"
+	"regexp"
 	"strings"
 )
 
@@ -34,9 +37,9 @@ const (
 )
 
 type OcRunner struct {
-	ocPath         string
-	kubeConfigPath string
-	runner         util.Runner
+	OcPath         string
+	KubeConfigPath string
+	Runner         util.Runner
 }
 
 // NewOcRunner creates a new OcRunner which uses the oc binary specified via the ocPath parameter. An error is returned
@@ -50,21 +53,21 @@ func NewOcRunner(ocPath string, kubeConfigPath string) (*OcRunner, error) {
 		return nil, errors.New(fmt.Sprintf(invalidKubeConfigPathError, kubeConfigPath))
 	}
 
-	return &OcRunner{ocPath: ocPath, kubeConfigPath: kubeConfigPath, runner: util.RealRunner{}}, nil
+	return &OcRunner{OcPath: ocPath, KubeConfigPath: kubeConfigPath, Runner: util.RealRunner{}}, nil
 }
 
 func (oc *OcRunner) Run(command string, stdOut io.Writer, stdErr io.Writer) int {
 	args := cmd.SplitCmdString(command)
 
 	// make sure we run with our copy of kube config to not influence the user
-	args = append([]string{fmt.Sprintf("--config=%s", oc.kubeConfigPath)}, args...)
+	args = append([]string{fmt.Sprintf("--config=%s", oc.KubeConfigPath)}, args...)
 
-	return oc.runner.Run(stdOut, stdErr, oc.ocPath, args...)
+	return oc.Runner.Run(stdOut, stdErr, oc.OcPath, args...)
 }
 
 func (oc *OcRunner) RunAsUser(command string, stdOut io.Writer, stdErr io.Writer) int {
 	args := strings.Split(command, " ")
-	return oc.runner.Run(stdOut, stdErr, oc.ocPath, args...)
+	return oc.Runner.Run(stdOut, stdErr, oc.OcPath, args...)
 }
 
 // AddSudoerRoleForUser gives the specified user the sudoer role
@@ -97,4 +100,42 @@ func (oc *OcRunner) AddCliContext(context string, ip string, username string, na
 	}
 
 	return nil
+}
+
+func SupportFlag(flag string, ocPath string, runner util.Runner) bool {
+	var buffer bytes.Buffer
+	cmdArgs := []string{"cluster", "up", "-h"}
+	runner.Run(&buffer, os.Stderr, ocPath, cmdArgs...)
+	ocCommandOptions := parseOcHelpCommand(buffer.Bytes())
+	if ocCommandOptions != nil {
+		return flagExist(ocCommandOptions, flag)
+	}
+	return false
+}
+
+func parseOcHelpCommand(cmdOut []byte) []string {
+	ocOptions := []string{}
+	ocOptionRegex := regexp.MustCompile(`(?s)Options(.*)OpenShift images`)
+	matches := ocOptionRegex.FindSubmatch(cmdOut)
+	if matches != nil {
+		tmpOptionsList := string(matches[0])
+		for _, value := range strings.Split(tmpOptionsList, "\n")[1:] {
+			tmpOption := strings.Split(strings.Split(strings.TrimSpace(value), "=")[0], "--")
+			if len(tmpOption) > 1 {
+				ocOptions = append(ocOptions, tmpOption[1])
+			}
+		}
+	} else {
+		return nil
+	}
+	return ocOptions
+}
+
+func flagExist(ocCommandOptions []string, flag string) bool {
+	for _, v := range ocCommandOptions {
+		if v == flag {
+			return true
+		}
+	}
+	return false
 }

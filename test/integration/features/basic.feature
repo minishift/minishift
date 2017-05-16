@@ -8,7 +8,6 @@ Feature: Basic
     Given Minishift has state "Does Not Exist"
      When executing "minishift start --docker-env=FOO=BAR --docker-env=BAZ=BAT" succeeds
      Then Minishift should have state "Running"
-      And Minishift should have a valid IP address
 
   Scenario: OpenShift is ready after startup
     After startup of Minishift OpenShift instance should respond correctly on its html endpoints
@@ -51,7 +50,7 @@ Feature: Basic
      When executing "minishift console --url" succeeds
      Then stdout should be valid URL
 
-  Scenario: OpenShift developer account has sudo permissions
+  Scenario: OpenShift developer has sudo permissions
      The 'developer' user should be configured with the sudoer role after starting Minishift
     Given Minishift has state "Running"
      When executing "oc --as system:admin get clusterrolebindings" succeeds

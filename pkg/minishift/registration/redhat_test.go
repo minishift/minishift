@@ -30,7 +30,7 @@ var (
 		Username: "foo",
 		Password: "foo",
 	}
-	expectedCMDRegistration = fmt.Sprintf("sudo -E subscription-manager register --auto-attach --username %s --password %s ",
+	expectedCMDRegistration = fmt.Sprintf("sudo -E subscription-manager register --auto-attach --username %s --password '%s' ",
 		param.Username, param.Password)
 	expectedCMDUnregistration = "sudo -E subscription-manager unregister"
 )

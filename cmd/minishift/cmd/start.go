@@ -531,7 +531,7 @@ func ocSupportFlag(cmdName string, flag string) bool {
 
 func setSubcriptionManagerParameters() {
 	cluster.RegistrationParameters.Username = viper.GetString(username)
-	cluster.RegistrationParameters.Password = util.EscapeStringForSSHUse(viper.GetString(password))
+	cluster.RegistrationParameters.Password = viper.GetString(password)
 }
 
 func getConfigClusterName(ip string, port int) string {

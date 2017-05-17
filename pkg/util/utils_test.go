@@ -65,7 +65,11 @@ func TestEscapeStringForSSHUse(t *testing.T) {
 		`Pa"ssw\ord$$`: `Pa\"ssw\\ord\$\$`,
 		`Password`:     `Password`,
 		"Passwo`rd":    "Passwo\\`rd",
+		"Passwo(rd":    `Passwo\(rd`,
+		"Passwo rd":    `Passwo\ rd`,
+		"Passwo'rd":    `Passwo\'rd`,
 	}
+
 	for pass, expected := range experimentstring {
 		if EscapeStringForSSHUse(pass) != expected {
 			t.Fatalf("Expected '%s' Got '%s'", expected, EscapeStringForSSHUse(pass))

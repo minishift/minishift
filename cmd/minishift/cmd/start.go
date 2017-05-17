@@ -72,7 +72,6 @@ const (
 	hostConfigDir     = "host-config-dir"
 	hostVolumesDir    = "host-volumes-dir"
 	hostDataDir       = "host-data-dir"
-	forwardPorts      = "forward-ports"
 	serverLogLevel    = "server-loglevel"
 	openshiftEnv      = "openshift-env"
 	metrics           = "metrics"
@@ -413,7 +412,6 @@ func initClusterUpFlags() {
 	clusterUpFlagSet.String(hostVolumesDir, hostVolumesDirectory, "Location of the OpenShift volumes on the Docker host.")
 	clusterUpFlagSet.String(hostDataDir, hostDataDirectory, "Location of the OpenShift data on the Docker host. If not specified, etcd data will not be persisted on the host.")
 	clusterUpFlagSet.String(hostPvDir, hostPvDirectory, "Directory on Docker host for OpenShift persistent volumes")
-	clusterUpFlagSet.Bool(forwardPorts, false, "Use Docker port forwarding to communicate with the origin container. Requires 'socat' locally.")
 	clusterUpFlagSet.Int(serverLogLevel, 0, "Log level for the OpenShift server.")
 	clusterUpFlagSet.StringSliceVarP(&openShiftEnv, openshiftEnv, "e", []string{}, "Specify key-value pairs of environment variables to set on the OpenShift container.")
 	clusterUpFlagSet.Bool(metrics, false, "Install metrics (experimental)")

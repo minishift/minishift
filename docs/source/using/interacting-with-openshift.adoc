@@ -24,9 +24,9 @@ For details about managing the Minishift VM, see the link:../using/managing-mini
 The `minishift start` command creates an OpenShift instance using the
 https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md[cluster up] approach.
 
-For this purpose it copies the `oc` binary onto your host. You will find it under `~/.minishift/cache/oc/{openshift-version}/oc`, provided you use Minishift's default version of OpenShift.
+For this purpose it copies the `oc` binary onto your host. It is located in the  _~/.minishift/cache/oc/{openshift-version}_ directory, provided you use Minishift's default version of OpenShift.
 You can add this binary to your `PATH` using link:../command-ref/minishift_oc-env{outfilesuffix}[`minishift oc-env`] which displays the command you need to type into your shell.
-The output of `oc-env` will differ depending on OS and shell type.
+The output of `oc-env` differs depending on the operating system and the shell type.
 
 ----
 $ minishift oc-env
@@ -46,7 +46,7 @@ for example, logging into another OpenShift instance, you can run:
 $ oc config use-context minishift
 ----
 
-For an introduction to `oc` usage, refer to the
+For an introduction to `oc` usage, see the
 https://docs.openshift.com/enterprise/3.2/cli_reference/get_started_cli.html[Get Started with the CLI]
 topic in the OpenShift documentation.
 
@@ -59,7 +59,7 @@ to authenticate against the local cluster. This means any non-empty user name an
 be used to login to the local cluster. The recommended user name and password combination is
 developer/developer, because it already has a default project _myproject_ and also can
 https://docs.openshift.org/latest/architecture/additional_concepts/authentication.html#authentication-impersonation[impersonate]
-the administrator user. This allows to run administrator commands using the `--as system:admin` parameter.
+the administrator. This allows you to run administrator commands using the `--as system:admin` parameter.
 
 To login as administrator, use the system account:
 
@@ -163,15 +163,18 @@ If you get the error `The specified patch need to be a valid JSON.` when you run
 you need to modify the above command depending on your Operating System,
 your shell environment and its interpolation behavior.
 
-For example, if you use PowerShell on Windows 10 modify the above command to:
+For example, if you use PowerShell on Windows 7 or 10 modify the above command to:
+
 ....
-$  .\minishift.exe --% openshift config set --patch "{\"routingConfig\": {\"subdomain\": \"192.168.99.101.nip.io\"}}"
+$ minishift openshift config set --patch '{\"corsAllowedOrigins\": [\".*\"]}'
 ....
 
 If you use Command Prompt you may need to use:
+
 ....
-minishift.exe openshift config set --patch "{\"routingConfig\": {\"subdomain\": \"192.168.99.101.nip.io\"}}"
+$ minishift openshift config set --patch "{\"corsAllowedOrigins\": [\".*\"]}"
 ....
+
 ====
 
 [[example-change-openshift-routing-suffix]]

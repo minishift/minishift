@@ -24,6 +24,8 @@ import (
 	"time"
 
 	"github.com/asaskevich/govalidator"
+	"net/http"
+	"net/url"
 )
 
 // Until endlessly loops the provided function until a message is received on the done channel.
@@ -139,4 +141,13 @@ func VersionOrdinal(version string) string {
 		vo[j]++
 	}
 	return string(vo)
+}
+
+func GetHttpClient(proxyUrl string) *http.Client {
+	myClient := http.DefaultClient
+	if proxyUrl != "" {
+		proxyUrl, _ := url.Parse(proxyUrl)
+		myClient = &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxyUrl)}}
+	}
+	return myClient
 }

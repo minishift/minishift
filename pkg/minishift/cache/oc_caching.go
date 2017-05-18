@@ -31,6 +31,7 @@ const OC_CACHE_DIR = "oc"
 type Oc struct {
 	OpenShiftVersion  string
 	MinishiftCacheDir string
+	ProxyUrl          string
 }
 
 func (oc *Oc) EnsureIsCached() error {
@@ -58,7 +59,7 @@ func (oc *Oc) isCached() bool {
 // cacheOc downloads and caches the oc binary into the minishift directory
 func (oc *Oc) cacheOc() error {
 	if !oc.isCached() {
-		if err := github.DownloadOpenShiftReleaseBinary(github.OC, minishiftos.CurrentOS(), oc.OpenShiftVersion, oc.GetCacheFilepath()); err != nil {
+		if err := github.DownloadOpenShiftReleaseBinary(github.OC, minishiftos.CurrentOS(), oc.OpenShiftVersion, oc.GetCacheFilepath(), oc.ProxyUrl); err != nil {
 			return errors.Wrapf(err, "Error attempting to download and cache %s", github.OC.String())
 		}
 	}

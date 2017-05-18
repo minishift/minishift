@@ -32,16 +32,16 @@ import (
 )
 
 const (
-	ocEnvTmpl = `{{ .Prefix }}PATH{{ .Delimiter }}{{ .OcPath }}{{ .Suffix }}{{ .UsageHint }}`
+	ocEnvTmpl = `{{ .Prefix }}PATH{{ .Delimiter }}{{ .OcDirPath }}{{ .Suffix }}{{ .UsageHint }}`
 )
 
 type OcShellConfig struct {
 	shell.ShellConfig
-	OcPath    string
+	OcDirPath string
 	UsageHint string
 }
 
-func getOcShellConfig(ocPath string, forcedShell string) (*OcShellConfig, error) {
+func getOcShellConfig(ocPath, forcedShell string) (*OcShellConfig, error) {
 	userShell, err := shell.GetShell(forcedShell)
 	if err != nil {
 		return nil, err
@@ -49,14 +49,11 @@ func getOcShellConfig(ocPath string, forcedShell string) (*OcShellConfig, error)
 
 	cmdLine := "minishift oc-env"
 	shellCfg := &OcShellConfig{
-		OcPath:    filepath.Dir(ocPath),
+		OcDirPath: filepath.Dir(ocPath),
 		UsageHint: shell.GenerateUsageHint(userShell, cmdLine),
 	}
 
-	prefix, suffix, delimiter := shell.GetPrefixSuffixDelimiterForSet(userShell, true)
-	shellCfg.Prefix = prefix
-	shellCfg.Suffix = suffix
-	shellCfg.Delimiter = delimiter
+	shellCfg.Prefix, shellCfg.Suffix, shellCfg.Delimiter = shell.GetPrefixSuffixDelimiterForSet(userShell, true)
 
 	return shellCfg, nil
 }
@@ -71,6 +68,9 @@ var ocEnvCmd = &cobra.Command{
 	Short: "Sets path of 'oc' binary.",
 	Long:  `Sets path of OpenShift client binary, 'oc'.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if config.InstanceConfig.OcPath == "" {
+			atexit.ExitWithMessage(1, "Unable to find OpenShift client binary.\nPlease make sure that OpenShift has been provisioned successfully.")
+		}
 
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()

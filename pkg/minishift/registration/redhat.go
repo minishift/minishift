@@ -57,7 +57,7 @@ func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) er
 		if strings.Contains(output, "not registered") {
 			subscriptionCommand := fmt.Sprintf("sudo -E subscription-manager register --auto-attach "+
 				"--username %s "+
-				"--password %s ", param.Username, param.Password)
+				"--password '%s' ", param.Username, param.Password)
 			if _, err := registrator.SSHCommand(subscriptionCommand); err != nil {
 				return err
 			}

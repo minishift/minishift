@@ -35,7 +35,7 @@ import (
 
 func NewMinishiftProvisioner(osReleaseID string, d drivers.Driver) *MinishiftProvisioner {
 	systemdProvisioner := provision.NewSystemdProvisioner(osReleaseID, d)
-	systemdProvisioner.SSHCommander = provision.RedHatSSHCommander{Driver: d}
+	systemdProvisioner.SSHCommander = provision.GenericSSHCommander{Driver: d}
 	return &MinishiftProvisioner{
 		systemdProvisioner,
 	}

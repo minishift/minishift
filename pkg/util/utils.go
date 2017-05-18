@@ -108,16 +108,6 @@ func (m MultiError) ToError() error {
 	return fmt.Errorf(strings.Join(errStrings, "\n"))
 }
 
-// EscapeStringForSSHUse will parse string and replace
-// shell special characters with escape
-func EscapeStringForSSHUse(s string) string {
-	r := strings.NewReplacer("$", "\\$",
-		`"`, `\"`,
-		"`", "\\`",
-		`\`, `\\`)
-	return r.Replace(s)
-}
-
 func VersionOrdinal(version string) string {
 	// ISO/IEC 14651:2011
 	// https://www.iso.org/standard/57976.html

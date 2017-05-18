@@ -28,7 +28,7 @@ func Test_unix_oc_path(t *testing.T) {
 		t.Fatalf("Unexepcted error: %s", err)
 	}
 
-	if shellConfig.OcPath != "/Users/john/.minishift/cache/oc/v1.5.0" {
-		t.Fatalf("Unexepcted oc path: %s", shellConfig.OcPath)
+	if shellConfig.OcDirPath != "/Users/john/.minishift/cache/oc/v1.5.0" {
+		t.Fatalf("Unexepcted oc path: %s", shellConfig.OcDirPath)
 	}
 }

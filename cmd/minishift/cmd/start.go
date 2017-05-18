@@ -24,6 +24,8 @@ import (
 	"strings"
 
 	"bytes"
+	"time"
+
 	units "github.com/docker/go-units"
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/drivers"
@@ -50,7 +52,6 @@ import (
 	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"time"
 )
 
 const (
@@ -72,7 +73,6 @@ const (
 	hostConfigDir     = "host-config-dir"
 	hostVolumesDir    = "host-volumes-dir"
 	hostDataDir       = "host-data-dir"
-	forwardPorts      = "forward-ports"
 	serverLogLevel    = "server-loglevel"
 	openshiftEnv      = "openshift-env"
 	metrics           = "metrics"
@@ -295,10 +295,10 @@ func configurePersistentVolumes(addOnManager *manager.AddOnManager, sshCommander
 	// if we have SELinux enabled we need to sort things out there as well
 	// 'cluster up' does this as well, but we do it here as well to have all required actions collected in one
 	// place, instead of relying on some implicit knowledge on what 'cluster up does (HF)
-	cmd = fmt.Sprintf("sudo which chcon; if [ $? -eq 0 ]; then chcon -R -t svirt_sandbox_file_t %s/*; fi", hostPvDir)
+	cmd = fmt.Sprintf("sudo which chcon; if [ $? -eq 0 ]; then chcon -R -t svirt_sandbox_file_t %s/pv*; fi", hostPvDir)
 	sshCommander.SSHCommand(cmd)
 
-	cmd = fmt.Sprintf("sudo which restorecon; if [ $? -eq 0 ]; then restorecon -R %s; fi", hostPvDir)
+	cmd = fmt.Sprintf("sudo which restorecon; if [ $? -eq 0 ]; then restorecon -R %s/pv*; fi", hostPvDir)
 	sshCommander.SSHCommand(cmd)
 
 	fmt.Println("OK")
@@ -413,7 +413,6 @@ func initClusterUpFlags() {
 	clusterUpFlagSet.String(hostVolumesDir, hostVolumesDirectory, "Location of the OpenShift volumes on the Docker host.")
 	clusterUpFlagSet.String(hostDataDir, hostDataDirectory, "Location of the OpenShift data on the Docker host. If not specified, etcd data will not be persisted on the host.")
 	clusterUpFlagSet.String(hostPvDir, hostPvDirectory, "Directory on Docker host for OpenShift persistent volumes")
-	clusterUpFlagSet.Bool(forwardPorts, false, "Use Docker port forwarding to communicate with the origin container. Requires 'socat' locally.")
 	clusterUpFlagSet.Int(serverLogLevel, 0, "Log level for the OpenShift server.")
 	clusterUpFlagSet.StringSliceVarP(&openShiftEnv, openshiftEnv, "e", []string{}, "Specify key-value pairs of environment variables to set on the OpenShift container.")
 	clusterUpFlagSet.Bool(metrics, false, "Install metrics (experimental)")
@@ -533,7 +532,7 @@ func ocSupportFlag(cmdName string, flag string) bool {
 
 func setSubcriptionManagerParameters() {
 	cluster.RegistrationParameters.Username = viper.GetString(username)
-	cluster.RegistrationParameters.Password = util.EscapeStringForSSHUse(viper.GetString(password))
+	cluster.RegistrationParameters.Password = viper.GetString(password)
 }
 
 func getConfigClusterName(ip string, port int) string {

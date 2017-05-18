@@ -58,7 +58,7 @@ func GenerateUsageHint(userShell, cmdLine string) string {
 	case "powershell":
 		cmd = fmt.Sprintf("& %s | Invoke-Expression", cmdLine)
 	case "cmd":
-		cmd = fmt.Sprintf("\t@FOR /f \"tokens=*\" %%i IN ('%s') DO @%%i", cmdLine)
+		cmd = fmt.Sprintf("\t@FOR /f \"tokens=*\" %%i IN ('%s') DO @call %%i", cmdLine)
 		comment = "REM"
 	case "emacs":
 		cmd = fmt.Sprintf("(with-temp-buffer (shell-command \"%s\" (current-buffer)) (eval-buffer))", cmdLine)

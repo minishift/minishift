@@ -95,6 +95,7 @@ var (
 	registryMirror   []string
 	openShiftEnv     []string
 	shellProxyEnv    string
+	proxyUrl         string
 )
 
 // startCmd represents the start command
@@ -163,6 +164,7 @@ func runStart(cmd *cobra.Command, args []string) {
 		HostOnlyCIDR:     viper.GetString(hostOnlyCIDR),
 		OpenShiftVersion: viper.GetString(openshiftVersion),
 		ShellProxyEnv:    shellProxyEnv,
+		ProxyUrl:         proxyUrl,
 	}
 
 	fmt.Printf("Starting local OpenShift cluster using '%s' hypervisor...\n", config.VMDriver)
@@ -347,9 +349,11 @@ func setOcProxy() {
 func setShellProxy() {
 	if viper.IsSet(httpProxy) {
 		shellProxyEnv += fmt.Sprintf("http_proxy=%s ", viper.GetString(httpProxy))
+		proxyUrl = viper.GetString(httpProxy)
 	}
 	if viper.IsSet(httpsProxy) {
 		shellProxyEnv += fmt.Sprintf("https_proxy=%s ", viper.GetString(httpsProxy))
+		proxyUrl = viper.GetString(httpsProxy)
 	}
 	if viper.IsSet(noProxyList) {
 		shellProxyEnv += fmt.Sprintf("no_proxy=%s", viper.GetString(noProxyList))
@@ -441,6 +445,7 @@ func clusterUp(config *cluster.MachineConfig, ip string) {
 	oc := cache.Oc{
 		OpenShiftVersion:  config.OpenShiftVersion,
 		MinishiftCacheDir: filepath.Join(constants.Minipath, "cache"),
+		ProxyUrl:          proxyUrl,
 	}
 	if err := oc.EnsureIsCached(); err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintln("Error starting the cluster: ", err))

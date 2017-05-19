@@ -130,8 +130,10 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`([^"]*) should be empty$`, commandReturnShouldBeEmpty)
 	s.Step(`([^"]*) should be valid ([^"]*)$`, shouldBeInValidFormat)
 
-	// step for HTTP requests
+	// step for HTTP requests for minishift web console
 	s.Step(`(body|status code) of HTTP request to "([^"]*)" (?:|at "([^"]*)" )(contains|is equal to) "([^"]*)"$`, verifyHTTPResponse)
+	// step for HTTP requests for accessing application
+	s.Step(`(body|status code) of HTTP request to "([^"]*)" of service "([^"]*)" in namespace "([^"]*)" (contains|is equal to) "([^"]*)"$`, getRoutingUrlAndVerifyHTTPResponse)
 
 	// steps for verifying config file content
 	s.Step(`JSON config file "([^"]*)" (contains|does not contain) key "(.*)" with value "(.*)"$`, configContains)
@@ -338,6 +340,19 @@ func verifyHTTPResponse(partOfResponse, url, urlSuffix, assertion, expected stri
 		}
 	default:
 		return fmt.Errorf("Assertion type: %s is not implemented", assertion)
+	}
+	return nil
+}
+
+func getRoutingUrlAndVerifyHTTPResponse(partOfResponse, urlRoot, serviceName, nameSpace, assertion, expected string) error {
+	url := minishift.getRoute(serviceName, nameSpace)
+	if urlRoot == "/" {
+		return verifyHTTPResponse(partOfResponse, url, "", assertion, expected)
+	} else if strings.HasPrefix(urlRoot, "/") {
+		url := url + urlRoot
+		return verifyHTTPResponse(partOfResponse, url, "", assertion, expected)
+	} else {
+		return fmt.Errorf("Wrong input format : %s. Input must start with /", urlRoot)
 	}
 	return nil
 }

@@ -112,3 +112,8 @@ func (m *Minishift) getOpenShiftUrl() string {
 	cmdOut, _, _ := m.runner.RunCommand("console --url")
 	return strings.TrimRight(cmdOut, "\n")
 }
+
+func (m *Minishift) getRoute(serviceName, nameSpace string) string {
+	cmdOut, _, _ := m.runner.RunCommand("openshift service " + serviceName + " -n" + nameSpace + " --url")
+	return strings.TrimRight(cmdOut, "\n")
+}

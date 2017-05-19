@@ -32,7 +32,7 @@ var versionCmd = &cobra.Command{
 		RootCmd.PersistentPreRun(cmd, args)
 	},
 	Run: func(command *cobra.Command, args []string) {
-		fmt.Println("Minishift version:", version.GetVersion())
+		fmt.Printf("minishift v%v\n", version.GetVersion())
 	},
 }
 

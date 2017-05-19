@@ -79,13 +79,17 @@ func (m *Minishift) executingOcCommand(command string) error {
 	return nil
 }
 
-func (m *Minishift) executingOcCommandSucceeds(command string) error {
+func (m *Minishift) executingOcCommandSucceedsOrFails(command, expectedResult string) error {
 	err := m.executingOcCommand(command)
 	if err != nil {
 		return err
 	}
-	if lastCommandOutput.ExitCode != 0 || len(lastCommandOutput.StdErr) != 0 {
+	commandFailed := (lastCommandOutput.ExitCode != 0 || len(lastCommandOutput.StdErr) != 0)
+	if expectedResult == "succeeds" && commandFailed == true {
 		return fmt.Errorf("Command did not execute successfully. cmdExit: %d, cmdErr: %s", lastCommandOutput.ExitCode, lastCommandOutput.StdErr)
+	}
+	if expectedResult == "fails" && commandFailed == false {
+		return fmt.Errorf("Command executed successfully, however was expected to fail. cmdExit: %d, cmdErr: %s", lastCommandOutput.ExitCode, lastCommandOutput.StdErr)
 	}
 
 	return nil

@@ -80,31 +80,31 @@ func FeatureContext(s *godog.Suite) {
 	minishift = &Minishift{runner: runner}
 
 	// steps to execute minishift commands
-	s.Step(`Minishift (?:has|should have) state "([^"]*)"`, minishift.shouldHaveState)
-	s.Step(`executing "minishift ([^"]*)"`, minishift.executingMinishiftCommand)
-	s.Step(`executing "minishift ([^"]*)" (.*)$`, executingMinishiftCommandSucceedsOrFails)
-	s.Step(`([^"]*) of command "minishift ([^"]*)" is equal to "([^"]*)"`, commandReturnEquals)
-	s.Step(`([^"]*) of command "minishift ([^"]*)" contains "([^"]*)"`, commandReturnContains)
+	s.Step(`Minishift (?:has|should have) state "([^"]*)"$`, minishift.shouldHaveState)
+	s.Step(`executing "minishift ([^"]*)"$`, minishift.executingMinishiftCommand)
+	s.Step(`executing "minishift ([^"]*)" (succeeds|fails)$`, executingMinishiftCommandSucceedsOrFails)
+	s.Step(`([^"]*) of command "minishift ([^"]*)" is equal to "([^"]*)"$`, commandReturnEquals)
+	s.Step(`([^"]*) of command "minishift ([^"]*)" contains "([^"]*)"$`, commandReturnContains)
 
 	// steps for running oc
 	s.Step(`executing "oc ([^"]*)" retrying (\d+) times with wait period of (\d+) seconds$`, minishift.executingRetryingTimesWithWaitPeriodOfSeconds)
-	s.Step(`executing "oc ([^"]*)`, minishift.executingOcCommand)
-	s.Step(`executing "oc ([^"]*)" succeeds$`, minishift.executingOcCommandSucceeds)
+	s.Step(`executing "oc ([^"]*)"$`, minishift.executingOcCommand)
+	s.Step(`executing "oc ([^"]*)" (succeeds|fails)$`, minishift.executingOcCommandSucceedsOrFails)
 
 	// steps to verify stdout and stderr of commands executed
-	s.Step(`([^"]*) should contain ([^"]*)`, commandReturnShouldContain)
-	s.Step(`([^"]*) should contain`, commandReturnShouldContainContent)
-	s.Step(`([^"]*) should equal ([^"]*)`, commandReturnShouldEqual)
-	s.Step(`([^"]*) should equal`, commandReturnShouldEqualContent)
-	s.Step(`([^"]*) should be empty`, commandReturnShouldBeEmpty)
-	s.Step(`([^"]*) should be valid ([^"]*)`, shouldBeInValidFormat)
+	s.Step(`([^"]*) should contain ([^"]*)$`, commandReturnShouldContain)
+	s.Step(`([^"]*) should contain$`, commandReturnShouldContainContent)
+	s.Step(`([^"]*) should equal ([^"]*)$`, commandReturnShouldEqual)
+	s.Step(`([^"]*) should equal$`, commandReturnShouldEqualContent)
+	s.Step(`([^"]*) should be empty$`, commandReturnShouldBeEmpty)
+	s.Step(`([^"]*) should be valid ([^"]*)$`, shouldBeInValidFormat)
 
 	// step for HTTP requests
-	s.Step(`(body|status code) of HTTP request to "([^"]*)" (?:|at "([^"]*)" )(contains|is equal to) "([^"]*)"`, verifyHTTPResponse)
+	s.Step(`(body|status code) of HTTP request to "([^"]*)" (?:|at "([^"]*)" )(contains|is equal to) "([^"]*)"$`, verifyHTTPResponse)
 
 	// steps for verifying config file content
-	s.Step(`JSON config file "([^"]*)" (contains|does not contain) key "(.*)" with value "(.*)"`, configContains)
-	s.Step(`JSON config file "([^"]*)" (contains|does not contain) key "(.*)"(.*)`, configContains)
+	s.Step(`JSON config file "([^"]*)" (contains|does not contain) key "(.*)" with value "(.*)"$`, configContains)
+	s.Step(`JSON config file "([^"]*)" (contains|does not contain) key "(.*)"(.*)$`, configContains)
 
 	s.BeforeSuite(func() {
 		testDir = setUp()
@@ -239,18 +239,12 @@ func executingMinishiftCommandSucceedsOrFails(command, expectedResult string) er
 	if err != nil {
 		return err
 	}
-	success := (lastCommandOutput.ExitCode != 0 || len(lastCommandOutput.StdErr) != 0)
-	switch expectedResult {
-	case "succeeds":
-		if success {
-			return fmt.Errorf("Command did not execute successfully. cmdExit: %d, cmdErr: %s", lastCommandOutput.ExitCode, lastCommandOutput.StdErr)
-		}
-	case "fails":
-		if success {
-			return fmt.Errorf("Command executed successfully, however was expected to fail. cmdExit: %d, cmdErr: %s", lastCommandOutput.ExitCode, lastCommandOutput.StdErr)
-		}
-	default:
-		return fmt.Errorf("Expected result: %s not recognized, please use: 'fails' or 'succeeds'", expectedResult)
+	commandFailed := (lastCommandOutput.ExitCode != 0 || len(lastCommandOutput.StdErr) != 0)
+	if expectedResult == "succeeds" && commandFailed == true {
+		return fmt.Errorf("Command did not execute successfully. cmdExit: %d, cmdErr: %s", lastCommandOutput.ExitCode, lastCommandOutput.StdErr)
+	}
+	if expectedResult == "fails" && commandFailed == false {
+		return fmt.Errorf("Command executed successfully, however was expected to fail. cmdExit: %d, cmdErr: %s", lastCommandOutput.ExitCode, lastCommandOutput.StdErr)
 	}
 	return nil
 }

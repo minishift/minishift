@@ -122,7 +122,7 @@ var clusterUpFlagSet = flag.NewFlagSet(commandName, flag.ContinueOnError)
 // subscription Manager FlagSet contains username and password details
 var subscriptionManagerFlagSet = flag.NewFlagSet(commandName, flag.ContinueOnError)
 
-// minishiftToClusterUp is a mapping between falg names used in minishift CLI and flag name as passed to 'cluster up'
+// minishiftToClusterUp is a mapping between flag names used in minishift CLI and flag name as passed to 'cluster up'
 var minishiftToClusterUp = map[string]string{
 	"openshift-env":     "env",
 	"openshift-version": "version",
@@ -393,9 +393,9 @@ func initClusterUpFlags() {
 	clusterUpFlagSet.Bool(metrics, false, "Install metrics (experimental)")
 	clusterUpFlagSet.Bool(logging, false, "Install logging (experimental)")
 	clusterUpFlagSet.String(openshiftVersion, version.GetOpenShiftVersion(), fmt.Sprintf("The OpenShift version to run, eg. %s", version.GetOpenShiftVersion()))
-	clusterUpFlagSet.String(httpProxy, "", "HTTP proxy used for downloading artefact and configure Docker as well as OpenShift (In the format of http://<username>:<password>@<proxy_host>:<proxy_port>). Overrides a potential HTTP_PROXY setting in the enviroment.")
-	clusterUpFlagSet.String(httpsProxy, "", "HTTPS proxy used for downloading artefact and configure Docker as well as OpenShift (In the format of https://<username>:<password>@<proxy_host>:<proxy_port>). Overrides a potential HTTPS_PROXY setting in the enviroment.")
 	clusterUpFlagSet.String(noProxyList, "", "List of hosts or subnets for which no proxy should be used.")
+	clusterUpFlagSet.AddFlag(httpProxyFlag)
+	clusterUpFlagSet.AddFlag(httpsProxyFlag)
 }
 
 // initProxyFlags create the CLI flags which needs to be passed for proxy

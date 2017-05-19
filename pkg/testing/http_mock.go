@@ -59,16 +59,16 @@ func NewMockRoundTripper() http.RoundTripper {
 }
 
 func (t *MockRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	// for now only proxy the actual download requests
-	re, _ := regexp.Compile(".*(openshift-origin-client-tools.*)&|.*(CHECKSUM).*")
+	// For now only proxy the actual download requests
+	re, _ := regexp.Compile(".*(openshift-origin-client-tools.*)&|.*(CHECKSUM).*|.*(minishift-.*-amd64.*)|.*(sha256)")
 	match := re.FindStringSubmatch(req.URL.String())
+	match = deleteEmpty(match)
 
 	if match != nil {
 		filename := match[1]
 		if filename == "" {
 			filename = match[2]
 		}
-		//fmt.Printf("MockRoundTripper - Proxying request %s\n", req.URL.String() )
 
 		response := &http.Response{
 			Header:     make(http.Header),
@@ -85,6 +85,16 @@ func (t *MockRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) 
 		return response, nil
 	}
 
-	// otherwise delegate
+	// Otherwise delegate
 	return t.delegate.RoundTrip(req)
+}
+
+func deleteEmpty(s []string) []string {
+	var r []string
+	for _, str := range s {
+		if str != "" {
+			r = append(r, str)
+		}
+	}
+	return r
 }

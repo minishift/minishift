@@ -108,6 +108,9 @@ func FeatureContext(s *godog.Suite) {
 
 	s.BeforeSuite(func() {
 		testDir = setUp()
+		if runner.IsCDK() {
+			runner.CDKSetup()
+		}
 		fmt.Println("Running Integration test in:", testDir)
 		fmt.Println("using binary:", givenPath)
 	})

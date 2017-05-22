@@ -103,10 +103,7 @@ func getConfigSet(api libmachine.API, forceShell string, noProxy bool) (*DockerS
 		shellCfg.NoProxyValue = noProxyValue
 	}
 
-	prefix, suffix, delimiter := shell.GetPrefixSuffixDelimiterForSet(userShell, false)
-	shellCfg.Prefix = prefix
-	shellCfg.Suffix = suffix
-	shellCfg.Delimiter = delimiter
+	shellCfg.Prefix, shellCfg.Suffix, shellCfg.Delimiter = shell.GetPrefixSuffixDelimiterForSet(userShell, false)
 
 	return shellCfg, nil
 }

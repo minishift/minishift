@@ -6,7 +6,7 @@ Feature: Basic
 
   Scenario: Starting Minishift
     Given Minishift has state "Does Not Exist"
-     When executing "minishift start --docker-env=FOO=BAR --docker-env=BAZ=BAT" succeeds
+     When executing "minishift start" succeeds
      Then Minishift should have state "Running"
 
   Scenario: OpenShift is ready after startup
@@ -100,15 +100,6 @@ Feature: Basic
      Then stdout should contain
       """
       hello
-      """
-
-  Scenario: User is able to set custom Docker specific environment variables
-    Given Minishift has state "Running"
-     When executing "minishift ssh cat /var/lib/boot2docker/profile" succeeds
-     Then stdout should contain
-      """
-      export "FOO=BAR"
-      export "BAZ=BAT"
       """
 
   Scenario: User is able to retrieve host and port of OpenShift registry

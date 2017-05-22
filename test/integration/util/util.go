@@ -81,6 +81,19 @@ func (m *MinishiftRunner) Start() {
 	m.RunCommand(fmt.Sprintf("start %s", m.CommandArgs))
 }
 
+func (m *MinishiftRunner) CDKSetup() {
+	if (os.Getenv("MINISHIFT_USERNAME") == "") || (os.Getenv("MINISHIFT_PASSWORD") == "") {
+		fmt.Println("Either MINISHIFT_USERNAME or MINISHIFT_PASSWORD is not set as environment variable")
+		os.Exit(1)
+	}
+	m.RunCommand(fmt.Sprintf("setup-cdk --force --minishift-home %s", os.Getenv(constants.MiniShiftHomeEnv)))
+}
+
+func (m *MinishiftRunner) IsCDK() bool {
+	cmdOut, _, _ := m.RunCommand("-h")
+	return strings.Contains(cmdOut, "setup-cdk")
+}
+
 func (m *MinishiftRunner) EnsureRunning() {
 	if m.GetStatus() != "Running" {
 		m.Start()

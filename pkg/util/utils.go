@@ -151,3 +151,8 @@ func GetHttpClient(proxyUrl string) *http.Client {
 	}
 	return myClient
 }
+
+func EscapeSingleQuote(s string) string {
+	r := strings.NewReplacer(`'`, `'"'"'`)
+	return r.Replace(s)
+}

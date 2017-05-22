@@ -21,9 +21,7 @@ special characters can trigger variable interpolation and therefore
 cause passwords to fail.
 
 Workaround: When creating and entering passwords, wrap the string with
-single quotes in the following format: `'<password>'`. If your password
-contain single quote ( `'` ) then do check the escaping string for your
-current shell. For example bash have escape string `'"'"'` for single quote.
+single quotes in the following format: `'<password>'`.
 
 [[minishift-delete-fails-undefine-snapshots]]
 == Undefining virsh snapshots fail

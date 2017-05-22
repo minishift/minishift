@@ -76,7 +76,7 @@ func setUp(t *testing.T) {
 	if err != nil {
 		t.Error()
 	}
-	testOc = Oc{"v1.3.1", filepath.Join(testDir, "cache"), ""}
+	testOc = Oc{"v1.3.1", filepath.Join(testDir, "cache")}
 }
 
 func EnsureGitHubApiAccessTokenSet(t *testing.T) {

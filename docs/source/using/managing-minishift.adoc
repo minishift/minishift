@@ -204,13 +204,10 @@ _/var/lib/minishift/openshift.local.pv_ on the Minishift VM.
 [[http-s-proxies]]
 == HTTP/HTTPS Proxies
 
-If you are behind a HTTP/HTTPS proxy, you need to supply proxy options
-to allow Docker and OpenShift to work properly. To do this, pass the required
-flags during `minishift start`.
+If you are behind a HTTP/HTTPS proxy, you need to supply proxy options to allow Docker and OpenShift to work properly.
+To do this, pass the required flags during `minishift start`.
 
 For example:
-
-[listing.console]
 
 ----
 $ minishift start --http-proxy http://YOURPROXY:PORT --https-proxy https://YOURPROXY:PORT
@@ -219,24 +216,20 @@ $ minishift start --http-proxy http://YOURPROXY:PORT --https-proxy https://YOURP
 In an authenticated proxy environment, the `proxy_user` and
 `proxy_password` must be a part of proxy URI.
 
-[listing.console]
-
 ----
  $ minishift start --http-proxy http://<proxy_username>:<proxy_password>@YOURPROXY:PORT \
                    --https-proxy https://<proxy_username>:<proxy_password>@YOURPROXY:PORT
 ----
 
-You can also use the `--no-proxy` flag to specify a comma-separated list of hosts
-that should not be proxied. For a list of all available options, see the
-link:../command-ref/minishift_start{outfilesuffix}[synopsis] of the `start` command.
+You can also use the `--no-proxy` flag to specify a comma-separated list of hosts that should not be proxied.
 
-Using the proxy options will transparently configure the Docker daemon
-and OpenShift to use the specified proxies.
+Using the proxy options will transparently configure the Docker daemon as well as OpenShift to use the specified proxies.
 
-NOTE: Using the proxy options requires that you run OpenShift version 1.5.0-alpha.2 or later.
-Use the `openshift-version` option to request a specific version of OpenShift. You can list
-all Minishift-compatible OpenShift versions with
-the link:../command-ref/minishift_openshift_list-versions{outfilesuffix}[`minishift openshift list-versions`] command.
+NOTE: `minishift start` honors the environment variables `HTTP_PROXY`, `HTTPS_PROXY` and `NO_PROXY`.
+If these variables are set, they are implicitly used during `minishift start` unless explicitly overridden by the corresponding command line flags.
+
+NOTE: Using the proxy options requires that you run OpenShift version 1.5.0 or later.
+Use the `openshift-version` option to request a specific version of OpenShift. You can list all Minishift-compatible OpenShift versions with the link:../command-ref/minishift_openshift_version_list{outfilesuffix}[`minishift openshift version list`] command.
 
 [[networking]]
 == Networking

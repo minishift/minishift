@@ -22,10 +22,6 @@ import (
 	"os"
 	"strings"
 	"time"
-
-	"github.com/asaskevich/govalidator"
-	"net/http"
-	"net/url"
 )
 
 // Until endlessly loops the provided function until a message is received on the done channel.
@@ -69,10 +65,6 @@ func CanReadFile(path string) bool {
 
 func Retry(attempts int, callback func() error) (err error) {
 	return RetryAfter(attempts, callback, 0)
-}
-
-func ValidateProxyURI(uri string) bool {
-	return govalidator.IsURL(uri)
 }
 
 func RetryAfter(attempts int, callback func() error, d time.Duration) (err error) {
@@ -141,15 +133,6 @@ func VersionOrdinal(version string) string {
 		vo[j]++
 	}
 	return string(vo)
-}
-
-func GetHttpClient(proxyUrl string) *http.Client {
-	myClient := http.DefaultClient
-	if proxyUrl != "" {
-		proxyUrl, _ := url.Parse(proxyUrl)
-		myClient = &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxyUrl)}}
-	}
-	return myClient
 }
 
 func EscapeSingleQuote(s string) string {

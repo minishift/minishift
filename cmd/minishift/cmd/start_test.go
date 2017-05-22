@@ -21,7 +21,6 @@ import (
 
 	minitesting "github.com/minishift/minishift/pkg/testing"
 
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -251,66 +250,6 @@ func TestStartClusterUpWithFlag(t *testing.T) {
 		"--routing-suffix", testIp + ".nip.io",
 		"--skip-registry-check", "true"}
 	assertCommandLineArguments(expectedArguments, t)
-}
-
-func TestShellProxyVariableWithProxyFlag(t *testing.T) {
-	defer viper.Reset()
-
-	expectedShellProxyVariable := "http_proxy=http://localhost:3128 https_proxy=https://localhost:3128 no_proxy=localhost,127.0.0.1"
-
-	viper.Set("http-proxy", "http://localhost:3128")
-	viper.Set("https-proxy", "https://localhost:3128")
-	viper.Set("no-proxy", "localhost,127.0.0.1")
-
-	setShellProxy()
-
-	if shellProxyEnv != expectedShellProxyVariable {
-		t.Fatalf("Shell variable doesn't set properly expected %s got %s", expectedShellProxyVariable, shellProxyEnv)
-	}
-}
-
-func TestDockerEnvWithProxyFlag(t *testing.T) {
-	defer viper.Reset()
-
-	expectedDockerEnv := []string{"HTTP_PROXY=http://localhost:3128",
-		fmt.Sprintf("NO_PROXY=%s", updateNoProxyForDocker())}
-
-	viper.Set("http-proxy", "http://localhost:3128")
-
-	setDockerProxy()
-
-	assertCompareSlice(expectedDockerEnv, dockerEnv, t)
-}
-
-func TestClusterUpWithProxyFlag(t *testing.T) {
-	setUp(t)
-	defer os.RemoveAll(testDir)
-	defer minitesting.ResetDefaultRoundTripper()
-	defer SetRunner(util.RealRunner{})
-	defer viper.Reset()
-
-	viper.Set("http-proxy", "http://localhost:3128")
-	viper.Set("https-proxy", "https://localhost:3128")
-	viper.Set("no-proxy", "10.0.0.1")
-
-	setOcProxy()
-	// To make sure oc download doesn't take localhost:3128 proxy in account
-	proxyUrl = ""
-
-	clusterUp(&testMachineConfig, testIp)
-
-	expectedArguments := []string{"cluster", "up", "--use-existing-config",
-		"--host-config-dir", hostConfigDirectory,
-		"--host-data-dir", hostDataDirectory,
-		"--host-pv-dir", hostPvDirectory,
-		"--host-volumes-dir", hostVolumesDirectory,
-		"--http-proxy", "http://localhost:3128",
-		"--https-proxy", "https://localhost:3128",
-		"--no-proxy", "10.0.0.1",
-		"--routing-suffix", testIp + ".nip.io",
-	}
-	assertCommandLineArguments(expectedArguments, t)
-
 }
 
 func TestStartClusterUpWithOpenShiftEnv(t *testing.T) {

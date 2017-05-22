@@ -95,7 +95,6 @@ var (
 	registryMirror   []string
 	openShiftEnv     []string
 	shellProxyEnv    string
-	proxyUrl         string
 )
 
 // startCmd represents the start command
@@ -120,9 +119,6 @@ var startFlagSet = flag.NewFlagSet(commandName, flag.ContinueOnError)
 // clusterUpFlagSet contains the command line switches which needs to be passed on to 'cluster up'
 var clusterUpFlagSet = flag.NewFlagSet(commandName, flag.ContinueOnError)
 
-// proxyFlagSet contains the command line switches for proxy
-var proxyFlagSet = flag.NewFlagSet(commandName, flag.ContinueOnError)
-
 // subscription Manager FlagSet contains username and password details
 var subscriptionManagerFlagSet = flag.NewFlagSet(commandName, flag.ContinueOnError)
 
@@ -145,14 +141,11 @@ func runStart(cmd *cobra.Command, args []string) {
 	defer libMachineClient.Close()
 
 	validateOpenshiftVersion()
-	validateProxyArgs()
+	setSubscriptionManagerParameters()
 
-	setDockerProxy()
-	setOcProxy()
-	setShellProxy()
-	setSubcriptionManagerParameters()
+	proxyConfig := handleProxies()
 
-	config := cluster.MachineConfig{
+	machineConfig := cluster.MachineConfig{
 		MinikubeISO:      viper.GetString(isoURL),
 		Memory:           viper.GetInt(memory),
 		CPUs:             viper.GetInt(cpus),
@@ -164,16 +157,15 @@ func runStart(cmd *cobra.Command, args []string) {
 		HostOnlyCIDR:     viper.GetString(hostOnlyCIDR),
 		OpenShiftVersion: viper.GetString(openshiftVersion),
 		ShellProxyEnv:    shellProxyEnv,
-		ProxyUrl:         proxyUrl,
 	}
 
-	fmt.Printf("Starting local OpenShift cluster using '%s' hypervisor...\n", config.VMDriver)
+	fmt.Printf("Starting local OpenShift cluster using '%s' hypervisor...\n", machineConfig.VMDriver)
 
 	isRestart := cmdutil.VMExists(libMachineClient, constants.MachineName)
 
 	var host *host.Host
 	start := func() (err error) {
-		host, err = cluster.StartHost(libMachineClient, config)
+		host, err = cluster.StartHost(libMachineClient, machineConfig)
 		if err != nil {
 			glog.Errorf("Error starting the VM: %s. Retrying.\n", err)
 		}
@@ -205,14 +197,47 @@ func runStart(cmd *cobra.Command, args []string) {
 		atexit.Exit(1)
 	}
 
+	if proxyConfig.IsEnabled() {
+		// once we know the IP, we need to make sure it is not proxied in a proxy environment
+		proxyConfig.AddNoProxy(ip)
+		proxyConfig.ApplyToEnvironment()
+	}
+
 	automountHostfolders(host.Driver)
 
-	clusterUp(&config, ip)
+	clusterUp(&machineConfig, ip)
 
 	if !isRestart {
 		sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
 		postClusterUp(constants.MachineName, ip, constants.APIServerPort, viper.GetString(routingSuffix), minishiftConfig.InstanceConfig.OcPath, constants.KubeConfigPath, "developer", "myproject", sshCommander)
 	}
+}
+
+func handleProxies() *util.ProxyConfig {
+	proxyConfig, err := util.NewProxyConfig(viper.GetString(httpProxy), viper.GetString(httpsProxy), viper.GetString(noProxyList))
+
+	if err != nil {
+		atexit.ExitWithMessage(1, err.Error())
+	}
+
+	if proxyConfig.IsEnabled() {
+		proxyConfig.ApplyToEnvironment()
+		dockerEnv = append(dockerEnv, proxyConfig.ProxyConfig()...)
+		shellProxyEnv += strings.Join(proxyConfig.ProxyConfig(), " ")
+
+		// It could be that the proxy config is retrieved from the environment. To make sure that
+		// proxy settings are properly passed to cluster up we need to explicitly set the values.
+		if proxyConfig.HttpProxy() != "" {
+			viper.Set(httpProxy, proxyConfig.HttpProxy())
+		}
+
+		if proxyConfig.HttpsProxy() != "" {
+			viper.Set(httpsProxy, proxyConfig.HttpsProxy())
+		}
+		viper.Set(noProxyList, proxyConfig.NoProxy())
+	}
+
+	return proxyConfig
 }
 
 // postClusterUp runs the Minishift specific provisioning after cluster up has run
@@ -315,58 +340,6 @@ func automountHostfolders(driver drivers.Driver) {
 	}
 }
 
-// Set Docker Proxy
-func setDockerProxy() {
-	if viper.IsSet(httpProxy) {
-		dockerEnv = append(dockerEnv, fmt.Sprintf("HTTP_PROXY=%s", viper.GetString(httpProxy)))
-	}
-	if viper.IsSet(httpsProxy) {
-		dockerEnv = append(dockerEnv, fmt.Sprintf("HTTPS_PROXY=%s", viper.GetString(httpsProxy)))
-	}
-	if viper.IsSet(noProxyList) {
-		dockerEnv = append(dockerEnv, fmt.Sprintf("NO_PROXY=%s,%s", updateNoProxyForDocker(),
-			viper.GetString(noProxyList)))
-	} else if viper.IsSet(httpProxy) || viper.IsSet(httpsProxy) {
-		dockerEnv = append(dockerEnv, fmt.Sprintf("NO_PROXY=%s", updateNoProxyForDocker()))
-	}
-
-}
-
-// Set OpenShiftProxy
-func setOcProxy() {
-	if viper.IsSet(httpProxy) {
-		clusterUpFlagSet.String(httpProxy, viper.GetString(httpProxy), "HTTP proxy to use for master and builds")
-	}
-	if viper.IsSet(httpsProxy) {
-		clusterUpFlagSet.String(httpsProxy, viper.GetString(httpsProxy), "HTTPS proxy to use for master and builds")
-	}
-	if viper.IsSet(noProxyList) {
-		clusterUpFlagSet.String(noProxyList, viper.GetString(noProxyList), "List of hosts or subnets for which a proxy shouldn't be use")
-	}
-}
-
-// Set shell proxy
-func setShellProxy() {
-	if viper.IsSet(httpProxy) {
-		shellProxyEnv += fmt.Sprintf("http_proxy=%s ", viper.GetString(httpProxy))
-		proxyUrl = viper.GetString(httpProxy)
-	}
-	if viper.IsSet(httpsProxy) {
-		shellProxyEnv += fmt.Sprintf("https_proxy=%s ", viper.GetString(httpsProxy))
-		proxyUrl = viper.GetString(httpsProxy)
-	}
-	if viper.IsSet(noProxyList) {
-		shellProxyEnv += fmt.Sprintf("no_proxy=%s", viper.GetString(noProxyList))
-	} else if viper.IsSet(httpProxy) || viper.IsSet(httpsProxy) {
-		dockerEnv = append(dockerEnv, fmt.Sprintf("NO_PROXY=%s", updateNoProxyForDocker()))
-	}
-}
-
-// update default no-proxy for docker
-func updateNoProxyForDocker() string {
-	return "localhost,127.0.0.1,172.30.1.1"
-}
-
 // calculateDiskSizeInMB converts a human specified disk size like "1000MB" or "1GB" and converts it into Megabits
 func calculateDiskSizeInMB(humanReadableDiskSize string) int {
 	diskSize, err := units.FromHumanSize(humanReadableDiskSize)
@@ -380,12 +353,10 @@ func calculateDiskSizeInMB(humanReadableDiskSize string) int {
 func init() {
 	initStartFlags()
 	initClusterUpFlags()
-	initProxyFlags()
 	initSubscriptionManagerFlags()
 
 	startCmd.Flags().AddFlagSet(startFlagSet)
 	startCmd.Flags().AddFlagSet(clusterUpFlagSet)
-	startCmd.Flags().AddFlagSet(proxyFlagSet)
 	startCmd.Flags().AddFlagSet(subscriptionManagerFlagSet)
 
 	viper.BindPFlags(startCmd.Flags())
@@ -422,13 +393,9 @@ func initClusterUpFlags() {
 	clusterUpFlagSet.Bool(metrics, false, "Install metrics (experimental)")
 	clusterUpFlagSet.Bool(logging, false, "Install logging (experimental)")
 	clusterUpFlagSet.String(openshiftVersion, version.GetOpenShiftVersion(), fmt.Sprintf("The OpenShift version to run, eg. %s", version.GetOpenShiftVersion()))
-}
-
-// initProxyFlags create the CLI flags which needs to be passed for proxy
-func initProxyFlags() {
-	proxyFlagSet.String(httpProxy, "", "HTTP proxy for virtual machine (In the format of http://<username>:<password>@<proxy_host>:<proxy_port>)")
-	proxyFlagSet.String(httpsProxy, "", "HTTPS proxy for virtual machine (In the format of https://<username>:<password>@<proxy_host>:<proxy_port>)")
-	proxyFlagSet.String(noProxyList, "", "List of hosts or subnets for which proxy should not be used.")
+	clusterUpFlagSet.String(httpProxy, "", "HTTP proxy used for downloading artefact and configure Docker as well as OpenShift (In the format of http://<username>:<password>@<proxy_host>:<proxy_port>). Overrides a potential HTTP_PROXY setting in the enviroment.")
+	clusterUpFlagSet.String(httpsProxy, "", "HTTPS proxy used for downloading artefact and configure Docker as well as OpenShift (In the format of https://<username>:<password>@<proxy_host>:<proxy_port>). Overrides a potential HTTPS_PROXY setting in the enviroment.")
+	clusterUpFlagSet.String(noProxyList, "", "List of hosts or subnets for which no proxy should be used.")
 }
 
 // initProxyFlags create the CLI flags which needs to be passed for proxy
@@ -445,7 +412,6 @@ func clusterUp(config *cluster.MachineConfig, ip string) {
 	oc := cache.Oc{
 		OpenShiftVersion:  config.OpenShiftVersion,
 		MinishiftCacheDir: filepath.Join(constants.Minipath, "cache"),
-		ProxyUrl:          proxyUrl,
 	}
 	if err := oc.EnsureIsCached(); err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintln("Error starting the cluster: ", err))
@@ -509,19 +475,6 @@ func validateOpenshiftVersion() {
 	}
 }
 
-func validateProxyArgs() {
-	if viper.IsSet(httpProxy) {
-		if !util.ValidateProxyURI(viper.GetString(httpProxy)) {
-			glog.Exitf("HTTP Proxy URL is not valid, Please check help message")
-		}
-	}
-	if viper.IsSet(httpsProxy) {
-		if !util.ValidateProxyURI(viper.GetString(httpsProxy)) {
-			glog.Exitf("HTTPS Proxy URL is not valid, Please check help message")
-		}
-	}
-}
-
 func ocSupportFlag(cmdName string, flag string) bool {
 	cmdArgs := []string{"cluster", "up", "-h"}
 	cmdOut, err := runner.Output(cmdName, cmdArgs...)
@@ -535,7 +488,7 @@ func ocSupportFlag(cmdName string, flag string) bool {
 	return false
 }
 
-func setSubcriptionManagerParameters() {
+func setSubscriptionManagerParameters() {
 	cluster.RegistrationParameters.Username = viper.GetString(username)
 	cluster.RegistrationParameters.Password = viper.GetString(password)
 }

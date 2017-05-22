@@ -17,32 +17,32 @@ limitations under the License.
 package util
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
 	"testing"
 )
 
 // Returns a function that will return n errors, then return successfully forever.
 func errorGenerator(n int) func() error {
-	errors := 0
+	generatedErrors := 0
 	return func() (err error) {
-		if errors < n {
-			errors += 1
-			return fmt.Errorf("Error!")
+		if generatedErrors < n {
+			generatedErrors += 1
+			return errors.New("Error!")
 		}
 		return nil
 	}
 }
 
 func TestErrorGenerator(t *testing.T) {
-	errors := 3
-	f := errorGenerator(errors)
-	for i := 0; i < errors-1; i++ {
+	errorCount := 3
+	f := errorGenerator(errorCount)
+	for i := 0; i < errorCount-1; i++ {
 		if err := f(); err == nil {
 			t.Fatalf("Error should have been reported at iteration %v", i)
 		}
 	}
 	if err := f(); err == nil {
-		t.Fatalf("Error should not have been reported by this call.")
+		t.Fatal("Error should not have been reported by this call.")
 	}
 }
 
@@ -50,30 +50,14 @@ func TestRetry(t *testing.T) {
 
 	f := errorGenerator(4)
 	if err := Retry(5, f); err != nil {
-		t.Fatalf("Error should not have been reported during retry.")
+		t.Fatal("Error should not have been reported during retry.")
 	}
 
 	f = errorGenerator(5)
 	if err := Retry(4, f); err == nil {
-		t.Fatalf("Error should have been reported during retry.")
+		t.Fatal("Error should have been reported during retry.")
 	}
 
-}
-
-func TestValidateProxyURI(t *testing.T) {
-	urlList := map[string]bool{
-		"http://foo.com:3128":          true,
-		"htt://foo.com:3128":           false,
-		"http://127.0.0.1:3128":        true,
-		"http://foo:bar@test.com:324":  true,
-		"https://foo:bar@test.com:454": true,
-		"https://foo:b@r@test.com:454": true,
-	}
-	for uri, val := range urlList {
-		if ValidateProxyURI(uri) != val {
-			t.Fatalf("Expected '%t' Got '%t'", val, ValidateProxyURI(uri))
-		}
-	}
 }
 
 func TestEscapeSingleQuote(t *testing.T) {
@@ -92,8 +76,8 @@ func TestEscapeSingleQuote(t *testing.T) {
 func TestMultiError(t *testing.T) {
 	m := MultiError{}
 
-	m.Collect(fmt.Errorf("Error 1"))
-	m.Collect(fmt.Errorf("Error 2"))
+	m.Collect(errors.New("Error 1"))
+	m.Collect(errors.New("Error 2"))
 
 	err := m.ToError()
 	expected := `Error 1
@@ -110,6 +94,6 @@ Error 2`
 
 func TestVersionOrdinal(t *testing.T) {
 	if VersionOrdinal("v3.4.1.10") < VersionOrdinal("v3.4.1.2") {
-		t.Fatalf("Expected 'false' Got 'true'")
+		t.Fatal("Expected 'false' Got 'true'")
 	}
 }

@@ -33,7 +33,6 @@ import (
 
 	"crypto/sha256"
 	"fmt"
-	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/archive"
 	minishiftos "github.com/minishift/minishift/pkg/util/os"
 	"io/ioutil"
@@ -89,7 +88,7 @@ func GetGitHubApiToken() string {
 	return ""
 }
 
-func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minishiftos.OS, version, outputPath string, proxyUrl string) error {
+func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minishiftos.OS, version, outputPath string) error {
 	client := Client()
 	var (
 		err     error
@@ -121,14 +120,13 @@ func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minis
 
 	// Download the asset
 	var asset io.Reader
-	asset, uri, err := client.Repositories.DownloadReleaseAsset("openshift", "origin", assetID)
+	asset, url, err := client.Repositories.DownloadReleaseAsset("openshift", "origin", assetID)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("Cannot download OpenShift release asset %d", assetID))
 	}
-	if len(uri) > 0 {
+	if len(url) > 0 {
 		fmt.Println(fmt.Sprintf("Downloading OpenShift binary '%s' version '%s'", binaryType.String(), *release.TagName))
-		myClient := util.GetHttpClient(proxyUrl)
-		httpResp, err := myClient.Get(uri)
+		httpResp, err := http.Get(url)
 		if err != nil {
 			return errors.Wrap(err, "Cannot download OpenShift release asset.")
 		}

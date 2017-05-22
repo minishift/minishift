@@ -188,7 +188,6 @@ type MachineConfig struct {
 	HostOnlyCIDR     string // Only used by the virtualbox driver
 	OpenShiftVersion string
 	ShellProxyEnv    string // Only used for proxy purpose
-	ProxyUrl         string // Only used for proxy purpose
 }
 
 func engineOptions(config MachineConfig) *engine.Options {
@@ -215,9 +214,7 @@ func (m *MachineConfig) CacheMinikubeISOFromURL() error {
 	fmt.Println(fmt.Sprintf("Downloading ISO '%s'", m.MinikubeISO))
 
 	// store the iso inside the MINISHIFT_HOME dir
-	myClient := util.GetHttpClient(m.ProxyUrl)
-
-	response, err := myClient.Get(m.MinikubeISO)
+	response, err := http.Get(m.MinikubeISO)
 	if err != nil {
 		return err
 	}

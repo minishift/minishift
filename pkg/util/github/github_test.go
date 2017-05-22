@@ -95,7 +95,7 @@ func TestDownloadOc(t *testing.T) {
 			continue
 		}
 
-		err = DownloadOpenShiftReleaseBinary(testAsset.binary, testAsset.os, testAsset.version, testDir, "")
+		err = DownloadOpenShiftReleaseBinary(testAsset.binary, testAsset.os, testAsset.version, testDir)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -133,7 +133,7 @@ func TestInvalidVersion(t *testing.T) {
 	defer os.RemoveAll(testDir)
 
 	dummyVersion := "foo"
-	err = DownloadOpenShiftReleaseBinary(OPENSHIFT, minishiftos.WINDOWS, dummyVersion, testDir, "")
+	err = DownloadOpenShiftReleaseBinary(OPENSHIFT, minishiftos.WINDOWS, dummyVersion, testDir)
 	if err == nil {
 		t.Fatal("There should have been an error")
 	}
@@ -153,7 +153,7 @@ func TestInvalidBinaryFormat(t *testing.T) {
 	}
 	defer os.RemoveAll(testDir)
 
-	err = DownloadOpenShiftReleaseBinary(OPENSHIFT, minishiftos.WINDOWS, testVersion, testDir, "")
+	err = DownloadOpenShiftReleaseBinary(OPENSHIFT, minishiftos.WINDOWS, testVersion, testDir)
 	if err == nil {
 		t.Fatal("There should have been an error")
 	}
@@ -178,7 +178,7 @@ func Test_Download_Oc_1_4_1(t *testing.T) {
 	}
 	defer os.RemoveAll(testDir)
 
-	err = DownloadOpenShiftReleaseBinary(OC, minishiftos.LINUX, "v1.4.1", testDir, "")
+	err = DownloadOpenShiftReleaseBinary(OC, minishiftos.LINUX, "v1.4.1", testDir)
 	if err != nil {
 		t.Fatal(err)
 	}

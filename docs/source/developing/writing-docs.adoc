@@ -56,7 +56,7 @@ In this case you need to build the container with a different user id.
 This will ensure that the _docs_ user in the container will be able to create files and directories.
 
 ----
-$ make build_docs_container IMAGE_UID=$(id -u)
+$ make gen_docs IMAGE_UID=$(id -u)
 ----
 ====
 

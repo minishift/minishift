@@ -38,8 +38,8 @@ func run(name string, value string, fns []setFn) error {
 }
 
 func findSetting(name string) (Setting, error) {
-	for _, s := range settings {
-		if name == s.name {
+	for _, s := range settingsList {
+		if name == s.Name {
 			return s, nil
 		}
 	}

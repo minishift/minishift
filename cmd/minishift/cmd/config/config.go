@@ -25,7 +25,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/minishift/minishift/pkg/minikube/config"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
@@ -38,84 +37,66 @@ type setFn func(string, string) error
 type MinishiftConfig map[string]interface{}
 
 type Setting struct {
-	name        string
+	Name        string
 	set         func(MinishiftConfig, string, string) error
 	validations []setFn
 	callbacks   []setFn
 }
 
-// These are all the settings that are configurable
-// and their validation and callback fn run on Set
-var settings []Setting = []Setting{
-	{
-		name:        "vm-driver",
-		set:         SetString,
-		validations: []setFn{IsValidDriver},
-		callbacks:   []setFn{RequiresRestartMsg},
-	},
-	{
-		name:        "v",
-		set:         SetInt,
-		validations: []setFn{IsPositive},
-	},
-	{
-		name:        "cpus",
-		set:         SetInt,
-		validations: []setFn{IsPositive},
-		callbacks:   []setFn{RequiresRestartMsg},
-	},
-	{
-		name:        "disk-size",
-		set:         SetString,
-		validations: []setFn{IsValidDiskSize},
-		callbacks:   []setFn{RequiresRestartMsg},
-	},
-	{
-		name:        "host-only-cidr",
-		set:         SetString,
-		validations: []setFn{IsValidCIDR},
-	},
-	{
-		name:        "memory",
-		set:         SetInt,
-		validations: []setFn{IsPositive},
-		callbacks:   []setFn{RequiresRestartMsg},
-	},
-	{
-		name: "show-libmachine-logs",
-		set:  SetBool,
-	},
-	{
-		name:        "log_dir",
-		set:         SetString,
-		validations: []setFn{IsValidPath},
-	},
-	{
-		name: "openshift-version",
-		set:  SetString,
-	},
-	{
-		name:        "iso-url",
-		set:         SetString,
-		validations: []setFn{IsValidUrl},
-		callbacks:   []setFn{RequiresRestartMsg},
-	},
-	{
-		name: "hostfolders-automount",
-		set:  SetBool,
-	},
-	{
-		name: "hostfolders-mountpath",
-		set:  SetString,
-	},
-	{
-		name: config.WantUpdateNotification,
-		set:  SetBool,
-	},
-	{
-		name: config.ReminderWaitPeriodInHours,
-		set:  SetInt,
-	},
+var settingsList []Setting
+
+var (
+	// minishift
+	ISOUrl           = createFlag("iso-url", SetString, []setFn{IsValidUrl}, []setFn{RequiresRestartMsg}, true)
+	CPUs             = createFlag("cpus", SetInt, []setFn{IsPositive}, []setFn{RequiresRestartMsg}, true)
+	Memory           = createFlag("memory", SetInt, []setFn{IsPositive}, []setFn{RequiresRestartMsg}, true)
+	DiskSize         = createFlag("disk-size", SetString, []setFn{IsValidDiskSize}, []setFn{RequiresRestartMsg}, true)
+	VmDriver         = createFlag("vm-driver", SetString, []setFn{IsValidDriver}, []setFn{RequiresRestartMsg}, true)
+	OpenshiftVersion = createFlag("openshift-version", SetString, nil, nil, true)
+	HostOnlyCIDR     = createFlag("host-only-cidr", SetString, []setFn{IsValidCIDR}, nil, true)
+
+	// cluster up
+	SkipRegistryCheck = createFlag("skip-registry-check", SetBool, nil, nil, true)
+	PublicHostname    = createFlag("public-hostname", SetString, nil, nil, true)
+	RoutingSuffix     = createFlag("routing-suffix", SetString, nil, nil, true)
+	HostConfigDir     = createFlag("host-config-dir", SetString, []setFn{IsValidPath}, nil, true)
+	HostVolumeDir     = createFlag("host-volumes-dir", SetString, []setFn{IsValidPath}, nil, true)
+	HostDataDir       = createFlag("host-data-dir", SetString, []setFn{IsValidPath}, nil, true)
+	HostPvDir         = createFlag("host-pv-dir", SetString, []setFn{IsValidPath}, nil, true)
+	ServerLogLevel    = createFlag("server-loglevel", SetInt, []setFn{IsPositive}, nil, true)
+	OpenshiftEnv      = createFlag("openshift-env", nil, nil, nil, false)
+	Metrics           = createFlag("metrics", SetBool, nil, nil, true)
+	Logging           = createFlag("logging", SetBool, nil, nil, true)
+
+	// Setting proxy
+	NoProxyList = createFlag("no-proxy", SetString, nil, nil, true)
+	HttpProxy   = createFlag("http-proxy", SetString, []setFn{IsValidProxy}, nil, true)
+	HttpsProxy  = createFlag("https-proxy", SetString, []setFn{IsValidProxy}, nil, true)
+
+	// Subscription Manager
+	Username = createFlag("username", SetString, nil, nil, true)
+	Password = createFlag("password", SetString, nil, nil, true)
+
+	// Global flags
+	LogDir             = createFlag("log_dir", SetString, []setFn{IsValidPath}, nil, true)
+	ShowLibmachineLogs = createFlag("show-libmachine-logs", SetBool, nil, nil, true)
+
+	// Host Folders
+	HostFoldersMountPath = createFlag("hostfolders-mountpath", SetString, nil, nil, true)
+	HostFoldersAutoMount = createFlag("hostfolders-automount", SetBool, nil, nil, true)
+)
+
+func createFlag(name string, set func(MinishiftConfig, string, string) error, validations []setFn, callbacks []setFn, isApply bool) *Setting {
+	flag := Setting{
+		Name:        name,
+		set:         set,
+		validations: validations,
+		callbacks:   callbacks,
+	}
+	if isApply {
+		settingsList = append(settingsList, flag)
+	}
+	return &flag
 }
 
 var ConfigCmd = &cobra.Command{
@@ -132,8 +113,8 @@ Configurable properties (enter as SUBCOMMAND): ` + "\n\n" + configurableFields()
 
 func configurableFields() string {
 	var fields []string
-	for _, s := range settings {
-		fields = append(fields, " * "+s.name)
+	for _, s := range settingsList {
+		fields = append(fields, " * "+s.Name)
 	}
 	return strings.Join(fields, "\n")
 }

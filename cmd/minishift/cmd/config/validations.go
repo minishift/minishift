@@ -28,6 +28,7 @@ import (
 
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/util"
 )
 
 func IsValidDriver(string, driver string) error {
@@ -86,6 +87,13 @@ func IsValidCIDR(name string, cidr string) error {
 func IsValidPath(name string, path string) error {
 	_, err := os.Stat(path)
 	if err != nil {
+		return fmt.Errorf("%s path is not valid: %v", name, err)
+	}
+	return nil
+}
+
+func IsValidProxy(name string, uri string) error {
+	if err := util.ValidateProxyURL(uri); err != nil {
 		return fmt.Errorf("%s path is not valid: %v", name, err)
 	}
 	return nil

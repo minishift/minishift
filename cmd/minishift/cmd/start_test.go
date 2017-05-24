@@ -28,6 +28,7 @@ import (
 	"path/filepath"
 
 	"github.com/docker/machine/libmachine/provision"
+	"github.com/minishift/minishift/cmd/minishift/cmd/config"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minikube/tests"
@@ -278,21 +279,21 @@ func TestNoExplicitRouteSuffixDefaultsToNip(t *testing.T) {
 	setDefaultRoutingPrefix(testIp)
 
 	expectedRoutingSuffix := testIp + ".nip.io"
-	if viper.Get(routingSuffix) != expectedRoutingSuffix {
-		t.Fatalf("Expected argument '%s'. Received '%s'", expectedRoutingSuffix, viper.Get(routingSuffix))
+	if viper.Get(config.RoutingSuffix.Name) != expectedRoutingSuffix {
+		t.Fatalf("Expected argument '%s'. Received '%s'", expectedRoutingSuffix, viper.Get(config.RoutingSuffix.Name))
 	}
 }
 
 func TestExplicitRouteSuffixGetApplied(t *testing.T) {
 	explicitRoutingSuffix := "acme.com"
 
-	viper.Set(routingSuffix, explicitRoutingSuffix)
+	viper.Set(config.RoutingSuffix.Name, explicitRoutingSuffix)
 	defer viper.Reset()
 
 	setDefaultRoutingPrefix(testIp)
 
-	if viper.Get(routingSuffix) != explicitRoutingSuffix {
-		t.Fatalf("Expected argument '%s'. Received '%s'", explicitRoutingSuffix, viper.Get(routingSuffix))
+	if viper.Get(config.RoutingSuffix.Name) != explicitRoutingSuffix {
+		t.Fatalf("Expected argument '%s'. Received '%s'", explicitRoutingSuffix, viper.Get(config.RoutingSuffix.Name))
 	}
 }
 

@@ -36,8 +36,8 @@ func TestFindSetting(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Cannot find the setting of the vm-driver: %s", err)
 	}
-	if s.name != "vm-driver" {
-		t.Fatalf("Incorrect setting, expected vm-driver, received %s", s.name)
+	if s.Name != "vm-driver" {
+		t.Fatalf("Incorrect setting, expected vm-driver, received %s", s.Name)
 	}
 }
 

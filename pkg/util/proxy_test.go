@@ -27,7 +27,7 @@ func Test_default_no_proxy_list(t *testing.T) {
 		t.Fatal("Unexpected error creating proxy config")
 	}
 
-	if proxyConfig.NoProxy() != "localhost,127.0.0.1,172.30.1.1" {
+	if proxyConfig.NoProxy() != "localhost,127.0.0.1,"+OpenShiftRegistryIp {
 		t.Fatalf("Unexpected default no proxy list: %s", proxyConfig.NoProxy())
 	}
 }
@@ -138,7 +138,7 @@ func Test_validate_proxy_url(t *testing.T) {
 		"http://foo:bar@test.com:abc":          false,
 	}
 	for proxyUrl, valid := range urlList {
-		err := validateProxyURL(proxyUrl)
+		err := ValidateProxyURL(proxyUrl)
 
 		if valid && err != nil {
 			t.Errorf("Proxy URL '%s' should be valid, but got error: %s", proxyUrl, err.Error())

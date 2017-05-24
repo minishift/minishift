@@ -42,7 +42,7 @@ func NewProxyConfig(httpProxy string, httpsProxy string, noProxy string) (*Proxy
 		httpProxy = os.Getenv("HTTP_PROXY")
 	}
 
-	err := validateProxyURL(httpProxy)
+	err := ValidateProxyURL(httpProxy)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func NewProxyConfig(httpProxy string, httpsProxy string, noProxy string) (*Proxy
 		httpsProxy = os.Getenv("HTTPS_PROXY")
 	}
 
-	err = validateProxyURL(httpsProxy)
+	err = ValidateProxyURL(httpsProxy)
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +142,7 @@ func (p *ProxyConfig) IsEnabled() bool {
 }
 
 // validateProxyURL validates that the specified proxyURL is valid
-func validateProxyURL(proxyUrl string) error {
+func ValidateProxyURL(proxyUrl string) error {
 	if proxyUrl == "" {
 		return nil
 	}

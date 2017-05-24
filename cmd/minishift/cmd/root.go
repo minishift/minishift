@@ -31,7 +31,6 @@ import (
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
 	hostfolderCmd "github.com/minishift/minishift/cmd/minishift/cmd/hostfolder"
 	cmdOpenshift "github.com/minishift/minishift/cmd/minishift/cmd/openshift"
-	"github.com/minishift/minishift/pkg/minikube/config"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
@@ -163,9 +162,6 @@ func setupViper() {
 	// e.g. show-libmachine-logs => $ENVPREFIX_SHOW_LIBMACHINE_LOGS
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	viper.AutomaticEnv()
-
-	viper.SetDefault(config.WantUpdateNotification, true)
-	viper.SetDefault(config.ReminderWaitPeriodInHours, 24)
 	setFlagsUsingViper()
 }
 

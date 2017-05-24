@@ -58,6 +58,38 @@ var configTestCases = []configTestCase{
 			"ReminderWaitPeriodInHours": 99,
 		},
 	},
+	{
+		data: `{
+    "host-config-dir": "/etc/foo/bar",
+    "host-data-dir": "/etc/foo/bar",
+    "host-only-cidr": "/etc/foo/bar",
+    "host-pv-dir": "/etc/foo/bar",
+    "host-volumes-dir": "/etc/foo/bar"
+}`,
+		config: map[string]interface{}{
+			"host-config-dir":  "/etc/foo/bar",
+			"host-data-dir":    "/etc/foo/bar",
+			"host-only-cidr":   "/etc/foo/bar",
+			"host-pv-dir":      "/etc/foo/bar",
+			"host-volumes-dir": "/etc/foo/bar",
+		},
+	},
+	{
+		data: `{
+    "http-proxy": "http://foo.com:3128",
+    "https-proxy": "https://foo.com:3128",
+    "logging": false,
+    "public-hostname": "localhost",
+    "routing-suffix": ".xip.io"
+}`,
+		config: map[string]interface{}{
+			"http-proxy":      "http://foo.com:3128",
+			"https-proxy":     "https://foo.com:3128",
+			"logging":         false,
+			"public-hostname": "localhost",
+			"routing-suffix":  ".xip.io",
+		},
+	},
 }
 
 func TestReadConfig(t *testing.T) {
@@ -65,7 +97,7 @@ func TestReadConfig(t *testing.T) {
 		r := bytes.NewBufferString(tt.data)
 		config, err := decode(r)
 		if reflect.DeepEqual(config, tt.config) || err != nil {
-			t.Errorf("Cannot decode config. \n\n expected %+v, \n\n received %+v", tt.config, config)
+			t.Errorf("Cannot decode config. \n\n expected %+v, \n\n received %+v \n\n err %+v", tt.config, config, err)
 		}
 	}
 }
@@ -78,7 +110,7 @@ func TestWriteConfig(t *testing.T) {
 			t.Errorf("Error encoding: %s", err)
 		}
 		if b.String() != tt.data {
-			t.Errorf("Cannot encode config. \n\n expected \n %+v, \n\n received \n %+v", tt.data, b.String())
+			t.Errorf("Cannot encode config. \n\n expected \n %+v, \n\n received \n %+v \n\n err %+v", tt.data, b.String(), err)
 		}
 		b.Reset()
 	}

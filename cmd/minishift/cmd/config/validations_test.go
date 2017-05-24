@@ -125,3 +125,54 @@ func TestValidURL(t *testing.T) {
 	}
 	runValidations(t, tests, "iso-url", IsValidUrl)
 }
+
+func TestValidProxyURL(t *testing.T) {
+
+	var tests = []validationTest{
+		{
+			value:     "",
+			shouldErr: false,
+		},
+		{
+			value:     "http://foo.com:3128",
+			shouldErr: false,
+		},
+		{
+			value:     "http://127.0.0.1:3128",
+			shouldErr: false,
+		},
+		{
+			value:     "http://foo:bar@test.com:324",
+			shouldErr: false,
+		},
+		{
+			value:     "https://foo:bar@test.com:454",
+			shouldErr: false,
+		},
+		{
+			value:     "https://foo:b@r@test.com:454",
+			shouldErr: false,
+		},
+		{
+			value:     "http://myuser:my%20pass@foo.com:3128",
+			shouldErr: false,
+		},
+		{
+			value:     "htt://foo.com:3128",
+			shouldErr: true,
+		},
+		{
+			value:     "http://:foo.com:3128",
+			shouldErr: true,
+		},
+		{
+			value:     "http://myuser@my pass:foo.com:3128",
+			shouldErr: true,
+		},
+		{
+			value:     "http://foo:bar@test.com:abc",
+			shouldErr: true,
+		},
+	}
+	runValidations(t, tests, "iso-url", IsValidProxy)
+}

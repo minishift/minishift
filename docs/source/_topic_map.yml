@@ -14,8 +14,8 @@ Topics:
         File: installing
       - Name: Quickstart
         File: quickstart
-      - Name: Installing Docker Machine drivers
-        File: docker-machine-drivers
+      - Name: Setting up the driver plugin
+        File: setting-up-driver-plugin
       - Name: Uninstalling Minishift
         File: uninstalling
   - Name: Using Minishift

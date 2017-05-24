@@ -16,10 +16,10 @@ The following section describes how to install Minishift and the required depend
 == Prerequisites
 
 Minishift requires a hypervisor to start the virtual machine on which the OpenShift cluster
-is provisioned. Make sure that the hypervisor of your choice is installed and enabled on
+is provisioned. Verify that the hypervisor of your choice is installed and enabled on
 your system before you start Minishift.
 
-Depending on your host OS, you have the choice of the following
+Depending on your host operating system, you have the choice of the following
 hypervisors:
 
 Mac OS X::
@@ -28,14 +28,14 @@ Mac OS X::
 - https://www.vmware.com/products/fusion[VMware Fusion]
 +
 NOTE: xhyve requires specific installation and configuration steps that are described
-in the link:../getting-started/docker-machine-drivers{outfilesuffix}[Installing Docker machine drivers] section.
+in the link:../getting-started/setting-up-driver-plugin{outfilesuffix}[Setting up the driver plugin] section.
 
 GNU/Linux::
 - https://en.wikipedia.org/wiki/Kernel-based_Virtual_Machine[KVM] (default)
 - https://www.virtualbox.org/wiki/Downloads[VirtualBox]
 +
 NOTE: KVM requires specific installation and configuration steps that are described
-in the link:../getting-started/docker-machine-drivers{outfilesuffix}[Installing Docker machine drivers] section.
+in the link:../getting-started/setting-up-driver-plugin{outfilesuffix}[Setting up the driver plugin] section.
 
 Windows::
 - https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v[Hyper-V] (default)
@@ -45,11 +45,7 @@ Windows::
 - To use Minishift with Hyper-V ensure that, after you
 https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v[install Hyper-V], you also
 https://msdn.microsoft.com/en-us/virtualization/hyperv_on_windows/quick_start/walkthrough_virtual_switch[add a Virtual Switch]
-using the Hyper-V Manager.
-- Make sure that you pair the virtual switch
-with a __network card (wired or wireless) that is connected to the network__.
-- If you have multiple virtual switches , set the environment variable `HYPERV_VIRTUAL_SWITCH` to the name of the external virtual switch you want to use for Minishift. For further information see
-link:../using/managing-minishift{outfilesuffix}#driver-specific-environment-variables[setting driver specific environment variables].
+using the Hyper-V Manager. For specific configuration steps see the link:../getting-started/setting-up-driver-plugin{outfilesuffix}[Setting up the driver plugin] section.
 ====
 
 - https://www.virtualbox.org/wiki/Downloads[VirtualBox]
@@ -63,7 +59,6 @@ the link:../using/troubleshooting{outfilesuffix}[Troubleshooting] section.
 [[installing-instructions]]
 == Installing Minishift
 
-[[manual-install]]
 === Manually
 
 .  Download the archive for your operating system from the https://github.com/minishift/minishift/releases[Minishift releases page]
@@ -97,8 +92,7 @@ install the stable version of Minishift:
 [[homebrew-latest-install]]
 ==== Latest Beta
 
-If you want to install the latest beta version of Minishift you will
-need the homebrew-cask versions tap. After you install `homebrew-cask`,
+If you want to install the latest beta version of Minishift use the homebrew-cask versions tap. After you install `homebrew-cask`,
 run the following command:
 
 ----

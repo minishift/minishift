@@ -1,5 +1,5 @@
-[[docker-machine-driver-install]]
-= Installing Docker Machine drivers
+[[set-up-driver-plugin]]
+= Setting up the driver plugin
 :icons:
 :toc: macro
 :toc-title:
@@ -7,14 +7,13 @@
 
 toc::[]
 
-[[docker-machine-drivers-overview]]
+[[hypervisor-drivers-overview]]
 == Overview
-
 Minishift uses Docker Machine and its driver plugin architecture to
-provide a consistent way to manage the OpenShift VM. Minishift embeds
-VirtualBox and VMware Fusion drivers so no additional steps are required to use them.
+provide a consistent way to manage the OpenShift VM.
+Minishift embeds VirtualBox and VMware Fusion drivers so no additional steps are required to use them.
 
-However, other drivers require manual installation steps that are
+However, other drivers require manual installation and setup that are
 described in the following sections.
 
 [[kvm-driver-install]]
@@ -22,10 +21,15 @@ described in the following sections.
 
 Minishift is currently tested against `docker-machine-driver-kvm` version 0.7.0.
 
-Install and execute the KVM binary as follows:
-
+. Install the KVM binary as follows:
++
 ----
 $ sudo curl -L https://github.com/dhiltgen/docker-machine-kvm/releases/download/v0.7.0/docker-machine-driver-kvm -o /usr/local/bin/docker-machine-driver-kvm
+----
+
+. Make the binary executable as follows:
++
+----
 $ sudo chmod +x /usr/local/bin/docker-machine-driver-kvm
 ----
 
@@ -82,7 +86,7 @@ Minishift is currently tested against `docker-machine-driver-xhyve` version 0.3.
 [[homebrew-install]]
 === Homebrew install
 
-You can verify the installed version of the xhyve driver on your system before you install.
+You can verify the existing version of the xhyve driver on your system using:
 
 ----
 $ brew info --installed docker-machine-driver-xhyve
@@ -152,5 +156,36 @@ $ sudo chown root:wheel /usr/local/bin/docker-machine-driver-xhyve
 $ sudo chmod u+s /usr/local/bin/docker-machine-driver-xhyve
 ----
 
-For more information, refer to the https://github.com/zchee/docker-machine-driver-xhyve#install[xhyve driver] documentation on GitHub.
+For more information, see the https://github.com/zchee/docker-machine-driver-xhyve#install[xhyve driver] documentation on GitHub.
 ====
+
+== Hyper-V
+To use Minishift with Hyper-V:
+
+. Install https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v[Hyper-V].
+. Add a https://msdn.microsoft.com/en-us/virtualization/hyperv_on_windows/quick_start/walkthrough_virtual_switch[Virtual Switch].
++
+NOTE: Verify that you pair the virtual switch
+with a __network card (wired or wireless) that is connected to the network__.
+
+. If you have multiple virtual switches, set the environment variable `HYPERV_VIRTUAL_SWITCH` to the name of the external virtual switch you want to use for Minishift. For further information see
+link:../using/managing-minishift{outfilesuffix}#driver-specific-environment-variables[setting driver specific environment variables].
++
+For Example, on Command Prompt use:
++
+----
+C:\> set HYPERV_VIRTUAL_SWITCH=External (Wireless)
+----
++
+Note that, using quotes in Command Prompt, results in the following error:
++
+----
+C:\> set HYPERV_VIRTUAL_SWITCH="External (Wireless)"
+Error creating the VM. Error with pre-create check: "vswitch \"\\\"External (Wireless)\\\"\" not found"
+----
++
+However on PowerShell you need to use the quotes:
++
+----
+$ env:HYPERV_VIRTUAL_SWITCH="External (Wireless)"
+----

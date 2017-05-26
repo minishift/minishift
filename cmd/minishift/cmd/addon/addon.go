@@ -20,6 +20,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	addOnConfigKey = "addons"
+
+	emptyAddOnError = "You must specify an add-on name. Use `minishift addons list` to view installed add-ons."
+	noAddOnMessage  = "No add-on with the name %s is installed."
+)
+
 var AddonsCmd = &cobra.Command{
 	Use:   "addons SUBCOMMAND [flags]",
 	Short: "Manages Minishift add-ons",

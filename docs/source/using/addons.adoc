@@ -144,6 +144,7 @@ By default, this is not allowed in OpensShift.
 
 Add-ons are enabled with the link:../command-ref/minishift_addons_enable{outfilesuffix}[`minishift addons enable`]
 command and disabled with the link:../command-ref/minishift_addons_disable{outfilesuffix}[`minishift addons disable`] command.
+Enabled add-ons automatically get executed during link:../command-ref/minishift_start{outfilesuffix}[`minishift start`].
 
 The following examples show how to enable and disable the _anyuid_ add-on.
 
@@ -193,6 +194,21 @@ the _eap_ add-on.
 
 NOTE: If two add-ons have the same priority the order in which they are getting applied is not
 determined.
+
+[[apply-addons]]
+== Applying add-ons
+
+Add-ons can be explicitly executed with the link:../command-ref/minishift_addons_apply{outfilesuffix}[`minishift addons apply`] command.
+You can use the `apply` command for both enabled and disabled add-ons. For applying multiple add-ons with a single command specify add-on names separated by space.
+
+The following example shows how to explicitly apply the anyuid and admin-user add-ons.
+
+[[example-apply-anyuid-admin-user]]
+.Example: Applying anyuid and admin-user add-ons
+
+----
+$ minishift addons apply anyuid admin-user
+----
 
 [[custom-addons]]
 == Writing custom add-ons

@@ -44,7 +44,7 @@ var registryCmd = &cobra.Command{
 			atexit.ExitWithMessage(1, err.Error())
 		}
 
-		util.ExitIfNotRunning(host.Driver)
+		util.ExitIfNotRunning(host.Driver, constants.MachineName)
 
 		registryInfo, err := openshift.GetDockerRegistryInfo()
 		if err != nil {

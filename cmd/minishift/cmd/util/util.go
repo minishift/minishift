@@ -18,6 +18,7 @@ package util
 
 import (
 	"fmt"
+
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/state"
@@ -35,7 +36,7 @@ func VMExists(client *libmachine.Client, machineName string) bool {
 func ExitIfUndefined(client *libmachine.Client, machineName string) {
 	exists := VMExists(client, machineName)
 	if !exists {
-		atexit.ExitWithMessage(0, fmt.Sprintf("There is currently no '%s' VM defined.", machineName))
+		atexit.ExitWithMessage(0, fmt.Sprintf("The execution of this command requires an existing '%s' VM. However, there is currently none defined.", machineName))
 	}
 }
 
@@ -43,9 +44,9 @@ func IsHostRunning(driver drivers.Driver) bool {
 	return drivers.MachineInState(driver, state.Running)()
 }
 
-func ExitIfNotRunning(driver drivers.Driver) {
+func ExitIfNotRunning(driver drivers.Driver, machineName string) {
 	running := IsHostRunning(driver)
 	if !running {
-		atexit.ExitWithMessage(0, "Minishift VM is not running.")
+		atexit.ExitWithMessage(0, fmt.Sprintf("The execution of this command requires a running '%s' VM, but there is currently none.", machineName))
 	}
 }

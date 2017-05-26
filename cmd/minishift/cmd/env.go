@@ -26,13 +26,14 @@ import (
 
 	"github.com/minishift/minishift/pkg/minikube/constants"
 
+	"strings"
+
 	"github.com/docker/machine/libmachine"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/minishift/minishift/pkg/util/shell"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 const (
@@ -153,7 +154,7 @@ var dockerEnvCmd = &cobra.Command{
 			atexit.ExitWithMessage(1, err.Error())
 		}
 
-		util.ExitIfNotRunning(host.Driver)
+		util.ExitIfNotRunning(host.Driver, constants.MachineName)
 
 		var shellCfg *DockerShellConfig
 		if unset {

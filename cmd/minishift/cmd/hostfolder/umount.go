@@ -46,7 +46,7 @@ var hostfolderUmountCmd = &cobra.Command{
 			atexit.ExitWithMessage(1, err.Error())
 		}
 
-		util.ExitIfNotRunning(host.Driver)
+		util.ExitIfNotRunning(host.Driver, constants.MachineName)
 
 		err = hostfolderActions.Umount(host.Driver, args[0])
 		if err != nil {

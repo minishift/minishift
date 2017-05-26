@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2016 Red Hat, Inc.
+Copyright (C) 2017 Red Hat, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,17 +26,17 @@ import (
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 )
 
-func Test_addon_name_must_be_specified_for_enable_command(t *testing.T) {
+func Test_addon_name_must_be_specified_for_apply_command(t *testing.T) {
 	tmpMinishiftHomeDir := cli.SetupTmpMinishiftHome(t)
 	tee := cli.CreateTee(t, true)
 	defer cli.TearDown(tmpMinishiftHomeDir, tee)
 
 	atexit.RegisterExitHandler(cli.CreateExitHandlerFunc(t, tee, 1, emptyAddOnError))
 
-	runEnableAddon(nil, nil)
+	runApplyAddon(nil, nil)
 }
 
-func Test_unknown_name_for_enable_command_returns_error(t *testing.T) {
+func Test_unknown_name_for_apply_command_returns_error(t *testing.T) {
 	tmpMinishiftHomeDir := cli.SetupTmpMinishiftHome(t)
 	os.Mkdir(filepath.Join(tmpMinishiftHomeDir, "addons"), 0777)
 
@@ -47,7 +47,7 @@ func Test_unknown_name_for_enable_command_returns_error(t *testing.T) {
 	expectedOut := fmt.Sprintf(noAddOnMessage+"\n", testAddOnName)
 	atexit.RegisterExitHandler(cli.CreateExitHandlerFunc(t, tee, 0, expectedOut))
 
-	runEnableAddon(nil, []string{testAddOnName})
+	runApplyAddon(nil, []string{testAddOnName})
 
 	actualOut := tee.StdoutBuffer.String()
 	if expectedOut != actualOut {

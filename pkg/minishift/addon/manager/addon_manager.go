@@ -18,16 +18,17 @@ package manager
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"sort"
+
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/pkg/minishift/addon"
 	"github.com/minishift/minishift/pkg/minishift/addon/command"
 	"github.com/minishift/minishift/pkg/minishift/addon/parser"
 	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/pkg/errors"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"sort"
 )
 
 // AddOnManager is the central point for all operations around managing addons. An addon
@@ -149,7 +150,7 @@ func (m *AddOnManager) Apply(context *command.ExecutionContext) error {
 
 	for _, addOn := range addOns {
 		if addOn.IsEnabled() {
-			err := m.applyAddOn(addOn, context)
+			err := m.ApplyAddOn(addOn, context)
 			if err != nil {
 				return err
 			}
@@ -167,7 +168,7 @@ func (m *AddOnManager) String() string {
 	return fmt.Sprintf("%#v", m)
 }
 
-func (m *AddOnManager) applyAddOn(addOn addon.AddOn, context *command.ExecutionContext) error {
+func (m *AddOnManager) ApplyAddOn(addOn addon.AddOn, context *command.ExecutionContext) error {
 	fmt.Print(fmt.Sprintf("-- Applying addon '%s':", addOn.MetaData().Name()))
 	context.AddToContext("addon-name", addOn.MetaData().Name())
 	defer context.RemoveFromContext("addon-name")

@@ -25,11 +25,7 @@ import (
 )
 
 const (
-	priorityFlag   = "priority"
-	addOnConfigKey = "addons"
-
-	emptyEnableError       = "You must specify an add-on name. Use `minishift addons list` to view installed add-ons."
-	noAddOnToEnableMessage = "No add-on with the name %s is installed."
+	priorityFlag = "priority"
 )
 
 var priority int
@@ -48,14 +44,14 @@ func init() {
 
 func runEnableAddon(cmd *cobra.Command, args []string) {
 	if len(args) == 0 {
-		atexit.ExitWithMessage(1, emptyEnableError)
+		atexit.ExitWithMessage(1, emptyAddOnError)
 	}
 
 	addonName := args[0]
 	addOnManager := GetAddOnManager()
 
 	if !addOnManager.IsInstalled(addonName) {
-		atexit.ExitWithMessage(0, fmt.Sprintf(noAddOnToEnableMessage, addonName))
+		atexit.ExitWithMessage(0, fmt.Sprintf(noAddOnMessage, addonName))
 	}
 
 	enableAddon(addOnManager, addonName, priority)

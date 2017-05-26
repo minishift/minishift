@@ -16,6 +16,8 @@ Topics:
         File: quickstart
       - Name: Setting up the driver plugin
         File: setting-up-driver-plugin
+      - Name: Updating Minishift
+        File: updating
       - Name: Uninstalling Minishift
         File: uninstalling
   - Name: Using Minishift

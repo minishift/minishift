@@ -8,4 +8,5 @@ application deployment.
 - link:../getting-started/installing{outfilesuffix}[Installing Minishift]
 - link:../getting-started/quickstart{outfilesuffix}[Minishift Quickstart]
 - link:../getting-started/setting-up-driver-plugin{outfilesuffix}[Setting up the driver plugin]
+- link:../getting-started/updating{outfilesuffix}[Updating Minishift]
 - link:../getting-started/uninstalling{outfilesuffix}[Uninstalling Minishift]

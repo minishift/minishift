@@ -1,0 +1,26 @@
+[[update-instructions]]
+= Updating Minishift
+:icons:
+:toc: macro
+:toc-title:
+:toclevels: 1
+
+toc::[]
+
+[[updating-overview]]
+== Overview
+This section describes how you can update the Minishift binary.
+
+[[update-instructions]]
+== Updating Minishift
+
+Update the Minishift binary as follows:
+
+----
+$ minishift update
+----
+
+This command checks whether there is a newer version of Minishift available.
+If so, it prompts user to confirm the update, downloads the new binary and replaces the current version of Minishift.
+
+NOTE: It is recommended to perform the `update` operation after a link:../command-ref/minishift_delete{outfilesuffix}[`minishift delete`] to avoid any backward compatibility issues.

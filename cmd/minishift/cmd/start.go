@@ -80,8 +80,6 @@ const (
 	logging           = "logging"
 
 	// Setting proxy
-	httpProxy   = "http-proxy"
-	httpsProxy  = "https-proxy"
 	noProxyList = "no-proxy"
 
 	// Subscription Manager (username/password)

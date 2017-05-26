@@ -20,12 +20,17 @@ import (
 	flag "github.com/spf13/pflag"
 )
 
+const (
+	httpProxy  = "http-proxy"
+	httpsProxy = "https-proxy"
+)
+
 type stringValue string
 
 var httpProxyFlag = &flag.Flag{
 	Name:      httpProxy,
 	Shorthand: "",
-	Usage:     "HTTP proxy used for downloading artefact and configure Docker as well as OpenShift (In the format of http://<username>:<password>@<proxy_host>:<proxy_port>). Overrides a potential HTTP_PROXY setting in the environment.",
+	Usage:     "HTTP proxy in the format http://<username>:<password>@<proxy_host>:<proxy_port>. Overrides potential HTTP_PROXY setting in the environment.",
 	Value:     newStringValue("", new(string)),
 	DefValue:  "",
 }
@@ -33,7 +38,7 @@ var httpProxyFlag = &flag.Flag{
 var httpsProxyFlag = &flag.Flag{
 	Name:      httpsProxy,
 	Shorthand: "",
-	Usage:     "HTTPS proxy used for downloading artefact and configure Docker as well as OpenShift (In the format of https://<username>:<password>@<proxy_host>:<proxy_port>). Overrides a potential HTTPS_PROXY setting in the environment.",
+	Usage:     "HTTPS proxy in the format https://<username>:<password>@<proxy_host>:<proxy_port>. Overrides potential HTTPS_PROXY setting in the environment.",
 	Value:     newStringValue("", new(string)),
 	DefValue:  "",
 }

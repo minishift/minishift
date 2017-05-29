@@ -53,6 +53,42 @@ the GitHub issue https://github.com/minishift/minishift/issues/179[#179].
 The link:../command-ref/minishift_delete{outfilesuffix}[`minishift delete`] command deletes the OpenShift cluster,
 and also shuts down and deletes the Minishift VM. No data or state are preserved.
 
+[[choosing-iso-image]]
+== Choosing the ISO image
+
+When you start Minishift, it downloads a live ISO image that the hypervisor uses to
+provision the Minishift VM.
+
+The following ISO images are available:
+
+- link:https://github.com/minishift/minishift-b2d-iso/releases[Minishift Boot2Docker] (Default). This ISO image is
+based on link:https://github.com/boot2docker/boot2docker[Boot2Docker], which is a
+lightweight Linux distribution customized to run Docker containers. This ISO image size is small and
+optimized for development but not for production.
+
+- link:https://github.com/minishift/minishift-centos-iso/releases[Minishift CentOS]. This ISO image is based on
+link:https://www.centos.org/[CentOS], which is an enterprise-ready Linux distribution that more
+closely resembles a production environment. This ISO image size is larger than the Boot2Docker ISO image.
+
+By default, Minishift uses the **Minishift Boot2Docker** ISO image. To choose the Minishift CentOS ISO image instead,
+you can do one of the following actions:
+
+- Set the `--iso-url` flag when you run `minishift start` and enter the download URL of the
+Minishift CentOS ISO image. For example:
++
+----
+$ minishift start --iso-url <Web_location_of_ISO_image>
+----
+- Manually download the Minishift CentSO ISO image from the link:https://github.com/minishift/minishift-centos-iso/releases[releases page]
+and enter the path to the ISO image location in the following format:
++
+----
+$ minishift start --iso-url file:///<path_to_ISO_image>
+----
+
+NOTE: You cannot run Minishift with both ISO images concurrently. To switch between
+ISO images, delete the Minishift instance and start a new instance with the ISO image that you want to use.
+
 [[runtime-options]]
 == Runtime options
 

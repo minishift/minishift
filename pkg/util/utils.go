@@ -19,7 +19,6 @@ package util
 import (
 	"fmt"
 	"io"
-	"os"
 	"strings"
 	"time"
 )
@@ -48,19 +47,6 @@ func Until(fn func() error, w io.Writer, name string, sleep time.Duration, done 
 
 func Pad(str string) string {
 	return fmt.Sprint("\n%s\n", str)
-}
-
-// If the file represented by path exists and
-// readable, return true otherwise return false.
-func CanReadFile(path string) bool {
-	f, err := os.Open(path)
-	if err != nil {
-		return false
-	}
-
-	defer f.Close()
-
-	return true
 }
 
 func Retry(attempts int, callback func() error) (err error) {

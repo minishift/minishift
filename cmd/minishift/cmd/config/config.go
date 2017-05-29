@@ -119,7 +119,7 @@ func configurableFields() string {
 	return strings.Join(fields, "\n")
 }
 
-// ReadConfig reads in the JSON minishift config
+// ReadConfig reads the config from $MINISHIFT_HOME/config/config.json file
 func ReadConfig() (MinishiftConfig, error) {
 	f, err := os.Open(constants.ConfigFile)
 	if err != nil {
@@ -137,7 +137,7 @@ func ReadConfig() (MinishiftConfig, error) {
 	return m, nil
 }
 
-// Writes a minikube config to the JSON file
+// Writes a config to the $MINISHIFT_HOME/config/config.json file
 func WriteConfig(m MinishiftConfig) error {
 	f, err := os.Create(constants.ConfigFile)
 	if err != nil {

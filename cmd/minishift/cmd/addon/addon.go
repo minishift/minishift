@@ -17,6 +17,7 @@ limitations under the License.
 package addon
 
 import (
+	"github.com/minishift/minishift/out/bindata"
 	"github.com/spf13/cobra"
 )
 
@@ -27,6 +28,10 @@ const (
 	noAddOnMessage  = "No add-on with the name %s is installed."
 )
 
+var (
+	defaultAssets = []string{"anyuid", "admin-user", "xpaas"}
+)
+
 var AddonsCmd = &cobra.Command{
 	Use:   "addons SUBCOMMAND [flags]",
 	Short: "Manages Minishift add-ons",
@@ -34,4 +39,12 @@ var AddonsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
+}
+
+func UnpackAddons(addonsDir string) error {
+	for _, asset := range defaultAssets {
+		return bindata.RestoreAssets(addonsDir, asset)
+	}
+
+	return nil
 }

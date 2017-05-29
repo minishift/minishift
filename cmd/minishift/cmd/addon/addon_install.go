@@ -21,7 +21,6 @@ import (
 
 	"strings"
 
-	"github.com/minishift/minishift/out/bindata"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
@@ -36,10 +35,9 @@ const (
 )
 
 var (
-	defaultAssets = []string{"anyuid", "admin-user", "xpaas"}
-	force         bool
-	enable        bool
-	defaults      bool
+	force    bool
+	enable   bool
+	defaults bool
 )
 
 var addonsInstallCmd = &cobra.Command{
@@ -59,7 +57,7 @@ func init() {
 func runInstallAddon(cmd *cobra.Command, args []string) {
 	addOnManager := GetAddOnManager()
 	if defaults {
-		unpackAddons(addOnManager.BaseDir())
+		UnpackAddons(addOnManager.BaseDir())
 		fmt.Println(fmt.Sprintf("Default add-ons %s installed", strings.Join(defaultAssets, ", ")))
 		return
 	}
@@ -80,14 +78,5 @@ func runInstallAddon(cmd *cobra.Command, args []string) {
 		// need to get a new manager
 		addOnManager := GetAddOnManager()
 		enableAddon(addOnManager, addOnName, 0)
-	}
-}
-
-func unpackAddons(dir string) {
-	for _, asset := range defaultAssets {
-		err := bindata.RestoreAssets(dir, asset)
-		if err != nil {
-			atexit.ExitWithMessage(1, fmt.Sprintf("Unable to install default add-ons: %s", err.Error()))
-		}
 	}
 }

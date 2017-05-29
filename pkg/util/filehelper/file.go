@@ -152,3 +152,20 @@ func CopyDir(src string, dst string) (err error) {
 
 	return
 }
+
+// IsDirEmpty checks whether directory is empty or not
+// https://stackoverflow.com/a/30708914/1120530
+func IsDirEmpty(name string) bool {
+	f, err := os.Open(name)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	_, err = f.Readdirnames(1)
+	if err == io.EOF {
+		return true
+	}
+
+	return false
+}

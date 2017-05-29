@@ -22,10 +22,13 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/update"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 
+	"github.com/kardianos/osext"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
 	"strings"
+	"syscall"
 )
 
 var updateCmd = &cobra.Command{
@@ -34,6 +37,8 @@ var updateCmd = &cobra.Command{
 	Long:  `Checks for the latest version of Minishift, prompt the user and update the binary if user answers with 'y'.`,
 	Run:   runUpdate,
 }
+
+var confirm string
 
 func runUpdate(cmd *cobra.Command, args []string) {
 	proxyConfig, err := util.NewProxyConfig(viper.GetString(httpProxy), viper.GetString(httpsProxy), "")
@@ -58,9 +63,7 @@ func runUpdate(cmd *cobra.Command, args []string) {
 	if update.IsNewerVersion(localVersion, latestVersion) {
 		fmt.Printf("A newer version of minishift is available.\nDo you want to update from %s to %s now? [y/N]: ", localVersion, latestVersion)
 
-		var confirm string
 		fmt.Scanln(&confirm)
-
 		if strings.ToLower(confirm) == "y" {
 			err := update.Update(latestVersion)
 			if err != nil {
@@ -68,6 +71,14 @@ func runUpdate(cmd *cobra.Command, args []string) {
 			}
 
 			fmt.Printf("\nUpdated successfully to minishift v%s.\n", latestVersion)
+		}
+
+		fmt.Printf("Do you want to update the default addons? [y/N]: ")
+		fmt.Scanln(&confirm)
+		if strings.ToLower(confirm) == "y" {
+			if err := updateAddonsPostUpdate(); err != nil {
+				atexit.ExitWithMessage(1, fmt.Sprintf("Error updating default addons : %s", err))
+			}
 		}
 	} else {
 		fmt.Printf("Nothing to update.\nAlready using latest version: %s.\n", latestVersion)
@@ -78,4 +89,18 @@ func init() {
 	RootCmd.AddCommand(updateCmd)
 	updateCmd.Flags().AddFlag(httpProxyFlag)
 	updateCmd.Flags().AddFlag(httpsProxyFlag)
+}
+
+func updateAddonsPostUpdate() error {
+	currentBinary, err := osext.Executable()
+	if err != nil {
+		return err
+	}
+
+	args := []string{currentBinary, "addons", "install", "--defaults"}
+	if err := syscall.Exec(currentBinary, args, os.Environ()); err != nil {
+		return err
+	}
+
+	return nil
 }

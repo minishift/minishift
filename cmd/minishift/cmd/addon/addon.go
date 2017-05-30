@@ -20,6 +20,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	forceFlag  = "force"
+	enableFlag = "enable"
+)
+
+var (
+	defaultAssets = []string{"anyuid", "admin-user"}
+	force         bool
+	enable        bool
+)
+
 var AddonsCmd = &cobra.Command{
 	Use:   "addons SUBCOMMAND [flags]",
 	Short: "Manages Minishift add-ons",

@@ -47,6 +47,7 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
 	minishiftUtil "github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/util"
+	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/minishift/minishift/pkg/version"
 	"github.com/pkg/errors"
@@ -236,6 +237,13 @@ func postClusterUp(machineName string, ip string, port int, routingSuffix string
 	if err := ocRunner.AddCliContext(machineName, ip, user, project); err != nil {
 		fmt.Println("Error adding OpenShift context: ", err)
 		atexit.Exit(1)
+	}
+
+	// Run the default addons if MINISHIFT_HOME dir does not exist or empty
+	if !homeDirExists || filehelper.IsDirEmpty(constants.Minipath) {
+		fmt.Print("-- Installing default addons ... ")
+		addon.UnpackAddons(constants.MakeMiniPath("addons"))
+		fmt.Println("OK")
 	}
 
 	addOnManager := addon.GetAddOnManager()

@@ -16,24 +16,44 @@ limitations under the License.
 
 package clusterup
 
-import "testing"
+import (
+	"github.com/pkg/errors"
+	"testing"
+)
 
 func TestValidateOpenshiftMinVersion(t *testing.T) {
-	verList := map[string]bool{
-		"v1.1.0":         false,
-		"v1.2.2":         false,
-		"v1.2.3-beta":    false,
-		"v1.3.1":         false,
-		"v1.3.5-alpha":   false,
-		"v1.4.1":         true,
-		"v1.5.0-alpha.0": true,
-		"v1.5.1-beta.0":  true,
-		"v1.6.0":         true,
+	var versionTests = []struct {
+		version string // input
+		valid   bool   // expected result
+		err     error
+	}{
+		{"v1.1.0", false, nil},
+		{"v1.2.2", false, nil},
+		{"v1.2.3-beta", false, nil},
+		{"v1.3.1", false, nil},
+		{"v1.3.5-alpha", false, nil},
+		{"foo", false, errors.New("Invalid version format 'foo': No Major.Minor.Patch elements found")},
+		{"151", false, errors.New("Invalid version format '151': No Major.Minor.Patch elements found")},
+		{"v1.4.1", true, nil},
+		{"v1.5.0-alpha.0", true, nil},
+		{"v1.5.1-beta.0", true, nil},
+		{"v3.6.0", true, nil},
+		{"3.6.0", true, nil},
 	}
+
 	minVer := "v1.4.1"
-	for ver, val := range verList {
-		if ValidateOpenshiftMinVersion(ver, minVer) != val {
-			t.Fatalf("Expected '%t' Got '%t' for %s", val, ValidateOpenshiftMinVersion(ver, minVer), ver)
+	for _, versionTest := range versionTests {
+		valid, err := ValidateOpenshiftMinVersion(versionTest.version, minVer)
+		if versionTest.err == nil && err != nil {
+			t.Fatalf("No error expected. Got '%v'", err)
+		}
+
+		if err != nil && err.Error() != versionTest.err.Error() {
+			t.Fatalf("Unexpected error. Expected '%v', got '%v'", versionTest.err, err)
+		}
+
+		if valid != versionTest.valid {
+			t.Fatalf("Expected '%t' Got '%t' for %s", versionTest.valid, valid, versionTest.version)
 		}
 	}
 }

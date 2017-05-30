@@ -61,12 +61,7 @@ var (
 )
 
 // startCmd represents the start command
-var startCmd = &cobra.Command{
-	Use:   commandName,
-	Short: "Starts a local OpenShift cluster.",
-	Long:  `Starts a local single-node OpenShift cluster on the specified hypervisor.`,
-	Run:   runStart,
-}
+var startCmd *cobra.Command
 
 // Set default value for host data and config dir
 var (
@@ -87,6 +82,15 @@ var minishiftToClusterUp = map[string]string{
 
 // init configures the command line options of this command
 func init() {
+	// need to initalize startCmd in init to avoid initalization loop (runStart calls validateOpenshiftVersion
+	// which in turn makes use of startCmd
+	startCmd = &cobra.Command{
+		Use:   commandName,
+		Short: "Starts a local OpenShift cluster.",
+		Long:  "Starts a local single-node OpenShift cluster.",
+		Run:   runStart,
+	}
+
 	clusterUpFlagSet = initClusterUpFlags()
 	startCmd.Flags().AddFlagSet(clusterUpFlagSet)
 	startCmd.Flags().AddFlagSet(initStartFlags())
@@ -379,15 +383,28 @@ func ensureNotRunning(client *libmachine.Client, machineName string) {
 }
 
 func validateOpenshiftVersion() {
-	if !viper.IsSet(startFlags.OpenshiftVersion.Name) {
-		return
+	requestedVersion := viper.GetString(startFlags.OpenshiftVersion.Name)
+
+	valid, err := clusterup.ValidateOpenshiftMinVersion(requestedVersion, constants.MinOpenshiftSuportedVersion)
+	if err != nil {
+		atexit.ExitWithMessage(1, err.Error())
 	}
 
-	if !clusterup.ValidateOpenshiftMinVersion(viper.GetString(startFlags.OpenshiftVersion.Name), constants.MinOpenshiftSuportedVersion) {
+	if !valid {
 		fmt.Printf("Minishift does not support Openshift version %s. "+
-			"You need to use a version >=%s\n", viper.GetString(startFlags.OpenshiftVersion.Name),
+			"You need to use a version >= %s\n", viper.GetString(startFlags.OpenshiftVersion.Name),
 			constants.MinOpenshiftSuportedVersion)
 		atexit.Exit(1)
+	}
+
+	// Make sure the version actually has a 'v' prefix. See https://github.com/minishift/minishift/issues/410
+	if !strings.HasPrefix(requestedVersion, constants.VersionPrefix) {
+		requestedVersion = constants.VersionPrefix + requestedVersion
+		// this will make sure the right version is set in case the version comes from config file
+		viper.Set(startFlags.OpenshiftVersion.Name, requestedVersion)
+
+		// if the version was specified via the CLI we need to update the flag value
+		startCmd.Flags().Lookup(startFlags.OpenshiftVersion.Name).Value.Set(requestedVersion)
 	}
 }
 

@@ -144,7 +144,7 @@ $ sudo virsh undefine minishift
  $ rm -rf ~/.minishift/machines
 ----
 
-In case all of this fails, you may want to link:../getting-started/installing{outfilesuffix}#uninstall-instructions[uninstall Minishift] and do a fresh install of Minishift.
+In case all of this fails, you may want to link:../getting-started/uninstalling{outfilesuffix}[uninstall Minishift] and do a fresh install of Minishift.
 
 [[create-vmnet-interface-permission]]
 == xhyve: Could not create vmnet interface

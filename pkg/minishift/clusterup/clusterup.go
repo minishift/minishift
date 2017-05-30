@@ -121,9 +121,9 @@ func EnsureHostDirectoriesExist(host *host.Host, dirs []string) error {
 // DetermineOpenShiftVersion returns the OpenShift/oc version to use.
 // If the requested version is < the base line version we use baseline oc to provision the requested OpenShift version.
 // If the requested OpenShift version is >= the baseline, we align the oc version with the requested OpenShift version.
-// It also handles the case the user just specifies a version without the required 'v' prefix
 func DetermineOpenShiftVersion(requestedVersion string) string {
-	if !ValidateOpenshiftMinVersion(requestedVersion, version.GetOpenShiftVersion()) {
+	valid, _ := ValidateOpenshiftMinVersion(requestedVersion, version.GetOpenShiftVersion())
+	if !valid {
 		requestedVersion = version.GetOpenShiftVersion()
 	}
 
@@ -215,16 +215,21 @@ func getConfigClusterName(ip string, port int) string {
 	return fmt.Sprintf("%s:%d", strings.Replace(ip, ".", "-", -1), port)
 }
 
-func ValidateOpenshiftMinVersion(ver string, minVersion string) bool {
-	v, _ := semver.Parse(strings.TrimPrefix(ver, constants.VersionPrefix))
+func ValidateOpenshiftMinVersion(version string, minVersion string) (bool, error) {
+	v, err := semver.Parse(strings.TrimPrefix(version, constants.VersionPrefix))
+	if err != nil {
+		return false, errors.New(fmt.Sprintf("Invalid version format '%s': %s", version, err.Error()))
+	}
+
 	minSupportedVersion := strings.TrimPrefix(minVersion, constants.VersionPrefix)
 	versionRange, err := semver.ParseRange(fmt.Sprintf(">=%s", minSupportedVersion))
 	if err != nil {
 		fmt.Println("Not able to parse version info", err)
-		return false
+		return false, err
 	}
+
 	if versionRange(v) {
-		return true
+		return true, nil
 	}
-	return false
+	return false, nil
 }

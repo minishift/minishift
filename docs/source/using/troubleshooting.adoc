@@ -69,7 +69,7 @@ $ rm -rf ~/.minishift/machines
 ----
 ====
 
-It is recommended to avoid using metadata when you create snapshots. To make sure of
+It is recommended to avoid use of metadata when you create snapshots. To ensure
 this, you can specify the `--no-metadata` flag. For example:
 
 ----
@@ -114,7 +114,7 @@ $ systemctl enable virtlogd
 == KVM: Domain 'minishift' already exists...
 
 If you try `minishift start` and hit the above error, ensure that you use `minishift delete` to delete the VMs created earlier by you.
-However if this fails and you wish to completely clean up Minishift and start fresh do the following:
+However if this fails and you want to completely clean up Minishift and start fresh do the following:
 
 . Check if any existing Minishift VM are running:
 +
@@ -156,7 +156,7 @@ based on the following files:
 * _/var/db/dhcpd_leases_
 * _/Library/Preferences/SystemConfiguration/com.apple.vmnet.plist_
 
-Reset the `minishift`-specific IP database, make sure to remove the
+Reset the `minishift`-specific IP database, ensure that you remove the
 `minishift` entry section from the `dhcpd_leases` file, and reboot your
 system.
 
@@ -176,7 +176,7 @@ manually but this is very *risky*.
 [[machine-doesnt-exist]]
 == VirtualBox: Error machine does not exist
 
-If you use Windows, make sure that you set the `--vm-driver virtualbox`
+If you use Windows, ensure that you set the `--vm-driver virtualbox`
 flag in the `minishift start` command. Alternatively, the problem might be
 an outdated version of VirtualBox.
 
@@ -185,7 +185,7 @@ To avoid this issue, it is recommended to use VirtualBox 5.1.12 or later.
 [[insufficient-privileges]]
 == Hyper-V: Hyper-V commands must be run as an Administrator
 
-If you run Minishift with Hyper-V on Windows as a normal user or as a user with Administrator privileges, you will encounter the following error:
+If you run Minishift with Hyper-V on Windows as a normal user or as a user with Administrator privileges, you encounter the following error:
 
 ----
 Error starting the VM: Error creating the VM. Error with pre-create check: "Hyper-V commands must be run as an Administrator".
@@ -213,3 +213,11 @@ You can also use the GUI to add yourself to the Hyper-V Administrators group as 
 Now you can run the Hyper-V commands as a normal user.
 
 For more options for Hyper-V see https://blogs.msdn.microsoft.com/virtual_pc_guy/2010/09/28/creating-a-hyper-v-administrators-local-group-through-powershell[creating Hyper-V administrators local group].
+
+== Hyper-V: Minishift running with Hyper-V fails when connected to OpenVPN
+
+If you try to use Minishift with Hyper-V using an external virtual switch, while you are connected to a VPN such as OpenVPN, Minishift might fail to provision the VM.
+
+Cause: Hyper-V networking may not route the network traffic in both directions properly, when connected to a VPN.
+
+Workaround: Disconnect from the VPN and try again after stopping the VM from the Hyper-V manager.

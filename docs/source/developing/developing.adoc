@@ -120,7 +120,7 @@ information to the Glide files.
 
 . Edit the _glide.yaml_ file to change the dependency list as needed.
 
-. Delete the _glide.lock_ file and re-create the vendor directory by link:#bootstrapping-dependencies[bootstrapping] it. Glide will recognize
+. Delete the _glide.lock_ file and re-create the vendor directory by link:#bootstrap-dependencies[bootstrapping] it. Glide will recognize
 that there is no lock file and recalculate the required dependencies.
 
 . Check-in the updated _glide.lock_ file and the updated _glide.yaml_.

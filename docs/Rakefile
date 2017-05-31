@@ -92,11 +92,13 @@ end
 
 desc 'Create adoc variables'
 task :adoc_variables => :init do
-  minishift_version = ENV['MINISHIFT_VERSION'] || 'unset'
-  openshift_version = ENV['OPENSHIFT_VERSION'] || 'unset'
+  minishift_version  = ENV['MINISHIFT_VERSION'] || 'unset'
+  openshift_version  = ENV['OPENSHIFT_VERSION'] || 'unset'
+  centos_iso_version = ENV['CENTOS_ISO_VERSION'] || 'unset'
   File.open(ADOC_VARIABLES, "w+") do |f|
     f.write(":minishift-version: #{minishift_version}\n")
     f.write(":openshift-version: #{openshift_version}\n")
+    f.write(":centos-iso-version: #{centos_iso_version}\n")
   end
 end
 

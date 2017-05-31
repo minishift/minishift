@@ -15,7 +15,8 @@
 # Various versions - Minishift, default OpenShift, default B2D ISO
 MINISHIFT_VERSION = 1.0.1
 OPENSHIFT_VERSION = v1.5.1
-ISO_VERSION = v1.0.2
+B2D_ISO_VERSION = v1.0.2
+CENTOS_ISO_VERSION = v1.0.0
 
 # Go and compliation related variables
 BUILD_DIR ?= out
@@ -34,7 +35,7 @@ SOURCE_DIRS = cmd pkg test
 
 # Linker flags
 VERSION_VARIABLES := -X $(REPOPATH)/pkg/version.version=$(MINISHIFT_VERSION) \
-	-X $(REPOPATH)/pkg/version.isoVersion=$(ISO_VERSION) \
+	-X $(REPOPATH)/pkg/version.isoVersion=$(B2D_ISO_VERSION) \
 	-X $(REPOPATH)/pkg/version.openshiftVersion=$(OPENSHIFT_VERSION)
 LDFLAGS := $(VERSION_VARIABLES) -s -w -extldflags '-static'
 
@@ -46,6 +47,7 @@ ADDON_ASSET_FILE = $(ADDON_BINDATA_DIR)/addon_assets.go
 # Setup for the docs tasks
 IMAGE_UID ?= 1000
 DOCS_SYNOPISIS_DIR = docs/source/_tmp
+DOC_VARIABLES = -e OPENSHIFT_VERSION=$(OPENSHIFT_VERSION) -e MINISHIFT_VERSION=$(MINISHIFT_VERSION) -e CENTOS_ISO_VERSION=$(CENTOS_ISO_VERSION)
 
 # Start of the actual build targets
 
@@ -92,19 +94,19 @@ build_docs_container:
 
 .PHONY: gen_adoc_tar
 gen_adoc_tar: synopsis_docs build_docs_container
-	cd docs && docker run -e OPENSHIFT_VERSION=$(OPENSHIFT_VERSION) -e MINISHIFT_VERSION=$(MINISHIFT_VERSION) -tiv $(shell pwd)/docs:/home/docs:Z minishift/docs clean adoc_tar
+	cd docs && docker run $(DOC_VARIABLES) -tiv $(shell pwd)/docs:/home/docs:Z minishift/docs clean adoc_tar
 
 .PHONY: gen_docs
 gen_docs: synopsis_docs build_docs_container
-	cd docs && docker run -e OPENSHIFT_VERSION=$(OPENSHIFT_VERSION) -e MINISHIFT_VERSION=$(MINISHIFT_VERSION) -tiv $(shell pwd)/docs:/home/docs:Z minishift/docs gen
+	cd docs && docker run $(DOC_VARIABLES) -tiv $(shell pwd)/docs:/home/docs:Z minishift/docs gen
 
 .PHONY: clean_docs
 clean_docs: build_docs_container
-	cd docs && docker run -e OPENSHIFT_VERSION=$(OPENSHIFT_VERSION) -e MINISHIFT_VERSION=$(MINISHIFT_VERSION) -tiv $(shell pwd)/docs:/home/docs:Z minishift/docs clean
+	cd docs && docker run $(DOC_VARIABLES) -tiv $(shell pwd)/docs:/home/docs:Z minishift/docs clean
 
 .PHONY: serve_docs
 serve_docs: synopsis_docs build_docs_container
-	cd docs && docker run -e OPENSHIFT_VERSION=$(OPENSHIFT_VERSION) -e MINISHIFT_VERSION=$(MINISHIFT_VERSION) -p 35729:35729 -p 4567:4567 -tiv $(shell pwd)/docs:/home/docs:Z minishift/docs serve[--watcher-force-polling]
+	cd docs && docker run $(DOC_VARIABLES) -p 35729:35729 -p 4567:4567 -tiv $(shell pwd)/docs:/home/docs:Z minishift/docs serve[--watcher-force-polling]
 
 $(DOCS_SYNOPISIS_DIR)/*.md: vendor $(ADDON_ASSET_FILE)
 	@# https://github.com/golang/go/issues/15038#issuecomment-207631885 ( CGO_ENABLED=0 )

@@ -1,3 +1,5 @@
+include::variables.adoc[]
+
 [[managing-minishift]]
 = Managing Minishift
 :icons:
@@ -75,13 +77,14 @@ you can do one of the following actions:
 
 - Set the `--iso-url` flag when you run `minishift start` and enter the download URL of the
 Minishift CentOS ISO image. For example:
-+
+
+[subs="attributes"]
 ----
-$ minishift start --iso-url <Web_location_of_ISO_image>
+$ minishift start --iso-url https://github.com/minishift/minishift-centos-iso/releases/download/{centos-iso-version}/minishift-centos7.iso
 ----
 - Manually download the Minishift CentSO ISO image from the link:https://github.com/minishift/minishift-centos-iso/releases[releases page]
 and enter the path to the ISO image location in the following format:
-+
+
 ----
 $ minishift start --iso-url file:///<path_to_ISO_image>
 ----

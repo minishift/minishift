@@ -29,27 +29,29 @@ import (
 )
 
 var (
-	err     error
-	testDir string
-)
-
-var (
+	_, b, _, _          = runtime.Caller(0)
+	basepath            = filepath.Dir(b)
+	err                 error
+	testDir             string
 	expectedArchivePath string
 	testDataDir         string
+	testVersion         = "1.0.0"
+	assetSet            = []struct {
+		os          minishiftos.OS
+		version     string
+		archiveName string
+	}{
+		{minishiftos.LINUX, testVersion, "minishift-1.0.0-linux-amd64.tgz"},
+		{minishiftos.WINDOWS, testVersion, "minishift-1.0.0-windows-amd64.zip"},
+	}
 )
-var testVersion = "1.0.0"
-var assetSet = []struct {
-	os          minishiftos.OS
-	version     string
-	archiveName string
-}{
-	{minishiftos.LINUX, testVersion, "minishift-1.0.0-linux-amd64.tgz"},
-	{minishiftos.WINDOWS, testVersion, "minishift-1.0.0-windows-amd64.zip"},
-}
 
 func TestDownloadAndVerifyArchive(t *testing.T) {
+	mockTransport := minitesting.NewMockRoundTripper()
+	addMockResponses(mockTransport)
+
 	client := http.DefaultClient
-	client.Transport = minitesting.NewMockRoundTripper()
+	client.Transport = mockTransport
 	defer minitesting.ResetDefaultRoundTripper()
 
 	setUp(t)
@@ -87,7 +89,7 @@ func TestExtractBinary(t *testing.T) {
 	testArchivePath := filepath.Join(testDataDir, archiveName)
 	tmpArchivePath := filepath.Join(testDir, archiveName)
 	// Copy test archive to tmpDir for testing purpose
-	copy(t, testArchivePath, tmpArchivePath)
+	copyArchive(t, testArchivePath, tmpArchivePath)
 	extractedBinaryPath, err := extractBinary(tmpArchivePath, testDir)
 	checkErr(t, err)
 	fmt.Println(extractedBinaryPath)
@@ -98,7 +100,7 @@ func setUp(t *testing.T) {
 	checkErr(t, err)
 }
 
-func copy(t *testing.T, src, dest string) {
+func copyArchive(t *testing.T, src, dest string) {
 	data, err := ioutil.ReadFile(src)
 	checkErr(t, err)
 	err = ioutil.WriteFile(dest, data, 0644)
@@ -109,4 +111,36 @@ func checkErr(t *testing.T, err error) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func addMockResponses(mockTransport *minitesting.MockRoundTripper) {
+	testDataDir := filepath.Join(basepath, "..", "..", "..", "test", "testdata")
+
+	url := "https://github.com/minishift/minishift/releases/download/v1.0.0/minishift-1.0.0-windows-amd64.zip$"
+	mockTransport.RegisterResponse(url, &minitesting.CannedResponse{
+		ResponseType: minitesting.SERVE_FILE,
+		Response:     filepath.Join(testDataDir, "minishift-1.0.0-windows-amd64.zip"),
+		ContentType:  minitesting.OCTET_STREAM,
+	})
+
+	url = "https://github.com/minishift/minishift/releases/download/v1.0.0/minishift-1.0.0-windows-amd64.zip.sha256"
+	mockTransport.RegisterResponse(url, &minitesting.CannedResponse{
+		ResponseType: minitesting.SERVE_FILE,
+		Response:     filepath.Join(testDataDir, "minishift-1.0.0-windows-amd64.zip.sha256"),
+		ContentType:  minitesting.OCTET_STREAM,
+	})
+
+	url = "https://github.com/minishift/minishift/releases/download/v1.0.0/minishift-1.0.0-linux-amd64.tgz$"
+	mockTransport.RegisterResponse(url, &minitesting.CannedResponse{
+		ResponseType: minitesting.SERVE_FILE,
+		Response:     filepath.Join(testDataDir, "minishift-1.0.0-linux-amd64.tgz"),
+		ContentType:  minitesting.OCTET_STREAM,
+	})
+
+	url = "https://github.com/minishift/minishift/releases/download/v1.0.0/minishift-1.0.0-linux-amd64.tgz.sha256"
+	mockTransport.RegisterResponse(url, &minitesting.CannedResponse{
+		ResponseType: minitesting.SERVE_FILE,
+		Response:     filepath.Join(testDataDir, "minishift-1.0.0-linux-amd64.tgz.sha256"),
+		ContentType:  minitesting.OCTET_STREAM,
+	})
 }

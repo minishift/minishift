@@ -23,7 +23,6 @@ import (
 
 	"io"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"path/filepath"
 
@@ -365,22 +364,6 @@ func TestExplicitRouteSuffixGetApplied(t *testing.T) {
 	}
 }
 
-func assertCompareSlice(expectedArguments []string, recievedArguments []string, t *testing.T) {
-	if len(expectedArguments) > len(recievedArguments) {
-		t.Errorf("Expected more arguments than received. Expected: '%s'. Got: '%s'", expectedArguments, recievedArguments)
-	}
-
-	if len(expectedArguments) < len(recievedArguments) {
-		t.Errorf("Received more arguments than expected. Expected: '%s'. Got '%s'", expectedArguments, recievedArguments)
-	}
-
-	for i, v := range recievedArguments {
-		if v != expectedArguments[i] {
-			t.Errorf("Expected argument '%s'. Received '%s'", expectedArguments[i], v)
-		}
-	}
-}
-
 func assertCommandLineArguments(expectedArguments []string, t *testing.T) {
 	if len(expectedArguments) > len(testRunner.Args) {
 		t.Errorf("Expected more arguments than received. Expected: '%s'. Got: '%s'", expectedArguments, testRunner.Args)
@@ -415,9 +398,6 @@ func setUp(t *testing.T) {
 	}
 
 	constants.Minipath = testDir
-
-	client := http.DefaultClient
-	client.Transport = minitesting.NewMockRoundTripper()
 
 	testRunner = &RecordingRunner{}
 

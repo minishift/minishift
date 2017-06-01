@@ -31,6 +31,8 @@ import (
 )
 
 var (
+	_, b, _, _   = runtime.Caller(0)
+	basepath     = filepath.Dir(b)
 	gitHubClient = Client()
 	err          error
 	release      *github.RepositoryRelease
@@ -79,8 +81,12 @@ func TestGetAssetIdAndFilename(t *testing.T) {
 func TestDownloadOc(t *testing.T) {
 	EnsureGitHubApiAccessTokenSet(t)
 
+	mockTransport := minitesting.NewMockRoundTripper()
+	addMockResponses(mockTransport)
+
 	client := http.DefaultClient
-	client.Transport = minitesting.NewMockRoundTripper()
+	client.Transport = mockTransport
+
 	defer minitesting.ResetDefaultRoundTripper()
 
 	testDir, err := ioutil.TempDir("", "minishift-test-")
@@ -168,8 +174,11 @@ func TestInvalidBinaryFormat(t *testing.T) {
 func Test_Download_Oc_1_4_1(t *testing.T) {
 	EnsureGitHubApiAccessTokenSet(t)
 
+	mockTransport := minitesting.NewMockRoundTripper()
+	addMockResponses(mockTransport)
+
 	client := http.DefaultClient
-	client.Transport = minitesting.NewMockRoundTripper()
+	client.Transport = mockTransport
 	defer minitesting.ResetDefaultRoundTripper()
 
 	testDir, err := ioutil.TempDir("", "minishift-test-")
@@ -208,4 +217,36 @@ func EnsureGitHubApiAccessTokenSet(t *testing.T) {
 		t.Skip("Skipping GitHub API based test, because no access token is defined in the environment.\n " +
 			"To run this test check https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/ and set for example MINISHIFT_GITHUB_API_TOKEN (see github.go).")
 	}
+}
+
+func addMockResponses(mockTransport *minitesting.MockRoundTripper) {
+	testDataDir := filepath.Join(basepath, "..", "..", "..", "test", "testdata")
+
+	url := "https://.*openshift-origin-client-tools-v1.3.1-2748423-mac.zip"
+	mockTransport.RegisterResponse(url, &minitesting.CannedResponse{
+		ResponseType: minitesting.SERVE_FILE,
+		Response:     filepath.Join(testDataDir, "openshift-origin-client-tools-v1.3.1-2748423-mac.zip"),
+		ContentType:  minitesting.OCTET_STREAM,
+	})
+
+	url = "https://.*openshift-origin-client-tools-v1.3.1-dad658de7465ba8a234a4fb40b5b446a45a4cee1-linux-64bit.tar.gz"
+	mockTransport.RegisterResponse(url, &minitesting.CannedResponse{
+		ResponseType: minitesting.SERVE_FILE,
+		Response:     filepath.Join(testDataDir, "openshift-origin-client-tools-v1.3.1-dad658de7465ba8a234a4fb40b5b446a45a4cee1-linux-64bit.tar.gz"),
+		ContentType:  minitesting.OCTET_STREAM,
+	})
+
+	url = "https://.*openshift-origin-client-tools-v1.3.1-dad658de7465ba8a234a4fb40b5b446a45a4cee1-windows.zip"
+	mockTransport.RegisterResponse(url, &minitesting.CannedResponse{
+		ResponseType: minitesting.SERVE_FILE,
+		Response:     filepath.Join(testDataDir, "openshift-origin-client-tools-v1.3.1-dad658de7465ba8a234a4fb40b5b446a45a4cee1-windows.zip"),
+		ContentType:  minitesting.OCTET_STREAM,
+	})
+
+	url = "https://.*openshift-origin-client-tools-v1.4.1-3f9807a-linux-64bit.tar.gz"
+	mockTransport.RegisterResponse(url, &minitesting.CannedResponse{
+		ResponseType: minitesting.SERVE_FILE,
+		Response:     filepath.Join(testDataDir, "openshift-origin-client-tools-v1.4.1-3f9807a-linux-64bit.tar.gz"),
+		ContentType:  minitesting.OCTET_STREAM,
+	})
 }

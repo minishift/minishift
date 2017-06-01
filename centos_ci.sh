@@ -199,7 +199,7 @@ function docs_tar_upload() {
   set +x
 
   version=$(cat docs/source/variables.adoc | cut -d' ' -f2 | head -n1)
-  LATEST=latest
+  LATEST=latest_test
   mkdir -p minishift/docs/$version minishift/docs/$LATEST
   cp docs/build/minishift-adoc.tar minishift/docs/$version/
   cp docs/build/minishift-adoc.tar minishift/docs/$LATEST/
@@ -219,7 +219,7 @@ else
   source ~/jenkins-env # Source environment variables for minishift_ci user
   PASS=$(echo $CICO_API_KEY | cut -d'-' -f1-2)
 
-  if [[ "$JOB_NAME" = "minishift-docs" ]]; then
+  if [[ "$JOB_NAME" != "minishift-docs" ]]; then
     prepare;
     cd gopath/src/github.com/minishift/minishift
     make gen_adoc_tar IMAGE_UID=$(id -u)
@@ -230,5 +230,6 @@ else
     cd $GOPATH/src/github.com/minishift/minishift
     run_tests;
     artifacts_upload_on_pr_and_master_trigger $PASS;
+    make gen_adoc_tar IMAGE_UID=$(id -u)
   fi
 fi

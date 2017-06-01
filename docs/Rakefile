@@ -78,7 +78,7 @@ task :adoc_tar => [:init, :adoc_variables, :markdown_to_asciidoc] do
       file_list.each { |f|
         tar.add_file(f, 0444) { |io|
           if File.extname(f) == ".adoc" then
-            adoc_content = File.read(f)
+            adoc_content = File.read(f, encoding: "ISO8859-1:utf-8")
             adoc_content = adoc_content.gsub(/include::.*variables\.adoc\[\]/, "include::minishift/variables.adoc[]")
             io.write(adoc_content)
           else

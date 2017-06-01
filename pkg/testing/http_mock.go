@@ -18,14 +18,19 @@ package testing
 
 import (
 	"bufio"
+	"fmt"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
-	"path/filepath"
 	"regexp"
-	"runtime"
+	"strings"
 	"time"
+)
+
+const (
+	OCTET_STREAM = "application/octet-stream"
+	JSON         = "application/json; charset=utf-8"
 )
 
 var DefaultRoundTripper http.RoundTripper = &http.Transport{
@@ -40,61 +45,101 @@ var DefaultRoundTripper http.RoundTripper = &http.Transport{
 	ExpectContinueTimeout: 1 * time.Second,
 }
 
-var (
-	_, b, _, _ = runtime.Caller(0)
-	basepath   = filepath.Dir(b)
-)
-
 func ResetDefaultRoundTripper() {
 	http.DefaultClient.Transport = DefaultRoundTripper
 }
 
-// MockRoundTripper mocks HTTP downloads of oc binaries
+// MockRoundTripper mocks HTTP requests and allows to return canned responses
 type MockRoundTripper struct {
-	delegate http.RoundTripper
+	delegate        http.RoundTripper
+	responses       map[string]*CannedResponse
+	verbose         bool
+	allowDelegation bool
 }
 
-func NewMockRoundTripper() http.RoundTripper {
-	return &MockRoundTripper{DefaultRoundTripper}
+type ResponseType int
+
+const (
+	SERVE_STRING ResponseType = iota
+	SERVE_FILE
+)
+
+type CannedResponse struct {
+	ResponseType ResponseType
+	Response     string
+	ContentType  string
+}
+
+func NewMockRoundTripper() *MockRoundTripper {
+	return &MockRoundTripper{
+		delegate:        DefaultRoundTripper,
+		responses:       make(map[string]*CannedResponse),
+		verbose:         false,
+		allowDelegation: false,
+	}
 }
 
 func (t *MockRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	// For now only proxy the actual download requests
-	re, _ := regexp.Compile(".*(openshift-origin-client-tools.*)&|.*(CHECKSUM).*|.*(minishift-.*-amd64.*)|.*(sha256)")
-	match := re.FindStringSubmatch(req.URL.String())
-	match = deleteEmpty(match)
+	if t.verbose {
+		fmt.Println(fmt.Sprintf("MockRoundTripper received HTTP request '%s'", req.URL.String()))
+	}
 
-	if match != nil {
-		filename := match[1]
-		if filename == "" {
-			filename = match[2]
+	for url, cannedResponse := range t.responses {
+		matched, _ := regexp.Match(url, []byte(req.URL.String()))
+		if !matched {
+			continue
 		}
 
-		response := &http.Response{
-			Header:     make(http.Header),
-			Request:    req,
-			StatusCode: http.StatusOK,
-		}
-		response.Header.Set("Content-Type", "application/octet-stream")
-		file, err := os.Open(filepath.Join(basepath, "..", "..", "test", "testdata", filename))
-		if err != nil {
-			panic(err)
-		}
+		response := t.createResponseFor(req, cannedResponse.ContentType)
+		switch cannedResponse.ResponseType {
+		case SERVE_STRING:
+			response.Body = ioutil.NopCloser(strings.NewReader(cannedResponse.Response))
+		case SERVE_FILE:
+			file, err := os.Open(cannedResponse.Response)
+			if err != nil {
+				panic(err)
+			}
+			response.Body = ioutil.NopCloser(bufio.NewReader(file))
+		default:
+			panic("Unknown canned response type")
 
-		response.Body = ioutil.NopCloser(bufio.NewReader(file))
+		}
+		if t.verbose {
+			fmt.Println(fmt.Sprintf("Returning canned response for HTTP request '%s'", req.URL.String()))
+		}
 		return response, nil
 	}
 
 	// Otherwise delegate
+	if t.verbose {
+		fmt.Println(fmt.Sprintf("Delegating '%s'", req.URL.String()))
+	}
+
+	if !t.allowDelegation {
+		panic(fmt.Sprintf("Not allowed to delegate '%s'", req.URL.String()))
+	}
+
 	return t.delegate.RoundTrip(req)
 }
 
-func deleteEmpty(s []string) []string {
-	var r []string
-	for _, str := range s {
-		if str != "" {
-			r = append(r, str)
-		}
+func (t *MockRoundTripper) RegisterResponse(url string, response *CannedResponse) {
+	t.responses[url] = response
+}
+
+func (t *MockRoundTripper) Verbose(verbose bool) {
+	t.verbose = verbose
+}
+
+func (t *MockRoundTripper) AllowDelegation(delegate bool) {
+	t.allowDelegation = delegate
+}
+
+func (t *MockRoundTripper) createResponseFor(req *http.Request, contentType string) *http.Response {
+	response := &http.Response{
+		Header:     make(http.Header),
+		Request:    req,
+		StatusCode: http.StatusOK,
 	}
-	return r
+	response.Header.Set("Content-Type", contentType)
+	return response
 }

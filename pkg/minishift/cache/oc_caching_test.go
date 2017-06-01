@@ -19,16 +19,20 @@ package cache
 import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minitesting "github.com/minishift/minishift/pkg/testing"
-	githubutils "github.com/minishift/minishift/pkg/util/github"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
 
-var testDir string
-var testOc Oc
+var (
+	_, b, _, _ = runtime.Caller(0)
+	basepath   = filepath.Dir(b)
+	testDir    string
+	testOc     Oc
+)
 
 func TestIsCached(t *testing.T) {
 	setUp(t)
@@ -53,12 +57,15 @@ func TestIsCached(t *testing.T) {
 }
 
 func TestCacheOc(t *testing.T) {
-	EnsureGitHubApiAccessTokenSet(t)
 	setUp(t)
 	defer os.RemoveAll(testDir) // clean up
 
+	mockTransport := minitesting.NewMockRoundTripper()
+	addMockResponses(mockTransport)
+
 	client := http.DefaultClient
-	client.Transport = minitesting.NewMockRoundTripper()
+	client.Transport = mockTransport
+
 	defer minitesting.ResetDefaultRoundTripper()
 
 	ocDir := filepath.Join(testDir, "cache", "oc", "v1.3.1")
@@ -79,9 +86,27 @@ func setUp(t *testing.T) {
 	testOc = Oc{"v1.3.1", filepath.Join(testDir, "cache")}
 }
 
-func EnsureGitHubApiAccessTokenSet(t *testing.T) {
-	if githubutils.GetGitHubApiToken() == "" {
-		t.Skip("Skipping GitHub API based test, because no access token is defined in the environment.\n " +
-			"To run this test check https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/ and set for example MINISHIFT_GITHUB_API_TOKEN (see github.go).")
+func addMockResponses(mockTransport *minitesting.MockRoundTripper) {
+	testDataDir := filepath.Join(basepath, "..", "..", "..", "test", "testdata")
+
+	mockTransport.RegisterResponse("https://api.github.com/repos/openshift/origin/releases/tags/v1.3.1", &minitesting.CannedResponse{
+		ResponseType: minitesting.SERVE_FILE,
+		Response:     filepath.Join(testDataDir, "openshift-1.3.1-release-tag.json"),
+		ContentType:  minitesting.JSON,
+	})
+
+	var assetContent string
+	switch runtime.GOOS {
+	case "windows":
+		assetContent = filepath.Join(testDataDir, "openshift-origin-client-tools-v1.3.1-dad658de7465ba8a234a4fb40b5b446a45a4cee1-windows.zip")
+	case "darwin":
+		assetContent = filepath.Join(testDataDir, "openshift-origin-client-tools-v1.3.1-2748423-mac.zip")
+	case "linux":
+		assetContent = filepath.Join(testDataDir, "openshift-origin-client-tools-v1.3.1-dad658de7465ba8a234a4fb40b5b446a45a4cee1-linux-64bit.tar.gz")
 	}
+	mockTransport.RegisterResponse("https://api.github.com/repos/openshift/origin/releases/assets/.*", &minitesting.CannedResponse{
+		ResponseType: minitesting.SERVE_FILE,
+		Response:     assetContent,
+		ContentType:  minitesting.OCTET_STREAM,
+	})
 }

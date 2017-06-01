@@ -1,8 +1,31 @@
 @basic
 Feature: Basic
-  In order to use Minishift
-  As a user
-  I need to be able to bring up a test environment
+  As a user I can perform basic operations of Minishift and OpenShift
+
+  Scenario: User can install default add-ons
+    Given Minishift has state "Does Not Exist"
+    When executing "minishift addons install --defaults" succeeds
+    Then stdout should contain
+     """
+     Default add-ons anyuid, admin-user, xpaas installed
+     """
+
+  Scenario: User can enable the anyuid add-on
+    Given Minishift has state "Does Not Exist"
+    When executing "minishift addons enable anyuid" succeeds
+    Then stdout should contain
+     """
+     Addon 'anyuid' enabled
+     """
+
+  Scenario: User can list enabled plugins
+    Given Minishift has state "Does Not Exist"
+    When executing "minishift addons list" succeeds
+    Then stdout should contain
+     """
+     - anyuid         : enabled    P(0)
+     - admin-user     : disabled   P(0)
+     """
 
   Scenario: Starting Minishift
     Given Minishift has state "Does Not Exist"
@@ -31,7 +54,7 @@ Feature: Basic
      When executing "minishift config unset <property>" succeeds
      Then stdout of command "minishift config get <property>" is equal to "<nil>"
       And JSON config file "config/config.json" does not contain key "<property>"
-      
+
   Examples: Config values to work with
     | property  | value |
     | disk-size | 22g   |
@@ -62,7 +85,7 @@ Feature: Basic
   Scenario: Sudo permissions are required for specific oc tasks
    Given Minishift has state "Running"
     Then executing "oc get clusterrolebindings" fails
- 
+
   Scenario: A 'minishift' context is created for 'oc' usage
     After a successful Minishift start the user's current context is 'minishift'
    Given Minishift has state "Running"
@@ -71,7 +94,7 @@ Feature: Basic
     """
     minishift
     """
- 
+
   Scenario: User can switch the current 'oc' context and return to 'minishift' context
     Given executing "oc config set-context dummy" succeeds
       And executing "oc config use-context dummy" succeeds
@@ -84,15 +107,14 @@ Feature: Basic
       minishift
       """
 
-#  Test disabled - see https://github.com/minishift/minishift/issues/837
-#  Scenario: User has a pre-configured set of persitence volumnes
-#    When executing "oc get pv --as system:admin -o=name" retrying 5 times with wait period of 3 seconds
-#    Then stderr should be empty
-#     And exitcode should equal 0
-#     And stdout should contain
-#     """
-#     persistentvolume/pv0001
-#     """
+  Scenario: User has a pre-configured set of persistent volumes
+    When executing "oc get pv --as system:admin -o=name"
+    Then stderr should be empty
+     And exitcode should equal 0
+     And stdout should contain
+     """
+     persistentvolume/pv0001
+     """
 
   Scenario: User is able to do ssh into Minishift VM
     Given Minishift has state "Running"
@@ -118,7 +140,7 @@ Feature: Basic
      """
      Login successful
      """
-  
+
   Scenario: User can create new namespace ruby for application ruby-ex
    Given Minishift has state "Running"
     When executing "oc new-project ruby" succeeds
@@ -126,8 +148,8 @@ Feature: Basic
      """
      Now using project "ruby"
      """
-  
-  Scenario: User can deploy application ruby-ex to namespace ruby 
+
+  Scenario: User can deploy application ruby-ex to namespace ruby
    Given Minishift has state "Running"
     When executing "oc new-app centos/ruby-22-centos7~https://github.com/openshift/ruby-ex.git" succeeds
     Then stdout should contain
@@ -139,7 +161,7 @@ Feature: Basic
      """
      "ruby-ex-1" successfully rolled out
      """
-  
+
   Scenario: User can create route for ruby-ex to make it visiable outside of the cluster
    Given Minishift has state "Running"
     When executing "oc expose svc/ruby-ex" succeeds
@@ -147,7 +169,7 @@ Feature: Basic
      """
      exposed
      """
-  
+
   Scenario: User can delete namespace ruby
    Given Minishift has state "Running"
     When executing "oc delete project ruby" succeeds
@@ -155,7 +177,7 @@ Feature: Basic
      """
      "ruby" deleted
      """
-  
+
   Scenario: User can log out the session
    Given Minishift has state "Running"
     When executing "oc logout" succeeds
@@ -164,7 +186,7 @@ Feature: Basic
      Logged "developer" out
      """
   # End of Ruby application ruby-ex deployment
-  
+
   Scenario: Stopping Minishift
     Given Minishift has state "Running"
      When executing "minishift stop" succeeds

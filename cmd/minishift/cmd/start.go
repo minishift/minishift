@@ -306,6 +306,7 @@ func initSubscriptionManagerFlags() *flag.FlagSet {
 
 	subscriptionManagerFlagSet.String(startFlags.Username.Name, "", "Username for the virtual machine registration.")
 	subscriptionManagerFlagSet.String(startFlags.Password.Name, "", "Password for the virtual machine registration.")
+	subscriptionManagerFlagSet.Bool(startFlags.SkipRegistration.Name, false, "Skip the virtual machine registration.")
 
 	return subscriptionManagerFlagSet
 }
@@ -394,4 +395,5 @@ func validateOpenshiftVersion() {
 func setSubscriptionManagerParameters() {
 	cluster.RegistrationParameters.Username = viper.GetString(startFlags.Username.Name)
 	cluster.RegistrationParameters.Password = viper.GetString(startFlags.Password.Name)
+	cluster.RegistrationParameters.SkipRegistration = viper.GetBool(startFlags.SkipRegistration.Name)
 }

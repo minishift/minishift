@@ -74,8 +74,9 @@ var (
 	HttpsProxy  = createFlag("https-proxy", SetString, []setFn{IsValidProxy}, nil, true)
 
 	// Subscription Manager
-	Username = createFlag("username", SetString, nil, nil, true)
-	Password = createFlag("password", SetString, nil, nil, true)
+	Username         = createFlag("username", SetString, nil, nil, true)
+	Password         = createFlag("password", SetString, nil, nil, true)
+	SkipRegistration = createFlag("skip-registration", SetBool, nil, nil, true)
 
 	// Global flags
 	LogDir             = createFlag("log_dir", SetString, []setFn{IsValidPath}, nil, true)

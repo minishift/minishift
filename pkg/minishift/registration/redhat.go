@@ -43,7 +43,7 @@ func (registrator *RedHatRegistrator) CompatibleWithDistribution(osReleaseInfo *
 	if osReleaseInfo.ID != "rhel" {
 		return false
 	}
-	if _, err := registrator.SSHCommand("sudo -E subscription-manager version"); err != nil {
+	if _, err := registrator.SSHCommand("sudo -E subscription-manager"); err != nil {
 		return false
 	} else {
 		return true

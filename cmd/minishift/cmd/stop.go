@@ -24,7 +24,10 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+)
+
+var (
+	skipUnRegistration bool
 )
 
 // stopCmd represents the stop command
@@ -41,6 +44,10 @@ func runStop(cmd *cobra.Command, args []string) {
 	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 	defer api.Close()
 
+	if skipUnRegistration {
+		cluster.RegistrationParameters.SkipUnRegistration = true
+	}
+
 	if err := cluster.StopHost(api); err != nil {
 		fmt.Println("Error stopping cluster: ", err)
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error stopping cluster: %s", err.Error()))
@@ -49,6 +56,6 @@ func runStop(cmd *cobra.Command, args []string) {
 }
 
 func init() {
-	viper.BindPFlags(stopCmd.Flags())
+	stopCmd.Flags().BoolVar(&skipUnRegistration, "skip-unregistration", false, "Skip the virtual machine unregistration.")
 	RootCmd.AddCommand(stopCmd)
 }

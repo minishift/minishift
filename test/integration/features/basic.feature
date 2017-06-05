@@ -111,7 +111,7 @@ Feature: Basic
       """
 
   Scenario: User has a pre-configured set of persistent volumes
-    When executing "oc get pv --as system:admin -o=name"
+    When executing "oc --as system:admin get pv -o=name"
     Then stderr should be empty
      And exitcode should equal "0"
      And stdout should contain
@@ -159,11 +159,7 @@ Feature: Basic
      """
      Success
      """
-    When executing "oc rollout status deploymentconfig ruby-ex --watch" succeeds
-    Then stdout should contain
-     """
-     "ruby-ex-1" successfully rolled out
-     """
+     And services "ruby-ex" rollout successfully
 
   Scenario: User can create route for ruby-ex to make it visiable outside of the cluster
    Given Minishift has state "Running"

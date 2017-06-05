@@ -23,10 +23,12 @@ import (
 	"fmt"
 	"github.com/minishift/minishift/test/integration/util"
 	"strings"
+	"sync"
 	"time"
 )
 
-var lastCommandOutput CommandOutput
+var commandOutputs []CommandOutput
+var commandVariables []CommandVariable
 
 type CommandOutput struct {
 	Command  string
@@ -35,7 +37,13 @@ type CommandOutput struct {
 	ExitCode int
 }
 
+type CommandVariable struct {
+	Name  string
+	Value string
+}
+
 type Minishift struct {
+	mutex  sync.Mutex
 	runner util.MinishiftRunner
 }
 
@@ -54,6 +62,7 @@ func (m *Minishift) executingRetryingTimesWithWaitPeriodOfSeconds(command string
 		if err != nil {
 			return err
 		}
+		lastCommandOutput := getLastCommandOutput()
 		if lastCommandOutput.ExitCode == 0 {
 			break
 		}
@@ -63,48 +72,94 @@ func (m *Minishift) executingRetryingTimesWithWaitPeriodOfSeconds(command string
 	return nil
 }
 
+func (m *Minishift) GetVariableByName(name string) *CommandVariable {
+	if len(commandVariables) == 0 {
+		return nil
+	}
+
+	for i := range commandVariables {
+
+		variable := commandVariables[i]
+
+		if variable.Name == name {
+			return &variable
+		}
+	}
+
+	return nil
+}
+
+func (m *Minishift) setVariableExecutingOcCommand(name string, command string) error {
+	return m.setVariableFromExecution(name, minishift.executingOcCommand, command)
+}
+
+func (m *Minishift) SetVariable(name string, value string) {
+	commandVariables = append(commandVariables,
+		CommandVariable{
+			name,
+			value,
+		})
+}
+
+func (m *Minishift) setVariableFromExecution(name string, execute commandRunner, command string) error {
+	err := execute(command)
+	if err != nil {
+		return err
+	}
+
+	lastCommandOutput := getLastCommandOutput()
+	commandFailed := (lastCommandOutput.ExitCode != 0 ||
+		len(lastCommandOutput.StdErr) != 0)
+
+	if commandFailed {
+		return fmt.Errorf("Command '%s' did not execute successfully. cmdExit: %d, cmdErr: %s",
+			lastCommandOutput.Command,
+			lastCommandOutput.ExitCode,
+			lastCommandOutput.StdErr)
+	}
+
+	m.SetVariable(name, strings.TrimSpace(lastCommandOutput.StdOut))
+
+	return nil
+}
+
+func (m *Minishift) processVariables(command string) string {
+	for _, v := range commandVariables {
+		command = strings.Replace(command, fmt.Sprintf("$(%s)", v.Name), v.Value, -1)
+	}
+	return command
+}
+
 func (m *Minishift) executingOcCommand(command string) error {
 	ocRunner := m.runner.GetOcRunner()
 	if ocRunner == nil {
 		return errors.New("Minishift is not Running")
 	}
+
+	command = m.processVariables(command)
 	cmdOut, cmdErr, cmdExit := ocRunner.RunCommand(command)
-	lastCommandOutput = CommandOutput{
-		command,
-		cmdOut,
-		cmdErr,
-		cmdExit,
-	}
-
-	return nil
-}
-
-func (m *Minishift) executingOcCommandSucceedsOrFails(command, expectedResult string) error {
-	err := m.executingOcCommand(command)
-	if err != nil {
-		return err
-	}
-	commandFailed := (lastCommandOutput.ExitCode != 0 || len(lastCommandOutput.StdErr) != 0)
-	if expectedResult == "succeeds" && commandFailed == true {
-		return fmt.Errorf("Command did not execute successfully. cmdExit: %d, cmdErr: %s", lastCommandOutput.ExitCode, lastCommandOutput.StdErr)
-	}
-	if expectedResult == "fails" && commandFailed == false {
-		return fmt.Errorf("Command executed successfully, however was expected to fail. cmdExit: %d, cmdErr: %s", lastCommandOutput.ExitCode, lastCommandOutput.StdErr)
-	}
+	commandOutputs = append(commandOutputs,
+		CommandOutput{
+			command,
+			cmdOut,
+			cmdErr,
+			cmdExit,
+		})
 
 	return nil
 }
 
 func (m *Minishift) executingMinishiftCommand(command string) error {
-	// TODO: there must be smarter way to destruct
+	command = m.processVariables(command)
 	cmdOut, cmdErr, cmdExit := m.runner.RunCommand(command)
-	lastCommandOutput = CommandOutput{
-		command,
-		cmdOut,
-		cmdErr,
-		cmdExit,
-	}
-	// Beware: you are responsible to verify the lastCommandOutput!
+	commandOutputs = append(commandOutputs,
+		CommandOutput{
+			command,
+			cmdOut,
+			cmdErr,
+			cmdExit,
+		})
+
 	return nil
 }
 
@@ -116,4 +171,50 @@ func (m *Minishift) getOpenShiftUrl() string {
 func (m *Minishift) getRoute(serviceName, nameSpace string) string {
 	cmdOut, _, _ := m.runner.RunCommand("openshift service " + serviceName + " -n" + nameSpace + " --url")
 	return strings.TrimRight(cmdOut, "\n")
+}
+
+func (m *Minishift) checkServiceRolloutForSuccess(service string, done chan bool) {
+	command := fmt.Sprintf("rollout status deploymentconfig %s --watch", service)
+
+	ocRunner := m.runner.GetOcRunner()
+	cmdOut, cmdErr, cmdExit := ocRunner.RunCommand(command)
+	m.mutex.Lock()
+	commandOutputs = append(commandOutputs,
+		CommandOutput{
+			command,
+			cmdOut,
+			cmdErr,
+			cmdExit,
+		})
+	m.mutex.Unlock()
+
+	expected := "successfully rolled out"
+	// if - else construct needed, else false is returned on the second time called
+	if strings.Contains(cmdOut, expected) {
+		done <- true
+	} else {
+		done <- false
+	}
+}
+
+func (m *Minishift) rolloutServicesSuccessfully(servicesToCheck string) error {
+	success := true
+	servicesStr := strings.Replace(servicesToCheck, ", ", " ", -1)
+	servicesStr = strings.Replace(servicesStr, ",", " ", -1)
+	services := strings.Split(servicesStr, " ")
+	total := len(services)
+	done := make(chan bool, total)
+
+	for i := 0; i < total; i++ {
+		go m.checkServiceRolloutForSuccess(services[i], done)
+	}
+
+	for i := 0; i < total; i++ {
+		success = success && <-done
+	}
+
+	if !success {
+		return fmt.Errorf("Not all successfully rolled out")
+	}
+	return nil
 }

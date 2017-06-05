@@ -135,7 +135,7 @@ function prepare() {
 function run_tests() {
   make clean test cross fmtcheck prerelease synopsis_docs link_check_docs
   # Run integration test with 'kvm' driver
-  MINISHIFT_VM_DRIVER=kvm make integration
+  MINISHIFT_VM_DRIVER=kvm make integration GODOG_OPTS="-tags basic -format pretty"
   echo "CICO: Tests ran successfully"
 }
 

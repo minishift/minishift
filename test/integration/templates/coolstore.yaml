@@ -1,0 +1,1138 @@
+apiVersion: v1
+kind: Template
+labels:
+  demo: coolstore-microservice
+  template: coolstore
+metadata:
+  annotations:
+    description: CoolStore demo microservices application template
+    iconClass: icon-java
+    tags: microservice,jboss,spring
+  name: coolstore
+objects:
+- apiVersion: v1
+  groupNames: null
+  kind: RoleBinding
+  metadata:
+    name: default_edit
+  roleRef:
+    name: view
+  subjects:
+  - kind: ServiceAccount
+    name: default
+# UI
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: web-ui
+    labels:
+      application: web-ui
+  spec:
+    tags:
+    - name: latest
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    name: web-ui
+    labels:
+      application: web-ui
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: web-ui:latest
+    source:
+      contextDir: coolstore-ui
+      git:
+        ref: ${GIT_REF}
+        uri: ${GIT_URI}
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: nodejs:4
+          namespace: openshift
+      type: Source
+    triggers:
+    - imageChange: {}
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: web-ui
+    labels:
+      application: web-ui
+  spec:
+    replicas: 1
+    selector:
+      application: web-ui
+      deploymentconfig: web-ui
+    strategy:
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          application: web-ui
+          deploymentconfig: web-ui
+      spec:
+        containers:
+        - env:
+          - name: COOLSTORE_GW_SERVICE
+            value: coolstore-gw
+          - name: HOSTNAME_HTTP
+            value: web-ui:8080
+          image: web-ui
+          imagePullPolicy: Always
+          name: web-ui
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          livenessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5            
+          readinessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - web-ui
+        from:
+          kind: ImageStreamTag
+          name: web-ui:latest
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: web-ui
+      application: web-ui
+    name: web-ui
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deploymentconfig: web-ui
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: web-ui
+  spec:
+    to:
+      kind: Service
+      name: web-ui
+# Coolstore Gateway
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: coolstore-gw
+    labels:
+      application: coolstore-gw
+  spec: {}
+  status:
+    dockerImageRepository: ""
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    name: coolstore-gw
+    labels:
+      application: coolstore-gw
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: coolstore-gw:latest
+    source:
+      contextDir: coolstore-gw
+      git:
+        ref: ${GIT_REF}
+        uri: ${GIT_URI}
+      type: Git
+    strategy:
+      sourceStrategy:
+        env:
+        - name: MAVEN_ARGS
+          value: package -DskipTests -Dfabric8.skip -e -B -Pearly-access-repo
+        - name: MAVEN_MIRROR_URL
+          value: ${MAVEN_MIRROR_URL}
+        forcePull: true
+        from:
+          kind: ImageStreamTag
+          name: fis-java-openshift:2.0
+          namespace: openshift
+      type: Source
+    triggers:
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: coolstore-gw
+    labels:
+      application: coolstore-gw
+  spec:
+    replicas: 1
+    selector:
+      deploymentconfig: coolstore-gw
+    strategy:
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          application: coolstore-gw
+          deploymentconfig: coolstore-gw
+        name: coolstore-gw
+      spec:
+        containers:
+        - env:
+          - name: KUBERNETES_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          image: library/coolstore-gw:latest
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8081
+            initialDelaySeconds: 30
+            failureThreshold: 10
+            periodSeconds: 10
+          name: coolstore-gw
+          ports:
+          - containerPort: 8778
+            name: jolokia
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8081
+            initialDelaySeconds: 30
+            failureThreshold: 10
+            periodSeconds: 10
+          resources: {}
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - coolstore-gw
+        from:
+          kind: ImageStreamTag
+          name: coolstore-gw:latest
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: coolstore-gw
+      application: coolstore-gw
+      hystrix.enabled: "true"
+    name: coolstore-gw
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deploymentconfig: coolstore-gw
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: coolstore-gw
+    labels:
+      application: coolstore-gw
+  spec:
+    to:
+      kind: Service
+      name: coolstore-gw
+# Inventory Service
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: inventory
+    labels:
+      application: inventory
+  spec:
+    tags:
+    - name: latest
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    name: inventory
+    labels:
+      application: inventory
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: inventory:latest
+    source:
+      contextDir: inventory-service
+      git:
+        ref: ${GIT_REF}
+        uri: ${GIT_URI}
+      type: Git
+    strategy:
+      sourceStrategy:
+        env:
+        - name: MAVEN_MIRROR_URL
+          value: ${MAVEN_MIRROR_URL}
+        from:
+          kind: ImageStreamTag
+          name: jboss-eap70-openshift:1.4
+          namespace: openshift
+      type: Source
+    triggers:
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: inventory
+    labels:
+      application: inventory
+  spec:
+    replicas: 1
+    selector:
+      deploymentconfig: inventory
+    strategy:
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          application: inventory
+          deploymentconfig: inventory
+        name: inventory
+      spec:
+        containers:
+        - env:
+          - name: OPENSHIFT_KUBE_PING_LABELS
+            value: application=inventory
+          - name: OPENSHIFT_KUBE_PING_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: MQ_CLUSTER_PASSWORD
+            value: 7mzX0pLV03
+          - name: JGROUPS_CLUSTER_PASSWORD
+            value: CqUo3fYDTv
+          - name: AUTO_DEPLOY_EXPLODED
+            value: "false"
+          - name: DB_SERVICE_PREFIX_MAPPING
+            value: inventory-postgresql=DB
+          - name: DB_JNDI
+            value: java:jboss/datasources/InventoryDS
+          - name: DB_USERNAME
+            value: ${INVENTORY_DB_USERNAME}
+          - name: DB_PASSWORD
+            value: ${INVENTORY_DB_PASSWORD}
+          - name: DB_DATABASE
+            value: inventorydb
+          image: inventory
+          imagePullPolicy: Always
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - /opt/eap/bin/jboss-cli.sh
+                - -c
+                - :shutdown(timeout=60)
+          livenessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          name: inventory
+          ports:
+          - containerPort: 8778
+            name: jolokia
+            protocol: TCP
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+          - containerPort: 8888
+            name: ping
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              memory: 512Mi
+          terminationMessagePath: /dev/termination-log
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 75
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - inventory
+        from:
+          kind: ImageStreamTag
+          name: inventory:latest
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      service.alpha.openshift.io/dependencies: '[{"name":"inventory-postgresql","namespace":"","kind":"Service"}]'
+    labels:
+      app: inventory
+      application: inventory
+    name: inventory
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deploymentconfig: inventory
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: inventory-postgresql
+    labels:
+      application: inventory
+  spec:
+    replicas: 1
+    selector:
+      deploymentconfig: inventory-postgresql
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          application: inventory
+          deploymentconfig: inventory-postgresql
+        name: inventory-postgresql
+      spec:
+        containers:
+        - env:
+          - name: POSTGRESQL_USER
+            value: ${INVENTORY_DB_USERNAME}
+          - name: POSTGRESQL_PASSWORD
+            value: ${INVENTORY_DB_PASSWORD}
+          - name: POSTGRESQL_DATABASE
+            value: inventorydb
+          image: postgresql
+          imagePullPolicy: Always
+          name: inventory-postgresql
+          volumeMounts:
+          - mountPath: /var/lib/pgsql/data
+            name: inventory-postgresql-data
+          ports:
+          - containerPort: 5432
+            protocol: TCP
+          livenessProbe:
+            initialDelaySeconds: 30
+            tcpSocket:
+              port: 5432
+            timeoutSeconds: 1
+          readinessProbe:
+            exec:
+              command:
+              - /bin/sh
+              - -i
+              - -c
+              - psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d $POSTGRESQL_DATABASE -c 'SELECT 1'
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+        terminationGracePeriodSeconds: 60
+        volumes:
+        - name: inventory-postgresql-data
+          emptyDir: {}
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - inventory-postgresql
+        from:
+          kind: ImageStreamTag
+          name: postgresql:latest
+          namespace: openshift
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: inventory
+      application: inventory
+    name: inventory-postgresql
+  spec:
+    ports:
+    - port: 5432
+      targetPort: 5432
+    selector:
+      deploymentconfig: inventory-postgresql
+# Catalog Service
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: catalog
+    labels:
+      application: catalog
+  spec:
+    tags:
+    - name: latest
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    name: catalog
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: catalog:latest
+    source:
+      contextDir: catalog-service
+      git:
+        ref: ${GIT_REF}
+        uri: ${GIT_URI}
+      type: Git
+    strategy:
+      sourceStrategy:
+        env:
+        - name: MAVEN_MIRROR_URL
+          value: ${MAVEN_MIRROR_URL}
+        from:
+          kind: ImageStreamTag
+          name: jboss-webserver30-tomcat8-openshift:1.2
+          namespace: openshift
+      type: Source
+    triggers:
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: catalog
+    labels:
+      application: catalog
+  spec:
+    replicas: 1
+    selector:
+      deploymentconfig: catalog
+    strategy:
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          application: catalog
+          deploymentconfig: catalog
+        name: catalog
+      spec:
+        containers:
+        - env:
+          - name: JWS_ADMIN_USERNAME
+            value: Skq3VtCd
+          - name: JWS_ADMIN_PASSWORD
+            value: oktt6yhw
+          - name: DB_USERNAME
+            value: ${CATALOG_DB_USERNAME}
+          - name: DB_PASSWORD
+            value: ${CATALOG_DB_PASSWORD}
+          - name: DB_NAME
+            value: catalogdb
+          - name: DB_SERVER
+            value: catalog-mongodb
+          image: catalog
+          imagePullPolicy: Always
+          name: catalog
+          ports:
+          - containerPort: 8778
+            name: jolokia
+            protocol: TCP
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 10
+            exec:
+              command:
+              - /bin/bash
+              - -c
+              - curl -s -u Skq3VtCd:oktt6yhw 'http://localhost:8080/manager/jmxproxy/?get=Catalina%3Atype%3DServer&att=stateName'
+                |grep -iq 'stateName *= *STARTED'
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              memory: 600Mi
+            requests:
+              memory: 200Mi
+          terminationMessagePath: /dev/termination-log
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 75
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - catalog
+        from:
+          kind: ImageStreamTag
+          name: catalog:latest
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      service.alpha.openshift.io/dependencies: '[{"name":"catalog-mongodb","namespace":"","kind":"Service"}]'
+    labels:
+      app: catalog
+      application: catalog
+    name: catalog
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deploymentconfig: catalog
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: catalog
+      application: catalog
+    name: catalog-mongodb
+  spec:
+    ports:
+    - name: mongo
+      port: 27017
+      protocol: TCP
+      targetPort: 27017
+    selector:
+      deploymentconfig: catalog-mongodb
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      application: catalog
+    name: catalog-mongodb
+  spec:
+    replicas: 1
+    selector:
+      deploymentconfig: catalog-mongodb
+    strategy:
+      recreateParams:
+        timeoutSeconds: 600
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          application: catalog
+          deploymentconfig: catalog-mongodb
+      spec:
+        containers:
+        - env:
+          - name: KUBERNETES_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: MONGODB_USER
+            value: ${CATALOG_DB_USERNAME}
+          - name: MONGODB_PASSWORD
+            value: ${CATALOG_DB_PASSWORD}
+          - name: MONGODB_DATABASE
+            value: catalogdb
+          - name: MONGODB_ADMIN_PASSWORD
+            value: ${CATALOG_DB_PASSWORD}
+          image: mongodb
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 10
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: 27017
+            timeoutSeconds: 1
+          name: catalog-mongodb
+          ports:
+          - containerPort: 27017
+            protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+              - /bin/sh
+              - -i
+              - -c
+              - mongo 127.0.0.1:27017/$MONGODB_DATABASE -u $MONGODB_USER -p $MONGODB_PASSWORD
+                --eval="quit()"
+            failureThreshold: 10
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              memory: 512Mi
+          securityContext:
+            capabilities: {}
+            privileged: false
+          terminationMessagePath: /dev/termination-log
+          volumeMounts:
+          - mountPath: /var/lib/mongodb/data
+            name: mongodb-data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - emptyDir: {}
+          name: mongodb-data
+    test: false
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - catalog-mongodb
+        from:
+          kind: ImageStreamTag
+          name: mongodb:3.2
+          namespace: openshift
+      type: ImageChange
+    - type: ConfigChange
+# Cart Service
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: cart
+    labels:
+      application: cart
+  spec:
+    tags:
+    - name: latest
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    name: cart
+    labels:
+      application: cart
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: cart:latest
+    source:
+      contextDir: cart-service
+      git:
+        ref: ${GIT_REF}
+        uri: ${GIT_URI}
+      type: Git
+    strategy:
+      sourceStrategy:
+        env:
+        - name: MAVEN_MIRROR_URL
+          value: ${MAVEN_MIRROR_URL}
+        from:
+          kind: ImageStreamTag
+          name: redhat-openjdk18-openshift:1.0
+          namespace: openshift
+      type: Source
+    triggers:
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: cart
+    labels:
+      application: cart
+  spec:
+    replicas: 1
+    selector:
+      deploymentconfig: cart
+    strategy:
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          application: cart
+          deploymentconfig: cart
+        name: cart
+      spec:
+        containers:
+        - env:
+          - name: CATALOG_ENDPOINT
+            value: "http://catalog:8080"
+          image: cart
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: cart
+          ports:
+          - containerPort: 8778
+            name: jolokia
+            protocol: TCP
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+          - containerPort: 8443
+            name: https
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              memory: 200Mi
+          terminationMessagePath: /dev/termination-log
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 75
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - cart
+        from:
+          kind: ImageStreamTag
+          name: cart:latest
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: cart
+      application: cart
+    name: cart
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deploymentconfig: cart
+# Netflix Turbine Server
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      application: turbine-server
+    name: turbine-server
+  spec:
+    dockerImageRepository: docker.io/siamaksade/turbine-server # temporary till fabric8 images remove privillegd requirement
+    tags:
+    - name: "1.0.27"
+      annotations:
+        description: Fabric8 Turbine Server
+        version: "1.0.27"
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      application: turbine-server
+    name: turbine-server
+  spec:
+    replicas: 1
+    selector:
+      application: turbine-server
+      deploymentconfig: turbine-server
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          application: turbine-server
+          deploymentconfig: turbine-server
+      spec:
+        containers:
+        - image: 'turbine-server'
+          name: turbine-server
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          - containerPort: 8778
+            protocol: TCP
+          - containerPort: 9779
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          readinessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          livenessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 1
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - turbine-server
+        from:
+          kind: ImageStreamTag
+          name: turbine-server:1.0.27
+      type: ImageChange
+  status:
+    observedGeneration: 2
+    replicas: 1
+    unavailableReplicas: 1
+    updatedReplicas: 1
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: turbine-server
+      application: turbine-server
+    name: turbine-server
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      application: turbine-server
+      deploymentconfig: turbine-server
+- apiVersion: v1
+  kind: Route
+  metadata:
+    labels:
+      application: turbine-server
+    name: turbine-server
+  spec:
+    port:
+      targetPort: 8080-tcp
+    to:
+      kind: Service
+      name: turbine-server
+      weight: 100
+# Netflix Hystrix Dashboard
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      application: hystrix-dashboard
+    name: hystrix-dashboard
+  spec:
+    dockerImageRepository: docker.io/siamaksade/hystrix-dashboard # temporary till fabric8 images remove privillegd requirement
+    tags:
+    - name: "1.0.27"
+      annotations:
+        description: Fabric8 Hystrix Dashboard
+        version: "1.0.27"
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      application: hystrix-dashboard
+    name: hystrix-dashboard
+  spec:
+    replicas: 1
+    selector:
+      application: hystrix-dashboard
+      deploymentconfig: hystrix-dashboard
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          application: hystrix-dashboard
+          deploymentconfig: hystrix-dashboard
+      spec:
+        containers:
+        - image: 'hystrix-dashboard'
+          name: hystrix-dashboard
+          ports:
+          - containerPort: 9779
+            protocol: TCP
+          - containerPort: 8080
+            protocol: TCP
+          - containerPort: 8778
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          readinessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          livenessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - hystrix-dashboard
+        from:
+          kind: ImageStreamTag
+          name: hystrix-dashboard:1.0.27
+      type: ImageChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: hystrix-dashboard
+      application: hystrix-dashboard
+    annotations:
+      service.alpha.openshift.io/dependencies: '[{"name":"turbine-server","namespace":"","kind":"Service"}]'
+    name: hystrix-dashboard
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      application: hystrix-dashboard
+      deploymentconfig: hystrix-dashboard
+- apiVersion: v1
+  kind: Route
+  metadata:
+    labels:
+      application: hystrix-dashboard
+    name: hystrix-dashboard
+  spec:
+    port:
+      targetPort: 8080-tcp
+    to:
+      kind: Service
+      name: hystrix-dashboard
+      weight: 100
+parameters:
+- description: Git source URI for application
+  displayName: Git source repository
+  name: GIT_URI
+  required: true
+  value: https://github.com/jbossdemocentral/coolstore-microservice
+- displayName: Git branch/tag reference
+  name: GIT_REF
+  required: true
+  value: 1.0.x
+- description: Maven mirror url. If nexus is deployed locally, use nexus url (e.g. http://nexus.ci:8081/content/groups/public/)
+  displayName: Maven mirror url
+  name: MAVEN_MIRROR_URL
+- description: Inventory Service database user name
+  displayName: Inventory Database username
+  from: user[a-zA-Z0-9]{3}
+  generate: expression
+  name: INVENTORY_DB_USERNAME
+  required: true
+- description: Inventory Service database user password
+  displayName: Inventory Database password
+  from: '[a-zA-Z0-9]{8}'
+  generate: expression
+  name: INVENTORY_DB_PASSWORD
+  required: true
+- description: Catalog Service database user name
+  displayName: Catalog Database username
+  from: user[a-zA-Z0-9]{3}
+  generate: expression
+  name: CATALOG_DB_USERNAME
+  required: true
+- description: Catalog Service database user password
+  displayName: Catalog Database password
+  from: '[a-zA-Z0-9]{8}'
+  generate: expression
+  name: CATALOG_DB_PASSWORD
+  required: true

@@ -97,10 +97,6 @@ func StartHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 		return nil, fmt.Errorf("Error configuring authorization on host: %s", err)
 	}
 
-	if err := registration.RegisterHostVM(h, RegistrationParameters); err != nil {
-		return nil, fmt.Errorf("Error registering the VM: %s", err)
-	}
-
 	return h, nil
 }
 
@@ -108,10 +104,6 @@ func StartHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 func StopHost(api libmachine.API) error {
 	host, err := api.Load(constants.MachineName)
 	if err != nil {
-		return err
-	}
-
-	if err = unregister(host); err != nil {
 		return err
 	}
 
@@ -128,24 +120,40 @@ func DeleteHost(api libmachine.API) error {
 		return err
 	}
 
-	if err = unregister(host); err != nil {
-		return err
-	}
-
 	m := util.MultiError{}
 	m.Collect(host.Driver.Remove())
 	m.Collect(api.Remove(constants.MachineName))
 	return m.ToError()
 }
 
-// Un-register host VM
-func unregister(host *host.Host) error {
-	if drivers.MachineInState(host.Driver, state.Running)() {
-		if err := registration.UnregisterHostVM(host, RegistrationParameters); err != nil {
-			return fmt.Errorf("Error unregistring the VM: %s", err)
-		}
+// Register host VM
+func Register(api libmachine.API) error {
+	host, err := api.Load(constants.MachineName)
+	if err != nil {
+		return err
+	}
+	if err := registration.RegisterHostVM(host, RegistrationParameters); err != nil {
+		return err
 	}
 	return nil
+}
+
+// Un-register host VM
+func UnRegister(api libmachine.API) (bool, error) {
+	host, err := api.Load(constants.MachineName)
+	if err != nil {
+		return false, err
+	}
+
+	if drivers.MachineInState(host.Driver, state.Running)() {
+		err := registration.UnregisterHostVM(host, RegistrationParameters)
+		if err != nil {
+			return false, err
+		}
+	} else {
+		return true, nil
+	}
+	return false, nil
 }
 
 // GetHostStatus gets the status of the host VM.
@@ -329,10 +337,6 @@ func createHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 		if err := minishiftUtil.SetProxyToShellEnv(h, config.ShellProxyEnv); err != nil {
 			return nil, fmt.Errorf("Error setting proxy to VM: %s", err)
 		}
-	}
-
-	if err := registration.RegisterHostVM(h, RegistrationParameters); err != nil {
-		return nil, fmt.Errorf("Error registering the VM: %s", err)
 	}
 
 	return h, nil

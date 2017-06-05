@@ -22,6 +22,7 @@ import (
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/host"
+	"github.com/docker/machine/libmachine/log"
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/cmd/minishift/cmd/addon"
@@ -118,6 +119,7 @@ func runStart(cmd *cobra.Command, args []string) {
 	isRestart := cmdutil.VMExists(libMachineClient, constants.MachineName)
 
 	hostVm, ip := startHost(libMachineClient)
+	registerHost(libMachineClient)
 
 	if proxyConfig.IsEnabled() {
 		// once we know the IP, we need to make sure it is not proxied in a proxy environment
@@ -412,5 +414,17 @@ func validateOpenshiftVersion() {
 func setSubscriptionManagerParameters() {
 	cluster.RegistrationParameters.Username = viper.GetString(startFlags.Username.Name)
 	cluster.RegistrationParameters.Password = viper.GetString(startFlags.Password.Name)
-	cluster.RegistrationParameters.SkipRegistration = viper.GetBool(startFlags.SkipRegistration.Name)
+}
+
+func registerHost(libMachineClient *libmachine.Client) {
+	if viper.GetBool(startFlags.SkipRegistration.Name) {
+		log.Debug("Skipping registration due to enabled --skip-registration flag")
+		return
+	}
+	if err := cluster.Register(libMachineClient); err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error to register VM: %v", err))
+	} else {
+		minishiftConfig.InstanceConfig.IsRegister = true
+		minishiftConfig.InstanceConfig.Write()
+	}
 }

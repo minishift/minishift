@@ -25,8 +25,9 @@ import (
 var InstanceConfig *InstanceConfigType
 
 type InstanceConfigType struct {
-	FilePath string `json:"-"`
-	OcPath   string
+	FilePath   string `json:"-"`
+	OcPath     string
+	IsRegister bool
 
 	HostFolders []HostFolder
 }

@@ -20,8 +20,10 @@ import (
 	"fmt"
 
 	"github.com/docker/machine/libmachine"
+	"github.com/docker/machine/libmachine/log"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
@@ -44,12 +46,17 @@ func runStop(cmd *cobra.Command, args []string) {
 	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 	defer api.Close()
 
-	if skipUnRegistration {
-		cluster.RegistrationParameters.SkipUnRegistration = true
+	if !skipUnRegistration {
+		if _, err := cluster.UnRegister(api); err != nil {
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error unregistering the VM: %s", err.Error()))
+		}
+		minishiftConfig.InstanceConfig.IsRegister = false
+		minishiftConfig.InstanceConfig.Write()
+	} else {
+		log.Debug("Skipping unregistration due to enabled --skip-unregistration flag")
 	}
 
 	if err := cluster.StopHost(api); err != nil {
-		fmt.Println("Error stopping cluster: ", err)
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error stopping cluster: %s", err.Error()))
 	}
 	fmt.Println("Cluster stopped.")

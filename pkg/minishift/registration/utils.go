@@ -26,18 +26,12 @@ import (
 )
 
 type RegistrationParameters struct {
-	Username           string
-	Password           string
-	SkipRegistration   bool
-	SkipUnRegistration bool
+	Username string
+	Password string
 }
 
 // Register host VM
 func RegisterHostVM(host *host.Host, param *RegistrationParameters) error {
-	if param.SkipRegistration {
-		log.Debug("Skipping registration due to enabled --skip-registration flag")
-		return nil
-	}
 	commander := provision.GenericSSHCommander{Driver: host.Driver}
 	registrator, supportRegistration, err := DetectRegistrator(commander)
 	if !supportRegistration {
@@ -66,10 +60,6 @@ func RegisterHostVM(host *host.Host, param *RegistrationParameters) error {
 
 // Unregister host VM
 func UnregisterHostVM(host *host.Host, param *RegistrationParameters) error {
-	if param.SkipUnRegistration {
-		log.Debug("Skipping unregistration due to enabled --skip-unregistration flag")
-		return nil
-	}
 	commander := provision.GenericSSHCommander{Driver: host.Driver}
 	registrator, supportUnregistration, err := DetectRegistrator(commander)
 

@@ -1,5 +1,5 @@
-hash: 67d3b6101a01a3c98bf5817ecb9a165ede19b0501fa5c2520528ab40de597ffb
-updated: 2017-05-30T16:34:30.535111917+05:30
+hash: 06f6721668ce434308cf50e5bc4388657ce27b0d146ad76fdf0d66a0ce2b54c0
+updated: 2017-06-05T20:52:13.483569805+02:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: 7b3beb6df3c42abd3509abfc3bcacc0fbfb7c877
@@ -175,7 +175,7 @@ imports:
   - internal/urlfetch
   - urlfetch
 - name: gopkg.in/cheggaaa/pb.v1
-  version: f6ccf2184de4dd34495277e38dc19b6e7fbe0ea2
+  version: b6229822fa186496fcbf34111237e7a9693c6971
 - name: gopkg.in/yaml.v2
   version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
 testImports: []

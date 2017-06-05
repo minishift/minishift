@@ -55,6 +55,7 @@ import:
   - ssh
 - package: golang.org/x/oauth2
 - package: gopkg.in/cheggaaa/pb.v1
+  version: v1.0.13
 - package: github.com/asaskevich/govalidator/
   version: 5
 - package: github.com/DATA-DOG/godog

@@ -33,6 +33,7 @@ import (
 	cmdOpenshift "github.com/minishift/minishift/cmd/minishift/cmd/openshift"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
+	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -62,6 +63,11 @@ var viperWhiteList = []string{
 	"log_dir",
 }
 
+var (
+	homeDirExists bool
+	homeDirEmpty  bool
+)
+
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "minishift",
@@ -69,6 +75,14 @@ var RootCmd = &cobra.Command{
 	Long:  `Minishift is a command-line tool that provisions and manages single-node OpenShift clusters optimized for development workflows.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		var err error
+
+		if filehelper.Exists(constants.Minipath) {
+			homeDirExists = true
+		}
+		if filehelper.IsDirEmpty(constants.Minipath) {
+			homeDirExists = true
+		}
+
 		for _, path := range dirs {
 			if err := os.MkdirAll(path, 0777); err != nil {
 				glog.Exitf("Error creating minishift directory: %s", err)

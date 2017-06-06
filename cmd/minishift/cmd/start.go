@@ -160,6 +160,15 @@ func runStart(cmd *cobra.Command, args []string) {
 	}
 
 	if !isRestart {
+		// Run the default addons if MINISHIFT_HOME dir does not exist or empty
+		if !homeDirExists || !homeDirEmpty {
+			fmt.Print("-- Installing default addons ... ")
+			if err := addon.UnpackAddons(constants.MakeMiniPath("addons")); err != nil {
+				atexit.ExitWithMessage(1, fmt.Sprintf("Error installing default addons : %s", err))
+			}
+			fmt.Println("OK")
+		}
+
 		postClusterUp(hostVm, clusterUpConfig)
 	}
 }

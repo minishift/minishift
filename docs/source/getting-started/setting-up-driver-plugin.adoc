@@ -187,5 +187,5 @@ Error creating the VM. Error with pre-create check: "vswitch \"\\\"External (Wir
 However on PowerShell you need to use the quotes:
 +
 ----
-$ env:HYPERV_VIRTUAL_SWITCH="External (Wireless)"
+PS C:\> $env:HYPERV_VIRTUAL_SWITCH="External (Wireless)"
 ----

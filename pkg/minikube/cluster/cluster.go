@@ -508,7 +508,8 @@ func CreateSSHShell(api libmachine.API, args []string) error {
 	if err != nil {
 		return err
 	}
-	return client.Shell(strings.Join(args, " "))
+
+	return client.Shell(args...)
 }
 
 func GetConsoleURL(api libmachine.API) (string, error) {

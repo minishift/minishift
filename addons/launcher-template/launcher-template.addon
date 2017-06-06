@@ -1,0 +1,4 @@
+# Name: launcher-template
+# Description: Imports the launch.openshift.io template
+
+oc create -f launchpad-template.yaml -n openshift

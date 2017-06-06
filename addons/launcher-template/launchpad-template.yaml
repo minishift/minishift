@@ -1,0 +1,442 @@
+kind: Template
+apiVersion: v1
+metadata:
+  name: launchpad
+  annotations:
+    openshift.io/display-name: "Launchpad (Frontend + Backend + Mission Control)"
+    description: This application consists of the combination of Mission Control and the Backend and Frontend
+    tags: instant-app,launchpad
+    iconClass: icon-shadowman
+    template.openshift.io/long-description: This application consists of the combination of Mission Control, Backend and Frontend
+    template.openshift.io/provider-display-name: Red Hat, Inc.
+    template.openshift.io/documentation-url: https://github.com/openshiftio
+    template.openshift.io/support-url: https://access.redhat.com
+message: "The following service(s) have been created in your project: mission-control, launchpad-backend, launchpad-frontend.\n\nFor more information about using this template, including OpenShift considerations, see https://github.com/openshiftio"
+labels:
+  template: launchpad
+objects:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: launchpad-missioncontrol
+    name: launchpad-missioncontrol
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: launchpad-missioncontrol
+      deploymentconfig: launchpad-missioncontrol
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: launchpad-missioncontrol
+    name: launchpad-missioncontrol
+  spec:
+    replicas: 1
+    selector:
+      app: launchpad-missioncontrol
+      deploymentconfig: launchpad-missioncontrol
+    strategy:
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: launchpad-missioncontrol
+          deploymentconfig: launchpad-missioncontrol
+      spec:
+        containers:
+        - env:
+          - name: LAUNCHPAD_MISSIONCONTROL_OPENSHIFT_API_URL
+            value: ${LAUNCHPAD_MISSIONCONTROL_OPENSHIFT_API_URL}
+          - name: LAUNCHPAD_MISSIONCONTROL_OPENSHIFT_CONSOLE_URL
+            value: ${LAUNCHPAD_MISSIONCONTROL_OPENSHIFT_CONSOLE_URL}
+          - name: LAUNCHPAD_MISSIONCONTROL_GITHUB_USERNAME
+            value: ${LAUNCHPAD_MISSIONCONTROL_GITHUB_USERNAME}
+          - name: LAUNCHPAD_MISSIONCONTROL_GITHUB_TOKEN
+            value: ${LAUNCHPAD_MISSIONCONTROL_GITHUB_TOKEN}
+          - name: LAUNCHPAD_KEYCLOAK_URL
+            value: ${LAUNCHPAD_KEYCLOAK_URL}
+          - name: LAUNCHPAD_KEYCLOAK_REALM
+            value: ${LAUNCHPAD_KEYCLOAK_REALM}
+          - name: LAUNCHPAD_MISSIONCONTROL_OPENSHIFT_USERNAME
+            value: ${LAUNCHPAD_MISSIONCONTROL_OPENSHIFT_USERNAME}
+          - name: LAUNCHPAD_MISSIONCONTROL_OPENSHIFT_PASSWORD
+            value: ${LAUNCHPAD_MISSIONCONTROL_OPENSHIFT_PASSWORD}
+          - name: LAUNCHPAD_TRACKER_SEGMENT_TOKEN
+            value: ${LAUNCHPAD_TRACKER_SEGMENT_TOKEN}
+          image: openshiftio/launchpad-missioncontrol:latest
+          imagePullPolicy: Always
+          name: launchpad-missioncontrol
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          readinessProbe:
+            httpGet:
+              path: /api/health/ready
+              port: 8080
+              scheme: HTTP
+            failureThreshold: 3
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          livenessProbe:
+            httpGet:
+              path: /api/health/ready
+              port: 8080
+              scheme: HTTP
+            failureThreshold: 3
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    labels:
+      app: launchpad-missioncontrol
+    name: launchpad-missioncontrol
+  spec:
+    to:
+      kind: Service
+      name: launchpad-missioncontrol
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      service: launchpad-backend
+    name: launchpad-backend
+  spec:
+    ports:
+    - name: "8080"
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      service: launchpad-backend
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    creationTimestamp: null
+    name: launchpad-backend
+    generation: 1
+  spec:
+    replicas: 1
+    selector:
+      service: launchpad-backend
+    strategy:
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          service: launchpad-backend
+      spec:
+        containers:
+        - env:
+          - name: LAUNCHPAD_BACKEND_CATALOG_GIT_REPOSITORY
+            value: ${LAUNCHPAD_BACKEND_CATALOG_GIT_REPOSITORY}
+          - name: LAUNCHPAD_BACKEND_CATALOG_GIT_REF
+            value: ${LAUNCHPAD_BACKEND_CATALOG_GIT_REF}
+          - name: LAUNCHPAD_BACKEND_CATALOG_INDEX_PERIOD
+            value: ${LAUNCHPAD_BACKEND_CATALOG_INDEX_PERIOD}
+          image: openshiftio/launchpad-backend:latest
+          imagePullPolicy: Always
+          name: launchpad-backend
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+              scheme: HTTP
+            failureThreshold: 3
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          livenessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+              scheme: HTTP
+            failureThreshold: 3
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - type: ConfigChange
+  status: {}
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: launchpad-backend
+    creationTimestamp: null
+  spec:
+    to:
+      kind: Service
+      name: launchpad-backend
+      weight: 100
+    wildcardPolicy: None
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      service: launchpad-frontend
+    name: launchpad-frontend
+    annotations:
+      service.alpha.openshift.io/dependencies: "[{\"name\":\"launchpad-backend\",\"namespace\":\"\",\"kind\":\"Service\"},{\"name\":\"launchpad-missioncontrol\",\"namespace\":\"\",\"kind\":\"Service\"}]"
+  spec:
+    ports:
+    - name: "8080"
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      service: launchpad-frontend
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    creationTimestamp: null
+    name: launchpad-frontend
+    generation: 1
+  spec:
+    replicas: 1
+    selector:
+      service: launchpad-frontend
+    strategy:
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          service: launchpad-frontend
+      spec:
+        containers:
+        - image: openshiftio/launchpad-frontend:latest
+          imagePullPolicy: Always
+          name: launchpad-frontend
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          env:
+          - name: LAUNCHPAD_BACKEND_URL
+            value: https://${LAUNCHPAD_FRONTEND_HOST}
+          - name: LAUNCHPAD_MISSIONCONTROL_URL
+            value: wss://${LAUNCHPAD_FRONTEND_HOST}
+          - name: LAUNCHPAD_KEYCLOAK_URL
+            value: ${LAUNCHPAD_KEYCLOAK_URL}
+          - name: LAUNCHPAD_KEYCLOAK_REALM
+            value: ${LAUNCHPAD_KEYCLOAK_REALM}
+          - name: LAUNCHPAD_TRACKER_SEGMENT_TOKEN
+            value: ${LAUNCHPAD_TRACKER_SEGMENT_TOKEN}
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          readinessProbe:
+            httpGet:
+              path: /wizard
+              port: 8080
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+            failureThreshold: 3
+            periodSeconds: 10
+            successThreshold: 1
+          livenessProbe:
+            httpGet:
+              path: /wizard
+              port: 8080
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+            failureThreshold: 3
+            periodSeconds: 10
+            successThreshold: 1
+        restartPolicy: Always
+        dnsPolicy: ClusterFirst
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - type: ConfigChange
+  status: {}
+- apiVersion: v1
+  kind: Route
+  metadata:
+    creationTimestamp: null
+    name: launchpad-frontend-main
+  spec:
+    host: ${LAUNCHPAD_FRONTEND_HOST}
+    to:
+      kind: Service
+      name: launchpad-frontend
+      weight: 100
+    tls:
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+    wildcardPolicy: None
+- apiVersion: v1
+  kind: Route
+  metadata:
+    creationTimestamp: null
+    name: launchpad-frontend-backend-rproxy
+  spec:
+    host: ${LAUNCHPAD_FRONTEND_HOST}
+    path: /launchpad
+    to:
+      kind: Service
+      name: launchpad-backend
+      weight: 100
+    tls:
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+    wildcardPolicy: None
+- apiVersion: v1
+  kind: Route
+  metadata:
+    creationTimestamp: null
+    name: launchpad-frontend-missioncontrol-rproxy
+  spec:
+    host: ${LAUNCHPAD_FRONTEND_HOST}
+    path: /status
+    to:
+      kind: Service
+      name: launchpad-missioncontrol
+      weight: 100
+    tls:
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+    wildcardPolicy: None
+parameters:
+- description: Your GitHub username (leave empty when using Keycloak)
+  displayName: Your GitHub username
+  name: LAUNCHPAD_MISSIONCONTROL_GITHUB_USERNAME
+- description: Your GitHub Mission Control access token (leave empty when using Keycloak)
+  displayName: Your GitHub Mission Control access token
+  name: LAUNCHPAD_MISSIONCONTROL_GITHUB_TOKEN
+- description: The base URL of the OpenShift API where the launched boosters
+    should be created (ie. https://hostname[:port] or https://ipaddress[:port]).
+    Leave the default value when targetting the same OpenShift/Minishift you are
+    running this on
+  displayName: Target OpenShift API URL
+  name: LAUNCHPAD_MISSIONCONTROL_OPENSHIFT_API_URL
+  required: true
+  value: https://openshift.default.svc.cluster.local
+- description: The base URL of the OpenShift Console where the launched boosters
+    should be created (ie. https://hostname[:port] or https://ipaddress[:port]).
+    When targetting the same OpenShift/Minishift instance you are running this on you
+    can most likely look at this page's address bar of your browser and copy the URL
+  displayName: Target OpenShift Console URL
+  name: LAUNCHPAD_MISSIONCONTROL_OPENSHIFT_CONSOLE_URL
+  required: true
+  value: https://$HOSTNAMEORIP:8443
+- description: OpenShift user name (leave empty when using Keycloak)
+  displayName: OpenShift user name
+  name: LAUNCHPAD_MISSIONCONTROL_OPENSHIFT_USERNAME
+  value: developer
+- description: OpenShift password (leave empty when using Keycloak)
+  displayName: OpenShift password
+  name: LAUNCHPAD_MISSIONCONTROL_OPENSHIFT_PASSWORD
+  value: developer
+- description: The URL (with the /auth part) of a Keycloak installation to perform SSO
+    authentication (leave empty if you've explicitly specified GItHub/OpenShift
+    authentication above)
+  displayName: KeyCloak URL
+  name: LAUNCHPAD_KEYCLOAK_URL
+  value: https://sso.openshift.io/auth
+- description: The keycloak realm to be used (leave empty if you've explicitly specified
+    GitHub/OpenShift authentication above)
+  displayName: KeyCloak Realm
+  name: LAUNCHPAD_KEYCLOAK_REALM
+  value: osio-launch-prod
+- description: The token to use for Segment tracking. Leaving this empty will default
+    to the token used for the development environment. This must be set to the proper
+    tokens for staging and production!
+  displayName: Segment Token
+  name: LAUNCHPAD_TRACKER_SEGMENT_TOKEN
+- description: The GitHub repository containing the booster catalog
+  displayName: Catalog Git Repository
+  name: LAUNCHPAD_BACKEND_CATALOG_GIT_REPOSITORY
+  required: true
+  value: https://github.com/openshiftio/booster-catalog.git
+- description: The Git reference to use for the above repository
+  displayName: Catalog Git Reference
+  name: LAUNCHPAD_BACKEND_CATALOG_GIT_REF
+  required: true
+  value: master
+- description: Time in minutes that the catalog will be periodically indexed ("0" means only once at startup)
+  displayName: Catalog Index Period
+  name: LAUNCHPAD_BACKEND_CATALOG_INDEX_PERIOD
+  required: true
+  value: "0"
+- description: The host name where the Frontend Launchpad application can be reached.
+    You have to deduce yourself as no meaningfull default value can be supplied.
+    If you're running everything on a local OpenShift/minishift instance you can
+    take a look at the default value displayed in this field and replace $PROJECTNAME
+    with the actual name of the project you are adding this template to and also
+    replace $HOSTNAMEORIP with the IP number of the OpenShift instance you are
+    running this on. If you're running this on an external server the URL in this
+    field should probably look somewhat like the URL you see in this page's address
+    bar of your browser
+  displayName: Launchpad Frontend Host
+  name: LAUNCHPAD_FRONTEND_HOST
+  required: true
+  value: launchpad-frontend-$PROJECTNAME.$HOSTNAMEORIP.nip.io
+

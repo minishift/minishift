@@ -275,3 +275,29 @@ Use the `openshift-version` option to request a specific version of OpenShift. Y
 
 The Minishift VM is exposed to the host system with a host-only IP address that
 can be obtained with the `minishift ip` command.
+
+[[connecting-with-ssh]]
+== Connecting to the Minishift VM with SSH
+
+You can use the xref:../command-ref/minishift_ssh{outfilesuffix}[`minishift ssh`] command to interact with the Minishift VM.
+
+When you run this command, it checks whether you have an external SSH client installed on your machine. An SSH client is not a
+prerequisite, but it impacts the behavior of the command.
+
+If you have an external SSH client::
+You can run `minishift ssh` without a sub-command to open an interactive shell using your external SSH client.
+Then, you can run commands on the Minishift VM in the same way that you run commands interactively on any remote machine using SSH.
+
+You can also run the command with a sub-command. The native Minishift client then sends the command to the Minishift VM
+and returns the result to your local shell.
+
+Make sure that the path to the SSH client is specified in the _PATH_ environment variable.
+
+NOTE: You can use most OpenSSH-based clients. However, if you use the Windows operating system, only *cygwin* is supported.
+
+If you do not have an external SSH client::
+You must specify a sub-command when you run `minishift ssh`. The native Minishift client then sends the command to the Minishift VM
+and returns the result to your local shell.
+
+This behavior is considered non-interactive and you must run the command with a sub-command
+each time you want to perform an operation on the Minishift VM.

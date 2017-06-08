@@ -77,7 +77,7 @@ func GetPrefixSuffixDelimiterForSet(userShell string, pathVar bool) (prefix, suf
 		suffix = "\";\n"
 		delimiter = " \""
 		if pathVar {
-			delimiter = " $PATH "
+			suffix = "\" $PATH;\n"
 		}
 	case "powershell":
 		prefix = "$Env:"

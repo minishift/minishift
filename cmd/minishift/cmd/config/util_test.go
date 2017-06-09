@@ -17,6 +17,8 @@ limitations under the License.
 package config
 
 import "testing"
+import "reflect"
+import "strings"
 
 var minikubeConfig = MinishiftConfig{
 	"vm-driver":            "kvm",
@@ -73,5 +75,20 @@ func TestSetBool(t *testing.T) {
 	}
 	if !val {
 		t.Fatalf("SetBool set value is incorrect")
+	}
+}
+
+func TestSetSlice(t *testing.T) {
+	expectedSlice := []string{"172.0.0.1/16", "mycustom.registry.com/3030"}
+	err := SetSlice(minikubeConfig, "insecure-registry", strings.Join(expectedSlice, ","))
+	if err != nil {
+		t.Fatal("Cannot set Slice value in config: %s", err)
+	}
+	val, ok := minikubeConfig["insecure-registry"].([]string)
+	if !ok {
+		t.Fatalf("Type is not set to slice")
+	}
+	if !reflect.DeepEqual(expectedSlice, val) {
+		t.Fatalf("Expected: %+v, Got: %+v", expectedSlice, val)
 	}
 }

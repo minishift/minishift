@@ -58,11 +58,14 @@ const (
 	b2dIsoAlias    = "b2d"
 	centOsIsoAlias = "centos"
 
+	defaultInsecureRegistry = "172.30.0.0/16"
+
 	unsupportedIsoUrlFormat = "Unsupported value for iso-url. It can be an URL, file URI or one of the following short names: [b2d centos]."
 )
 
 var (
 	dockerEnv        []string
+	dockerEngineOpt  []string
 	insecureRegistry []string
 	registryMirror   []string
 	openShiftEnv     []string
@@ -221,6 +224,25 @@ func handleProxies() *util.ProxyConfig {
 	return proxyConfig
 }
 
+func getSlice(key string) []string {
+	if viper.IsSet(key) {
+		return viper.GetStringSlice(key)
+	}
+	return nil
+}
+
+func determineInsecureRegistry(key string) []string {
+	s := getSlice(key)
+	if s != nil {
+		for _, v := range s {
+			if v == defaultInsecureRegistry {
+				return s
+			}
+		}
+	}
+	return append(s, defaultInsecureRegistry)
+}
+
 func startHost(libMachineClient *libmachine.Client) (*host.Host, string) {
 	machineConfig := &cluster.MachineConfig{
 		MinikubeISO:      determineIsoUrl(viper.GetString(startFlags.ISOUrl.Name)),
@@ -228,15 +250,16 @@ func startHost(libMachineClient *libmachine.Client) (*host.Host, string) {
 		CPUs:             viper.GetInt(startFlags.CPUs.Name),
 		DiskSize:         calculateDiskSizeInMB(viper.GetString(startFlags.DiskSize.Name)),
 		VMDriver:         viper.GetString(startFlags.VmDriver.Name),
-		DockerEnv:        dockerEnv,
-		InsecureRegistry: insecureRegistry,
-		RegistryMirror:   registryMirror,
+		DockerEnv:        getSlice(startFlags.DockerEnv.Name),
+		DockerEngineOpt:  getSlice(startFlags.DockerEngineOpt.Name),
+		InsecureRegistry: determineInsecureRegistry(startFlags.InsecureRegistry.Name),
+		RegistryMirror:   getSlice(startFlags.RegistryMirror.Name),
 		HostOnlyCIDR:     viper.GetString(startFlags.HostOnlyCIDR.Name),
 		ShellProxyEnv:    shellProxyEnv,
 	}
 
 	fmt.Printf("Starting local OpenShift cluster using '%s' hypervisor...\n", machineConfig.VMDriver)
-
+	fmt.Printf("%+v", machineConfig)
 	var hostVm *host.Host
 	start := func() (err error) {
 		hostVm, err = cluster.StartHost(libMachineClient, *machineConfig)
@@ -300,9 +323,10 @@ func initStartFlags() *flag.FlagSet {
 	startFlagSet.Int(startFlags.CPUs.Name, constants.DefaultCPUS, "Number of CPU cores to allocate to the Minishift VM.")
 	startFlagSet.String(startFlags.DiskSize.Name, constants.DefaultDiskSize, "Disk size to allocate to the Minishift VM. Use the format <size><unit>, where unit = b, k, m or g.")
 	startFlagSet.String(startFlags.HostOnlyCIDR.Name, "192.168.99.1/24", "The CIDR to be used for the minishift VM. (Only supported with VirtualBox driver.)")
-	startFlagSet.StringArrayVar(&dockerEnv, "docker-env", nil, "Environment variables to pass to the Docker daemon. Use the format <key>=<value>.")
-	startFlagSet.StringSliceVar(&insecureRegistry, "insecure-registry", []string{"172.30.0.0/16"}, "Non-secure Docker registries to pass to the Docker daemon.")
-	startFlagSet.StringSliceVar(&registryMirror, "registry-mirror", nil, "Registry mirrors to pass to the Docker daemon.")
+	startFlagSet.StringArrayVar(&dockerEnv, startFlags.DockerEnv.Name, nil, "Environment variables to pass to the Docker daemon. Use the format <key>=<value>.")
+	startFlagSet.StringSliceVar(&dockerEngineOpt, startFlags.DockerEngineOpt.Name, nil, "Specify arbitrary flags to pass to the Docker daemon in the form <flag>=<value>.")
+	startFlagSet.StringSliceVar(&insecureRegistry, startFlags.InsecureRegistry.Name, []string{defaultInsecureRegistry}, "Non-secure Docker registries to pass to the Docker daemon.")
+	startFlagSet.StringSliceVar(&registryMirror, startFlags.RegistryMirror.Name, nil, "Registry mirrors to pass to the Docker daemon.")
 
 	return startFlagSet
 }

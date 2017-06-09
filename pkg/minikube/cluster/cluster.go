@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"encoding/json"
+
 	"github.com/docker/machine/drivers/hyperv"
 	"github.com/docker/machine/drivers/virtualbox"
 	"github.com/docker/machine/libmachine"
@@ -191,6 +192,7 @@ type MachineConfig struct {
 	DiskSize         int
 	VMDriver         string
 	DockerEnv        []string // Each entry is formatted as KEY=VALUE.
+	DockerEngineOpt  []string
 	InsecureRegistry []string
 	RegistryMirror   []string
 	HostOnlyCIDR     string // Only used by the virtualbox driver
@@ -200,6 +202,7 @@ type MachineConfig struct {
 func engineOptions(config MachineConfig) *engine.Options {
 	o := engine.Options{
 		Env:              config.DockerEnv,
+		ArbitraryFlags:   config.DockerEngineOpt,
 		InsecureRegistry: config.InsecureRegistry,
 		RegistryMirror:   config.RegistryMirror,
 	}

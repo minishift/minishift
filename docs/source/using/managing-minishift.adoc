@@ -171,17 +171,26 @@ command.
 The easiest way to change a persistent configuration option is with
 the link:../command-ref/minishift_config_set{outfilesuffix}[`config set`] sub-command. For example:
 
-[listing.console]
-
 ----
 # Set default memory 4096 MB
 $ minishift config set memory 4096
 ----
 
+Flags which can be used multiple times per command invocation, like `docker-env` or `insecure-registry`, need to be comma (`,`) separated when used with the `config set` command.
+For example, from the CLI one can use `insecure-registry` like this:
+
+----
+$ minishift start --insecure-registry hub.foo.com --insecure-registry hub.bar.com
+----
+
+If you want to configure the same registries in the persistent configuration, you would run:
+
+----
+$ minishift config set insecure-registry hub.foo.com,hub.bar.com
+----
+
 To view all persistent configuration values, you can use the
 link:../command-ref/minishift_config_view{outfilesuffix}[`view`] sub-command:
-
-[listing.console]
 
 ----
 $ minishift config view
@@ -190,8 +199,6 @@ $ minishift config view
 
 Alternatively, you can display a single value with the
 link:../command-ref/minishift_config_get{outfilesuffix}[`get`] sub-command:
-
-[listing.console]
 
 ----
 $ minishift config get memory
@@ -203,8 +210,6 @@ $ minishift config get memory
 
 To remove a persistent configuration option, you can use the
 link:../command-ref/minishift_config_unset{outfilesuffix}[`unset`] sub-command. For example:
-
-[listing.console]
 
 ----
 $ minishift config unset memory

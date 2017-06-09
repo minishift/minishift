@@ -192,6 +192,15 @@ Feature: Basic
      When executing "minishift stop" succeeds
      Then Minishift should have state "Stopped"
 
+  Scenario: Stopping an already stopped VM
+    Given Minishift has state "Stopped"
+     When executing "minishift stop"
+     Then Minishift should have state "Stopped"
+      And stdout should contain
+      """
+      The 'minishift' VM is already stopped.
+      """
+
   Scenario: Deleting Minishift
     Given Minishift has state "Stopped"
      When executing "minishift delete" succeeds

@@ -44,6 +44,10 @@ func IsHostRunning(driver drivers.Driver) bool {
 	return drivers.MachineInState(driver, state.Running)()
 }
 
+func IsHostStopped(driver drivers.Driver) bool {
+	return drivers.MachineInState(driver, state.Stopped)()
+}
+
 func ExitIfNotRunning(driver drivers.Driver, machineName string) {
 	running := IsHostRunning(driver)
 	if !running {

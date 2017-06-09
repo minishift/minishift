@@ -19,6 +19,7 @@ package config
 import (
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 // Runs all the validation or callback functions and collects errors
@@ -68,5 +69,16 @@ func SetBool(m MinishiftConfig, name string, val string) error {
 		return err
 	}
 	m[name] = b
+	return nil
+}
+
+func SetSlice(m MinishiftConfig, name string, val string) error {
+	var tmpSlice []string
+	if val != "" {
+		for _, v := range strings.Split(val, ",") {
+			tmpSlice = append(tmpSlice, strings.TrimSpace(v))
+		}
+	}
+	m[name] = tmpSlice
 	return nil
 }

@@ -50,7 +50,7 @@ func runStop(cmd *cobra.Command, args []string) {
 		if _, err := cluster.UnRegister(api); err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error unregistering the VM: %s", err.Error()))
 		}
-		minishiftConfig.InstanceConfig.IsRegister = false
+		minishiftConfig.InstanceConfig.IsRegistered = false
 		minishiftConfig.InstanceConfig.Write()
 	} else {
 		log.Debug("Skipping unregistration due to enabled --skip-unregistration flag")

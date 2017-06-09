@@ -48,17 +48,17 @@ func runDelete(cmd *cobra.Command, args []string) {
 
 	util.ExitIfUndefined(api, constants.MachineName)
 
-	if minishiftConfig.InstanceConfig.IsRegister {
+	if minishiftConfig.InstanceConfig.IsRegistered {
 		if stopped, err := cluster.UnRegister(api); err != nil || stopped {
 			handleFailedUnRegistration()
 		}
-		minishiftConfig.InstanceConfig.IsRegister = false
+		minishiftConfig.InstanceConfig.IsRegistered = false
 		minishiftConfig.InstanceConfig.Write()
 	}
 
 	fmt.Println("Deleting the Minishift VM...")
 	if err := cluster.DeleteHost(api); err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting the VM: %s", err.Error()))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting the Minishift VM: %s", err.Error()))
 	}
 
 	removeInstanceConfigs()
@@ -67,10 +67,10 @@ func runDelete(cmd *cobra.Command, args []string) {
 }
 
 func handleFailedUnRegistration() {
-	userConfirmation := pkgUtil.ReadInputFromStdin("Current Minishift instance is registered with subscription, " +
-		"Still want to Delete VM (y/n)")
+	userConfirmation := pkgUtil.ReadInputFromStdin("Current Minishift VM is registered, but unregistration failed. " +
+		"Do you still want to delete the VM [y/N]?")
 	if strings.ToUpper(userConfirmation) != "Y" {
-		atexit.ExitWithMessage(0, fmt.Sprintln("Delete aborted by User"))
+		atexit.ExitWithMessage(0, fmt.Sprintln("Delete aborted."))
 	}
 }
 

@@ -424,7 +424,7 @@ func registerHost(libMachineClient *libmachine.Client) {
 	if err := cluster.Register(libMachineClient); err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error to register VM: %v", err))
 	} else {
-		minishiftConfig.InstanceConfig.IsRegister = true
+		minishiftConfig.InstanceConfig.IsRegistered = true
 		minishiftConfig.InstanceConfig.Write()
 	}
 }

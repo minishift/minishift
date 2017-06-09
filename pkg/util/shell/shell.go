@@ -17,9 +17,15 @@ limitations under the License.
 package shell
 
 import (
+	"errors"
 	"fmt"
 	"github.com/docker/machine/libmachine/shell"
 	"os"
+	"strings"
+)
+
+var (
+	supportedShell = []string{"bash", "fish", "powershell", "cmd", "emacs", "tcsh", "zsh"}
 )
 
 type ShellConfig struct {
@@ -30,9 +36,21 @@ type ShellConfig struct {
 
 func GetShell(userShell string) (string, error) {
 	if userShell != "" {
+		if !isSupportedShell(userShell) {
+			return "", errors.New(fmt.Sprintf("'%s' is not a supported shell.\nSupported shells are %s.", userShell, strings.Join(supportedShell, ", ")))
+		}
 		return userShell, nil
 	}
 	return shell.Detect()
+}
+
+func isSupportedShell(userShell string) bool {
+	for _, shell := range supportedShell {
+		if userShell == shell {
+			return true
+		}
+	}
+	return false
 }
 
 func FindNoProxyFromEnv() (string, string) {
@@ -67,7 +85,7 @@ func GenerateUsageHint(userShell, cmdLine string) string {
 		cmd = fmt.Sprintf("eval $(%s)", cmdLine)
 	}
 
-	return fmt.Sprintf("%s Run this command to configure your shell: \n%s %s\n", comment, comment, cmd)
+	return fmt.Sprintf("%s Run this command to configure your shell:\n%s %s\n", comment, comment, cmd)
 }
 
 func GetPrefixSuffixDelimiterForSet(userShell string, pathVar bool) (prefix, suffix, delimiter string) {
@@ -77,7 +95,7 @@ func GetPrefixSuffixDelimiterForSet(userShell string, pathVar bool) (prefix, suf
 		suffix = "\";\n"
 		delimiter = " \""
 		if pathVar {
-			suffix = "\" $PATH;\n"
+			suffix = "\" \"$PATH\";\n"
 		}
 	case "powershell":
 		prefix = "$Env:"

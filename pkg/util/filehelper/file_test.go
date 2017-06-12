@@ -92,3 +92,35 @@ func Test_file_is_not_a_directory(t *testing.T) {
 		t.Fatalf("The path '%s' should not be a directory", testDir)
 	}
 }
+
+func Test_non_existing_directory(t *testing.T) {
+	testDir := "/foo/bar"
+	if empty := IsEmptyDir(testDir); empty {
+		t.Fatalf("Expected that the directory %s doesn't exist.", testDir)
+	}
+}
+
+func Test_existing_empty_directory(t *testing.T) {
+	testDir, err := ioutil.TempDir("", "minishift-test-filetest-")
+	defer os.RemoveAll(testDir)
+	if err != nil {
+		t.Fatal("Unexpected error: " + err.Error())
+	}
+
+	if empty := IsEmptyDir(testDir); !empty {
+		t.Fatalf("Expected %s to be empty.", testDir)
+	}
+}
+
+func Test_existing_nonempty_directory(t *testing.T) {
+	testDir, _ := ioutil.TempDir("", "minishift-test-filetest-")
+	_, err := ioutil.TempFile(testDir, "foo")
+	defer os.RemoveAll(testDir)
+	if err != nil {
+		t.Fatal("Unexpected error: " + err.Error())
+	}
+
+	if empty := IsEmptyDir(testDir); empty {
+		t.Fatalf("Expected %s to be nonempty.", testDir)
+	}
+}

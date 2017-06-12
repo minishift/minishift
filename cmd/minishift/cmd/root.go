@@ -25,15 +25,19 @@ import (
 
 	"path/filepath"
 
+	"encoding/json"
 	"github.com/docker/machine/libmachine/log"
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/cmd/minishift/cmd/addon"
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
 	hostfolderCmd "github.com/minishift/minishift/cmd/minishift/cmd/hostfolder"
 	cmdOpenshift "github.com/minishift/minishift/cmd/minishift/cmd/openshift"
+	"github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
+	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
+	"github.com/minishift/minishift/pkg/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -68,7 +72,15 @@ var RootCmd = &cobra.Command{
 	Short: "Minishift is a tool for application development in local OpenShift clusters.",
 	Long:  `Minishift is a command-line tool that provisions and manages single-node OpenShift clusters optimized for development workflows.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		var err error
+		var (
+			err          error
+			isFreshStart bool
+		)
+
+		if !filehelper.Exists(constants.Minipath) || filehelper.IsEmptyDir(constants.Minipath) {
+			isFreshStart = true
+		}
+
 		for _, path := range dirs {
 			if err := os.MkdirAll(path, 0777); err != nil {
 				glog.Exitf("Error creating minishift directory: %s", err)
@@ -80,7 +92,6 @@ var RootCmd = &cobra.Command{
 		// Create all instances config
 		allInstanceConfigPath := filepath.Join(constants.Minipath, "config", "allinstances.json")
 		minishiftConfig.AllInstancesConfig, err = minishiftConfig.NewAllInstancesConfig(allInstanceConfigPath)
-
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error creating config for all instances: %s", err.Error()))
 		}
@@ -88,9 +99,25 @@ var RootCmd = &cobra.Command{
 		// Create MACHINE_NAME.json
 		instanceConfigPath := filepath.Join(constants.Minipath, "machines", constants.MachineName+".json")
 		minishiftConfig.InstanceConfig, err = minishiftConfig.NewInstanceConfig(instanceConfigPath)
-
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error creating config for VM: %s", err.Error()))
+		}
+
+		// Run the default addons on fresh minishift start
+		if isFreshStart {
+			fmt.Print("-- Installing default addons ... ")
+			if err := util.UnpackAddons(constants.MakeMiniPath("addons")); err != nil {
+				atexit.ExitWithMessage(1, fmt.Sprintf("Error installing default add-ons : %s", err))
+			}
+
+			fmt.Println("OK")
+		}
+
+		// Check marker file created by update command and perform post update execution steps
+		if filehelper.Exists(filepath.Join(constants.Minipath, constants.UpdateMarkerFileName)) {
+			if err := performPostUpdateExecution(filepath.Join(constants.Minipath, constants.UpdateMarkerFileName)); err != nil {
+				atexit.ExitWithMessage(1, fmt.Sprintf("Error in performing post update exeuction: %s", err))
+			}
 		}
 
 		shouldShowLibmachineLogs := viper.GetBool(showLibmachineLogs)
@@ -178,4 +205,32 @@ func ensureConfigFileExists(configPath string) {
 			glog.Exitf("Cannot encode config %s: %s", configPath, err)
 		}
 	}
+}
+
+// performPostUpdateExecution executes the post update actions like unpacking the default addons
+// if user chose to update addons during `minishift update` command.
+// It also remove the marker file created by update command to avoid repeating the post update execution process
+func performPostUpdateExecution(markerPath string) error {
+	var markerData UpdateMarker
+
+	file, err := ioutil.ReadFile(markerPath)
+	if err != nil {
+		return err
+	}
+
+	json.Unmarshal(file, &markerData)
+	if markerData.InstallAddon {
+		fmt.Println(fmt.Sprintf("Minishift was upgraded from v%s to v%s. Running post update actions.", markerData.PreviousVersion, version.GetVersion()))
+		fmt.Print("--- Updating default add-ons ... ")
+		util.UnpackAddons(constants.MakeMiniPath("add-ons"))
+		fmt.Println("OK")
+		fmt.Println(fmt.Sprintf("Default add-ons %s installed", strings.Join(util.DefaultAssets, ", ")))
+	}
+
+	// Delete the marker file once post update execution is done
+	if err := os.Remove(markerPath); err != nil {
+		return err
+	}
+
+	return nil
 }

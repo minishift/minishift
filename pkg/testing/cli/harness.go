@@ -51,7 +51,7 @@ func CreateTee(t *testing.T, silent bool) *Tee {
 	return tee
 }
 
-// VerifyExitCodeAndMessage creates an exit handler which verifies that the programm will try to exit execution with the specified
+// VerifyExitCodeAndMessage creates an exit handler which verifies that the program will try to exit execution with the specified
 // exit code and message.
 func VerifyExitCodeAndMessage(t *testing.T, tee *Tee, expectedExitCode int, expectedErrorMessage string) func(int) bool {
 	var exitHandler func(int) bool

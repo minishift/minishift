@@ -24,31 +24,21 @@ import (
 	"github.com/minishift/minishift/pkg/version"
 )
 
-// MachineName is the name to use for the VM.
-const MachineName = "minishift"
-
-// APIServerPort is the port that the API server should listen on.
-const APIServerPort = 8443
+const (
+	MachineName                  = "minishift"      // Name to use for the VM
+	APIServerPort                = 8443             // Port that the API server should listen on
+	MiniShiftEnvPrefix           = "MINISHIFT"      // Prefix for the environmental variables
+	MiniShiftHomeEnv             = "MINISHIFT_HOME" // Environment variable used to change the Minishift home directory
+	VersionPrefix                = "v"
+	MinOpenshiftSupportedVersion = "v1.4.1"
+	DefaultMemory                = 2048
+	DefaultCPUS                  = 2
+	DefaultDiskSize              = "20g"
+	UpdateMarkerFileName         = "updated"
+)
 
 // Fix for windows
 var Minipath = getMinishiftHomeDir()
-
-// MiniShiftEnvPrefix is the prefix for the environmental variables
-const MiniShiftEnvPrefix = "MINISHIFT"
-
-// MiniShiftHomeEnv is the environment variable used to change the Minishift home directory
-const MiniShiftHomeEnv = "MINISHIFT_HOME"
-
-const VersionPrefix = "v"
-
-// Minimum Openshift supported version
-const MinOpenshiftSuportedVersion = "v1.4.1"
-
-const (
-	DefaultMemory   = 2048
-	DefaultCPUS     = 2
-	DefaultDiskSize = "20g"
-)
 
 var KubeConfigPath = filepath.Join(Minipath, "machines", MachineName+"_kubeconfig")
 

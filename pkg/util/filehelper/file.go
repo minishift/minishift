@@ -152,3 +152,20 @@ func CopyDir(src string, dst string) (err error) {
 
 	return
 }
+
+// IsDirEmpty returns true if and only if the specified path denotes an empty directory, false otherwise.
+func IsEmptyDir(path string) bool {
+	// https://stackoverflow.com/a/30708914/1120530
+	f, err := os.Open(path)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	_, err = f.Readdirnames(1)
+	if err == io.EOF {
+		return true
+	}
+
+	return false
+}

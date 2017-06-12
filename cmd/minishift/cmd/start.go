@@ -388,7 +388,7 @@ func ensureNotRunning(client *libmachine.Client, machineName string) {
 func validateOpenshiftVersion() {
 	requestedVersion := viper.GetString(startFlags.OpenshiftVersion.Name)
 
-	valid, err := clusterup.ValidateOpenshiftMinVersion(requestedVersion, constants.MinOpenshiftSuportedVersion)
+	valid, err := clusterup.ValidateOpenshiftMinVersion(requestedVersion, constants.MinOpenshiftSupportedVersion)
 	if err != nil {
 		atexit.ExitWithMessage(1, err.Error())
 	}
@@ -396,7 +396,7 @@ func validateOpenshiftVersion() {
 	if !valid {
 		fmt.Printf("Minishift does not support Openshift version %s. "+
 			"You need to use a version >= %s\n", viper.GetString(startFlags.OpenshiftVersion.Name),
-			constants.MinOpenshiftSuportedVersion)
+			constants.MinOpenshiftSupportedVersion)
 		atexit.Exit(1)
 	}
 

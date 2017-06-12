@@ -55,6 +55,8 @@ const (
 
 var (
 	dockerEnv        []string
+	addRegistry      []string
+	blockRegistry    []string
 	insecureRegistry []string
 	registryMirror   []string
 	openShiftEnv     []string
@@ -221,6 +223,8 @@ func startHost(libMachineClient *libmachine.Client) (*host.Host, string) {
 		DiskSize:         calculateDiskSizeInMB(viper.GetString(startFlags.DiskSize.Name)),
 		VMDriver:         viper.GetString(startFlags.VmDriver.Name),
 		DockerEnv:        dockerEnv,
+		AddRegistry:      addRegistry,
+		BlockRegistry:    blockRegistry,
 		InsecureRegistry: insecureRegistry,
 		RegistryMirror:   registryMirror,
 		HostOnlyCIDR:     viper.GetString(startFlags.HostOnlyCIDR.Name),
@@ -276,6 +280,8 @@ func initStartFlags() *flag.FlagSet {
 	startFlagSet.String(startFlags.DiskSize.Name, constants.DefaultDiskSize, "Disk size to allocate to the Minishift VM. Use the format <size><unit>, where unit = b, k, m or g.")
 	startFlagSet.String(startFlags.HostOnlyCIDR.Name, "192.168.99.1/24", "The CIDR to be used for the minishift VM. (Only supported with VirtualBox driver.)")
 	startFlagSet.StringArrayVar(&dockerEnv, "docker-env", nil, "Environment variables to pass to the Docker daemon. Use the format <key>=<value>.")
+	startFlagSet.StringSliceVar(&addRegistry, "add-registry", nil, "Additional default registries to pass to the Docker daemon.")
+	startFlagSet.StringSliceVar(&blockRegistry, "block-registry", nil, "Blocked registries to pass to the Docker daemon.")
 	startFlagSet.StringSliceVar(&insecureRegistry, "insecure-registry", []string{"172.30.0.0/16"}, "Non-secure Docker registries to pass to the Docker daemon.")
 	startFlagSet.StringSliceVar(&registryMirror, "registry-mirror", nil, "Registry mirrors to pass to the Docker daemon.")
 

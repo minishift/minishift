@@ -191,6 +191,8 @@ type MachineConfig struct {
 	DiskSize         int
 	VMDriver         string
 	DockerEnv        []string // Each entry is formatted as KEY=VALUE.
+	AddRegistry      []string
+	BlockRegistry    []string
 	InsecureRegistry []string
 	RegistryMirror   []string
 	HostOnlyCIDR     string // Only used by the virtualbox driver
@@ -200,6 +202,8 @@ type MachineConfig struct {
 func engineOptions(config MachineConfig) *engine.Options {
 	o := engine.Options{
 		Env:              config.DockerEnv,
+		AddRegistry:      config.AddRegistry,
+		BlockRegistry:    config.BlockRegistry,
 		InsecureRegistry: config.InsecureRegistry,
 		RegistryMirror:   config.RegistryMirror,
 	}

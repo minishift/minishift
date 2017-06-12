@@ -22,12 +22,20 @@ import (
 	"github.com/docker/machine/libmachine/host"
 	"github.com/docker/machine/libmachine/log"
 	"github.com/docker/machine/libmachine/provision"
-	"github.com/pkg/errors"
 )
 
 type RegistrationParameters struct {
-	Username string
-	Password string
+	Username               string
+	Password               string
+	GetUsernameInteractive func(message string) string
+	GetPasswordInteractive func(message string) string
+}
+
+// Detect supported Registrator
+func NeedRegistration(host *host.Host) (bool, error) {
+	commander := provision.GenericSSHCommander{Driver: host.Driver}
+	_, supportRegistration, err := DetectRegistrator(commander)
+	return supportRegistration, err
 }
 
 // Register host VM
@@ -44,13 +52,6 @@ func RegisterHostVM(host *host.Host, param *RegistrationParameters) error {
 
 	if registrator != nil {
 		fmt.Println("Registering machine using subscription-manager")
-		if param.Username == "" || param.Password == "" {
-			return errors.New("This virtual machine requires registration. " +
-				"Credentials must either be passed via the environment variables " +
-				"MINISHIFT_USERNAME and MINISHIFT_PASSWORD " +
-				" or the --username and --password flags\n")
-		}
-
 		if err := registrator.Register(param); err != nil {
 			return err
 		}

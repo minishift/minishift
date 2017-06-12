@@ -18,9 +18,10 @@ package registration
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/pkg/util"
-	"strings"
 )
 
 func init() {
@@ -51,16 +52,35 @@ func (registrator *RedHatRegistrator) CompatibleWithDistribution(osReleaseInfo *
 }
 
 func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) error {
-	if output, err := registrator.SSHCommand("sudo -E subscription-manager version"); err != nil {
+	output, err := registrator.SSHCommand("sudo -E subscription-manager version")
+	if err != nil {
 		return err
-	} else {
-		if strings.Contains(output, "not registered") {
+	}
+	if strings.Contains(output, "not registered") {
+		for i := 1; i < 4; i++ {
+			if param.Username == "" {
+				param.Username = param.GetUsernameInteractive("Red Hat Developers or Red Hat Subscription Management (RHSM) username")
+			}
+			if param.Password == "" {
+				param.Password = param.GetPasswordInteractive("Red Hat Developers or Red Hat Subscription Management (RHSM) password")
+			}
 			subscriptionCommand := fmt.Sprintf("sudo -E subscription-manager register --auto-attach "+
 				"--username %s "+
 				"--password '%s' ", param.Username, util.EscapeSingleQuote(param.Password))
-			if _, err := registrator.SSHCommand(subscriptionCommand); err != nil {
+			_, err = registrator.SSHCommand(subscriptionCommand)
+			if err == nil {
+				return nil
+			}
+			if strings.Contains(err.Error(), "Invalid username or password") {
+				fmt.Println("Invalid username or password Retry: ", i)
+				param.Username = ""
+				param.Password = ""
+			} else {
 				return err
 			}
+		}
+		if err != nil {
+			return err
 		}
 	}
 	return nil

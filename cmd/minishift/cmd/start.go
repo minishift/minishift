@@ -18,6 +18,10 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+
 	units "github.com/docker/go-units"
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/drivers"
@@ -36,14 +40,12 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/hostfolder"
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
 	"github.com/minishift/minishift/pkg/util"
+	inputUtils "github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/minishift/minishift/pkg/version"
 	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
 const (
@@ -414,6 +416,16 @@ func validateOpenshiftVersion() {
 func setSubscriptionManagerParameters() {
 	cluster.RegistrationParameters.Username = viper.GetString(startFlags.Username.Name)
 	cluster.RegistrationParameters.Password = viper.GetString(startFlags.Password.Name)
+	cluster.RegistrationParameters.GetUsernameInteractive = getUsernameInteractive
+	cluster.RegistrationParameters.GetPasswordInteractive = getPasswordInteractive
+}
+
+func getUsernameInteractive(message string) string {
+	return inputUtils.ReadInputFromStdin(message)
+}
+
+func getPasswordInteractive(message string) string {
+	return inputUtils.ReadPasswordFromStdin(message)
 }
 
 func registerHost(libMachineClient *libmachine.Client) {

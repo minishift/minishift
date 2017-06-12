@@ -35,6 +35,7 @@ _testmain.go
 *.iso
 /.idea
 *.iml
+/.vscode
 
 # Docs
 .ruby-gemset

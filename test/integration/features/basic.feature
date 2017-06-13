@@ -72,6 +72,8 @@ Feature: Basic
     Given Minishift has state "Running"
      When executing "minishift console --url" succeeds
      Then stdout should be valid URL
+     When executing "minishift dashboard --url" succeeds
+     Then stdout should be valid URL
 
   Scenario: OpenShift developer has sudo permissions
      The 'developer' user should be configured with the sudoer role after starting Minishift

@@ -55,6 +55,16 @@ func TestMain(m *testing.M) {
 	var godogPaths = flag.String("paths", "./features", "")
 	flag.Parse()
 
+	if *godogTags != "" {
+		*godogTags += "&&"
+	}
+	runner := util.MinishiftRunner{CommandPath: givenPath}
+	if runner.IsCDK() {
+		*godogTags += "~minishift-only"
+	} else {
+		*godogTags += "~cdk-only"
+	}
+
 	status := godog.RunWithOptions("minishift", func(s *godog.Suite) {
 		FeatureContext(s)
 	}, godog.Options{

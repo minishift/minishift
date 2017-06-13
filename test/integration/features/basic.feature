@@ -3,7 +3,7 @@ Feature: Basic
   As a user I can perform basic operations of Minishift and OpenShift
 
   Scenario: User can install default add-ons
-    Given Minishift has state "Does Not Exist"
+   Given Minishift has state "Does Not Exist"
     When executing "minishift addons install --defaults" succeeds
     Then stdout should contain
      """
@@ -11,15 +11,16 @@ Feature: Basic
      """
 
   Scenario: User can enable the anyuid add-on
-    Given Minishift has state "Does Not Exist"
+   Given Minishift has state "Does Not Exist"
     When executing "minishift addons enable anyuid" succeeds
     Then stdout should contain
      """
      Addon 'anyuid' enabled
      """
 
+  @minishift-only
   Scenario: User can list enabled plugins
-    Given Minishift has state "Does Not Exist"
+   Given Minishift has state "Does Not Exist"
     When executing "minishift addons list" succeeds
     Then stdout should contain
      """

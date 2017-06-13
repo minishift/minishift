@@ -26,10 +26,12 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
+	pkgUtil "github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"strings"
 )
 
 // deleteCmd represents the delete command
@@ -46,23 +48,45 @@ func runDelete(cmd *cobra.Command, args []string) {
 
 	util.ExitIfUndefined(api, constants.MachineName)
 
+	if minishiftConfig.InstanceConfig.IsRegistered {
+		if stopped, err := cluster.UnRegister(api); err != nil || stopped {
+			handleFailedUnRegistration()
+		}
+		minishiftConfig.InstanceConfig.IsRegistered = false
+		minishiftConfig.InstanceConfig.Write()
+	}
+
 	fmt.Println("Deleting the Minishift VM...")
 	if err := cluster.DeleteHost(api); err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting the VM: %s", err.Error()))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting the Minishift VM: %s", err.Error()))
 	}
 
-	if err := minishiftConfig.InstanceConfig.Delete(); err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintln(fmt.Sprintf("Error deleting %s: ", minishiftConfig.InstanceConfig.FilePath), err))
-	}
+	removeInstanceConfigs()
 
-	exists := filehelper.Exists(constants.KubeConfigPath)
+	fmt.Println("Minishift VM deleted.")
+}
+
+func handleFailedUnRegistration() {
+	userConfirmation := pkgUtil.ReadInputFromStdin("Current Minishift VM is registered, but unregistration failed. " +
+		"Do you still want to delete the VM [y/N]?")
+	if strings.ToUpper(userConfirmation) != "Y" {
+		atexit.ExitWithMessage(0, fmt.Sprintln("Delete aborted."))
+	}
+}
+
+func removeInstanceConfigs() {
+	exists := filehelper.Exists(minishiftConfig.InstanceConfig.FilePath)
+	if exists {
+		if err := minishiftConfig.InstanceConfig.Delete(); err != nil {
+			atexit.ExitWithMessage(1, fmt.Sprintln(fmt.Sprintf("Error deleting %s: ", minishiftConfig.InstanceConfig.FilePath), err))
+		}
+	}
+	exists = filehelper.Exists(constants.KubeConfigPath)
 	if exists {
 		if err := os.Remove(constants.KubeConfigPath); err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting '%s'", constants.KubeConfigPath))
 		}
 	}
-
-	fmt.Println("Minishift VM deleted.")
 }
 
 func init() {

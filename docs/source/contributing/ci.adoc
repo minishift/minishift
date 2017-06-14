@@ -11,23 +11,47 @@ toc::[]
 [[overview]]
 == Overview
 
-The following sections describes the various CI setups Minishift utilizes.
-
-[[ci-setup]]
-== CentOS CI
+Minishift uses the following CI build systems: CentOS CI, AppVeyor, Circle CI, and Travis CI.
+These systems build the master branch when a commit occurs as well as the incoming pull requests.
+Except for Travis CI, they also archive build artifacts.
 
 image::ci-servers.png[CI Servers]
 
-Minishift uses several CI build servers, including https://ci.centos.org/[CentOS CI]. The server
-builds incoming pull requests and pushes to master. It also archives build artifacts of successful
-builds.
 
-You can find the CentOS CI Jenkins job for Minishift https://ci.centos.org/job/minishift/[here].
+[[ci-system-summary]]
+== CI System Summary
 
-The artifacts of a successful pull request build can be found at
-http://artifacts.ci.centos.org/minishift/minishift/pr/[artifacts.ci.centos.org/minishift/minishift/pr/<PRID>].
+The following table describes the various CI build servers Minishift utilizes and the locations of their builds and configuration files:
 
-Artifacts of a successful master build can be found at
-http://artifacts.ci.centos.org/minishift/minishift/master/[artifacts.ci.centos.org/minishift/minishift/master/<BUILDID>].
+[cols="4*", options="header"]
+|===
+|CI Systems
+|Description
+|CI Builds
+|Configuration files
 
-For more information about CentOS CI, see the https://wiki.centos.org/QaWiki/CI[CentOS CI] documentation.
+|link:https://ci.centos.org/[*CentOS CI*]
+|This is the only CI system which can be used to run integration tests as it supports nested virtualization.
+Apart from integration tests, link:https://wiki.centos.org/QaWiki/CI[CentOS CI] is also used to run the unit tests, language-style checks and build the tar bundle used for xref:../contributing/writing-docs.adoc#integration-with-docs-openshift-org[integration into docs.openshift.org].
+|link:https://ci.centos.org/job/minishift/[master], link:https://ci.centos.org/job/minishift-pr/[pull requests], link:https://ci.centos.org/job/minishift-docs/[docs]
+
+link:http://artifacts.ci.centos.org/minishift/minishift/master/<BUILD_ID>[Artifacts of a successful master build]
+
+link:http://artifacts.ci.centos.org/minishift/minishift/pr/<PR_ID>[Artifacts of a successful pull request build]
+|link:https://github.com/minishift/minishift/blob/master/centos_ci.sh[centos_ci.sh]
+
+|link:https://circleci.com/[*Circle CI*]
+|This system is used for compilation and unit testing on macOS.
+|link:https://circleci.com/gh/minishift/minishift/tree/master[master and pull requests]
+|link:https://github.com/minishift/minishift/blob/master/circle.yml[circle.yml]
+
+|link:https://ci.appveyor.com[*AppVeyor*]
+|This server is used for compilation and unit testing on Windows.
+|link:https://ci.appveyor.com/project/hferentschik/minishift-o61ou/history[master and pull requests]
+|link:https://github.com/minishift/minishift/blob/master/appveyor.yml[appveyor.yml]
+
+|link:https://travis-ci.org/[*Travis CI*]
+|This server is used for compilation and unit testing on Linux (Ubuntu).
+|link:https://travis-ci.org/minishift/minishift/branches[master], link:https://travis-ci.org/minishift/minishift/pull_requests[pull requests]
+|link:https://github.com/minishift/minishift/blob/master/.travis.yml[.travis.yml]
+|===

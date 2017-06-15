@@ -3,7 +3,7 @@ Feature: Basic
   As a user I can perform basic operations of Minishift and OpenShift
 
   Scenario: User can install default add-ons
-    Given Minishift has state "Does Not Exist"
+   Given Minishift has state "Does Not Exist"
     When executing "minishift addons install --defaults" succeeds
     Then stdout should contain
      """
@@ -11,15 +11,16 @@ Feature: Basic
      """
 
   Scenario: User can enable the anyuid add-on
-    Given Minishift has state "Does Not Exist"
+   Given Minishift has state "Does Not Exist"
     When executing "minishift addons enable anyuid" succeeds
     Then stdout should contain
      """
      Addon 'anyuid' enabled
      """
 
+  @minishift-only
   Scenario: User can list enabled plugins
-    Given Minishift has state "Does Not Exist"
+   Given Minishift has state "Does Not Exist"
     When executing "minishift addons list" succeeds
     Then stdout should contain
      """
@@ -71,6 +72,8 @@ Feature: Basic
     User is able to get URL of console of OpenShift instance running on provided virtual machine.
     Given Minishift has state "Running"
      When executing "minishift console --url" succeeds
+     Then stdout should be valid URL
+     When executing "minishift dashboard --url" succeeds
      Then stdout should be valid URL
 
   Scenario: OpenShift developer has sudo permissions
@@ -191,6 +194,15 @@ Feature: Basic
     Given Minishift has state "Running"
      When executing "minishift stop" succeeds
      Then Minishift should have state "Stopped"
+
+  Scenario: Stopping an already stopped VM
+    Given Minishift has state "Stopped"
+     When executing "minishift stop"
+     Then Minishift should have state "Stopped"
+      And stdout should contain
+      """
+      The 'minishift' VM is already stopped.
+      """
 
   Scenario: Deleting Minishift
     Given Minishift has state "Stopped"

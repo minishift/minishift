@@ -38,9 +38,10 @@ CONSOLE_URL=%s`
 
 // consoleCmd represents the console command
 var consoleCmd = &cobra.Command{
-	Use:   "console",
-	Short: "Opens or displays the OpenShift Web Console URL.",
-	Long:  `Opens the OpenShift Web Console URL in the default browser or displays it to the console.`,
+	Use:     "console",
+	Aliases: []string{"dashboard"},
+	Short:   "Opens or displays the OpenShift Web Console URL.",
+	Long:    `Opens the OpenShift Web Console URL in the default browser or displays it to the console.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()

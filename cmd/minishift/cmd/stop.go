@@ -21,6 +21,7 @@ import (
 
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/log"
+	"github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
@@ -42,9 +43,23 @@ VM but does not delete any associated files. To start the cluster again, use the
 }
 
 func runStop(cmd *cobra.Command, args []string) {
-	fmt.Println("Stopping local OpenShift cluster...")
 	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 	defer api.Close()
+
+	// if VM does not exist, exit with error
+	util.ExitIfUndefined(api, constants.MachineName)
+
+	hostVm, err := api.Load(constants.MachineName)
+	if err != nil {
+		atexit.ExitWithMessage(1, err.Error())
+	}
+
+	// check if VM is already in stopped state
+	if util.IsHostStopped(hostVm.Driver) {
+		atexit.ExitWithMessage(0, fmt.Sprintf("The '%s' VM is already stopped.", constants.MachineName))
+	}
+
+	fmt.Println("Stopping local OpenShift cluster...")
 
 	if !skipUnRegistration {
 		if _, err := cluster.UnRegister(api); err != nil {

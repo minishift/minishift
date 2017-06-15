@@ -23,6 +23,12 @@ import (
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/state"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
+
+	"github.com/minishift/minishift/out/bindata"
+)
+
+var (
+	DefaultAssets = []string{"anyuid", "admin-user", "xpaas"}
 )
 
 func VMExists(client *libmachine.Client, machineName string) bool {
@@ -44,9 +50,24 @@ func IsHostRunning(driver drivers.Driver) bool {
 	return drivers.MachineInState(driver, state.Running)()
 }
 
+func IsHostStopped(driver drivers.Driver) bool {
+	return drivers.MachineInState(driver, state.Stopped)()
+}
+
 func ExitIfNotRunning(driver drivers.Driver, machineName string) {
 	running := IsHostRunning(driver)
 	if !running {
 		atexit.ExitWithMessage(0, fmt.Sprintf("The execution of this command requires a running '%s' VM, but there is currently none.", machineName))
 	}
+}
+
+// UnpackAddons will unpack the default addons into addons default dir
+func UnpackAddons(addonsDir string) error {
+	for _, asset := range DefaultAssets {
+		if err := bindata.RestoreAssets(addonsDir, asset); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

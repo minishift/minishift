@@ -19,11 +19,12 @@ package kubeconfig
 import (
 	"errors"
 	"fmt"
-	"github.com/minishift/minishift/pkg/util"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/minishift/minishift/pkg/util"
+	"gopkg.in/yaml.v2"
 )
 
 // kubeconfig Data types
@@ -83,7 +84,7 @@ func CacheSystemAdminEntries(systemEntriesConfigPath, clusterName string) error 
 
 	userName := fmt.Sprintf("system:admin/%s", clusterName)
 	for k, v := range config.Users {
-		if v.Name == userName {
+		if v.Name == userName || v.Name == "system:admin/127-0-0-1:8443" {
 			targetConfig.Users = append(targetConfig.Users, config.Users[k])
 			break
 		}

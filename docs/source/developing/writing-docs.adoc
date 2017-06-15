@@ -1,5 +1,5 @@
 [[writing-minishift-docs]]
-= Writing and publishing Minishift documentation
+= Writing and Publishing Minishift Documentation
 :icons:
 :toc: macro
 :toc-title:
@@ -10,8 +10,8 @@ toc::[]
 [[writing-docs-overview]]
 == Overview
 
-Minishift documentation is located in the `docs` sub-folder.
-The documentation is a mix of generated https://en.wikipedia.org/wiki/Markdown[Markdown] files and manually maintained https://en.wikipedia.org/wiki/AsciiDoc[Asciidoc] files.
+Minishift documentation is located in the *_docs_* sub-directory of the repository.
+The documentation is a mix of auto-generated https://en.wikipedia.org/wiki/Markdown[Markdown] files and manually maintained https://en.wikipedia.org/wiki/AsciiDoc[Asciidoc] files.
 
 [[contribute-to-docs]]
 == Contributing to the documentation
@@ -24,7 +24,8 @@ submit a pull request with the changes.
 [[docs-conventions-guidelines]]
 == Conventions and guidelines
 
-Minishift documentation is authored in the AsciiDoc markup format. Since Minishift is closely related to the OpenShift Origin
+Minishift documentation is authored in the link:http://asciidoctor.org/docs/asciidoc-syntax-quick-reference[AsciiDoc] markup format. Since
+Minishift is closely related to the OpenShift Origin
 project, we follow the link:https://github.com/openshift/openshift-docs/blob/master/contributing_to_docs/doc_guidelines.adoc[OpenShift Documentation Guidelines]
 for tagging, formatting, and structure wherever possible.
 
@@ -32,31 +33,29 @@ The documentation source structure follows a modular format, where each file is 
 a _topic_ and each topic is stored under a sub-folder based on the relevant category, such as
 getting started, using Minishift, or command reference.
 
-TIP: You can check out the link:https://github.com/minishift/minishift/blob/master/docs/source/developing/writing-docs.adoc[raw file]
+TIP: You can check out the link:https://raw.githubusercontent.com/minishift/minishift/master/docs/source/developing/writing-docs.adoc[raw file]
 of this topic or other existing Minishift topics to see examples of how the information is structured and which tags to use.
 
 [[common-conventions]]
 === Commonly-used conventions
 
-- Each file must contain a topic metadata header with a top-level heading followed by required AsciiDoc variable declarations.
-The only exception to this is the command reference topics, which are automatically generated and do not require this header.
-You can view the raw file of this topic to see an example. Also, see
+- Each file must contain a topic metadata header with a top-level heading followed by required AsciiDoc variable declarations. See
 the link:https://github.com/openshift/openshift-docs/blob/master/contributing_to_docs/doc_guidelines.adoc#topic-metadata[topic metadata]
 section in the OpenShift documentation guidelines for more information.
 
-- Whenever you link to internal documentation topics, you should use relative links that can
-be resolved during the publication workflow instead of hard-coding URLs. See the link:https://github.com/openshift/openshift-docs/blob/master/contributing_to_docs/doc_guidelines.adoc#internal-cross-references[internal cross-references]
+- Links to another location within an AsciiDoc topic or between AsciiDoc topics are called cross-references and should use the _xref_ notation.
+See the link:https://github.com/openshift/openshift-docs/blob/master/contributing_to_docs/doc_guidelines.adoc#internal-cross-references[internal cross-references]
 section of the OpenShift documentation guidelines for more information and examples.
 
 - Each section heading must be preceded by a unique anchor ID, to help make sure that
 cross-references resolve to the correct section. The anchor ID text should match the title
-as much as possible and it does not need to include the prefix _section_ or _topic_. See the link:https://github.com/openshift/openshift-docs/blob/master/contributing_to_docs/doc_guidelines.adoc#unique-ids[unique IDs]
+as much as possible. See the link:https://github.com/openshift/openshift-docs/blob/master/contributing_to_docs/doc_guidelines.adoc#unique-ids[unique IDs]
 section of the OpenShift documentation guidelines for more information and examples.
 
 [[adding-new-topic]]
 === Adding a new topic
 
-If you are adding a new topic, or file, to the documentation library, you must also
+If you are adding a new topic to the documentation library, you must also
 update the navigation in the following ways:
 
 - Add an entry to the relevant *_index.adoc_* file for that topic. For example, if you
@@ -71,24 +70,13 @@ Make sure to add the new topic in the same order in all of the locations.
 [[building-docs]]
 == Building the documentation
 
-Minishift documentation is located in the *_docs_* sub-folder. The
-documentation is a mix of generated
-https://en.wikipedia.org/wiki/Markdown[Markdown] files and manually
-maintained https://en.wikipedia.org/wiki/AsciiDoc[Asciidoc] files.
-
 By default, the documentation is built in a Docker container. This way
-you avoid having to install all the required dependencies on your
+you do not need to install all the required dependencies on your
 development machine. All you need is a running Docker daemon. In case
-you don't have one, use Minishift itself. For more information, see the
-link:../command-ref/minishift_docker-env{outfilesuffix}[`minishift docker-env`] command.
+you don't have one, use Minishift itself. For more information, see
+xref:../using/docker-daemon.adoc#reusing-docker-daemon[reusing the Docker daemon].
 
-To build the Docker image, run:
-
-----
-$ make build_docs_container
-----
-
-To generate the documentation into the directory *_docs/build_*, run:
+To generate the documentation into the directory _docs/build_, run:
 
 ----
 $ make gen_docs
@@ -100,7 +88,9 @@ Your local checkout of the sources are going to be mounted into the container in
 Depending on your UID on the host, you might see file permissions problems when trying to run _gen_docs_.
 This is caused by the fact, that the _docs_ user used within the container uses per default a UID of 1000.
 This might conflict with the user id of the mounted docs sources.
+
 Your output might look like:
+
 ----
 $ make gen_docs
 mkdir -p build
@@ -108,12 +98,13 @@ rake aborted!
 Errno::EACCES: Permission denied @ dir_s_mkdir - build
 ----
 
-In this case you need to build the container with a different user id.
+In this case you need to build the container with a different user ID.
 This will ensure that the _docs_ user in the container will be able to create files and directories.
 
 ----
 $ make build_docs_container IMAGE_UID=$(id -u)
 ----
+
 ====
 
 To build and serve the documentation for editing, run:
@@ -122,48 +113,48 @@ To build and serve the documentation for editing, run:
 $ make serve_docs
 ----
 
-The `make serve_docs` command starts the link:https://middlemanapp.com[Middleman] server on
-port 4567. You can access the rendered documentation by browsing to _http://<IP-of-Docker-daemon>:4567_.
+The `make serve_docs` command builds and generates a live-preview of the documentation.
+You can access the documentation by browsing to _http://<IP-of-Docker-daemon>:4567_.
 
 If you encounter issues with the local staging of the documentation, you can run the following
-command to delete the *_build_* sub-folder and the variables file:
+command to remove all build artefacts:
 
 ----
 $ make clean_docs
 ----
 
-[[deploying-docs]]
-== Deploying the documentation
+[[auto-deploy-to-docs-openshift-org]]
+== Automatic deployment to docs.openshift.org
 
 The Minishift documentation is deployed on _docs.openshift.org_ under
 link:https://docs.openshift.org/latest/minishift[https://docs.openshift.org/latest/minishift].
 
-To integrate with the _docs.openshift.org_ we deliver a tarball containing
-the Minishift AsciiDoc files as well as some link:http://www.asciibinder.org/[AsciiBinder]
-meta data.
+To integrate with _docs.openshift.org_, we deliver a tarball that contains the Minishift AsciiDoc files as well as some link:http://www.asciibinder.org/[AsciiBinder] metadata files.
+This tarball is generated with a Jenkins job on link:https://ci.centos.org/job/minishift-docs[CentOS CI] and is triggered as part of a xref:./releasing.adoc#cut-release[release].
 
-This tarball can be built using:
+[[manually-building-openshift-docs]]
+=== Manually building the OpenShift documentation
+
+To view the Minishift documentation integrated into the OpenShift documentation, you can follow the following steps.
+
+[NOTE]
+====
+- Before you start, you need to check out the link:https://github.com/openshift/openshift-docs.git[openshift-docs] GitHub repository.
+You need all the tooling to build openshift-docs.
+See the link:https://github.com/openshift/openshift-docs/blob/master/contributing_to_docs/tools_and_setup.adoc[Install and set up the tools and software] section, which is part of the _openshift-docs_ repository.
+
+- Make sure that the `rake build` commands succeeds before integrating the Minishift documentation.
+====
+
+. In the local Minishift repository, build the Minishift documentation tarball.
 
 ----
 $ make gen_adoc_tar
 ----
 
-After the build completes there will be a *_minishift-adoc.tar_* file in the *_docs/build_* directory
-of your local repository.
+After the build completes there will be a *_minishift-adoc.tar_* file in the *_docs/build_* directory of the local Minishift repository.
 
-[[building-openshift-docs]]
-=== Building OpenShift documentation
-
-Before you start, you need to check out the link:https://github.com/openshift/openshift-docs.git[openshift-docs]
-GitHub repository. You need all the tooling to build openshift-docs. See the
-link:https://github.com/openshift/openshift-docs/blob/master/contributing_to_docs/tools_and_setup.adoc[Install and set up the tools and software] section,
-which is part of the _openshift-docs_ repository.
-
-After you successfully run `rake build` in your local repository, you can integrate the
-Minishift documentation.
-
-After you build the Minishift documentation tarball, follow these steps from the directory of
-your local openshift-docs repository:
+. In the local openshift-docs repository, run the following commands:
 
 ----
 $ mkdir minishift
@@ -176,6 +167,3 @@ $ rake build
 ----
 
 If the build completes successfully, the site is available under *_preview/openshift-origin/latest/welcome/index.html_*.
-
-OpenShift runs a nightly build in which they update the documentation. After you update the documentation,
-you must wait for the nightly build that runs at midnight EST daily to view the documentation on _docs.openshift.org_.

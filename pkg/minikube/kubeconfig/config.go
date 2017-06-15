@@ -60,7 +60,7 @@ func GetConfigPath() string {
 }
 
 // Cache system admin entries to be used to run oc commands
-func CacheSystemAdminEntries(systemEntriesConfigPath, clusterName string) error {
+func CacheSystemAdminEntries(systemEntriesConfigPath, clusterName string, userName string) error {
 	config, err := Read(GetConfigPath())
 	if err != nil {
 		return errors.New(fmt.Sprintf("Error reading config file %s", systemEntriesConfigPath))
@@ -82,9 +82,8 @@ func CacheSystemAdminEntries(systemEntriesConfigPath, clusterName string) error 
 		}
 	}
 
-	userName := fmt.Sprintf("system:admin/%s", clusterName)
 	for k, v := range config.Users {
-		if v.Name == userName || v.Name == "system:admin/127-0-0-1:8443" {
+		if v.Name == userName {
 			targetConfig.Users = append(targetConfig.Users, config.Users[k])
 			break
 		}

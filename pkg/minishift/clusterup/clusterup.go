@@ -20,9 +20,14 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+
 	"github.com/blang/semver"
 	"github.com/docker/machine/libmachine/host"
 	"github.com/docker/machine/libmachine/provision"
+
+	"os"
+	"strings"
+	"time"
 
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minikube/kubeconfig"
@@ -31,9 +36,6 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/oc"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/version"
-	"os"
-	"strings"
-	"time"
 )
 
 const (
@@ -75,7 +77,16 @@ func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string, runne
 
 // PostClusterUp runs the Minishift specific provisioning after 'cluster up' has run
 func PostClusterUp(clusterUpConfig *ClusterUpConfig, sshCommander provision.SSHCommander, addOnManager *manager.AddOnManager) error {
-	err := kubeconfig.CacheSystemAdminEntries(clusterUpConfig.KubeConfigPath, getConfigClusterName(clusterUpConfig.Ip, clusterUpConfig.Port))
+	isOpenshift3_6 := util.VersionOrdinal(clusterUpConfig.OpenShiftVersion) >= util.VersionOrdinal("v3.6.0")
+
+	clusterName := getConfigClusterName(clusterUpConfig.Ip, clusterUpConfig.Port)
+	userName := fmt.Sprintf("system:admin/%s", clusterName)
+	// See issue https://github.com/minishift/minishift/issues/1011. Needs to be revisted whether needed with final OpensShift 3.6 (HF)
+	if isOpenshift3_6 {
+		userName = fmt.Sprintf("system:admin/127-0-0-1:%d", clusterUpConfig.Port)
+	}
+
+	err := kubeconfig.CacheSystemAdminEntries(clusterUpConfig.KubeConfigPath, getConfigClusterName(clusterUpConfig.Ip, clusterUpConfig.Port), userName)
 	if err != nil {
 		return err
 	}

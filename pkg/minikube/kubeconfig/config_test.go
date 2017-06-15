@@ -18,11 +18,12 @@ package kubeconfig
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
+
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -35,7 +36,7 @@ func TestCacheSystemAdminEntries(t *testing.T) {
 	defer tearDown(t)
 	testSystemConfig := SystemKubeConfig{}
 
-	CacheSystemAdminEntries(testSystemConfigPath, "10-168-99-100:8443")
+	CacheSystemAdminEntries(testSystemConfigPath, "10-168-99-100:8443", "system:admin/10-168-99-100:8443")
 
 	// read test kube config
 	data, _ := ioutil.ReadFile(testKubeConfigPath)

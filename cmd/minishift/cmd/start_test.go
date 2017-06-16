@@ -30,6 +30,7 @@ import (
 
 	"github.com/minishift/minishift/cmd/minishift/cmd/config"
 
+	"fmt"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minikube/tests"
 	"github.com/minishift/minishift/pkg/minishift/clusterup"
@@ -364,6 +365,37 @@ func TestExplicitRouteSuffixGetApplied(t *testing.T) {
 	}
 }
 
+func TestDetermineIsoUrl(t *testing.T) {
+	var isoTests = []struct {
+		in  string
+		out string
+	}{
+		{"", constants.DefaultB2dIsoUrl},
+		{"b2d", constants.DefaultB2dIsoUrl},
+		{"B2D", constants.DefaultB2dIsoUrl},
+		{"centos", constants.DefaultCentOsIsoUrl},
+		{"CentOs", constants.DefaultCentOsIsoUrl},
+		{"http://my.custom.url/myiso.iso", "http://my.custom.url/myiso.iso"},
+		{"https://my.custom.url/myiso.iso", "https://my.custom.url/myiso.iso"},
+		{"file://somewhere/on/disk", "file://somewhere/on/disk"},
+	}
+
+	for _, isoTest := range isoTests {
+		isoUrl := determineIsoUrl(isoTest.in)
+		if isoUrl != isoTest.out {
+			t.Errorf("Expected '%s' as ISO URL for input '%s'. Got '%s'.", isoTest.out, isoTest.in, isoUrl)
+		}
+	}
+}
+
+func TestDetermineIsoUrlWithInvalidName(t *testing.T) {
+	tee := cli.CreateTee(t, true)
+	atexit.RegisterExitHandler(cli.VerifyExitCodeAndMessage(t, tee, 1, unsupportedIsoUrlFormat))
+	defer tearDown(tee)
+
+	determineIsoUrl("foo")
+}
+
 func assertCommandLineArguments(expectedArguments []string, t *testing.T) {
 	if len(expectedArguments) > len(testRunner.Args) {
 		t.Errorf("Expected more arguments than received. Expected: '%s'. Got: '%s'", expectedArguments, testRunner.Args)
@@ -410,4 +442,16 @@ func setUp(t *testing.T) {
 	provision.SetDetector(&tests.MockDetector{&tests.MockProvisioner{Provisioned: true}})
 
 	atexit.RegisterExitHandler(cli.PreventExitWithNonZeroExitCode(t))
+}
+
+func tearDown(tee *cli.Tee) {
+	tee.Close()
+	viper.Reset()
+	atexit.ClearExitHandler()
+	if r := recover(); r != nil {
+		reason := fmt.Sprint(r)
+		if reason != atexit.ExitHandlerPanicMessage {
+			fmt.Println("Recovered from panic:", r)
+		}
+	}
 }

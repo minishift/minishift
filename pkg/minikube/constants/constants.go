@@ -37,18 +37,16 @@ const (
 	UpdateMarkerFileName         = "updated"
 )
 
-// Fix for windows
-var Minipath = getMinishiftHomeDir()
+var (
+	// Fix for windows
+	Minipath = getMinishiftHomeDir()
 
-var KubeConfigPath = filepath.Join(Minipath, "machines", MachineName+"_kubeconfig")
+	KubeConfigPath = filepath.Join(Minipath, "machines", MachineName+"_kubeconfig")
+	ConfigFile     = MakeMiniPath("config", "config.json")
 
-var isoVersion = version.GetIsoVersion()
-var isoName = "minishift-b2d.iso"
-var githubProject = "https://github.com/minishift/minishift-b2d-iso"
-
-var DefaultIsoUrl = githubProject + "/releases/download/" + isoVersion + "/" + isoName
-
-var ConfigFile = MakeMiniPath("config", "config.json")
+	DefaultB2dIsoUrl    = "https://github.com/minishift/minishift-b2d-iso/releases/download/" + version.GetB2dIsoVersion() + "/" + "minishift-b2d.iso"
+	DefaultCentOsIsoUrl = "https://github.com/minishift/minishift-centos-iso/releases/download/" + version.GetCentOsIsoVersion() + "/" + "minishift-centos7.iso"
+)
 
 // MakeMiniPath is a utility to calculate a relative path to our directory.
 func MakeMiniPath(fileName ...string) string {

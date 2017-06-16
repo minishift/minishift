@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/asaskevich/govalidator"
 	units "github.com/docker/go-units"
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/drivers"
@@ -53,6 +54,11 @@ const (
 
 	defaultProject = "myproject"
 	defaultUser    = "developer"
+
+	b2dIsoAlias    = "b2d"
+	centOsIsoAlias = "centos"
+
+	unsupportedIsoUrlFormat = "Unsupported value for iso-url. It can be an URL, file URI or one of the following short names: [b2d centos]."
 )
 
 var (
@@ -217,7 +223,7 @@ func handleProxies() *util.ProxyConfig {
 
 func startHost(libMachineClient *libmachine.Client) (*host.Host, string) {
 	machineConfig := &cluster.MachineConfig{
-		MinikubeISO:      viper.GetString(startFlags.ISOUrl.Name),
+		MinikubeISO:      determineIsoUrl(viper.GetString(startFlags.ISOUrl.Name)),
 		Memory:           viper.GetInt(startFlags.Memory.Name),
 		CPUs:             viper.GetInt(startFlags.CPUs.Name),
 		DiskSize:         calculateDiskSizeInMB(viper.GetString(startFlags.DiskSize.Name)),
@@ -267,11 +273,28 @@ func calculateDiskSizeInMB(humanReadableDiskSize string) int {
 	return int(diskSize / units.MB)
 }
 
+func determineIsoUrl(iso string) string {
+	iso = strings.ToLower(iso)
+
+	switch iso {
+	case b2dIsoAlias, "":
+		iso = constants.DefaultB2dIsoUrl
+	case centOsIsoAlias:
+		iso = constants.DefaultCentOsIsoUrl
+	default:
+		if !(govalidator.IsURL(iso) || strings.HasPrefix(iso, "file:")) {
+			atexit.ExitWithMessage(1, unsupportedIsoUrlFormat)
+		}
+	}
+
+	return iso
+}
+
 // initStartFlags creates the CLI flags which needs to be passed on to 'libmachine'
 func initStartFlags() *flag.FlagSet {
 	startFlagSet := flag.NewFlagSet(commandName, flag.ContinueOnError)
 
-	startFlagSet.String(startFlags.ISOUrl.Name, constants.DefaultIsoUrl, "Location of the minishift ISO.")
+	startFlagSet.String(startFlags.ISOUrl.Name, constants.DefaultB2dIsoUrl, "Location of the minishift ISO. Can be an URL, file URI or one of the following short names: [b2d centos].")
 	startFlagSet.String(startFlags.VmDriver.Name, constants.DefaultVMDriver, fmt.Sprintf("The driver to use for the Minishift VM. Possible values: %v", constants.SupportedVMDrivers))
 	startFlagSet.Int(startFlags.Memory.Name, constants.DefaultMemory, "Amount of RAM to allocate to the Minishift VM.")
 	startFlagSet.Int(startFlags.CPUs.Name, constants.DefaultCPUS, "Number of CPU cores to allocate to the Minishift VM.")

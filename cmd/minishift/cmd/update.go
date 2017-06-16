@@ -91,7 +91,7 @@ func runUpdate(cmd *cobra.Command, args []string) {
 
 			fmt.Printf("\nUpdated successfully to minishift v%s.\n", latestVersion)
 
-			markerData := UpdateMarker{InstallAddon: false, PreviousVersion: version.GetVersion()}
+			markerData := UpdateMarker{InstallAddon: false, PreviousVersion: version.GetMinishiftVersion()}
 
 			fmt.Print("\nDo you want to update default addons? [y/N]: ")
 			fmt.Scanln(&confirm)

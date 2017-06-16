@@ -33,7 +33,7 @@ The documentation source structure follows a modular format, where each file is 
 a _topic_ and each topic is stored under a sub-folder based on the relevant category, such as
 getting started, using Minishift, or command reference.
 
-TIP: You can check out the link:https://raw.githubusercontent.com/minishift/minishift/master/docs/source/developing/writing-docs.adoc[raw file]
+TIP: You can check out the link:https://raw.githubusercontent.com/minishift/minishift/master/docs/source/contributing/writing-docs.adoc[raw file]
 of this topic or other existing Minishift topics to see examples of how the information is structured and which tags to use.
 
 [[common-conventions]]

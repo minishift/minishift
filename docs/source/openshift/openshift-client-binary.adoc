@@ -1,7 +1,7 @@
 include::variables.adoc[]
 
-[[interacting-with-openshift]]
-= Interacting with OpenShift
+[[openshift-client-binary]]
+= Using the OpenShift client binary (oc)
 :icons:
 :toc: macro
 :toc-title:
@@ -9,23 +9,14 @@ include::variables.adoc[]
 
 toc::[]
 
-[[interacting-openshift-overview]]
+[[overview]]
 == Overview
 
-Minishift creates a virtual machine (VM) and provisions a local, single-node OpenShift
-cluster in this VM. The following sections describe how Minishift can assist you in
-interacting with and configuring your local OpenShift instance.
+The `minishift start` command creates an OpenShift instance using the https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md[cluster up] approach.
 
-For details about managing the Minishift VM, see the link:../using/managing-minishift{outfilesuffix}[Managing Minishift] section.
-
-[[openshift-client-binary]]
-== Using the OpenShift client binary (oc)
-
-The `minishift start` command creates an OpenShift instance using the
-https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md[cluster up] approach.
-
-For this purpose it copies the `oc` binary onto your host. It is located in the  _~/.minishift/cache/oc/{openshift-version}_ directory, provided you use Minishift's default version of OpenShift.
-You can add this binary to your `PATH` using link:../command-ref/minishift_oc-env{outfilesuffix}[`minishift oc-env`] which displays the command you need to type into your shell.
+For this purpose it copies the `oc` binary onto your host.
+It is located in the  _~/.minishift/cache/oc/{openshift-version}_ directory, provided you use Minishift's default version of OpenShift.
+You can add this binary to your `PATH` using xref:../command-ref/minishift_oc-env.adoc#minishift-oc-env[`minishift oc-env`] which displays the command you need to type into your shell.
 The output of `oc-env` differs depending on the operating system and the shell type.
 
 ----
@@ -35,8 +26,10 @@ export PATH="/Users/john/.minishift/cache/oc/v1.5.0:$PATH"
 # eval $(minishift oc-env)
 ----
 
-As part of the `minishift start` command there is also a `minishift`
-https://docs.openshift.org/latest/cli_reference/manage_cli_profiles.html[oc context] created.
+[[minishift-oc-context]]
+== Minishift oc context
+
+As part of the `minishift start` command there is also a `minishift` https://docs.openshift.org/latest/cli_reference/manage_cli_profiles.html[oc context] created.
 This context contains the configuration to communicate with your OpenShift cluster.
 
 Minishift activates this context automatically, but if you need to switch back to it after
@@ -46,20 +39,15 @@ for example, logging into another OpenShift instance, you can run:
 $ oc config use-context minishift
 ----
 
-For an introduction to `oc` usage, see the
-https://docs.openshift.com/enterprise/3.2/cli_reference/get_started_cli.html[Get Started with the CLI]
-topic in the OpenShift documentation.
+For an introduction to `oc` usage, see the https://docs.openshift.com/enterprise/3.2/cli_reference/get_started_cli.html[Get Started with the CLI] topic in the OpenShift documentation.
 
 [[log-into-cluster]]
-=== Logging into the cluster
+== Logging into the cluster
 
-By default, _cluster up_ uses
-https://docs.openshift.org/latest/install_config/configuring_authentication.html#AllowAllPasswordIdentityProvider[AllowAllPasswordIdentityProvider]
-to authenticate against the local cluster. This means any non-empty user name and password can
-be used to login to the local cluster. The recommended user name and password combination is
-developer/developer, because it already has a default project _myproject_ and also can
-https://docs.openshift.org/latest/architecture/additional_concepts/authentication.html#authentication-impersonation[impersonate]
-the administrator. This allows you to run administrator commands using the `--as system:admin` parameter.
+By default, _cluster up_ uses https://docs.openshift.org/latest/install_config/configuring_authentication.html#AllowAllPasswordIdentityProvider[AllowAllPasswordIdentityProvider] to authenticate against the local cluster.
+This means any non-empty user name and password can be used to login to the local cluster.
+The recommended user name and password is developer and developer respectively since it already has a default project _myproject_ and also can https://docs.openshift.org/latest/architecture/additional_concepts/authentication.html#authentication-impersonation[impersonate] the administrator.
+This allows you to run administrator commands using the `--as system:admin` parameter.
 
 To login as administrator, use the system account:
 
@@ -67,9 +55,9 @@ To login as administrator, use the system account:
 $ oc login -u system:admin
 ----
 
-In this case, https://docs.openshift.com/enterprise/3.2/architecture/additional_concepts/authentication.html#api-authentication[client certificates]
-are used. The certificates are stored in `~/.kube/config`. The _cluster up_ command
-installs the appropriate certificates as a part of the bootstrap.
+In this case, https://docs.openshift.com/enterprise/3.2/architecture/additional_concepts/authentication.html#api-authentication[client certificates] are used.
+The certificates are stored in `~/.kube/config`.
+The `cluster up` command installs the appropriate certificates as a part of the bootstrap.
 
 [NOTE]
 ====
@@ -84,7 +72,7 @@ $ oc config view
 ----
 
 [[access-web-console]]
-=== Accessing the Web console
+== Accessing the Web console
 
 To access the https://docs.openshift.org/latest/architecture/infrastructure_components/web_console.html[OpenShift console],
 you can run this command in a shell after starting Minishift to get the URL of the Web console:
@@ -101,17 +89,18 @@ $ minishift console
 ----
 
 [[access-openshift-services]]
-=== Accessing OpenShift services
+== Accessing OpenShift services
 
-To access a service exposed with a node port, run this command in a
-shell after starting Minishift to get the address:
+To access a service exposed with a route, run this command in a shell:
 
 ----
 $ minishift openshift service [-n NAMESPACE] [--url] NAME
 ----
 
+For more information refer also to xref:../openshift/accessing-applications.adoc#accessing-applications[Accessing applications].
+
 [[view-openshift-logs]]
-=== Viewing OpenShift logs
+== Viewing OpenShift logs
 
 To access OpenShift logs, run the `logs` command after starting Minishift:
 

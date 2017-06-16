@@ -1,4 +1,4 @@
-[[developing-minishift]]
+[[minishift-ci]]
 = Minishift CI
 :icons:
 :toc: macro
@@ -7,7 +7,7 @@
 
 toc::[]
 
-[[ci-overview]]
+[[overview]]
 == Overview
 
 The following sections describes the various CI setups Minishift utilizes.

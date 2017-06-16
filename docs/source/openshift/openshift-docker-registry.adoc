@@ -7,13 +7,13 @@
 
 toc::[]
 
-[[openshift-docker-registry-intro]]
+[[overview]]
 == Overview
 
 OpenShift provides an integrated Docker registry which can be used for development as well.
 Images present in the registry can directly be used for applications, speeding up
 the local development work-flow.
-Refer to <<stage-app-with-openshift-registry>> to know more.
+Refer to xref:../openshift/openshift-docker-registry.adoc#stage-app-with-openshift-registry[Application deployment] to know more.
 
 
 [[login-to-openshift-docker-registry]]

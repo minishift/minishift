@@ -1,4 +1,4 @@
-[[getting-started-index]]
+[[getting-started]]
 = Getting started with Minishift
 :icons:
 

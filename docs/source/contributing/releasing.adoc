@@ -1,4 +1,4 @@
-[[release-minishift]]
+[[releasing-minishift]]
 = Releasing Minishift
 :icons:
 :toc: macro

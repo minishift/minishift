@@ -1,0 +1,13 @@
+[[interacting-with-openshift]]
+= Interacting with OpenShift
+:icons:
+
+Minishift creates a virtual machine (VM) and provisions a local, single-node OpenShift
+cluster in this VM.
+The following sections describe how Minishift can assist you in interacting and configuring your local OpenShift instance.
+
+For details about managing the Minishift VM, see the xref:../using/managing-minishift.adoc#managing-minishift[Managing Minishift] section.
+
+- xref:../openshift/openshift-client-binary.adoc#openshift-client-binary[Using the OpenShift client binary]
+- xref:../openshift/exposing-services.adoc#exposing-services[Exposing Services]
+- xref:../openshift/openshift-docker-registry.adoc#accessing-the-openshift-docker-registry[Accessing the OpenShift Docker Registry]

@@ -7,7 +7,7 @@
 
 toc::[]
 
-[[troubleshooting-overview]]
+[[overview]]
 == Overview
 
 This section contains solutions to common problems that you might

@@ -7,7 +7,7 @@
 
 toc::[]
 
-[[addons-overview]]
+[[overview]]
 == Overview
 
 NOTE: This feature is still considered experimental and might change in future releases.

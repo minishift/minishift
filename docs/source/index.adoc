@@ -16,7 +16,8 @@ cluster inside a VM.
 This documentation library contains the following sections to help you get started with, use, and
 extend Minishift:
 
-- link:./getting-started/index{outfilesuffix}[Getting started]
-- link:./using/index{outfilesuffix}[Using Minishift]
-- link:./developing/index{outfilesuffix}[Developing Minishift]
-- link:./command-ref/minishift{outfilesuffix}[Command reference]
+- xref:./getting-started/index.adoc#getting-started[Getting started]
+- xref:./using/index.adoc#using-minishift[Using Minishift]
+- xref:./openshift/index.adoc#interacting-with-openshift[Interacting with OpenShift]
+- xref:./contributing/index.adoc#contributing-to-minishift[Contributing to Minishift]
+- xref:./command-ref/minishift.adoc#minishift[Command reference]

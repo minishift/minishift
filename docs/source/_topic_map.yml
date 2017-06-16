@@ -31,16 +31,23 @@ Topics:
         File: addons
       - Name: Host Folders
         File: host-folders
-      - Name: Interacting with OpenShift
-        File: interacting-with-openshift
       - Name: Using the Minishift Docker daemon
         File: docker-daemon
-      - Name: Accessing the OpenShift Docker registry
-        File: accessing-the-openshift-docker-registry
       - Name: Troubleshooting
         File: troubleshooting
-  - Name: Developing Minishift
-    Dir: developing
+  - Name: Interacting with OpenShift
+    Dir: openshift
+    Topics:
+      - Name: Overview
+        File: index
+      - Name: Using the OpenShift client binary
+        File: openshift-client-binary
+      - Name: Exposing Services
+        File: exposing-services
+      - Name: Accessing the OpenShift Docker registry
+        File: openshift-docker-registry
+  - Name: Contributing to Minishift
+    Dir: contributing
     Topics:
       - Name: Overview
         File: index

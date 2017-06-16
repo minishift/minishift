@@ -24,27 +24,37 @@ import (
 
 const VersionPrefix = "v"
 
-// The current version of minishift
-// This is a private field and should be set when compiling with --ldflags="-X github.com/minishift/minishift/pkg/version.version=vX.Y.Z"
-var version = "v0.0.0-unset"
+// The following variables are private fields and should be set when compiling with for example --ldflags="-X github.com/minishift/minishift/pkg/version.openshiftVersion=vX.Y.Z
+var (
+	// The current version of minishift
+	minishiftVersion = "v0.0.0-unset"
 
-func GetVersion() string {
-	return version
+	// The default version of OpenShift
+	openshiftVersion = "v0.0.0-unset"
+
+	// The default version of the B2D ISO version
+	b2dIsoVersion = "v0.0.0-unset"
+
+	// The default version of the CentOS ISO version
+	centOsIsoVersion = "v0.0.0-unset"
+)
+
+func GetMinishiftVersion() string {
+	return minishiftVersion
 }
 
 func GetSemverVersion() (semver.Version, error) {
-	return semver.Make(strings.TrimPrefix(GetVersion(), VersionPrefix))
+	return semver.Make(strings.TrimPrefix(GetMinishiftVersion(), VersionPrefix))
 }
-
-// The default version of OpenShift
-// This is a private field and should be set when compiling with --ldflags="-X github.com/minishift/minishift/pkg/version.openshiftVersion=vX.Y.Z"
-var openshiftVersion = "v0.0.0-unset"
-var isoVersion = "v0.0.0-unset"
 
 func GetOpenShiftVersion() string {
 	return openshiftVersion
 }
 
-func GetIsoVersion() string {
-	return isoVersion
+func GetB2dIsoVersion() string {
+	return b2dIsoVersion
+}
+
+func GetCentOsIsoVersion() string {
+	return centOsIsoVersion
 }

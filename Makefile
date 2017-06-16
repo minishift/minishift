@@ -34,8 +34,9 @@ PACKAGES := go list ./... | grep -v /vendor
 SOURCE_DIRS = cmd pkg test
 
 # Linker flags
-VERSION_VARIABLES := -X $(REPOPATH)/pkg/version.version=$(MINISHIFT_VERSION) \
-	-X $(REPOPATH)/pkg/version.isoVersion=$(B2D_ISO_VERSION) \
+VERSION_VARIABLES := -X $(REPOPATH)/pkg/version.minishiftVersion=$(MINISHIFT_VERSION) \
+	-X $(REPOPATH)/pkg/version.b2dIsoVersion=$(B2D_ISO_VERSION) \
+	-X $(REPOPATH)/pkg/version.centOsIsoVersion=$(CENTOS_ISO_VERSION) \
 	-X $(REPOPATH)/pkg/version.openshiftVersion=$(OPENSHIFT_VERSION)
 LDFLAGS := $(VERSION_VARIABLES) -s -w -extldflags '-static'
 

@@ -18,9 +18,8 @@ The following sections describe how to build and test Minishift.
 - Git
 - A recent Go distribution (>1.7)
 
-NOTE: You should be able to develop Minishift on any operating system, such as GNU/Linux,
-Mac OS X or Windows. The Windows operating system might require additional steps or
-have some limitations.
+NOTE: You should be able to develop Minishift on any operating system, such as GNU/Linux, macOS or Windows.
+The Windows operating system might require additional steps or have some limitations.
 
 [[set-up-dev-env]]
 == Setting up the development environment
@@ -29,10 +28,9 @@ have some limitations.
 === Creating the Go workspace
 
 We highly recommend to setup a default Go https://golang.org/doc/code.html#Workspaces[workspace].
-Even though it might require an adjustment in your work processes, the goal is to have a single
-workspace for all Go development.
+Even though it might require an adjustment in your work processes, the goal is to have a single workspace for all Go development.
 
-. Create the following directories in the base directory you want to use, such as _$HOME/work_:
+. Create the following directories in the base directory you want to use, such as *_$HOME/work_*:
 +
 /bin::
 Contains executable commands
@@ -43,20 +41,20 @@ Contains package objects
 /src::
 Contains Go source files
 
-. Add the path of the root workspace directory to the _GOPATH_ environment
+. Add the path of the root workspace directory to the `GOPATH` environment
 variable. For example:
 +
 ----
 $ export GOPATH=$HOME/work
 ----
 
-. Add the workspace _bin_ directory to the _PATH_ environment variable:
+. Add the workspace *_bin_* directory to the `PATH` environment variable:
 +
 ----
 $ export PATH=$PATH:$GOPATH/bin
 ----
 
-NOTE: On Windows operating systems, you use the UI or use _setx_ to set the environment variables.
+NOTE: On Windows operating systems, you use the UI or use `setx` to set the environment variables.
 
 [[cloning-repository]]
 === Cloning the repository
@@ -71,10 +69,9 @@ $ git clone https://github.com/minishift/minishift.git github.com/minishift/mini
 [[using-ide]]
 === Using an IDE
 
-You can use any editor you want. However, most of the core maintainers of Minishift use Intellij
-https://www.jetbrains.com/idea/[IDEA] with the latest Go plugin. This IDE indexes your
-whole workspace and allows for easy navigation of the sources, and also integrates
-with the Go debugger https://github.com/derekparker/delve[Delve].
+You can use any editor you want.
+However, most of the core maintainers of Minishift use IntelliJ https://www.jetbrains.com/idea/[IDEA] with the latest Go plugin.
+This IDE indexes your whole workspace and allows for easy navigation of the sources, and also integrates with the Go debugger https://github.com/derekparker/delve[Delve].
 
 For instructions on setting up IDEA, see http://hadihariri.com/2015/09/30/setting-up-go-on-intellij/[Setting up Go on IntelliJ].
 
@@ -92,13 +89,13 @@ Before you can use Glide you need to download and install it from GitHub:
 $ go get github.com/Masterminds/glide
 ----
 
-This will install the _glide_ binary into _$GOPATH/bin_. Make sure to use Glide version _0.12.3_ or later.
+This will install the `glide` binary into *_$GOPATH/bin_*.
+Make sure to use Glide version _0.12.3_ or later.
 
 [[bootstrap-dependencies]]
 === Bootstrapping dependencies
 
-After a clean checkout or after a `make clean`, there won't be a _vendor_ directory
-containing the needed Minishift dependencies.
+After a clean checkout or after a `make clean`, there won't be a *_vendor_* directory containing the needed Minishift dependencies.
 
 To install the dependencies, you can run the following command:
 
@@ -106,7 +103,8 @@ To install the dependencies, you can run the following command:
 $ make vendor
 ----
 
-This command calls and runs Glide. Alternatively, you can run the Glide command directly.
+This command calls and runs Glide.
+Alternatively, you can run the Glide command directly.
 
 ----
 $ glide install -v
@@ -115,17 +113,19 @@ $ glide install -v
 [[update-dependencies]]
 === Updating dependencies
 
-If your work requires a change to the dependencies, you need to incorporate the updated
-information to the Glide files.
+If your work requires a change to the dependencies, you need to update the Glide configuration.
 
-. Edit the _glide.yaml_ file to change the dependency list as needed.
+. Edit *_glide.yaml_* to change the dependencies as needed.
 
-. Delete the _glide.lock_ file and re-create the vendor directory by link:#bootstrap-dependencies[bootstrapping] it. Glide will recognize
-that there is no lock file and recalculate the required dependencies.
+. Delete *_glide.lock_*  and re-create the vendor directory by running `make vendor`.
+ Glide will recognize that there is no lock file and recalculate the required dependencies.
 
-. Check-in the updated _glide.lock_ file and the updated _glide.yaml_.
+. Check-in the updated *_glide.yaml_* and *_glide.lock_*.
 
-. Test that everything still compiles with the new lock file in place.
+. Test that everything still compiles with the new lock file in place: `make clean && make`.
+
+TIP: In some cases the Glide cache located under *_~/.glide/cache_* can get corrupted.
+If you seeing Glide errors during `make vendor`, you can clear the Glide cache via `glide cc`.
 
 [[build-minishift]]
 == Building Minishift
@@ -134,7 +134,7 @@ that there is no lock file and recalculate the required dependencies.
 === Building the Minishift binary
 
 Run the following command to create a platform-specific binary and copy it
-to _$GOPATH/bin_.
+to *_$GOPATH/bin_*.
 
 ----
 $ make
@@ -151,18 +151,17 @@ Start the OpenShift cluster with your built minishift binary:
 $ minishift start
 ----
 
-This command will run Minishift from _$GOPATH/bin/minishift_, if you set up your Go
-workspace as described in the link:#creating-the-go-workspace[Creating the Go workspace] section.
+This command will run Minishift from *_$GOPATH/bin/minishift_*, if you set up your Go
+workspace as described in the xref:./developing.adoc#create-go-workspace[Creating the Go workspace] section.
 
-You can also execute the binaries directly from the _out_ directory of
-the checkout. Depending on your operating system, the binary is in one of the following
-directories:
+You can also execute the binaries directly from the *_out_* directory of the checkout.
+Depending on your operating system, the binary is in one of the following directories:
 
-* _out/darwin-amd64_
-* _out/linux-amd64_
-* _out/windows-amd64_
+* *_out/darwin-amd64_*
+* *_out/linux-amd64_*
+* *_out/windows-amd64_*
 
-For more minishift commands and flags, see the link:../command-ref/minishift{outfilesuffix}[Minishift command reference] documentation.
+For more minishift commands and flags, see the xref:../command-ref/minishift.adoc#minishift[Minishift command reference] documentation.
 
 [[unit-tests]]
 === Running unit tests
@@ -197,23 +196,22 @@ For more information about test options, run the `go test --help` command and re
 [[integration-tests]]
 === Running integration tests
 
-Integration tests utilize https://github.com/DATA-DOG/godog[`godog`], which uses Gherkin (Cucumber)
-to define test cases. The test cases are defined in `test/integration/*.feature`.
-Per default, the tests are executed against the binary created by `make build`, that is `$GOPATH/bin/minishift`. +
+Integration tests utilize https://github.com/DATA-DOG/godog[`godog`], which uses Gherkin (Cucumber) to define test cases.
+The test cases are defined in *_test/integration/+*+.feature_*.
+Per default, the tests are executed against the binary created by `make build`, that is *_$GOPATH/bin/minishift_*.
 To run the tests, run:
 
 ----
 $ make integration
 ----
 
-To run integration tests against a Minishift binary in a different location you can use the
-`MINISHIFT_BINARY` argument:
+To run integration tests against a Minishift binary in a different location you can use the `MINISHIFT_BINARY` argument:
 
 ----
 $ make integration MINISHIFT_BINARY=<path-to-custom-binary>
 ----
 
-Additional properties for Godog runner can be specified with `GODOG_OPTS` argument. +
+Additional properties for Godog runner can be specified with `GODOG_OPTS` argument.
 The following options are available:
 
 - `tags`: Use `tags` to ensure that scenarios and features containing at least one of the selected tags are executed.
@@ -231,8 +229,7 @@ the following command can be used:
 $ make integration GODOG_OPTS="-paths ~/tests/custom.feature,~/my.feature -tags basic,openshift -no-colors true"
 ----
 
-NOTE: When multiple values are used for options in GODOG_OPTS, then they have to be separated by a
-comma, without whitespace.
+NOTE: When multiple values are used for options in `GODOG_OPTS`, then they have to be separated by a comma, without whitespace.
 While `-tags basic,openshift` will be parsed properly by make, `-tags basic, openshift` will
 result in only `@basic` being used.
 
@@ -247,8 +244,7 @@ files violate the guidelines with the following command:
 $ make fmtcheck
 ----
 
-You can correct the formatting errors yourself or instruct the violations to be corrected automatically
-with the following command:
+You can correct the formatting errors yourself or instruct the violations to be corrected automatically with the following command:
 
 ----
 $ make fmt

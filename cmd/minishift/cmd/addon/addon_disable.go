@@ -58,7 +58,7 @@ func runDisableAddon(cmd *cobra.Command, args []string) {
 		fmt.Println(fmt.Sprintf("Addon '%s' disabled", addOnName))
 	}
 
-	addOnConfigMap := getAddOnConfiguration()
+	addOnConfigMap := GetAddOnConfiguration()
 	addOnConfigMap[addOnConfig.Name] = addOnConfig
-	writeAddOnConfig(addOnConfigMap)
+	WriteAddOnConfig(addOnConfigMap)
 }

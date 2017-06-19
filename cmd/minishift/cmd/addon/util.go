@@ -29,7 +29,7 @@ import (
 
 // GetAddOnManager returns the addon manager
 func GetAddOnManager() *manager.AddOnManager {
-	addOnConfigs := getAddOnConfiguration()
+	addOnConfigs := GetAddOnConfiguration()
 	m, err := manager.NewAddOnManager(constants.MakeMiniPath("addons"), addOnConfigs)
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to initialize the add-on manager: %s", err.Error()))
@@ -38,7 +38,7 @@ func GetAddOnManager() *manager.AddOnManager {
 	return m
 }
 
-func writeAddOnConfig(addOnConfigMap map[string]*addon.AddOnConfig) {
+func WriteAddOnConfig(addOnConfigMap map[string]*addon.AddOnConfig) {
 	c, err := config.ReadConfig()
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to read the Minishift configuration: %s", err.Error()))
@@ -52,9 +52,9 @@ func writeAddOnConfig(addOnConfigMap map[string]*addon.AddOnConfig) {
 	}
 }
 
-// getAddOnConfiguration reads the Minishift configuration in $MINISHIFT_HOME/config/config.json related to addons and returns
+// GetAddOnConfiguration reads the Minishift configuration in $MINISHIFT_HOME/config/config.json related to addons and returns
 // a map of addon names to AddOnConfig
-func getAddOnConfiguration() map[string]*addon.AddOnConfig {
+func GetAddOnConfiguration() map[string]*addon.AddOnConfig {
 	c, err := config.ReadConfig()
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to read the Minishift configuration: %s", err.Error()))

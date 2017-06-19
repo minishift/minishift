@@ -65,7 +65,7 @@ func enableAddon(addOnManager *manager.AddOnManager, addOnName string, priority 
 		fmt.Println(fmt.Sprintf("Addon '%s' enabled", addOnName))
 	}
 
-	addOnConfigMap := getAddOnConfiguration()
+	addOnConfigMap := GetAddOnConfiguration()
 	addOnConfigMap[addOnConfig.Name] = addOnConfig
-	writeAddOnConfig(addOnConfigMap)
+	WriteAddOnConfig(addOnConfigMap)
 }

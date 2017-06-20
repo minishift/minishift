@@ -64,7 +64,7 @@ func Test_create_addon_manager(t *testing.T) {
 
 	addOns := manager.List()
 
-	expectedNumberOfAddOns := 4
+	expectedNumberOfAddOns := 5
 	actualNumberOfAddOns := len(addOns)
 	if actualNumberOfAddOns != expectedNumberOfAddOns {
 		t.Fatal(fmt.Sprintf("Unexpected number of addons. Expected %d, got %d", expectedNumberOfAddOns, actualNumberOfAddOns))

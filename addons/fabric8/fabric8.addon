@@ -1,5 +1,7 @@
 # Name: fabric8
-# Description: Installs fabric8 locally on MiniShift
+# Description: Installs fabric8 locally on Minishift
+
+# TODO enable CORS!
 
 oc login -u system:admin
 
@@ -13,6 +15,7 @@ oc new-project developer
 oc new-project fabric8
 
 echo Installing the Fabric8 System using GitHub Client ID ${GITHUB_OAUTH_CLIENT_SECRET}
+# TODO lets uncomment when we figure out parameter passing!
 #oc new-app --param APISERVER_HOSTPORT="#{ip}:8443" --param GITHUB_OAUTH_CLIENT_SECRET=${GITHUB_OAUTH_CLIENT_SECRET} --param GITHUB_OAUTH_CLIENT_ID=${GITHUB_OAUTH_CLIENT_ID} https://raw.githubusercontent.com/fabric8io/fabric8-resources/master/fabric8-system-openshift.yml
 oc new-app --param APISERVER_HOSTPORT="#{ip}:8443" https://raw.githubusercontent.com/fabric8io/fabric8-resources/master/fabric8-system-openshift.yml
 
@@ -24,8 +27,8 @@ echo
 echo Or you can watch in the OpenShift console via:
 echo   minishift console
 echo
-echo When the pods are all running please click on the following URLs in your browser, then ADVANCED, then click the URL at the bottom
-echo To approve the certs
+echo When the pods are all running please click on the following URLs in your browser
+echo then ADVANCED, then click the URL at the bottom to approve the certs:
 echo
 echo   https://keycloak-fabric8.#{ip}.#{routing-suffix}/
 echo   https://wit-fabric8.#{ip}.#{routing-suffix}/api/status
@@ -35,5 +38,3 @@ echo
 echo
 echo Then you should be able the open the fabric8 console here:
 echo   https://fabric8-fabric8.#{ip}.#{routing-suffix}/
-
-

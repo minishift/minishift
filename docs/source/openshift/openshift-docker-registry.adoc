@@ -11,37 +11,42 @@ toc::[]
 == Overview
 
 OpenShift provides an integrated Docker registry which can be used for development as well.
-Images present in the registry can directly be used for applications, speeding up
-the local development work-flow.
-Refer to xref:../openshift/openshift-docker-registry.adoc#stage-app-with-openshift-registry[Application deployment] to know more.
+Images present in the registry can directly be used for applications, speeding up the local development workflow.
 
+[[login-to-registry]]
+== Logging Into the Registry
 
-[[login-to-openshift-docker-registry]]
-== Registry login
-
-. Start Minishift and add the `oc` binary to the PATH. Refer link:../getting-started/quickstart{outfilesuffix}[Minishift quickstart] for details.
-. Make sure your shell is configured to  link:../using/docker-daemon{outfilesuffix}[reuse the Minishift docker daemon].
-. Login to the docker registry
-
+. Start Minishift and add the *oc* binary to the PATH. For a detailed example, see the xref:../getting-started/quickstart.adoc#quickstart[Minishift Quickstart] section.
+. Make sure your shell is configured to xref:../using/docker-daemon.adoc#reusing-docker-daemon[reuse the Minishift docker daemon].
+. Log into the OpenShift Docker registry.
++
+----
  $ docker login -u developer -p $(oc whoami -t) $(minishift openshift registry)
+----
 
-[[stage-app-with-openshift-registry]]
-== Application deployment
+[[deploy-applications]]
+== Deploying Applications
 
-The following example shows how to deploy an OpenShift application directly from a locally built docker image.
-In this example, the OpenShift project _myproject_ is used, as it is automatically created by `minishift start`.
+The following example shows how to deploy an OpenShift application directly from a locally-built docker image.
+This example uses the OpenShift project *myproject*. This project is automatically created by `minishift start`.
 
-. Make sure your shell is configured to  link:../using/docker-daemon{outfilesuffix}[reuse the Minishift docker daemon].
+. Make sure your shell is configured to xref:../using/docker-daemon.adoc#reusing-docker-daemon[reuse the Minishift docker daemon].
 . Build the docker image as usual.
 . Tag the image against the OpenShift registry.
-
++
+----
  $ docker tag my-app $(minishift openshift registry)/myproject/my-app
+----
 
 . Push the image to the registry to create an image stream with the same name as the application.
-
++
+----
  $ docker push $(minishift openshift registry)/myproject/my-app
+----
 
 . Create an application from the image stream and expose the service.
-
++
+----
  $ oc new-app --image-stream=my-app --name=my-app
  $ oc expose service my-app
+----

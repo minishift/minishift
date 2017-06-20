@@ -1,5 +1,5 @@
 [[set-up-driver-plugin]]
-= Setting up the driver plugin
+= Setting Up the Driver Plug-in
 :icons:
 :toc: macro
 :toc-title:
@@ -7,19 +7,17 @@
 
 toc::[]
 
-[[hypervisor-drivers-overview]]
+[[setup-driver-plugin-overview]]
 == Overview
-Minishift uses Docker Machine and its driver plugin architecture to
-provide a consistent way to manage the OpenShift VM.
+Minishift uses Docker Machine and its driver plug-in architecture to provide a consistent way to manage the OpenShift VM.
 Minishift embeds VirtualBox and VMware Fusion drivers so no additional steps are required to use them.
 
-However, other drivers require manual installation and setup that are
-described in the following sections.
+However, other drivers require manual installation and setup that are described in the following sections.
 
 [[kvm-driver-install]]
-== KVM driver
+== KVM Driver
 
-Minishift is currently tested against `docker-machine-driver-kvm` version 0.7.0.
+Minishift is currently tested against *docker-machine-driver-kvm* version 0.7.0.
 
 . Install the KVM binary as follows:
 +
@@ -33,19 +31,18 @@ $ sudo curl -L https://github.com/dhiltgen/docker-machine-kvm/releases/download/
 $ sudo chmod +x /usr/local/bin/docker-machine-driver-kvm
 ----
 
-For more information, see the GitHub documentation of the https://github.com/dhiltgen/docker-machine-kvm#quick-start-instructions[docker machine KVM driver].
+For more information, see the GitHub documentation of the link:https://github.com/dhiltgen/docker-machine-kvm#quick-start-instructions[docker machine KVM driver].
 
 [[kvm-driver-debian]]
 === On Debian/Ubuntu
 
-.  Install `libvirt` and `qemu-kvm` on your system:
+.  Install *libvirt* and *qemu-kvm* on your system:
 +
 ----
 $ sudo apt install libvirt-bin qemu-kvm
 ----
 
-.  Add yourself to the **libvirtd** group (this may vary according to the Linux
-distribution) so that you do not need to use `sudo`:
+.  Add yourself to the **libvirtd** group (this may vary according to the Linux distribution) so that you do not need to use `sudo`:
 +
 ----
 $ sudo usermod -a -G libvirtd <username>
@@ -60,13 +57,13 @@ $ newgrp libvirtd
 [[kvm-driver-fedora]]
 === On Fedora
 
-.  Install `libvirt` and `qemu-kvm` on your system:
+.  Install *libvirt* and *qemu-kvm* on your system:
 +
 ----
 $ sudo dnf install libvirt qemu-kvm
 ----
 
-.  Add yourself to the **libvirt** group so that you do not need to use `sudo`:
+.  Add yourself to the *libvirt* group so that you do not need to use `sudo`:
 +
 ----
 $ sudo usermod -a -G libvirt <username>
@@ -79,12 +76,12 @@ $ newgrp libvirt
 ----
 
 [[xhyve-driver-install]]
-== xhyve driver
+== xhyve Driver
 
-Minishift is currently tested against `docker-machine-driver-xhyve` version 0.3.1.
+Minishift is currently tested against *docker-machine-driver-xhyve* version 0.3.1.
 
 [[homebrew-install]]
-=== Homebrew install
+=== Homebrew Install
 
 You can verify the existing version of the xhyve driver on your system using:
 
@@ -108,25 +105,23 @@ $ sudo chown root:wheel $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/doc
 $ sudo chmod u+s $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
 ----
 
-For more information, see the GitHub documentation for the https://github.com/zchee/docker-machine-driver-xhyve#install[xhyve driver].
+For more information, see the GitHub documentation for the link:https://github.com/zchee/docker-machine-driver-xhyve#install[xhyve driver].
 
 [[manual-install]]
-=== Manual install
+=== Manual Install
 
-To manually install the xhyve driver, you need to download and install the
-`docker-machine-driver-xhyve` binary and place it in a directory which is on your _PATH_.
-`/usr/local/bin` is most likely a good choice, since it is the default installation
-directory for Docker Machine binaries.
+To manually install the xhyve driver, you need to download and install the *docker-machine-driver-xhyve* binary and place it in a directory which is on your `PATH` environment variable.
+The directory *_/usr/local/bin_* is most likely a good choice, since it is the default installation directory for Docker Machine binaries.
 
-The following steps explain the installation of the `docker-machine-driver-xhyve` binary to the `/usr/local/bin/` directory:
+The following steps explain the installation of the *docker-machine-driver-xhyve* binary to the *_/usr/local/bin/_* directory:
 
-. Download the `docker-machine-driver-xhyve` binary using:
+. Download the *docker-machine-driver-xhyve* binary using:
 +
 ----
 $ sudo curl -L  https://github.com/zchee/docker-machine-driver-xhyve/releases/download/v0.3.1/docker-machine-driver-xhyve -o /usr/local/bin/docker-machine-driver-xhyve
 ----
 
-. Enable root access for the `docker-machine-driver-xhyve` binary and add it to the default wheel group:
+. Enable root access for the *docker-machine-driver-xhyve* binary and add it to the default wheel group:
 +
 ----
 $ sudo chown root:wheel /usr/local/bin/docker-machine-driver-xhyve
@@ -140,9 +135,9 @@ $ sudo chmod u+s /usr/local/bin/docker-machine-driver-xhyve
 
 [NOTE]
 ====
-The downloaded `docker-machine-driver-xhyve` binaries are compiled against a specific
-version of OS X. It is possible that the driver fails to work after an OS X version
-upgrade. In this case you can try to compile the driver from source:
+The downloaded *docker-machine-driver-xhyve* binaries are compiled against a specific version of macOS.
+It is possible that the driver fails to work after an macOS version upgrade.
+In this case you can try to compile the driver from source:
 
 ----
 $ go get -u -d github.com/zchee/docker-machine-driver-xhyve
@@ -156,35 +151,34 @@ $ sudo chown root:wheel /usr/local/bin/docker-machine-driver-xhyve
 $ sudo chmod u+s /usr/local/bin/docker-machine-driver-xhyve
 ----
 
-For more information, see the https://github.com/zchee/docker-machine-driver-xhyve#install[xhyve driver] documentation on GitHub.
+For more information, see the link:https://github.com/zchee/docker-machine-driver-xhyve#install[xhyve driver] documentation on GitHub.
 ====
 
-== Hyper-V
+== Hyper-V Driver
 To use Minishift with Hyper-V:
 
 . Install https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v[Hyper-V].
 . Add an https://msdn.microsoft.com/en-us/virtualization/hyperv_on_windows/quick_start/walkthrough_virtual_switch[External Virtual Switch].
 +
-NOTE: Verify that you pair the virtual switch
-with a __network card (wired or wireless) that is connected to the network__.
+NOTE: Verify that you pair the virtual switch with a network card (wired or wireless) that is connected to the network.
 
-. If you have multiple virtual switches, set the environment variable `HYPERV_VIRTUAL_SWITCH` to the name of the external virtual switch you want to use for Minishift. For further information see
-link:../using/managing-minishift{outfilesuffix}#driver-specific-environment-variables[setting driver specific environment variables].
+. If you have multiple virtual switches, set the environment variable `HYPERV_VIRTUAL_SWITCH` to the name of the external virtual switch you want to use for Minishift.
+For more information, see xref:../using/managing-minishift.adoc#driver-specific-environment-variables[driver-specific environment variables].
 +
-For Example, on Command Prompt use:
+For example, on Command Prompt use:
 +
 ----
 C:\> set HYPERV_VIRTUAL_SWITCH=External (Wireless)
 ----
 +
-Note that, using quotes in Command Prompt, results in the following error:
+Note that using quotes in Command Prompt results in the following error:
 +
 ----
 C:\> set HYPERV_VIRTUAL_SWITCH="External (Wireless)"
 Error creating the VM. Error with pre-create check: "vswitch \"\\\"External (Wireless)\\\"\" not found"
 ----
 +
-However on PowerShell you need to use the quotes:
+However, on PowerShell you need to use the quotes:
 +
 ----
 PS C:\> $env:HYPERV_VIRTUAL_SWITCH="External (Wireless)"

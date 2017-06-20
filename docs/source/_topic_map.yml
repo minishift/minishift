@@ -12,9 +12,9 @@ Topics:
         File: index
       - Name: Installing Minishift
         File: installing
-      - Name: Quickstart
+      - Name: Minishift Quickstart
         File: quickstart
-      - Name: Setting up the driver plugin
+      - Name: Setting up the Driver Plug-in
         File: setting-up-driver-plugin
       - Name: Updating Minishift
         File: updating
@@ -31,7 +31,7 @@ Topics:
         File: addons
       - Name: Host Folders
         File: host-folders
-      - Name: Using the Minishift Docker daemon
+      - Name: Minishift Docker Daemon
         File: docker-daemon
       - Name: Troubleshooting
         File: troubleshooting
@@ -40,11 +40,11 @@ Topics:
     Topics:
       - Name: Overview
         File: index
-      - Name: Using the OpenShift client binary
+      - Name: Using the OpenShift Client Binary
         File: openshift-client-binary
       - Name: Exposing Services
         File: exposing-services
-      - Name: Accessing the OpenShift Docker registry
+      - Name: Accessing the OpenShift Docker Registry
         File: openshift-docker-registry
   - Name: Contributing to Minishift
     Dir: contributing
@@ -55,7 +55,7 @@ Topics:
         File: developing
       - Name: Minishift CI
         File: ci
-      - Name: Writing documentation
+      - Name: Writing Documentation
         File: writing-docs
       - Name: Releasing Minishift
         File: releasing

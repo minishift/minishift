@@ -1,7 +1,7 @@
 include::variables.adoc[]
 
 [[openshift-client-binary]]
-= Using the OpenShift client binary (oc)
+= Using the OpenShift Client Binary (oc)
 :icons:
 :toc: macro
 :toc-title:
@@ -12,12 +12,13 @@ toc::[]
 [[overview]]
 == Overview
 
-The `minishift start` command creates an OpenShift instance using the https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md[cluster up] approach.
+The `minishift start` command creates an OpenShift cluster using the link:https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md[cluster up] approach.
+For this purpose it copies the *oc* binary onto your host.
 
-For this purpose it copies the `oc` binary onto your host.
-It is located in the  _~/.minishift/cache/oc/{openshift-version}_ directory, provided you use Minishift's default version of OpenShift.
-You can add this binary to your `PATH` using xref:../command-ref/minishift_oc-env.adoc#minishift-oc-env[`minishift oc-env`] which displays the command you need to type into your shell.
-The output of `oc-env` differs depending on the operating system and the shell type.
+The *oc* binary is located in the  *_~/.minishift/cache/oc/{openshift-version}_* directory, assuming that you use Minishift's default version of OpenShift.
+You can add this binary to your `PATH` using xref:../command-ref/minishift_oc-env.adoc#minishift-oc-env[`minishift oc-env`], which displays the command you need to type into your shell.
+
+The output of `minishift oc-env` differs depending on the operating system and the shell type.
 
 ----
 $ minishift oc-env
@@ -27,26 +28,26 @@ export PATH="/Users/john/.minishift/cache/oc/v1.5.0:$PATH"
 ----
 
 [[minishift-oc-context]]
-== Minishift oc context
+== Minishift CLI Profile
 
-As part of the `minishift start` command there is also a `minishift` https://docs.openshift.org/latest/cli_reference/manage_cli_profiles.html[oc context] created.
-This context contains the configuration to communicate with your OpenShift cluster.
+As a part of the `minishift start` command, a Minishift https://docs.openshift.org/latest/cli_reference/manage_cli_profiles.html[CLI profile] is also created.
+This profile, also known as a _context_, contains the configuration to communicate with your OpenShift cluster.
 
-Minishift activates this context automatically, but if you need to switch back to it after
-for example, logging into another OpenShift instance, you can run:
+Minishift activates this context automatically, but if you need to switch back to it after, for example, logging into another OpenShift instance, you can run:
 
 ----
 $ oc config use-context minishift
 ----
 
-For an introduction to `oc` usage, see the https://docs.openshift.com/enterprise/3.2/cli_reference/get_started_cli.html[Get Started with the CLI] topic in the OpenShift documentation.
+For an introduction to `oc` usage, see the link:https://docs.openshift.com/enterprise/3.2/cli_reference/get_started_cli.html[Get Started with the CLI] topic in the OpenShift documentation.
 
 [[log-into-cluster]]
-== Logging into the cluster
+== Logging Into the Cluster
 
-By default, _cluster up_ uses https://docs.openshift.org/latest/install_config/configuring_authentication.html#AllowAllPasswordIdentityProvider[AllowAllPasswordIdentityProvider] to authenticate against the local cluster.
+By default, `cluster up` uses link:https://docs.openshift.org/latest/install_config/configuring_authentication.html#AllowAllPasswordIdentityProvider[AllowAllPasswordIdentityProvider] to authenticate against the local cluster.
 This means any non-empty user name and password can be used to login to the local cluster.
-The recommended user name and password is developer and developer respectively since it already has a default project _myproject_ and also can https://docs.openshift.org/latest/architecture/additional_concepts/authentication.html#authentication-impersonation[impersonate] the administrator.
+
+The recommended user name and password is `developer` and `developer`, respectively. This is because they are already assigned to the default project *myproject* and also can link:https://docs.openshift.org/latest/architecture/additional_concepts/authentication.html#authentication-impersonation[impersonate] the administrator.
 This allows you to run administrator commands using the `--as system:admin` parameter.
 
 To login as administrator, use the system account:
@@ -55,8 +56,8 @@ To login as administrator, use the system account:
 $ oc login -u system:admin
 ----
 
-In this case, https://docs.openshift.com/enterprise/3.2/architecture/additional_concepts/authentication.html#api-authentication[client certificates] are used.
-The certificates are stored in `~/.kube/config`.
+In this case, link:https://docs.openshift.com/enterprise/3.2/architecture/additional_concepts/authentication.html#api-authentication[client certificates] are used.
+The certificates are stored in *_~/.kube/config_*.
 The `cluster up` command installs the appropriate certificates as a part of the bootstrap.
 
 [NOTE]
@@ -65,42 +66,40 @@ If you run the command `oc login -u system -p admin`, you will log in but not as
 Instead, you will be logged in as an unprivileged user with no particular rights.
 ====
 
-To view the currently available login contexts, run:
+To view the available login contexts, run:
 
 ----
 $ oc config view
 ----
 
 [[access-web-console]]
-== Accessing the Web console
+== Accessing the Web Console
 
-To access the https://docs.openshift.org/latest/architecture/infrastructure_components/web_console.html[OpenShift console],
-you can run this command in a shell after starting Minishift to get the URL of the Web console:
+To access the link:https://docs.openshift.org/latest/architecture/infrastructure_components/web_console.html[OpenShift Web console], you can run this command in a shell after starting Minishift to get the URL of the Web console:
 
 ----
 $ minishift console --url
 ----
 
-Alternatively, after starting Minishift, you can use the following command
-to directly open the console in a browser:
+Alternatively, after starting Minishift, you can use the following command to directly open the console in a browser:
 
 ----
 $ minishift console
 ----
 
 [[access-openshift-services]]
-== Accessing OpenShift services
+== Accessing OpenShift Services
 
-To access a service exposed with a route, run this command in a shell:
+To access a service that is exposed with a route, run this command in a shell:
 
 ----
 $ minishift openshift service [-n NAMESPACE] [--url] NAME
 ----
 
-For more information refer also to xref:../openshift/accessing-applications.adoc#accessing-applications[Accessing applications].
+For more information refer also to xref:../openshift/accessing-applications.adoc#accessing-applications[Accessing Applications].
 
 [[view-openshift-logs]]
-== Viewing OpenShift logs
+== Viewing OpenShift Logs
 
 To access OpenShift logs, run the `logs` command after starting Minishift:
 
@@ -109,36 +108,29 @@ $ minishift logs
 ----
 
 [[update-openshift-config]]
-== Updating OpenShift configuration
+== Updating OpenShift Configuration
 
-While OpenShift is running, you can view and change the master or the
-node configuration of your cluster.
+While OpenShift is running, you can view and change the master or the node configuration of your cluster.
 
-To view the current OpenShift master configuration
-(_master-config.yaml_), run the following command:
+To view the OpenShift master configuration file *_master-config.yaml_*, run the following command:
 
 ----
 $ minishift openshift config view
 ----
 
-To show the node configuration instead of the master configuration,
-specify the `target` flag.
+To show the node configuration instead of the master configuration, specify the `target` flag.
 
-For details about the `view` command, see the link:../command-ref/minishift_openshift_config_view{outfilesuffix}[synopsis]
-command reference.
+For details about the `view` sub-command, see the xref:../command-ref/minishift_openshift_config_view.adoc#minishift-openshift-config-view[minishift openshift config view] synopsis.
 
 NOTE: After you update the OpenShift configuration, OpenShift will transparently restart.
 
 [[example-config-cors]]
 === Example: Configuring cross-origin resource sharing
 
-In this example, you configure https://en.wikipedia.org/wiki/Cross-origin_resource_sharing[cross-origin resource sharing] (CORS)
-by updating the OpenShift master configuration to allow additional IP addresses to request resources.
+In this example, you configure link:https://en.wikipedia.org/wiki/Cross-origin_resource_sharing[cross-origin resource sharing] (CORS) by updating the OpenShift master configuration to allow additional IP addresses to request resources.
 
-By default, OpenShift only allows cross-origin resource requests from the IP address of the
-cluster or from localhost. This setting is stored in the `corsAllowedOrigins` property of the
-https://docs.openshift.com/enterprise/3.0/admin_guide/master_node_configuration.html#master-configuration-files[master configuration]
-file (_master-config.yaml_).
+By default, OpenShift only allows cross-origin resource requests from the IP address of the cluster or from localhost.
+This setting is stored in the `corsAllowedOrigins` property of the link:https://docs.openshift.com/enterprise/3.0/admin_guide/master_node_configuration.html#master-configuration-files[master configuration] file *_master-config.yaml_*.
 
 To change the property value and allow cross-origin requests from all domains, run the following command:
 
@@ -148,21 +140,19 @@ $  minishift openshift config set --patch '{"corsAllowedOrigins": [".*"]}'
 
 [NOTE]
 ====
-If you get the error `The specified patch need to be a valid JSON.` when you run the above command,
-you need to modify the above command depending on your Operating System,
-your shell environment and its interpolation behavior.
+If you get the error _The specified patch need to be a valid JSON._ when you run the above command, you need to modify the above command depending on your Operating System, your shell environment and its interpolation behavior.
 
-For example, if you use PowerShell on Windows 7 or 10 modify the above command to:
+For example, if you use PowerShell on Windows 7 or 10, modify the above command to:
 
-....
+----
 $ minishift openshift config set --patch '{\"corsAllowedOrigins\": [\".*\"]}'
-....
+----
 
-If you use Command Prompt you may need to use:
+If you use Command Prompt you might need to use:
 
-....
+----
 $ minishift openshift config set --patch "{\"corsAllowedOrigins\": [\".*\"]}"
-....
+----
 
 ====
 
@@ -171,19 +161,16 @@ $ minishift openshift config set --patch "{\"corsAllowedOrigins\": [\".*\"]}"
 
 In this example, you change the OpenShift routing suffix in the master configuration.
 
-If you use a static routing suffix, you can set the `routing-suffix` flag as part of the
-link:../command-ref/minishift_start{outfilesuffix}[`start`] command. By default, Minishift uses a
-dynamic routing prefix based on http://nip.io/[nip.io], in which the IP address of the VM is a
-part of the routing suffix, for example _192.168.99.103.nip.io_.
+If you use a static routing suffix, you can set the `routing-suffix` flag as part of the xref:../command-ref/minishift_start.adoc#minishift-start[`minishift start`] command.
+By default, Minishift uses a dynamic routing prefix based on http://nip.io/[nip.io], in which the IP address of the VM is a part of the routing suffix, for example *192.168.99.103.nip.io*.
 
-If you experience issues with `nip.io`, you can use http://xip.io/[xip.io], which is
-based on the same principles.
+If you experience issues with *nip.io*, you can use http://xip.io/[xip.io], which is based on the same principles.
 
-To set the routing suffix to `xip.io`, run the following command:
+To set the routing suffix to *xip.io*, run the following command:
 
 ----
 $ minishift openshift config set --patch '{"routingConfig": {"subdomain": "<IP-ADDRESS>.xip.io"}}'
 ----
 
 Make sure to replace `IP-ADDRESS` in the above example with the IP address of your Minishift VM.
-You can retrieve the IP address by running the link:../command-ref/minishift_ip{outfilesuffix}[`ip`] command.
+You can retrieve the IP address by running the xref:../command-ref/minishift_ip.adoc#minishift-ip[`minishift ip`] command.

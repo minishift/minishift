@@ -15,25 +15,26 @@ The following sections describe how to release Minishift.
 [[release-prereqs]]
 == Prerequisites
 
-* You must have a https://help.github.com/articles/creating-an-access-token-for-command-line-use[GitHub personal access token]
+- You must have a https://help.github.com/articles/creating-an-access-token-for-command-line-use[GitHub personal access token]
 defined in your environment as _GITHUB_ACCESS_TOKEN_.
-* You need _gnutar_ installed on your machine. See also GitHub issue link:https://github.com/minishift/minishift/issues/657[#657].
+- You need _gnutar_ installed on your machine. See also GitHub issue link:https://github.com/minishift/minishift/issues/657[#657].
 
-== Preparing the GitHub milestone
+[[preparing-github-milestone]]
+== Preparing the GitHub Milestone
 
-. Verify the milestone you want to release
- * Move remaining open issues into the next milestone
- * Review resolved/closed issues and make sure they are classified correctly
- * Check and update the resolution of the issues. For example, issues with a merged pull
-   requests should be labeled as _resolution/done_
-. Close milestone
+. Verify the milestone you want to release:
+  - Move remaining open issues into the next milestone.
+  - Review resolved/closed issues and make sure they are classified correctly.
+  - Check and update the resolution of the issues.
+  For example, issues with a merged pull requests should be labeled as *resolution/done*.
+. Close milestone.
 
 [[cut-release]]
-== Cutting the release
+== Cutting the Release
 
-. Bump the Minishift version in the link:https://github.com/minishift/minishift/blob/master/Makefile[Makefile]
+. Bump the Minishift version in the link:https://github.com/minishift/minishift/blob/master/Makefile[Makefile].
 
-. Commit and push your changes with a message of the form "cut v1.0.0"
+. Commit and push your changes with a message of the form `cut v1.0.0`.
 
 . Create binaries and upload them to GitHub (this will also tag the release):
 +
@@ -41,26 +42,25 @@ defined in your environment as _GITHUB_ACCESS_TOKEN_.
 $ make release
 ----
 
-. Trigger documentation build.
-This will build link:http://artifacts.ci.centos.org/minishift/minishift/docs/latest/[minishift-adoc.tar] which is in turn consumed by docs.openshift.org.
-See also <<writing-docs#section-building-openshift-docs,Building OpenShift documentation>>.
+. Trigger the documentation build.
 +
 ----
 $ export API_KEY=<api-key>
 $ curl -H "$(curl --user minishift:$API_KEY 'https://ci.centos.org//crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)')" -X POST https://ci.centos.org/job/minishift-docs/build --user "minishift:$API_KEY"
 ----
++
+This will build link:http://artifacts.ci.centos.org/minishift/minishift/docs/latest/[minishift-adoc.tar], which will be consumed by *docs.openshift.org* during the next nightly build.
+For more information, see xref:../contributing/writing-docs.adoc#writing-minishift-docs[Writing and Publishing Minishift Documentation].
 
-== Post release
+[[post-release-tasks]]
+== Post-Release Tasks
 
-As part of the release process we also send a release announcement and edit the GitHub
-release page.
+As part of the release process we also send a release announcement and edit the GitHub release page.
 
-For the latter we usually add a categorized list of closed issues as well as some
-release highlights (most often taken from the release announcement).
+For the latter we usually add a categorized list of closed issues as well as some release highlights (most often taken from the release announcement).
 
-If you have the link:https://stedolan.github.io/jq/[jq] installed on your machine, you
-can use the link:https://github.com/minishift/minishift/blob/master/scripts/release/issue-list.sh[issue-list.sh] script to generate the markdown needed for adding the
-issue list, for example:
+If you have link:https://stedolan.github.io/jq/[jq] installed on your machine, you can use the link:https://github.com/minishift/minishift/blob/master/scripts/release/issue-list.sh[issue-list.sh] script to generate the markdown needed for adding the issue list.
+For example:
 
 ----
 $ cd scripts/release

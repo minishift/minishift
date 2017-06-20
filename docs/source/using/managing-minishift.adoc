@@ -18,45 +18,37 @@ When you use Minishift, you interact with two components:
 - the OpenShift cluster provisioned by Minishift within the VM
 
 The following sections contain information about managing the Minishift VM.
-For details about using Minishift to manage your local OpenShift cluster,
-see the link:../using/interacting-with-openshift{outfilesuffix}[Interacting with OpenShift] section.
+For details about using Minishift to manage your local OpenShift cluster, see the xref:../openshift/index.adoc#interacting-with-openshift[Interacting with OpenShift] section.
 
 [[minishift-life-cycle]]
-== Minishift life-cycle
+== Minishift Life-cycle
 
-[[minishift-start]]
-=== Minishift start
+[[minishift-start-overview]]
+=== Minishift start Command
 
-The link:../command-ref/minishift_start{outfilesuffix}[`minishift start`] command creates and
-configures the Minishift VM and provisions a local, single-node
-OpenShift instance within the VM.
+The xref:../command-ref/minishift_start.adoc#minishift-start[`minishift start`] command creates and configures the Minishift VM and provisions a local, single-node OpenShift cluster within the Minishift VM.
 
-The command also copies the `oc` binary to your host so that you can interact
-with OpenShift through the `oc` command line tool or through the Web console,
-which can be accessed through the URL provided in the output
-of the `minishift start` command.
+The command also copies the *oc* binary to your host so that you can interact with OpenShift through the `oc` command-line tool or through the Web console, which can be accessed through the URL provided in the output of the `minishift start` command.
 
-[[minishift-stop]]
-=== Minishift stop
+[[minishift-stop-overview]]
+=== Minishift stop Command
 
-The link:../command-ref/minishift_stop{outfilesuffix}[`minishift stop`] command stops your OpenShift cluster and
-shuts down the Minishift VM, but preserves the OpenShift cluster state.
+The xref:../command-ref/minishift_stop.adoc#minishift-stop[`minishift stop`] command stops your OpenShift cluster and shuts down the Minishift VM, but preserves the OpenShift cluster state.
 
-Starting Minishift again will restore the OpenShift cluster, allowing
-you to continue working from the last session. However, you must enter the same
-parameters that you used in the original start command.
+Starting Minishift again will restore the OpenShift cluster, allowing you to continue working from the last session.
+However, you must enter the same parameters that you used in the original start command.
 
-Efforts to further refine this experience are in progress. For details, see
-the GitHub issue https://github.com/minishift/minishift/issues/179[#179].
+Efforts to further refine this experience are in progress.
+For details, see the GitHub issue link:https://github.com/minishift/minishift/issues/179[#179].
 
-[[minishift-delete]]
-=== Minishift delete
+[[minishift-delete-overview]]
+=== Minishift delete Command
 
-The link:../command-ref/minishift_delete{outfilesuffix}[`minishift delete`] command deletes the OpenShift cluster,
-and also shuts down and deletes the Minishift VM. No data or state are preserved.
+The xref:../command-ref/minishift_delete.adoc#minishift-delete[`minishift delete`] command deletes the OpenShift cluster, and also shuts down and deletes the Minishift VM.
+No data or state are preserved.
 
 [[choosing-iso-image]]
-== Choosing the ISO image
+== Choosing the ISO Image
 
 When you start Minishift, it downloads a live ISO image that the hypervisor uses to provision the Minishift VM.
 
@@ -73,7 +65,7 @@ The image size is larger than the Boot2Docker ISO image.
 By default, Minishift uses the Minishift Boot2Docker ISO image.
 To choose the Minishift CentOS ISO image instead, you can do one of the following:
 
-- Use the _centos_ alias to download and use the latest CentOS ISO:
+- Use the *centos* alias to download and use the latest CentOS ISO:
 +
 ----
 $ minishift start --iso-url centos
@@ -92,92 +84,74 @@ $ minishift start --iso-url https://github.com/minishift/minishift-centos-iso/re
 $ minishift start --iso-url file:///<path_to_ISO_image>
 ----
 
-NOTE: You cannot run Minishift with both ISO images concurrently. To switch between
-ISO images, delete the Minishift instance and start a new instance with the ISO image that you want to use.
+NOTE: You cannot run Minishift with both ISO images concurrently.
+To switch between ISO images, delete the Minishift instance and start a new instance with the ISO image that you want to use.
 
 [[runtime-options]]
-== Runtime options
+== Runtime Options
 
-The runtime behavior of Minishift can be controlled through flags,
-environment variables, and persistent configuration options.
+The runtime behavior of Minishift can be controlled through flags, environment variables, and persistent configuration options.
 
-The following precedence order is applied to control the behavior of
-Minishift. Each action in the following list takes precedence over
-the action below it:
+The following precedence order is applied to control the behavior of Minishift.
+Each action in the following list takes precedence over the action below it:
 
-.  Use command-line flags as specified in the link:#flags[Flags] section.
-.  Set environment variables as described in the
-link:#environment-variables[Environment variables] section.
-.  Use persistent configuration options as described in the
-link:#persistent-configuration[Persistent configuration] section.
+.  Use command-line flags as specified in the xref:flags[Flags] section.
+.  Set environment variables as described in the xref:environment-variables[Environment Variables] section.
+.  Use persistent configuration options as described in the xref:persistent-configuration[Persistent Configuration] section.
 .  Accept the default value as defined by Minishift.
 
 [[flags]]
 === Flags
 
-You can use command line flags with Minishift to specify options and
-direct its behavior. This has the highest precedence. Almost all
-commands have flags, although different commands might have different flags.
-Some of the commonly used command line flags of the `minishift start`
-command are `cpus`, `memory` or `vm-driver`.
+You can use command line flags with Minishift to specify options and direct its behavior.
+This has the highest precedence.
+Almost all commands have flags, although different commands might have different flags.
+Some of the commonly-used command line flags of the `minishift start` command are `cpus`, `memory` or `vm-driver`.
 
 [[environment-variables]]
-=== Environment variables
+=== Environment Variables
 
-Minishift allows you to specify command-line flags you commonly use
-through environment variables.
-To do so, apply the following rules to the flag you want to set as an
-environment variable.
+Minishift allows you to specify command-line flags you commonly use through environment variables.
+To do so, apply the following rules to the flag you want to set as an environment variable.
 
-.  Apply `MINISHIFT_` as a prefix to the flag you want to set as an
-environment variable. For example, the `vm-driver` flag
- of the link:../command-ref/minishift_start{outfilesuffix}[`minishift start`] command becomes
-`MINISHIFT_vm-driver`.
-.  Use uppercase characters for the flag, so `MINISHIFT_vm-driver` in the above
-example becomes `MINISHIFT_VM-DRIVER`.
+.  Apply `MINISHIFT_` as a prefix to the flag you want to set as an environment variable.
+For example, the `vm-driver` flag of the xref:../command-ref/minishift_start.adoc#minishift-start[`minishift start`] command becomes `MINISHIFT_vm-driver`.
+.  Use uppercase characters for the flag, so `MINISHIFT_vm-driver` in the above example becomes `MINISHIFT_VM-DRIVER`.
 .  Replace `-` with `_`, so `MINISHIFT_VM-DRIVER` becomes `MINISHIFT_VM_DRIVER`.
 
-Environment variables can be used to replace any option of any Minishift
-command. A common example is the URL of the ISO to be used. Usually, you
-specify it with the `iso-url` flag of the `minishift start` command.
-Applying the above rules, you can also specify this URL by setting the environment
-variable as `MINISHIFT_ISO_URL`.
+Environment variables can be used to replace any option of any Minishift command.
+A common example is the URL of the ISO to be used.
+Usually, you specify it with the `iso-url` flag of the `minishift start` command.
+Applying the above rules, you can also specify this URL by setting the environment variable as `MINISHIFT_ISO_URL`.
 
-NOTE: You can also use the `MINISHIFT_HOME` environment variable, to
-choose a different home directory for Minishift. By default, Minishift
-places all runtime state into `~/.minishift`. This environment variable is
-currently experimental and semantics might change in future releases.
+NOTE: You can also use the `MINISHIFT_HOME` environment variable, to choose a different home directory for Minishift.
+By default, Minishift places all runtime state into *_~/.minishift_*.
+This environment variable is currently experimental and semantics might change in future releases.
 
 [[persistent-configuration]]
-=== Persistent configuration
+=== Persistent Configuration
 
-Using persistent configuration allows you to control the Minishift
-behavior without specifying actual command line flags, similar to the
-way you use link:#environment-variables[environment variables].
+Using persistent configuration allows you to control the Minishift behavior without specifying actual command line flags, similar to the way you use environment variables.
 
-Minishift maintains a configuration file in
-`$MINISHIFT_HOME/config/config.json`. This file can be
-used to set commonly-used command-line flags persistently.
+Minishift maintains a configuration file in *_$MINISHIFT_HOME/config/config.json_*.
+This file can be used to set commonly-used command-line flags persistently.
 
-NOTE: Persistent configuration can only be applied to the set of
-supported configuration options that are listed in the synopsis of the
-link:../command-ref/minishift_config{outfilesuffix}[`minishift config`] sub-command, unlike
-environment variables that can be used to replace any option of any
-command.
+NOTE: Persistent configuration can only be applied to the set of supported configuration options that are listed in the synopsis of the xref:../command-ref/minishift_config.adoc#minishift-config[`minishift config`] sub-command.
+This is different from environment variables, which can be used to replace any option of any command.
 
 [[setting-persistent-configuration-values]]
-==== Setting persistent configuration values
+==== Setting Persistent Configuration Values
 
-The easiest way to change a persistent configuration option is with
-the link:../command-ref/minishift_config_set{outfilesuffix}[`config set`] sub-command. For example:
+The easiest way to change a persistent configuration option is with the xref:../command-ref/minishift_config_set.adoc#minishift-config-set[`minishift config set`] sub-command.
+For example:
 
 ----
 # Set default memory 4096 MB
 $ minishift config set memory 4096
 ----
 
-Flags which can be used multiple times per command invocation, like `docker-env` or `insecure-registry`, need to be comma (`,`) separated when used with the `config set` command.
-For example, from the CLI one can use `insecure-registry` like this:
+Flags which can be used multiple times per command invocation, like `docker-env` or `insecure-registry`, need to be comma-separated when used with the `config set` command.
+For example, from the CLI, you can use `insecure-registry` like this:
 
 ----
 $ minishift start --insecure-registry hub.foo.com --insecure-registry hub.bar.com
@@ -189,16 +163,14 @@ If you want to configure the same registries in the persistent configuration, yo
 $ minishift config set insecure-registry hub.foo.com,hub.bar.com
 ----
 
-To view all persistent configuration values, you can use the
-link:../command-ref/minishift_config_view{outfilesuffix}[`view`] sub-command:
+To view all persistent configuration values, you can use the xref:../command-ref/minishift_config_view.adoc#minishift-config-view[`minishift config view`] sub-command:
 
 ----
 $ minishift config view
 - memory: 4096
 ----
 
-Alternatively, you can display a single value with the
-link:../command-ref/minishift_config_get{outfilesuffix}[`get`] sub-command:
+Alternatively, you can display a single value with the xref:../command-ref/minishift_config_get.adoc#minishift-config-get[`minishift config get`] sub-command:
 
 ----
 $ minishift config get memory
@@ -206,52 +178,47 @@ $ minishift config get memory
 ----
 
 [[unsetting-persistent-configuration-values]]
-==== Unsetting persistent configuration values
+==== Unsetting Persistent Configuration Values
 
-To remove a persistent configuration option, you can use the
-link:../command-ref/minishift_config_unset{outfilesuffix}[`unset`] sub-command. For example:
+To remove a persistent configuration option, you can use the xref:../command-ref/minishift_config_unset.adoc#minishift-config-unset[`minishift config unset`] sub-command.
+For example:
 
 ----
 $ minishift config unset memory
 ----
 
 [[driver-specific-environment-variables]]
-=== Driver specific environment variables
+=== Driver-Specific Environment Variables
 
-You can also specify driver specific environment variables. Each
-docker-machine driver supports its own set of options and variables. A good starting point is the
-official docker-machine link:https://docs.docker.com/machine/drivers/[driver documentation].
-xhyve and KVM documentation is available under their respective GitHub repository
-link:https://github.com/zchee/docker-machine-driver-xhyve[docker-machine-driver-xhyve]
-and https://github.com/dhiltgen/docker-machine-kvm[docker-machine-kvm].
+You can also set driver-specific environment variables.
+Each docker-machine driver supports its own set of options and variables.
+A good starting point is the official docker-machine link:https://docs.docker.com/machine/drivers/[driver documentation].
 
-To use driver specific options make sure to export the variable as defined in its driver documentation
-prior to calling link:../command-ref/minishift_start{outfilesuffix}[`minishift start`]. For example,
-xhyve's experimental NFS sharing can be enabled by executing:
+xhyve and KVM documentation is available under their respective GitHub repository link:https://github.com/zchee/docker-machine-driver-xhyve[docker-machine-driver-xhyve] and https://github.com/dhiltgen/docker-machine-kvm[docker-machine-kvm].
+
+To use driver-specific options, make sure to export the variable as defined in its driver documentation before running xref:../command-ref/minishift_start.adoc#minishift-start[`minishift start`].
+For example, the xhyve experimental NFS sharing can be enabled by executing:
 
 ----
 $ export XHYVE_EXPERIMENTAL_NFS_SHARE=true
 $ minishift start --vm-driver xhyve
 ----
 
-CAUTION: Driver specific options might overlap with values specified using Minishift
-specific flags and environment variables. Examples are boot2docker URL, memory size, cpu count, etc.
-In this case driver specific environment variables will override Minishift specific settings.
+CAUTION: Driver-specific options might overlap with values specified using Minishift-specific flags and environment variables.
+Examples are boot2docker URL, memory size, cpu count, and so on.
+In this case, driver-specific environment variables will override Minishift-specific settings.
 
 [[persistent-volumes]]
 == Persistent Volumes
 
-As part of the <<interacting-with-openshift#openshift-client-binary,cluster up>> provisioning
-100 link:https://docs.openshift.org/latest/dev_guide/persistent_volumes.html[persistent volumes] are created
-for your OpenShift cluster. This allows applications to make
-link:https://docs.openshift.org/latest/dev_guide/persistent_volumes.html#persistent-volumes-claims-as-volumes-in-pods[persistent volumes claims]. The location of the persistent data is determined via the _host-pv-dir_ flag
-of the link:../command-ref/minishift_start{outfilesuffix}[`start`] command and defaults to
-_/var/lib/minishift/openshift.local.pv_ on the Minishift VM.
+As part of the OpenShift cluster provisioning, 100 link:https://docs.openshift.org/latest/dev_guide/persistent_volumes.html[persistent volumes] are created for your OpenShift cluster.
+This allows applications to make link:https://docs.openshift.org/latest/dev_guide/persistent_volumes.html#persistent-volumes-claims-as-volumes-in-pods[persistent volumes claims].
+The location of the persistent data is determined in the `host-pv-dir` flag of the xref:../command-ref/minishift_start.adoc#minishift-start[`minishift start`] command and defaults to *_/var/lib/minishift/openshift.local.pv_* on the Minishift VM.
 
 [[http-s-proxies]]
 == HTTP/HTTPS Proxies
 
-If you are behind a HTTP/HTTPS proxy, you need to supply proxy options to allow Docker and OpenShift to work properly.
+If you are behind an HTTP/HTTPS proxy, you need to supply proxy options to allow Docker and OpenShift to work properly.
 To do this, pass the required flags during `minishift start`.
 
 For example:
@@ -260,8 +227,7 @@ For example:
 $ minishift start --http-proxy http://YOURPROXY:PORT --https-proxy https://YOURPROXY:PORT
 ----
 
-In an authenticated proxy environment, the `proxy_user` and
-`proxy_password` must be a part of proxy URI.
+In an authenticated proxy environment, the `proxy_user` and `proxy_password` must be a part of proxy URI.
 
 ----
  $ minishift start --http-proxy http://<proxy_username>:<proxy_password>@YOURPROXY:PORT \
@@ -272,28 +238,30 @@ You can also use the `--no-proxy` flag to specify a comma-separated list of host
 
 Using the proxy options will transparently configure the Docker daemon as well as OpenShift to use the specified proxies.
 
-NOTE: `minishift start` honors the environment variables `HTTP_PROXY`, `HTTPS_PROXY` and `NO_PROXY`.
+[NOTE]
+====
+- `minishift start` honors the environment variables `HTTP_PROXY`, `HTTPS_PROXY` and `NO_PROXY`.
 If these variables are set, they are implicitly used during `minishift start` unless explicitly overridden by the corresponding command line flags.
 
-NOTE: Using the proxy options requires that you run OpenShift version 1.5.0 or later.
-Use the `openshift-version` option to request a specific version of OpenShift. You can list all Minishift-compatible OpenShift versions with the link:../command-ref/minishift_openshift_version_list{outfilesuffix}[`minishift openshift version list`] command.
+- Using the proxy options requires that you run OpenShift version 1.5.0 or later.
+Use the `openshift-version` option to request a specific version of OpenShift.
+You can list all Minishift-compatible OpenShift versions with the xref:../command-ref/minishift_openshift_version_list.adoc#minishift-openshift-version-list[`minishift openshift version list`] command.
+====
 
 [[networking]]
 == Networking
 
-The Minishift VM is exposed to the host system with a host-only IP address that
-can be obtained with the `minishift ip` command.
+The Minishift VM is exposed to the host system with a host-only IP address that can be obtained with the xref:../command-ref/minishift_ip.adoc#minishift-ip[`minishift ip`] command.
 
 [[connecting-with-ssh]]
 == Connecting to the Minishift VM with SSH
 
 You can use the xref:../command-ref/minishift_ssh.adoc#minishift-ssh[`minishift ssh`] command to interact with the Minishift VM.
 
-You can run `minishift ssh` without a sub-command to open an interactive shell and run commands on the
-Minishift VM in the same way that you run commands interactively on any remote machine using SSH.
+You can run `minishift ssh` without a sub-command to open an interactive shell and run commands on the Minishift VM in the same way that you run commands interactively on any remote machine using SSH.
 
-You can also run `minishift ssh` with a sub-command to send the sub-command directly to the Minishift VM and return
-the result to your local shell. For example:
+You can also run `minishift ssh` with a sub-command to send the sub-command directly to the Minishift VM and return the result to your local shell.
+For example:
 
 ----
 $ minishift ssh -- docker ps

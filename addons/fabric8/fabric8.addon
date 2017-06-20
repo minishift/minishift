@@ -1,0 +1,39 @@
+# Name: fabric8
+# Description: Installs fabric8 locally on MiniShift
+
+oc login -u system:admin
+
+echo Adding the OAuthClient and cluster-admin role to the init-tenant service account
+oc new-app --param URL="https://keycloak-fabric8.#{ip}.#{routing-suffix}/auth/realms/fabric8/broker/openshift-v3/endpoint" https://raw.githubusercontent.com/fabric8io/fabric8-resources/master/fabric8-oauthclient-template.yml
+oc adm policy add-cluster-role-to-user cluster-admin system:serviceaccount:fabric8:init-tenant
+
+oc login -u developer -p developer
+
+oc new-project developer
+oc new-project fabric8
+
+echo Installing the Fabric8 System using GitHub Client ID ${GITHUB_OAUTH_CLIENT_SECRET}
+#oc new-app --param APISERVER_HOSTPORT="#{ip}:8443" --param GITHUB_OAUTH_CLIENT_SECRET=${GITHUB_OAUTH_CLIENT_SECRET} --param GITHUB_OAUTH_CLIENT_ID=${GITHUB_OAUTH_CLIENT_ID} https://raw.githubusercontent.com/fabric8io/fabric8-resources/master/fabric8-system-openshift.yml
+oc new-app --param APISERVER_HOSTPORT="#{ip}:8443" https://raw.githubusercontent.com/fabric8io/fabric8-resources/master/fabric8-system-openshift.yml
+
+echo Please wait while the pods all startup!
+echo
+echo To watch this happening you can type:
+echo   oc get pod -l provider=fabric8 -w
+echo
+echo Or you can watch in the OpenShift console via:
+echo   minishift console
+echo
+echo When the pods are all running please click on the following URLs in your browser, then ADVANCED, then click the URL at the bottom
+echo To approve the certs
+echo
+echo   https://keycloak-fabric8.#{ip}.#{routing-suffix}/
+echo   https://wit-fabric8.#{ip}.#{routing-suffix}/api/status
+echo   https://forge-fabric8.#{ip}.#{routing-suffix}/forge/version
+echo   https://fabric8-fabric8.#{ip}.#{routing-suffix}/
+echo
+echo
+echo Then you should be able the open the fabric8 console here:
+echo   https://fabric8-fabric8.#{ip}.#{routing-suffix}/
+
+

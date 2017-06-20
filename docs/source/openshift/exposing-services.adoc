@@ -59,5 +59,5 @@ $ mysql --user=root --password=foo --host=$(minishift ip) --port=30907
 In case you want to quickly access a port of a specific pod of your cluster, you can also use the `oc port-forward` command of the xref:../openshift/openshift-client-binary.adoc#openshift-client-binary[OpenShift CLI].
 
 ----
-$ oc port-froward POD [LOCAL_PORT:]REMOTE_PORT
+$ oc port-forward POD [LOCAL_PORT:]REMOTE_PORT
 ----

@@ -20,15 +20,18 @@ import (
 	"fmt"
 
 	"github.com/docker/machine/libmachine"
+	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/clusterup"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
+	"github.com/minishift/minishift/pkg/minishift/docker"
 	"github.com/minishift/minishift/pkg/minishift/oc"
+	"github.com/minishift/minishift/pkg/minishift/openshift"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -77,7 +80,7 @@ func runApplyAddon(cmd *cobra.Command, args []string) {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error getting IP: %s", err.Error()))
 	}
 
-	routingSuffix := viper.GetString(routingSuffix)
+	routingSuffix := determineRoutingSuffix(host.Driver)
 	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
 	ocRunner, err := oc.NewOcRunner(minishiftConfig.InstanceConfig.OcPath, constants.KubeConfigPath)
 	if err != nil {
@@ -96,4 +99,29 @@ func runApplyAddon(cmd *cobra.Command, args []string) {
 			atexit.ExitWithMessage(1, fmt.Sprint("Error executing addon commands: ", err))
 		}
 	}
+}
+
+func determineRoutingSuffix(driver drivers.Driver) string {
+	defer func() {
+		if r := recover(); r != nil {
+			atexit.ExitWithMessage(1, "Unable to determine routing suffix from OpenShift master config.")
+		}
+	}()
+
+	sshCommander := provision.GenericSSHCommander{Driver: driver}
+	dockerCommander := docker.NewVmDockerCommander(sshCommander)
+
+	raw, err := openshift.ViewConfig(openshift.MASTER, dockerCommander)
+	if err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to retrieve OpenShift master configuration: %s", err.Error()))
+	}
+
+	var config map[interface{}]interface{}
+	err = yaml.Unmarshal([]byte(raw), &config)
+	if err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to parse OpenShift master configuration: %s", err.Error()))
+	}
+
+	// making assumptions about the master config here. In case the config structure changes, the code might panic here
+	return config["routingConfig"].(map[interface{}]interface{})["subdomain"].(string)
 }

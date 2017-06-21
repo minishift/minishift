@@ -158,7 +158,7 @@ func runStart(cmd *cobra.Command, args []string) {
 		MachineName:      constants.MachineName,
 		Ip:               ip,
 		Port:             constants.APIServerPort,
-		RoutingSuffix:    viper.GetString(startFlags.RoutingSuffix.Name),
+		RoutingSuffix:    getDefaultRoutingPrefix(ip),
 		HostPvDir:        viper.GetString(startFlags.HostPvDir.Name),
 		User:             defaultUser,
 		Project:          defaultProject,
@@ -374,8 +374,7 @@ func determineClusterUpParameters(config *clusterup.ClusterUpConfig) map[string]
 	viper.Set(startFlags.HostDataDir.Name, viper.GetString(startFlags.HostDataDir.Name))
 	viper.Set(startFlags.HostVolumeDir.Name, viper.GetString(startFlags.HostVolumeDir.Name))
 	viper.Set(startFlags.HostPvDir.Name, viper.GetString(startFlags.HostPvDir.Name))
-
-	setDefaultRoutingPrefix(config.Ip)
+	viper.Set(startFlags.RoutingSuffix.Name, config.RoutingSuffix)
 
 	clusterUpFlagSet.VisitAll(func(flag *flag.Flag) {
 		if viper.IsSet(flag.Name) {
@@ -411,10 +410,12 @@ func cacheOc(openShiftVersion string) string {
 	return minishiftConfig.InstanceConfig.OcPath
 }
 
-func setDefaultRoutingPrefix(ip string) {
+func getDefaultRoutingPrefix(ip string) string {
 	// prefer nip.io over xip.io. See GitHub issue #501
-	if !viper.IsSet(startFlags.RoutingSuffix.Name) {
-		viper.Set(startFlags.RoutingSuffix.Name, ip+".nip.io")
+	if viper.IsSet(startFlags.RoutingSuffix.Name) {
+		return viper.GetString(startFlags.RoutingSuffix.Name)
+	} else {
+		return ip + ".nip.io"
 	}
 }
 

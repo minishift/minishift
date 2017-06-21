@@ -133,6 +133,7 @@ var (
 		OpenShiftVersion: "v1.5.1",
 		Ip:               "192.168.99.42",
 		OcPath:           "/home/john/.minishift/cache/oc/1.5.1/oc",
+		RoutingSuffix:    "192.168.99.42.nip.io",
 	}
 	testDir    string
 	testRunner *RecordingRunner
@@ -344,10 +345,10 @@ func TestStartClusterUpWithOpenShiftEnv(t *testing.T) {
 func TestNoExplicitRouteSuffixDefaultsToNip(t *testing.T) {
 	defer viper.Reset()
 
-	setDefaultRoutingPrefix(testConfig.Ip)
 	expectedRoutingSuffix := testConfig.Ip + ".nip.io"
+	actualRoutingSuffix := getDefaultRoutingPrefix(testConfig.Ip)
 
-	if viper.Get(config.RoutingSuffix.Name) != expectedRoutingSuffix {
+	if actualRoutingSuffix != expectedRoutingSuffix {
 		t.Fatalf("Expected argument '%s'. Received '%s'", expectedRoutingSuffix, viper.Get(config.RoutingSuffix.Name))
 	}
 }
@@ -358,9 +359,9 @@ func TestExplicitRouteSuffixGetApplied(t *testing.T) {
 	viper.Set(config.RoutingSuffix.Name, explicitRoutingSuffix)
 	defer viper.Reset()
 
-	setDefaultRoutingPrefix(testConfig.Ip)
+	actualRoutingSuffix := getDefaultRoutingPrefix(testConfig.Ip)
 
-	if viper.Get(config.RoutingSuffix.Name) != explicitRoutingSuffix {
+	if actualRoutingSuffix != explicitRoutingSuffix {
 		t.Fatalf("Expected argument '%s'. Received '%s'", explicitRoutingSuffix, viper.Get(config.RoutingSuffix.Name))
 	}
 }

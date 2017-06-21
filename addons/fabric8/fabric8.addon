@@ -3,6 +3,7 @@
 
 echo "Enabling CORS"
 openshift ex config patch /var/lib/origin/openshift.local.config/master/master-config.yaml --patch='{"corsAllowedOrigins": [".*"]}'
+docker restart origin
 
 echo Adding the OAuthClient and cluster-admin role to the init-tenant service account
 oc --as system:admin new-app --param URL="https://keycloak-fabric8.#{ip}.#{routing-suffix}/auth/realms/fabric8/broker/openshift-v3/endpoint" https://raw.githubusercontent.com/fabric8io/fabric8-resources/master/fabric8-oauthclient-template.yml

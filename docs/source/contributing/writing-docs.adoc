@@ -11,70 +11,60 @@ toc::[]
 == Overview
 
 Minishift documentation is located in the *_docs_* sub-directory of the Minishift repository.
-The documentation is a mix of auto-generated https://en.wikipedia.org/wiki/Markdown[Markdown] files and manually maintained https://en.wikipedia.org/wiki/AsciiDoc[Asciidoc] files.
+The documentation is a mix of auto-generated https://en.wikipedia.org/wiki/Markdown[Markdown] files and manually maintained https://en.wikipedia.org/wiki/AsciiDoc[AsciiDoc] files.
 
 [[contribute-to-docs]]
-== Contributing to the documentation
+== Contributing to the Documentation
 
-Minishift is an open-source project and we welcome contributions. Similar to code
-contributions, if you want to add or edit Minishift documentation, you can create an
-issue in our link:https://github.com/minishift/minishift/issues[Github issue tracker] and
-submit a pull request with the changes.
+Minishift is an open-source project and we welcome contributions.
+Similar to code contributions, if you want to add or edit Minishift documentation, you can create an issue in our link:https://github.com/minishift/minishift/issues[Github issue tracker] and submit a pull request with the changes.
 
 [[docs-conventions-guidelines]]
-== Conventions and guidelines
+== Conventions and Guidelines
 
-Minishift documentation is authored in the link:http://asciidoctor.org/docs/asciidoc-syntax-quick-reference[AsciiDoc] markup format. Since
-Minishift is closely related to the OpenShift Origin
-project, we follow the link:https://github.com/openshift/openshift-docs/blob/master/contributing_to_docs/doc_guidelines.adoc[OpenShift Documentation Guidelines]
-for tagging, formatting, and structure wherever possible.
+Minishift documentation is authored in the link:http://asciidoctor.org/docs/asciidoc-syntax-quick-reference[AsciiDoc] markup format.
+Since Minishift is closely related to the OpenShift Origin project, we follow the link:https://github.com/openshift/openshift-docs/blob/master/contributing_to_docs/doc_guidelines.adoc[OpenShift Documentation Guidelines] for tagging, formatting, and structure wherever possible.
 
-The documentation source structure follows a modular format, where each file is called
-a _topic_ and each topic is stored under a sub-folder based on the relevant category, such as
-getting started, using Minishift, or command reference.
+The documentation source structure follows a modular format, where each file is called a _topic_ and each topic is stored under a sub-folder based on the relevant category, such as Getting Started, Using Minishift, or Command Reference.
 
-TIP: You can check out the link:https://raw.githubusercontent.com/minishift/minishift/master/docs/source/contributing/writing-docs.adoc[raw file]
-of this topic or other existing Minishift topics to see examples of how the information is structured and which tags to use.
+TIP: You can check out the link:https://raw.githubusercontent.com/minishift/minishift/master/docs/source/contributing/writing-docs.adoc[raw file] of this topic or other existing Minishift topics to see examples of how the information is structured and which tags to use.
 
 [[common-conventions]]
-=== Commonly-used conventions
+=== Commonly-Used Conventions
 
-- Each file must contain a topic metadata header with a top-level heading followed by required AsciiDoc variable declarations. See
-the link:https://github.com/openshift/openshift-docs/blob/master/contributing_to_docs/doc_guidelines.adoc#topic-metadata[topic metadata]
-section in the OpenShift documentation guidelines for more information.
+- Each file must contain a topic metadata header with a top-level heading followed by required AsciiDoc variable declarations.
+See the link:https://github.com/openshift/openshift-docs/blob/master/contributing_to_docs/doc_guidelines.adoc#topic-metadata[topic metadata] section in the OpenShift documentation guidelines for more information.
 
 - Links to another location within an AsciiDoc topic or between AsciiDoc topics are called cross-references and should use the _xref_ notation.
-See the link:https://github.com/openshift/openshift-docs/blob/master/contributing_to_docs/doc_guidelines.adoc#internal-cross-references[internal cross-references]
-section of the OpenShift documentation guidelines for more information and examples.
+See the link:https://github.com/openshift/openshift-docs/blob/master/contributing_to_docs/doc_guidelines.adoc#internal-cross-references[internal cross-references] section of the OpenShift documentation guidelines for more information and examples.
 
-- Each section heading must be preceded by a unique anchor ID, to help make sure that
-cross-references resolve to the correct section. The anchor ID text should match the title
-as much as possible. See the link:https://github.com/openshift/openshift-docs/blob/master/contributing_to_docs/doc_guidelines.adoc#unique-ids[unique IDs]
-section of the OpenShift documentation guidelines for more information and examples.
+- Each section heading must be preceded by a unique anchor ID, to help make sure that cross-references resolve to the correct section.
+The anchor ID text should match the title as much as possible.
+See the link:https://github.com/openshift/openshift-docs/blob/master/contributing_to_docs/doc_guidelines.adoc#unique-ids[unique IDs] section of the OpenShift documentation guidelines for more information and examples.
+
+- To make documentation reviews easier on GitHub, we use one line per sentence wherever possible. This practice is in addition to the OpenShift documentation guidlines.
 
 [[adding-new-topic]]
-=== Adding a new topic
+=== Adding a New Topic
 
-If you are adding a new topic to the documentation library, you must also
-update the navigation in the following ways:
+If you are adding a new topic to the documentation library, you must also update the navigation in the following ways:
 
-- Add an entry to the relevant *_index.adoc_* file for that topic. For example, if you
-add a new topic in the *_docs/source/using/_* directory, you must update the *_docs/source/using/index.adoc_*
-file in the same directory.
+- Add an entry to the relevant *_index.adoc_* file for that topic.
+For example, if you add a new topic in the *_docs/source/using/_* directory, you must update the *_docs/source/using/index.adoc_* file in the same directory.
 
-- Add an entry to the *__topic_map.yml_* in the *_docs/source_* sub-folder. The entry must
-contain the topic title and the file name.
+- Add an entry to the *__topic_map.yml_* in the *_docs/source_* sub-folder.
+The entry must contain the topic title and the file name.
 
 Make sure to add the new topic in the same order in all of the locations.
 
-[[building-docs]]
-== Building the documentation
+[[building-docs-locally]]
+== Building the Documentation Locally
 
-By default, the documentation is built in a Docker container. This way
-you do not need to install all the required dependencies on your
-development machine. All you need is a running Docker daemon. In case
-you don't have one, use Minishift itself. For more information, see
-xref:../using/docker-daemon.adoc#reusing-docker-daemon[reusing the Docker daemon].
+By default, the documentation is built in a Docker container.
+This way you do not need to install all the required dependencies on your development machine.
+All you need is a running Docker daemon.
+In case you don't have one, use Minishift itself.
+For more information, see xref:../using/docker-daemon.adoc#reusing-docker-daemon[reusing the Docker daemon].
 
 To generate the documentation into the *_docs/build_* directory, run:
 
@@ -86,7 +76,7 @@ $ make gen_docs
 ====
 Your local checkout of the sources are going to be mounted into the container in order to built the docs.
 Depending on your UID on the host, you might see file permissions problems when trying to run `make gen_docs`.
-This is caused by the fact, that the _docs_ user used within the container uses per default a UID of 1000.
+This is caused by the fact, that the *docs* user used within the container has a UID of 1000 by default.
 This might conflict with the user id of the mounted docs sources.
 
 Your output might look like:
@@ -99,7 +89,7 @@ Errno::EACCES: Permission denied @ dir_s_mkdir - build
 ----
 
 In this case you need to build the container with a different user ID.
-This will ensure that the _docs_ user in the container will be able to create files and directories.
+This will ensure that the *docs* user in the container will be able to create files and directories.
 
 ----
 $ make build_docs_container IMAGE_UID=$(id -u)
@@ -114,10 +104,9 @@ $ make serve_docs
 ----
 
 The `make serve_docs` command builds and generates a live-preview of the documentation.
-You can access the documentation by browsing to _http://<IP-of-Docker-daemon>:4567_.
+You can access the documentation by browsing to *http://<IP-of-Docker-daemon>:4567*.
 
-If you encounter issues with the local staging of the documentation, you can run the following
-command to remove all build artefacts:
+If you encounter issues with the local staging of the documentation, you can run the following command to remove all build artifacts:
 
 ----
 $ make clean_docs
@@ -126,14 +115,13 @@ $ make clean_docs
 [[integration-with-docs-openshift-org]]
 == Integration with docs.openshift.org
 
-The Minishift documentation is deployed on _docs.openshift.org_ under
-link:https://docs.openshift.org/latest/minishift[https://docs.openshift.org/latest/minishift].
+The Minishift documentation is deployed on *docs.openshift.org* under link:https://docs.openshift.org/latest/minishift[https://docs.openshift.org/latest/minishift].
 
-To integrate with _docs.openshift.org_, we deliver a tarball that contains the Minishift AsciiDoc files as well as some link:http://www.asciibinder.org/[AsciiBinder] metadata files.
+To integrate with *docs.openshift.org*, we deliver a tarball that contains the Minishift AsciiDoc files as well as some link:http://www.asciibinder.org/[AsciiBinder] metadata files.
 This tarball is generated with a Jenkins job on link:https://ci.centos.org/job/minishift-docs[CentOS CI] and is triggered as part of a xref:./releasing.adoc#cut-release[release].
 
 [[manually-building-openshift-docs]]
-=== Manually building the OpenShift documentation
+=== Manually Building the OpenShift Documentation
 
 To view the Minishift documentation integrated into the OpenShift documentation, you can follow the following steps.
 

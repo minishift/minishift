@@ -26,6 +26,7 @@ import (
 	"path/filepath"
 
 	"encoding/json"
+
 	"github.com/docker/machine/libmachine/log"
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/cmd/minishift/cmd/addon"

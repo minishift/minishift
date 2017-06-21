@@ -178,6 +178,15 @@ the link:../command-ref/minishift_config_set{outfilesuffix}[`config set`] sub-co
 $ minishift config set memory 4096
 ----
 
+Flags which support string slice also can be set in config with comma (`,`) separated strings.
+
+[listing.console]
+
+---
+# Set custom insecure registries
+$ minishift config set insecure-registry hub.foo.com,hub.bar.com
+---
+
 To view all persistent configuration values, you can use the
 link:../command-ref/minishift_config_view{outfilesuffix}[`view`] sub-command:
 

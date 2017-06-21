@@ -163,7 +163,7 @@ For more information, see the https://github.com/zchee/docker-machine-driver-xhy
 To use Minishift with Hyper-V:
 
 . Install https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v[Hyper-V].
-. Add a https://msdn.microsoft.com/en-us/virtualization/hyperv_on_windows/quick_start/walkthrough_virtual_switch[Virtual Switch].
+. Add an https://msdn.microsoft.com/en-us/virtualization/hyperv_on_windows/quick_start/walkthrough_virtual_switch[External Virtual Switch].
 +
 NOTE: Verify that you pair the virtual switch
 with a __network card (wired or wireless) that is connected to the network__.

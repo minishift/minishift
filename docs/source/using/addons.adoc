@@ -12,16 +12,16 @@ toc::[]
 
 NOTE: This feature is still considered experimental and might change in future releases.
 
-Minishift allows to configure the vanilla OpenShift setup provided by _cluster up_ with an add-on mechanism.
+Minishift allows to configure the vanilla OpenShift setup provided by *cluster up* with an add-on mechanism.
 
-Add-ons are directories that contain one or more text files with the _addon_ extension. The directory can also
-have other resource files such as JSON template files. However, only one _addon_ file is allowed.
+Add-ons are directories that contain one or more text files with the *_.addon_* extension.
+The directory can also have other resource files such as JSON template files.
+However, only one *_.addon_* file is allowed in each directory.
+
+The following example shows the contents of the add-on text file, including the name and description of the add-on, additional metadata, and the actual commands to run.
 
 [[example-anyuid-addon]]
 .Example: anyuid add-on definition file
-
-This example shows the contents of the add-on text file, including the name and description of the add-on,
-additional metadata, and the actual commands to run.
 
 ----
 # Name: anyuid                                                                          // <1>
@@ -31,65 +31,60 @@ oc adm policy add-scc-to-group anyuid system:authenticated                      
 ----
 <1> (Required) Name of the add-on.
 <2> (Required) Description of the add-on.
-<3> Actual add-on command. In this case, the command executes the _oc_ binary. For the full
-list of the supported add-on commands, see the <<addon-commands>> section.
+<3> Actual add-on command. In this case, the command executes the *oc* binary.
 
 NOTE: Comment lines can be inserted at anywhere in the file. Comment lines must start with the '#' character.
 
-Enabled add-ons (see <<enabling-disabling-addons>>) are be applied during
-link:../command-ref/minishift_start{outfilesuffix}[`minishift start`], immediately after the initial
-cluster provisioning is successfully completed.
+Enabled add-ons are applied during xref:../command-ref/minishift_start.adoc#minishift-start[`minishift start`], immediately after the initial cluster provisioning is successfully completed.
 
 [[addon-commands]]
-== Add-on commands
+== Add-on Commands
 
 This section describes the command types that an add-on file can contain and what the commands do.
 The following command types are available forming a sort of mini-DSL for add-ons:
 
 ssh::
-If the add-on command starts with _ssh_, you can run any command within the Minishift-managed VM.
-This is similar to running link:../command-ref/minishift_ssh{outfilesuffix}[`minishift ssh`] and
-then executing any command on the VM.
+If the add-on command starts with `ssh`, you can run any command within the Minishift-managed VM.
+This is similar to running xref:../command-ref/minishift_ssh.adoc#minishift-ssh[`minishift ssh`] and then executing any command on the VM.
+For more information about the `minishift ssh` command usage, see xref:../using/managing-minishift.adoc#connecting-with-ssh[Connecting to the Minishift VM with SSH].
 
 oc::
-If the add-on command starts with _oc_, it uses the _oc_ binary that is cached on your host to execute
-the specified `oc` command. This is similar to running `oc --as system:admin ...` from the command-line.
+If the add-on command starts with `oc`, it uses the *oc* binary that is cached on your host to execute the specified `oc` command.
+This is similar to running `oc --as system:admin ...` from the command-line.
 +
-NOTE: The `oc` command is executed as _system:admin_
+NOTE: The `oc` command is executed as *system:admin*.
 
 openshift::
-If the add-on command starts with _openshift_, you can run the `openshift` binary within
-the container that runs OpenShift. This means that any file parameters or other system-specific
-parameters must match the environment of the container instead of your host.
+If the add-on command starts with `openshift`, you can run the *openshift* binary within the container that runs OpenShift.
+This means that any file parameters or other system-specific parameters must match the environment of the container instead of your host.
 
 docker::
-If the add-on command starts with _docker_, it executes a `docker` command against the Docker daemon
-within the Minishift VM. This is the same daemon on which the single-node OpenShift cluster is
-running as well. This is similar to running `eval $(minishift docker-env)` on your host and
-then executing any `docker` command. See also
-link:../command-ref/minishift_docker-env{outfilesuffix}[`minishift docker-env`].
+If the add-on command starts with `docker`, it executes a `docker` command against the Docker daemon within the Minishift VM.
+This is the same daemon on which the single-node OpenShift cluster is running as well.
+This is similar to running `eval $(minishift docker-env)` on your host and then executing any `docker` command.
+See also xref:../command-ref/minishift_docker-env.adoc#minishift-docker-env[`minishift docker-env`].
 
 echo::
-If the add-on command starts with _echo_, the arguments following the _echo_ command are printed
-to the console. This can be used to provide additional feedback during add-on execution.
+If the add-on command starts with `echo`, the arguments following the `echo` command are printed to the console.
+This can be used to provide additional feedback during add-on execution.
 
 sleep::
-If the add-on command starts with _sleep_, it waits for the specified number of seconds. This can be
-useful in cases where you know that a command such as `oc` might take a few seconds before a certain
-resource can be queried.
+If the add-on command starts with `sleep`, it waits for the specified number of seconds.
+This can be useful in cases where you know that a command such as `oc` might take a few seconds before a certain resource can be queried.
 
 NOTE: Trying to add a command that is not listed will cause an error when the add-on gets parsed.
 
 [[addon-variable-interpolation]]
-=== Variable interpolation
+=== Variable Interpolation
 
 Minishift also allows the use of variables as part of the supported commands.
-Variables have the from _#{<variable-name>}_. <<example-addon-routing-variable>>
-shows how the routing suffix can be interpolated into a _openshift_ command
-to create a new certificate as part of securing the OpenShift registry.
+Variables have the format `#{<variable-name>}`.
+
+The following example shows how the routing suffix can be interpolated into an `openshift` command to create a new certificate as part of securing the OpenShift registry.
 
 [[example-addon-routing-variable]]
 .Example: Usage of the routing suffix variable
+
 ----
 $ openshift admin ca create-server-cert \
   --signer-cert=/var/lib/origin/openshift.local.config/master/ca.crt \
@@ -100,53 +95,52 @@ $ openshift admin ca create-server-cert \
   --key=/etc/secrets/registry.key
 ----
 
-<<table-supported-addon-variables>> shows the currently supported variables
-which are available for interpolation.
+The following table shows the supported variables that are available for interpolation.
 
 [[table-supported-addon-variables]]
 .Supported add-on variables
+
 |===
 |Variable |Description
 
 |ip
-|The IP of the Minishift VM
+|IP of the Minishift VM.
 
 |routing-suffix
-|The OpenShift routing suffix for application
+|OpenShift routing suffix for the application.
 
 |addon-name
-|The name of the current add-on
+|Name of the current add-on.
 |===
 
 [[default-addons]]
-== Default add-ons
+== Default Add-ons
 
-Minishift provides a set of built-in add-ons that offer some common OpenShift customization
-to assist with development. To install the default add-ons, run:
+Minishift provides a set of built-in add-ons that offer some common OpenShift customization to assist with development.
+To install the default add-ons, run:
 
 ----
 $ minishift addons install --defaults
 ----
 
-This command extracts the default add-ons to the add-on installation directory
-(`$MINISHIFT_HOME/addons`). To view the list of installed add-ons, you can then run:
+This command extracts the default add-ons to the add-on installation directory *_$MINISHIFT_HOME/addons_*.
+To view the list of installed add-ons, you can then run:
 
 ----
 $ minishift addons list --verbose=true
 ----
 
-This command prints a list of installed add-ons. You should at least see the _anyuid_ add-on listed.
+This command prints a list of installed add-ons. You should at least see the *anyuid* add-on listed.
 This is an important add-on that allows you to run images that do not use a pre-allocated UID.
-By default, this is not allowed in OpensShift.
+By default, this is not allowed in OpenShift.
 
 [[enabling-disabling-addons]]
-== Enabling and disabling add-ons
+== Enabling and Disabling Add-ons
 
-Add-ons are enabled with the link:../command-ref/minishift_addons_enable{outfilesuffix}[`minishift addons enable`]
-command and disabled with the link:../command-ref/minishift_addons_disable{outfilesuffix}[`minishift addons disable`] command.
-Enabled add-ons automatically get executed during link:../command-ref/minishift_start{outfilesuffix}[`minishift start`].
+Add-ons are enabled with the xref:../command-ref/minishift_addons_enable.adoc#minishift-addons-enable[`minishift addons enable`] command and disabled with the xref:../command-ref/minishift_addons_disable.adoc#minishift-addons-disable[`minishift addons disable`] command.
+Enabled add-ons automatically get executed during xref:../command-ref/minishift_start.adoc#minishift-start[`minishift start`].
 
-The following examples show how to enable and disable the _anyuid_ add-on.
+The following examples show how to enable and disable the *anyuid* add-on.
 
 [[example-enable-anyuid]]
 .Example: Enabling the anyuid add-on
@@ -163,10 +157,11 @@ $ minishift addons disable anyuid
 ----
 
 [[addon-priorities]]
-=== Add-on priorities
+=== Add-on Priorities
 
-When you enable an add-on, you can also specify a priority as seen in
-<<example-enable-registry-priority>>.
+When you enable an add-on, you can also specify a priority, which determines the order that the add-ons are applied.
+
+The following example shows how to enable the *registry* add-on with a higher priority value.
 
 [[example-enable-registry-priority]]
 .Example: Enabling the registry add-on with priority
@@ -178,6 +173,9 @@ $ minishift addons enable registry --priority=5
 The add-on priority attribute determines the order in which add-ons are applied.
 By default, an add-on has the priority 0. Add-ons with a lower priority value are applied first.
 
+In the following example, the *anyuid*, *registry*, and *eap* add-ons are enabled with the respective priorities of 0, 5 and 10.
+This means that *anyuid* is applied first, followed by *registry*, and lastly the *eap* add-on.
+
 [[example-priority-list]]
 .Example: List command output with explicit priorities
 
@@ -188,20 +186,16 @@ $ minishift addons list
 - eap            : enabled    P(10)
 ----
 
-In <<example-priority-list>>, the _anyuid_, _registry_, and _eap_ add-ons are enabled with the respective
-priorities of 0, 5 and 10. This means that _anyuid_ gets applied first, followed by _registry_, and lastly
-the _eap_ add-on.
-
-NOTE: If two add-ons have the same priority the order in which they are getting applied is not
-determined.
+NOTE: If two add-ons have the same priority the order in which they are getting applied is not determined.
 
 [[apply-addons]]
-== Applying add-ons
+== Applying Add-ons
 
-Add-ons can be explicitly executed with the link:../command-ref/minishift_addons_apply{outfilesuffix}[`minishift addons apply`] command.
-You can use the `apply` command for both enabled and disabled add-ons. For applying multiple add-ons with a single command specify add-on names separated by space.
+Add-ons can be explicitly executed with the xref:../command-ref/minishift_addons_apply.adoc#minishift-addons-apply[`minishift addons apply`] command.
+You can use the `apply` command for both enabled and disabled add-ons.
+To apply multiple add-ons with a single command, specify add-on names separated by space.
 
-The following example shows how to explicitly apply the anyuid and admin-user add-ons.
+The following example shows how to explicitly apply the *anyuid* and the *admin-user* add-ons.
 
 [[example-apply-anyuid-admin-user]]
 .Example: Applying anyuid and admin-user add-ons
@@ -211,14 +205,13 @@ $ minishift addons apply anyuid admin-user
 ----
 
 [[custom-addons]]
-== Writing custom add-ons
+== Writing Custom Add-ons
 
-To write a custom add-on, you should create a directory and in it create at least one
-text file with the extension _.addon_, for example `admin-role.addon`.
+To write a custom add-on, you should create a directory and in it create at least one text file with the extension *_.addon_*, for example *_admin-role.addon_*.
 
-This file needs to contain the _Name_ and _Description_ metadata as well as the commands
-that you want to execute as a part of the add-on. <<example-admin-role>> shows the the
-definition of an add-on that gives the developer user cluster-admin privileges.
+This file needs to contain the *Name* and *Description* metadata fields, as well as the commands that you want to execute as a part of the add-on.
+
+The following example shows the definition of an add-on that gives the developer user cluster-admin privileges.
 
 [[example-admin-role]]
 .Example: Add-on definition for admin-role
@@ -236,6 +229,5 @@ After you define the add-on, you can install it by running:
 $ minishift addons install <ADDON_DIR_PATH>
 ----
 
-NOTE: You can also edit your add-on directly in the Minishift add-on install directory
-`$MINISHIFT_HOME/addons`. Be aware that if there is an error in the add-on, it will not show
-when you run any _addons_ commands and it will not be applied during the `minishift start` process.
+NOTE: You can also edit your add-on directly in the Minishift add-on install directory *_$MINISHIFT_HOME/addons_*.
+Be aware that if there is an error in the add-on, it will not show when you run any `addons` commands, and it will not be applied during the `minishift start` process.

@@ -10,25 +10,19 @@ toc::[]
 [[overview]]
 == Overview
 
-This section contains solutions to common problems that you might
-encounter while using Minishift.
+This section contains solutions to common problems that you might encounter while using Minishift.
 
 [[special-characters-passwords]]
 == Special characters cause passwords to fail
 
-Depending on your operating system and shell environment, certain
-special characters can trigger variable interpolation and therefore
-cause passwords to fail.
+Depending on your operating system and shell environment, certain special characters can trigger variable interpolation and therefore cause passwords to fail.
 
-Workaround: When creating and entering passwords, wrap the string with
-single quotes in the following format: `'<password>'`.
+Workaround: When creating and entering passwords, wrap the string with single quotes in the following format: `'<password>'`
 
 [[minishift-delete-fails-undefine-snapshots]]
 == Undefining virsh snapshots fail
 
-If you use `virsh` on KVM/libvirt to create snapshots in your development
-workflow, and then use `minishift delete` to delete the snapshots along with
-the VM, you might encounter the following error:
+If you use `virsh` on KVM/libvirt to create snapshots in your development workflow, and then use `minishift delete` to delete the snapshots along with the VM, you might encounter the following error:
 
 ----
 $ minishift delete
@@ -36,10 +30,9 @@ Deleting the Minishift VM...
 Error deleting the VM:  [Code-55] [Domain-10] Requested operation is not valid: cannot delete inactive domain with 4 snapshots
 ----
 
-Cause: The snapshots are stored in `~/.minishift/machines`, but the
-definitions are stored in `var/lib/libvirt/qemu/snapshot/minishift`.
+Cause: The snapshots are stored in *_~/.minishift/machines_*, but the definitions are stored in *_var/lib/libvirt/qemu/snapshot/minishift_*.
 
-Workaround: To delete the snapshots you need to perform the following steps.
+Workaround: To delete the snapshots, you need to perform the following steps.
 
 .  Delete the definitions.
 +
@@ -57,20 +50,19 @@ $ sudo virsh undefine minishift
 +
 
 You can now run `minishft delete` to delete the VM and restart Minishift.
-+
 
 [NOTE]
 ====
-In case the above steps do not resolve the issue, you can also
-use the following command to delete the snapshots:
+If these steps do not resolve the issue, you can also use the following command to delete the snapshots:
 
 ----
 $ rm -rf ~/.minishift/machines
 ----
 ====
 
-It is recommended to avoid use of metadata when you create snapshots. To ensure
-this, you can specify the `--no-metadata` flag. For example:
+It is recommended to avoid using metadata when you create snapshots.
+To ensure this, you can specify the `--no-metadata` flag.
+For example:
 
 ----
 $ sudo virsh snapshot-create-as --domain vm1 overlay1 --diskspec vda,file=/export/overlay1.qcow2 --disk-only --atomic --no-metadata
@@ -79,14 +71,14 @@ $ sudo virsh snapshot-create-as --domain vm1 overlay1 --diskspec vda,file=/expor
 [[dial-tcp-missing-address]]
 == KVM: Error creating new host: dial tcp: missing address
 
-The problem is likely that the `libvirtd` service is not running. You can check this
-with the following command:
+The problem is likely that the *libvirtd* service is not running.
+You can check this with the following command:
 
 ----
 $ systemctl status libvirtd
 ----
 
-If `libvirtd` is not running, start it and enable it to start on boot:
+If *libvirtd* is not running, start it and enable it to start on boot:
 
 ----
 $ systemctl start libvirtd
@@ -96,14 +88,14 @@ $ systemctl enable libvirtd
 [[fail-connect-socket]]
 == KVM: Failed to connect socket to '/var/run/libvirt/virtlogd-sock'
 
-The problem is likely that the `virtlogd` service is not running.
+The problem is likely that the *virtlogd* service is not running.
 You can check this with the following command:
 
 ----
 $ systemctl status virtlogd
 ----
 
-If `virtlogd` is not running, start it and enable it to start on boot:
+If *virtlogd* is not running, start it and enable it to start on boot:
 
 ----
 $ systemctl start virtlogd
@@ -113,8 +105,8 @@ $ systemctl enable virtlogd
 [[domain-minishift-already-exists]]
 == KVM: Domain 'minishift' already exists...
 
-If you try `minishift start` and hit the above error, ensure that you use `minishift delete` to delete the VMs created earlier by you.
-However if this fails and you want to completely clean up Minishift and start fresh do the following:
+If you try `minishift start` and the this error appears, ensure that you use `minishift delete` to delete the VMs that you created earlier.
+However, if this fails and you want to completely clean up Minishift and start fresh, do the following:
 
 . Check if any existing Minishift VM are running:
 +
@@ -137,28 +129,25 @@ $ sudo virsh destroy minishift
 $ sudo virsh undefine minishift
 ----
 
-. Delete the `.minishift/machines` directory using:
+. Delete the *_.minishift/machines_* directory:
 +
 
 ----
  $ rm -rf ~/.minishift/machines
 ----
 
-In case all of this fails, you may want to link:../getting-started/uninstalling{outfilesuffix}[uninstall Minishift] and do a fresh install of Minishift.
+In case all of this fails, you might want to xref:../getting-started/uninstalling.adoc#uninstall-minishift[uninstall Minishift] and do a fresh install of Minishift.
 
 [[create-vmnet-interface-permission]]
 == xhyve: Could not create vmnet interface
 
-The problem is likely that the xhyve driver is not able to clean
-up `vmnet` when a VM is removed. `vmnet.framework` determines the IP address
-based on the following files:
+The problem is likely that the xhyve driver is not able to clean up *vmnet* when a VM is removed.
+*vmnet.framework* determines the IP address based on the following files:
 
-* _/var/db/dhcpd_leases_
-* _/Library/Preferences/SystemConfiguration/com.apple.vmnet.plist_
+* *_/var/db/dhcpd_leases_*
+* *_/Library/Preferences/SystemConfiguration/com.apple.vmnet.plist_*
 
-Reset the `minishift`-specific IP database, ensure that you remove the
-`minishift` entry section from the `dhcpd_leases` file, and reboot your
-system.
+Reset the Minishift-specific IP database, ensure that you remove the `minishift` entry section from the `dhcpd_leases` file, and reboot your system.
 
 ----
 {
@@ -170,38 +159,36 @@ system.
 }
 ----
 
-NOTE: You can completely reset the IP database by removing the files
-manually but this is very *risky*.
+NOTE: You can completely reset the IP database by removing the files manually but this is very risky.
 
 [[machine-doesnt-exist]]
 == VirtualBox: Error machine does not exist
 
-If you use Windows, ensure that you set the `--vm-driver virtualbox`
-flag in the `minishift start` command. Alternatively, the problem might be
-an outdated version of VirtualBox.
+If you use Windows, ensure that you set the `--vm-driver virtualbox` flag in the `minishift start` command.
+Alternatively, the problem might be an outdated version of VirtualBox.
 
 To avoid this issue, it is recommended to use VirtualBox 5.1.12 or later.
 
 [[insufficient-privileges]]
 == Hyper-V: Hyper-V commands must be run as an Administrator
 
-If you run Minishift with Hyper-V on Windows as a normal user or as a user with Administrator privileges, you encounter the following error:
+If you run Minishift with Hyper-V on Windows as a normal user or as a user with Administrator privileges, you might encounter the following error:
 
 ----
 Error starting the VM: Error creating the VM. Error with pre-create check: "Hyper-V commands must be run as an Administrator".
 ----
 
-Workaround: To overcome this error you can either add yourself to the Hyper-V Administrators group, which is recommended, or run the shell in an elevated mode.
+Workaround: You can either add yourself to the Hyper-V Administrators group, which is recommended, or run the shell in an elevated mode.
 
-If use PowerShell, you can add yourself to the Hyper-V Administrators group as follows:
+If you are using PowerShell, you can add yourself to the Hyper-V Administrators group as follows:
 
-. As an administrator run the following command:
+. As an administrator, run the following command:
 +
 ----
 ([adsi]”WinNT://./Hyper-V Administrators,group”).Add(“WinNT://$env:UserDomain/$env:Username,user”)
 ----
 
-. Log off and log in for the change to take effect.
+. Log out and log back in for the change to take effect.
 
 You can also use the GUI to add yourself to the Hyper-V Administrators group as follows:
 
@@ -212,12 +199,13 @@ You can also use the GUI to add yourself to the Hyper-V Administrators group as 
 
 Now you can run the Hyper-V commands as a normal user.
 
-For more options for Hyper-V see https://blogs.msdn.microsoft.com/virtual_pc_guy/2010/09/28/creating-a-hyper-v-administrators-local-group-through-powershell[creating Hyper-V administrators local group].
+For more options for Hyper-V see link:https://blogs.msdn.microsoft.com/virtual_pc_guy/2010/09/28/creating-a-hyper-v-administrators-local-group-through-powershell[creating Hyper-V administrators local group].
 
+[[hyperv-fails-openvpn]]
 == Hyper-V: Minishift running with Hyper-V fails when connected to OpenVPN
 
-If you try to use Minishift with Hyper-V using an external virtual switch, while you are connected to a VPN such as OpenVPN, Minishift might fail to provision the VM.
+If you try to use Minishift with Hyper-V using an external virtual switch while you are connected to a VPN such as OpenVPN, Minishift might fail to provision the VM.
 
-Cause: Hyper-V networking may not route the network traffic in both directions properly, when connected to a VPN.
+Cause: Hyper-V networking might not route the network traffic in both directions properly when connected to a VPN.
 
 Workaround: Disconnect from the VPN and try again after stopping the VM from the Hyper-V manager.

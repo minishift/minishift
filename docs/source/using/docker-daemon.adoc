@@ -8,22 +8,19 @@
 toc::[]
 
 [[reusing-docker-daemon]]
-== Reusing the Docker daemon
+== Reusing the Docker Daemon
 
 When running OpenShift in a single VM, you can reuse the Docker daemon managed by Minishift for other Docker use-cases as well.
 By using the same docker daemon as Minishift, you can speed up your local development.
 
 In order to configure your console to reuse the Minishift Docker dameon, follow these steps:
 
-. Make sure that you have the Docker client binary installed on your
-machine. For information about specific binary installations for your
-operating system, see the
-https://docs.docker.com/engine/installation/[Docker installation] site.
+. Make sure that you have the Docker client binary installed on your machine.
+For information about specific binary installations for your operating system, see the link:https://docs.docker.com/engine/installation/[Docker installation] site.
 
-. Start Minishift with the link:../command-ref/minishift_start{outfilesuffix}[`minishift start`] command.
+. Start Minishift with the xref:../command-ref/minishift_start.adoc#minishift-start[`minishift start`] command.
 
-. Use link:../command-ref/minishift_docker-env{outfilesuffix}[`minishift docker-env`]
-to display the command you need to type into your shell in order to configure your Docker client.
+. Run the xref:../command-ref/minishift_docker-env.adoc#minishift-docker-env[`minishift docker-env`] command to display the command you need to type into your shell in order to configure your Docker client.
 The command output will differ depending on OS and shell type.
 +
 ----
@@ -36,7 +33,7 @@ export DOCKER_API_VERSION="1.24"
 # eval $(minishift docker-env)
 ----
 
-. Test the connection, running the following command:
+. Test the connection by running the following command:
 +
 ----
 $ docker ps

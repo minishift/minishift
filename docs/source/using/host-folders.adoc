@@ -12,60 +12,71 @@ toc::[]
 
 Host folders are directories on the host which are shared between the host and the Minishift VM.
 They allow for a two way file synchronization between host and VM.
-The following sections discuss the various types of host folders, driver provided host folders, as well as the Minishift `hostfolder` command.
+The following sections discuss the various types of host folders, driver provided host folders, as well as the `minishift hostfolder` command.
 
 [[driver-host-folders]]
-== Driver provided host folders
+== Driver-Provided Host Folders
 
 Some drivers mount a default host folder into the VM in order to share files between the VM and the host.
 These folders are currently not configurable and differ for each driver and OS.
 
-.Driver provided host folders
-[cols=",,,",options="header",]
-|========================================
+[[table-driver-host-folders]]
+.Driver-provided host folders
+
+|===
 |Driver |OS |HostFolder |VM
+
 |Virtualbox |Linux |/home |/hosthome
+
 |Virtualbox |OSX |/Users |/Users
+
 |Virtualbox |Windows |C://Users |/c/Users
+
 |VMWare Fusion |OSX |/Users |/Users
+
 |Xhyve |OSX |/Users |/Users
-|========================================
+|===
 
-NOTE: Host folder sharing is not implemented in the KVM and Hyper-V drivers.
-If you use one of these drivers, you need to use <<minishift-host-folders, Minishift specific host folder options>>.
+[NOTE]
+====
+- Host folder sharing is not implemented in the KVM and Hyper-V drivers.
+If you use one of these drivers, you need to use the `minishift hostfolder` command to set up and configure host folders.
 
-NOTE: The VirtualBox default host folders are available only with the default Boot2Docker ISO.
+- The VirtualBox default host folders are available only with the default Boot2Docker ISO.
 It requires VirtualBox link:https://www.virtualbox.org/manual/ch04.html[Guest Additions], which is currently unavailable in the CentOS ISO.
+====
 
-[[minishift-host-folders]]
-== Minishift hostfolder command
+[[minishift-hostfolder-command]]
+== Minishift hostfolder Command
 
-Minishift provides the link:../command-ref/minishift_hostfolder{outfilesuffix}[`hostfolder`] command to list, add, mount, unmount and remove host folders.
-In contrast to the <<driver-host-folders, driver provided host folders>>, the `hostfolder` command allows you to mount multiple shared folders onto custom specified mount points.
+Minishift provides the xref:../command-ref/minishift_hostfolder.adoc#minishift-hostfolder[`minishift hostfolder`] command to list, add, mount, unmount and remove host folders.
+In contrast to the driver-provided host folders, you can use the `hostfolder` command to mount multiple shared folders onto custom specified mount points.
 
-At the moment only https://en.wikipedia.org/wiki/Server_Message_Block[CIFS] is supported as host folder type.
-Support for https://en.wikipedia.org/wiki/SSHFS[SSHFS] based host folders is in progress (see GitHub issue link:https://github.com/minishift/minishift/issues/317[#317]).
-If you want to use SSHFS now, refer to <<sshfs-folder-mount>> for manual instructions.
-
-The following sections describe the prerequisite for using the `hostfolder` command, as well as the various sub-commands it provides.
+[NOTE]
+====
+Currently only link:https://en.wikipedia.org/wiki/Server_Message_Block[CIFS] is supported as a host folder type.
+Support for link:https://en.wikipedia.org/wiki/SSHFS[SSHFS]-based host folders is in progress, as described in GitHub issue link:https://github.com/minishift/minishift/issues/317[#317].
+If you want to manually set up SSHFS, see xref:sshfs-folder-mount[SSHFS Host Folders].
+====
 
 [[host-folder-prerequisite]]
-=== Prerequisite
+=== Prerequisites
 
-To use the hostfolder command, you need to be able to share directories using CIFS.
-On Windows CIFS is the default technology for sharing directories.
-For example, on Windows 10 the _C:\Users_ folder is shared by default and can be accessed by locally-authenticated users.
+To use the `minishift hostfolder` command, you need to be able to share directories using CIFS.
+On Windows, CIFS is the default technology for sharing directories.
+For example, on Windows 10 the *_C:\Users_* folder is shared by default and can be accessed by locally-authenticated users.
 
-It is also possible to use CIFS on OS X and Linux.
-On the former you can enable CIFS based shares under _System Preferences > Sharing_.
-Refer to link:https://support.apple.com/en-us/HT204445[How to connect with File Sharing on your Mac] for detailed setup instructions.
+It is also possible to use CIFS on macOS and Linux.
+On macOS, you can enable CIFS-based shares under *System Preferences > Sharing*.
+See link:https://support.apple.com/en-us/HT204445[How to connect with File Sharing on your Mac] for detailed setup instructions.
 
-On Linux follow your distribution specific instructions to install link:https://www.samba.org[Samba].
+On Linux, follow your distribution-specific instructions to install link:https://www.samba.org[Samba].
 
 [[displaying-host-folders]]
-=== Displaying host folders
+=== Displaying Host Folders
 
-The link:../command-ref/minishift_hostfolder_list{outfilesuffix}[`hostfolder list`] command gives you an overview of the defined host folders, their name, mount point, remote path and whether they are currently mounted.
+The xref:../command-ref/minishift_hostfolder_list.adoc#minishift-hostfolder-list[`minishift hostfolder list`] command gives you an overview of the defined host folders, their names, mount points, remote paths and whether they are currently mounted.
+
 An example output could look like:
 
 ----
@@ -74,18 +85,18 @@ Name        Mountpoint            Remote path              Mounted
 myshare     /mnt/sda1/myshare     //192.168.1.82/MYSHARE   N
 ----
 
-In this example, there is a host folder with the name _myshare_ which mounts _//192.168.1.82/MYSHARE_ onto _/mnt/sda1/myshare_ in the Minishift VM.
+In this example, there is a host folder with the name *_myshare_* which mounts *_//192.168.1.82/MYSHARE_* onto *_/mnt/sda1/myshare_* in the Minishift VM.
 The share is currently not mounted.
 
 NOTE: The remote path must be reachable from within the VM.
-In the example above _192.168.1.82_ is the IP of host within the LAN which is one options one can use.
+In the example above, *192.168.1.82* is the IP of host within the LAN, which is one option you can use.
 You can use `ifconfig` (or `Get-NetIPAddress | Format-Table` on Windows) to determine a routable IP address.
 
 [[adding-host-folders]]
-=== Adding host folders
+=== Adding Host Folders
 
-The link:../command-ref/minishift_hostfolder_add{outfilesuffix}[`hostfolder add`] command allows you to define a new host folder.
-This in an interactive process which queries the relevant details for a host folder based on CIFS.
+The xref:../command-ref/minishift_hostfolder_add.adoc#minishift-hostfolder-add[`minishift hostfolder add`] command allows you to define a new host folder.
+This in an interactive process that queries the relevant details for a host folder based on CIFS.
 
 [[adding-cifs-hostfolder]]
 .Adding a CIFS based hostfolder
@@ -98,30 +109,32 @@ Password: [HIDDEN]                 // <5>
 Domain:                            // <6>
 Added: myshare
 ----
-<1> (Required) Actual `hostfolder add` command, specifying a hostfolder with a name of _myshare_.
+<1> (Required) Actual `minishift hostfolder add` command that specifie a host folder with a name of *_myshare_*.
 <2> (Required) The UNC path for the share.
-<3> The mount point within the VM. The default is _/mnt/sda1/<host folder name>_.
-<4> (Required) The username for the CIFS share.
+<3> The mount point within the VM. The default is *_/mnt/sda1/<host folder name>_*.
+<4> (Required) The user name for the CIFS share.
 <5> (Required) The password for the CIFS share.
-<6> The domain of the share. Often this can be left blank, but for example on Windows, when your account is linked to a Microsoft account, you must use the Microsoft account email address as username as well as your machine name as displayed by _$env:COMPUTERNAME_ as domain.
+<6> The domain of the share. Often this can be left blank, but for example on Windows, when your account is linked to a Microsoft account, you must use the Microsoft account email address as user name as well as your machine name as displayed by `$env:COMPUTERNAME` as a domain.
 
-TIP: On Windows hosts the `hostfolder add` command also provides a _users-share_ option.
-When specified no UNC path needs to be specified and the _C:\Users_ is assumed.
+TIP: On Windows hosts, the `minishift hostfolder add` command also provides a `users-share` option.
+When this option is specified, no UNC path needs to be specified and the *_C:\Users_* is assumed.
 
-WARNING: When you use the Boot2Docker ISO along with the VirtualBox driver, VirtualBox guest additions are automatically enabled and occupy the _/Users_ mountpoint.
+WARNING: When you use the Boot2Docker ISO with the VirtualBox driver, VirtualBox guest additions are automatically enabled and occupy the *_/Users_* mount point.
 
-==== Instance specific host folders
+[[instance-host-folders]]
+==== Instance-Specific Host Folders
 
-Per default, host folder definitions are persistent, similar to options specified using the `<<managing-minishift#persistent-configuration, minishift config>>` command.
+By default, host folder definitions are persistent, similar to other xref:../using/managing-minishift.adoc#persistent-configuration[persistent configuration] options.
 This means that these host folder definitions will survive the deletion and subsequent re-creation of a Minishift VM.
 
-In some cases you might want to define a host folder just for a specific Minishift instance. To do so you can use the _instance-only_ flag of the link:../command-ref/minishift_hostfolder_add{outfilesuffix}[`hostfolder add`] command.
-Host folder definition created with the _instance-only_ flag will be removed together with any other instance specific state during `<<managing-minishift#minishift-delete,minishift delete>>`.
+In some cases you might want to define a host folder just for a specific Minishift instance.
+To do so, you can use the `instance-only` flag of the xref:../command-ref/minishift_hostfolder_add.adoc#minishift-hostfolder-add[`minishift hostfolder add`] command.
+Host folder definition that are created with the `instance-only` flag will be removed together with any other instance-specific state during xref:../command-ref/minishift_delete.adoc#minishift-delete[`minishift delete`].
 
 [[mounting-host-folders]]
-=== Mounting host folders
+=== Mounting Host Folders
 
-Once you have <<adding-host-folders,added your host folder>> definitions, the link:../command-ref/minishift_hostfolder_mount{outfilesuffix}[`hostfolder mount`] command allows you to mount a host folder by its name:
+After you add host folders, you use the xref:../command-ref/minishift_hostfolder_mount.adoc#minishift-hostfolder-mount[`minishift hostfolder mount`] command to mount a host folder by its name:
 
 ----
 $ minishift hostfolder mount myshare
@@ -143,21 +156,21 @@ $ minishift ssh "ls -al /mnt/sda1/myshare"
 ----
 
 [[auto-mounting-host-folders]]
-==== Auto-mounting of host folders
+==== Auto-Mounting Host Folders
 
-Host folders can also be mounted automatically on each `<<managing-minishift#minishift-start,minishift start>>`.
-To achieve this you need to set the <<managing-minishift#persistent-configuration,persistent configuration>> option _hostfolders-automount_:
+Host folders can also be mounted automatically each time you run xref:../command-ref/minishift_start.adoc#minishift-start[`minishift start`].
+To set auto-mounting, you need to set the `hostfolder-automount` option in the Minishift configuration file.
 
 ----
 $ minishift config set hostfolders-automount true
 ----
 
-Once _hostfolders-automount_ is set, Minishift will attempt to mount all defined host folders during `minishift start`.
+After the `hostfolders-automount` option is set, Minishift will attempt to mount all defined host folders during `minishift start`.
 
 [[umounting-host-folders]]
-=== Unmounting host folders
+=== Unmounting Host Folders
 
-In contrast to the `hostfolder add` command, link:../command-ref/minishift_hostfolder_umount{outfilesuffix}[`hostfolder umount`] can be used to unmount a host folder:
+You use the xref:../command-ref/minishift_hostfolder_umount.adoc#minishift-hostfolder-umount[`minishift hostfolder umount`] command to unmount a host folder.
 
 ----
 $ minishift hostfolder umount myshare
@@ -169,9 +182,9 @@ myshare    /mnt/sda1/myshare   //192.168.99.1/MYSHARE   N
 ----
 
 [[deleting-host-folders]]
-=== Deleting host folders
+=== Deleting Host Folders
 
-The link:../command-ref/minishift_hostfolder_remove{outfilesuffix}[`hostfolder remove`] command finally enabled you to remove a host folder definition:
+You use the xref:../command-ref/minishift_hostfolder_remove.adoc#minishift-hostfolder-remove[`minishift hostfolder remove`] command to remove a host folder definition.
 
 ----
 $ minishift hostfolder list
@@ -186,26 +199,23 @@ No host folders defined
 ----
 
 [[sshfs-folder-mount]]
-=== SSHFS host folders
+=== SSHFS Host Folders
 
-NOTE: This host folder type is not supported by the `hostfolder` command for now.
-You need to manually configure it.
+NOTE: This host folder type is not supported by the `minishift hostfolder` command and requires manual configuration.
 
-You can also use SSHFS-based host folders provided you have an SSH daemon running on your host.
-Normally, this prerequisite is met by default on Linux and Mac OS X.
+You can use SSHFS-based host folders if you have an SSH daemon running on your host.
+Normally, this prerequisite is met by default on Linux and Mac macOS.
 
-Most Linux distributions have an SSH daemon installed. If not, follow the instructions
-for your specific distribution to install an SSH daemon.
+Most Linux distributions have an SSH daemon installed. If not, follow the instructions for your specific distribution to install an SSH daemon.
 
-Mac OS X also has a built-in
-SSH server. To use it, make sure that _Remote Login_ is enabled in _System Preferences > Sharing_.
+Mac macOS also has a built-in SSH server.
+To use it, make sure that *Remote Login* is enabled in *System Preferences > Sharing*.
 
-On Windows you can install https://winscp.net/eng/docs/guide_windows_openssh_server[OpenSSH for Windows].
+On Windows, you can install link:https://winscp.net/eng/docs/guide_windows_openssh_server[OpenSSH for Windows].
 
 The following steps demonstrate how to mount host folders with SSHFS.
 
-. Run `ifconfig` (or `Get-NetIPAddress` on Windows) to determine the local IP
-address from the same network segment as your Minishift instance.
+. Run `ifconfig` (or `Get-NetIPAddress` on Windows) to determine the local IP address from the same network segment as your Minishift instance.
 
 . Create a mountpoint and mount the shared folder.
 +

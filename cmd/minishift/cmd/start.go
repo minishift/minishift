@@ -259,7 +259,6 @@ func startHost(libMachineClient *libmachine.Client) (*host.Host, string) {
 	}
 
 	fmt.Printf("Starting local OpenShift cluster using '%s' hypervisor...\n", machineConfig.VMDriver)
-	fmt.Printf("%+v", machineConfig)
 	var hostVm *host.Host
 	start := func() (err error) {
 		hostVm, err = cluster.StartHost(libMachineClient, *machineConfig)

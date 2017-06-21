@@ -89,6 +89,8 @@ var (
 	// Host Folders
 	HostFoldersMountPath = createFlag("hostfolders-mountpath", SetString, nil, nil, true)
 	HostFoldersAutoMount = createFlag("hostfolders-automount", SetBool, nil, nil, true)
+
+	ImageCaching = createFlag("image-caching", SetBool, nil, nil, true)
 )
 
 func createFlag(name string, set func(MinishiftConfig, string, string) error, validations []setFn, callbacks []setFn, isApply bool) *Setting {

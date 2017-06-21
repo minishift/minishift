@@ -14,24 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package addon
+package image
 
 import (
 	"github.com/spf13/cobra"
 )
 
-const (
-	addOnConfigKey = "addons"
-
-	emptyAddOnError = "You must specify an add-on name. Use `minishift addons list` to view installed add-ons."
-	noAddOnMessage  = "No add-on with the name %s is installed."
-)
-
-var AddonsCmd = &cobra.Command{
-	Use:     "addons SUBCOMMAND [flags]",
-	Aliases: []string{"addon"},
-	Short:   "Manages Minishift add-ons",
-	Long:    "Manages Minishift add-ons. You can install, list, enable or disable Minishift add-ons.",
+var ImageCmd = &cobra.Command{
+	Use:    "image SUBCOMMAND [flags]",
+	Short:  "Command for exporting and importing container images (experimental).",
+	Long:   "Command for exporting and importing container images (experimental).",
+	Hidden: true,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

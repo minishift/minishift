@@ -28,7 +28,9 @@ type Runner interface {
 	Output(string, ...string) ([]byte, error)
 }
 
-type RealRunner struct{}
+type RealRunner struct {
+	Env []string
+}
 
 // the real runner for get the output as byte format
 func (r RealRunner) Output(command string, args ...string) ([]byte, error) {
@@ -49,6 +51,7 @@ func (r RealRunner) Run(stdOut io.Writer, stdErr io.Writer, commandPath string, 
 
 	cmd.Stdout = stdOut
 	cmd.Stderr = stdErr
+	cmd.Env = r.Env
 
 	err := cmd.Run()
 

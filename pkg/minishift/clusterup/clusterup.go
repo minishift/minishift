@@ -34,6 +34,7 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/addon/command"
 	"github.com/minishift/minishift/pkg/minishift/addon/manager"
 	"github.com/minishift/minishift/pkg/minishift/oc"
+
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/version"
 )
@@ -129,10 +130,10 @@ func EnsureHostDirectoriesExist(host *host.Host, dirs []string) error {
 	return nil
 }
 
-// DetermineOpenShiftVersion returns the OpenShift/oc version to use.
+// DetermineOcVersion returns the oc version to use.
 // If the requested version is < the base line version we use baseline oc to provision the requested OpenShift version.
 // If the requested OpenShift version is >= the baseline, we align the oc version with the requested OpenShift version.
-func DetermineOpenShiftVersion(requestedVersion string) string {
+func DetermineOcVersion(requestedVersion string) string {
 	valid, _ := ValidateOpenshiftMinVersion(requestedVersion, version.GetOpenShiftVersion())
 	if !valid {
 		requestedVersion = version.GetOpenShiftVersion()

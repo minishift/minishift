@@ -21,7 +21,7 @@ import (
 	"strings"
 
 	"github.com/docker/machine/libmachine/provision"
-	"github.com/minishift/minishift/pkg/util"
+	minishiftStrings "github.com/minishift/minishift/pkg/util/strings"
 )
 
 func init() {
@@ -66,7 +66,7 @@ func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) er
 			}
 			subscriptionCommand := fmt.Sprintf("sudo -E subscription-manager register --auto-attach "+
 				"--username %s "+
-				"--password '%s' ", param.Username, util.EscapeSingleQuote(param.Password))
+				"--password '%s' ", param.Username, minishiftStrings.EscapeSingleQuote(param.Password))
 			_, err = registrator.SSHCommand(subscriptionCommand)
 			if err == nil {
 				return nil

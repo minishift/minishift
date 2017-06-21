@@ -121,7 +121,11 @@ func VersionOrdinal(version string) string {
 	return string(vo)
 }
 
-func EscapeSingleQuote(s string) string {
-	r := strings.NewReplacer(`'`, `'"'"'`)
-	return r.Replace(s)
+// TimeTrack is used to time the execution of a method. It is passed the start time as well as a output writer for the timing.
+// The usage of TimeTrack is in combination with defer like so:
+//
+//    defer TimeTrack(time.Now(), os.Stdout)
+func TimeTrack(start time.Time, w io.Writer) {
+	elapsed := time.Since(start)
+	fmt.Fprintln(w, fmt.Sprintf("[%s]", elapsed))
 }

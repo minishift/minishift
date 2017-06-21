@@ -133,6 +133,17 @@ func Patch(target OpenShiftPatchTarget, patch string, commander docker.DockerCom
 	return true, nil
 }
 
+// IsRunning checks whether the origin container is in running state.
+// This method returns true if the origin container is running, false otherwise
+func IsRunning(commander docker.DockerCommander) bool {
+	status, err := commander.Status(OPENSHIFT_CONTAINER_NAME)
+	if err != nil || status != "running" {
+		return false
+	}
+
+	return true
+}
+
 func ViewConfig(target OpenShiftPatchTarget, commander docker.DockerCommander) (string, error) {
 	path, err := target.containerConfigFilePath()
 	if err != nil {

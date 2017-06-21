@@ -1,5 +1,5 @@
 [[exposing-services]]
-= Exposing services
+= Exposing Services
 :icons:
 :toc: macro
 :toc-title:
@@ -10,29 +10,30 @@ toc::[]
 [[overview]]
 == Overview
 
-There are several ways you can expose your service once deployed on OpenShift.
-The following sections describes the various alternatives and when to use them.
+There are several ways you can expose your service after you deploy it on OpenShift.
+The following sections describes the various methods and when to use them.
 
 [[application-routes]]
 == Routes
 
-Provided you are deploying some form of web application, the most common way to expose it is by a so called link:https://docs.openshift.org/latest/dev_guide/routes.html[route].
+If you are deploying a Web application, the most common way to expose it is by a link:https://docs.openshift.org/latest/dev_guide/routes.html[route].
 A route exposes the service as a host name.
-You can create a route using the web console or the CLI:
+You can create a route using the Web console or the CLI:
 
 ----
 oc expose svc/frontend --hostname=www.example.com
 ----
 
-To see a full example of creating an application and exposing it via a route, refer to the xref:../getting-started/quickstart.adoc#deploy-sample-app[quickstart].
+To see a full example of creating an application and exposing it with a route, see the xref:../getting-started/quickstart.adoc#deploy-sample-app[Minishift Quickstart] section.
 
-== NodePorts
+[[nodeport-services]]
+== NodePort Services
 
-In case the service you want to expose is not HTTP based, you can create a link:https://docs.openshift.org/latest/architecture/core_concepts/pods_and_services.html#service-nodeport[_NodePort_] service.
-In this case each OpenShift node will proxy that port into your service.
+In case the service you want to expose is not HTTP based, you can create a link:https://docs.openshift.org/latest/architecture/core_concepts/pods_and_services.html#service-nodeport[*NodePort*] service.
+In this case, each OpenShift node will proxy that port into your service.
 To access this port on your Minishift VM, you need to configure an link:https://docs.openshift.org/latest/dev_guide/getting_traffic_into_cluster.html#using-ingress-IP-self-service[Ingress IP Self-Service] using `oc expose` with the parameter `type=LoadBalancer`.
 
-A common use case for Ingress IP Self-Service is the ability to expose a database service.
+A common use-case for Ingress IP Self-Service is the ability to expose a database service.
 The following example shows the complete workflow to create and expose a link:https://mariadb.org[MariaDB] instance using Minishift:
 
 ----
@@ -48,15 +49,16 @@ ports:
  ....
 ----
 
-Once the service is exposed, you can access MariaDB via the `mysql` CLI using the Minishift VM IP and the exposed NodePort.
+After the service is exposed, you can access MariaDB with the `mysql` CLI using the Minishift VM IP and the exposed NodePort service.
 
 ----
 $ mysql --user=root --password=foo --host=$(minishift ip) --port=30907
 ----
 
+[[port-forwarding]]
 == Port Forwarding
 
-In case you want to quickly access a port of a specific pod of your cluster, you can also use the `oc port-forward` command of the xref:../openshift/openshift-client-binary.adoc#openshift-client-binary[OpenShift CLI].
+If you want to quickly access a port of a specific pod of your cluster, you can also use the `oc port-forward` command of the xref:../openshift/openshift-client-binary.adoc#openshift-client-binary[OpenShift CLI].
 
 ----
 $ oc port-forward POD [LOCAL_PORT:]REMOTE_PORT

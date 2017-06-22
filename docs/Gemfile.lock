@@ -14,6 +14,7 @@ GEM
       coffee-script-source
       execjs
     coffee-script-source (1.12.2)
+    colored (1.2)
     compass-import-once (1.0.5)
       sass (>= 3.2, < 3.5)
     concurrent-ruby (1.0.5)
@@ -23,6 +24,8 @@ GEM
       eventmachine (>= 0.12.9)
       http_parser.rb (~> 0.6.0)
     erubis (2.7.0)
+    ethon (0.10.1)
+      ffi (>= 1.3.0)
     eventmachine (1.2.3)
     execjs (2.7.0)
     fast_blank (1.0.0)
@@ -35,6 +38,15 @@ GEM
     hamster (3.0.0)
       concurrent-ruby (~> 1.0)
     hashie (3.5.5)
+    html-proofer (3.7.2)
+      activesupport (>= 4.2, < 6.0)
+      addressable (~> 2.3)
+      colored (~> 1.2)
+      mercenary (~> 0.3.2)
+      nokogiri (~> 1.7)
+      parallel (~> 1.3)
+      typhoeus (~> 0.7)
+      yell (~> 2.0)
     http_parser.rb (0.6.0)
     i18n (0.7.0)
     kramdown (1.13.2)
@@ -43,6 +55,7 @@ GEM
       rb-fsevent (~> 0.9, >= 0.9.4)
       rb-inotify (~> 0.9, >= 0.9.7)
     memoist (0.15.0)
+    mercenary (0.3.6)
     middleman (4.2.1)
       coffee-script (~> 2.2)
       compass-import-once (= 1.0.5)
@@ -86,7 +99,10 @@ GEM
     middleman-syntax (3.0.0)
       middleman-core (>= 3.2)
       rouge (~> 2.0)
+    mini_portile2 (2.2.0)
     minitest (5.10.1)
+    nokogiri (1.8.0)
+      mini_portile2 (~> 2.2.0)
     padrino-helpers (0.13.3.3)
       i18n (~> 0.6, >= 0.6.7)
       padrino-support (= 0.13.3.3)
@@ -112,16 +128,20 @@ GEM
     thor (0.19.4)
     thread_safe (0.3.6)
     tilt (2.0.6)
+    typhoeus (0.8.0)
+      ethon (>= 0.8.0)
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
     uglifier (3.1.5)
       execjs (>= 0.3.0, < 3)
+    yell (2.0.7)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   font-awesome-middleman
+  html-proofer
   middleman (~> 4.2)
   middleman-asciidoc
   middleman-livereload (~> 3.4)

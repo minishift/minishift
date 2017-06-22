@@ -133,7 +133,7 @@ function prepare() {
 }
 
 function run_tests() {
-  make clean test cross fmtcheck prerelease
+  make clean test cross fmtcheck prerelease synopsis_docs link_check_docs
   # Run integration test with 'kvm' driver
   MINISHIFT_VM_DRIVER=kvm make integration
   echo "CICO: Tests ran successfully"

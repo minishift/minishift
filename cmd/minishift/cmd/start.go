@@ -450,6 +450,8 @@ func determineIsoUrl(iso string) string {
 		iso = constants.DefaultB2dIsoUrl
 	case minishiftConstants.CentOsIsoAlias:
 		iso = constants.DefaultCentOsIsoUrl
+	case minishiftConstants.MinikubeIsoAlias:
+		iso = constants.DefaultMinikubeIsoURL
 	default:
 		if !(govalidator.IsURL(iso) || strings.HasPrefix(iso, "file:")) {
 			fmt.Println()

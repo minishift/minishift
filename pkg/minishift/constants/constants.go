@@ -19,6 +19,7 @@ package constants
 const (
 	B2dIsoAlias            = "b2d"
 	CentOsIsoAlias         = "centos"
+	MinikubeIsoAlias       = "minikube"
 	OpenshiftContainerName = "origin"
 	OpenshiftExec          = "/usr/bin/openshift"
 	DefaultProject         = "myproject"

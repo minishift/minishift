@@ -125,7 +125,30 @@ func VersionOrdinal(version string) string {
 // The usage of TimeTrack is in combination with defer like so:
 //
 //    defer TimeTrack(time.Now(), os.Stdout)
-func TimeTrack(start time.Time, w io.Writer) {
+func TimeTrack(start time.Time, w io.Writer, friendly bool) {
 	elapsed := time.Since(start)
-	fmt.Fprintln(w, fmt.Sprintf("[%s]", elapsed))
+
+	if friendly {
+		elapsed = FriendlyDuration(elapsed)
+	}
+
+	fmt.Fprintln(w, fmt.Sprintf("[%v]", elapsed.String()))
+}
+
+func FriendlyDuration(d time.Duration) time.Duration {
+	if d > 10*time.Second {
+		d2 := ((d + 50*time.Millisecond) / (100 * time.Millisecond)) * (100 * time.Millisecond)
+		return d2
+	}
+	if d > time.Second {
+		d2 := ((d + 5*time.Millisecond) / (10 * time.Millisecond)) * (10 * time.Millisecond)
+		return d2
+	}
+	if d > time.Microsecond {
+		d2 := ((d + 50*time.Microsecond) / (100 * time.Microsecond)) * (100 * time.Microsecond)
+		return d2
+	}
+
+	d2 := (d / time.Nanosecond) * (time.Nanosecond)
+	return d2
 }

@@ -19,6 +19,7 @@ package util
 import (
 	"github.com/pkg/errors"
 	"testing"
+	"time"
 )
 
 // Returns a function that will return n errors, then return successfully forever.
@@ -82,5 +83,33 @@ Error 2`
 func TestVersionOrdinal(t *testing.T) {
 	if VersionOrdinal("v3.4.1.10") < VersionOrdinal("v3.4.1.2") {
 		t.Fatal("Expected 'false' Got 'true'")
+	}
+}
+
+var durationTests = []struct {
+	in   time.Duration
+	want string
+}{
+	{10*time.Second + 555*time.Millisecond, "10.6s"},
+	{10*time.Second + 555*time.Millisecond, "10.6s"},
+	{10*time.Second + 500*time.Millisecond, "10.5s"},
+	{10*time.Second + 499*time.Millisecond, "10.5s"},
+	{9*time.Second + 401*time.Millisecond, "9.4s"},
+	{9*time.Second + 456*time.Millisecond, "9.46s"},
+	{9*time.Second + 445*time.Millisecond, "9.45s"},
+	{1 * time.Second, "1s"},
+	{859*time.Millisecond + 445*time.Microsecond, "859.4ms"},
+	{859*time.Millisecond + 460*time.Microsecond, "859.5ms"},
+	{859*time.Microsecond + 100*time.Nanosecond, "900µs"},
+	{45 * time.Nanosecond, "45ns"},
+}
+
+func TestFriendlyDuration(t *testing.T) {
+	for _, tt := range durationTests {
+		got := FriendlyDuration(tt.in)
+		expected, _ := time.ParseDuration(tt.want)
+		if got != expected {
+			t.Errorf("Expected %v but got %v", tt.in, got, expected)
+		}
 	}
 }

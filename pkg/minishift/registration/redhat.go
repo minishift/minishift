@@ -20,9 +20,16 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/briandowns/spinner"
 	"github.com/docker/machine/libmachine/provision"
+	"github.com/golang/glog"
+	"github.com/minishift/minishift/pkg/util"
 	minishiftStrings "github.com/minishift/minishift/pkg/util/strings"
+	"os"
+	"time"
 )
+
+const SPINNER_SPEED = 200 // In milliseconds
 
 func init() {
 	Register("Redhat", &RegisteredRegistrator{
@@ -51,12 +58,25 @@ func (registrator *RedHatRegistrator) CompatibleWithDistribution(osReleaseInfo *
 	}
 }
 
+func (registrator *RedHatRegistrator) SSHCommand(cmd string) (string, error) {
+	startTime := time.Now()
+	out, err := registrator.SSHCommander.SSHCommand(cmd)
+	elapsed := time.Since(startTime)
+
+	if glog.V(2) {
+		fmt.Printf("Command \"%s\" took %v\n", cmd, util.FriendlyDuration(elapsed).String())
+	}
+
+	return out, err
+}
+
 func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) error {
 	output, err := registrator.SSHCommand("sudo -E subscription-manager version")
 	if err != nil {
 		return err
 	}
 	if strings.Contains(output, "not registered") {
+		spinnerView := spinner.New(spinner.CharSets[9], SPINNER_SPEED*time.Millisecond)
 		for i := 1; i < 4; i++ {
 			if param.Username == "" {
 				param.Username = param.GetUsernameInteractive("Red Hat Developers or Red Hat Subscription Management (RHSM) username")
@@ -67,7 +87,16 @@ func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) er
 			subscriptionCommand := fmt.Sprintf("sudo -E subscription-manager register --auto-attach "+
 				"--username %s "+
 				"--password '%s' ", param.Username, minishiftStrings.EscapeSingleQuote(param.Password))
+			spinnerView.Start()
+			startTime := time.Now()
 			_, err = registrator.SSHCommand(subscriptionCommand)
+			spinnerView.Stop()
+			if err == nil {
+				fmt.Print("Registration successful ")
+			} else {
+				fmt.Print("Registration unsuccessful ")
+			}
+			util.TimeTrack(startTime, os.Stdout, true)
 			if err == nil {
 				return nil
 			}

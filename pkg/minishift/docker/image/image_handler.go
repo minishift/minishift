@@ -166,7 +166,7 @@ func (handler *DockerImageHandler) getOutputWriter(config *ImageCacheConfig) io.
 }
 
 func (handler *DockerImageHandler) importImage(imagePath string, out io.Writer) error {
-	defer util.TimeTrack(time.Now(), out)
+	defer util.TimeTrack(time.Now(), out, true)
 	fmt.Fprint(out, fmt.Sprintf("   Importing %s ", handler.fileNameToImageName(imagePath)))
 
 	session, err := handler.createSshSession()
@@ -210,7 +210,7 @@ func (handler *DockerImageHandler) importImage(imagePath string, out io.Writer) 
 }
 
 func (handler *DockerImageHandler) exportImage(image string, cacheDir string, w io.Writer) error {
-	defer util.TimeTrack(time.Now(), w)
+	defer util.TimeTrack(time.Now(), w, true)
 	fmt.Fprint(w, fmt.Sprintf("Exporting image %s ", image))
 
 	imageCacheFile := filepath.Join(cacheDir, handler.imageNameToFileName(image))
@@ -266,7 +266,7 @@ func (handler *DockerImageHandler) exportImage(image string, cacheDir string, w 
 }
 
 func (handler *DockerImageHandler) pullImage(image string, w io.Writer) error {
-	defer util.TimeTrack(time.Now(), w)
+	defer util.TimeTrack(time.Now(), w, true)
 	fmt.Fprint(w, fmt.Sprintf("Pulling image %s ", image))
 
 	session, err := handler.createSshSession()

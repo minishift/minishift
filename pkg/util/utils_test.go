@@ -17,48 +17,54 @@ limitations under the License.
 package util
 
 import (
-	"github.com/pkg/errors"
 	"testing"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 // Returns a function that will return n errors, then return successfully forever.
-func errorGenerator(n int) func() error {
-	generatedErrors := 0
+func errorGenerator(n int, retryable bool) func() error {
+	errorCount := 0
 	return func() (err error) {
-		if generatedErrors < n {
-			generatedErrors += 1
-			return errors.New("Error!")
+		if errorCount < n {
+			errorCount += 1
+			e := errors.New("Error!")
+			if retryable {
+				return &RetriableError{Err: e}
+			} else {
+				return e
+			}
+
 		}
+
 		return nil
 	}
 }
 
 func TestErrorGenerator(t *testing.T) {
-	errorCount := 3
-	f := errorGenerator(errorCount)
-	for i := 0; i < errorCount-1; i++ {
+	errors := 3
+	f := errorGenerator(errors, false)
+	for i := 0; i < errors-1; i++ {
 		if err := f(); err == nil {
-			t.Fatalf("Error should have been reported at iteration %v", i)
+			t.Fatalf("Error should have been thrown at iteration %v", i)
 		}
 	}
 	if err := f(); err == nil {
-		t.Fatal("Error should not have been reported by this call.")
+		t.Fatalf("Error should not have been thrown this call!")
 	}
 }
 
 func TestRetry(t *testing.T) {
-
-	f := errorGenerator(4)
+	f := errorGenerator(4, true)
 	if err := Retry(5, f); err != nil {
-		t.Fatal("Error should not have been reported during retry.")
+		t.Fatalf("Error should not have been raised by retry.")
 	}
 
-	f = errorGenerator(5)
+	f = errorGenerator(5, true)
 	if err := Retry(4, f); err == nil {
-		t.Fatal("Error should have been reported during retry.")
+		t.Fatalf("Error should have been raised by retry.")
 	}
-
 }
 
 func TestMultiError(t *testing.T) {

@@ -18,6 +18,7 @@ package provisioner
 
 import (
 	"fmt"
+
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/log"
 	"github.com/docker/machine/libmachine/provision"
@@ -47,6 +48,10 @@ func (detector *MinishiftProvisionerDetector) DetectProvisioner(driver drivers.D
 		provisioner := NewMinishiftProvisioner("minishift", driver)
 		provisioner.SetOsReleaseInfo(osReleaseInfo)
 		return provisioner, nil
+	} else if detector.isBuildrootIso(osReleaseInfo) {
+		provisioner := NewBuildrootProvisioner("buildroot", driver)
+		provisioner.SetOsReleaseInfo(osReleaseInfo)
+		return provisioner, nil
 	} else {
 		return detector.Delegate.DetectProvisioner(driver)
 	}
@@ -55,6 +60,13 @@ func (detector *MinishiftProvisionerDetector) DetectProvisioner(driver drivers.D
 
 func (detector *MinishiftProvisionerDetector) isMinishiftIso(osReleaseInfo *provision.OsRelease) bool {
 	if osReleaseInfo.Variant == "minishift" {
+		return true
+	}
+	return false
+}
+
+func (detector *MinishiftProvisionerDetector) isBuildrootIso(osReleaseInfo *provision.OsRelease) bool {
+	if osReleaseInfo.ID == "buildroot" {
 		return true
 	}
 	return false

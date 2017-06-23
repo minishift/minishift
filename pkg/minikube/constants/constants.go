@@ -20,12 +20,12 @@ import (
 	"os"
 	"path/filepath"
 
+	cmdProfile "github.com/minishift/minishift/cmd/minishift/cmd/profile"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/version"
 )
 
 const (
-	MachineName                  = "minishift"      // Name to use for the VM
 	APIServerPort                = 8443             // Port that the API server should listen on
 	MiniShiftEnvPrefix           = "MINISHIFT"      // Prefix for the environmental variables
 	MiniShiftHomeEnv             = "MINISHIFT_HOME" // Environment variable used to change the Minishift home directory
@@ -35,14 +35,17 @@ const (
 	DefaultCPUS                  = 2
 	DefaultDiskSize              = "20g"
 	UpdateMarkerFileName         = "updated"
+	DefaultMachineName           = "minishift"
 )
 
 var (
 	// Fix for windows
-	Minipath = getMinishiftHomeDir()
+	Minipath    = GetMinishiftHomeDir()
+	MachineName = DefaultMachineName // Name to use for the VM
 
-	KubeConfigPath = filepath.Join(Minipath, "machines", MachineName+"_kubeconfig")
-	ConfigFile     = MakeMiniPath("config", "config.json")
+	KubeConfigPath        = filepath.Join(Minipath, "machines", MachineName+"_kubeconfig")
+	ConfigFile            = MakeMiniPath("config", "config.json")
+	AllInstanceConfigPath = filepath.Join(Minipath, "config", "allinstances.json")
 
 	DefaultB2dIsoUrl    = "https://github.com/minishift/minishift-b2d-iso/releases/download/" + version.GetB2dIsoVersion() + "/" + "minishift-b2d.iso"
 	DefaultCentOsIsoUrl = "https://github.com/minishift/minishift-centos-iso/releases/download/" + version.GetCentOsIsoVersion() + "/" + "minishift-centos7.iso"
@@ -58,10 +61,12 @@ func MakeMiniPath(fileName ...string) string {
 // getMinishiftHomeDir determines the Minishift home directory where all state information is kept.
 // The default directory is .minishift in the users HOME directory which can be overwritten by the MINISHIFT_HOME
 // environment variable
-func getMinishiftHomeDir() string {
+func GetMinishiftHomeDir() string {
 	homeEnv, ok := os.LookupEnv(MiniShiftHomeEnv)
 	if ok {
 		return homeEnv
+	} else if cmdProfile.ProfileExists() {
+		return filepath.Join(util.HomeDir(), ".minishift", cmdProfile.GetProfileName())
 	} else {
 		return filepath.Join(util.HomeDir(), ".minishift")
 	}

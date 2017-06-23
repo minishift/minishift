@@ -1,0 +1,31 @@
+= Minishift Profiles
+:icons:
+:toc: macro
+:toc-title:
+:toclevels: 1
+
+toc::[]
+
+
+[[create-multi-instances-of-minishift]]
+== Create multiple instances of Minishift
+
+With the help of profile feature you can create multiple instances of Minishift with xref:../command-ref/minishift_start.adoc#[`minishift start --profile`] command.
+
+[[manage-multi-instances-of-minishift]]
+== Manage multiple instances of Minishift
+
+When you have multiple profiles you can run Minishift commands  against a specific profile using `--profile` flag.
+
+If you do not want to pass `--profile` flag everytime with commands you can set a profile as the default with `minishift profile set` command.
+
+To remove a profile from default profile you need to use `minishift profile reset` command.
+
++
+----
+$ minishift profile list
+
+$ minishift profile set <profile_name>
+
+$ minishift profile reset
+----

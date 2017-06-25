@@ -27,6 +27,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	follow bool
+)
+
 // logsCmd represents the logs command
 var logsCmd = &cobra.Command{
 	Use:   "logs",
@@ -35,7 +39,7 @@ var logsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()
-		s, err := cluster.GetHostLogs(api)
+		s, err := cluster.GetHostLogs(api, follow)
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error getting logs: %s", err.Error()))
 		}
@@ -44,5 +48,6 @@ var logsCmd = &cobra.Command{
 }
 
 func init() {
+	logsCmd.Flags().BoolVarP(&follow, "follow", "f", false, "Continously print the logs entries")
 	RootCmd.AddCommand(logsCmd)
 }

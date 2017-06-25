@@ -17,7 +17,10 @@ limitations under the License.
 package cluster
 
 import (
+	"github.com/docker/machine/libmachine/drivers"
+	"github.com/docker/machine/libmachine/host"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minikube/tests"
 	"path/filepath"
 	"testing"
 )
@@ -48,5 +51,53 @@ func TestLocalBoot2DockerURL(t *testing.T) {
 
 	if url != localISOUrl {
 		t.Fatalf("Expected URL : %s", localISOUrl)
+	}
+}
+
+func TestFollowLogsFlag(t *testing.T) {
+	api := tests.NewMockAPI()
+
+	s, _ := tests.NewSSHServer()
+	port, err := s.Start()
+	if err != nil {
+		t.Fatalf("Error starting ssh server: %s", err)
+	}
+
+	d := &tests.MockDriver{
+		Port: port,
+		BaseDriver: drivers.BaseDriver{
+			IPAddress:  "127.0.0.1",
+			SSHKeyPath: "",
+		},
+	}
+	api.Hosts[constants.MachineName] = &host.Host{Driver: d}
+
+	tests := []struct {
+		description string
+		follow      bool
+	}{
+		{
+			description: "logs",
+			follow:      false,
+		},
+		{
+			description: "logs -f",
+			follow:      true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.description, func(t *testing.T) {
+			cmd := logsCmd
+			if test.follow {
+				cmd = logsCmdFollow
+			}
+			if _, err = GetHostLogs(api, test.follow); err != nil {
+				t.Errorf("Error getting logs of the running OpenShift cluster: %s", err)
+			}
+			if _, ok := s.Commands[cmd]; !ok {
+				t.Errorf("Expected command %s to run but did not.", cmd)
+			}
+		})
 	}
 }

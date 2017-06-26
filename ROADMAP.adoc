@@ -57,11 +57,12 @@ version name of a given release.
 [[minishift-110]]
 === Minishift 1.1.0
 
-- [ ] Implement caching of OpenShift image https://github.com/minishift/minishift/issues/143[#143]
+- [x] Add update command  https://github.com/minishift/minishift/issues/72[#72]
 
 [[minishift-120]]
 === Minishift 1.2.0
 
+- [x] Implement caching of OpenShift image https://github.com/minishift/minishift/issues/143[#143]
 - [ ] Ability to create and manage multiple clusters https://github.com/minishift/minishift/issues/126[#126]
 - [ ] Add a profile parameter https://github.com/minishift/minishift/issues/549[#549]
 

@@ -38,42 +38,47 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/test/integration/util"
 	"net/http"
+	"path/filepath"
 )
 
-var givenArgs, givenPath, testDir string
-var minishift *Minishift
+var (
+	minishift       *Minishift
+	minishiftArgs   string
+	minishiftBinary string
+
+	testDir string
+
+	// Godog options
+	godogFormat              string
+	godogTags                string
+	godogShowStepDefinitions bool
+	godogStopOnFailure       bool
+	godogNoColors            bool
+	godogPaths               string
+)
 
 func TestMain(m *testing.M) {
-	flag.StringVar(&givenArgs, "minishift-args", "", "Arguments to pass to minishift")
-	flag.StringVar(&givenPath, "binary", "", "Path to minishift binary")
+	parseFlags()
 
-	var godogFormat = flag.String("format", "progress", "Sets which format godog will use")
-	var godogTags = flag.String("tags", "", "Tags for godog test")
-	var godogShowStepDefinitions = flag.Bool("definitions", false, "")
-	var godogStopOnFailure = flag.Bool("stop-on-failure ", false, "Stop when failure is found")
-	var godogNoColors = flag.Bool("no-colors", false, "Disable colors in godog output")
-	var godogPaths = flag.String("paths", "./features", "")
-	flag.Parse()
-
-	if *godogTags != "" {
-		*godogTags += "&&"
+	if godogTags != "" {
+		godogTags += "&&"
 	}
-	runner := util.MinishiftRunner{CommandPath: givenPath}
+	runner := util.MinishiftRunner{CommandPath: minishiftBinary}
 	if runner.IsCDK() {
-		*godogTags += "~minishift-only"
+		godogTags += "~minishift-only"
 	} else {
-		*godogTags += "~cdk-only"
+		godogTags += "~cdk-only"
 	}
 
 	status := godog.RunWithOptions("minishift", func(s *godog.Suite) {
 		FeatureContext(s)
 	}, godog.Options{
-		Format:              *godogFormat,
-		Paths:               strings.Split(*godogPaths, ","),
-		Tags:                *godogTags,
-		ShowStepDefinitions: *godogShowStepDefinitions,
-		StopOnFailure:       *godogStopOnFailure,
-		NoColors:            *godogNoColors,
+		Format:              godogFormat,
+		Paths:               strings.Split(godogPaths, ","),
+		Tags:                godogTags,
+		ShowStepDefinitions: godogShowStepDefinitions,
+		StopOnFailure:       godogStopOnFailure,
+		NoColors:            godogNoColors,
 	})
 
 	if st := m.Run(); st > status {
@@ -82,10 +87,26 @@ func TestMain(m *testing.M) {
 	os.Exit(status)
 }
 
+func parseFlags() {
+	flag.StringVar(&minishiftArgs, "minishift-args", "", "Arguments to pass to minishift")
+	flag.StringVar(&minishiftBinary, "binary", "", "Path to minishift binary")
+
+	flag.StringVar(&testDir, "test-dir", "", "Path to the directory in which to execute the tests")
+
+	flag.StringVar(&godogFormat, "format", "progress", "Sets which format godog will use")
+	flag.StringVar(&godogTags, "tags", "", "Tags for godog test")
+	flag.BoolVar(&godogShowStepDefinitions, "definitions", false, "")
+	flag.BoolVar(&godogStopOnFailure, "stop-on-failure ", false, "Stop when failure is found")
+	flag.BoolVar(&godogNoColors, "no-colors", false, "Disable colors in godog output")
+	flag.StringVar(&godogPaths, "paths", "./features", "")
+
+	flag.Parse()
+}
+
 func FeatureContext(s *godog.Suite) {
 	runner := util.MinishiftRunner{
-		CommandArgs: givenArgs,
-		CommandPath: givenPath}
+		CommandArgs: minishiftArgs,
+		CommandPath: minishiftBinary}
 
 	minishift = &Minishift{runner: runner}
 
@@ -122,7 +143,7 @@ func FeatureContext(s *godog.Suite) {
 			runner.CDKSetup()
 		}
 		fmt.Println("Running Integration test in:", testDir)
-		fmt.Println("using binary:", givenPath)
+		fmt.Println("Using binary:", minishiftBinary)
 	})
 
 	s.AfterSuite(func() {
@@ -131,9 +152,31 @@ func FeatureContext(s *godog.Suite) {
 }
 
 func setUp() string {
-	testDir, _ := ioutil.TempDir("", "minishift-integration-test-")
+	if testDir == "" {
+		testDir, _ = ioutil.TempDir("", "minishift-integration-test-")
+	} else {
+		ensureTestDirEmpty()
+	}
+
 	os.Setenv(constants.MiniShiftHomeEnv, testDir)
 	return testDir
+}
+
+func ensureTestDirEmpty() {
+	files, err := ioutil.ReadDir(testDir)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("Unable to setup integration test directory: %v", err))
+		os.Exit(1)
+	}
+
+	for _, file := range files {
+		fullPath := filepath.Join(testDir, file.Name())
+		if filepath.Base(file.Name()) == "cache" {
+			fmt.Println(fmt.Sprintf("Keeping Minishift cache directory '%s' for test run.", fullPath))
+			continue
+		}
+		os.RemoveAll(fullPath)
+	}
 }
 
 //  To get values of nested keys, use following dot formating in Scenarios: key.nestedKey

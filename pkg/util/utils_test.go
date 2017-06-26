@@ -60,19 +60,6 @@ func TestRetry(t *testing.T) {
 
 }
 
-func TestEscapeSingleQuote(t *testing.T) {
-	experimentstring := map[string]string{
-		`foo'bar`:  `foo'"'"'bar`,
-		`foo''bar`: `foo'"'"''"'"'bar`,
-		`foobar`:   `foobar`,
-	}
-	for pass, expected := range experimentstring {
-		if EscapeSingleQuote(pass) != expected {
-			t.Fatalf("Expected '%s' Got '%s'", expected, EscapeSingleQuote(pass))
-		}
-	}
-}
-
 func TestMultiError(t *testing.T) {
 	m := MultiError{}
 

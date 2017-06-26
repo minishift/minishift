@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -38,7 +37,10 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/cache"
 	"github.com/minishift/minishift/pkg/minishift/clusterup"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
+	"github.com/minishift/minishift/pkg/minishift/docker"
+	"github.com/minishift/minishift/pkg/minishift/docker/image"
 	"github.com/minishift/minishift/pkg/minishift/hostfolder"
+	"github.com/minishift/minishift/pkg/minishift/openshift"
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
 	"github.com/minishift/minishift/pkg/util"
 	inputUtils "github.com/minishift/minishift/pkg/util"
@@ -47,6 +49,7 @@ import (
 	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"os"
 )
 
 const (
@@ -94,7 +97,7 @@ var minishiftToClusterUp = map[string]string{
 
 // init configures the command line options of this command
 func init() {
-	// need to initalize startCmd in init to avoid initalization loop (runStart calls validateOpenshiftVersion
+	// need to initialize startCmd in init to avoid initialization loop (runStart calls validateOpenshiftVersion
 	// which in turn makes use of startCmd
 	startCmd = &cobra.Command{
 		Use:   commandName,
@@ -138,23 +141,23 @@ func runStart(cmd *cobra.Command, args []string) {
 		proxyConfig.ApplyToEnvironment()
 	}
 
-	// Making sure the required Docker environment variables are set to make 'cluster up' work
-	envMap, err := cluster.GetHostDockerEnv(libMachineClient)
-	for k, v := range envMap {
-		os.Setenv(k, v)
-	}
+	applyDockerEnvToProcessEnv(libMachineClient)
 
-	err = clusterup.EnsureHostDirectoriesExist(hostVm, getRequiredHostDirectories())
+	err := clusterup.EnsureHostDirectoriesExist(hostVm, getRequiredHostDirectories())
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error creating required host directories: %v", err))
 	}
 
 	autoMountHostFolders(hostVm.Driver)
 
-	openShiftVersion := clusterup.DetermineOpenShiftVersion(viper.GetString(startFlags.OpenshiftVersion.Name))
-	ocPath := cacheOc(openShiftVersion)
+	requestedOpenShiftVersion := viper.GetString(startFlags.OpenshiftVersion.Name)
+	if !isRestart {
+		importContainerImages(hostVm, requestedOpenShiftVersion)
+	}
+
+	ocPath := cacheOc(clusterup.DetermineOcVersion(requestedOpenShiftVersion))
 	clusterUpConfig := &clusterup.ClusterUpConfig{
-		OpenShiftVersion: openShiftVersion,
+		OpenShiftVersion: requestedOpenShiftVersion,
 		MachineName:      constants.MachineName,
 		Ip:               ip,
 		Port:             constants.APIServerPort,
@@ -168,12 +171,18 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	clusterUpParams := determineClusterUpParameters(clusterUpConfig)
 	err = clusterup.ClusterUp(clusterUpConfig, clusterUpParams, &util.RealRunner{})
+
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error during 'cluster up' execution: %v", err))
 	}
 
+	if !IsOpenShiftRunning(hostVm.Driver) {
+		atexit.ExitWithMessage(1, "OpenShift provisioning failed. origin container failed to start.")
+	}
+
 	if !isRestart {
 		postClusterUp(hostVm, clusterUpConfig)
+		exportContainerImages(hostVm, requestedOpenShiftVersion)
 	}
 }
 
@@ -284,6 +293,56 @@ func autoMountHostFolders(driver drivers.Driver) {
 	if hostfolder.IsAutoMount() && hostfolder.IsHostfoldersDefined() {
 		hostfolder.MountHostfolders(driver)
 	}
+}
+
+func importContainerImages(hostVm *host.Host, openShiftVersion string) {
+	if !viper.GetBool(startFlags.ImageCaching.Name) {
+		return
+	}
+
+	handler := getImageHandler(hostVm)
+	config := &image.ImageCacheConfig{
+		HostCacheDir: constants.MakeMiniPath("cache", "images"),
+		CachedImages: image.GetOpenShiftImageNames(openShiftVersion),
+	}
+	handler.ImportImages(config)
+}
+
+func getImageHandler(hostVm *host.Host) image.ImageHandler {
+	handler, err := image.NewDockerImageHandler(hostVm.Driver)
+	if err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to create image handler: %v", err))
+	}
+
+	return handler
+}
+
+// exportContainerImages exports the OpenShift images in a background process (by calling 'minishift image export')
+func exportContainerImages(hostVm *host.Host, version string) {
+	if !viper.GetBool(startFlags.ImageCaching.Name) {
+		return
+	}
+
+	handler := getImageHandler(hostVm)
+	config := &image.ImageCacheConfig{
+		HostCacheDir: constants.MakeMiniPath("cache", "images"),
+		CachedImages: image.GetOpenShiftImageNames(version),
+	}
+
+	if handler.AreImagesCached(config) {
+		return
+	}
+
+	exportCmd, err := image.CreateExportCommand(version)
+	if err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error creating export command: %v", err))
+	}
+
+	err = exportCmd.Start()
+	if err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error during export: %v", err))
+	}
+	fmt.Println(fmt.Sprintf("-- Exporting of OpenShift images is occuring in background process with pid %d.", exportCmd.Process.Pid))
 }
 
 // calculateDiskSizeInMB converts a human specified disk size like "1000MB" or "1GB" and converts it into Megabits
@@ -486,4 +545,22 @@ func registerHost(libMachineClient *libmachine.Client) {
 		minishiftConfig.InstanceConfig.IsRegistered = true
 		minishiftConfig.InstanceConfig.Write()
 	}
+}
+
+func applyDockerEnvToProcessEnv(libMachineClient *libmachine.Client) {
+	// Making sure the required Docker environment variables are set to make 'cluster up' work
+	envMap, err := cluster.GetHostDockerEnv(libMachineClient)
+	for k, v := range envMap {
+		os.Setenv(k, v)
+	}
+	if err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error determining Docker settings: %v", err))
+	}
+}
+
+func IsOpenShiftRunning(driver drivers.Driver) bool {
+	sshCommander := provision.GenericSSHCommander{Driver: driver}
+	dockerCommander := docker.NewVmDockerCommander(sshCommander)
+
+	return openshift.IsRunning(dockerCommander)
 }

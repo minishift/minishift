@@ -30,17 +30,21 @@ import (
 	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"strings"
 )
 
-// deleteCmd represents the delete command
-var deleteCmd = &cobra.Command{
-	Use:   "delete",
-	Short: "Deletes the Minishift VM.",
-	Long:  `Deletes the Minishift VM, including the local OpenShift cluster and all associated files.`,
-	Run:   runDelete,
-}
+var (
+	// deleteCmd represents the delete command
+	deleteCmd = &cobra.Command{
+		Use:   "delete",
+		Short: "Deletes the Minishift VM.",
+		Long:  `Deletes the Minishift VM, including the local OpenShift cluster and all associated files.`,
+		Run:   runDelete,
+	}
+
+	forceMachineDeletion bool
+	clearCache           bool
+)
 
 func runDelete(cmd *cobra.Command, args []string) {
 	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
@@ -56,9 +60,16 @@ func runDelete(cmd *cobra.Command, args []string) {
 		minishiftConfig.InstanceConfig.Write()
 	}
 
+	if clearCache {
+		err := os.RemoveAll(constants.MakeMiniPath("cache"))
+		if err != nil {
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting Minishift cache: %v", err))
+		}
+	}
+
 	fmt.Println("Deleting the Minishift VM...")
 	if err := cluster.DeleteHost(api); err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting the Minishift VM: %s", err.Error()))
+		handleFailedHostDeletion(err)
 	}
 
 	removeInstanceConfigs()
@@ -71,6 +82,17 @@ func handleFailedUnRegistration() {
 		"Do you still want to delete the VM [y/N]?")
 	if strings.ToUpper(userConfirmation) != "Y" {
 		atexit.ExitWithMessage(0, fmt.Sprintln("Delete aborted."))
+	}
+}
+
+func handleFailedHostDeletion(err error) {
+	if forceMachineDeletion {
+		err := os.RemoveAll(constants.MakeMiniPath("machines"))
+		if err != nil {
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting '%s': %v", constants.MakeMiniPath("machines"), err))
+		}
+	} else {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting the Minishift VM: %v", err))
 	}
 }
 
@@ -90,6 +112,7 @@ func removeInstanceConfigs() {
 }
 
 func init() {
-	viper.BindPFlags(deleteCmd.Flags())
+	deleteCmd.Flags().BoolVar(&forceMachineDeletion, "force", false, "Forces the deletion of the VM specific files in MINISHIFT_HOME.")
+	deleteCmd.Flags().BoolVar(&clearCache, "clear-cache", false, "Deletes all cached artifacts as part of the VM deletion.")
 	RootCmd.AddCommand(deleteCmd)
 }

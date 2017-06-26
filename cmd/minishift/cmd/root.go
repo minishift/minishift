@@ -32,6 +32,7 @@ import (
 	"github.com/minishift/minishift/cmd/minishift/cmd/addon"
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
 	hostfolderCmd "github.com/minishift/minishift/cmd/minishift/cmd/hostfolder"
+	"github.com/minishift/minishift/cmd/minishift/cmd/image"
 	cmdOpenshift "github.com/minishift/minishift/cmd/minishift/cmd/openshift"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/constants"
@@ -51,6 +52,7 @@ var dirs = [...]string{
 	constants.MakeMiniPath("cache"),
 	constants.MakeMiniPath("cache", "iso"),
 	constants.MakeMiniPath("cache", "oc"),
+	constants.MakeMiniPath("cache", "images"),
 	constants.MakeMiniPath("config"),
 	constants.MakeMiniPath("addons"),
 	constants.MakeMiniPath("logs"),
@@ -163,6 +165,7 @@ func init() {
 	RootCmd.AddCommand(cmdOpenshift.OpenShiftCmd)
 	RootCmd.AddCommand(hostfolderCmd.HostfolderCmd)
 	RootCmd.AddCommand(addon.AddonsCmd)
+	RootCmd.AddCommand(image.ImageCmd)
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
 	logDir := pflag.Lookup("log_dir")
 	if !logDir.Changed {

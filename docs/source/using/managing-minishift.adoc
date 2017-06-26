@@ -208,6 +208,31 @@ CAUTION: Driver-specific options might overlap with values specified using Minis
 Examples are boot2docker URL, memory size, cpu count, and so on.
 In this case, driver-specific environment variables will override Minishift-specific settings.
 
+[[caching-openshift-images]]
+== Caching OpenShift images (experimental)
+
+To speed up provisioning of the OpenShift cluster and to minimize network traffic, the core OpenShift images can be cached on the host.
+This feature is considered experimental and needs to be explicitly enabled using the xref:../command-ref/minishift_config_set#minishift-config-set[`minishift config set`] command:
+
+----
+$ minishift config set image-caching true
+----
+
+Once enabled, caching occurs transparently, in a background process, the first time you use the xref:../command-ref/minishift_start#minishift-ssh[`minishift start`] command.
+Once the images are cached under _$MINISHIFT_HOME/cache/images_, successive Minishift VM creations will use these cached images.
+
+Each time an image exporting background process runs, a log file is generated under _$MINISHIFT_HOME/logs_ which can be used to verify the progress of the export.
+
+You can disable the caching of the OpenShift images by setting `image-caching` to `false` or removing the setting altogether using xref:../command-ref/minishift_config_unset#minishift-config-unset[`minishift config unset`]:
+
+----
+$ minishift config unset image-caching
+----
+
+NOTE: Image caching is considered experimental and its semantics and API is subject to change.
+The aim is to allow caching of arbitrary images, as well as using a better format for storing the images on the host.
+You can track the progress on this feature on the GitHub issue link:https://github.com/minishift/minishift/issues/952[#952].
+
 [[persistent-volumes]]
 == Persistent Volumes
 

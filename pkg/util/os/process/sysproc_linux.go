@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2016 Red Hat, Inc.
+Copyright (C) 2017 Red Hat, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,41 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package os
+package process
 
 import (
-	"github.com/kardianos/osext"
-	"runtime"
+	"fmt"
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	"os"
+	"syscall"
 )
 
-type OS string
+func SysProcForBackgroundProcess() *syscall.SysProcAttr {
+	sysProcAttr := new(syscall.SysProcAttr)
+	sysProcAttr.Setpgid = true
+	sysProcAttr.Pgid = 0
 
-const (
-	LINUX   OS = "linux"
-	DARWIN  OS = "darwin"
-	WINDOWS OS = "windows"
-)
-
-func (t OS) String() string {
-	return string(t)
+	return sysProcAttr
 }
 
-func CurrentOS() OS {
-	switch runtime.GOOS {
-	case "windows":
-		return WINDOWS
-	case "darwin":
-		return DARWIN
-	case "linux":
-		return LINUX
+func EnvForBackgroundProcess() []string {
+	return []string{
+		fmt.Sprintf("MINISHIFT_HOME=%s", constants.Minipath),
+		fmt.Sprintf("PATH=%s", os.Getenv("PATH")),
 	}
-	panic("Unexpected OS type")
-}
-
-func CurrentExecutable() (string, error) {
-	currentExec, err := osext.Executable()
-	if err != nil {
-		return "", err
-	}
-	return currentExec, nil
 }

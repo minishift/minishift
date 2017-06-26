@@ -18,8 +18,9 @@ OPENSHIFT_VERSION = v1.5.1
 B2D_ISO_VERSION = v1.0.2
 CENTOS_ISO_VERSION = v1.0.0
 
-# Go and compliation related variables
+# Go and compilation related variables
 BUILD_DIR ?= out
+INTEGRATION_TEST_DIR = $(CURDIR)/$(BUILD_DIR)/integration-test
 
 GOOS ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)
@@ -143,7 +144,8 @@ test: vendor $(ADDON_ASSET_FILE)
 
 .PHONY: integration
 integration: $(MINISHIFT_BINARY)
-	go test -timeout 3600s $(REPOPATH)/test/integration --tags=integration -v -args --binary $(MINISHIFT_BINARY) $(GODOG_OPTS)
+	mkdir -p $(INTEGRATION_TEST_DIR)
+	go test -timeout 3600s $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) $(GODOG_OPTS)
 
 .PHONY: fmt
 fmt:

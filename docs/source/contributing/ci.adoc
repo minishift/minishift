@@ -1,5 +1,7 @@
 [[minishift-ci]]
 = Minishift CI
+:data-uri:
+:imagesdir: images
 :icons:
 :toc: macro
 :toc-title:
@@ -14,6 +16,8 @@ The following sections describes the various CI setups Minishift utilizes.
 
 [[ci-setup]]
 == CentOS CI
+
+image::ci-servers.png[CI Servers]
 
 Minishift uses several CI build servers, including https://ci.centos.org/[CentOS CI]. The server
 builds incoming pull requests and pushes to master. It also archives build artifacts of successful

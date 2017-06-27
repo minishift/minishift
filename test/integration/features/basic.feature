@@ -102,7 +102,7 @@ Feature: Basic
     Given executing "oc config set-context dummy" succeeds
       And executing "oc config use-context dummy" succeeds
      When executing "oc project -q"
-     Then exitcode should equal 1
+     Then exitcode should equal "1"
      When executing "oc config use-context minishift" succeeds
       And executing "oc config current-context" succeeds
      Then stdout should contain
@@ -113,7 +113,7 @@ Feature: Basic
   Scenario: User has a pre-configured set of persistent volumes
     When executing "oc get pv --as system:admin -o=name"
     Then stderr should be empty
-     And exitcode should equal 0
+     And exitcode should equal "0"
      And stdout should contain
      """
      persistentvolume/pv0001
@@ -209,4 +209,4 @@ Feature: Basic
      When executing "minishift delete" succeeds
      Then Minishift should have state "Does Not Exist"
      When executing "minishift ip"
-     Then exitcode should equal 1
+     Then exitcode should equal "1"

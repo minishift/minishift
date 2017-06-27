@@ -72,7 +72,8 @@ end
 
 desc 'Create adoc tar bundle'
 task :adoc_tar => [:init, :adoc_variables, :markdown_to_asciidoc] do
-  file_list = FileList.new('source/**/*.adoc', TOPIC_MAP, ADOC_VARIABLES)
+  file_list = FileList.new('source/**/*.adoc', 'source/**/images/*', TOPIC_MAP, ADOC_VARIABLES)
+  file_list.exclude("source/images/**")
   File.open("#{BUILD_DIR}/minishift-adoc.tar", "wb") do |file|
     Gem::Package::TarWriter.new(file) do |tar|
       file_list.each { |f|

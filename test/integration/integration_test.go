@@ -123,9 +123,9 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`executing "oc ([^"]*)" (succeeds|fails)$`, minishift.executingOcCommandSucceedsOrFails)
 
 	// steps to verify stdout and stderr of commands executed
-	s.Step(`([^"]*) should contain ([^"]*)$`, commandReturnShouldContain)
+	s.Step(`([^"]*) should contain "([^"]*)"$`, commandReturnShouldContain)
 	s.Step(`([^"]*) should contain$`, commandReturnShouldContainContent)
-	s.Step(`([^"]*) should equal ([^"]*)$`, commandReturnShouldEqual)
+	s.Step(`([^"]*) should equal "([^"]*)"$`, commandReturnShouldEqual)
 	s.Step(`([^"]*) should equal$`, commandReturnShouldEqualContent)
 	s.Step(`([^"]*) should be empty$`, commandReturnShouldBeEmpty)
 	s.Step(`([^"]*) should be valid ([^"]*)$`, shouldBeInValidFormat)

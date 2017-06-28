@@ -1,4 +1,3 @@
-[[exposing-services]]
 = Exposing Services
 :icons:
 :toc: macro
@@ -58,7 +57,7 @@ $ mysql --user=root --password=foo --host=$(minishift ip) --port=30907
 [[port-forwarding]]
 == Port Forwarding
 
-If you want to quickly access a port of a specific pod of your cluster, you can also use the `oc port-forward` command of the xref:../openshift/openshift-client-binary.adoc#openshift-client-binary[OpenShift CLI].
+If you want to quickly access a port of a specific pod of your cluster, you can also use the `oc port-forward` command of the xref:../openshift/openshift-client-binary.adoc#[OpenShift CLI].
 
 ----
 $ oc port-forward POD [LOCAL_PORT:]REMOTE_PORT

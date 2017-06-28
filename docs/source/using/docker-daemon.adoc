@@ -1,4 +1,3 @@
-[[minishift-docker-daemon]]
 = Minishift Docker daemon
 :icons:
 :toc: macro
@@ -18,9 +17,9 @@ In order to configure your console to reuse the Minishift Docker dameon, follow 
 . Make sure that you have the Docker client binary installed on your machine.
 For information about specific binary installations for your operating system, see the link:https://docs.docker.com/engine/installation/[Docker installation] site.
 
-. Start Minishift with the xref:../command-ref/minishift_start.adoc#minishift-start[`minishift start`] command.
+. Start Minishift with the xref:../command-ref/minishift_start.adoc#[`minishift start`] command.
 
-. Run the xref:../command-ref/minishift_docker-env.adoc#minishift-docker-env[`minishift docker-env`] command to display the command you need to type into your shell in order to configure your Docker client.
+. Run the xref:../command-ref/minishift_docker-env.adoc#[`minishift docker-env`] command to display the command you need to type into your shell in order to configure your Docker client.
 The command output will differ depending on OS and shell type.
 +
 ----

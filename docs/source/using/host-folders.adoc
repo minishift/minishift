@@ -1,4 +1,3 @@
-[[host-folders]]
 = Host Folders
 :icons:
 :toc: macro
@@ -49,7 +48,7 @@ It requires VirtualBox link:https://www.virtualbox.org/manual/ch04.html[Guest Ad
 [[minishift-hostfolder-command]]
 == Minishift hostfolder Command
 
-Minishift provides the xref:../command-ref/minishift_hostfolder.adoc#minishift-hostfolder[`minishift hostfolder`] command to list, add, mount, unmount and remove host folders.
+Minishift provides the xref:../command-ref/minishift_hostfolder.adoc#[`minishift hostfolder`] command to list, add, mount, unmount and remove host folders.
 In contrast to the driver-provided host folders, you can use the `hostfolder` command to mount multiple shared folders onto custom specified mount points.
 
 [NOTE]
@@ -75,7 +74,7 @@ On Linux, follow your distribution-specific instructions to install link:https:/
 [[displaying-host-folders]]
 === Displaying Host Folders
 
-The xref:../command-ref/minishift_hostfolder_list.adoc#minishift-hostfolder-list[`minishift hostfolder list`] command gives you an overview of the defined host folders, their names, mount points, remote paths and whether they are currently mounted.
+The xref:../command-ref/minishift_hostfolder_list.adoc#[`minishift hostfolder list`] command gives you an overview of the defined host folders, their names, mount points, remote paths and whether they are currently mounted.
 
 An example output could look like:
 
@@ -95,7 +94,7 @@ You can use `ifconfig` (or `Get-NetIPAddress | Format-Table` on Windows) to dete
 [[adding-host-folders]]
 === Adding Host Folders
 
-The xref:../command-ref/minishift_hostfolder_add.adoc#minishift-hostfolder-add[`minishift hostfolder add`] command allows you to define a new host folder.
+The xref:../command-ref/minishift_hostfolder_add.adoc#[`minishift hostfolder add`] command allows you to define a new host folder.
 This in an interactive process that queries the relevant details for a host folder based on CIFS.
 
 [[adding-cifs-hostfolder]]
@@ -128,13 +127,13 @@ By default, host folder definitions are persistent, similar to other xref:../usi
 This means that these host folder definitions will survive the deletion and subsequent re-creation of a Minishift VM.
 
 In some cases you might want to define a host folder just for a specific Minishift instance.
-To do so, you can use the `instance-only` flag of the xref:../command-ref/minishift_hostfolder_add.adoc#minishift-hostfolder-add[`minishift hostfolder add`] command.
-Host folder definition that are created with the `instance-only` flag will be removed together with any other instance-specific state during xref:../command-ref/minishift_delete.adoc#minishift-delete[`minishift delete`].
+To do so, you can use the `instance-only` flag of the xref:../command-ref/minishift_hostfolder_add.adoc#[`minishift hostfolder add`] command.
+Host folder definition that are created with the `instance-only` flag will be removed together with any other instance-specific state during xref:../command-ref/minishift_delete.adoc#[`minishift delete`].
 
 [[mounting-host-folders]]
 === Mounting Host Folders
 
-After you add host folders, you use the xref:../command-ref/minishift_hostfolder_mount.adoc#minishift-hostfolder-mount[`minishift hostfolder mount`] command to mount a host folder by its name:
+After you add host folders, you use the xref:../command-ref/minishift_hostfolder_mount.adoc#[`minishift hostfolder mount`] command to mount a host folder by its name:
 
 ----
 $ minishift hostfolder mount myshare
@@ -158,7 +157,7 @@ $ minishift ssh "ls -al /mnt/sda1/myshare"
 [[auto-mounting-host-folders]]
 ==== Auto-Mounting Host Folders
 
-Host folders can also be mounted automatically each time you run xref:../command-ref/minishift_start.adoc#minishift-start[`minishift start`].
+Host folders can also be mounted automatically each time you run xref:../command-ref/minishift_start.adoc#[`minishift start`].
 To set auto-mounting, you need to set the `hostfolder-automount` option in the Minishift configuration file.
 
 ----
@@ -170,7 +169,7 @@ After the `hostfolders-automount` option is set, Minishift will attempt to mount
 [[umounting-host-folders]]
 === Unmounting Host Folders
 
-You use the xref:../command-ref/minishift_hostfolder_umount.adoc#minishift-hostfolder-umount[`minishift hostfolder umount`] command to unmount a host folder.
+You use the xref:../command-ref/minishift_hostfolder_umount.adoc#[`minishift hostfolder umount`] command to unmount a host folder.
 
 ----
 $ minishift hostfolder umount myshare
@@ -184,7 +183,7 @@ myshare    /mnt/sda1/myshare   //192.168.99.1/MYSHARE   N
 [[deleting-host-folders]]
 === Deleting Host Folders
 
-You use the xref:../command-ref/minishift_hostfolder_remove.adoc#minishift-hostfolder-remove[`minishift hostfolder remove`] command to remove a host folder definition.
+You use the xref:../command-ref/minishift_hostfolder_remove.adoc#[`minishift hostfolder remove`] command to remove a host folder definition.
 
 ----
 $ minishift hostfolder list

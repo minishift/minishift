@@ -1,12 +1,11 @@
-[[contributing-to-minishift]]
 = Contributing to Minishift
 :icons:
 
 Join the Minishift community! Learn about the project and how to contribute.
 
-- xref:../contributing/developing.adoc#developing-minishift[Developing Minishift]
-- xref:../contributing/ci.adoc#minishift-ci[Minishift CI]
-- xref:../contributing/writing-docs.adoc#writing-minishift-docs[Writing Documentation]
-- xref:../contributing/releasing.adoc#releasing-minishift[Releasing Minishift]
+- xref:../contributing/developing.adoc#[Developing Minishift]
+- xref:../contributing/ci.adoc#[Minishift CI]
+- xref:../contributing/writing-docs.adoc#[Writing Documentation]
+- xref:../contributing/releasing.adoc#[Releasing Minishift]
 
 If you have more questions join us on Freenode IRC #minishift.

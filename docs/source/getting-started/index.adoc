@@ -1,11 +1,10 @@
-[[getting-started]]
 = Getting Started with Minishift
 :icons:
 
 This section contains information about installing Minishift, quickstart steps, and sample application deployment.
 
-- xref:../getting-started/installing.adoc#installing-minishift[Installing Minishift]
-- xref:../getting-started/quickstart.adoc#quickstart[Minishift Quickstart]
-- xref:../getting-started/setting-up-driver-plugin.adoc#set-up-driver-plugin[Setting Up the Driver Plug-in]
-- xref:../getting-started/updating.adoc#update-minishift[Updating Minishift]
-- xref:../getting-started/uninstalling.adoc#uninstall-minishift[Uninstalling Minishift]
+- xref:../getting-started/installing.adoc#[Installing Minishift]
+- xref:../getting-started/quickstart.adoc#[Minishift Quickstart]
+- xref:../getting-started/setting-up-driver-plugin.adoc#[Setting Up the Driver Plug-in]
+- xref:../getting-started/updating.adoc#[Updating Minishift]
+- xref:../getting-started/uninstalling.adoc#[Uninstalling Minishift]

@@ -172,6 +172,8 @@ Feature: Basic
      """
      exposed
      """
+    And status code of HTTP request "/" of service "ruby-ex" in namespace "ruby" is equal to "200"
+    And body of HTTP request "/" of service "ruby-ex" in namespace "ruby" contains "Welcome to your Ruby application on OpenShift"
 
   Scenario: User can delete namespace ruby
    Given Minishift has state "Running"

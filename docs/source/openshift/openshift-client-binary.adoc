@@ -1,6 +1,5 @@
 include::variables.adoc[]
 
-[[openshift-client-binary]]
 = Using the OpenShift Client Binary (oc)
 :icons:
 :toc: macro
@@ -16,7 +15,7 @@ The `minishift start` command creates an OpenShift cluster using the link:https:
 For this purpose it copies the *oc* binary onto your host.
 
 The *oc* binary is located in the  *_~/.minishift/cache/oc/{openshift-version}_* directory, assuming that you use Minishift's default version of OpenShift.
-You can add this binary to your `PATH` using xref:../command-ref/minishift_oc-env.adoc#minishift-oc-env[`minishift oc-env`], which displays the command you need to type into your shell.
+You can add this binary to your `PATH` using xref:../command-ref/minishift_oc-env.adoc#[`minishift oc-env`], which displays the command you need to type into your shell.
 
 The output of `minishift oc-env` differs depending on the operating system and the shell type.
 
@@ -96,7 +95,7 @@ To access a service that is exposed with a route, run this command in a shell:
 $ minishift openshift service [-n NAMESPACE] [--url] NAME
 ----
 
-For more information refer also to xref:../openshift/accessing-applications.adoc#accessing-applications[Accessing Applications].
+For more information refer also to xref:../openshift/exposing-services.adoc#[Exposing Services].
 
 [[view-openshift-logs]]
 == Viewing OpenShift Logs
@@ -120,7 +119,7 @@ $ minishift openshift config view
 
 To show the node configuration instead of the master configuration, specify the `target` flag.
 
-For details about the `view` sub-command, see the xref:../command-ref/minishift_openshift_config_view.adoc#minishift-openshift-config-view[minishift openshift config view] synopsis.
+For details about the `view` sub-command, see the xref:../command-ref/minishift_openshift_config_view.adoc#[minishift openshift config view] synopsis.
 
 NOTE: After you update the OpenShift configuration, OpenShift will transparently restart.
 
@@ -161,7 +160,7 @@ $ minishift openshift config set --patch "{\"corsAllowedOrigins\": [\".*\"]}"
 
 In this example, you change the OpenShift routing suffix in the master configuration.
 
-If you use a static routing suffix, you can set the `routing-suffix` flag as part of the xref:../command-ref/minishift_start.adoc#minishift-start[`minishift start`] command.
+If you use a static routing suffix, you can set the `routing-suffix` flag as part of the xref:../command-ref/minishift_start.adoc#[`minishift start`] command.
 By default, Minishift uses a dynamic routing prefix based on http://nip.io/[nip.io], in which the IP address of the VM is a part of the routing suffix, for example *192.168.99.103.nip.io*.
 
 If you experience issues with *nip.io*, you can use http://xip.io/[xip.io], which is based on the same principles.
@@ -173,4 +172,4 @@ $ minishift openshift config set --patch '{"routingConfig": {"subdomain": "<IP-A
 ----
 
 Make sure to replace `IP-ADDRESS` in the above example with the IP address of your Minishift VM.
-You can retrieve the IP address by running the xref:../command-ref/minishift_ip.adoc#minishift-ip[`minishift ip`] command.
+You can retrieve the IP address by running the xref:../command-ref/minishift_ip.adoc#[`minishift ip`] command.

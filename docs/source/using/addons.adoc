@@ -1,4 +1,3 @@
-[[addons]]
 = Add-ons
 :icons:
 :toc: macro
@@ -35,7 +34,7 @@ oc adm policy add-scc-to-group anyuid system:authenticated                      
 
 NOTE: Comment lines can be inserted at anywhere in the file. Comment lines must start with the '#' character.
 
-Enabled add-ons are applied during xref:../command-ref/minishift_start.adoc#minishift-start[`minishift start`], immediately after the initial cluster provisioning is successfully completed.
+Enabled add-ons are applied during xref:../command-ref/minishift_start.adoc#[`minishift start`], immediately after the initial cluster provisioning is successfully completed.
 
 [[addon-commands]]
 == Add-on Commands
@@ -45,7 +44,7 @@ The following command types are available forming a sort of mini-DSL for add-ons
 
 ssh::
 If the add-on command starts with `ssh`, you can run any command within the Minishift-managed VM.
-This is similar to running xref:../command-ref/minishift_ssh.adoc#minishift-ssh[`minishift ssh`] and then executing any command on the VM.
+This is similar to running xref:../command-ref/minishift_ssh.adoc#[`minishift ssh`] and then executing any command on the VM.
 For more information about the `minishift ssh` command usage, see xref:../using/managing-minishift.adoc#connecting-with-ssh[Connecting to the Minishift VM with SSH].
 
 oc::
@@ -62,7 +61,7 @@ docker::
 If the add-on command starts with `docker`, it executes a `docker` command against the Docker daemon within the Minishift VM.
 This is the same daemon on which the single-node OpenShift cluster is running as well.
 This is similar to running `eval $(minishift docker-env)` on your host and then executing any `docker` command.
-See also xref:../command-ref/minishift_docker-env.adoc#minishift-docker-env[`minishift docker-env`].
+See also xref:../command-ref/minishift_docker-env.adoc#[`minishift docker-env`].
 
 echo::
 If the add-on command starts with `echo`, the arguments following the `echo` command are printed to the console.
@@ -137,8 +136,8 @@ By default, this is not allowed in OpenShift.
 [[enabling-disabling-addons]]
 == Enabling and Disabling Add-ons
 
-Add-ons are enabled with the xref:../command-ref/minishift_addons_enable.adoc#minishift-addons-enable[`minishift addons enable`] command and disabled with the xref:../command-ref/minishift_addons_disable.adoc#minishift-addons-disable[`minishift addons disable`] command.
-Enabled add-ons automatically get executed during xref:../command-ref/minishift_start.adoc#minishift-start[`minishift start`].
+Add-ons are enabled with the xref:../command-ref/minishift_addons_enable.adoc#[`minishift addons enable`] command and disabled with the xref:../command-ref/minishift_addons_disable.adoc#[`minishift addons disable`] command.
+Enabled add-ons automatically get executed during xref:../command-ref/minishift_start.adoc#[`minishift start`].
 
 The following examples show how to enable and disable the *anyuid* add-on.
 
@@ -191,7 +190,7 @@ NOTE: If two add-ons have the same priority the order in which they are getting 
 [[apply-addons]]
 == Applying Add-ons
 
-Add-ons can be explicitly executed with the xref:../command-ref/minishift_addons_apply.adoc#minishift-addons-apply[`minishift addons apply`] command.
+Add-ons can be explicitly executed with the xref:../command-ref/minishift_addons_apply.adoc#[`minishift addons apply`] command.
 You can use the `apply` command for both enabled and disabled add-ons.
 To apply multiple add-ons with a single command, specify add-on names separated by space.
 

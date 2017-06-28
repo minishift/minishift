@@ -1,4 +1,3 @@
-[[minishift-ci]]
 = Minishift CI
 :data-uri:
 :imagesdir: images

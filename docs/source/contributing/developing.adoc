@@ -1,4 +1,3 @@
-[[developing-minishift]]
 = Developing Minishift
 :icons:
 :toc: macro
@@ -159,7 +158,7 @@ Depending on your operating system, the binary is in one of the following direct
 * *_out/linux-amd64_*
 * *_out/windows-amd64_*
 
-For more Minishift commands and flags, see the xref:../command-ref/minishift.adoc#minishift[Minishift command reference] documentation.
+For more Minishift commands and flags, see the xref:../command-ref/minishift.adoc#[Minishift command reference] documentation.
 
 [[unit-tests]]
 === Running Unit Tests

@@ -1,13 +1,12 @@
-[[using-minishift]]
 = Using Minishift
 :icons:
 
 This section describes how to use the Minishift CLI and manage your Minishift VM. It also helps troubleshooting common issues.
 
-For details about using Minishift to manage your local OpenShift cluster, see the xref:../openshift/index.adoc#interacting-with-openshift[Interacting with OpenShift] section.
+For details about using Minishift to manage your local OpenShift cluster, see the xref:../openshift/index.adoc#[Interacting with OpenShift] section.
 
-- xref:../using/managing-minishift.adoc#managing-minishift[Managing Minishift]
-- xref:../using/addons.adoc#addons[Add-ons]
-- xref:../using/host-folders.adoc#host-folders[Host Folders]
-- xref:../using/docker-daemon.adoc#minishift-docker-daemon[Minishift Docker Daemon]
-- xref:../using/troubleshooting.adoc#troubleshooting[Troubleshooting]
+- xref:../using/managing-minishift.adoc#[Managing Minishift]
+- xref:../using/addons.adoc#[Add-ons]
+- xref:../using/host-folders.adoc#[Host Folders]
+- xref:../using/docker-daemon.adoc#[Minishift Docker Daemon]
+- xref:../using/troubleshooting.adoc#[Troubleshooting]

@@ -1,4 +1,3 @@
-[[troubleshooting]]
 = Troubleshooting Minishift
 :icons:
 :toc: macro
@@ -136,7 +135,7 @@ $ sudo virsh undefine minishift
  $ rm -rf ~/.minishift/machines
 ----
 
-In case all of this fails, you might want to xref:../getting-started/uninstalling.adoc#uninstall-minishift[uninstall Minishift] and do a fresh install of Minishift.
+In case all of this fails, you might want to xref:../getting-started/uninstalling.adoc#[uninstall Minishift] and do a fresh install of Minishift.
 
 [[create-vmnet-interface-permission]]
 == xhyve: Could not create vmnet interface

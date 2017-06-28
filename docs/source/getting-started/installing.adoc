@@ -23,7 +23,7 @@ Depending on your host operating system, you have the choice of the following hy
 Mac macOS::
 - link:https://github.com/mist64/xhyve[xhyve] (default)
 +
-NOTE: xhyve requires specific installation and configuration steps that are described in the xref:../getting-started/setting-up-driver-plugin.adoc#set-up-driver-plugin[Setting Up the Driver Plug-in] section.
+NOTE: xhyve requires specific installation and configuration steps that are described in the xref:../getting-started/setting-up-driver-plugin.adoc#[Setting Up the Driver Plug-in] section.
 
 - link:https://www.virtualbox.org/wiki/Downloads[VirtualBox]
 - link:https://www.vmware.com/products/fusion[VMware Fusion]
@@ -31,7 +31,7 @@ NOTE: xhyve requires specific installation and configuration steps that are desc
 GNU/Linux::
 - link:https://en.wikipedia.org/wiki/Kernel-based_Virtual_Machine[KVM] (default)
 +
-NOTE: KVM requires specific installation and configuration steps that are described in the xref:../getting-started/setting-up-driver-plugin.adoc#set-up-driver-plugin[Setting Up the Driver Plug-in] section.
+NOTE: KVM requires specific installation and configuration steps that are described in the xref:../getting-started/setting-up-driver-plugin.adoc#[Setting Up the Driver Plug-in] section.
 
 - link:https://www.virtualbox.org/wiki/Downloads[VirtualBox]
 
@@ -40,8 +40,8 @@ Windows::
 +
 [NOTE]
 ====
-To use Minishift with Hyper-V ensure that, after you link:https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v[install Hyper-V], you also link:https://msdn.microsoft.com/en-us/virtualization/hyperv_on_windows/quick_start/walkthrough_virtual_switch[add a Virtual Switch] using the Hyper-V Manager.
-For specific configuration steps see the xref:../getting-started/setting-up-driver-plugin.adoc#set-up-driver-plugin[Setting Up the Driver Plug-in] section.
+To use Minishift with Hyper-V ensure that, after you link:https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v[install Hyper-V], you also link:https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/connect-to-network[add a Virtual Switch] using the Hyper-V Manager.
+For specific configuration steps see the xref:../getting-started/setting-up-driver-plugin.adoc#[Setting Up the Driver Plug-in] section.
 ====
 
 - link:https://www.virtualbox.org/wiki/Downloads[VirtualBox]
@@ -49,7 +49,7 @@ For specific configuration steps see the xref:../getting-started/setting-up-driv
 [NOTE]
 ====
 It is recommended to use VirtualBox 5.1.12 or later on Windows to avoid the issue xref:../using/troubleshooting.adoc#machine-doesnt-exist[Error: machine does not exist].
-If you encounter issues related to the hypervisor, see the xref:../using/troubleshooting.adoc#troubleshooting[Troubleshooting] section.
+If you encounter issues related to the hypervisor, see the xref:../using/troubleshooting.adoc#[Troubleshooting] section.
 ====
 
 [[installing-instructions]]

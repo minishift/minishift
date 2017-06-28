@@ -1,4 +1,3 @@
-[[releasing-minishift]]
 = Releasing Minishift
 :icons:
 :toc: macro
@@ -50,7 +49,7 @@ $ curl -H "$(curl --user minishift:$API_KEY 'https://ci.centos.org//crumbIssuer/
 ----
 +
 This will build link:http://artifacts.ci.centos.org/minishift/minishift/docs/latest/[minishift-adoc.tar], which will be consumed by *docs.openshift.org* during the next nightly build.
-For more information, see xref:../contributing/writing-docs.adoc#writing-minishift-docs[Writing and Publishing Minishift Documentation].
+For more information, see xref:../contributing/writing-docs.adoc#[Writing and Publishing Minishift Documentation].
 
 [[post-release-tasks]]
 == Post-Release Tasks

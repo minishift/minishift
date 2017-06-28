@@ -18,8 +18,9 @@ package command
 
 import (
 	"fmt"
-	"github.com/minishift/minishift/pkg/testing/cli"
 	"testing"
+
+	"github.com/minishift/minishift/pkg/testing/cli"
 )
 
 func Test_echo_prints_to_stdoutl(t *testing.T) {
@@ -36,6 +37,25 @@ func Test_echo_prints_to_stdoutl(t *testing.T) {
 	tee.Close()
 
 	expectedOut := "\n  Hello World"
+	if tee.StdoutBuffer.String() != expectedOut {
+		t.Fatal(fmt.Sprintf("Unexpected output to stdout. Expected '%s', but got '%s'", expectedOut, tee.StdoutBuffer.String()))
+	}
+}
+
+func Test_echo_prints_emptyline(t *testing.T) {
+	tee, err := cli.NewTee(true)
+	defer tee.Close()
+
+	if err != nil {
+		t.Fatal("Unexpected error: " + err.Error())
+	}
+
+	echo := NewEchoCommand("")
+	context := &FakeInterpolationContext{}
+	echo.Execute(&ExecutionContext{interpolationContext: context})
+	tee.Close()
+
+	expectedOut := "\n"
 	if tee.StdoutBuffer.String() != expectedOut {
 		t.Fatal(fmt.Sprintf("Unexpected output to stdout. Expected '%s', but got '%s'", expectedOut, tee.StdoutBuffer.String()))
 	}

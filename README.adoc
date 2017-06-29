@@ -43,11 +43,11 @@ the https://docs.openshift.org/latest/minishift/getting-started/index.html[Getti
 Minishift documentation is published as a part of the
 OpenShift Origin link:https://docs.openshift.org/latest[documentation library].
 Check out the latest official Minishift documentation for information about getting started,
-using, and developing Minishift:
+using, and contributing to Minishift:
 
 - https://docs.openshift.org/latest/minishift/getting-started/index.html[Getting started with Minishift]
 - https://docs.openshift.org/latest/minishift/using/index.html[Using Minishift]
-- https://docs.openshift.org/latest/minishift/developing/index.html[Developing Minishift]
+- https://docs.openshift.org/latest/minishift/contributing/index.html[Contributing to Minishift]
 - https://docs.openshift.org/latest/minishift/command-ref/minishift.html[Command Reference]
 
 In addition, you can review the release notes and project roadmap here on GitHub:
@@ -64,8 +64,8 @@ The code base is forked from the https://github.com/kubernetes/minikube[Minikube
 Contributions, questions, and comments are all welcomed and encouraged!
 Minishift developers hang out on IRC in the #minishift channel on Freenode.
 
-For information about developing, building, and releasing Minishift, as well as guidelines for
-writing documentation, see the https://docs.openshift.org/latest/minishift/developing/index.html[Developing Minishift] topics.
+For information about contributing, building, and releasing Minishift, as well as guidelines for
+writing documentation, see the https://docs.openshift.org/latest/minishift/contributing/index.html[Contributing to Minishift] topics.
 
 If you want to contribute, make sure to follow the link:CONTRIBUTING.adoc[contribution guidelines]
 when you open issues or submit pull requests.

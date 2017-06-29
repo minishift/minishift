@@ -40,8 +40,8 @@ const (
 
 var addonsApplyCmd = &cobra.Command{
 	Use:   "apply ADDON_NAME ...",
-	Short: "Executes the specified add-ons.",
-	Long:  "Executes the specified add-ons. The command works with both enabled and disabled add-ons.",
+	Short: "Applies the specified add-ons.",
+	Long:  "Applies the specified add-ons. You can specify one or more add-ons, regardless of whether the add-on is enabled or disabled.",
 	Run:   runApplyAddon,
 }
 
@@ -77,14 +77,14 @@ func runApplyAddon(cmd *cobra.Command, args []string) {
 
 	ip, err := host.Driver.GetIP()
 	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Error getting IP: %s", err.Error()))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error getting the IP address: %s", err.Error()))
 	}
 
 	routingSuffix := determineRoutingSuffix(host.Driver)
 	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
 	ocRunner, err := oc.NewOcRunner(minishiftConfig.InstanceConfig.OcPath, constants.KubeConfigPath)
 	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Error applying addon: %s", err.Error()))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error applying the add-on: %s", err.Error()))
 	}
 
 	for i := range args {
@@ -92,11 +92,11 @@ func runApplyAddon(cmd *cobra.Command, args []string) {
 		addon := addOnManager.Get(addonName)
 		addonContext, err := clusterup.GetExecutionContext(ip, routingSuffix, ocRunner, sshCommander)
 		if err != nil {
-			atexit.ExitWithMessage(1, fmt.Sprint("Error executing addon commands: ", err))
+			atexit.ExitWithMessage(1, fmt.Sprint("Error applying the add-on: ", err))
 		}
 		err = addOnManager.ApplyAddOn(addon, addonContext)
 		if err != nil {
-			atexit.ExitWithMessage(1, fmt.Sprint("Error executing addon commands: ", err))
+			atexit.ExitWithMessage(1, fmt.Sprint("Error applying the add-on: ", err))
 		}
 	}
 }
@@ -104,7 +104,7 @@ func runApplyAddon(cmd *cobra.Command, args []string) {
 func determineRoutingSuffix(driver drivers.Driver) string {
 	defer func() {
 		if r := recover(); r != nil {
-			atexit.ExitWithMessage(1, "Unable to determine routing suffix from OpenShift master config.")
+			atexit.ExitWithMessage(1, "Cannot determine the routing suffix from the OpenShift master configuration.")
 		}
 	}()
 
@@ -113,13 +113,13 @@ func determineRoutingSuffix(driver drivers.Driver) string {
 
 	raw, err := openshift.ViewConfig(openshift.MASTER, dockerCommander)
 	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to retrieve OpenShift master configuration: %s", err.Error()))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot get the OpenShift master configuration: %s", err.Error()))
 	}
 
 	var config map[interface{}]interface{}
 	err = yaml.Unmarshal([]byte(raw), &config)
 	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to parse OpenShift master configuration: %s", err.Error()))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot parse the OpenShift master configuration: %s", err.Error()))
 	}
 
 	// making assumptions about the master config here. In case the config structure changes, the code might panic here

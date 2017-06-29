@@ -33,7 +33,7 @@ import (
 var restartCmd = &cobra.Command{
 	Use:   "restart",
 	Short: "Restarts the OpenShift cluster.",
-	Long:  "Restarts the OpenShift cluster, keeping the VM alive.",
+	Long:  "Restarts the OpenShift cluster and maintains the state of the Minishift VM.",
 	Run:   runRestart,
 }
 
@@ -54,6 +54,6 @@ func runRestart(cmd *cobra.Command, args []string) {
 	dockerCommander := docker.NewVmDockerCommander(sshCommander)
 	_, err = openshift.RestartOpenShift(dockerCommander)
 	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Error restarting OpenShift cluster: %s", err.Error()))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error restarting the OpenShift cluster: %s", err.Error()))
 	}
 }

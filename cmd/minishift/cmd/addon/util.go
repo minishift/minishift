@@ -32,7 +32,7 @@ func GetAddOnManager() *manager.AddOnManager {
 	addOnConfigs := GetAddOnConfiguration()
 	m, err := manager.NewAddOnManager(constants.MakeMiniPath("addons"), addOnConfigs)
 	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to initialize the add-on manager: %s", err.Error()))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot initialize the add-on manager: %s", err.Error()))
 	}
 
 	return m
@@ -41,14 +41,14 @@ func GetAddOnManager() *manager.AddOnManager {
 func WriteAddOnConfig(addOnConfigMap map[string]*addon.AddOnConfig) {
 	c, err := config.ReadConfig()
 	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to read the Minishift configuration: %s", err.Error()))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot read the Minishift configuration: %s", err.Error()))
 	}
 
 	c[addOnConfigKey] = addOnConfigMap
 
 	err = config.WriteConfig(c)
 	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to write the Minishift configuration: %s", err.Error()))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot write the Minishift configuration: %s", err.Error()))
 	}
 }
 
@@ -57,7 +57,7 @@ func WriteAddOnConfig(addOnConfigMap map[string]*addon.AddOnConfig) {
 func GetAddOnConfiguration() map[string]*addon.AddOnConfig {
 	c, err := config.ReadConfig()
 	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to read the Minishift configuration: %s", err.Error()))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot read the Minishift configuration: %s", err.Error()))
 	}
 
 	var configSlice map[string]interface{}

@@ -15,7 +15,7 @@ Feature: Basic
     When executing "minishift addons enable anyuid" succeeds
     Then stdout should contain
      """
-     Addon 'anyuid' enabled
+     Add-on 'anyuid' enabled
      """
 
   @minishift-only

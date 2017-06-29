@@ -30,8 +30,8 @@ var serviceListNamespace string
 // serviceListCmd represents the service list command
 var serviceListCmd = &cobra.Command{
 	Use:   "list [flags]",
-	Short: "Gets the URLs of the services in your local cluster.",
-	Long:  `Gets the URLs of the services in your local cluster.`,
+	Short: "Gets the URLs of the services in your local OpenShift cluster.",
+	Long:  `Gets the URLs of the services in your local OpenShift cluster.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		urls, err := openshift.GetServiceURLs(serviceListNamespace)
 		if err != nil {

@@ -33,8 +33,8 @@ var (
 
 var hostfolderMountCmd = &cobra.Command{
 	Use:   "mount HOSTFOLDER_NAME",
-	Short: "Mounts a host folder to the running OpenShift cluster.",
-	Long:  `Mounts a host folder to the running OpenShift cluster.`,
+	Short: "Mounts the specified host folder to the running OpenShift cluster.",
+	Long:  `Mounts the specified host folder to the running OpenShift cluster. You can set the 'all' flag to mount all of the defined host folders.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()
@@ -59,7 +59,7 @@ var hostfolderMountCmd = &cobra.Command{
 		}
 
 		if err != nil {
-			atexit.ExitWithMessage(1, fmt.Sprintf("Error to mount host folder: %s", err.Error()))
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error mounting the host folder: %s", err.Error()))
 		}
 
 	},
@@ -67,5 +67,5 @@ var hostfolderMountCmd = &cobra.Command{
 
 func init() {
 	HostfolderCmd.AddCommand(hostfolderMountCmd)
-	hostfolderMountCmd.Flags().BoolVarP(&mountAll, "all", "a", false, "Mounts all defined host folders to the OpenShift cluster.")
+	hostfolderMountCmd.Flags().BoolVarP(&mountAll, "all", "a", false, "Mounts all defined host folders to the running OpenShift cluster.")
 }

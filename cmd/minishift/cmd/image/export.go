@@ -31,8 +31,8 @@ import (
 
 var imageExportCmd = &cobra.Command{
 	Use:   "export [image ...]",
-	Short: "Exports container images (experimental).",
-	Long:  "Exports container images (experimental).",
+	Short: "Exports the specified container images (experimental).",
+	Long:  "Exports the specified container images (experimental).",
 	Run:   exportImage,
 }
 
@@ -44,21 +44,21 @@ func exportImage(cmd *cobra.Command, args []string) {
 	defer api.Close()
 
 	if len(args) < 1 {
-		atexit.ExitWithMessage(0, "No image specifications provided")
+		atexit.ExitWithMessage(0, "You must specify at least one container image.")
 	}
 
 	util.ExitIfUndefined(api, constants.MachineName)
 
 	host, err := api.Load(constants.MachineName)
 	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Error creating VM client: %v", err))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error creating the VM client: %v", err))
 	}
 
 	util.ExitIfNotRunning(host.Driver, constants.MachineName)
 
 	handler, err := image.NewDockerImageHandler(host.Driver)
 	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to create image handler: %v", err))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot create the image handler: %v", err))
 	}
 
 	imageCacheConfig := &image.ImageCacheConfig{
@@ -69,7 +69,7 @@ func exportImage(cmd *cobra.Command, args []string) {
 	}
 	err = handler.ExportImages(imageCacheConfig)
 	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Export of container images failed: %v", err))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Failed to export the container images: %v", err))
 	}
 }
 
@@ -79,7 +79,7 @@ func createLogFile() *os.File {
 	logFilePath := filepath.Join(constants.MakeMiniPath("logs"), fmt.Sprintf("image-export-%s.log", timeStamp))
 	logFile, err := os.Create(logFilePath)
 	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to create log file for image export: %v", err))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot create the log file of the image export: %v", err))
 	}
 
 	return logFile

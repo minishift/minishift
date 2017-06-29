@@ -27,8 +27,8 @@ const (
 
 var configCmd = &cobra.Command{
 	Use:   "config SUBCOMMAND [flags]",
-	Short: "Displays or patches OpenShift configuration.",
-	Long:  "Displays or patches OpenShift master or node configuration. Patches are supplied in JSON format.",
+	Short: "Displays or patches the OpenShift configuration.",
+	Long:  "Displays or patches the OpenShift master or node configuration. Patches must be in a valid JSON format.",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

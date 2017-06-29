@@ -23,41 +23,45 @@ import (
 	"github.com/minishift/minishift/pkg/testing/cli"
 )
 
-func Test_echo_prints_to_stdoutl(t *testing.T) {
-	tee, err := cli.NewTee(true)
-	defer tee.Close()
-
-	if err != nil {
-		t.Fatal("Unexpected error: " + err.Error())
+func Test_echo_command(t *testing.T) {
+	testCases := []struct {
+		echoCommand    string
+		expectedOutput string
+	}{
+		{
+			echoCommand:    "echo hello world",
+			expectedOutput: "\n  hello world",
+		},
+		{
+			echoCommand:    "echo hello\n world",
+			expectedOutput: "\n  hello\n world",
+		},
+		{
+			echoCommand:    "echo",
+			expectedOutput: "\n",
+		},
+		{
+			echoCommand:    "echo ",
+			expectedOutput: "\n",
+		},
 	}
 
-	echo := NewEchoCommand("Hello World")
-	context := &FakeInterpolationContext{}
-	echo.Execute(&ExecutionContext{interpolationContext: context})
-	tee.Close()
+	for _, test := range testCases {
+		tee, err := cli.NewTee(true)
+		defer tee.Close()
 
-	expectedOut := "\n  Hello World"
-	if tee.StdoutBuffer.String() != expectedOut {
-		t.Fatal(fmt.Sprintf("Unexpected output to stdout. Expected '%s', but got '%s'", expectedOut, tee.StdoutBuffer.String()))
-	}
-}
+		if err != nil {
+			t.Fatal("Unexpected error: " + err.Error())
+		}
 
-func Test_echo_prints_emptyline(t *testing.T) {
-	tee, err := cli.NewTee(true)
-	defer tee.Close()
+		echo := NewEchoCommand(test.echoCommand)
+		context := &FakeInterpolationContext{}
+		echo.Execute(&ExecutionContext{interpolationContext: context})
+		tee.Close()
 
-	if err != nil {
-		t.Fatal("Unexpected error: " + err.Error())
-	}
-
-	echo := NewEchoCommand("")
-	context := &FakeInterpolationContext{}
-	echo.Execute(&ExecutionContext{interpolationContext: context})
-	tee.Close()
-
-	expectedOut := "\n"
-	if tee.StdoutBuffer.String() != expectedOut {
-		t.Fatal(fmt.Sprintf("Unexpected output to stdout. Expected '%s', but got '%s'", expectedOut, tee.StdoutBuffer.String()))
+		if tee.StdoutBuffer.String() != test.expectedOutput {
+			t.Fatal(fmt.Sprintf("Unexpected output to stdout. Expected '%s', but got '%s'", test.expectedOutput, tee.StdoutBuffer.String()))
+		}
 	}
 }
 

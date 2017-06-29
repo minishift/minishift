@@ -22,4 +22,4 @@ script:
 - make cross test fmtcheck prerelease
 
 notifications:
-  webhooks: http://minibot-1.31182c86.cont.dockerapp.io:9009/hubot/travis-ci
+  webhooks: http://minibot.34e99f76.svc.dockerapp.io:9009/hubot/travis-ci

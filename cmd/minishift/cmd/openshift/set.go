@@ -37,8 +37,8 @@ const (
 	patchFlag  = "patch"
 
 	unknownPatchTargetError = "Unkown patch target. Only 'master' and 'node' are supported."
-	emptyPatchError         = "You need to specify a patch using --patch."
-	invalidJSONError        = "The specified patch need to be valid JSON."
+	emptyPatchError         = "You must specify a patch using the --patch flag."
+	invalidJSONError        = "The patch must be a valid JSON file."
 )
 
 var (
@@ -48,14 +48,14 @@ var (
 
 var setCmd = &cobra.Command{
 	Use:   "set",
-	Short: "Updates the specified OpenShift configuration resource with the specified patch.",
-	Long:  "Updates the specified OpenShift configuration resource with the specified patch. The patch needs to be in JSON format.",
+	Short: "Patches the OpenShift configuration resource with the specified patch.",
+	Long:  "Patches the OpenShift configuration resource with the specified patch. The patch must be a valid JSON file.",
 	Run:   runPatch,
 }
 
 func init() {
-	setCmd.Flags().StringVar(&target, targetFlag, "master", "Target configuration to patch. Either 'master' or 'node'.")
-	setCmd.Flags().StringVar(&patch, patchFlag, "", "The patch to apply")
+	setCmd.Flags().StringVar(&target, targetFlag, "master", "Target configuration to patch. Options are 'master' or 'node'.")
+	setCmd.Flags().StringVar(&patch, patchFlag, "", "The patch to apply.")
 	configCmd.AddCommand(setCmd)
 }
 
@@ -86,7 +86,7 @@ func runPatch(cmd *cobra.Command, args []string) {
 
 	_, err = openshift.Patch(patchTarget, patch, dockerCommander)
 	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Error patching OpenShift configuration: %s", err.Error()))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error patching the OpenShift configuration: %s", err.Error()))
 	}
 }
 

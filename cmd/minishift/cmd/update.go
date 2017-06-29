@@ -48,8 +48,8 @@ var (
 
 var updateCmd = &cobra.Command{
 	Use:   "update",
-	Short: "Update to latest version of Minishift.",
-	Long:  `Checks for the latest version of Minishift, prompt the user and update the binary if user answers with 'y'.`,
+	Short: "Updates Minishift to the latest version.",
+	Long:  `Checks for the latest version of Minishift, prompts the user, and updates the binary if the user answers 'y'.`,
 	Run:   runUpdate,
 }
 
@@ -89,16 +89,16 @@ func runUpdate(cmd *cobra.Command, args []string) {
 				atexit.ExitWithMessage(1, fmt.Sprintf("Update failed: %s", err))
 			}
 
-			fmt.Printf("\nUpdated successfully to minishift v%s.\n", latestVersion)
+			fmt.Printf("\nUpdated successfully to Minishift version %s.\n", latestVersion)
 
 			markerData := UpdateMarker{InstallAddon: false, PreviousVersion: version.GetMinishiftVersion()}
 
-			fmt.Print("\nDo you want to update default addons? [y/N]: ")
+			fmt.Print("\nDo you want to update the default add-ons? [y/N]: ")
 			fmt.Scanln(&confirm)
 
 			if strings.ToLower(confirm) == "y" {
 				markerData.InstallAddon = true
-				fmt.Println("Default add-ons will be updated when executing the next minishift command.")
+				fmt.Println("Default add-ons will be updated the next time you run any 'minishift' command.")
 			}
 			if err := createUpdateMarker(filepath.Join(constants.Minipath, constants.UpdateMarkerFileName), markerData); err != nil {
 				atexit.ExitWithMessage(1, "Failed to create update marker file.")
@@ -107,7 +107,7 @@ func runUpdate(cmd *cobra.Command, args []string) {
 		}
 
 	} else {
-		fmt.Printf("Nothing to update.\nAlready using latest version: %s.\n", latestVersion)
+		fmt.Printf("Nothing to update.\nAlready using the latest version: %s.\n", latestVersion)
 	}
 }
 
@@ -115,7 +115,7 @@ func init() {
 	RootCmd.AddCommand(updateCmd)
 	updateCmd.Flags().AddFlag(httpProxyFlag)
 	updateCmd.Flags().AddFlag(httpsProxyFlag)
-	updateCmd.Flags().BoolVar(&addonForce, addonForceFlag, false, "Force update the addons post binary update. Otherwise, prompt user to update addons.")
+	updateCmd.Flags().BoolVar(&addonForce, addonForceFlag, false, "Force update the add-ons after the binary update. Otherwise, prompt the user to update add-ons.")
 }
 
 func createUpdateMarker(markerPath string, data UpdateMarker) error {

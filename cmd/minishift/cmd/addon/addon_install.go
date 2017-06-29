@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	unspecifiedSourceError   = "You need to specify the source for the add-on."
+	unspecifiedSourceError   = "You must specify the source of the add-on."
 	failedPluginInstallation = "Add-on installation failed with the error: %s"
 
 	forceFlag    = "force"

@@ -29,8 +29,8 @@ import (
 
 var registryCmd = &cobra.Command{
 	Use:   "registry [flags]",
-	Short: "Prints host and port of the OpenShift registry.",
-	Long:  `Prints host and port of the OpenShift docker registry in the format 'host:port'.`,
+	Short: "Prints the host name and port number of the OpenShift registry to the standard output.",
+	Long:  `Prints the host name and port number of the OpenShift Docker registry in the format: 'host:port'`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		//Check if Minishift VM is running

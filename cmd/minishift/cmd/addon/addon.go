@@ -23,15 +23,15 @@ import (
 const (
 	addOnConfigKey = "addons"
 
-	emptyAddOnError = "You must specify an add-on name. Use `minishift addons list` to view installed add-ons."
+	emptyAddOnError = "You must specify an add-on name. Run `minishift addons list` to view installed add-ons."
 	noAddOnMessage  = "No add-on with the name %s is installed."
 )
 
 var AddonsCmd = &cobra.Command{
 	Use:     "addons SUBCOMMAND [flags]",
 	Aliases: []string{"addon"},
-	Short:   "Manages Minishift add-ons",
-	Long:    "Manages Minishift add-ons. You can install, list, enable or disable Minishift add-ons.",
+	Short:   "Manages Minishift add-ons.",
+	Long:    "Manages Minishift add-ons. Use the sub-commands to install, list, enable or disable Minishift add-ons.",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

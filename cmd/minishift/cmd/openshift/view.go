@@ -33,7 +33,7 @@ import (
 
 const (
 	configTargetFlag         = "target"
-	unknownConfigTargetError = "Unkown config target. Only 'master' and 'node' are supported."
+	unknownConfigTargetError = "Unknown configuration target. Only 'master' and 'node' are supported."
 )
 
 var (
@@ -48,7 +48,7 @@ var viewCmd = &cobra.Command{
 }
 
 func init() {
-	viewCmd.Flags().StringVar(&configTarget, configTargetFlag, "master", "Target configuration to display. Either 'master' or 'node'.")
+	viewCmd.Flags().StringVar(&configTarget, configTargetFlag, "master", "Target configuration to display. Options are 'master' or 'node'.")
 	configCmd.AddCommand(viewCmd)
 }
 
@@ -77,7 +77,7 @@ func runViewConfig(cmd *cobra.Command, args []string) {
 
 	out, err := openshift.ViewConfig(configFileTarget, dockerCommander)
 	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to display OpenShift configuration: %s", err.Error()))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot display the OpenShift configuration: %s", err.Error()))
 	}
 
 	fmt.Println(out)

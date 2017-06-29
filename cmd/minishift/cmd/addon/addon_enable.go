@@ -38,7 +38,7 @@ var addonsEnableCmd = &cobra.Command{
 }
 
 func init() {
-	addonsEnableCmd.Flags().IntVar(&priority, priorityFlag, 0, "The priority of the add-on when it is applied.")
+	addonsEnableCmd.Flags().IntVar(&priority, priorityFlag, 0, "The priority of the add-on.")
 	AddonsCmd.AddCommand(addonsEnableCmd)
 }
 
@@ -60,9 +60,9 @@ func runEnableAddon(cmd *cobra.Command, args []string) {
 func enableAddon(addOnManager *manager.AddOnManager, addOnName string, priority int) {
 	addOnConfig, err := addOnManager.Enable(addOnName, priority)
 	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to enable add-on %s: %s", addOnName, err.Error()))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot enable the add-on %s: %s", addOnName, err.Error()))
 	} else {
-		fmt.Println(fmt.Sprintf("Addon '%s' enabled", addOnName))
+		fmt.Println(fmt.Sprintf("Add-on '%s' enabled", addOnName))
 	}
 
 	addOnConfigMap := GetAddOnConfiguration()

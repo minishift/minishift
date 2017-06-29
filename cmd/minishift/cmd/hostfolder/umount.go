@@ -50,7 +50,7 @@ var hostfolderUmountCmd = &cobra.Command{
 
 		err = hostfolderActions.Umount(host.Driver, args[0])
 		if err != nil {
-			atexit.ExitWithMessage(1, fmt.Sprintf("Error to unmount host folder: %s", err.Error()))
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error unmounting the host folder: %s", err.Error()))
 		}
 	},
 }

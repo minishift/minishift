@@ -36,8 +36,8 @@ var (
 // serviceCmd represents the service command
 var serviceCmd = &cobra.Command{
 	Use:   "service [flags] SERVICE",
-	Short: "Opens the URL for the specified service in the browser or prints it to the console",
-	Long:  `Opens the URL for the specified service and namespace in the browser or prints it to the console. If no namespace is provided, 'default' is assumed.`,
+	Short: "Opens the URL for the specified service in the browser or prints it to the console.",
+	Long:  `Opens the URL for the specified service and namespace in the default browser or prints it to the console. If no namespace is provided, 'default' is assumed.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 || len(args) > 1 {
 			atexit.ExitWithMessage(1, "You must specify the name of the service.")
@@ -61,7 +61,7 @@ var serviceCmd = &cobra.Command{
 
 func init() {
 	serviceCmd.Flags().StringVarP(&namespace, "namespace", "n", "default", "The namespace of the service.")
-	serviceCmd.Flags().BoolVar(&urlMode, "url", false, "Access the service in the command-line console instead of the default browser.")
+	serviceCmd.Flags().BoolVar(&urlMode, "url", false, "Access the service in the command-line console instead of in the default browser.")
 	serviceCmd.Flags().BoolVar(&https, "https", false, "Access the service with HTTPS instead of HTTP.")
 	OpenShiftCmd.AddCommand(serviceCmd)
 }

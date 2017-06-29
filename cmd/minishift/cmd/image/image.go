@@ -22,8 +22,8 @@ import (
 
 var ImageCmd = &cobra.Command{
 	Use:    "image SUBCOMMAND [flags]",
-	Short:  "Command for exporting and importing container images (experimental).",
-	Long:   "Command for exporting and importing container images (experimental).",
+	Short:  "Exports and imports container images (experimental).",
+	Long:   "Exports and imports container images (experimental).",
 	Hidden: true,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()

@@ -32,8 +32,8 @@ import (
 // version command represent current running openshift version and available one.
 var versionCmd = &cobra.Command{
 	Use:   "version [command] [flags]",
-	Short: "Print the current running openshift version to stdout",
-	Long:  `Print the current running openshift version to stdout`,
+	Short: "Prints the current running OpenShift version to the standard output.",
+	Long:  `Prints the current running OpenShift version to the standard output.`,
 	Run:   runVersion,
 }
 
@@ -49,7 +49,7 @@ func runVersion(cmd *cobra.Command, args []string) {
 	dockerCommander := docker.NewVmDockerCommander(sshCommander)
 	version, err := dockerCommander.Exec(" ", "origin", "openshift", "version")
 	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Error restarting OpenShift cluster: %s", err.Error()))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error restarting the OpenShift cluster: %s", err.Error()))
 	}
 	fmt.Fprintln(os.Stdout, version)
 }

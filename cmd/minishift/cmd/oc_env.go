@@ -65,11 +65,11 @@ func executeOcTemplateStdout(shellCfg *OcShellConfig) error {
 
 var ocEnvCmd = &cobra.Command{
 	Use:   "oc-env",
-	Short: "Sets path of 'oc' binary.",
-	Long:  `Sets path of OpenShift client binary, 'oc'.`,
+	Short: "Sets the path of the 'oc' binary.",
+	Long:  `Sets the path of OpenShift client binary 'oc'.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if config.InstanceConfig.OcPath == "" {
-			atexit.ExitWithMessage(1, "Unable to find OpenShift client binary.\nPlease make sure that OpenShift has been provisioned successfully.")
+			atexit.ExitWithMessage(1, "Cannot find the OpenShift client binary.\nMake sure that OpenShift was provisioned successfully.")
 		}
 
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
@@ -85,7 +85,7 @@ var ocEnvCmd = &cobra.Command{
 
 		shellCfg, err = getOcShellConfig(config.InstanceConfig.OcPath, forceShell)
 		if err != nil {
-			atexit.ExitWithMessage(1, fmt.Sprintf("Error running oc-env command: %s", err.Error()))
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error running the oc-env command: %s", err.Error()))
 		}
 
 		executeOcTemplateStdout(shellCfg)

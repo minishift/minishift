@@ -34,7 +34,7 @@ var (
 func VMExists(client *libmachine.Client, machineName string) bool {
 	exists, err := client.Exists(machineName)
 	if err != nil {
-		atexit.ExitWithMessage(1, "Unable to determine state of Minishift VM.")
+		atexit.ExitWithMessage(1, "Cannot determine the state of Minishift VM.")
 	}
 	return exists
 }
@@ -42,7 +42,7 @@ func VMExists(client *libmachine.Client, machineName string) bool {
 func ExitIfUndefined(client *libmachine.Client, machineName string) {
 	exists := VMExists(client, machineName)
 	if !exists {
-		atexit.ExitWithMessage(0, fmt.Sprintf("The execution of this command requires an existing '%s' VM. However, there is currently none defined.", machineName))
+		atexit.ExitWithMessage(0, fmt.Sprintf("Running this command requires an existing '%s' VM, but no VM is defined.", machineName))
 	}
 }
 
@@ -57,7 +57,7 @@ func IsHostStopped(driver drivers.Driver) bool {
 func ExitIfNotRunning(driver drivers.Driver, machineName string) {
 	running := IsHostRunning(driver)
 	if !running {
-		atexit.ExitWithMessage(0, fmt.Sprintf("The execution of this command requires a running '%s' VM, but there is currently none.", machineName))
+		atexit.ExitWithMessage(0, fmt.Sprintf("Running this command requires a running '%s' VM, but no VM is running.", machineName))
 	}
 }
 

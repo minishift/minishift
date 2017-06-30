@@ -20,11 +20,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/pkg/browser"
-	"github.com/spf13/cobra"
-
+	"github.com/docker/machine/libmachine"
+	"github.com/minishift/minishift/cmd/minishift/cmd/util"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/openshift"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
+	"github.com/pkg/browser"
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -39,13 +41,18 @@ var serviceCmd = &cobra.Command{
 	Short: "Opens the URL for the specified service in the browser or prints it to the console.",
 	Long:  `Opens the URL for the specified service and namespace in the default browser or prints it to the console. If no namespace is provided, 'default' is assumed.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+		defer api.Close()
+
+		util.ExitIfUndefined(api, constants.MachineName)
+
 		if len(args) == 0 || len(args) > 1 {
 			atexit.ExitWithMessage(1, "You must specify the name of the service.")
 		}
 
 		service := args[0]
 
-		url, err := openshift.GetServiceURL(service, namespace, https)
+		url, err := openshift.GetServiceSpec(service, namespace, https)
 		if err != nil {
 			atexit.ExitWithMessage(1, err.Error())
 		}

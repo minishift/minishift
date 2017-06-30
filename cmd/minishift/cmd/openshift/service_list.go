@@ -17,8 +17,13 @@ limitations under the License.
 package openshift
 
 import (
+	"fmt"
 	"os"
+	"strings"
 
+	"github.com/docker/machine/libmachine"
+	"github.com/minishift/minishift/cmd/minishift/cmd/util"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/openshift"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/olekukonko/tablewriter"
@@ -33,18 +38,52 @@ var serviceListCmd = &cobra.Command{
 	Short: "Gets the URLs of the services in your local OpenShift cluster.",
 	Long:  `Gets the URLs of the services in your local OpenShift cluster.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		urls, err := openshift.GetServiceURLs(serviceListNamespace)
+		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+		defer api.Close()
+
+		util.ExitIfUndefined(api, constants.MachineName)
+
+		host, err := api.Load(constants.MachineName)
+		if err != nil {
+			atexit.ExitWithMessage(1, err.Error())
+		}
+
+		util.ExitIfNotRunning(host.Driver, constants.MachineName)
+
+		ip, err := host.Driver.GetIP()
+		if err != nil {
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error getting IP: %s", err.Error()))
+		}
+
+		serviceSpecs, err := openshift.GetServiceSpecs(serviceListNamespace)
 		if err != nil {
 			atexit.ExitWithMessage(1, err.Error())
 		}
 
 		var data [][]string
-		for _, url := range urls {
-			data = append(data, []string{url.Namespace, url.Name, url.URL})
+		namespace := make(map[string]bool)
+		for _, serviceSpec := range serviceSpecs {
+			if _, ok := namespace[serviceSpec.Namespace]; ok {
+				serviceSpec.Namespace = ""
+			} else {
+				namespace[serviceSpec.Namespace] = true
+			}
+			var urls, weights string
+			nodePortURL := serviceSpec.NodePort
+			if nodePortURL != "" {
+				nodePortURL = fmt.Sprintf("%s:%s", ip, nodePortURL)
+			}
+			if serviceSpec.URL != nil {
+				urls = strings.Join(serviceSpec.URL, "\n")
+			}
+			if serviceSpec.Weight != nil {
+				weights = strings.Join(serviceSpec.Weight, "\n")
+			}
+			data = append(data, []string{serviceSpec.Namespace, serviceSpec.Name, nodePortURL, urls, weights})
 		}
 
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Namsepace", "Name", "URL"})
+		table.SetHeader([]string{"Namsepace", "Name", "NodePort", "Route-URL", "Weight"})
 		table.SetBorders(tablewriter.Border{Left: true, Top: true, Right: true, Bottom: true})
 		table.SetCenterSeparator("|")
 		table.AppendBulk(data) // Add Bulk Data
@@ -53,6 +92,6 @@ var serviceListCmd = &cobra.Command{
 }
 
 func init() {
-	serviceListCmd.Flags().StringVarP(&serviceListNamespace, "namespace", "n", "default", "The namespace of the services.")
+	serviceListCmd.Flags().StringVarP(&serviceListNamespace, "namespace", "n", "", "The namespace of the services.")
 	serviceCmd.AddCommand(serviceListCmd)
 }

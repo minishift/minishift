@@ -18,13 +18,18 @@ package openshift
 
 import (
 	"fmt"
+	"net/url"
+	"path/filepath"
+	"strconv"
+	"strings"
+
+	"encoding/json"
+
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/pkg/errors"
-	"path/filepath"
-	"regexp"
-	"strings"
+	"sort"
 )
 
 var (
@@ -36,69 +41,111 @@ func init() {
 	systemKubeConfigPath = filepath.Join(constants.Minipath, "machines", constants.MachineName+"_kubeconfig")
 }
 
-type ServiceURL struct {
+type Service struct {
+	Items []struct {
+		Metadata struct {
+			Name string `json:"name"`
+		} `json:"metadata"`
+		Spec struct {
+			Ports []struct {
+				NodePort int `json:"nodePort"`
+			} `json:"ports"`
+		} `json:"spec"`
+	} `json:"items"`
+}
+
+type Route struct {
+	Items []struct {
+		Spec struct {
+			AlternateBackends []struct {
+				Name   string `json:"name"`
+				Weight int    `json:"weight"`
+			} `json:"alternateBackends"`
+			Host string `json:"host"`
+			To   struct {
+				Name   string `json:"name"`
+				Weight int    `json:"weight"`
+			} `json:"to"`
+		} `json:"spec"`
+	} `json:"items"`
+}
+
+type ServiceWeight struct {
+	Name   string
+	Weight string
+}
+
+type ServiceSpec struct {
 	Namespace string
 	Name      string
-	URL       string
+	URL       []string
+	NodePort  string
+	Weight    []string
 }
 
 const (
-	URLCustomCol      = "-o=custom-columns=URL:.spec.host"
-	URLsCustomCol     = "-o=custom-columns=NAME:.metadata.name,HOST:.spec.host"
 	ProjectsCustomCol = "-o=custom-columns=NAME:.metadata.name"
 )
 
 // Get the route for service
-func GetServiceURL(service, namespace string, https bool) (string, error) {
+func GetServiceSpec(service, namespace string, https bool) (string, error) {
 	urlScheme := "http://"
 	if https {
 		urlScheme = "https://"
 	}
 
-	if !isProjectExists(namespace) {
-		return "", errors.New(fmt.Sprintf("Namespace %s doesn't exits", namespace))
-	}
-
-	cmdArgText := fmt.Sprintf("get route/%s -n %s --config=%s %s", service, namespace, systemKubeConfigPath, URLCustomCol)
-	tokens := strings.Split(cmdArgText, " ")
-	cmdName := instanceState.InstanceConfig.OcPath
-	cmdOut, err := runner.Output(cmdName, tokens...)
+	serviceSpecs, err := GetServiceSpecs(namespace)
 	if err != nil {
-		return "", errors.New(fmt.Sprintf("No service with name '%s' defined in namespace '%s'", service, namespace))
+		return "", err
 	}
 
-	url := strings.Split(byteArrayToString(cmdOut), "\n")[1] // second element contain actual URL content
-	return urlScheme + url, nil
+	for _, serviceSpec := range serviceSpecs {
+		sort.Strings(serviceSpec.URL)
+		if serviceSpec.Name == service {
+			if serviceSpec.URL != nil {
+				u, _ := url.Parse(serviceSpec.URL[0])
+				return urlScheme + u.Host, nil
+			} else {
+				return "", errors.New(fmt.Sprintf("Service '%s' in namespace '%s' does not have route associated which can be opened in the browser.", service, namespace))
+			}
+		}
+	}
+
+	return "", errors.New(fmt.Sprintf("Service %s does not exist in namespace %s.", service, namespace))
 }
 
-// Get the available routes to user
-func GetServiceURLs(serviceListNamespace string) ([]ServiceURL, error) {
-	var serviceURLs []ServiceURL
+// GetServiceSpecs takes Namespace string and return route/nodeport/name/weight in a ServiceSpec structure
+func GetServiceSpecs(serviceNamespace string) ([]ServiceSpec, error) {
+	var serviceSpecs []ServiceSpec
 
-	if serviceListNamespace != "" && !isProjectExists(serviceListNamespace) {
-		return serviceURLs, errors.New(fmt.Sprintf("Namespace %s doesn't exits", serviceListNamespace))
+	if serviceNamespace != "" && !isProjectExists(serviceNamespace) {
+		return serviceSpecs, errors.New(fmt.Sprintf("Namespace %s doesn't exits", serviceNamespace))
 	}
 
-	namespaces, err := getValidNamespaces(serviceListNamespace)
+	namespaces, err := getValidNamespaces(serviceNamespace)
 	if err != nil {
-		return serviceURLs, err
+		return serviceSpecs, err
 	}
 
-	// iterate over namespaces, get command output, format route in ServiceURL
+	// iterate over namespaces, get command output, format route and nodePort
 	for _, namespace := range namespaces {
-		outputData, err := getServiceURLsOutput(namespace)
+		serviceNodePort, err := getService(namespace)
 		if err != nil {
-			return serviceURLs, err
+			return serviceSpecs, err
 		}
-		if !strings.Contains(outputData, "No resources found") {
-			serviceURLs = filterAndUpdateServiceURLS(outputData, namespace)
+		routeSpec, err := getRouteSpec(namespace)
+		if err != nil {
+			return serviceSpecs, err
+		}
+		if serviceNodePort != nil {
+			serviceSpecs = append(serviceSpecs, filterAndUpdateServiceSpecs(routeSpec, namespace, serviceNodePort)...)
 		}
 	}
-	if len(serviceURLs) == 0 {
-		return serviceURLs, errors.New(fmt.Sprintf("No services defined in namespace '%s'", serviceListNamespace))
+	if len(serviceSpecs) == 0 {
+		return serviceSpecs, errors.New(fmt.Sprintf("No services defined in namespace '%s'", serviceNamespace))
 	}
 
-	return serviceURLs, nil
+	return serviceSpecs, nil
 }
 
 // Check whether project exists or not
@@ -136,33 +183,94 @@ func getValidNamespaces(serviceListNamespace string) ([]string, error) {
 	return namespaces, nil
 }
 
-func getServiceURLsOutput(namespace string) (string, error) {
-	cmdArgText := fmt.Sprintf("get route -n %s --config=%s %s", namespace, systemKubeConfigPath, URLsCustomCol)
+// getRouteSpec take valid namespace and return map which have route as key and
+// value be ServiceWeight struct
+func getRouteSpec(namespace string) (map[string][]ServiceWeight, error) {
+	routeSpec := make(map[string][]ServiceWeight)
+	cmdArgText := fmt.Sprintf("get route -o json --config=%s -n %s", systemKubeConfigPath, namespace)
 	tokens := strings.Split(cmdArgText, " ")
 	cmdName := instanceState.InstanceConfig.OcPath
 	cmdOut, err := runner.Output(cmdName, tokens...)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return byteArrayToString(cmdOut), nil
+	if strings.Contains(string(cmdOut), "No resources found") {
+		return nil, nil
+	}
+
+	var data Route
+	err = json.Unmarshal(cmdOut, &data)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range data.Items {
+		totalWeight := item.Spec.To.Weight
+		for _, alternateBackend := range item.Spec.AlternateBackends {
+			totalWeight += alternateBackend.Weight
+		}
+		routeSpec[item.Spec.Host] = []ServiceWeight{{Name: item.Spec.To.Name, Weight: calculateWeight(float64(item.Spec.To.Weight), float64(totalWeight))}}
+		for _, alternateBackend := range item.Spec.AlternateBackends {
+			routeSpec[item.Spec.Host] = append(routeSpec[item.Spec.Host], ServiceWeight{Name: alternateBackend.Name,
+				Weight: calculateWeight(float64(alternateBackend.Weight), float64(totalWeight))})
+		}
+	}
+	return routeSpec, nil
 }
 
-func filterAndUpdateServiceURLS(data, namespace string) []ServiceURL {
-	var serviceURLs []ServiceURL
+func calculateWeight(a float64, b float64) string {
+	weightPercentage := int(a / b * 100)
+	if weightPercentage != 100 {
+		return strconv.Itoa(weightPercentage) + "%"
+	}
+	return ""
+}
 
-	re_whtsp_inside := regexp.MustCompile(`[\s\p{Zs}]{2,}`)
-	data = re_whtsp_inside.ReplaceAllString(data, " ") // replace all extra whitespaces
-	contents := strings.Split(data, "\n")              // split on new lines
-	contents = emptyFilter(contents[1:])               // remove the header "NAME HOST" and empty elements
+func filterAndUpdateServiceSpecs(routeSpec map[string][]ServiceWeight, namespace string, serviceNodePort map[string]string) []ServiceSpec {
+	var serviceSpecs []ServiceSpec
+	serviceSpecMap := make(map[string]*ServiceSpec)
 
-	for _, content := range contents {
-		// split content on white space to separate NAME and HOST
-		data := strings.Split(content, " ")
-		serviceURLs = append(serviceURLs, ServiceURL{Namespace: namespace, Name: data[0], URL: "http://" + data[1]})
+	for routeURL, v := range routeSpec {
+		for _, service := range v {
+			// split content on colon to separate NAME, HOST and Weight
+			if _, ok := serviceNodePort[service.Name]; ok {
+				if _, ok := serviceSpecMap[service.Name]; !ok {
+					serviceSpecMap[service.Name] = &ServiceSpec{Namespace: namespace,
+						Name:     service.Name,
+						URL:      []string{fmt.Sprintf("http://%s", routeURL)},
+						NodePort: serviceNodePort[service.Name],
+						Weight:   []string{service.Weight},
+					}
+				} else {
+					serviceSpecMap[service.Name].URL = append(serviceSpecMap[service.Name].URL, fmt.Sprintf("http://%s", routeURL))
+					serviceSpecMap[service.Name].Weight = append(serviceSpecMap[service.Name].Weight, service.Weight)
+				}
+				delete(serviceNodePort, service.Name)
+			} else {
+				if _, ok := serviceSpecMap[service.Name]; !ok {
+					serviceSpecMap[service.Name] = &ServiceSpec{Namespace: namespace,
+						Name:     service.Name,
+						URL:      []string{fmt.Sprintf("http://%s", routeURL)},
+						NodePort: "",
+						Weight:   []string{service.Weight},
+					}
+				} else {
+					serviceSpecMap[service.Name].URL = append(serviceSpecMap[service.Name].URL, fmt.Sprintf("http://%s", routeURL))
+					serviceSpecMap[service.Name].Weight = append(serviceSpecMap[service.Name].Weight, service.Weight)
+				}
+			}
+		}
 	}
 
-	return serviceURLs
+	for k, v := range serviceNodePort {
+		serviceSpecs = append(serviceSpecs, ServiceSpec{Namespace: namespace, Name: k, URL: nil, NodePort: v, Weight: nil})
+	}
+	for _, v := range serviceSpecMap {
+		serviceSpecs = append(serviceSpecs, *v)
+	}
+
+	return serviceSpecs
 }
 
 // Discard empty elements
@@ -178,6 +286,39 @@ func emptyFilter(data []string) []string {
 	return res
 }
 
+// Get service provide service name and node-port as map data structure
+func getService(namespace string) (map[string]string, error) {
+	serviceNodePort := make(map[string]string)
+	cmdArgText := fmt.Sprintf("get svc -o json --config=%s -n %s", systemKubeConfigPath, namespace)
+	tokens := strings.Split(cmdArgText, " ")
+	cmdName := instanceState.InstanceConfig.OcPath
+	cmdOut, err := runner.Output(cmdName, tokens...)
+	if err != nil {
+		return nil, err
+	}
+
+	if strings.Contains(string(cmdOut), "No resources found") {
+		return nil, nil
+	}
+
+	var data Service
+	err = json.Unmarshal(cmdOut, &data)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range data.Items {
+		for _, port := range item.Spec.Ports {
+			nodePort := ""
+			if port.NodePort != 0 {
+				nodePort = fmt.Sprintf("%d", port.NodePort)
+			}
+			serviceNodePort[item.Metadata.Name] = nodePort
+		}
+	}
+	return serviceNodePort, nil
+}
+
 // Get all projects a user belongs to
 func getProjects() ([]string, error) {
 	cmdArgText := fmt.Sprintf("get projects --config=%s %s", systemKubeConfigPath, ProjectsCustomCol)
@@ -188,11 +329,6 @@ func getProjects() ([]string, error) {
 		return []string{}, err
 	}
 
-	contents := strings.Split(byteArrayToString(cmdOut), "\n")
+	contents := strings.Split(string(cmdOut), "\n")
 	return emptyFilter(contents[1:]), nil
-}
-
-// Convert byte array to string
-func byteArrayToString(data []byte) string {
-	return string(data)
 }

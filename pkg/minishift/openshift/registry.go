@@ -35,6 +35,6 @@ func GetDockerRegistryInfo() (string, error) {
 		return "", errors.New(fmt.Sprintf("No information found for '%s'", service))
 	}
 
-	registryInfo := byteArrayToString(cmdOut)
+	registryInfo := string(cmdOut)
 	return registryInfo, nil
 }

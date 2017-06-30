@@ -18,8 +18,8 @@ package cmd
 
 import (
 	"fmt"
-
 	"os"
+	"strings"
 
 	"github.com/docker/machine/libmachine"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
@@ -30,7 +30,6 @@ import (
 	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 var (
@@ -61,9 +60,12 @@ func runDelete(cmd *cobra.Command, args []string) {
 	}
 
 	if clearCache {
-		err := os.RemoveAll(constants.MakeMiniPath("cache"))
+		cachePath := constants.MakeMiniPath("cache")
+		err := os.RemoveAll(cachePath)
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting Minishift cache: %v", err))
+		} else {
+			fmt.Printf("Removed the cache at: %s\n", cachePath)
 		}
 	}
 

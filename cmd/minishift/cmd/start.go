@@ -22,8 +22,10 @@ import (
 	"strings"
 
 	"os"
+	"time"
 
 	"github.com/asaskevich/govalidator"
+	"github.com/briandowns/spinner"
 	units "github.com/docker/go-units"
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/drivers"
@@ -44,6 +46,7 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/hostfolder"
 	"github.com/minishift/minishift/pkg/minishift/openshift"
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
+
 	"github.com/minishift/minishift/pkg/util"
 	inputUtils "github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
@@ -62,6 +65,8 @@ const (
 	defaultInsecureRegistry = "172.30.0.0/16"
 
 	unsupportedIsoUrlFormat = "Unsupported value for iso-url. It can be an URL, file URI or one of the following short names: [b2d centos]."
+
+	SPINNER_SPEED = 200 // In milliseconds
 )
 
 var (
@@ -126,6 +131,10 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	ensureNotRunning(libMachineClient, constants.MachineName)
 	validateOpenshiftVersion()
+
+	// preflight check (before start)
+	preflightChecksBeforeStartingHost()
+
 	setSubscriptionManagerParameters()
 
 	proxyConfig := handleProxies()
@@ -134,8 +143,13 @@ func runStart(cmd *cobra.Command, args []string) {
 	// we need to determine whether this is a restart prior to potentially creating a new VM
 	isRestart := cmdutil.VMExists(libMachineClient, constants.MachineName)
 
-	hostVm, ip := startHost(libMachineClient)
+	fmt.Printf("-- Starting local OpenShift cluster")
+	hostVm := startHost(libMachineClient)
 	registerHost(libMachineClient)
+
+	// preflight checks (after start)
+	preflightChecksAfterStartingHost(hostVm.Driver)
+	ip, _ := hostVm.Driver.GetIP()
 
 	if proxyConfig.IsEnabled() {
 		// once we know the IP, we need to make sure it is not proxied in a proxy environment
@@ -173,6 +187,8 @@ func runStart(cmd *cobra.Command, args []string) {
 	}
 
 	clusterUpParams := determineClusterUpParameters(clusterUpConfig)
+	fmt.Println("-- OpenShift cluster will be configured with ...")
+	fmt.Println("   Version:", requestedOpenShiftVersion)
 	err = clusterup.ClusterUp(clusterUpConfig, clusterUpParams, &util.RealRunner{})
 
 	if err != nil {
@@ -259,7 +275,10 @@ func determineInsecureRegistry(key string) []string {
 	return append(s, defaultInsecureRegistry)
 }
 
-func startHost(libMachineClient *libmachine.Client) (*host.Host, string) {
+func startHost(libMachineClient *libmachine.Client) *host.Host {
+	spinnerView := spinner.New(spinner.CharSets[9], SPINNER_SPEED*time.Millisecond)
+
+	// Configuration used for creation/setup of the Virtual Machine
 	machineConfig := &cluster.MachineConfig{
 		MinikubeISO:      determineIsoUrl(viper.GetString(startFlags.ISOUrl.Name)),
 		Memory:           viper.GetInt(startFlags.Memory.Name),
@@ -274,11 +293,25 @@ func startHost(libMachineClient *libmachine.Client) (*host.Host, string) {
 		ShellProxyEnv:    shellProxyEnv,
 	}
 
-	fmt.Printf("Starting local OpenShift cluster using '%s' hypervisor...\n", machineConfig.VMDriver)
+	fmt.Printf(" using '%s' hypervisor ...\n", machineConfig.VMDriver)
 	var hostVm *host.Host
+
+	// configuration with these settings only happen on create
+	isRestart := cmdutil.VMExists(libMachineClient, constants.MachineName)
+	if !isRestart {
+		fmt.Println("-- Minishift VM will be configured with ...")
+		fmt.Println("   Memory:   ", units.HumanSize(float64((machineConfig.Memory/units.KiB)*units.GB)))
+		fmt.Println("   vCPUs :   ", machineConfig.CPUs)
+		fmt.Println("   Disk size:", units.HumanSize(float64(machineConfig.DiskSize*units.MB)))
+		// Should handle cached images
+		//fmt.Println("   Boot ISO:  ", machineConfig.MinikubeISO)
+	}
+	fmt.Printf("-- Starting Minishift VM ... ")
+	spinnerView.Start()
 	start := func() (err error) {
 		hostVm, err = cluster.StartHost(libMachineClient, *machineConfig)
 		if err != nil {
+			fmt.Printf("FAIL ")
 			glog.Errorf("Error starting the VM: %s. Retrying.\n", err)
 		}
 		return err
@@ -287,13 +320,10 @@ func startHost(libMachineClient *libmachine.Client) (*host.Host, string) {
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error starting the VM: %v", err))
 	}
+	spinnerView.Stop()
+	fmt.Println("OK")
 
-	ip, err := hostVm.Driver.GetIP()
-	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Error determining host ip: %v ", err))
-	}
-
-	return hostVm, ip
+	return hostVm
 }
 
 func autoMountHostFolders(driver drivers.Driver) {

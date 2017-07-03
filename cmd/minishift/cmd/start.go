@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"runtime"
 	"strings"
 
@@ -31,6 +30,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/cmd/minishift/cmd/addon"
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
+	imageCmd "github.com/minishift/minishift/cmd/minishift/cmd/image"
 	registrationUtil "github.com/minishift/minishift/cmd/minishift/cmd/registration"
 	cmdUtil "github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
@@ -46,7 +46,6 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/openshift"
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
-
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/minishift/minishift/pkg/util/progressdots"
@@ -55,6 +54,7 @@ import (
 	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"os"
 )
 
 const (
@@ -148,6 +148,8 @@ For the latter see 'minishift config -h'.`,
 
 // runStart handles all command line arguments, launches the VM and provisions OpenShift
 func runStart(cmd *cobra.Command, args []string) {
+	fmt.Println(fmt.Sprintf("-- Starting profile '%s'", constants.ProfileName))
+
 	libMachineClient := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 	defer libMachineClient.Close()
 
@@ -165,8 +167,8 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	proxyConfig := handleProxies()
 
-	fmt.Println(fmt.Sprintf("-- Starting profile '%s'", constants.ProfileName))
-	fmt.Printf("-- Starting local OpenShift cluster")
+	fmt.Print("-- Starting local OpenShift cluster")
+
 	hostVm := startHost(libMachineClient)
 	registrationUtil.RegisterHost(libMachineClient)
 
@@ -195,7 +197,7 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	requestedOpenShiftVersion := viper.GetString(configCmd.OpenshiftVersion.Name)
 	if !isRestart {
-		importContainerImages(hostVm, requestedOpenShiftVersion)
+		importContainerImages(hostVm.Driver, libMachineClient, requestedOpenShiftVersion)
 	}
 
 	ocPath := cmdUtil.CacheOc(clusterup.DetermineOcVersion(requestedOpenShiftVersion))
@@ -229,7 +231,7 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	if !isRestart {
 		postClusterUp(hostVm, clusterUpConfig)
-		exportContainerImages(hostVm, requestedOpenShiftVersion)
+		exportContainerImages(hostVm.Driver, libMachineClient, requestedOpenShiftVersion)
 	}
 	if isRestart {
 		err = cmdUtil.SetOcContext(minishiftConfig.AllInstancesConfig.ActiveProfile)
@@ -343,7 +345,7 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 			IPAddress: viper.GetString(configCmd.IPAddress.Name),
 			Netmask:   viper.GetString(configCmd.Netmask.Name),
 			Gateway:   viper.GetString(configCmd.Gateway.Name),
-			DNS1:      viper.GetString(configCmd.Nameserver.Name),
+			DNS1:      viper.GetString(configCmd.NameServer.Name),
 		}
 
 		// Configure networking on startup only works on Hyper-V
@@ -390,21 +392,37 @@ func addActiveProfileInformation() {
 	}
 }
 
-func importContainerImages(hostVm *host.Host, openShiftVersion string) {
+func importContainerImages(driver drivers.Driver, api libmachine.API, openShiftVersion string) {
 	if !viper.GetBool(configCmd.ImageCaching.Name) {
 		return
 	}
 
-	handler := getImageHandler(hostVm)
-	config := &image.ImageCacheConfig{
-		HostCacheDir: constants.MakeMiniPath("cache", "images"),
-		CachedImages: image.GetOpenShiftImageNames(openShiftVersion),
+	images := viper.GetStringSlice(configCmd.CacheImages.Name)
+	for _, coreImage := range image.GetOpenShiftImageNames(openShiftVersion) {
+		if !stringUtils.Contains(images, coreImage) {
+			images = append(images, coreImage)
+		}
 	}
-	handler.ImportImages(config)
+
+	envMap, err := cluster.GetHostDockerEnv(api)
+	if err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error determining Docker settings for image import: %v", err))
+	}
+
+	handler := getImageHandler(driver, envMap)
+	config := &image.ImageCacheConfig{
+		HostCacheDir: constants.MakeMiniPath(imageCmd.CacheDir...),
+		CachedImages: images,
+		Out:          os.Stdout,
+	}
+	err = handler.ImportImages(config)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("  WARN: Import of cached images failed. Continuing without importing images. Error: %s ", err.Error()))
+	}
 }
 
-func getImageHandler(hostVm *host.Host) image.ImageHandler {
-	handler, err := image.NewDockerImageHandler(hostVm.Driver)
+func getImageHandler(driver drivers.Driver, envMap map[string]string) image.ImageHandler {
+	handler, err := image.NewOciImageHandler(driver, envMap)
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to create image handler: %v", err))
 	}
@@ -413,22 +431,34 @@ func getImageHandler(hostVm *host.Host) image.ImageHandler {
 }
 
 // exportContainerImages exports the OpenShift images in a background process (by calling 'minishift image export')
-func exportContainerImages(hostVm *host.Host, version string) {
+func exportContainerImages(driver drivers.Driver, api libmachine.API, version string) {
 	if !viper.GetBool(configCmd.ImageCaching.Name) {
 		return
 	}
 
-	handler := getImageHandler(hostVm)
+	images := viper.GetStringSlice(configCmd.CacheImages.Name)
+	for _, coreImage := range image.GetOpenShiftImageNames(version) {
+		if !stringUtils.Contains(images, coreImage) {
+			images = append(images, coreImage)
+		}
+	}
+
+	envMap, err := cluster.GetHostDockerEnv(api)
+	if err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error determining Docker settings for image import: %v", err))
+	}
+
+	handler := getImageHandler(driver, envMap)
 	config := &image.ImageCacheConfig{
-		HostCacheDir: constants.MakeMiniPath("cache", "images"),
-		CachedImages: image.GetOpenShiftImageNames(version),
+		HostCacheDir: constants.MakeMiniPath(imageCmd.CacheDir...),
+		CachedImages: images,
 	}
 
 	if handler.AreImagesCached(config) {
 		return
 	}
 
-	exportCmd, err := image.CreateExportCommand(version)
+	exportCmd, err := image.CreateExportCommand(version, constants.ProfileName, images)
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error creating export command: %v", err))
 	}
@@ -510,7 +540,7 @@ func initStartFlags() *flag.FlagSet {
 		startFlagSet.String(configCmd.IPAddress.Name, "", "Specify IP address to assign to the instance (experimental - Hyper-V only)")
 		startFlagSet.String(configCmd.Netmask.Name, "24", "Specify netmask to use for the IP address. Ignored if no IP address specified (experimental - Hyper-V only)")
 		startFlagSet.String(configCmd.Gateway.Name, "", "Specify gateway to use for the instance. Ignored if no IP address specified (experimental - Hyper-V only)")
-		startFlagSet.String(configCmd.Nameserver.Name, "8.8.8.8", "Specify nameserver to use for the instance. Ignored if no IP address specified (experimental - Hyper-V only)")
+		startFlagSet.String(configCmd.NameServer.Name, "8.8.8.8", "Specify nameserver to use for the instance. Ignored if no IP address specified (experimental - Hyper-V only)")
 	}
 
 	if minishiftConfig.EnableExperimental {

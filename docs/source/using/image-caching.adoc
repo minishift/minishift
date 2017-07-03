@@ -4,39 +4,150 @@ include::variables.adoc[]
 :icons:
 :toc: macro
 :toc-title:
-:toclevels: 1
+:toclevels: 2
 
 toc::[]
 
 [[image-caching-overview]]
 == Overview
 
-To speed up provisioning of the OpenShift cluster and to minimize network traffic, the core OpenShift images can be cached on the host.
-This feature is considered experimental and needs to be explicitly enabled.
+To speed up the provisioning of the OpenShift cluster and to minimize network traffic, container images can be cached on the host.
+These images can then be imported into the running Docker daemon, either explicitly on request or implicitly during xref:../using/basic-usage.adoc#minishift-start-overview[`minishift start`].
+The following sections describe image caching and its configuration in more detail.
 
-[[image-chaching-configuration]]
-== Image Caching Configuration
+[TIP]
+====
+The format in which images are cached has changed with {project} version 1.10.0.
+Prior to 1.10.0 the images were stored as tar files.
+As of 1.10.0, images are stored in the link:https://github.com/opencontainers/image-spec/blob/master/spec.md[OCI image format].
 
-To enable image caching you use the xref:../command-ref/minishift_config_set#[`minishift config set`] command:
+If you used image caching prior to {project} 1.10.0, your cache will need to be recreated.
+If you want to remove the obsolete pre 1.10.0 images, you can clear your cache via:
+----
+$ minishift delete --clear-cache
+----
+====
+
+[[explicit-image-caching]]
+== Explicit Image Caching
+
+{project} provides the `image` command together with its sub-commands to control the behavior of image caching.
+To export and import images from the Docker daemon of the {project} VM, use `minishift image export` and `minishift image import`.
+
+[[single-images]]
+=== Importing and Exporting Single Images
+
+Once the {project} VM is running, images can be explicitly exported from the Docker daemon:
+
+----
+$ minishift image export <image-name-0> <image-name-1> ...
+Pulling image <image-name-0> .. OK
+Exporting <image-name-0>. OK
+Pulling image <image-name-1> .. OK
+Exporting <image-name-2>. OK
+----
+
+[NOTE]
+====
+Images which are not available in the Docker daemon will be pulled prior to being exported to the host.
+====
+
+To import previously cached images, use the xref:../command-ref/minishift_image_import.adoc#[`minishift image import`] command:
+
+----
+$ minishift image import <image-name-0> <image-name-1> ...
+Importing <image-name-0> . OK
+----
+
+[[listing-cached-images]]
+=== Listing Cached Images
+
+The xref:../command-ref/minishift_image_list.adoc#[`minishift image list`] command lists either the currently cached images or the images available in the {project} Docker daemon.
+
+To view currently cached images on the host:
+
+----
+$ minishift image list
+openshift/origin-docker-registry:v3.6.0
+openshift/origin-haproxy-router:v3.6.0
+openshift/origin:v3.6.0
+----
+
+To view images available in the Docker daemon:
+
+----
+$ minishift image list --vm
+openshift/origin-deployer:v3.6.0
+openshift/origin-docker-registry:v3.6.0
+openshift/origin-haproxy-router:v3.6.0
+openshift/origin-pod:v3.6.0
+openshift/origin:v3.6.0
+----
+
+[[persisting-image-names]]
+=== Persisting Cached Image Names
+
+In order to avoid having to type the image names explicitly as part of the `image export` or `image import` command, you can store a list of image names for import and export in the persistent configuration.
+
+Use xref:../command-ref/minishift_image_cache-config_view#[`minishift image cache-config view`] to view the list of currently configured images and xref:../command-ref/minishift_image_cache-config_add#[`minishift image cache-config add`] to add images to the list:
+
+----
+$ minishift image cache-config view
+$ minishift image cache-config add alpine:latest busybox:latest
+$ minishift image cache-config view
+alpine:latest
+busybox:latest
+----
+
+To remove images from the list use xref:../command-ref/minishift_image_cache-config_remove#[`minishift image cache-config remove`]:
+
+----
+$ minishift image cache-config remove alpine:latest
+$ minishift image cache-config view
+busybox:latest
+----
+
+Once the image names are stored in the persistent configuration, you can run xref:../command-ref/minishift_image_export#[`minishift image export`] and xref:../command-ref/minishift_image_import#[`minishift image import`] without any arguments.
+
+[[all-images]]
+=== Exporting and Importing All Images
+
+You can export and import all images using the `--all` flag.
+For the export command, this means that all images currently available on the Docker daemon will be exported to the host.
+For the import command, it means that all images available in the local {project} cache will be imported into the Docker daemon of the {project} VM.
+
+[WARNING]
+====
+Exporting and importing all images can take a long time and locally cached images can take up a considerable amount of disk space.
+We recommend using this feature with caution.
+====
+
+[[implicit-image-caching]]
+== Implicit Image Caching
+
+Image caching can be configured to automatically occur during the creation of the {project} VM while executing `minishift start`.
+To enable this feature you need to enable the `image-caching` property in the persistent configuration using the xref:../command-ref/minishift_config_set#[`minishift config set`] command:
 
 ----
 $ minishift config set image-caching true
 ----
 
-Once enabled, caching occurs transparently, in a background process, the first time you use the xref:../command-ref/minishift_start#[`minishift start`] command.
+Once enabled, caching occurs in a background process, the first time you use the xref:../command-ref/minishift_start#[`minishift start`] command.
 Once the images are cached under *_$MINISHIFT_HOME/cache/images_*, successive {project} VM creations will use these cached images.
 
+[NOTE]
+====
+Enabling implicit image caching will transparently add the required OpenShift images to the list of cached images as specified per `cache-images` configuration option.
+See xref:../using/image-caching.adoc#persisting-image-names[Persisting Cached Image Names].
+====
+
+[TIP]
+====
 Each time an image exporting background process runs, a log file is generated under *_$MINISHIFT_HOME/logs_* which can be used to verify the progress of the export.
+====
 
 You can disable the caching of the OpenShift images by setting `image-caching` to `false` or removing the setting altogether using xref:../command-ref/minishift_config_unset#[`minishift config unset`]:
 
 ----
 $ minishift config unset image-caching
 ----
-
-[NOTE]
-====
-Image caching is considered experimental and its semantics and API are subject to change.
-The aim is to allow caching of arbitrary images, as well as using a better format for storing the images on the host.
-You can track the progress on this feature on GitHub issue link:https://github.com/minishift/minishift/issues/952[#952].
-====

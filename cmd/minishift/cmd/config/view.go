@@ -59,6 +59,7 @@ var configViewCmd = &cobra.Command{
 
 func init() {
 	excludedConfigKeys["addons"] = true
+	excludedConfigKeys["cache-images"] = true
 	configViewCmd.Flags().StringVar(&configViewFormat, "format", DefaultConfigViewFormat,
 		`Go template format to apply to the configuration file. For more information about Go templates, see: https://golang.org/pkg/text/template/
 		For the list of configurable variables for the template, see the struct values section of ConfigViewTemplate at: https://godoc.org/github.com/minishift/minishift/cmd/minishift/cmd/config#ConfigViewTemplate`)

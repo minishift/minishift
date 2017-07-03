@@ -14,26 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package process
+package image
 
 import (
-	"fmt"
-	"github.com/minishift/minishift/pkg/minikube/constants"
-	"os"
-	"syscall"
+	"testing"
+
+	"github.com/minishift/minishift/pkg/testing/cli"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
 )
 
-func SysProcForBackgroundProcess() *syscall.SysProcAttr {
-	sysProcAttr := new(syscall.SysProcAttr)
-	sysProcAttr.Setpgid = true
-	sysProcAttr.Pgid = 0
+func Test_no_images_to_export(t *testing.T) {
+	tee := cli.CreateTee(t, true)
+	defer cli.TearDown("", tee)
+	expectedOut := noCachedImagesSpecified
 
-	return sysProcAttr
-}
+	atexit.RegisterExitHandler(cli.VerifyExitCodeAndMessage(t, tee, 0, expectedOut))
 
-func EnvForBackgroundProcess() []string {
-	return []string{
-		fmt.Sprintf("MINISHIFT_HOME=%s", constants.GetMinishiftHomeDir()),
-		fmt.Sprintf("PATH=%s", os.Getenv("PATH")),
+	imagesToExport(nil, nil)
+
+	actualOut := tee.StdoutBuffer.String()
+	if expectedOut != actualOut {
+		t.Fatalf("Expected output '%s'. Got '%s'.", expectedOut, actualOut)
 	}
 }

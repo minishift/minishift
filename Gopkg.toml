@@ -20,6 +20,8 @@
 #  name = "github.com/x/y"
 #  version = "2.4.0"
 
+# We don't want to end up with an old logrus import, only github.com/sirupsen/logrus should be used
+ignored = ["github.com/Sirupsen/logrus"]
 
 [[constraint]]
   name = "github.com/DATA-DOG/godog"
@@ -35,6 +37,7 @@
 
 [[constraint]]
   name = "github.com/docker/go-units"
+  revision = "0bbddae09c5a5419a8c6dcdd7ff90da3d450393b"
 
 [[constraint]]
   name = "github.com/docker/machine"
@@ -42,6 +45,7 @@
 
 [[constraint]]
   name = "github.com/elazarl/goproxy"
+  revision = "aacba83f36a55ac31cbb71c06547a328c0cd1604"
 
 [[constraint]]
   name = "github.com/gbraad/go-hvkvp"
@@ -62,42 +66,106 @@
 
 [[constraint]]
   name = "github.com/inconshreveable/go-update"
+  revision = "8152e7eb6ccf8679a64582a66b78519688d156ad"
 
 [[constraint]]
   name = "github.com/kardianos/osext"
 
 [[constraint]]
   name = "github.com/olekukonko/tablewriter"
-
-[[constraint]]
-  name = "github.com/pborman/uuid"
+  revision = "febf2d34b54a69ce7530036c7503b1c9fbfdf0bb"
 
 [[constraint]]
   name = "github.com/pkg/browser"
+  revision = "c90ca0c84f15f81c982e32665bffd8d7aac8f097"
 
 [[constraint]]
   name = "github.com/pkg/errors"
-  version = "0.8.0"
+  version = "=0.8.0"
 
 [[constraint]]
   name = "github.com/spf13/cobra"
+  revision = "e606913c4ee45fec232e67e70105fb6c866b95d9"
 
 [[constraint]]
   name = "github.com/spf13/pflag"
+  revision = "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
 
 [[constraint]]
   name = "github.com/spf13/viper"
   revision = "382f87b929b84ce13e9c8a375a4b217f224e6c65"
 
 [[constraint]]
-  name = "golang.org/x/crypto"
-
-[[constraint]]
   name = "golang.org/x/oauth2"
+  revision = "442624c9ec9243441e83b374a9e22ac549b5c51d"
 
 [[constraint]]
   name = "gopkg.in/cheggaaa/pb.v1"
   version = "=1.0.13"
 
+# Get all dependencies for containers/image which is used for OCI image chaching
+[[constraint]]
+  name = "github.com/containers/image"
+  revision = "8b24210344a448e58be6ed53636e2eacaa30be32"
+
+[[constraint]]
+  name = "github.com/opencontainers/runc"
+  revision = "6b1d0e76f239ffb435445e5ae316d2676c07c6e3"
+
+[[constraint]]
+  name = "github.com/docker/go-connections"
+  revision = "3ede32e2033de7505e6500d6c868c2b9ed9f169d"
+
+# Use override for docker/docker and docker/distribution to ensure we get the specfied version.
+# In particular we need a version which uses the altest logrus
+[[override]]
+  name = "github.com/docker/docker"
+  revision = "30eb4d8cdc422b023d5f11f29a82ecb73554183b"
+
+[[override]]
+  name = "github.com/docker/distribution"
+  revision = "5f6282db7d65e6d72ad7c2cc66310724a57be716"
+
+[[constraint]]
+  name = "github.com/opencontainers/image-spec"
+  version = "=v1.0.0"
+
 [[constraint]]
   name = "gopkg.in/yaml.v2"
+  revision = "a3f3340b5840cee44f372bddb5880fcbc419b46a"
+
+[[constraint]]
+  name = "github.com/pborman/uuid"
+  revision = "1b00554d822231195d1babd97ff4a781231955c9"
+
+[[constraint]]
+  name = "golang.org/x/crypto"
+  revision = "453249f01cfeb54c3d549ddb75ff152ca243f9d8"
+
+[[constraint]]
+  name = "github.com/sirupsen/logrus"
+  version = "=v1.0.0"
+
+[[constraint]]
+  name = "github.com/gorilla/mux"
+  revision = "94e7d24fd285520f3d12ae998f7fdd6b5393d453"
+
+[[constraint]]
+  name = "github.com/docker/libtrust"
+  revision = "aabc10ec26b754e797f9028f4589c5b7bd90dc20"
+
+[[constraint]]
+  name = "github.com/ghodss/yaml"
+  revision = "04f313413ffd65ce25f2541bfd2b2ceec5c0908c"
+
+[[constraint]]
+  name = "github.com/vbatts/tar-split"
+  version = "=v0.10.2"
+
+[[constraint]]
+  name = "golang.org/x/sys"
+  revision = "43e60d72a8e2bd92ee98319ba9a384a0e9837c08"
+
+[[constraint]]
+  name = "github.com/opencontainers/go-digest"
+  revision = "aa2ec055abd10d26d539eb630a92241b781ce4bc"

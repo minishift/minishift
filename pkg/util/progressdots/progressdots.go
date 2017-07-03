@@ -18,6 +18,8 @@ package progressdots
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"time"
 )
 
@@ -31,6 +33,7 @@ type ProgressDots struct {
 	easing     int
 	dotCounter int
 	handler    chan bool
+	out        io.Writer
 }
 
 // New creates the channel to handle progress dots
@@ -45,6 +48,7 @@ func New(easingOptional ...int) *ProgressDots {
 		easing:     easing,
 		dotCounter: 0,
 		handler:    make(chan bool),
+		out:        os.Stdout,
 	}
 }
 
@@ -56,7 +60,7 @@ func (s *ProgressDots) Start() {
 			case <-s.handler:
 				return
 			default:
-				fmt.Print(".")
+				fmt.Fprint(s.out, ".")
 				s.dotCounter++
 				time.Sleep(s.interval)
 				if s.easing != 0 && s.dotCounter%s.easing == 0 {
@@ -77,4 +81,9 @@ func (s *ProgressDots) Stop() {
 // SetInterval sets the interval
 func (s *ProgressDots) SetInterval(interval time.Duration) {
 	s.interval = interval
+}
+
+// SetWriter sets the writer for the output
+func (s *ProgressDots) SetWriter(out io.Writer) {
+	s.out = out
 }

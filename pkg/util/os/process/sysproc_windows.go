@@ -36,10 +36,12 @@ func SysProcForBackgroundProcess() *syscall.SysProcAttr {
 
 func EnvForBackgroundProcess() []string {
 	return []string{
-		fmt.Sprintf("MINISHIFT_HOME=%s", constants.Minipath),
+		fmt.Sprintf("MINISHIFT_HOME=%s", constants.GetMinishiftHomeDir()),
 		fmt.Sprintf("PATH=%s", os.Getenv("PATH")),
 		fmt.Sprintf("PATHEXT=%s", os.Getenv("PATHEXT")),
 		fmt.Sprintf("SystemRoot=%s", os.Getenv("SystemRoot")),
 		fmt.Sprintf("COMPUTERNAME=%s", os.Getenv("COMPUTERNAME")),
+		fmt.Sprintf("TMP=%s", os.Getenv("TMP")),
+		fmt.Sprintf("TEMP=%s", os.Getenv("TEMP")),
 	}
 }

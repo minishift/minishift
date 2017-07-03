@@ -111,8 +111,12 @@ func (provisioner *MinishiftProvisioner) Provision(swarmOptions swarm.Options, a
 	}
 	provisioner.EngineOptions.StorageDriver = storageDriver
 
+    print("-- Setting hostname ... ")
 	if err := provisioner.SetHostname(provisioner.Driver.GetMachineName()); err != nil {
+		println("FAIL")
 		return err
+	} else {
+		println("OK")
 	}
 
 	if err := mcnutils.WaitFor(provisioner.dockerDaemonResponding); err != nil {

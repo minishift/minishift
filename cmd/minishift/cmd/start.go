@@ -18,8 +18,12 @@ package cmd
 
 import (
 	"fmt"
+	"net"
 	"path/filepath"
 	"strings"
+
+	"os"
+	"os/exec"
 
 	"github.com/asaskevich/govalidator"
 	units "github.com/docker/go-units"
@@ -42,6 +46,7 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/hostfolder"
 	"github.com/minishift/minishift/pkg/minishift/openshift"
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
+	miniutil "github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/util"
 	inputUtils "github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
@@ -49,7 +54,6 @@ import (
 	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"os"
 )
 
 const (
@@ -124,6 +128,9 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	ensureNotRunning(libMachineClient, constants.MachineName)
 	validateOpenshiftVersion()
+
+	preflightChecksBeforeStartHost()
+
 	setSubscriptionManagerParameters()
 
 	proxyConfig := handleProxies()
@@ -132,8 +139,15 @@ func runStart(cmd *cobra.Command, args []string) {
 	// we need to determine whether this is a restart prior to potentially creating a new VM
 	isRestart := cmdutil.VMExists(libMachineClient, constants.MachineName)
 
+	print("-- Starting local OpenShift cluster")
 	hostVm, ip := startHost(libMachineClient)
 	registerHost(libMachineClient)
+
+	// preflight checks
+	if net.ParseIP(ip).To4() == nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("VM has been assigned an unusable IP address: %s", ip))
+	}
+	preflightChecksAfterStartHost(hostVm.Driver)
 
 	if proxyConfig.IsEnabled() {
 		// once we know the IP, we need to make sure it is not proxied in a proxy environment
@@ -267,7 +281,7 @@ func startHost(libMachineClient *libmachine.Client) (*host.Host, string) {
 		ShellProxyEnv:    shellProxyEnv,
 	}
 
-	fmt.Printf("Starting local OpenShift cluster using '%s' hypervisor...\n", machineConfig.VMDriver)
+	fmt.Printf(" using '%s' hypervisor ...\n", machineConfig.VMDriver)
 	var hostVm *host.Host
 	start := func() (err error) {
 		hostVm, err = cluster.StartHost(libMachineClient, *machineConfig)
@@ -281,11 +295,14 @@ func startHost(libMachineClient *libmachine.Client) (*host.Host, string) {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error starting the VM: %v", err))
 	}
 
+	print("-- Checking for IP ... ")
 	ip, err := hostVm.Driver.GetIP()
 	if err != nil {
+		println("FAIL")
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error determining host ip: %v ", err))
+	} else {
+		println("OK")
 	}
-
 	return hostVm, ip
 }
 
@@ -563,4 +580,202 @@ func IsOpenShiftRunning(driver drivers.Driver) bool {
 	dockerCommander := docker.NewVmDockerCommander(sshCommander)
 
 	return openshift.IsRunning(dockerCommander)
+}
+
+/*
+
+Starting local OpenShift cluster using 'kvm' hypervisor...
+   Memory: 2GB
+   Virtual CPU: 2
+   Diskspace: 20GB persistent storage
+
+*/
+
+/*
+
+Starting locsl OpenShift cluster using '' hypervisor...
+-- Provision hostname
+-- Setting systemd unit files for Docker
+   Restarting Docker ... OK
+-- Mounting hostfolders
+   Mounting 'Disks': //remotemachine/Disks/ ... OK
+-- Provision OpenShift via
+
+*/
+
+/*
+
+ * does the minishift instance have an IP address?
+ * can a remote IP address be reached? (check connectivity)
+ * can a remote host be resolved? (check dns)
+ * is persistent disk mounted
+ * #966 check if driver plugin is available
+
+ */
+
+/*
+
+startupCheck("Checking for ... ", func() bool, shouldFail)
+
+*/
+
+type preflightCheckRunner func() bool
+type preflightCheckWithDriverRunner func(driver drivers.Driver) bool
+
+func succeedsOrFails(execute preflightCheckRunner, message string, exitOnError bool, exitMessage string) {
+	print(message)
+	if execute() {
+		println("OK")
+	} else {
+		println("FAIL")
+		if exitOnError {
+			atexit.ExitWithMessage(1, exitMessage)
+		}
+	}
+}
+
+func succeedsOrFailsWithDriver(execute preflightCheckWithDriverRunner, driver drivers.Driver, message string, exitOnError bool, exitMessage string) {
+	print(message)
+	if execute(driver) {
+		println("OK")
+	} else {
+		println("FAIL")
+		if exitOnError {
+			atexit.ExitWithMessage(1, exitMessage)
+		}
+	}
+}
+
+func preflightChecksBeforeStartHost() {
+	// TODO: to be split-up in individual tests that can be enabled, disabled or ignored
+
+	// to extract
+	vmdriver := viper.GetString(startFlags.VmDriver.Name)
+	switch vmdriver {
+	case "xhyve":
+		succeedsOrFails(
+			checkXhyveDriver,
+			"-- Checking if 'xhyve' driver installed ... ",
+			false, "")
+	case "kvm":
+		succeedsOrFails(
+			checkKvmDriver,
+			"-- Checking if 'kvm' driver installed ... ",
+			false, "")
+	case "hyperv":
+		succeedsOrFails(checkHypervDriver,
+			"-- Checking if 'hyperv' driver configured ...",
+			true,
+			"   Hyper-V virtual switch not set")
+	}
+}
+
+func checkXhyveDriver() bool {
+	_, err := exec.LookPath("docker-machine-driver-xhyve")
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func checkKvmDriver() bool {
+	_, err := exec.LookPath("docker-machine-driver-kvm")
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func checkHypervDriver() bool {
+	switchEnv := os.Getenv("HYPERV_VIRTUAL_SWITCH")
+	if switchEnv == "" {
+		return false
+	}
+	return true
+}
+
+func preflightChecksAfterStartHost(driver drivers.Driver) {
+	succeedsOrFailsWithDriver(
+		checkVMConnectivity, driver,
+		"-- Checking if VM is reachable from host ... ",
+		true,
+		"   Please check our troubleshooting guide")
+	succeedsOrFailsWithDriver(
+		checkIPConnectivity, driver,
+		"-- Checking host '8.8.8.8' reachable from VM ... ",
+		false, "")
+	succeedsOrFailsWithDriver(
+		checkDNSConnectivity, driver,
+		"-- Checking host 'www.redhat.com' reachable from VM ... ",
+		false, "")
+	succeedsOrFailsWithDriver(
+		checkStorageMounted, driver,
+		"-- Checking storage disk mounted ... ",
+		false, "")
+
+	// extract
+	print("-- Checking storage disk usage ... ")
+	println(getDiskUsage(driver, "/mnt/sda1"))
+}
+
+func checkVMConnectivity(driver drivers.Driver) bool {
+	// get ip
+	// ping local to ip
+	ip, _ := driver.GetIP()
+	println(ip)
+
+	cmd := exec.Command("ping", "-n 1", ip)
+	stdoutStderr, err := cmd.CombinedOutput()
+	println(err.Error())
+	if err != nil {
+		return false
+	}
+	fmt.Printf("%s\n", stdoutStderr)
+	return false
+}
+
+func checkIPConnectivity(driver drivers.Driver) bool {
+	return miniutil.IsIPReachable(driver, "8.8.8.8", false)
+}
+
+func checkDNSConnectivity(driver drivers.Driver) bool {
+	return miniutil.IsIPReachable(driver, "www.redhat.com", false)
+}
+
+func checkStorageMounted(driver drivers.Driver) bool {
+	if mounted, _ := isMounted(driver, "/mnt/sda1"); mounted {
+		return true
+	}
+	return false
+}
+
+func getDiskUsage(driver drivers.Driver, mountpoint string) string {
+	cmd := fmt.Sprintf(
+		"df -h %s | awk 'FNR > 1 {print $5}'",
+		mountpoint)
+
+	out, err := drivers.RunSSHCommandFromDriver(driver, cmd)
+
+	if err != nil {
+		return "ERR"
+	}
+
+	return strings.Trim(out, "\n")
+}
+
+func isMounted(driver drivers.Driver, mountpoint string) (bool, error) {
+	cmd := fmt.Sprintf(
+		"if grep -qs %s /proc/mounts; then echo '1'; else echo '0'; fi",
+		mountpoint)
+
+	out, err := drivers.RunSSHCommandFromDriver(driver, cmd)
+
+	if err != nil {
+		return false, err
+	}
+	if strings.Trim(out, "\n") == "0" {
+		return false, nil
+	}
+
+	return true, nil
 }

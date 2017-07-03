@@ -29,6 +29,8 @@ import (
 
 	"encoding/json"
 
+	"github.com/briandowns/spinner"
+	units "github.com/docker/go-units"
 	"github.com/docker/machine/drivers/hyperv"
 	"github.com/docker/machine/drivers/virtualbox"
 	"github.com/docker/machine/libmachine"
@@ -54,7 +56,8 @@ var (
 )
 
 const (
-	fileScheme = "file"
+	fileScheme    = "file"
+	SPINNER_SPEED = 200 // In milliseconds
 )
 
 //This init function is used to set the logtostderr variable to false so that INFO level log info does not clutter the CLI
@@ -223,7 +226,7 @@ func createDriverOptions(driver drivers.Driver, explicitOptions map[string]inter
 }
 
 func (m *MachineConfig) CacheMinikubeISOFromURL() error {
-	fmt.Println(fmt.Sprintf("Downloading ISO '%s'", m.MinikubeISO))
+	fmt.Println(fmt.Sprintf("   Downloading ISO '%s'", m.MinikubeISO))
 
 	// store the iso inside the MINISHIFT_HOME dir
 	response, err := http.Get(m.MinikubeISO)
@@ -298,6 +301,8 @@ func (m *MachineConfig) IsMinikubeISOCached() bool {
 }
 
 func createHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
+	spinnerView := spinner.New(spinner.CharSets[9], SPINNER_SPEED*time.Millisecond)
+
 	if config.ShouldCacheMinikubeISO() {
 		if err := config.CacheMinikubeISOFromURL(); err != nil {
 			return nil, err
@@ -328,20 +333,33 @@ func createHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 	h.HostOptions.AuthOptions.StorePath = constants.Minipath
 	h.HostOptions.EngineOptions = engineOptions(config)
 
+	println("-- Instance will be configured with ...")
+	println("   Memory:   ", units.HumanSize(float64(config.Memory*units.MB)))
+	println("   vCPUs :   ", config.CPUs)
+	println("   Disksize: ", units.HumanSize(float64(config.DiskSize*units.MB)))
+	print("-- Creating Minishift VM ... ")
+	spinnerView.Start()
 	if err := api.Create(h); err != nil {
+		spinnerView.Stop()
 		// Wait for all the logs to reach the client
 		time.Sleep(2 * time.Second)
+		println("FAIL")
 		return nil, fmt.Errorf("Error creating the VM. %s", err)
 	}
+	spinnerView.Stop()
+	println("OK")
 
 	if err := api.Save(h); err != nil {
 		return nil, fmt.Errorf("Error attempting to save store: %s", err)
 	}
 
 	if config.ShellProxyEnv != "" {
+		print("-- Setting proxy information ... ")
 		if err := minishiftUtil.SetProxyToShellEnv(h, config.ShellProxyEnv); err != nil {
+			println("FAIL")
 			return nil, fmt.Errorf("Error setting proxy to VM: %s", err)
 		}
+		println("OK")
 	}
 
 	return h, nil

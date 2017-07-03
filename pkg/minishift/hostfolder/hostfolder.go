@@ -285,9 +285,8 @@ func determineHostIp(driver drivers.Driver) (string, error) {
 			hostip, _, _ := net.ParseCIDR(hostaddr)
 			if miniutil.IsIPReachable(driver, hostip.String(), false) {
 				return hostip.String(), nil
-			} else {
-				return "", errors.New("Unreachable")
 			}
+			return "", errors.New("Unreachable")
 		}
 	}
 

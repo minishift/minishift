@@ -52,54 +52,78 @@ const (
 
 var (
 	// minishift
-	ISOUrl           = createFlag("iso-url", SetString, []setFn{IsValidUrl}, []setFn{RequiresRestartMsg}, true)
-	CPUs             = createFlag("cpus", SetInt, []setFn{IsPositive}, []setFn{RequiresRestartMsg}, true)
-	Memory           = createFlag("memory", SetInt, []setFn{IsPositive}, []setFn{RequiresRestartMsg}, true)
-	DiskSize         = createFlag("disk-size", SetString, []setFn{IsValidDiskSize}, []setFn{RequiresRestartMsg}, true)
-	VmDriver         = createFlag("vm-driver", SetString, []setFn{IsValidDriver}, []setFn{RequiresRestartMsg}, true)
-	OpenshiftVersion = createFlag("openshift-version", SetString, nil, nil, true)
-	HostOnlyCIDR     = createFlag("host-only-cidr", SetString, []setFn{IsValidCIDR}, nil, true)
-	DockerEnv        = createFlag("docker-env", SetSlice, nil, nil, true)
-	DockerEngineOpt  = createFlag("docker-opt", SetSlice, nil, nil, true)
-	InsecureRegistry = createFlag("insecure-registry", SetSlice, nil, nil, true)
-	RegistryMirror   = createFlag("registry-mirror", SetSlice, nil, nil, true)
-	AddonEnv         = createFlag("addon-env", SetSlice, nil, nil, true)
+	ISOUrl           = createConfigSetting("iso-url", SetString, []setFn{IsValidUrl}, []setFn{RequiresRestartMsg}, true)
+	CPUs             = createConfigSetting("cpus", SetInt, []setFn{IsPositive}, []setFn{RequiresRestartMsg}, true)
+	Memory           = createConfigSetting("memory", SetInt, []setFn{IsPositive}, []setFn{RequiresRestartMsg}, true)
+	DiskSize         = createConfigSetting("disk-size", SetString, []setFn{IsValidDiskSize}, []setFn{RequiresRestartMsg}, true)
+	VmDriver         = createConfigSetting("vm-driver", SetString, []setFn{IsValidDriver}, []setFn{RequiresRestartMsg}, true)
+	OpenshiftVersion = createConfigSetting("openshift-version", SetString, nil, nil, true)
+	HostOnlyCIDR     = createConfigSetting("host-only-cidr", SetString, []setFn{IsValidCIDR}, nil, true)
+	DockerEnv        = createConfigSetting("docker-env", SetSlice, nil, nil, true)
+	DockerEngineOpt  = createConfigSetting("docker-opt", SetSlice, nil, nil, true)
+	InsecureRegistry = createConfigSetting("insecure-registry", SetSlice, nil, nil, true)
+	RegistryMirror   = createConfigSetting("registry-mirror", SetSlice, nil, nil, true)
+	AddonEnv         = createConfigSetting("addon-env", SetSlice, nil, nil, true)
 
 	// cluster up
-	SkipRegistryCheck = createFlag("skip-registry-check", SetBool, nil, nil, true)
-	PublicHostname    = createFlag("public-hostname", SetString, nil, nil, true)
-	RoutingSuffix     = createFlag("routing-suffix", SetString, nil, nil, true)
-	HostConfigDir     = createFlag("host-config-dir", SetString, []setFn{IsValidPath}, nil, true)
-	HostVolumeDir     = createFlag("host-volumes-dir", SetString, []setFn{IsValidPath}, nil, true)
-	HostDataDir       = createFlag("host-data-dir", SetString, []setFn{IsValidPath}, nil, true)
-	HostPvDir         = createFlag("host-pv-dir", SetString, []setFn{IsValidPath}, nil, true)
-	ServerLogLevel    = createFlag("server-loglevel", SetInt, []setFn{IsPositive}, nil, true)
-	OpenshiftEnv      = createFlag("openshift-env", nil, nil, nil, false)
-	Metrics           = createFlag("metrics", SetBool, nil, nil, true)
-	Logging           = createFlag("logging", SetBool, nil, nil, true)
+	SkipRegistryCheck = createConfigSetting("skip-registry-check", SetBool, nil, nil, true)
+	PublicHostname    = createConfigSetting("public-hostname", SetString, nil, nil, true)
+	RoutingSuffix     = createConfigSetting("routing-suffix", SetString, nil, nil, true)
+	HostConfigDir     = createConfigSetting("host-config-dir", SetString, []setFn{IsValidPath}, nil, true)
+	HostVolumeDir     = createConfigSetting("host-volumes-dir", SetString, []setFn{IsValidPath}, nil, true)
+	HostDataDir       = createConfigSetting("host-data-dir", SetString, []setFn{IsValidPath}, nil, true)
+	HostPvDir         = createConfigSetting("host-pv-dir", SetString, []setFn{IsValidPath}, nil, true)
+	ServerLogLevel    = createConfigSetting("server-loglevel", SetInt, []setFn{IsPositive}, nil, true)
+	OpenshiftEnv      = createConfigSetting("openshift-env", nil, nil, nil, false)
+	Metrics           = createConfigSetting("metrics", SetBool, nil, nil, true)
+	Logging           = createConfigSetting("logging", SetBool, nil, nil, true)
 
 	// Setting proxy
-	NoProxyList = createFlag("no-proxy", SetString, nil, nil, true)
-	HttpProxy   = createFlag("http-proxy", SetString, []setFn{IsValidProxy}, nil, true)
-	HttpsProxy  = createFlag("https-proxy", SetString, []setFn{IsValidProxy}, nil, true)
+	NoProxyList = createConfigSetting("no-proxy", SetString, nil, nil, true)
+	HttpProxy   = createConfigSetting("http-proxy", SetString, []setFn{IsValidProxy}, nil, true)
+	HttpsProxy  = createConfigSetting("https-proxy", SetString, []setFn{IsValidProxy}, nil, true)
 
 	// Subscription Manager
-	Username         = createFlag("username", SetString, nil, nil, true)
-	Password         = createFlag("password", SetString, nil, nil, true)
-	SkipRegistration = createFlag("skip-registration", SetBool, nil, nil, true)
+	Username         = createConfigSetting("username", SetString, nil, nil, true)
+	Password         = createConfigSetting("password", SetString, nil, nil, true)
+	SkipRegistration = createConfigSetting("skip-registration", SetBool, nil, nil, true)
 
 	// Global flags
-	LogDir             = createFlag("log_dir", SetString, []setFn{IsValidPath}, nil, true)
-	ShowLibmachineLogs = createFlag("show-libmachine-logs", SetBool, nil, nil, true)
+	LogDir             = createConfigSetting("log_dir", SetString, []setFn{IsValidPath}, nil, true)
+	ShowLibmachineLogs = createConfigSetting("show-libmachine-logs", SetBool, nil, nil, true)
 
 	// Host Folders
-	HostFoldersMountPath = createFlag("hostfolders-mountpath", SetString, nil, nil, true)
-	HostFoldersAutoMount = createFlag("hostfolders-automount", SetBool, nil, nil, true)
+	HostFoldersMountPath = createConfigSetting("hostfolders-mountpath", SetString, nil, nil, true)
+	HostFoldersAutoMount = createConfigSetting("hostfolders-automount", SetBool, nil, nil, true)
 
-	ImageCaching = createFlag("image-caching", SetBool, nil, nil, true)
+	ImageCaching = createConfigSetting("image-caching", SetBool, nil, nil, true)
+
+	// Preflight checks (before start)
+	SkipCheckKVMDriver    = createConfigSetting("skip-check-kvm-driver", SetBool, nil, nil, true)
+	WarnCheckKVMDriver    = createConfigSetting("warn-check-kvm-driver", SetBool, nil, nil, true)
+	SkipCheckXHyveDriver  = createConfigSetting("skip-check-xhyve-driver", SetBool, nil, nil, true)
+	WarnCheckXHyveDriver  = createConfigSetting("warn-check-xhyve-driver", SetBool, nil, nil, true)
+	SkipCheckHyperVDriver = createConfigSetting("skip-check-hyperv-driver", SetBool, nil, nil, true)
+	WarnCheckHyperVDriver = createConfigSetting("warn-check-hyperv-driver", SetBool, nil, nil, true)
+	// Preflight checks (after start)
+	SkipInstanceIP        = createConfigSetting("skip-check-instance-ip", SetBool, nil, nil, true)
+	WarnInstanceIP        = createConfigSetting("warn-check-instance-ip", SetBool, nil, nil, true)
+	SkipCheckNetworkHost  = createConfigSetting("skip-check-network-host", SetBool, nil, nil, true)
+	WarnCheckNetworkHost  = createConfigSetting("warn-check-network-host", SetBool, nil, nil, true)
+	SkipCheckNetworkPing  = createConfigSetting("skip-check-network-ping", SetBool, nil, nil, true)
+	WarnCheckNetworkPing  = createConfigSetting("warn-check-network-ping", SetBool, nil, nil, true)
+	SkipCheckNetworkHTTP  = createConfigSetting("skip-check-network-http", SetBool, nil, nil, true)
+	WarnCheckNetworkHTTP  = createConfigSetting("warn-check-network-http", SetBool, nil, nil, true)
+	SkipCheckStorageMount = createConfigSetting("skip-check-storage-mount", SetBool, nil, nil, true)
+	WarnCheckStorageMount = createConfigSetting("warn-check-storage-mount", SetBool, nil, nil, true)
+	SkipCheckStorageUsage = createConfigSetting("skip-check-storage-usage", SetBool, nil, nil, true)
+	WarnCheckStorageUsage = createConfigSetting("warn-check-storage-usage", SetBool, nil, nil, true)
+	// Preflight values
+	CheckNetworkHttpHost = createConfigSetting("check-network-http-host", SetString, nil, nil, true)
+	CheckNetworkPingHost = createConfigSetting("check-network-ping-host", SetString, nil, nil, true)
 )
 
-func createFlag(name string, set func(MinishiftConfig, string, string) error, validations []setFn, callbacks []setFn, isApply bool) *Setting {
+func createConfigSetting(name string, set func(MinishiftConfig, string, string) error, validations []setFn, callbacks []setFn, isApply bool) *Setting {
 	flag := Setting{
 		Name:        name,
 		set:         set,

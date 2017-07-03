@@ -229,7 +229,7 @@ func createDriverOptions(driver drivers.Driver, explicitOptions map[string]inter
 // CacheMinikubeISOFromURL download minishift ISO from a given URI.
 // It also checks sha256sum if present and then put ISO to cached directory.
 func (m *MachineConfig) CacheMinikubeISOFromURL() error {
-	fmt.Println(fmt.Sprintf("Downloading ISO '%s'", m.MinikubeISO))
+	fmt.Println(fmt.Sprintf("\n   Downloading ISO '%s'", m.MinikubeISO))
 	tmpISOFile, err := os.Create(m.GetISOCacheFilepath() + ".part")
 	if err != nil {
 		return err
@@ -399,9 +399,12 @@ func createHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 	}
 
 	if config.ShellProxyEnv != "" {
+		fmt.Printf("-- Setting proxy information ... ")
 		if err := minishiftUtil.SetProxyToShellEnv(h, config.ShellProxyEnv); err != nil {
+			fmt.Println("FAIL")
 			return nil, fmt.Errorf("Error setting proxy to VM: %s", err)
 		}
+		fmt.Println("OK")
 	}
 
 	return h, nil

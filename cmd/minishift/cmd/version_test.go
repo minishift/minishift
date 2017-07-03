@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2016 Red Hat, Inc.
+Copyright (C) 2017 Red Hat, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,23 +17,27 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/minishift/minishift/pkg/testing/cli"
-	"strings"
 	"testing"
+
+	"github.com/minishift/minishift/pkg/testing/cli"
+	"regexp"
 )
 
-func TestDisplayConsoleInMachineReadable(t *testing.T) {
-	tee := cli.CreateTee(t, true)
+func Test_version_output_has_correct_format(t *testing.T) {
+	tee := cli.CreateTee(t, false)
 
-	expectedStdout := `HOST=192.168.1.1
-PORT=8443
-CONSOLE_URL=https://192.168.99.103:8443`
+	runPrintVersion(nil, nil)
 
-	displayConsoleInMachineReadable("192.168.1.1", "https://192.168.99.103:8443")
 	tee.Close()
+	versionString := tee.StdoutBuffer.String()
 
-	actualStdout := tee.StdoutBuffer.String()
-	if strings.TrimSpace(actualStdout) != expectedStdout {
-		t.Fatalf("Expected:\n '%s' \nGot\n '%s'", expectedStdout, actualStdout)
+	versionRegExp := "minishift v[0-9]+\\.[0-9]+\\.[0-9]+\\+[a-z0-9]{7,8}\n"
+	match, err := regexp.Match(versionRegExp, []byte(versionString))
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if !match {
+		t.Fatalf("Expected version string to match '%s' but '%s' does not.", versionRegExp, versionString)
 	}
 }

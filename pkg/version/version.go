@@ -27,16 +27,19 @@ const VersionPrefix = "v"
 // The following variables are private fields and should be set when compiling with for example --ldflags="-X github.com/minishift/minishift/pkg/version.openshiftVersion=vX.Y.Z
 var (
 	// The current version of minishift
-	minishiftVersion = "v0.0.0-unset"
+	minishiftVersion = "0.0.0-unset"
 
 	// The default version of OpenShift
-	openshiftVersion = "v0.0.0-unset"
+	openshiftVersion = "0.0.0-unset"
 
 	// The default version of the B2D ISO version
-	b2dIsoVersion = "v0.0.0-unset"
+	b2dIsoVersion = "0.0.0-unset"
 
 	// The default version of the CentOS ISO version
-	centOsIsoVersion = "v0.0.0-unset"
+	centOsIsoVersion = "0.0.0-unset"
+
+	// The SHA-1 of the commit this binary is build off
+	commitSha = "sha-unset"
 )
 
 func GetMinishiftVersion() string {
@@ -57,4 +60,8 @@ func GetB2dIsoVersion() string {
 
 func GetCentOsIsoVersion() string {
 	return centOsIsoVersion
+}
+
+func GetCommitSha() string {
+	return commitSha
 }

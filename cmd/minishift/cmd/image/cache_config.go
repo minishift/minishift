@@ -14,26 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package process
+package image
 
 import (
-	"fmt"
-	"github.com/minishift/minishift/pkg/minikube/constants"
-	"os"
-	"syscall"
+	"github.com/spf13/cobra"
 )
 
-func SysProcForBackgroundProcess() *syscall.SysProcAttr {
-	sysProcAttr := new(syscall.SysProcAttr)
-	sysProcAttr.Setpgid = true
-	sysProcAttr.Pgid = 0
+const (
+	noImageSpecified = "You need to specify one or more images."
+)
 
-	return sysProcAttr
+var ImageCacheConfigCmd = &cobra.Command{
+	Use:   "cache-config SUBCOMMAND [flags]",
+	Short: "Controls the list of cached images which are implicitly imported and exported.",
+	Long:  "Controls the list of cached images which are implicitly imported and exported.",
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
 }
 
-func EnvForBackgroundProcess() []string {
-	return []string{
-		fmt.Sprintf("MINISHIFT_HOME=%s", constants.GetMinishiftHomeDir()),
-		fmt.Sprintf("PATH=%s", os.Getenv("PATH")),
-	}
+func init() {
+	ImageCmd.AddCommand(ImageCacheConfigCmd)
 }

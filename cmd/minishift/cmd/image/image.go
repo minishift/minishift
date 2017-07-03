@@ -20,11 +20,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	noCachedImagesSpecified = "You need to either specify a list of images on the command line or configure the list of cached images via 'image config [add|remove]'."
+)
+
 var ImageCmd = &cobra.Command{
-	Use:    "image SUBCOMMAND [flags]",
-	Short:  "Exports and imports container images (experimental).",
-	Long:   "Exports and imports container images (experimental).",
-	Hidden: true,
+	Use:     "image SUBCOMMAND [flags]",
+	Aliases: []string{"images"},
+	Short:   "Exports and imports container images.",
+	Long:    "Exports and imports container images.",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

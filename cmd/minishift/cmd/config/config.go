@@ -95,9 +95,11 @@ var (
 	HostFoldersMountPath = createConfigSetting("hostfolders-mountpath", SetString, nil, nil, true)
 	HostFoldersAutoMount = createConfigSetting("hostfolders-automount", SetBool, nil, nil, true)
 
+	// Image caching
 	ImageCaching = createConfigSetting("image-caching", SetBool, nil, nil, true)
+	CacheImages  = createConfigSetting("cache-images", SetSlice, nil, nil, true)
 
-	// Preflight checks (before start)
+	// Pre-flight checks (before start)
 	SkipCheckKVMDriver    = createConfigSetting("skip-check-kvm-driver", SetBool, nil, nil, true)
 	WarnCheckKVMDriver    = createConfigSetting("warn-check-kvm-driver", SetBool, nil, nil, true)
 	SkipCheckXHyveDriver  = createConfigSetting("skip-check-xhyve-driver", SetBool, nil, nil, true)
@@ -108,7 +110,8 @@ var (
 	WarnCheckIsoUrl       = createConfigSetting("warn-check-iso-url", SetBool, nil, nil, true)
 	SkipCheckVMDriver     = createConfigSetting("skip-check-vm-driver", SetBool, nil, nil, true)
 	WarnCheckVMDriver     = createConfigSetting("warn-check-vm-driver", SetBool, nil, nil, true)
-	// Preflight checks (after start)
+
+	// Pre-flight checks (after start)
 	SkipInstanceIP        = createConfigSetting("skip-check-instance-ip", SetBool, nil, nil, true)
 	WarnInstanceIP        = createConfigSetting("warn-check-instance-ip", SetBool, nil, nil, true)
 	SkipCheckNetworkHost  = createConfigSetting("skip-check-network-host", SetBool, nil, nil, true)
@@ -121,7 +124,8 @@ var (
 	WarnCheckStorageMount = createConfigSetting("warn-check-storage-mount", SetBool, nil, nil, true)
 	SkipCheckStorageUsage = createConfigSetting("skip-check-storage-usage", SetBool, nil, nil, true)
 	WarnCheckStorageUsage = createConfigSetting("warn-check-storage-usage", SetBool, nil, nil, true)
-	// Preflight values
+
+	// Pre-flight values
 	CheckNetworkHttpHost = createConfigSetting("check-network-http-host", SetString, nil, nil, true)
 	CheckNetworkPingHost = createConfigSetting("check-network-ping-host", SetString, nil, nil, true)
 
@@ -130,7 +134,7 @@ var (
 	IPAddress     = createConfigSetting("network-ipaddress", SetString, []setFn{validations.IsValidIPv4Address}, nil, true)
 	Netmask       = createConfigSetting("network-netmask", SetString, []setFn{validations.IsValidNetmask}, nil, true)
 	Gateway       = createConfigSetting("network-gateway", SetString, []setFn{validations.IsValidIPv4Address}, nil, true)
-	Nameserver    = createConfigSetting("network-nameserver", SetString, []setFn{validations.IsValidIPv4Address}, nil, true)
+	NameServer    = createConfigSetting("network-nameserver", SetString, []setFn{validations.IsValidIPv4Address}, nil, true)
 )
 
 func createConfigSetting(name string, set func(MinishiftConfig, string, string) error, validations []setFn, callbacks []setFn, isApply bool) *Setting {

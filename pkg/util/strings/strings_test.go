@@ -46,6 +46,24 @@ func TestContains(t *testing.T) {
 	}
 }
 
+func TestRemove(t *testing.T) {
+	var testCases = []struct {
+		slice    []string
+		element  string
+		expected []string
+	}{
+		{[]string{"a", "b", "c"}, "b", []string{"a", "c"}},
+		{[]string{"a", "b", "c"}, "", []string{"a", "b", "c"}},
+		{[]string{"a", "b", "c"}, "d", []string{"a", "b", "c"}},
+		{[]string{}, "a", []string{}},
+	}
+
+	for _, testCase := range testCases {
+		actual := Remove(testCase.slice, testCase.element)
+		minishiftTesting.AssertEqualSlice(testCase.expected, actual, t)
+	}
+}
+
 func TestHasMatcher(t *testing.T) {
 	var testCases = []struct {
 		testString     string

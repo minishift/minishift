@@ -29,6 +29,7 @@ import:
   subpackages:
   - github
 - package: github.com/inconshreveable/go-update
+# Explicit version for mapstructure overriding the version required by libmachine
 - package: github.com/mitchellh/mapstructure
   version: db1efb556f84b25a0a13a04aad883943538ad2e0
 - package: github.com/kardianos/osext
@@ -50,9 +51,6 @@ import:
   subpackages:
   - doc
 - package: github.com/spf13/pflag
-- package: golang.org/x/crypto
-  subpackages:
-  - ssh
 - package: golang.org/x/oauth2
 - package: gopkg.in/cheggaaa/pb.v1
   version: v1.0.13
@@ -67,6 +65,42 @@ import:
   version: c7d06af17c68cd34c835053720b21f6549d9b0ee
 - package: github.com/gbraad/go-hvkvp
   version: 0.3
+
+# Get all dependencies for containers/image which is used for OCI image chaching
+- package: github.com/containers/image
+  version: issue-368
+  repo: https://github.com/hferentschik/image.git
+- package: github.com/opencontainers/runc
+  version: 6b1d0e76f239ffb435445e5ae316d2676c07c6e3
+- package: github.com/docker/go-connections
+  version: 3ede32e2033de7505e6500d6c868c2b9ed9f169d
+- package: github.com/docker/docker
+  version: 30eb4d8cdc422b023d5f11f29a82ecb73554183b
+- package: github.com/docker/distribution
+  version: 5f6282db7d65e6d72ad7c2cc66310724a57be716
+- package: github.com/opencontainers/image-spec
+  version: v1.0.0
+- package: gopkg.in/yaml.v2
+  version: a3f3340b5840cee44f372bddb5880fcbc419b46a
+- package: github.com/pborman/uuid
+  version: 1b00554d822231195d1babd97ff4a781231955c9
+- package: golang.org/x/crypto
+  version: 453249f01cfeb54c3d549ddb75ff152ca243f9d8
+- package: github.com/sirupsen/logrus
+  version: v1.0.0
+- package: github.com/gorilla/mux
+  version: 94e7d24fd285520f3d12ae998f7fdd6b5393d453
+- package: github.com/docker/libtrust
+  version: aabc10ec26b754e797f9028f4589c5b7bd90dc20
+- package: github.com/ghodss/yaml
+  version: 04f313413ffd65ce25f2541bfd2b2ceec5c0908c
+- package: github.com/vbatts/tar-split
+  version: bd4c5d64c3e9297f410025a3b1bd0c58f659e721
+- package: golang.org/x/sys
+  version: 07c182904dbd53199946ba614a412c61d3c548f5
+- package: github.com/opencontainers/go-digest
+  version: aa2ec055abd10d26d539eb630a92241b781ce4bc
+
 # The following repositories need to be specified explicitly, since the versions referenced by the openshift/origin dependency
 # refer to forks of these projects within the openshift organizaton
 # This needs to be manually updated after upgrading the openshift/origin dependnecy

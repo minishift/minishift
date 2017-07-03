@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 2,
+  "manifests": [
+    {
+      "mediaType": "application/vnd.oci.image.manifest.v1+json",
+      "digest": "sha256:bb1fb6e9d0509afa26e52b75bdf144faea07d2473c9d5c693427b6f09b6c3ba5",
+      "size": 823,
+      "annotations": {
+        "org.opencontainers.image.ref.name": "openshift/origin:v3.6.0"
+      },
+      "platform": {
+        "architecture": "amd64",
+        "os": "darwin"
+      }
+    },
+    {
+      "mediaType": "application/vnd.oci.image.manifest.v1+json",
+      "digest": "sha256:3f35865b0dd264757de97eb62f1f317791e9fcd63e647dd47b5f73cd012e9aef",
+      "size": 662,
+      "annotations": {
+        "org.opencontainers.image.ref.name": "openshift/origin-pod:v3.6.0"
+      },
+      "platform": {
+        "architecture": "amd64",
+        "os": "darwin"
+      }
+    },
+    {
+      "mediaType": "application/vnd.oci.image.manifest.v1+json",
+      "digest": "sha256:a6f02728622186556d5842e44cd73b5e8b81ac43025e629e7a120351f23b41ea",
+      "size": 823,
+      "annotations": {
+        "org.opencontainers.image.ref.name": "openshift/origin-docker-registry:v3.6.0"
+      },
+      "platform": {
+        "architecture": "amd64",
+        "os": "darwin"
+      }
+    },
+    {
+      "mediaType": "application/vnd.oci.image.manifest.v1+json",
+      "digest": "sha256:5a1f719285eb1aaf9459acfe5c4b01d7813426e36f09b61d965f1a86141a74ef",
+      "size": 981,
+      "annotations": {
+        "org.opencontainers.image.ref.name": "openshift/origin-haproxy-router:v3.6.0"
+      },
+      "platform": {
+        "architecture": "amd64",
+        "os": "darwin"
+      }
+    }
+  ]
+}

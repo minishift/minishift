@@ -27,10 +27,8 @@ import (
 type ImageMissStrategy int
 
 const (
-	SKIP ImageMissStrategy = iota
-	PULL
-	// TODO Implement a retry strategy as well (HF)
-	//RETRY
+	Skip ImageMissStrategy = iota
+	Pull
 )
 
 type ImageCacheConfig struct {

@@ -19,8 +19,6 @@ package cmd
 import (
 	"testing"
 
-	minitesting "github.com/minishift/minishift/pkg/testing"
-
 	"io"
 	"io/ioutil"
 	"os"
@@ -137,13 +135,12 @@ var (
 	}
 	testDir    string
 	testRunner *RecordingRunner
+	tee        *cli.Tee
 )
 
 func TestStartClusterUpNoFlags(t *testing.T) {
 	setUp(t)
-	defer os.RemoveAll(testDir)
-	defer minitesting.ResetDefaultRoundTripper()
-	defer viper.Reset()
+	defer tearDown()
 
 	clusterUpParams := determineClusterUpParameters(testConfig)
 	clusterup.ClusterUp(testConfig, clusterUpParams, testRunner)
@@ -167,9 +164,7 @@ func TestStartClusterUpNoFlags(t *testing.T) {
 
 func TestStartClusterUpWithOverrideHostConfigDirFlag(t *testing.T) {
 	setUp(t)
-	defer os.RemoveAll(testDir)
-	defer minitesting.ResetDefaultRoundTripper()
-	defer viper.Reset()
+	defer tearDown()
 
 	viper.Set("host-config-dir", "/var/tmp/foo")
 
@@ -191,9 +186,7 @@ func TestStartClusterUpWithOverrideHostConfigDirFlag(t *testing.T) {
 
 func TestStartClusterUpWithOverrideHostDataDirFlag(t *testing.T) {
 	setUp(t)
-	defer os.RemoveAll(testDir)
-	defer minitesting.ResetDefaultRoundTripper()
-	defer viper.Reset()
+	defer tearDown()
 
 	viper.Set("host-data-dir", "/var/tmp/foo")
 
@@ -215,9 +208,7 @@ func TestStartClusterUpWithOverrideHostDataDirFlag(t *testing.T) {
 
 func TestStartClusterUpWithOverrideHostVolumesDirFlag(t *testing.T) {
 	setUp(t)
-	defer os.RemoveAll(testDir)
-	defer minitesting.ResetDefaultRoundTripper()
-	defer viper.Reset()
+	defer tearDown()
 
 	viper.Set("host-volumes-dir", "/var/tmp/foo")
 
@@ -239,9 +230,7 @@ func TestStartClusterUpWithOverrideHostVolumesDirFlag(t *testing.T) {
 
 func TestStartClusterUpWithOverrideHostPvDirFlag(t *testing.T) {
 	setUp(t)
-	defer os.RemoveAll(testDir)
-	defer minitesting.ResetDefaultRoundTripper()
-	defer viper.Reset()
+	defer tearDown()
 
 	viper.Set("host-pv-dir", "/var/tmp/foo")
 
@@ -263,9 +252,7 @@ func TestStartClusterUpWithOverrideHostPvDirFlag(t *testing.T) {
 
 func TestStartClusterUpWithFlag(t *testing.T) {
 	setUp(t)
-	defer os.RemoveAll(testDir)
-	defer minitesting.ResetDefaultRoundTripper()
-	defer viper.Reset()
+	defer tearDown()
 
 	viper.Set("public-hostname", "foobar")
 	viper.Set("skip-registry-check", "true")
@@ -289,9 +276,7 @@ func TestStartClusterUpWithFlag(t *testing.T) {
 
 func TestClusterUpWithProxyFlag(t *testing.T) {
 	setUp(t)
-	defer os.RemoveAll(testDir)
-	defer minitesting.ResetDefaultRoundTripper()
-	defer viper.Reset()
+	defer tearDown()
 
 	viper.Set("http-proxy", "http://localhost:3128")
 	viper.Set("https-proxy", "https://localhost:3128")
@@ -319,9 +304,7 @@ func TestClusterUpWithProxyFlag(t *testing.T) {
 
 func TestStartClusterUpWithOpenShiftEnv(t *testing.T) {
 	setUp(t)
-	defer os.RemoveAll(testDir)
-	defer minitesting.ResetDefaultRoundTripper()
-	defer viper.Reset()
+	defer tearDown()
 
 	viper.Set("openshift-env", "HTTP_PROXY=http://localhost:3128,HTTP_PROXY_USER=foo,HTTP_PROXY_PASS=bar")
 
@@ -343,7 +326,8 @@ func TestStartClusterUpWithOpenShiftEnv(t *testing.T) {
 }
 
 func TestNoExplicitRouteSuffixDefaultsToNip(t *testing.T) {
-	defer viper.Reset()
+	setUp(t)
+	defer tearDown()
 
 	expectedRoutingSuffix := testConfig.Ip + ".nip.io"
 	actualRoutingSuffix := getDefaultRoutingPrefix(testConfig.Ip)
@@ -354,6 +338,9 @@ func TestNoExplicitRouteSuffixDefaultsToNip(t *testing.T) {
 }
 
 func TestExplicitRouteSuffixGetApplied(t *testing.T) {
+	setUp(t)
+	defer tearDown()
+
 	explicitRoutingSuffix := "acme.com"
 
 	viper.Set(config.RoutingSuffix.Name, explicitRoutingSuffix)
@@ -390,9 +377,9 @@ func TestDetermineIsoUrl(t *testing.T) {
 }
 
 func TestDetermineIsoUrlWithInvalidName(t *testing.T) {
-	tee := cli.CreateTee(t, true)
+	tee = cli.CreateTee(t, true)
 	atexit.RegisterExitHandler(cli.VerifyExitCodeAndMessage(t, tee, 1, unsupportedIsoUrlFormat))
-	defer tearDown(tee)
+	defer tearDown()
 
 	determineIsoUrl("foo")
 }
@@ -445,10 +432,20 @@ func setUp(t *testing.T) {
 	atexit.RegisterExitHandler(cli.PreventExitWithNonZeroExitCode(t))
 }
 
-func tearDown(tee *cli.Tee) {
-	tee.Close()
+func tearDown() {
+	if tee != nil {
+		tee.Close()
+		tee = nil
+	}
+
+	if testDir != "" {
+		os.RemoveAll(testDir)
+		testDir = ""
+	}
+
 	viper.Reset()
 	atexit.ClearExitHandler()
+
 	if r := recover(); r != nil {
 		reason := fmt.Sprint(r)
 		if reason != atexit.ExitHandlerPanicMessage {

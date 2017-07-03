@@ -31,9 +31,11 @@ var versionCmd = &cobra.Command{
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		RootCmd.PersistentPreRun(cmd, args)
 	},
-	Run: func(command *cobra.Command, args []string) {
-		fmt.Printf("minishift v%v\n", version.GetMinishiftVersion())
-	},
+	Run: runPrintVersion,
+}
+
+func runPrintVersion(cmd *cobra.Command, args []string) {
+	fmt.Println(fmt.Sprintf("minishift v%s+%s\n", version.GetMinishiftVersion(), version.GetCommitSha()))
 }
 
 func init() {

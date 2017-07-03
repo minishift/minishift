@@ -17,6 +17,7 @@ MINISHIFT_VERSION = 1.2.0
 OPENSHIFT_VERSION = v1.5.1
 B2D_ISO_VERSION = v1.0.2
 CENTOS_ISO_VERSION = v1.0.0
+COMMIT_SHA=$(shell git rev-parse --short HEAD)
 
 # Go and compilation related variables
 BUILD_DIR ?= out
@@ -38,7 +39,8 @@ SOURCE_DIRS = cmd pkg test
 VERSION_VARIABLES := -X $(REPOPATH)/pkg/version.minishiftVersion=$(MINISHIFT_VERSION) \
 	-X $(REPOPATH)/pkg/version.b2dIsoVersion=$(B2D_ISO_VERSION) \
 	-X $(REPOPATH)/pkg/version.centOsIsoVersion=$(CENTOS_ISO_VERSION) \
-	-X $(REPOPATH)/pkg/version.openshiftVersion=$(OPENSHIFT_VERSION)
+	-X $(REPOPATH)/pkg/version.openshiftVersion=$(OPENSHIFT_VERSION) \
+	-X $(REPOPATH)/pkg/version.commitSha=$(COMMIT_SHA)
 LDFLAGS := $(VERSION_VARIABLES) -s -w -extldflags '-static'
 
 # Setup for go-bindata to include binary assets
@@ -144,7 +146,7 @@ clean:
 
 .PHONY: test
 test: vendor $(ADDON_ASSET_FILE)
-	@go test -v $(shell $(PACKAGES))
+	@go test -ldflags="$(VERSION_VARIABLES)" -v $(shell $(PACKAGES))
 
 .PHONY: integration
 integration: $(MINISHIFT_BINARY)

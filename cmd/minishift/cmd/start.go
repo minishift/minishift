@@ -102,8 +102,12 @@ func init() {
 	startCmd = &cobra.Command{
 		Use:   commandName,
 		Short: "Starts a local OpenShift cluster.",
-		Long:  "Starts a local single-node OpenShift cluster.",
-		Run:   runStart,
+		Long: `Starts a local single-node OpenShift cluster.
+
+All flags of this command can also be configured by setting corresponding environment variables or persistent configuration options.
+For the former prefix the flag with MINISHIFT_, uppercase characters and replace '-' with '_', for example MINISHIFT_VM_DRIVER.
+For the latter see 'minishift config -h'.`,
+		Run: runStart,
 	}
 
 	clusterUpFlagSet = initClusterUpFlags()
@@ -375,7 +379,7 @@ func determineIsoUrl(iso string) string {
 func initStartFlags() *flag.FlagSet {
 	startFlagSet := flag.NewFlagSet(commandName, flag.ContinueOnError)
 
-	startFlagSet.String(startFlags.ISOUrl.Name, constants.DefaultB2dIsoUrl, "Location of the minishift ISO. Can be an URL, file URI or one of the following short names: [b2d centos].")
+	startFlagSet.String(startFlags.ISOUrl.Name, b2dIsoAlias, "Location of the minishift ISO. Can be an URL, file URI or one of the following short names: [b2d centos].")
 	startFlagSet.String(startFlags.VmDriver.Name, constants.DefaultVMDriver, fmt.Sprintf("The driver to use for the Minishift VM. Possible values: %v", constants.SupportedVMDrivers))
 	startFlagSet.Int(startFlags.Memory.Name, constants.DefaultMemory, "Amount of RAM to allocate to the Minishift VM.")
 	startFlagSet.Int(startFlags.CPUs.Name, constants.DefaultCPUS, "Number of CPU cores to allocate to the Minishift VM.")

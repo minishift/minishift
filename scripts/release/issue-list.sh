@@ -40,9 +40,22 @@ function milestone_issues()
   # Remove enclosing quotes on each line
   issue_list=`echo "$issue_list" | tr -d \"`
 
+  # Replace \ which is left over from above command with "(double quote) and suppress warning
+  issue_list=`echo "$issue_list" | tr '\' '"' 2> /dev/null`
+
   # Adjust the issue links
   issue_list=`echo "$issue_list" | sed -e s/api.github.com.repos/github.com/g`
-  echo "$issue_list"
+
+  features="# Features\n"
+  bugs="\n# Bugs\n"
+  tasks="\n# Tasks\n"
+  while read line; do
+    if [[ "$line" == *"(feature)"* ]]; then features="$features\n$line"; fi
+    if [[ "$line" == *"(bug)"* ]]; then bugs="$bugs\n$line"; fi
+    if [[ "$line" == *"(task)"* ]]; then tasks="$tasks\n$line"; fi
+  done <<< "$issue_list"
+
+  echo -e "$features\n$bugs\n$tasks"
 }
 
 while getopts ":r:m:" opt; do

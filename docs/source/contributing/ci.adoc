@@ -21,7 +21,7 @@ image::ci-servers.png[CI Servers]
 [[ci-system-summary]]
 == CI System Summary
 
-The following table describes the various CI build servers Minishift utilizes and the locations of their builds and configuration files:
+The following table describes the various CI systems Minishift utilizes and the locations of their build and configuration files:
 
 [cols="4*", options="header"]
 |===
@@ -31,13 +31,15 @@ The following table describes the various CI build servers Minishift utilizes an
 |Configuration files
 
 |link:https://ci.centos.org/[*CentOS CI*]
-|This is the only CI system which can be used to run integration tests as it supports nested virtualization.
-Apart from integration tests, link:https://wiki.centos.org/QaWiki/CI[CentOS CI] is also used to run the unit tests, language-style checks and build the tar bundle used for xref:../contributing/writing-docs.adoc#integration-with-docs-openshift-org[integration into docs.openshift.org].
+|CentOS CIis the only CI system which can run integration tests, as it supports nested virtualization.
+Thus it is used to run integration tests in addition to unit tests.
+
+The artifacts of a successful master build can be found at link:http://artifacts.ci.centos.org/minishift/minishift/master/[artifacts.ci.centos.org/minishift/minishift/master/<BUILD_ID>].
+The artifacts of a successful pull request build can be found at link:http://artifacts.ci.centos.org/minishift/minishift/pr/[artifacts.ci.centos.org/minishift/minishift/pr/<PR_ID>].
+
+On top of building the master branch and pull requests, CentOS CI is also used to build the tar bundle used for xref:../contributing/writing-docs.adoc#integration-with-docs-openshift-org[integration with docs.openshift.org].
 |link:https://ci.centos.org/job/minishift/[master], link:https://ci.centos.org/job/minishift-pr/[pull requests], link:https://ci.centos.org/job/minishift-docs/[docs]
 
-link:http://artifacts.ci.centos.org/minishift/minishift/master/<BUILD_ID>[Artifacts of a successful master build]
-
-link:http://artifacts.ci.centos.org/minishift/minishift/pr/<PR_ID>[Artifacts of a successful pull request build]
 |link:https://github.com/minishift/minishift/blob/master/centos_ci.sh[centos_ci.sh]
 
 |link:https://circleci.com/[*Circle CI*]

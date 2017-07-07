@@ -18,7 +18,7 @@ Minishift uses https://github.com/docker/machine/tree/master/libmachine[libmachi
 provisioning VMs, and https://github.com/openshift/origin[OpenShift Origin] for running the cluster.
 
 https://travis-ci.org/minishift/minishift[image:https://secure.travis-ci.org/minishift/minishift.png[Build Status]]
-https://ci.appveyor.com/project/hferentschik/minishift-o61ou/branch/master[image:https://ci.appveyor.com/api/projects/status/6wyv1cpd588cm4ce/branch/master?svg=true[Build status]]
+https://ci.appveyor.com/project/minishift-bot/minishift/branch/master[image:https://ci.appveyor.com/api/projects/status/o0mha7mpanp7dpyo/branch/master?svg=true[Build status]]
 https://circleci.com/gh/minishift/minishift/tree/master[image:https://circleci.com/gh/minishift/minishift/tree/master.svg?style=svg[Build status]]
 https://ci.centos.org/job/minishift/[image:https://ci.centos.org/buildStatus/icon?job=minishift[Build Status]]
 

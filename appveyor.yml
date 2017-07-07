@@ -33,3 +33,7 @@ artifacts:
     name: OS-X minishift binary
   - path: out\windows-amd64\minishift.exe
     name: Windows minishift binary
+
+notifications:
+  - provider: Webhook
+    url: http://minibot.34e99f76.svc.dockerapp.io:9009/hubot/appveyor

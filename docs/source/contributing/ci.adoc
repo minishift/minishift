@@ -49,7 +49,7 @@ On top of building the master branch and pull requests, CentOS CI is also used t
 
 |link:https://ci.appveyor.com[*AppVeyor*]
 |This server is used for compilation and unit testing on Windows.
-|link:https://ci.appveyor.com/project/hferentschik/minishift-o61ou/history[master and pull requests]
+|link:https://ci.appveyor.com/project/minishift-bot/minishift/history[master and pull requests]
 |link:https://github.com/minishift/minishift/blob/master/appveyor.yml[appveyor.yml]
 
 |link:https://travis-ci.org/[*Travis CI*]

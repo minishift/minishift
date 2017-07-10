@@ -18,7 +18,6 @@ package openshift
 
 import (
 	"fmt"
-	"net/url"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -29,7 +28,6 @@ import (
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/pkg/errors"
-	"sort"
 )
 
 var (
@@ -86,33 +84,6 @@ type ServiceSpec struct {
 const (
 	ProjectsCustomCol = "-o=custom-columns=NAME:.metadata.name"
 )
-
-// Get the route for service
-func GetServiceSpec(service, namespace string, https bool) (string, error) {
-	urlScheme := "http://"
-	if https {
-		urlScheme = "https://"
-	}
-
-	serviceSpecs, err := GetServiceSpecs(namespace)
-	if err != nil {
-		return "", err
-	}
-
-	for _, serviceSpec := range serviceSpecs {
-		sort.Strings(serviceSpec.URL)
-		if serviceSpec.Name == service {
-			if serviceSpec.URL != nil {
-				u, _ := url.Parse(serviceSpec.URL[0])
-				return urlScheme + u.Host, nil
-			} else {
-				return "", errors.New(fmt.Sprintf("Service '%s' in namespace '%s' does not have route associated which can be opened in the browser.", service, namespace))
-			}
-		}
-	}
-
-	return "", errors.New(fmt.Sprintf("Service %s does not exist in namespace %s.", service, namespace))
-}
 
 // GetServiceSpecs takes Namespace string and return route/nodeport/name/weight in a ServiceSpec structure
 func GetServiceSpecs(serviceNamespace string) ([]ServiceSpec, error) {

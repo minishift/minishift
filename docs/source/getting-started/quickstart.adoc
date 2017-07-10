@@ -92,7 +92,7 @@ $ oc expose svc/nodejs-ex
 .  Access the application.
 +
 ----
-$ minishift openshift service nodejs-ex -n myproject
+$ minishift openshift service nodejs-ex --in-browser
 ----
 
 .  To stop Minishift, use the following command:

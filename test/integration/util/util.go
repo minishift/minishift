@@ -41,10 +41,6 @@ type OcRunner struct {
 	CommandPath string
 }
 
-type BashRunner struct {
-	CommandPath string
-}
-
 func runCommand(command string, commandPath string) (stdOut string, stdErr string, exitCode int) {
 	commandArr := strings.Split(command, " ")
 	path, _ := filepath.Abs(commandPath)

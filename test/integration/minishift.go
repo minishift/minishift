@@ -160,3 +160,47 @@ func (m *Minishift) getRoute(serviceName, nameSpace string) string {
 	cmdOut, _, _ := m.runner.RunCommand("openshift service " + serviceName + " -n" + nameSpace + " --url")
 	return strings.TrimRight(cmdOut, "\n")
 }
+
+func (m *Minishift) checkServiceRolloutForSuccess(service string, done chan bool) {
+	command := fmt.Sprintf("rollout status deploymentconfig %s --watch", service)
+
+	ocRunner := m.runner.GetOcRunner()
+	cmdOut, cmdErr, cmdExit := ocRunner.RunCommand(command)
+	commandOutputs = append(commandOutputs,
+		CommandOutput{
+			command,
+			cmdOut,
+			cmdErr,
+			cmdExit,
+		})
+
+	expected := "successfully rolled out"
+	// if - else construct needed, else false is returned on the second time called
+	if strings.Contains(cmdOut, expected) {
+		done <- true
+	} else {
+		done <- false
+	}
+}
+
+func (m *Minishift) rolloutServicesSuccessfully(servicesToCheck string) error {
+	success := true
+	servicesStr := strings.Replace(servicesToCheck, ", ", " ", -1)
+	servicesStr = strings.Replace(servicesStr, ",", " ", -1)
+	services := strings.Split(servicesStr, " ")
+	total := len(services)
+	done := make(chan bool, total)
+
+	for i := 0; i < total; i++ {
+		go m.checkServiceRolloutForSuccess(services[i], done)
+	}
+
+	for i := 0; i < total; i++ {
+		success = success && <-done
+	}
+
+	if !success {
+		return fmt.Errorf("Not all successfully rolled out")
+	}
+	return nil
+}

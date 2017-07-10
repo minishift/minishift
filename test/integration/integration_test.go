@@ -123,7 +123,10 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^executing "oc ([^"]*)" (succeeds|fails)$`, executingOcCommandSucceedsOrFails)
 
 	// step for variable usage
-	s.Step(`sets scenario variable "([^"]*)" to the result from executing "oc ([^"]*)"$`, minishift.setVariableExecutingOcCommand)
+	s.Step(`setting scenario variable "([^"]*)" to the stdout from executing "oc ([^"]*)"$`, minishift.setVariableExecutingOcCommand)
+
+	// steps for rollout
+	s.Step(`^services "([^"]*)" rollout successfully$`, minishift.rolloutServicesSuccessfully)
 
 	// steps to verify stdout and stderr of commands executed
 	s.Step(`([^"]*) should contain ([^"]*)$`, commandReturnShouldContain)

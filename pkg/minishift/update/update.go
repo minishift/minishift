@@ -282,11 +282,11 @@ func updateBinary(binary string) error {
 		Hash: crypto.SHA256,
 	})
 	if err != nil {
-		fmt.Errorf("Cannot apply binary update: %s", err)
-		err := update.RollbackError(err)
-		if err != nil {
-			return errors.New(fmt.Sprintf("Failed to rollback update: %s", err))
+		rollbackErr := update.RollbackError(err)
+		if rollbackErr != nil {
+			return errors.New(fmt.Sprintf("Failed to rollback update: %s", rollbackErr))
 		}
+		return err
 	}
 
 	return nil

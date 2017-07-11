@@ -18,6 +18,7 @@ package addon
 
 import (
 	"fmt"
+	minishiftTesting "github.com/minishift/minishift/pkg/testing"
 	"testing"
 )
 
@@ -29,11 +30,7 @@ func Test_Metadata_creation_succeeds(t *testing.T) {
 	testMap["Name"] = testName
 	testMap["Description"] = testDescription
 
-	addOnMeta, err := NewAddOnMeta(testMap)
-
-	if err != nil {
-		t.Fatal(fmt.Sprintf("No error expected, but got: '%s'", err.Error()))
-	}
+	addOnMeta := getAddOnMeta(testMap, t)
 
 	if addOnMeta.Name() != testName {
 		t.Fatal(fmt.Sprintf("Expected addon name '%s', but got '%s'", testName, addOnMeta.Name()))
@@ -90,13 +87,40 @@ func Test_optional_metadata_is_retained(t *testing.T) {
 	testMap["Description"] = testDescription
 	testMap["Url"] = testUrl
 
+	addOnMeta := getAddOnMeta(testMap, t)
+
+	if addOnMeta.GetValue("Url") != testUrl {
+		t.Fatal(fmt.Sprintf("Expected addon value '%s', but got '%s'", testName, addOnMeta.GetValue("Url")))
+	}
+}
+
+func Test_required_vars_meta_is_extracted(t *testing.T) {
+	testMap := make(map[string]string)
+	testMap["Name"] = "acme"
+	testMap["Description"] = "Acme Add-on"
+	testMap["Required-Vars"] = " USER, access_token "
+
+	addOnMeta := getAddOnMeta(testMap, t)
+
+	minishiftTesting.AssertEqualSlice(addOnMeta.RequiredVars(), []string{"USER", "access_token"}, t)
+}
+
+func Test_required_vars_empty_if_not_specified(t *testing.T) {
+	testMap := make(map[string]string)
+	testMap["Name"] = "acme"
+	testMap["Description"] = "Acme Add-on"
+
+	addOnMeta := getAddOnMeta(testMap, t)
+
+	minishiftTesting.AssertEqualSlice(addOnMeta.RequiredVars(), []string{}, t)
+}
+
+func getAddOnMeta(testMap map[string]string, t *testing.T) AddOnMeta {
 	addOnMeta, err := NewAddOnMeta(testMap)
 
 	if err != nil {
 		t.Fatal(fmt.Sprintf("No error expected, but got: '%s'", err.Error()))
 	}
 
-	if addOnMeta.GetValue("Url") != testUrl {
-		t.Fatal(fmt.Sprintf("Expected addon value '%s', but got '%s'", testName, addOnMeta.GetValue("Url")))
-	}
+	return addOnMeta
 }

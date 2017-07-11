@@ -11,13 +11,13 @@ toc::[]
 
 NOTE: This feature is still considered experimental and might change in future releases.
 
-Minishift allows to configure the vanilla OpenShift setup provided by *cluster up* with an add-on mechanism.
+Minishift allows to extend the vanilla OpenShift setup provided by *cluster up* with an add-on mechanism.
 
-Add-ons are directories that contain one or more text files with the *_.addon_* extension.
-The directory can also have other resource files such as JSON template files.
-However, only one *_.addon_* file is allowed in each directory.
+Add-ons are directories that contain a text file with the *_.addon_* extension.
+The directory can also contain other resource files such as JSON template files.
+However, only one *_.addon_* file is allowed per add-on.
 
-The following example shows the contents of the add-on text file, including the name and description of the add-on, additional metadata, and the actual commands to run.
+The following example shows the contents of an add-on file, including the name and description of the add-on, additional metadata, and the actual add-on commands to apply.
 
 [[example-anyuid-addon]]
 .Example: anyuid add-on definition file
@@ -25,22 +25,24 @@ The following example shows the contents of the add-on text file, including the 
 ----
 # Name: anyuid                                                                          // <1>
 # Description: Allows authenticated users to run images under a non pre-allocated UID   // <2>
+# Required-vars: ACME_TOKEN                                                             // <3>
 
-oc adm policy add-scc-to-group anyuid system:authenticated                              // <3>
+oc adm policy add-scc-to-group anyuid system:authenticated                              // <4>
 ----
 <1> (Required) Name of the add-on.
 <2> (Required) Description of the add-on.
-<3> Actual add-on command. In this case, the command executes the *oc* binary.
+<3> (Optional) Comma separated list of required interpolation variables. See xref:../using/addons.adoc#addon-variable-interpolation[Variable Interpolation]
+<4> Actual add-on command. In this case, the command executes the *oc* binary.
 
-NOTE: Comment lines can be inserted at anywhere in the file. Comment lines must start with the '#' character.
+NOTE: Comment lines, starting with the '#' character, can be inserted at anywhere in the file.
 
 Enabled add-ons are applied during xref:../command-ref/minishift_start.adoc#[`minishift start`], immediately after the initial cluster provisioning is successfully completed.
 
 [[addon-commands]]
 == Add-on Commands
 
-This section describes the command types that an add-on file can contain and what the commands do.
-The following command types are available forming a sort of mini-DSL for add-ons:
+This section describes the commands that an add-on file can contain.
+They are forming a mini-DSL for Minishift add-ons:
 
 ssh::
 If the add-on command starts with `ssh`, you can run any command within the Minishift-managed VM.
@@ -71,18 +73,18 @@ sleep::
 If the add-on command starts with `sleep`, it waits for the specified number of seconds.
 This can be useful in cases where you know that a command such as `oc` might take a few seconds before a certain resource can be queried.
 
-NOTE: Trying to add a command that is not listed will cause an error when the add-on gets parsed.
+NOTE: Trying to use an undefined command will cause an error when the add-on gets parsed.
 
 [[addon-variable-interpolation]]
-=== Variable Interpolation
+== Variable Interpolation
 
-Minishift also allows the use of variables as part of the supported commands.
+Minishift allows the use of variables within the add-on commands.
 Variables have the format `#{<variable-name>}`.
-
-The following example shows how the routing suffix can be interpolated into an `openshift` command to create a new certificate as part of securing the OpenShift registry.
+The following example shows how the OpenShift routing suffix can be interpolated into an `openshift` command to create a new certificate as part of securing the OpenShift registry.
+The used variable `#{routing-suffix}` is part of the built-in add-on variables.
 
 [[example-addon-routing-variable]]
-.Example: Usage of the routing suffix variable
+.Example: Usage of the routing-suffix variable
 
 ----
 $ openshift admin ca create-server-cert \
@@ -94,10 +96,14 @@ $ openshift admin ca create-server-cert \
   --key=/etc/secrets/registry.key
 ----
 
-The following table shows the supported variables that are available for interpolation.
+[[addon-built-in-variables]]
+=== Built-in Variables
+
+There exist several built-in variables which are available for interpolation at all times.
+The following table shows these variables.
 
 [[table-supported-addon-variables]]
-.Supported add-on variables
+.Supported built-in add-on variables
 
 |===
 |Variable |Description
@@ -111,6 +117,45 @@ The following table shows the supported variables that are available for interpo
 |addon-name
 |Name of the current add-on.
 |===
+
+[[addon-dynamic-variables]]
+=== Dynamic Variables
+
+The commands xref:../command-ref/minishift_start.adoc#[`minishift start`] as well as xref:../command-ref/minishift_addons_apply.adoc#[`minishift addons apply`] also provide an `--addon-env` flag which allows to dynamically pass variables for interpolation, for example:
+
+----
+$ minishift addons apply --addon-env PROJECT_USER=john acme
+----
+
+The `--addon-env` flag can be specified multiple times to define more than one variables for interpolation.
+
+Specifying dynamic variables also works in conjunction with xref:../using/managing-minishift.adoc#setting-persistent-configuration-values[setting persistent configuration values].
+
+----
+$ minishift config set addon-env PROJECT_USER=john
+$ minishift addons apply acme
+----
+
+TIP: Multiple variables need to be comma separated when the xref:../command-ref/minishift_config_set.adoc#[`minishift config set`] is used.
+
+There is also the possibility to dynamically interpolate a variable with the value of an environment variable at the time the add-on gets applied. For this the variable value needs to be prefixed with _env_.
+
+----
+$ minishift config set addon-env PROJECT_USER=env.USER        // <1>
+$ minishift addons apply acme                                 // <2>
+----
+<1> Using the _env_ prefix ensures that instead of literally replacing '#{PROJECT_USER}' with 'env.USER', the value of the environment variable `USER` is used.
+If the environment variable is not set not, interpolation does not occur.
+<2> When the add-on is applied, each occurrence of `#{PROJECT_USER}` within an add-on command gets replaced with the value of the environment variable `USER`.
+
+As add-on developer, you can enforce that a variable value is provided when the add-on gets applied by adding the varaible name to the _Required-Vars_ metadata header.
+Multiple variables need to be comma separated.
+
+----
+# Name: acme
+# Description: ACME add-on
+# Required-Vars: PROJECT_USER
+----
 
 [[default-addons]]
 == Default Add-ons

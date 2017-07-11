@@ -169,6 +169,7 @@ func runStart(cmd *cobra.Command, args []string) {
 		Project:          defaultProject,
 		KubeConfigPath:   constants.KubeConfigPath,
 		OcPath:           ocPath,
+		AddonEnv:         viper.GetStringSlice(cmdutil.AddOnEnv),
 	}
 
 	clusterUpParams := determineClusterUpParameters(clusterUpConfig)
@@ -209,7 +210,7 @@ func getRequiredHostDirectories() []string {
 }
 
 func handleProxies() *util.ProxyConfig {
-	proxyConfig, err := util.NewProxyConfig(viper.GetString(httpProxy), viper.GetString(httpsProxy), viper.GetString(startFlags.NoProxyList.Name))
+	proxyConfig, err := util.NewProxyConfig(viper.GetString(cmdutil.HttpProxy), viper.GetString(cmdutil.HttpsProxy), viper.GetString(startFlags.NoProxyList.Name))
 
 	if err != nil {
 		atexit.ExitWithMessage(1, err.Error())
@@ -223,11 +224,11 @@ func handleProxies() *util.ProxyConfig {
 		// It could be that the proxy config is retrieved from the environment. To make sure that
 		// proxy settings are properly passed to cluster up we need to explicitly set the values.
 		if proxyConfig.HttpProxy() != "" {
-			viper.Set(httpProxy, proxyConfig.HttpProxy())
+			viper.Set(cmdutil.HttpProxy, proxyConfig.HttpProxy())
 		}
 
 		if proxyConfig.HttpsProxy() != "" {
-			viper.Set(httpsProxy, proxyConfig.HttpsProxy())
+			viper.Set(cmdutil.HttpsProxy, proxyConfig.HttpsProxy())
 		}
 		viper.Set(startFlags.NoProxyList.Name, proxyConfig.NoProxy())
 	}
@@ -388,6 +389,7 @@ func initStartFlags() *flag.FlagSet {
 	startFlagSet.StringSliceVar(&dockerEngineOpt, startFlags.DockerEngineOpt.Name, nil, "Specify arbitrary flags to pass to the Docker daemon in the form <flag>=<value>.")
 	startFlagSet.StringSliceVar(&insecureRegistry, startFlags.InsecureRegistry.Name, []string{defaultInsecureRegistry}, "Non-secure Docker registries to pass to the Docker daemon.")
 	startFlagSet.StringSliceVar(&registryMirror, startFlags.RegistryMirror.Name, nil, "Registry mirrors to pass to the Docker daemon.")
+	startFlagSet.AddFlag(cmdutil.AddOnEnvFlag)
 
 	return startFlagSet
 }
@@ -410,8 +412,8 @@ func initClusterUpFlags() *flag.FlagSet {
 	clusterUpFlagSet.Bool(startFlags.Logging.Name, false, "Install logging (experimental)")
 	clusterUpFlagSet.String(startFlags.OpenshiftVersion.Name, version.GetOpenShiftVersion(), fmt.Sprintf("The OpenShift version to run, eg. %s", version.GetOpenShiftVersion()))
 	clusterUpFlagSet.String(startFlags.NoProxyList.Name, "", "List of hosts or subnets for which no proxy should be used.")
-	clusterUpFlagSet.AddFlag(httpProxyFlag)
-	clusterUpFlagSet.AddFlag(httpsProxyFlag)
+	clusterUpFlagSet.AddFlag(cmdutil.HttpProxyFlag)
+	clusterUpFlagSet.AddFlag(cmdutil.HttpsProxyFlag)
 
 	return clusterUpFlagSet
 }

@@ -63,6 +63,7 @@ var (
 	DockerEngineOpt  = createFlag("docker-opt", SetSlice, nil, nil, true)
 	InsecureRegistry = createFlag("insecure-registry", SetSlice, nil, nil, true)
 	RegistryMirror   = createFlag("registry-mirror", SetSlice, nil, nil, true)
+	AddonEnv         = createFlag("addon-env", SetSlice, nil, nil, true)
 
 	// cluster up
 	SkipRegistryCheck = createFlag("skip-registry-check", SetBool, nil, nil, true)

@@ -19,14 +19,20 @@ package addon
 import (
 	"errors"
 	"fmt"
+	"strings"
 )
 
 var requiredMetaTags = []string{"Name", "Description"}
 
-// AddOnMeta defines a set of meta data for a AddOn. Name and Description are required. Others are optional.
+const (
+	requiredVars = "Required-Vars"
+)
+
+// AddOnMeta defines a set of meta data for an AddOn. Name and Description are required. Others are optional.
 type AddOnMeta interface {
 	Name() string
 	Description() string
+	RequiredVars() []string
 	GetValue(key string) string
 }
 
@@ -57,6 +63,25 @@ func (meta *DefaultAddOnMeta) Description() string {
 	return meta.headers[requiredMetaTags[1]]
 }
 
+func (meta *DefaultAddOnMeta) RequiredVars() []string {
+	if val, contains := meta.headers[requiredVars]; contains {
+		return meta.splitAndTrim(val)
+	} else {
+		return []string{}
+	}
+}
+
 func (meta *DefaultAddOnMeta) GetValue(key string) string {
 	return meta.headers[key]
+}
+
+func (meta *DefaultAddOnMeta) splitAndTrim(s string) []string {
+	// Trims the stream and then splits
+	trimmed := strings.TrimSpace(s)
+	split := strings.Split(trimmed, ",")
+	cleanSplit := make([]string, len(split))
+	for i, val := range split {
+		cleanSplit[i] = strings.TrimSpace(val)
+	}
+	return cleanSplit
 }

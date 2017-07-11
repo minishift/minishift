@@ -37,11 +37,13 @@ import (
 
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/version"
+	"regexp"
 )
 
 const (
 	ipKey            = "ip"
 	routingSuffixKey = "routing-suffix"
+	envPrefix        = "env."
 )
 
 type ClusterUpConfig struct {
@@ -55,6 +57,7 @@ type ClusterUpConfig struct {
 	Project          string
 	KubeConfigPath   string
 	OcPath           string
+	AddonEnv         []string
 }
 
 // ClusterUp downloads and installs the oc binary in order to run 'cluster up'
@@ -112,7 +115,7 @@ func PostClusterUp(clusterUpConfig *ClusterUpConfig, sshCommander provision.SSHC
 		return err
 	}
 
-	err = applyAddOns(addOnManager, clusterUpConfig.Ip, clusterUpConfig.RoutingSuffix, ocRunner, sshCommander)
+	err = applyAddOns(addOnManager, clusterUpConfig.Ip, clusterUpConfig.RoutingSuffix, clusterUpConfig.AddonEnv, ocRunner, sshCommander)
 	if err != nil {
 		return err
 	}
@@ -142,9 +145,9 @@ func DetermineOcVersion(requestedVersion string) string {
 	return requestedVersion
 }
 
-// GetExecutionContext creates an ExecutionContext for executing add-on.
+// GetExecutionContext creates an ExecutionContext used for variable interpolation during add-on application.
 // The context contains variables to interpolate during add-on execution, as well as the means to communicate with the VM (SSHCommander) and OpenShift (OcRunner).
-func GetExecutionContext(ip string, routingSuffix string, ocRunner *oc.OcRunner, sshCommander provision.SSHCommander) (*command.ExecutionContext, error) {
+func GetExecutionContext(ip string, routingSuffix string, addOnEnv []string, ocRunner *oc.OcRunner, sshCommander provision.SSHCommander) (*command.ExecutionContext, error) {
 	context, err := command.NewExecutionContext(ocRunner, sshCommander)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("Unable to initialise execution context: %s", err.Error()))
@@ -153,7 +156,30 @@ func GetExecutionContext(ip string, routingSuffix string, ocRunner *oc.OcRunner,
 	context.AddToContext(ipKey, ip)
 	context.AddToContext(routingSuffixKey, routingSuffix)
 
+	for _, env := range addOnEnv {
+		match, _ := regexp.Match(".*=.*", []byte(env))
+		if !match {
+			return nil, errors.New(fmt.Sprintf("Add-on interpolation variables need to be specified in the format <key>=<value>.'%s' is not.", env))
+		}
+		key, value := splitKeyValue(env, "=")
+
+		if strings.HasPrefix(value, envPrefix) {
+			if os.Getenv(strings.TrimPrefix(value, envPrefix)) != "" {
+				value = os.Getenv(strings.TrimPrefix(value, envPrefix))
+			} else {
+				continue
+			}
+		}
+
+		context.AddToContext(key, value)
+	}
+
 	return context, nil
+}
+
+func splitKeyValue(s string, separator string) (string, string) {
+	x := strings.Split(s, separator)
+	return strings.TrimSpace(x[0]), strings.TrimSpace(x[1])
 }
 
 // TODO - persistent volume creation should really be fixed upstream, aka 'cluster up'. See https://github.com/openshift/origin/issues/14076 (HF)
@@ -213,8 +239,12 @@ func configurePersistentVolumes(hostPvDir string, addOnManager *manager.AddOnMan
 	return nil
 }
 
-func applyAddOns(addOnManager *manager.AddOnManager, ip string, routingSuffix string, ocRunner *oc.OcRunner, sshCommander provision.SSHCommander) error {
-	context, err := GetExecutionContext(ip, routingSuffix, ocRunner, sshCommander)
+func applyAddOns(addOnManager *manager.AddOnManager, ip string, routingSuffix string, addonEnv []string, ocRunner *oc.OcRunner, sshCommander provision.SSHCommander) error {
+	context, err := GetExecutionContext(ip, routingSuffix, addonEnv, ocRunner, sshCommander)
+	if err != nil {
+		return err
+	}
+
 	err = addOnManager.Apply(context)
 	if err != nil {
 		return err

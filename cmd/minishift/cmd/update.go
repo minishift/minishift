@@ -23,6 +23,7 @@ import (
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 
 	"encoding/json"
+	cmdutil "github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/version"
@@ -58,7 +59,7 @@ var (
 )
 
 func runUpdate(cmd *cobra.Command, args []string) {
-	proxyConfig, err := util.NewProxyConfig(viper.GetString(httpProxy), viper.GetString(httpsProxy), "")
+	proxyConfig, err := util.NewProxyConfig(viper.GetString(cmdutil.HttpProxy), viper.GetString(cmdutil.HttpsProxy), "")
 	if err != nil {
 		atexit.ExitWithMessage(1, err.Error())
 	}
@@ -113,8 +114,8 @@ func runUpdate(cmd *cobra.Command, args []string) {
 
 func init() {
 	RootCmd.AddCommand(updateCmd)
-	updateCmd.Flags().AddFlag(httpProxyFlag)
-	updateCmd.Flags().AddFlag(httpsProxyFlag)
+	updateCmd.Flags().AddFlag(cmdutil.HttpProxyFlag)
+	updateCmd.Flags().AddFlag(cmdutil.HttpsProxyFlag)
 	updateCmd.Flags().BoolVar(&addonForce, addonForceFlag, false, "Force update the add-ons after the binary update. Otherwise, prompt the user to update add-ons.")
 }
 

@@ -79,3 +79,7 @@ func (ic *FakeInterpolationContext) RemoveFromContext(key string) error {
 func (ic *FakeInterpolationContext) Interpolate(cmd string) string {
 	return cmd
 }
+
+func (ic *FakeInterpolationContext) Vars() []string {
+	return []string{}
+}

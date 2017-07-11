@@ -32,6 +32,9 @@ type InterpolationContext interface {
 
 	// Interpolate the cmd in the current context
 	Interpolate(cmd string) string
+
+	// Keys returns a list of variables  available for interpolation in a sorted slice
+	Vars() []string
 }
 
 type defaultInterpolationContext struct {
@@ -52,7 +55,7 @@ func NewInterpolationContext() InterpolationContext {
 }
 
 func (c *defaultInterpolationContext) AddToContext(key string, value string) error {
-	r, err := regexp.Compile(fmt.Sprintf("#{%s}", key))
+	r, err := regexp.Compile(fmt.Sprintf("#{%s}", regexp.QuoteMeta(key)))
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("Unable to add %s/%s to interpolation context", key, value))
 	}
@@ -67,7 +70,15 @@ func (c *defaultInterpolationContext) RemoveFromContext(key string) error {
 
 func (c *defaultInterpolationContext) Interpolate(cmd string) string {
 	for _, v := range c.context {
-		cmd = v.regexp.ReplaceAllString(cmd, v.subsitution)
+		cmd = v.regexp.ReplaceAllLiteralString(cmd, v.subsitution)
 	}
 	return cmd
+}
+
+func (c *defaultInterpolationContext) Vars() []string {
+	keys := make([]string, len(c.context))
+	for k := range c.context {
+		keys = append(keys, k)
+	}
+	return keys
 }

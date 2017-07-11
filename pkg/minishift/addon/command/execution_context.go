@@ -66,3 +66,7 @@ func (ec *ExecutionContext) RemoveFromContext(key string) error {
 func (ec *ExecutionContext) Interpolate(cmd string) string {
 	return ec.interpolationContext.Interpolate(cmd)
 }
+
+func (ec *ExecutionContext) Vars() []string {
+	return ec.interpolationContext.Vars()
+}

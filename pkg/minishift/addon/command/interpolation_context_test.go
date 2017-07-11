@@ -35,19 +35,7 @@ func Test_interpolate_cmd(t *testing.T) {
 	}
 }
 
-func Test_adding_invalid_key_value(t *testing.T) {
-	context := NewInterpolationContext()
-
-	key := "*+"
-	value := ""
-	err := context.AddToContext(key, value)
-
-	if err == nil {
-		t.Fatal(fmt.Sprintf("It should not have been possible to add %s/%s", key, value))
-	}
-}
-
-func Test_multiple_contexts(t *testing.T) {
+func Test_adding_multiple_interpolation_variables(t *testing.T) {
 	context := NewInterpolationContext()
 
 	context.AddToContext("foo", "bar")
@@ -62,7 +50,21 @@ func Test_multiple_contexts(t *testing.T) {
 	}
 }
 
-func Test_adding_and_removing_context(t *testing.T) {
+func Test_dollar_sign_in_replacement_value_prints_literally(t *testing.T) {
+	context := NewInterpolationContext()
+
+	context.AddToContext("foo", "$bar")
+	cmd := "#{foo}"
+
+	expectedCmd := "$bar"
+	actualCmd := context.Interpolate(cmd)
+
+	if expectedCmd != actualCmd {
+		t.Fatal(fmt.Sprintf("Expected command: %s. Got: %s.", expectedCmd, actualCmd))
+	}
+}
+
+func Test_adding_and_removing_context_variables(t *testing.T) {
 	context := NewInterpolationContext()
 
 	context.AddToContext("foo", "bar")

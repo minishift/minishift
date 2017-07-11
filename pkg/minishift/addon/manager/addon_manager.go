@@ -29,6 +29,7 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/addon/parser"
 	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/pkg/errors"
+	"strings"
 )
 
 // AddOnManager is the central point for all operations around managing addons. An addon
@@ -173,6 +174,11 @@ func (m *AddOnManager) ApplyAddOn(addOn addon.AddOn, context *command.ExecutionC
 	context.AddToContext("addon-name", addOn.MetaData().Name())
 	defer context.RemoveFromContext("addon-name")
 
+	err := m.verifyRequiredVariablesInContext(context, addOn.MetaData())
+	if err != nil {
+		return err
+	}
+
 	oldDir, err := os.Getwd()
 	if err != nil {
 		return errors.Wrap(err, "Unable to apply addon due to failing IO operation")
@@ -198,6 +204,28 @@ func (m *AddOnManager) mapToSlice() []addon.AddOn {
 		i++
 	}
 	return addOnSlice
+}
+
+func (m *AddOnManager) verifyRequiredVariablesInContext(context *command.ExecutionContext, meta addon.AddOnMeta) error {
+	missingVars := []string{}
+
+	check := make(map[string]bool)
+	for _, v := range context.Vars() {
+		check[v] = true
+	}
+
+	for _, requiredVar := range meta.RequiredVars() {
+		if !check[requiredVar] {
+			missingVars = append(missingVars, requiredVar)
+		}
+	}
+
+	if len(missingVars) > 0 {
+		missing := strings.TrimSpace(strings.Join(missingVars, ", "))
+		return errors.New(fmt.Sprintf("The variable(s) %s are required by the add-on, but are not defined in the context.", missing))
+	}
+
+	return nil
 }
 
 func setStateAndPriority(addOn addon.AddOn, configMap map[string]*addon.AddOnConfig) {

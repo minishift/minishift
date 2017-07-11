@@ -17,11 +17,13 @@ limitations under the License.
 package clusterup
 
 import (
+	"fmt"
 	"github.com/pkg/errors"
+	"os"
 	"testing"
 )
 
-func TestValidateOpenshiftMinVersion(t *testing.T) {
+func Test_validate_openshift_min_versions(t *testing.T) {
 	var versionTests = []struct {
 		version string // input
 		valid   bool   // expected result
@@ -55,5 +57,63 @@ func TestValidateOpenshiftMinVersion(t *testing.T) {
 		if valid != versionTest.valid {
 			t.Fatalf("Expected '%t' Got '%t' for %s", versionTest.valid, valid, versionTest.version)
 		}
+	}
+}
+
+func Test_invalid_addon_variable_leads_to_error_in_context_creation(t *testing.T) {
+	context, err := GetExecutionContext("127.0.0.1", "foo.bar", []string{"FOOBAR"}, nil, nil)
+
+	if err == nil {
+		t.Fatal("There should have been an error due to invalide addon env variable.")
+	}
+
+	if context != nil {
+		t.Fatal("There should be no InterpolationContext returned.")
+	}
+}
+
+func Test_addon_variable_can_be_interpolated(t *testing.T) {
+	assertInterpolation([]string{"FOO=env.BAR"}, "#{FOO}", "#{FOO}", t)
+}
+
+func Test_nil_can_be_passed_to_create_context(t *testing.T) {
+	_, err := GetExecutionContext("127.0.0.1", "foo.bar", nil, nil, nil)
+
+	if err != nil {
+		t.Fatal(fmt.Sprintf("There should have been no error, but got '%s'.", err.Error()))
+	}
+}
+
+func Test_addon_variable_can_be_interpolated_from_environment(t *testing.T) {
+	env := os.Environ()
+	os.Clearenv()
+	defer resetEnv(env)
+
+	assertInterpolation([]string{"FOO=env.BAR"}, "#{FOO}", "#{FOO}", t)
+
+	os.Setenv("BAR", "SNAFU")
+	assertInterpolation([]string{"FOO=env.BAR"}, "#{FOO}", "SNAFU", t)
+
+	os.Unsetenv("BAR")
+	assertInterpolation([]string{"FOO=env.BAR"}, "#{FOO}", "#{FOO}", t)
+}
+
+func assertInterpolation(variables []string, testString string, expectedResult string, t *testing.T) {
+	context, err := GetExecutionContext("127.0.0.1", "foo.bar", variables, nil, nil)
+	if err != nil {
+		t.Fatal(fmt.Sprintf("There should have been no error, but got '%s'.", err.Error()))
+	}
+
+	result := context.Interpolate(testString)
+	if result != expectedResult {
+		t.Fatal(fmt.Sprintf("Unexpected interpolation result. Expected '%s', got '%s'.", expectedResult, result))
+	}
+}
+
+func resetEnv(env []string) {
+	os.Clearenv()
+	for _, envSetting := range env {
+		key, value := splitKeyValue(envSetting, "=")
+		os.Setenv(key, value)
 	}
 }

@@ -31,26 +31,25 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/openshift"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 )
 
-const (
-	routingSuffix = "routing-suffix"
+var (
+	addonsApplyCmd = &cobra.Command{
+		Use:   "apply ADDON_NAME ...",
+		Short: "Applies the specified add-ons.",
+		Long:  "Applies the specified add-ons. You can specify one or more add-ons, regardless of whether the add-on is enabled or disabled.",
+		Run:   runApplyAddon,
+	}
 )
 
-var addonsApplyCmd = &cobra.Command{
-	Use:   "apply ADDON_NAME ...",
-	Short: "Applies the specified add-ons.",
-	Long:  "Applies the specified add-ons. You can specify one or more add-ons, regardless of whether the add-on is enabled or disabled.",
-	Run:   runApplyAddon,
-}
-
 func init() {
+	addonsApplyCmd.Flags().AddFlag(util.AddOnEnvFlag)
 	AddonsCmd.AddCommand(addonsApplyCmd)
 }
 
 func runApplyAddon(cmd *cobra.Command, args []string) {
-
 	if len(args) == 0 {
 		atexit.ExitWithMessage(1, emptyAddOnError)
 	}
@@ -90,7 +89,7 @@ func runApplyAddon(cmd *cobra.Command, args []string) {
 	for i := range args {
 		addonName := args[i]
 		addon := addOnManager.Get(addonName)
-		addonContext, err := clusterup.GetExecutionContext(ip, routingSuffix, ocRunner, sshCommander)
+		addonContext, err := clusterup.GetExecutionContext(ip, routingSuffix, viper.GetStringSlice(util.AddOnEnv), ocRunner, sshCommander)
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprint("Error applying the add-on: ", err))
 		}

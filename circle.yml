@@ -39,3 +39,8 @@ test:
 general:
     artifacts:
         - "../src/github.com/minishift/minishift/out"
+
+## Notifications
+notify:
+    webhooks:
+        - url: http://minibot.34e99f76.svc.dockerapp.io:9009/hubot/circleci

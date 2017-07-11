@@ -21,6 +21,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"os"
+
 	"github.com/asaskevich/govalidator"
 	units "github.com/docker/go-units"
 	"github.com/docker/machine/libmachine"
@@ -49,7 +51,6 @@ import (
 	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"os"
 )
 
 const (
@@ -57,9 +58,6 @@ const (
 
 	defaultProject = "myproject"
 	defaultUser    = "developer"
-
-	b2dIsoAlias    = "b2d"
-	centOsIsoAlias = "centos"
 
 	defaultInsecureRegistry = "172.30.0.0/16"
 
@@ -360,11 +358,12 @@ func calculateDiskSizeInMB(humanReadableDiskSize string) int {
 
 func determineIsoUrl(iso string) string {
 	iso = strings.ToLower(iso)
+	isoNotSpecified := ""
 
 	switch iso {
-	case b2dIsoAlias, "":
+	case startFlags.B2dIsoAlias, isoNotSpecified:
 		iso = constants.DefaultB2dIsoUrl
-	case centOsIsoAlias:
+	case startFlags.CentOsIsoAlias:
 		iso = constants.DefaultCentOsIsoUrl
 	default:
 		if !(govalidator.IsURL(iso) || strings.HasPrefix(iso, "file:")) {
@@ -379,7 +378,7 @@ func determineIsoUrl(iso string) string {
 func initStartFlags() *flag.FlagSet {
 	startFlagSet := flag.NewFlagSet(commandName, flag.ContinueOnError)
 
-	startFlagSet.String(startFlags.ISOUrl.Name, b2dIsoAlias, "Location of the minishift ISO. Can be an URL, file URI or one of the following short names: [b2d centos].")
+	startFlagSet.String(startFlags.ISOUrl.Name, startFlags.B2dIsoAlias, "Location of the minishift ISO. Can be an URL, file URI or one of the following short names: [b2d centos].")
 	startFlagSet.String(startFlags.VmDriver.Name, constants.DefaultVMDriver, fmt.Sprintf("The driver to use for the Minishift VM. Possible values: %v", constants.SupportedVMDrivers))
 	startFlagSet.Int(startFlags.Memory.Name, constants.DefaultMemory, "Amount of RAM to allocate to the Minishift VM.")
 	startFlagSet.Int(startFlags.CPUs.Name, constants.DefaultCPUS, "Number of CPU cores to allocate to the Minishift VM.")

@@ -122,6 +122,18 @@ func TestValidURL(t *testing.T) {
 			value:     "file:///foo/download/minishift.tar.gz",
 			shouldErr: false,
 		},
+		{
+			value:     "centos",
+			shouldErr: false,
+		},
+		{
+			value:     "b2d",
+			shouldErr: false,
+		},
+		{
+			value:     "random",
+			shouldErr: true,
+		},
 	}
 	runValidations(t, tests, "iso-url", IsValidUrl)
 }

@@ -45,6 +45,11 @@ type Setting struct {
 
 var settingsList []Setting
 
+const (
+	B2dIsoAlias    = "b2d"
+	CentOsIsoAlias = "centos"
+)
+
 var (
 	// minishift
 	ISOUrl           = createFlag("iso-url", SetString, []setFn{IsValidUrl}, []setFn{RequiresRestartMsg}, true)

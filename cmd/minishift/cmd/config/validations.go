@@ -100,6 +100,9 @@ func IsValidProxy(name string, uri string) error {
 }
 
 func IsValidUrl(_ string, isoURL string) error {
+	if isoURL == B2dIsoAlias || isoURL == CentOsIsoAlias {
+		return nil
+	}
 	_, err := url.ParseRequestURI(isoURL)
 	if err != nil {
 		return fmt.Errorf("%s url is not valid: %v", isoURL, err)

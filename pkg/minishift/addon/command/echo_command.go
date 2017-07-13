@@ -37,16 +37,12 @@ func (c *EchoCommand) doExecute(ec *ExecutionContext) error {
 	var err error
 
 	// split off the actual 'echo' command. As we need to print rest of the string
-	echoString := strings.Replace(c.rawCommand, "echo", "", 1)
+	echoString := strings.TrimPrefix(c.rawCommand, "echo")
+	echoString = strings.Replace(echoString, " ", "", 1)
 
-	//Remove leading and trailing spaces
-	echoString = strings.TrimSpace(echoString)
-	if echoString == "" {
-		_, err = fmt.Print("\n")
-	} else {
-		echoString = ec.Interpolate(echoString)
-		_, err = fmt.Print("\n  " + echoString)
-	}
+	echoString = ec.Interpolate(echoString)
+	_, err = fmt.Print("\n" + echoString)
+
 	if err != nil {
 		return errors.New(fmt.Sprintf("Error executing command '%s':", err.Error()))
 	}

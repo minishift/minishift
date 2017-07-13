@@ -30,11 +30,11 @@ func Test_echo_command(t *testing.T) {
 	}{
 		{
 			echoCommand:    "echo hello world",
-			expectedOutput: "\n  hello world",
+			expectedOutput: "\nhello world",
 		},
 		{
-			echoCommand:    "echo hello\n world",
-			expectedOutput: "\n  hello\n world",
+			echoCommand:    "echo    good\n bye", // 3 extrace spaces are preserved
+			expectedOutput: "\n   good\n bye",
 		},
 		{
 			echoCommand:    "echo",
@@ -43,6 +43,10 @@ func Test_echo_command(t *testing.T) {
 		{
 			echoCommand:    "echo ",
 			expectedOutput: "\n",
+		},
+		{
+			echoCommand:    "echo  ", // single additional space
+			expectedOutput: "\n ",
 		},
 	}
 

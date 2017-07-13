@@ -44,6 +44,6 @@ _testmain.go
 docs/build
 docs/source/_tmp/*.md
 docs/source/command-ref/*.adoc
-docs/source/variables.adoc
+docs/source/**/variables.adoc
 docs/.bundle/
 docs/.sass-cache/

@@ -6,7 +6,12 @@ task :default => :gen
 BUILD_DIR          = "build"
 MARKDOWN_FILES     = Rake::FileList.new("source/_tmp/*.md")
 TOPIC_MAP          = "#{BUILD_DIR}/_topic_map.yml"
-ADOC_VARIABLES     = "source/variables.adoc"
+ADOC_VARIABLES     = FileList.new('source/variables.adoc',
+ 'source/contributing/variables.adoc',
+ 'source/getting-started/variables.adoc',
+ 'source/openshift/variables.adoc',
+ 'source/using/variables.adoc'
+)
 GENERATED_ADOC_DIR = "source/command-ref"
 ADOC_FILES = Rake::FileList.new do |list|
 	MARKDOWN_FILES.each do |f|
@@ -96,10 +101,13 @@ task :adoc_variables => :init do
   minishift_version  = ENV['MINISHIFT_VERSION'] || 'unset'
   openshift_version  = ENV['OPENSHIFT_VERSION'] || 'unset'
   centos_iso_version = ENV['CENTOS_ISO_VERSION'] || 'unset'
-  File.open(ADOC_VARIABLES, "w+") do |f|
-    f.write(":minishift-version: #{minishift_version}\n")
-    f.write(":openshift-version: #{openshift_version}\n")
-    f.write(":centos-iso-version: #{centos_iso_version}\n")
+
+  ADOC_VARIABLES.each do |f|
+    File.open(f, "w+") do |f|
+      f.write(":minishift-version: #{minishift_version}\n")
+      f.write(":openshift-version: #{openshift_version}\n")
+      f.write(":centos-iso-version: #{centos_iso_version}\n")
+    end
   end
 end
 

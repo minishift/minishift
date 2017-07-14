@@ -17,6 +17,8 @@ limitations under the License.
 package cluster
 
 import (
+	"bytes"
+	"crypto/sha256"
 	"flag"
 	"fmt"
 	"io"
@@ -27,6 +29,7 @@ import (
 	"strings"
 	"time"
 
+	"encoding/hex"
 	"encoding/json"
 
 	"github.com/docker/machine/drivers/hyperv"
@@ -222,10 +225,15 @@ func createDriverOptions(driver drivers.Driver, explicitOptions map[string]inter
 	return checkFlags, nil
 }
 
+// CacheMinikubeISOFromURL download minishift ISO from a given URI.
+// It also checks sha256sum if present and then put ISO to cached directory.
 func (m *MachineConfig) CacheMinikubeISOFromURL() error {
 	fmt.Println(fmt.Sprintf("Downloading ISO '%s'", m.MinikubeISO))
+	tmpISOFile, err := os.Create(m.GetISOCacheFilepath() + ".part")
+	if err != nil {
+		return err
+	}
 
-	// store the iso inside the MINISHIFT_HOME dir
 	response, err := http.Get(m.MinikubeISO)
 	if err != nil {
 		return err
@@ -236,7 +244,10 @@ func (m *MachineConfig) CacheMinikubeISOFromURL() error {
 		return fmt.Errorf("Received %d response from %s while trying to download the ISO", response.StatusCode, m.MinikubeISO)
 	}
 
-	iso := response.Body
+	var iso io.Reader
+	iso = response.Body
+	hasher := sha256.New()
+	iso = io.TeeReader(iso, hasher)
 
 	if response.ContentLength > 0 {
 		bar := pb.New64(response.ContentLength).SetUnits(pb.U_BYTES)
@@ -248,15 +259,50 @@ func (m *MachineConfig) CacheMinikubeISOFromURL() error {
 		}()
 	}
 
+	if _, err = io.Copy(tmpISOFile, iso); err != nil {
+		return err
+	}
+
+	if err := tmpISOFile.Sync(); err != nil {
+		return err
+	}
+
+	checkSum := m.getChecksum(m.MinikubeISO)
+	if checkSum != "" {
+		hash := hex.EncodeToString(hasher.Sum(nil))
+		if hash != checkSum {
+			return errors.New(fmt.Sprintf("Updated file has wrong checksum. Expected: %s, got: %s", hash, checkSum))
+		}
+	}
+
 	out, err := os.Create(m.GetISOCacheFilepath())
 	if err != nil {
 		return err
 	}
 	defer out.Close()
-	if _, err = io.Copy(out, iso); err != nil {
+
+	if err = os.Rename(tmpISOFile.Name(), out.Name()); err != nil {
 		return err
 	}
 	return nil
+}
+
+// getChecksum Tries to get the checksum for a given URL. If the checksum cannot be retrieved the empty string is returned.
+func (m *MachineConfig) getChecksum(baseUrl string) string {
+	checksumURL := fmt.Sprintf(baseUrl + ".sha256")
+	checksumResp, err := http.Get(checksumURL)
+	defer checksumResp.Body.Close()
+	if err != nil {
+		return ""
+	}
+
+	if checksumResp.StatusCode != 200 {
+		return ""
+	}
+
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(checksumResp.Body)
+	return strings.TrimSpace(buf.String())
 }
 
 func (m *MachineConfig) ShouldCacheMinikubeISO() bool {

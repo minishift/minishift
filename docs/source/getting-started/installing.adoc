@@ -65,7 +65,8 @@ If you encounter issues related to the hypervisor, see the xref:../using/trouble
 
 [NOTE]
 ====
-- On Windows operating system, due to issue link:https://github.com/minishift/minishift/issues/236[#236], you need to execute the minishift binary from the drive containing your *%USERPROFILE%* directory.
+- On Windows operating system, due to issue link:https://github.com/minishift/minishift/issues/236[#236], you need to execute the Minishift binary from your local C:/ drive.
+You cannot run Minishift from a network drive.
 
 - Automatic update of the Minishift binary and the virtual machine ISO is currently disabled.
 See also issue link:https://github.com/minishift/minishift/issues/204[#204].

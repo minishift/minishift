@@ -39,7 +39,7 @@ func NeedRegistration(host *host.Host) (bool, error) {
 }
 
 // Register host VM
-func RegisterHostVM(host *host.Host, param *RegistrationParameters) error {
+func RegisterHostVM(host *host.Host, param *RegistrationParameters) (bool, error) {
 	commander := provision.GenericSSHCommander{Driver: host.Driver}
 	registrator, supportRegistration, err := DetectRegistrator(commander)
 	if !supportRegistration {
@@ -47,16 +47,16 @@ func RegisterHostVM(host *host.Host, param *RegistrationParameters) error {
 	}
 
 	if err != nil && err != ErrDetectionFailed {
-		return err
+		return supportRegistration, err
 	}
 
 	if registrator != nil {
 		fmt.Println("Registering machine using subscription-manager")
 		if err := registrator.Register(param); err != nil {
-			return err
+			return supportRegistration, err
 		}
 	}
-	return nil
+	return supportRegistration, nil
 }
 
 // Unregister host VM

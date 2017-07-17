@@ -49,12 +49,12 @@ Feature: Basic
     and its subcommands, changing values stored in "config/config.json".
     Given Minishift has state "Running"
      When executing "minishift config set <property> <value>" succeeds
-     Then JSON config file "config/config.json" contains key "<property>" with value "<value>"
+     Then JSON config file "config/config.json" contains key "<property>" with value matching "<value>"
       And stdout of command "minishift config get <property>" is equal to "<value>"
       And stdout of command "minishift config view --format {{.ConfigKey}}:{{.ConfigValue}}" contains "<property>:<value>"
      When executing "minishift config unset <property>" succeeds
      Then stdout of command "minishift config get <property>" is equal to "<nil>"
-      And JSON config file "config/config.json" does not contain key "<property>"
+      And JSON config file "config/config.json" does not have key "<property>"
 
   Examples: Config values to work with
     | property  | value |

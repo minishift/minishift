@@ -39,6 +39,7 @@ import (
 	"github.com/minishift/minishift/test/integration/util"
 	"net/http"
 	"path/filepath"
+	"regexp"
 )
 
 var (
@@ -169,10 +170,10 @@ func FeatureContext(s *godog.Suite) {
 		getRoutingUrlAndVerifyHTTPResponse)
 
 	// steps for verifying config file content
-	s.Step(`JSON config file "([^"]*)" (contains|does not contain) key "(.*)" with value "(.*)"$`,
-		configContains)
-	s.Step(`JSON config file "([^"]*)" (contains|does not contain) key "(.*)"(.*)$`,
-		configContains)
+	s.Step(`^JSON config file "([^"]*)" (contains|does not contain) key "(.*)" with value matching "(.*)"$`,
+		matchConfigValue)
+	s.Step(`^JSON config file "([^"]*)" (has|does not have) key "(.*)"$`,
+		checkConfigKey)
 
 	s.BeforeSuite(func() {
 		testDir = setUp()
@@ -217,28 +218,60 @@ func ensureTestDirEmpty() {
 }
 
 //  To get values of nested keys, use following dot formating in Scenarios: key.nestedKey
-//  If an array is expected, use following formating: [value1 value2 value3].
-func configContains(configPath, expectingResult, expectedKeyPath, expectedValue string) error {
+//  If an array is expected, then expect: "[value1 value2 value3]"
+//  If empty string, non existing value are expected, then expect "<nil>"
+func getConfigValue(configPath string, keyPath string) (string, error) {
+	var keyValue string
 	data, err := ioutil.ReadFile(testDir + "/" + configPath)
 	if err != nil {
-		return fmt.Errorf("Cannot read config file: %s", err)
+		return "", fmt.Errorf("Cannot read config file: %v", err)
 	}
 	var values map[string]interface{}
 	json.Unmarshal(data, &values)
-	actualValue := ""
-	keyPath := strings.Split(expectedKeyPath, ".")
-	for _, element := range keyPath {
+	keyPathArray := strings.Split(keyPath, ".")
+	for _, element := range keyPathArray {
 		switch value := values[element].(type) {
 		case map[string]interface{}:
 			values = value
 		case []interface{}, nil, string, float64:
-			actualValue = fmt.Sprintf("%v", value)
+			keyValue = fmt.Sprintf("%v", value)
 		default:
-			return errors.New("Unexpected type in JSON config, not supported by testsuite")
+			return "", errors.New("Unexpected type in JSON config, not supported by testsuite")
 		}
 	}
-	if (expectingResult == "contains") && (actualValue != expectedValue) {
-		return fmt.Errorf("For key '%s' config contains unexpected value '%s'", expectedKeyPath, actualValue)
+	return keyValue, nil
+}
+
+func matchConfigValue(configPath string, condition string, keyPath string, expectedValue string) error {
+	expectedRegexp, err := regexp.Compile(expectedValue)
+	if err != nil {
+		return fmt.Errorf("Expected value must be a valid regular expression statement: ", err)
+	}
+
+	keyValue, err := getConfigValue(configPath, keyPath)
+	if err != nil {
+		return err
+	}
+
+	if (condition == "contains") && !expectedRegexp.MatchString(keyValue) {
+		return fmt.Errorf("For key '%s' config contains unexpected value '%s'", keyPath, keyValue)
+	} else if (condition == "does not contain") && expectedRegexp.MatchString(keyValue) {
+		return fmt.Errorf("For key '%s' config contains value '%s', which it should not contain", keyPath, keyValue)
+	}
+
+	return nil
+}
+
+func checkConfigKey(configPath string, condition string, keyPath string) error {
+	keyValue, err := getConfigValue(configPath, keyPath)
+	if err != nil {
+		return err
+	}
+
+	if (condition == "has") && (keyValue == "<nil>") {
+		return fmt.Errorf("Config does not contain any value for key %s", keyPath)
+	} else if (condition == "does not have") && (keyValue != "<nil>") {
+		return fmt.Errorf("Config contains key %s with assigned value: %s", keyPath, keyValue)
 	}
 
 	return nil

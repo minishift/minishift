@@ -133,15 +133,16 @@ func DeleteHost(api libmachine.API) error {
 }
 
 // Register host VM
-func Register(api libmachine.API) error {
+func Register(api libmachine.API) (bool, error) {
 	host, err := api.Load(constants.MachineName)
 	if err != nil {
-		return err
+		return false, err
 	}
-	if err := registration.RegisterHostVM(host, RegistrationParameters); err != nil {
-		return err
+	supportRegistration, err := registration.RegisterHostVM(host, RegistrationParameters)
+	if err != nil {
+		return supportRegistration, err
 	}
-	return nil
+	return supportRegistration, nil
 }
 
 // Un-register host VM

@@ -544,11 +544,14 @@ func registerHost(libMachineClient *libmachine.Client) {
 		log.Debug("Skipping registration due to enabled --skip-registration flag")
 		return
 	}
-	if err := cluster.Register(libMachineClient); err != nil {
+	supportRegistration, err := cluster.Register(libMachineClient)
+	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error to register VM: %v", err))
-	} else {
+	}
+	if supportRegistration {
 		minishiftConfig.InstanceConfig.IsRegistered = true
 		minishiftConfig.InstanceConfig.Write()
+		return
 	}
 }
 

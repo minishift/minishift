@@ -38,7 +38,7 @@ Minishift activates this context automatically, but if you need to switch back t
 $ oc config use-context minishift
 ----
 
-For an introduction to `oc` usage, see the link:https://docs.openshift.com/enterprise/3.2/cli_reference/get_started_cli.html[Get Started with the CLI] topic in the OpenShift documentation.
+For an introduction to `oc` usage, see the link:https://docs.openshift.org/latest/cli_reference/get_started_cli.html[Get Started with the CLI] topic in the OpenShift documentation.
 
 [[log-into-cluster]]
 == Logging Into the Cluster
@@ -55,7 +55,7 @@ To login as administrator, use the system account:
 $ oc login -u system:admin
 ----
 
-In this case, link:https://docs.openshift.com/enterprise/3.2/architecture/additional_concepts/authentication.html#api-authentication[client certificates] are used.
+In this case, link:https://docs.openshift.org/latest/architecture/additional_concepts/authentication.html#api-authentication[client certificates] are used.
 The certificates are stored in *_~/.kube/config_*.
 The `cluster up` command installs the appropriate certificates as a part of the bootstrap.
 
@@ -129,7 +129,7 @@ NOTE: After you update the OpenShift configuration, OpenShift will transparently
 In this example, you configure link:https://en.wikipedia.org/wiki/Cross-origin_resource_sharing[cross-origin resource sharing] (CORS) by updating the OpenShift master configuration to allow additional IP addresses to request resources.
 
 By default, OpenShift only allows cross-origin resource requests from the IP address of the cluster or from localhost.
-This setting is stored in the `corsAllowedOrigins` property of the link:https://docs.openshift.com/enterprise/3.0/admin_guide/master_node_configuration.html#master-configuration-files[master configuration] file *_master-config.yaml_*.
+This setting is stored in the `corsAllowedOrigins` property of the link:https://docs.openshift.org/latest/admin_guide/master_node_configuration.html#master-configuration-files[master configuration] file *_master-config.yaml_*.
 
 To change the property value and allow cross-origin requests from all domains, run the following command:
 

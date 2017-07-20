@@ -130,7 +130,7 @@ $ sudo chown root:wheel /usr/local/bin/docker-machine-driver-xhyve
 . Set owner User ID (SUID) for the binary as follows:
 +
 ----
-$ sudo chmod u+s /usr/local/bin/docker-machine-driver-xhyve
+$ sudo chmod u+s,+x /usr/local/bin/docker-machine-driver-xhyve
 ----
 
 [NOTE]

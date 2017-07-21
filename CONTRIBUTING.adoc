@@ -5,28 +5,21 @@
 == Filing issues
 
 File issues using the standard
-https://github.com/minishift/minishift/issues[Github issue tracker] for
-the repository. Before you submit a new issue, we recommend that you
-search the list of issues to see if anyone already submitted a similar
-issue.
+https://github.com/minishift/minishift/issues[Github issue tracker] for the repository.
+Before you submit a new issue, we recommend that you search the list of issues to see if anyone already submitted a similar issue.
 
 [[contributing-patches]]
 == Contributing patches
 
-Thank you for your contributions! Please follow this process to submit a
-patch:
+Thank you for your contributions! Please follow this process to submit a patch:
 
 .  Create an issue describing your proposed change to the repository.
-.  The repository owners will triage and respond to your issue
-promptly.
+.  The repository owners will triage and respond to your issue promptly.
 .  Fork the repository and create a topic branch.
-.  Refer to the https://docs.openshift.org/latest/minishift/developing/developing.html[developer document]
-for guidelines and tips on how to build and test Minishift.
+.  Refer to the link:https://docs.openshift.org/latest/minishift/contributing/developing.html[developer documentation] for guidelines and tips on how to build and test Minishift.
 .  Submit a pull request with the proposed changes.
 
 [[questions]]
 == Questions?
 
-If you run into issues or have any questions about contributions, feel
-free to ping the Minishift developers on IRC at the #minishift channel
-on Freenode.
+If you run into issues or have any questions about contributions, feel free to ping the Minishift developers on IRC at the #minishift channel on Freenode.

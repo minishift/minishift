@@ -262,7 +262,7 @@ func startHost(libMachineClient *libmachine.Client) (*host.Host, string) {
 		CPUs:             viper.GetInt(startFlags.CPUs.Name),
 		DiskSize:         calculateDiskSizeInMB(viper.GetString(startFlags.DiskSize.Name)),
 		VMDriver:         viper.GetString(startFlags.VmDriver.Name),
-		DockerEnv:        getSlice(startFlags.DockerEnv.Name),
+		DockerEnv:        dockerEnv,
 		DockerEngineOpt:  getSlice(startFlags.DockerEngineOpt.Name),
 		InsecureRegistry: determineInsecureRegistry(startFlags.InsecureRegistry.Name),
 		RegistryMirror:   getSlice(startFlags.RegistryMirror.Name),

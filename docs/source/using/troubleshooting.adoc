@@ -6,7 +6,7 @@
 
 toc::[]
 
-[[overview]]
+[[troubleshooting-overview]]
 == Overview
 
 This section contains solutions to common problems that you might encounter while using Minishift.

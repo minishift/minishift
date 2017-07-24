@@ -6,7 +6,7 @@
 
 toc::[]
 
-[[overview]]
+[[openshift-docker-registry-overview]]
 == Overview
 
 OpenShift provides an integrated Docker registry which can be used for development as well.

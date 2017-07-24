@@ -6,7 +6,7 @@
 
 toc::[]
 
-[[overview]]
+[[exposing-services-overview]]
 == Overview
 
 There are several ways you can expose your service after you deploy it on OpenShift.

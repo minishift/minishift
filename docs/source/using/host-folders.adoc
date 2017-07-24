@@ -6,7 +6,7 @@
 
 toc::[]
 
-[[overview]]
+[[host-folders-overview]]
 == Overview
 
 Host folders are directories on the host which are shared between the host and the Minishift VM.

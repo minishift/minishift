@@ -80,7 +80,7 @@ $ newgrp libvirt
 
 Minishift is currently tested against *docker-machine-driver-xhyve* version 0.3.1.
 
-[[homebrew-install]]
+[[homebrew-install-xhyve]]
 === Homebrew Install
 
 You can verify the existing version of the xhyve driver on your system using:

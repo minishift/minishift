@@ -410,6 +410,7 @@ func initClusterUpFlags() *flag.FlagSet {
 	clusterUpFlagSet.StringSliceVarP(&openShiftEnv, startFlags.OpenshiftEnv.Name, "e", []string{}, "Specify key-value pairs of environment variables to set on the OpenShift container.")
 	clusterUpFlagSet.Bool(startFlags.Metrics.Name, false, "Install metrics (experimental)")
 	clusterUpFlagSet.Bool(startFlags.Logging.Name, false, "Install logging (experimental)")
+	clusterUpFlagSet.Bool(startFlags.ServiceCatalog.Name, false, "Install service catalog (experimental)")
 	clusterUpFlagSet.String(startFlags.OpenshiftVersion.Name, version.GetOpenShiftVersion(), fmt.Sprintf("The OpenShift version to run, eg. %s", version.GetOpenShiftVersion()))
 	clusterUpFlagSet.String(startFlags.NoProxyList.Name, "", "List of hosts or subnets for which no proxy should be used.")
 	clusterUpFlagSet.AddFlag(cmdutil.HttpProxyFlag)

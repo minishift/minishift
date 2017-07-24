@@ -68,6 +68,7 @@ func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string, runne
 		if !oc.SupportFlag(key, config.OcPath, runner) {
 			return errors.New(fmt.Sprintf("Flag %s is not supported for oc version %s. Use 'openshift-version' flag to select a different version of OpenShift.", key, config.OpenShiftVersion))
 		}
+
 		cmdArgs = append(cmdArgs, "--"+key)
 		cmdArgs = append(cmdArgs, value)
 	}

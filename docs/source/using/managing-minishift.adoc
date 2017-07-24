@@ -8,7 +8,7 @@ include::variables.adoc[]
 
 toc::[]
 
-[[overview]]
+[[managing-minishift-overview]]
 == Overview
 
 When you use Minishift, you interact with two components:

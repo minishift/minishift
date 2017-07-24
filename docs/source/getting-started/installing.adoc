@@ -72,7 +72,7 @@ You cannot run Minishift from a network drive.
 See also issue link:https://github.com/minishift/minishift/issues/204[#204].
 ====
 
-[[homebrew-install]]
+[[homebrew-install-minishift]]
 === With Homebrew
 
 [[homebrew-stable-install]]

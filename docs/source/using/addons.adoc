@@ -6,7 +6,7 @@
 
 toc::[]
 
-[[overview]]
+[[add-ons-overview]]
 == Overview
 
 NOTE: This feature is still considered experimental and might change in future releases.

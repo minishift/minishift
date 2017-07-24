@@ -29,6 +29,11 @@ import (
 	"github.com/minishift/minishift/cmd/minishift/cmd/config"
 
 	"fmt"
+	"sort"
+	"strings"
+
+	"bytes"
+
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minikube/tests"
 	"github.com/minishift/minishift/pkg/minishift/clusterup"
@@ -36,8 +41,6 @@ import (
 	"github.com/minishift/minishift/pkg/testing/cli"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/viper"
-	"sort"
-	"strings"
 )
 
 var (
@@ -382,6 +385,37 @@ func TestDetermineIsoUrlWithInvalidName(t *testing.T) {
 	defer tearDown()
 
 	determineIsoUrl("foo")
+}
+
+func Test_getslice_withConfig(t *testing.T) {
+	viper.SetConfigType("json")
+	defer viper.Reset()
+	var confFile = []byte(`
+{
+    "bar": [
+        "hello",
+        "world"
+    ]
+}
+	`)
+
+	viper.ReadConfig(bytes.NewBuffer(confFile))
+
+	expectedSlice := []string{"hello", "world"}
+	for i, v := range getSlice("bar") {
+		if expectedSlice[i] != v {
+			t.Errorf("expected %+v. Got %+v", expectedSlice[i], v)
+		}
+	}
+}
+
+func Test_getslice_withCommandLine(t *testing.T) {
+	viper.Set("foo", []string{"hello", "world"})
+	defer viper.Reset()
+
+	if getSlice("foo") != nil {
+		t.Errorf("expected %+v. Got %+v", nil, getSlice("foo"))
+	}
 }
 
 func assertCommandLineArguments(expectedArguments []string, t *testing.T) {

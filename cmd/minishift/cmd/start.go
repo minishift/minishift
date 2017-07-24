@@ -236,9 +236,13 @@ func handleProxies() *util.ProxyConfig {
 	return proxyConfig
 }
 
+// getSlice return slice for provided key if value type is []interface{} otherwise nil
 func getSlice(key string) []string {
 	if viper.IsSet(key) {
-		return viper.GetStringSlice(key)
+		value := viper.Get(key)
+		if _, ok := value.([]interface{}); ok {
+			return viper.GetStringSlice(key)
+		}
 	}
 	return nil
 }
@@ -262,10 +266,10 @@ func startHost(libMachineClient *libmachine.Client) (*host.Host, string) {
 		CPUs:             viper.GetInt(startFlags.CPUs.Name),
 		DiskSize:         calculateDiskSizeInMB(viper.GetString(startFlags.DiskSize.Name)),
 		VMDriver:         viper.GetString(startFlags.VmDriver.Name),
-		DockerEnv:        getSlice(startFlags.DockerEnv.Name),
-		DockerEngineOpt:  getSlice(startFlags.DockerEngineOpt.Name),
+		DockerEnv:        append(dockerEnv, getSlice(startFlags.DockerEnv.Name)...),
+		DockerEngineOpt:  append(dockerEngineOpt, getSlice(startFlags.DockerEngineOpt.Name)...),
 		InsecureRegistry: determineInsecureRegistry(startFlags.InsecureRegistry.Name),
-		RegistryMirror:   getSlice(startFlags.RegistryMirror.Name),
+		RegistryMirror:   append(registryMirror, getSlice(startFlags.RegistryMirror.Name)...),
 		HostOnlyCIDR:     viper.GetString(startFlags.HostOnlyCIDR.Name),
 		ShellProxyEnv:    shellProxyEnv,
 	}

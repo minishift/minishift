@@ -29,6 +29,7 @@ import (
 	"strings"
 	"time"
 
+	startFlags "github.com/minishift/minishift/cmd/minishift/cmd/config"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minikube/kubeconfig"
 	"github.com/minishift/minishift/pkg/minishift/addon/command"
@@ -65,6 +66,15 @@ func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string, runne
 	cmdArgs := []string{"cluster", "up", "--use-existing-config"}
 
 	fmt.Println("-- Checking `oc` support for startup flags ... ")
+
+	// Deal with extra flags (remove from cluster up params)
+	var extraFlags string
+	if val, ok := clusterUpParams[startFlags.ExtraClusterUpFlags.Name]; ok {
+		extraFlags = val
+		delete(clusterUpParams, startFlags.ExtraClusterUpFlags.Name)
+	}
+
+	// Check if clusterUp flags are supported
 	for key, value := range clusterUpParams {
 		fmt.Printf("   %s ... ", key)
 		if !oc.SupportFlag(key, config.OcPath, runner) {
@@ -72,8 +82,19 @@ func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string, runne
 			return errors.New(fmt.Sprintf("Flag %s is not supported for oc version %s. Use 'openshift-version' flag to select a different version of OpenShift.", key, config.OpenShiftVersion))
 		}
 		fmt.Println("OK")
+
 		cmdArgs = append(cmdArgs, "--"+key)
 		cmdArgs = append(cmdArgs, value)
+	}
+
+	// Deal with extra flags (add to command arguments)
+	if len(extraFlags) > 0 {
+		fmt.Println("-- Extra `oc` cluster up flags (experimental) ... ")
+		fmt.Printf("   '%s'\n", extraFlags)
+		extraFlagFields := strings.Fields(extraFlags)
+		for _, extraFlag := range extraFlagFields {
+			cmdArgs = append(cmdArgs, extraFlag)
+		}
 	}
 
 	exitCode := runner.Run(os.Stdout, os.Stderr, config.OcPath, cmdArgs...)

@@ -449,6 +449,11 @@ func initClusterUpFlags() *flag.FlagSet {
 	clusterUpFlagSet.AddFlag(cmdutil.HttpProxyFlag)
 	clusterUpFlagSet.AddFlag(cmdutil.HttpsProxyFlag)
 
+	if hasEnabledExperimental {
+		clusterUpFlagSet.Bool(startFlags.ServiceCatalog.Name, false, "Install service catalog (experimental)")
+		clusterUpFlagSet.String(startFlags.ExtraClusterUpFlags.Name, "", "Specify optional flags for use with 'cluster up' (unsupported)")
+	}
+
 	return clusterUpFlagSet
 }
 

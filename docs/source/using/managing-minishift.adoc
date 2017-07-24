@@ -292,3 +292,24 @@ $ minishift ssh -- docker ps
 CONTAINER    IMAGE                   COMMAND                CREATED        STATUS        NAMES
 71fe8ff16548 openshift/origin:v1.5.1 "/usr/bin/openshift s" 4 minutes ago  Up 4 minutes  origin
 ----
+
+[[experimental-functionality]]
+== Experimental functionality
+
+To allow users and developers to get early access to some upcoming features, we offer a way to enable experimental functionality.
+
+You do this by setting the environment variable `MINISHIFT_ENABLE_EXPERIMENTAL` which will make additional flags available:
+
+----
+$ export MINISHIFT_ENABLE_EXPERIMENTAL=y
+----
+
+At the moment this is only relevant for the xref:../command-ref/minishift_start.adoc#[`minishift start`] command where you get additional options related to  xref:../openshift/openshift-client-binary.adoc#[`oc cluster up`].
+By setting the environment variable, you get access to the `service-catalog` flag which allows you to provision OpenShift's link:https://docs.openshift.org/latest/architecture/service_catalog/index.html[service catalog].
+
+You also get access to the `extra-clusterup-flags` flag, allowing you to pass any extra flags to `oc cluster up`.
+Minishift does per default not expose all `oc cluster up` flags in its CLI, either because certain features are not considered stable or simply because Minishift has not caught up yet with the latest options in `oc cluster up`.
+In these cases `extra-clusterup-flags` can be used to run experiments with these options.
+
+Be aware that these features can break or give a result you weren't expecting.
+We welcome your feedback when using them.

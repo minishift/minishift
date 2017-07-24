@@ -60,7 +60,8 @@ var dirs = [...]string{
 }
 
 const (
-	showLibmachineLogs = "show-libmachine-logs"
+	showLibmachineLogs    = "show-libmachine-logs"
+	enableExperimentalEnv = "MINISHIFT_ENABLE_EXPERIMENTAL"
 )
 
 var viperWhiteList = []string{
@@ -68,6 +69,8 @@ var viperWhiteList = []string{
 	"alsologtostderr",
 	"log_dir",
 }
+
+var hasEnabledExperimental bool = false
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
@@ -123,6 +126,10 @@ var RootCmd = &cobra.Command{
 			}
 		}
 
+		if hasEnabledExperimental {
+			glog.Info("Experimental features are enabled")
+		}
+
 		shouldShowLibmachineLogs := viper.GetBool(showLibmachineLogs)
 		if glog.V(3) {
 			log.SetDebug(true)
@@ -160,6 +167,12 @@ func setFlagsUsingViper() {
 }
 
 func init() {
+	enableExperimental, err := util.GetBoolEnv(enableExperimentalEnv)
+	if err == util.BooleanFormatError {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error enabling experimental features: %s", err))
+	}
+	hasEnabledExperimental = enableExperimental
+
 	RootCmd.PersistentFlags().Bool(showLibmachineLogs, false, "Show logs from libmachine.")
 	RootCmd.AddCommand(configCmd.ConfigCmd)
 	RootCmd.AddCommand(cmdOpenshift.OpenShiftCmd)
@@ -225,7 +238,7 @@ func performPostUpdateExecution(markerPath string) error {
 	json.Unmarshal(file, &markerData)
 	if markerData.InstallAddon {
 		fmt.Println(fmt.Sprintf("Minishift was upgraded from v%s to v%s. Running post update actions.", markerData.PreviousVersion, version.GetMinishiftVersion()))
-		fmt.Print("-- Updating default add-ons ... ")
+		fmt.Print("--- Updating default add-ons ... ")
 		util.UnpackAddons(constants.MakeMiniPath("add-ons"))
 		fmt.Println("OK")
 		fmt.Println(fmt.Sprintf("Default add-ons %s installed", strings.Join(util.DefaultAssets, ", ")))

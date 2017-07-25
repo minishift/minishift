@@ -16,7 +16,7 @@
 MINISHIFT_VERSION = 1.3.0
 OPENSHIFT_VERSION = v1.5.1
 B2D_ISO_VERSION = v1.0.2
-CENTOS_ISO_VERSION = v1.0.0
+CENTOS_ISO_VERSION = v1.1.0
 COMMIT_SHA=$(shell git rev-parse --short HEAD)
 
 # Go and compilation related variables

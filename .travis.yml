@@ -4,8 +4,8 @@ go:
 - 1.7.1
 
 install:
-- mkdir /home/travis/gopath/bin
-- mkdir /home/travis/gopath/pkg
+- mkdir -p /home/travis/gopath/bin
+- mkdir -p /home/travis/gopath/pkg
 - cd $HOME/gopath/src/github.com
 - mv `ls` foo
 - mv foo minishift

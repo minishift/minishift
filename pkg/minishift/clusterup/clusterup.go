@@ -66,7 +66,7 @@ func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string, runne
 
 	for key, value := range clusterUpParams {
 		if !oc.SupportFlag(key, config.OcPath, runner) {
-			errors.New(fmt.Sprintf("Flag %s is not supported for oc version %s. Use 'openshift-version' flag to select a different version of OpenShift.", key, config.OpenShiftVersion))
+			return errors.New(fmt.Sprintf("Flag %s is not supported for oc version %s. Use 'openshift-version' flag to select a different version of OpenShift.", key, config.OpenShiftVersion))
 		}
 		cmdArgs = append(cmdArgs, "--"+key)
 		cmdArgs = append(cmdArgs, value)
@@ -74,7 +74,7 @@ func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string, runne
 
 	exitCode := runner.Run(os.Stdout, os.Stderr, config.OcPath, cmdArgs...)
 	if exitCode != 0 {
-		errors.New("Error starting the cluster.")
+		return errors.New("Error starting the cluster.")
 	}
 	return nil
 }

@@ -415,6 +415,7 @@ func initClusterUpFlags() *flag.FlagSet {
 	clusterUpFlagSet.String(startFlags.NoProxyList.Name, "", "List of hosts or subnets for which no proxy should be used.")
 	clusterUpFlagSet.AddFlag(cmdutil.HttpProxyFlag)
 	clusterUpFlagSet.AddFlag(cmdutil.HttpsProxyFlag)
+	clusterUpFlagSet.String(startFlags.OcClusterExtraFlags.Name, "", "Specify optional flags for use with 'cluster up' (unsupported)")
 
 	return clusterUpFlagSet
 }

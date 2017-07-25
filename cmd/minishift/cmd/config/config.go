@@ -77,6 +77,9 @@ var (
 	OpenshiftEnv      = createFlag("openshift-env", nil, nil, nil, false)
 	Metrics           = createFlag("metrics", SetBool, nil, nil, true)
 	Logging           = createFlag("logging", SetBool, nil, nil, true)
+	ServiceCatalog    = createFlag("service-catalog", SetBool, nil, nil, true)
+	// ability to specify additional cluster up flags
+	OcClusterExtraFlags = createFlag("oc-cluster-extra-flags", SetString, nil, nil, true)
 
 	// Setting proxy
 	NoProxyList = createFlag("no-proxy", SetString, nil, nil, true)

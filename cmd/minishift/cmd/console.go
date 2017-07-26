@@ -29,9 +29,10 @@ import (
 )
 
 var (
-	consoleURLMode  bool
-	machineReadAble bool
-	machineDetails  = `HOST=%s
+	consoleURLMode    bool
+	machineReadAble   bool
+	requestOauthToken bool
+	machineDetails    = `HOST=%s
 PORT=%d
 CONSOLE_URL=%s`
 )
@@ -50,6 +51,9 @@ var consoleCmd = &cobra.Command{
 			fmt.Fprintln(os.Stdout, getHostUrl(api))
 		} else if machineReadAble {
 			displayConsoleInMachineReadable(getHostIp(api), getHostUrl(api))
+		} else if requestOauthToken {
+			fmt.Fprintln(os.Stdout, "Opening requested token URI in the default browser...")
+			browser.OpenURL(getHostUrl(api) + "/oauth/token/request")
 		} else {
 			fmt.Fprintln(os.Stdout, "Opening the OpenShift Web console in the default browser...")
 			browser.OpenURL(getHostUrl(api))
@@ -65,7 +69,6 @@ func displayConsoleInMachineReadable(hostIP string, url string) {
 func getHostUrl(api *libmachine.Client) string {
 	url, err := cluster.GetConsoleURL(api)
 	if err != nil {
-
 		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot access the OpenShift console. Verify that Minishift is running. Error: %s", err.Error()))
 	}
 	return url
@@ -82,5 +85,6 @@ func getHostIp(api *libmachine.Client) string {
 func init() {
 	consoleCmd.Flags().BoolVar(&consoleURLMode, "url", false, "Prints the OpenShift Web Console URL to the console.")
 	consoleCmd.Flags().BoolVar(&machineReadAble, "machine-readable", false, "Prints OpenShift's IP, port and Web Console URL in Machine readable format")
+	consoleCmd.Flags().BoolVar(&requestOauthToken, "request-oauth-token", false, "Open token request to default web browser")
 	RootCmd.AddCommand(consoleCmd)
 }

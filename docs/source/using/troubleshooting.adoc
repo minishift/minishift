@@ -230,3 +230,16 @@ If you try to use Minishift with Hyper-V using an external virtual switch while 
 Cause: Hyper-V networking might not route the network traffic in both directions properly when connected to a VPN.
 
 Workaround: Disconnect from the VPN and try again after stopping the VM from the Hyper-V manager.
+
+[[root-filesystem-exceeds-overlay-size]]
+== The root filesystem of the Minishift VM exceeds overlay size
+
+Installing additional packages or copying large files to the root filesystem of the Minishift VM might exceed the allocated overlay size and lock the Minishift VM.
+
+Cause: The Minishift VM root filesystem contains core packages that are configured to optimize running the Minishift VM and containers.
+The available storage on the root filesystem is determined by the overlay size, which is smaller than the total available storage.
+
+Workaround: Avoid installing packages or storing large files in the root filesystem of the Minishift VM.
+Instead, you can create a sub-directory in the *_mnt/sda1/_* persistent storage volume or define and mount xref:../using/host-folders.adoc#[host folders] that can share storage space between the host and the Minishift VM.
+
+If you want to perform development tasks inside the Minishift VM, it is recommended that you use containers, which are stored in persistent storage volumes, and reuse the xref:../using/docker-daemon.adoc#[Minishift Docker daemon].

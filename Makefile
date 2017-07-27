@@ -15,8 +15,6 @@
 # Various versions - Minishift, default OpenShift, default B2D ISO
 MINISHIFT_VERSION = 1.3.1
 OPENSHIFT_VERSION = v1.5.1
-B2D_ISO_VERSION = v1.0.2
-CENTOS_ISO_VERSION = v1.1.0
 COMMIT_SHA=$(shell git rev-parse --short HEAD)
 
 # Go and compilation related variables
@@ -37,8 +35,6 @@ SOURCE_DIRS = cmd pkg test
 
 # Linker flags
 VERSION_VARIABLES := -X $(REPOPATH)/pkg/version.minishiftVersion=$(MINISHIFT_VERSION) \
-	-X $(REPOPATH)/pkg/version.b2dIsoVersion=$(B2D_ISO_VERSION) \
-	-X $(REPOPATH)/pkg/version.centOsIsoVersion=$(CENTOS_ISO_VERSION) \
 	-X $(REPOPATH)/pkg/version.openshiftVersion=$(OPENSHIFT_VERSION) \
 	-X $(REPOPATH)/pkg/version.commitSha=$(COMMIT_SHA)
 LDFLAGS := $(VERSION_VARIABLES) -s -w -extldflags '-static'

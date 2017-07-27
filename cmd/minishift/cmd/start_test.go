@@ -38,6 +38,7 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/tests"
 	"github.com/minishift/minishift/pkg/minishift/clusterup"
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
+	minishiftUtil "github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/testing/cli"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/viper"
@@ -361,11 +362,11 @@ func TestDetermineIsoUrl(t *testing.T) {
 		in  string
 		out string
 	}{
-		{"", constants.DefaultB2dIsoUrl},
-		{"b2d", constants.DefaultB2dIsoUrl},
-		{"B2D", constants.DefaultB2dIsoUrl},
-		{"centos", constants.DefaultCentOsIsoUrl},
-		{"CentOs", constants.DefaultCentOsIsoUrl},
+		{"", minishiftUtil.GetLatestISOVersion("b2d")},
+		{"b2d", minishiftUtil.GetLatestISOVersion("b2d")},
+		{"B2D", minishiftUtil.GetLatestISOVersion("b2d")},
+		{"centos", minishiftUtil.GetLatestISOVersion("centos")},
+		{"CentOs", minishiftUtil.GetLatestISOVersion("centos")},
 		{"http://my.custom.url/myiso.iso", "http://my.custom.url/myiso.iso"},
 		{"https://my.custom.url/myiso.iso", "https://my.custom.url/myiso.iso"},
 		{"file://somewhere/on/disk", "file://somewhere/on/disk"},

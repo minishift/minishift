@@ -234,6 +234,7 @@ func (m *MachineConfig) CacheMinikubeISOFromURL() error {
 	if err != nil {
 		return err
 	}
+	defer tmpISOFile.Close()
 
 	response, err := http.Get(m.MinikubeISO)
 	if err != nil {
@@ -282,7 +283,19 @@ func (m *MachineConfig) CacheMinikubeISOFromURL() error {
 	}
 	defer out.Close()
 
-	if err = os.Rename(tmpISOFile.Name(), out.Name()); err != nil {
+	if err = renameFile(tmpISOFile, out); err != nil {
+		return nil
+	}
+
+	return nil
+}
+
+func renameFile(oldFile, newFile *os.File) error {
+	// File descriptor need to be closed otherwise it will throw error
+	// for Windows https://github.com/minishift/minishift/issues/1186
+	oldFile.Close()
+	newFile.Close()
+	if err := os.Rename(oldFile.Name(), newFile.Name()); err != nil {
 		return err
 	}
 	return nil

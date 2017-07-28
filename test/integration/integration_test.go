@@ -142,7 +142,7 @@ func FeatureContext(s *godog.Suite) {
 		minishift.rolloutServicesSuccessfully)
 
 	// steps to verify `stdout`, `stderr` and `exitcode` of commands executed
-	s.Step(`([^"]*) should contain ([^"]*)$`,
+	s.Step(`([^"]*) should contain "([^"]*)"$`,
 		commandReturnShouldContain)
 	s.Step(`([^"]*) should not contain "([^"]*)"$`,
 		commandReturnShouldNotContain)
@@ -160,6 +160,15 @@ func FeatureContext(s *godog.Suite) {
 		commandReturnShouldNotBeEmpty)
 	s.Step(`([^"]*) should be valid ([^"]*)$`,
 		shouldBeInValidFormat)
+	// steps for matching stdout, stderr or exitcode with regular expression
+	s.Step(`([^"]*) should match "([^"]*)"$`,
+		commandReturnShouldMatchRegex)
+	s.Step(`([^"]*) should not match "([^"]*)"$`,
+		commandReturnShouldNotMatchRegex)
+	s.Step(`([^"]*) should match$`,
+		commandReturnShouldMatchRegexContent)
+	s.Step(`([^"]*) should not match$`,
+		commandReturnShouldNotMatchRegexContent)
 
 	// step for HTTP requests for minishift web console
 	s.Step(`(body|status code) of HTTP request to "([^"]*)" (?:|at "([^"]*)" )(contains|is equal to) "([^"]*)"$`,
@@ -243,19 +252,17 @@ func getConfigValue(configPath string, keyPath string) (string, error) {
 }
 
 func matchConfigValue(configPath string, condition string, keyPath string, expectedValue string) error {
-	expectedRegexp, err := regexp.Compile(expectedValue)
-	if err != nil {
-		return fmt.Errorf("Expected value must be a valid regular expression statement: ", err)
-	}
-
 	keyValue, err := getConfigValue(configPath, keyPath)
 	if err != nil {
 		return err
 	}
 
-	if (condition == "contains") && !expectedRegexp.MatchString(keyValue) {
+	matches, err := performRegexMatch(expectedValue, keyValue)
+	if err != nil {
+		return err
+	} else if (condition == "contains") && !matches {
 		return fmt.Errorf("For key '%s' config contains unexpected value '%s'", keyPath, keyValue)
-	} else if (condition == "does not contain") && expectedRegexp.MatchString(keyValue) {
+	} else if (condition == "does not contain") && matches {
 		return fmt.Errorf("For key '%s' config contains value '%s', which it should not contain", keyPath, keyValue)
 	}
 
@@ -279,7 +286,7 @@ func checkConfigKey(configPath string, condition string, keyPath string) error {
 
 func compareExpectedWithActualContains(expected string, actual string) error {
 	if !strings.Contains(actual, expected) {
-		return fmt.Errorf("Output did not match. Expected: %s, Actual: %s", expected, actual)
+		return fmt.Errorf("Output did not match. Expected: '%s', Actual: '%s'", expected, actual)
 	}
 
 	return nil
@@ -287,7 +294,7 @@ func compareExpectedWithActualContains(expected string, actual string) error {
 
 func compareExpectedWithActualNotContains(notexpected string, actual string) error {
 	if strings.Contains(actual, notexpected) {
-		return fmt.Errorf("Output did match. Not expected: %s, Actual: %s", notexpected, actual)
+		return fmt.Errorf("Output did match. Not expected: '%s', Actual: '%s'", notexpected, actual)
 	}
 
 	return nil
@@ -295,7 +302,7 @@ func compareExpectedWithActualNotContains(notexpected string, actual string) err
 
 func compareExpectedWithActualEquals(expected string, actual string) error {
 	if actual != expected {
-		return fmt.Errorf("Output did not match. Expected: %s, Actual: %s", expected, actual)
+		return fmt.Errorf("Output did not match. Expected: '%s', Actual: '%s'", expected, actual)
 	}
 
 	return nil
@@ -303,7 +310,38 @@ func compareExpectedWithActualEquals(expected string, actual string) error {
 
 func compareExpectedWithActualNotEquals(notexpected string, actual string) error {
 	if actual == notexpected {
-		return fmt.Errorf("Output did match. Not expected: %s, Actual: %s", notexpected, actual)
+		return fmt.Errorf("Output did match. Not expected: '%s', Actual: '%s'", notexpected, actual)
+	}
+
+	return nil
+}
+
+func performRegexMatch(regex string, input string) (bool, error) {
+	compRegex, err := regexp.Compile(regex)
+	if err != nil {
+		return false, fmt.Errorf("Expected value must be a valid regular expression statement: ", err)
+	}
+
+	return compRegex.MatchString(input), nil
+}
+
+func compareExpectedWithActualMatchesRegex(expected string, actual string) error {
+	matches, err := performRegexMatch(expected, actual)
+	if err != nil {
+		return err
+	} else if !matches {
+		return fmt.Errorf("Output did not match. Expected: '%s', Actual: '%s'", expected, actual)
+	}
+
+	return nil
+}
+
+func compareExpectedWithActualNotMatchesRegex(notexpected string, actual string) error {
+	matches, err := performRegexMatch(notexpected, actual)
+	if err != nil {
+		return err
+	} else if matches {
+		return fmt.Errorf("Output did match. Not expected: '%s', Actual: '%s'", notexpected, actual)
 	}
 
 	return nil
@@ -392,6 +430,22 @@ func commandReturnShouldNotBeEmpty(commandField string) error {
 
 func variableShouldNotBeEmpty(variableName string) error {
 	return compareExpectedWithActualNotEquals("", minishift.GetVariableByName(variableName).Value)
+}
+
+func commandReturnShouldMatchRegex(commandField string, expected string) error {
+	return compareExpectedWithActualMatchesRegex(expected, selectFieldFromLastOutput(commandField))
+}
+
+func commandReturnShouldNotMatchRegex(commandField string, notexpected string) error {
+	return compareExpectedWithActualNotMatchesRegex(notexpected, selectFieldFromLastOutput(commandField))
+}
+
+func commandReturnShouldMatchRegexContent(commandField string, expected *gherkin.DocString) error {
+	return compareExpectedWithActualMatchesRegex(expected.Content, selectFieldFromLastOutput(commandField))
+}
+
+func commandReturnShouldNotMatchRegexContent(commandField string, notexpected *gherkin.DocString) error {
+	return compareExpectedWithActualNotMatchesRegex(notexpected.Content, selectFieldFromLastOutput(commandField))
 }
 
 type commandRunner func(string) error

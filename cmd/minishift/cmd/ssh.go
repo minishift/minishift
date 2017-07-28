@@ -26,6 +26,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	SshCommunicationError = "exit status 255"
+)
+
 // sshCmd represents the docker-machine ssh command
 var sshCmd = &cobra.Command{
 	Use:   "ssh [-- COMMAND]",
@@ -34,9 +38,13 @@ var sshCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 		defer api.Close()
+
 		err := cluster.CreateSSHShell(api, args)
 		if err != nil {
-			atexit.ExitWithMessage(1, fmt.Sprintf("Cannot establish SSH connection to the VM: %s", err.Error()))
+			if err.Error() == SshCommunicationError {
+				atexit.ExitWithMessage(1, fmt.Sprintf("Cannot establish SSH connection to the VM: %s", err.Error()))
+			}
+			atexit.ExitWithMessage(1, fmt.Sprintf("Command failed: %s", err.Error()))
 		}
 	},
 }

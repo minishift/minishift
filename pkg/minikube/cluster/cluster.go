@@ -57,7 +57,8 @@ var (
 )
 
 const (
-	fileScheme = "file"
+	fileScheme            = "file"
+	SshCommunicationError = "exit status 255"
 )
 
 //This init function is used to set the logtostderr variable to false so that INFO level log info does not clutter the CLI
@@ -595,7 +596,12 @@ func CreateSSHShell(api libmachine.API, args []string) error {
 		return err
 	}
 
-	return client.Shell(args...)
+	err = client.Shell(args...)
+	// do not fail if interactive and able to connect
+	if err != nil && len(args) == 0 && err.Error() != SshCommunicationError {
+		return nil
+	}
+	return err
 }
 
 func GetConsoleURL(api libmachine.API) (string, error) {

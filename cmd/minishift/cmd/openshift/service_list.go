@@ -83,7 +83,7 @@ var serviceListCmd = &cobra.Command{
 		}
 
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Namsepace", "Name", "NodePort", "Route-URL", "Weight"})
+		table.SetHeader([]string{"Namespace", "Name", "NodePort", "Route-URL", "Weight"})
 		table.SetBorders(tablewriter.Border{Left: true, Top: true, Right: true, Bottom: true})
 		table.SetCenterSeparator("|")
 		table.AppendBulk(data) // Add Bulk Data

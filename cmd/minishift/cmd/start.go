@@ -268,7 +268,7 @@ func startHost(libMachineClient *libmachine.Client) (*host.Host, string) {
 		VMDriver:         viper.GetString(startFlags.VmDriver.Name),
 		DockerEnv:        append(dockerEnv, getSlice(startFlags.DockerEnv.Name)...),
 		DockerEngineOpt:  append(dockerEngineOpt, getSlice(startFlags.DockerEngineOpt.Name)...),
-		InsecureRegistry: determineInsecureRegistry(startFlags.InsecureRegistry.Name),
+		InsecureRegistry: append(insecureRegistry, determineInsecureRegistry(startFlags.InsecureRegistry.Name)...),
 		RegistryMirror:   append(registryMirror, getSlice(startFlags.RegistryMirror.Name)...),
 		HostOnlyCIDR:     viper.GetString(startFlags.HostOnlyCIDR.Name),
 		ShellProxyEnv:    shellProxyEnv,

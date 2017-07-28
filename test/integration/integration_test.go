@@ -67,9 +67,9 @@ func TestMain(m *testing.M) {
 	}
 	runner := util.MinishiftRunner{CommandPath: minishiftBinary}
 	if runner.IsCDK() {
-		godogTags += "~minishift-only"
+		godogTags += "~minishift-only ~b2d-only"
 	} else {
-		godogTags += "~cdk-only"
+		godogTags += "~cdk-only ~rhel-only"
 	}
 
 	status := godog.RunWithOptions("minishift", func(s *godog.Suite) {
@@ -200,6 +200,7 @@ func FeatureContext(s *godog.Suite) {
 		if runner.IsCDK() {
 			runner.CDKSetup()
 		}
+
 		fmt.Println("Running Integration test in:", testDir)
 		fmt.Println("Using binary:", minishiftBinary)
 	})

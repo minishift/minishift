@@ -19,14 +19,12 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/docker/machine/libmachine"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
-	pkgUtil "github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
@@ -51,13 +49,8 @@ func runDelete(cmd *cobra.Command, args []string) {
 
 	util.ExitIfUndefined(api, constants.MachineName)
 
-	if minishiftConfig.InstanceConfig.IsRegistered {
-		if stopped, err := cluster.UnRegister(api); err != nil || stopped {
-			handleFailedUnRegistration()
-		}
-		minishiftConfig.InstanceConfig.IsRegistered = false
-		minishiftConfig.InstanceConfig.Write()
-	}
+	// Unregistration, do not allow to be skipped
+	unregisterHost(api, false)
 
 	if clearCache {
 		cachePath := constants.MakeMiniPath("cache")
@@ -77,14 +70,6 @@ func runDelete(cmd *cobra.Command, args []string) {
 	removeInstanceConfigs()
 
 	fmt.Println("Minishift VM deleted.")
-}
-
-func handleFailedUnRegistration() {
-	userConfirmation := pkgUtil.ReadInputFromStdin("Current Minishift VM is registered, but unregistration failed. " +
-		"Do you still want to delete the VM [y/N]?")
-	if strings.ToUpper(userConfirmation) != "Y" {
-		atexit.ExitWithMessage(0, fmt.Sprintln("Delete aborted."))
-	}
 }
 
 func handleFailedHostDeletion(err error) {

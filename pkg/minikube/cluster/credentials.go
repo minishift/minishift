@@ -19,14 +19,12 @@ package cluster
 import (
 	"net"
 
-	"github.com/minishift/minishift/pkg/minishift/registration"
 	"github.com/minishift/minishift/pkg/util"
 )
 
 var (
 	// This is the internalIP the the API server and other components communicate on.
-	internalIP             = net.ParseIP(DefaultServiceClusterIP)
-	RegistrationParameters = new(registration.RegistrationParameters)
+	internalIP = net.ParseIP(DefaultServiceClusterIP)
 )
 
 func GenerateCerts(pub, priv string, ip net.IP) error {

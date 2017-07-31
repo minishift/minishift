@@ -38,6 +38,19 @@ func NeedRegistration(host *host.Host) (bool, error) {
 	return supportRegistration, err
 }
 
+type RegistrationHostActionFunc func(param *RegistrationParameters) error
+
+func doRegistrationHostAction(actionMessage string, registrationAction RegistrationHostActionFunc, param *RegistrationParameters) (bool, error) {
+	fmt.Println(actionMessage)
+	if err := registrationAction(param); err != nil {
+		// error occured during action
+		return false, err
+	}
+
+	// was succesfully
+	return true, nil
+}
+
 // Register host VM
 func RegisterHostVM(host *host.Host, param *RegistrationParameters) (bool, error) {
 	commander := provision.GenericSSHCommander{Driver: host.Driver}
@@ -45,38 +58,42 @@ func RegisterHostVM(host *host.Host, param *RegistrationParameters) (bool, error
 	if !supportRegistration {
 		log.Debug("Distribution doesn't support registration")
 	}
-
 	if err != nil && err != ErrDetectionFailed {
 		return supportRegistration, err
 	}
-
-	if registrator != nil {
-		fmt.Println("Registering machine using subscription-manager")
-		if err := registrator.Register(param); err != nil {
-			return supportRegistration, err
-		}
+	if err != nil && err != ErrDetectionFailed {
+		// failed
+		return supportRegistration, err
 	}
-	return supportRegistration, nil
+	if err == ErrDetectionFailed || registrator == nil {
+		// does not support registration
+		return supportRegistration, nil
+	}
+
+	return doRegistrationHostAction(
+		"Registering machine using subscription-manager",
+		registrator.Register,
+		param)
 }
 
 // Unregister host VM
-func UnregisterHostVM(host *host.Host, param *RegistrationParameters) error {
+func UnregisterHostVM(host *host.Host, param *RegistrationParameters) (bool, error) {
 	commander := provision.GenericSSHCommander{Driver: host.Driver}
-	registrator, supportUnregistration, err := DetectRegistrator(commander)
-
-	if !supportUnregistration {
+	registrator, supportRegistration, err := DetectRegistrator(commander)
+	if !supportRegistration {
 		log.Debug("Distribution doesn't support unregistration")
 	}
-
 	if err != nil && err != ErrDetectionFailed {
-		return err
+		// failed
+		return supportRegistration, err
+	}
+	if err == ErrDetectionFailed || registrator == nil {
+		// does not support unregistration
+		return supportRegistration, nil
 	}
 
-	if registrator != nil {
-		fmt.Println("Unregistering machine")
-		if err := registrator.Unregister(param); err != nil {
-			return err
-		}
-	}
-	return nil
+	return doRegistrationHostAction(
+		"Unregistering machine",
+		registrator.Unregister,
+		param)
 }

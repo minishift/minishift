@@ -20,17 +20,11 @@ import (
 	"fmt"
 
 	"github.com/docker/machine/libmachine"
-	"github.com/docker/machine/libmachine/log"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
-	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
-)
-
-var (
-	skipUnRegistration bool
 )
 
 // stopCmd represents the stop command
@@ -61,15 +55,8 @@ func runStop(cmd *cobra.Command, args []string) {
 
 	fmt.Println("Stopping local OpenShift cluster...")
 
-	if !skipUnRegistration {
-		if _, err := cluster.UnRegister(api); err != nil {
-			atexit.ExitWithMessage(1, fmt.Sprintf("Error unregistering the VM: %s", err.Error()))
-		}
-		minishiftConfig.InstanceConfig.IsRegistered = false
-		minishiftConfig.InstanceConfig.Write()
-	} else {
-		log.Debug("Skipping unregistration due to enabled --skip-unregistration flag")
-	}
+	// Unregister, allow to be skipped
+	unregisterHost(api, true)
 
 	if err := cluster.StopHost(api); err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error stopping cluster: %s", err.Error()))

@@ -30,7 +30,6 @@ import (
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/host"
-	"github.com/docker/machine/libmachine/log"
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/cmd/minishift/cmd/addon"
@@ -39,6 +38,7 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/cache"
+	minishiftCluster "github.com/minishift/minishift/pkg/minishift/cluster"
 	"github.com/minishift/minishift/pkg/minishift/clusterup"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/minishift/docker"
@@ -484,10 +484,9 @@ func initClusterUpFlags() *flag.FlagSet {
 // initSubscriptionManagerFlags create the CLI flags which are needed for VM registration
 func initSubscriptionManagerFlags() *flag.FlagSet {
 	subscriptionManagerFlagSet := flag.NewFlagSet(commandName, flag.ContinueOnError)
-
 	subscriptionManagerFlagSet.String(configCmd.Username.Name, "", "Username for the virtual machine registration.")
 	subscriptionManagerFlagSet.String(configCmd.Password.Name, "", "Password for the virtual machine registration.")
-	subscriptionManagerFlagSet.Bool(configCmd.SkipRegistration.Name, false, "Skip the virtual machine registration.")
+	subscriptionManagerFlagSet.BoolVar(&skipRegistration, configCmd.SkipRegistration.Name, false, "Skip the virtual machine registration.")
 
 	return subscriptionManagerFlagSet
 }
@@ -588,10 +587,10 @@ func validateOpenshiftVersion() {
 }
 
 func setSubscriptionManagerParameters() {
-	cluster.RegistrationParameters.Username = viper.GetString(configCmd.Username.Name)
-	cluster.RegistrationParameters.Password = viper.GetString(configCmd.Password.Name)
-	cluster.RegistrationParameters.GetUsernameInteractive = getUsernameInteractive
-	cluster.RegistrationParameters.GetPasswordInteractive = getPasswordInteractive
+	minishiftCluster.RegistrationParameters.Username = viper.GetString(configCmd.Username.Name)
+	minishiftCluster.RegistrationParameters.Password = viper.GetString(configCmd.Password.Name)
+	minishiftCluster.RegistrationParameters.GetUsernameInteractive = getUsernameInteractive
+	minishiftCluster.RegistrationParameters.GetPasswordInteractive = getPasswordInteractive
 }
 
 func getUsernameInteractive(message string) string {
@@ -600,22 +599,6 @@ func getUsernameInteractive(message string) string {
 
 func getPasswordInteractive(message string) string {
 	return inputUtils.ReadPasswordFromStdin(message)
-}
-
-func registerHost(libMachineClient *libmachine.Client) {
-	if viper.GetBool(configCmd.SkipRegistration.Name) {
-		log.Debug("Skipping registration due to enabled --skip-registration flag")
-		return
-	}
-	supportRegistration, err := cluster.Register(libMachineClient)
-	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Error to register VM: %v", err))
-	}
-	if supportRegistration {
-		minishiftConfig.InstanceConfig.IsRegistered = true
-		minishiftConfig.InstanceConfig.Write()
-		return
-	}
 }
 
 func applyDockerEnvToProcessEnv(libMachineClient *libmachine.Client) {

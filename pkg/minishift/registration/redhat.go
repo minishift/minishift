@@ -17,19 +17,21 @@ limitations under the License.
 package registration
 
 import (
+	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/briandowns/spinner"
 	"github.com/docker/machine/libmachine/provision"
-	"github.com/golang/glog"
 	"github.com/minishift/minishift/pkg/util"
 	minishiftStrings "github.com/minishift/minishift/pkg/util/strings"
-	"os"
-	"time"
 )
 
-const SPINNER_SPEED = 200 // In milliseconds
+const (
+	SPINNER_SPEED = 200 // In milliseconds
+	RHSMName      = "Red Hat Developers or Red Hat Subscription Management (RHSM)"
+)
 
 func init() {
 	Register("Redhat", &RegisteredRegistrator{
@@ -47,6 +49,7 @@ type RedHatRegistrator struct {
 	provision.SSHCommander
 }
 
+// CompatibleWithDistribution returns true if system supports registration with RHSM
 func (registrator *RedHatRegistrator) CompatibleWithDistribution(osReleaseInfo *provision.OsRelease) bool {
 	if osReleaseInfo.ID != "rhel" {
 		return false
@@ -58,35 +61,33 @@ func (registrator *RedHatRegistrator) CompatibleWithDistribution(osReleaseInfo *
 	}
 }
 
-func (registrator *RedHatRegistrator) SSHCommand(cmd string) (string, error) {
-	startTime := time.Now()
-	out, err := registrator.SSHCommander.SSHCommand(cmd)
-	elapsed := time.Since(startTime)
-
-	if glog.V(2) {
-		fmt.Printf("Command \"%s\" took %v\n", cmd, util.FriendlyDuration(elapsed).String())
-	}
-
-	return out, err
-}
-
+// Register attempts to register the system with RHSM
 func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) error {
-	output, err := registrator.SSHCommand("sudo -E subscription-manager version")
-	if err != nil {
-		return err
-	}
-	if strings.Contains(output, "not registered") {
+	if isRegistered, err := registrator.isRegistered(); !isRegistered && err == nil {
 		spinnerView := spinner.New(spinner.CharSets[9], SPINNER_SPEED*time.Millisecond)
+
 		for i := 1; i < 4; i++ {
+			// request username (disallow empty value)
 			if param.Username == "" {
-				param.Username = param.GetUsernameInteractive("Red Hat Developers or Red Hat Subscription Management (RHSM) username")
+				for param.Username == "" {
+					param.Username = param.GetUsernameInteractive(RHSMName + " username")
+				}
 			}
+			// request password (disallow empty value)
 			if param.Password == "" {
-				param.Password = param.GetPasswordInteractive("Red Hat Developers or Red Hat Subscription Management (RHSM) password")
+				for param.Password == "" {
+					param.Password = param.GetPasswordInteractive(RHSMName + " password")
+				}
 			}
+
+			// prepare subscription command
 			subscriptionCommand := fmt.Sprintf("sudo -E subscription-manager register --auto-attach "+
 				"--username %s "+
-				"--password '%s' ", param.Username, minishiftStrings.EscapeSingleQuote(param.Password))
+				"--password '%s' ",
+				param.Username,
+				minishiftStrings.EscapeSingleQuote(param.Password))
+
+			// start timed SSH command to register
 			spinnerView.Start()
 			startTime := time.Now()
 			_, err = registrator.SSHCommand(subscriptionCommand)
@@ -96,17 +97,22 @@ func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) er
 			} else {
 				fmt.Print("Registration unsuccessful ")
 			}
-			util.TimeTrack(startTime, os.Stdout, true)
+			fmt.Println(util.TimeElapsed(startTime, true))
+
 			if err == nil {
 				return nil
 			}
+
+			// general error when registration fails
 			if strings.Contains(err.Error(), "Invalid username or password") {
-				fmt.Println("Invalid username or password Retry: ", i)
-				param.Username = ""
-				param.Password = ""
+				fmt.Println("Invalid username or password. Retry:", i)
 			} else {
 				return err
 			}
+
+			// always reset credentials
+			param.Username = ""
+			param.Password = ""
 		}
 		if err != nil {
 			return err
@@ -115,16 +121,29 @@ func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) er
 	return nil
 }
 
+// Unregister attempts to unregister the system from RHSM
 func (registrator *RedHatRegistrator) Unregister(param *RegistrationParameters) error {
-	if output, err := registrator.SSHCommand("sudo -E subscription-manager version"); err != nil {
-		return err
-	} else {
-		if !strings.Contains(output, "not registered") {
-			if _, err := registrator.SSHCommand(
-				"sudo -E subscription-manager unregister"); err != nil {
-				return err
-			}
+	if isRegistered, err := registrator.isRegistered(); isRegistered {
+		if _, err := registrator.SSHCommand(
+			"sudo -E subscription-manager unregister"); err != nil {
+			return err
 		}
+	} else {
+		return err
 	}
 	return nil
+}
+
+// isRegistered returns registration state of RHSM or errors when undetermined
+func (registrator *RedHatRegistrator) isRegistered() (bool, error) {
+	if output, err := registrator.SSHCommand("sudo -E subscription-manager version"); err != nil {
+		return false, err
+	} else {
+		if !strings.Contains(output, "not registered") {
+			return true, nil
+		}
+		return false, nil
+	}
+
+	return false, errors.New("Unable to determine registration state")
 }

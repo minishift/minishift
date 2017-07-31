@@ -19,6 +19,7 @@ package util
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"golang.org/x/crypto/ssh/terminal"
 )
@@ -39,4 +40,10 @@ func ReadPasswordFromStdin(fieldlabel string) string {
 		value = string(pwinput)
 	}
 	return value
+}
+
+func AskForConfirmation(message string) bool {
+	userConfirmation := ReadInputFromStdin(message +
+		" Do you want to continue [y/N]?")
+	return strings.ToUpper(userConfirmation) == "Y"
 }

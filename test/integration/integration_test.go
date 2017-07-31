@@ -66,9 +66,23 @@ func TestMain(m *testing.M) {
 	}
 	runner := util.MinishiftRunner{CommandPath: minishiftBinary}
 	if runner.IsCDK() {
-		godogTags += "~minishift-only ~b2d-only"
+		godogTags += "~minishift-only&&~b2d-only&&~centos-only"
 	} else {
-		godogTags += "~cdk-only ~rhel-only"
+		switch os.Getenv("MINISHIFT_ISO_URL") {
+		case "b2d":
+			godogTags += "~cdk-only&&~centos-only&&~rhel-only"
+			fmt.Println("Test run using b2d iso image.")
+		case "centos":
+			godogTags += "~cdk-only&&~b2d-only&&~rhel-only"
+			fmt.Println("Test run using centos iso image.")
+		case "":
+			godogTags += "~cdk-only&&~centos-only&&~rhel-only"
+			os.Setenv("MINISHIFT_ISO_URL", "b2d")
+			fmt.Println("Test run using b2d iso image.")
+		default:
+			godogTags += "~cdk-only"
+			fmt.Println("Test run using custom path for iso image. WARNING: Only default image names 'b2d' and 'centos' are automatically supported by Minishift test suite. When using images with custom ISO_URL value, please add '~centos-only' or '~b2d-only' tags appropriately.")
+		}
 	}
 
 	status := godog.RunWithOptions("minishift", func(s *godog.Suite) {

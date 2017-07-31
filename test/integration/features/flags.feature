@@ -44,7 +44,7 @@ Feature: Flags
       export "BAZ=BAT"
       """
 
-  @rhel-only
+  @centos-only
   Scenario: User is able to get value of the docker environment variables
     Given Minishift has state "Running"
      When executing "minishift ssh cat /etc/systemd/system/docker.service.d/10-machine.conf" succeeds
@@ -66,7 +66,7 @@ Feature: Flags
       --dns=8.8.8.8
       """
 
-  @rhel-only
+  @centos-only
     Scenario: User is able to get the value of docker optional parameters
     Given Minishift has state "Running"
      When executing "minishift ssh cat /etc/systemd/system/docker.service.d/10-machine.conf" succeeds

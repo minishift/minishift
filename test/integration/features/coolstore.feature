@@ -1,4 +1,4 @@
-@coolstore
+@coolstore @centos-only
 Feature: Cool Store
   In order to test Minishift under load
   I need to setup a test environment

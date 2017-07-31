@@ -49,6 +49,7 @@ var (
 	minishiftBinary string
 
 	testDir string
+	isoName string
 
 	// Godog options
 	godogFormat              string
@@ -67,9 +68,35 @@ func TestMain(m *testing.M) {
 	}
 	runner := util.MinishiftRunner{CommandPath: minishiftBinary}
 	if runner.IsCDK() {
-		godogTags += "~minishift-only ~b2d-only"
+		godogTags += "~minishift-only"
+		isoName = "rhel"
+		fmt.Println("Test run using CDK binary with RHEL iso.")
 	} else {
-		godogTags += "~cdk-only ~rhel-only"
+		godogTags += "~cdk-only"
+		isoUrl := os.Getenv("MINISHIFT_ISO_URL")
+		switch isoUrl {
+		case "b2d":
+			fmt.Println("Test run using Boot2Docker iso image.")
+			isoName = "b2d"
+		case "centos":
+			fmt.Println("Test run using CentOS iso image.")
+			isoName = "centos"
+		case "":
+			fmt.Println("Test run using Boot2Docker iso image.")
+			isoName = "b2d"
+		default:
+			fmt.Print("Using full path for iso image. ")
+			if matched, _ := regexp.MatchString(".*centos7\\.iso", isoUrl); matched {
+				fmt.Println("CentOS variant was assumed from the filename of ISO.")
+				isoName = "centos"
+			} else if matched, _ := regexp.MatchString(".*b2d\\.iso", isoUrl); matched {
+				fmt.Println("Boot2docker variant was assumed from the filename of ISO.")
+				isoName = "b2d"
+			} else {
+				fmt.Println("Can't assume ISO variant from its filename. Will use Boot2Docker. To avoid this situation please name your ISO to end with 'b2d.iso' or 'centos7.iso'.")
+				isoName = "b2d"
+			}
+		}
 	}
 
 	status := godog.RunWithOptions("minishift", func(s *godog.Suite) {
@@ -194,6 +221,10 @@ func FeatureContext(s *godog.Suite) {
 		matchConfigValue)
 	s.Step(`^JSON config file "([^"]*)" (has|does not have) key "(.*)"$`,
 		checkConfigKey)
+
+	// iso dependent steps
+	s.Step(`^printing Docker daemon configuration to stdout$`,
+		catDockerConfigFile)
 
 	s.BeforeSuite(func() {
 		testDir = setUp()
@@ -555,4 +586,19 @@ func proxyLogShouldContain(expected string) error {
 
 func proxyLogShouldContainContent(expected *gherkin.DocString) error {
 	return compareExpectedWithActualContains(expected.Content, testProxy.GetLog())
+}
+
+func catDockerConfigFile() error {
+	var err error
+	if isoName == "b2d" {
+		err = executingMinishiftCommandSucceedsOrFails("ssh -- cat /var/lib/boot2docker/profile", "succeeds")
+
+	} else if isoName == "centos" || isoName == "rhel" {
+		err = executingMinishiftCommandSucceedsOrFails("ssh -- cat /etc/systemd/system/docker.service.d/10-machine.conf", "succeeds")
+
+	} else {
+		return errors.New("ISO name not supported.")
+	}
+
+	return err
 }

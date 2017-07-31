@@ -13,7 +13,7 @@ Feature: Cool Store
       """
       Add-on 'xpaas' enabled
       """
-     When executing "minishift start --memory 4096 --iso-url centos" succeeds
+     When executing "minishift start --memory 4096" succeeds
      Then Minishift should have state "Running"
 
   Scenario: User creates a project and deploys CoolStore

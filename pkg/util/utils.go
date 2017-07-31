@@ -126,13 +126,18 @@ func VersionOrdinal(version string) string {
 //
 //    defer TimeTrack(time.Now(), os.Stdout)
 func TimeTrack(start time.Time, w io.Writer, friendly bool) {
+	fmt.Fprintln(w, fmt.Sprintf("[%v]", TimeElapsed(start, friendly)))
+}
+
+// TimeElapsed is used to time the execution of a method.
+func TimeElapsed(start time.Time, friendly bool) string {
 	elapsed := time.Since(start)
 
 	if friendly {
 		elapsed = FriendlyDuration(elapsed)
 	}
 
-	fmt.Fprintln(w, fmt.Sprintf("[%v]", elapsed.String()))
+	return elapsed.String()
 }
 
 func FriendlyDuration(d time.Duration) time.Duration {

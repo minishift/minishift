@@ -41,7 +41,6 @@ import (
 	"github.com/docker/machine/libmachine/state"
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/pkg/minikube/constants"
-	"github.com/minishift/minishift/pkg/minishift/registration"
 	minishiftUtil "github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/util"
 	minishiftOs "github.com/minishift/minishift/pkg/util/os"
@@ -131,37 +130,6 @@ func DeleteHost(api libmachine.API) error {
 	m.Collect(host.Driver.Remove())
 	m.Collect(api.Remove(constants.MachineName))
 	return m.ToError()
-}
-
-// Register host VM
-func Register(api libmachine.API) (bool, error) {
-	host, err := api.Load(constants.MachineName)
-	if err != nil {
-		return false, err
-	}
-	supportRegistration, err := registration.RegisterHostVM(host, RegistrationParameters)
-	if err != nil {
-		return supportRegistration, err
-	}
-	return supportRegistration, nil
-}
-
-// Un-register host VM
-func UnRegister(api libmachine.API) (bool, error) {
-	host, err := api.Load(constants.MachineName)
-	if err != nil {
-		return false, err
-	}
-
-	if drivers.MachineInState(host.Driver, state.Running)() {
-		err := registration.UnregisterHostVM(host, RegistrationParameters)
-		if err != nil {
-			return false, err
-		}
-	} else {
-		return true, nil
-	}
-	return false, nil
 }
 
 // GetHostStatus gets the status of the host VM.

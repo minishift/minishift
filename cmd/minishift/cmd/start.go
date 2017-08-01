@@ -44,6 +44,7 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/hostfolder"
 	"github.com/minishift/minishift/pkg/minishift/openshift"
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
+	minishiftUtil "github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/util"
 	inputUtils "github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
@@ -367,9 +368,9 @@ func determineIsoUrl(iso string) string {
 
 	switch iso {
 	case startFlags.B2dIsoAlias, isoNotSpecified:
-		iso = constants.DefaultB2dIsoUrl
+		iso = minishiftUtil.GetLatestISOVersion(startFlags.B2dIsoAlias)
 	case startFlags.CentOsIsoAlias:
-		iso = constants.DefaultCentOsIsoUrl
+		iso = minishiftUtil.GetLatestISOVersion(startFlags.CentOsIsoAlias)
 	default:
 		if !(govalidator.IsURL(iso) || strings.HasPrefix(iso, "file:")) {
 			atexit.ExitWithMessage(1, unsupportedIsoUrlFormat)

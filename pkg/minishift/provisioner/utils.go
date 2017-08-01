@@ -24,6 +24,7 @@ import (
 
 	"github.com/docker/machine/libmachine/auth"
 	"github.com/docker/machine/libmachine/log"
+	"github.com/docker/machine/libmachine/provision"
 )
 
 var (
@@ -58,9 +59,53 @@ ExecStart=/usr/bin/dockerd-current -H tcp://0.0.0.0:{{.DockerPort}} -H unix:///v
            {{ range .EngineOptions.Labels }}--label {{.}} {{ end }}{{ range .EngineOptions.InsecureRegistry }}--insecure-registry {{.}} {{ end }}{{ range .EngineOptions.RegistryMirror }}--registry-mirror {{.}} {{ end }}{{ range .EngineOptions.ArbitraryFlags }}--{{.}} {{ end }}
 Environment={{range .EngineOptions.Env}}{{ printf "%q" . }} {{end}}
 `
+	engineConfigTemplateBuildRoot = `[Unit]
+Description=Docker Application Container Engine
+Documentation=https://docs.docker.com
+After=network.target docker.socket
+Requires=docker.socket
+
+[Service]
+Type=notify
+
+# DOCKER_RAMDISK disables pivot_root in Docker, using MS_MOVE instead.
+Environment=DOCKER_RAMDISK=yes
+{{range .EngineOptions.Env}}Environment={{.}}
+{{end}}
+
+# This file is a systemd drop-in unit that inherits from the base dockerd configuration.
+# The base configuration already specifies an 'ExecStart=...' command. The first directive
+# here is to clear out that command inherited from the base configuration. Without this,
+# the command from the base configuration and the command specified here are treated as
+# a sequence of commands, which is not the desired behavior, nor is it valid -- systemd
+# will catch this invalid input and refuse to start the service with an error like:
+#  Service has more than one ExecStart= setting, which is only allowed for Type=oneshot services.
+ExecStart=
+ExecStart=/usr/bin/docker daemon -H tcp://0.0.0.0:{{.DockerPort}} -H unix:///var/run/docker.sock --tlsverify --tlscacert {{.AuthOptions.CaCertRemotePath}} --tlscert {{.AuthOptions.ServerCertRemotePath}} --tlskey {{.AuthOptions.ServerKeyRemotePath}} {{ range .EngineOptions.Labels }}--label {{.}} {{ end }}{{ range .EngineOptions.InsecureRegistry }}--insecure-registry {{.}} {{ end }}{{ range .EngineOptions.RegistryMirror }}--registry-mirror {{.}} {{ end }}{{ range .EngineOptions.ArbitraryFlags }}--{{.}} {{ end }}
+ExecReload=/bin/kill -s HUP $MAINPID
+
+# Having non-zero Limit*s causes performance problems due to accounting overhead
+# in the kernel. We recommend using cgroups to do container-local accounting.
+LimitNOFILE=infinity
+LimitNPROC=infinity
+LimitCORE=infinity
+
+# Uncomment TasksMax if your systemd version supports it.
+# Only systemd 226 and above support this version.
+TasksMax=infinity
+TimeoutStartSec=0
+
+# set delegate yes so that systemd does not reset the cgroups of docker containers
+Delegate=yes
+
+# kill only the docker process, not all processes in the cgroup
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target`
 )
 
-func makeDockerOptionsDir(p *MinishiftProvisioner) error {
+func makeDockerOptionsDir(p provision.Provisioner) error {
 	dockerDir := p.GetDockerOptionsDir()
 	if _, err := p.SSHCommand(fmt.Sprintf("sudo mkdir -p %s", dockerDir)); err != nil {
 		return err
@@ -69,7 +114,7 @@ func makeDockerOptionsDir(p *MinishiftProvisioner) error {
 	return nil
 }
 
-func setRemoteAuthOptions(p *MinishiftProvisioner) auth.Options {
+func setRemoteAuthOptions(p provision.Provisioner) auth.Options {
 	dockerDir := p.GetDockerOptionsDir()
 	authOptions := p.GetAuthOptions()
 
@@ -82,7 +127,7 @@ func setRemoteAuthOptions(p *MinishiftProvisioner) auth.Options {
 	return authOptions
 }
 
-func decideStorageDriver(p *MinishiftProvisioner, defaultDriver, suppliedDriver string) (string, error) {
+func decideStorageDriver(p provision.Provisioner, defaultDriver, suppliedDriver string) (string, error) {
 	if suppliedDriver != "" {
 		return suppliedDriver, nil
 	}
@@ -111,7 +156,7 @@ func decideStorageDriver(p *MinishiftProvisioner, defaultDriver, suppliedDriver 
 
 }
 
-func getFilesystemType(p *MinishiftProvisioner, directory string) (string, error) {
+func getFilesystemType(p provision.Provisioner, directory string) (string, error) {
 	statCommandOutput, err := p.SSHCommand("stat -f -c %T " + directory)
 	if err != nil {
 		err = fmt.Errorf("Error looking up file system type: %s", err)

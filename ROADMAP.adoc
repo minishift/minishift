@@ -63,27 +63,36 @@ version name of a given release.
 === Minishift 1.2.0
 
 - [x] Implement caching of OpenShift image https://github.com/minishift/minishift/issues/143[#143]
-- [ ] Ability to create and manage multiple clusters https://github.com/minishift/minishift/issues/126[#126]
-- [ ] Add a profile parameter https://github.com/minishift/minishift/issues/549[#549]
 
 [[minishift-130]]
 === Minishift 1.3.0
 
-- [ ] Implement host folder mounts using sshfs  https://github.com/minishift/minishift/issues/317[#317]
-- [ ] Ability to manage users https://github.com/minishift/minishift/issues/390[#390]
-- [ ] Ability interactively select OpenShift version https://github.com/minishift/minishift/issues/197[#197]
+- [x] Incorporate NodePort into minishift openshift service https://github.com/minishift/minishift/issues/1106[#1106]
 
 [[minishift-140]]
 === Minishift 1.4.0
 
-- [ ] Ability to use you own certificates for the cluster https://github.com/minishift/minishift/issues/391[#391]
-- [ ] Bundle custom libmachine drivers into Minishift https://github.com/minishift/minishift/issues/217[#217]
-- [ ] Ability to pack&go your current Minishift configuration https://github.com/minishift/minishift/issues/397[#397]
+- [ ] Ability to create and manage multiple clusters https://github.com/minishift/minishift/issues/126[#126]
 
 [[minishift-150]]
 === Minishift 1.5.0
 
-- [ ] Ability to provide and use custom a host- and domain-name https://github.com/minishift/minishift/issues/201[#201]
+- [ ] Ability to manage users https://github.com/minishift/minishift/issues/390[#390]
+- [ ] Add a profile parameter https://github.com/minishift/minishift/issues/549[#549]
+- [ ] Provide caching of docker images https://github.com/minishift/minishift/issues/952[#952]
+
+[[minishift-160]]
+=== Minishift 1.6.0
+
+- [ ] Implement host folder mounts using sshfs https://github.com/minishift/minishift/issues/317[#317]
+- [ ] Ability to use you own certificates for the cluster https://github.com/minishift/minishift/issues/391[#391]
 - [ ] Ability on running on existing Docker daemon https://github.com/minishift/minishift/issues/392[#392]
+- [ ] Use Minikube as dependency https://github.com/minishift/minishift/issues/1063[#1063]
 
+[[minishift-170]]
+=== Minishift 1.7.0
 
+- [ ] Ability interactively select OpenShift version https://github.com/minishift/minishift/issues/197[#197]
+- [ ] Ability to provide and use custom a host- and domain-name https://github.com/minishift/minishift/issues/201[#201]
+- [ ] Bundle custom libmachine drivers into Minishift https://github.com/minishift/minishift/issues/217[#217]
+- [ ] Ability to pack&go your current Minishift configuration https://github.com/minishift/minishift/issues/397[#397]

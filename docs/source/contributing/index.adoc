@@ -8,4 +8,7 @@ Join the Minishift community! Learn about the link:https://github.com/minishift/
 - xref:../contributing/writing-docs.adoc#[Writing Documentation]
 - xref:../contributing/releasing.adoc#[Releasing Minishift]
 
-If you have more questions join us on Freenode IRC #minishift.
+You can reach the Minishift community by:
+
+- Signing up to our link:https://lists.minishift.io/admin/lists/minishift.lists.minishift.io[mailing list]
+- Joining the #minishift channel on link:https://freenode.net/[Freenode IRC]

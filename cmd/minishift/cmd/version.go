@@ -35,7 +35,7 @@ var versionCmd = &cobra.Command{
 }
 
 func runPrintVersion(cmd *cobra.Command, args []string) {
-	fmt.Println(fmt.Sprintf("minishift v%s+%s\n", version.GetMinishiftVersion(), version.GetCommitSha()))
+	fmt.Printf("minishift v%s+%s\n", version.GetMinishiftVersion(), version.GetCommitSha())
 }
 
 func init() {

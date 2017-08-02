@@ -14,7 +14,7 @@
 
 # Various versions - Minishift, default OpenShift, default B2D ISO
 MINISHIFT_VERSION = 1.3.1
-OPENSHIFT_VERSION = v1.5.1
+OPENSHIFT_VERSION = v3.6.0
 B2D_ISO_VERSION = v1.0.2
 CENTOS_ISO_VERSION = v1.1.0
 COMMIT_SHA=$(shell git rev-parse --short HEAD)

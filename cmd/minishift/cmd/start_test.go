@@ -131,9 +131,9 @@ func (r *RecordingRunner) Output(command string, args ...string) ([]byte, error)
 
 var (
 	testConfig = &clusterup.ClusterUpConfig{
-		OpenShiftVersion: "v1.5.1",
+		OpenShiftVersion: "v3.6.0",
 		Ip:               "192.168.99.42",
-		OcPath:           "/home/john/.minishift/cache/oc/1.5.1/oc",
+		OcPath:           "/home/john/.minishift/cache/oc/3.6.0/oc",
 		RoutingSuffix:    "192.168.99.42.nip.io",
 	}
 	testDir    string

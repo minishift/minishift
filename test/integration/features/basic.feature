@@ -116,7 +116,7 @@ Feature: Basic
      And exitcode should equal "0"
      And stdout should contain
      """
-     persistentvolume/pv0001
+     persistentvolumes/pv0001
      """
 
   Scenario: User is able to do ssh into Minishift VM

@@ -16,7 +16,6 @@ The following sections describe how to release Minishift.
 
 - You must have a https://help.github.com/articles/creating-an-access-token-for-command-line-use[GitHub personal access token]
 defined in your environment as _GITHUB_ACCESS_TOKEN_.
-- You need _gnutar_ installed on your machine. See also GitHub issue link:https://github.com/minishift/minishift/issues/657[#657].
 
 [[preparing-github-milestone]]
 == Preparing the GitHub Milestone

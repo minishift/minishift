@@ -23,6 +23,28 @@ import (
 	"github.com/docker/machine/libmachine/drivers"
 )
 
+func IsRetrievable(driver drivers.Driver, url string, printOutput bool) bool {
+	cmd := fmt.Sprintf(
+		"curl -s -m 5 %s > /dev/null 2>&1",
+		url)
+
+	if printOutput {
+		print(fmt.Sprintf("   Checking if '%s' is retrievable ... ", url))
+	}
+
+	if _, err := drivers.RunSSHCommandFromDriver(driver, cmd); err != nil {
+		if printOutput {
+			print("FAIL\n")
+		}
+		return false
+	}
+
+	if printOutput {
+		print("OK\n")
+	}
+	return true
+}
+
 // IsIPReachable returns true is IP address is reachable from the virtual instance
 func IsIPReachable(driver drivers.Driver, ip string, printOutput bool) bool {
 	cmd := fmt.Sprintf(

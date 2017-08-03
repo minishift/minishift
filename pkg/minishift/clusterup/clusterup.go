@@ -64,10 +64,14 @@ type ClusterUpConfig struct {
 func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string, runner util.Runner) error {
 	cmdArgs := []string{"cluster", "up", "--use-existing-config"}
 
+	fmt.Println("-- Checking `oc` support for startup flags ... ")
 	for key, value := range clusterUpParams {
+		fmt.Printf("   %s ... ", key)
 		if !oc.SupportFlag(key, config.OcPath, runner) {
+			fmt.Println("FAIL")
 			return errors.New(fmt.Sprintf("Flag %s is not supported for oc version %s. Use 'openshift-version' flag to select a different version of OpenShift.", key, config.OpenShiftVersion))
 		}
+		fmt.Println("OK")
 		cmdArgs = append(cmdArgs, "--"+key)
 		cmdArgs = append(cmdArgs, value)
 	}

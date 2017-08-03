@@ -243,3 +243,71 @@ Workaround: Avoid installing packages or storing large files in the root filesys
 Instead, you can create a sub-directory in the *_mnt/sda1/_* persistent storage volume or define and mount xref:../using/host-folders.adoc#[host folders] that can share storage space between the host and the Minishift VM.
 
 If you want to perform development tasks inside the Minishift VM, it is recommended that you use containers, which are stored in persistent storage volumes, and reuse the xref:../using/docker-daemon.adoc#[Minishift Docker daemon].
+
+
+[[minshift-startup-check-failed]]
+== Minishift startup check failed
+
+While Minishift starts, it runs several startup checks to make sure that the Minishift VM and the OpenShift Cluster are able to start without any issues.
+If any configuration is incorrect or missing, the startup checks fail and Minishift does not start.
+
+The following sections describe the different startup checks.
+
+Driver plug-in configuration::
+One of the startup checks verifies that the relevant driver plug-in is configured correctly.
+If this startup check fails, review the xref:../getting-started/setting-up-driver-plugin.adoc#[setting up the driver plug-in] topic and configure the driver.
+
+If you want to force Minishift to start despite any failed checks, you can instruct Minishift to treat these errors as warnings as follows:
+
+- For KVM/Libvirt on Linux, run the following command:
++
+----
+$ minishift config set warn-check-kvm-driver true
+----
+
+- For xhyve on macOS, run the following command:
++
+----
+$ minishift config set warn-check-xhyve-driver true
+----
+
+- For Hyper-V on Windows, run the following command:
++
+----
+$ minishift config set warn-check-hyperv-driver true
+----
+
+
+Persistent storage volume configuration and usage::
+Minishift checks whether the persistent storage volume is mounted and that enough disk space is available.
++
+For example, if the persistent storage volume uses more than 95% of the available disk space, then Minishift will not start.
++
+If you want to recover the data, you can skip this test and start Minishift to access the persistent volume.
+To skip this test, run run the following command:
++
+----
+$ minishift config set skip-check-storage-usage true
+----
+
+External network connectivity::
+After the Minishift VM starts, it runs several network checks to verify whether external connectivity is possible from within the Minishift VM.
++
+By default, network checks are configured to treat the errors as warnings, because of the diversity of the development environments.
+You can configure the network checks to optimize them for your environment.
++
+For example, one of the network checks pings an external host. You can change the host by running the following command:
++
+----
+$ minishift config set check-network-ping-host <host-IP-address>
+----
++
+You can replace the `host IP address` with the address of your internal DNS server, proxy host, or an external host that you can reach from your machine.
++
+Because proxy connectivity might be problematic, you can run a check that tries to retrieve an external resource.
+You can change the URL by running the following command:
++
+----
+$ minishift config set check-network-http-host <URL>
+----
+

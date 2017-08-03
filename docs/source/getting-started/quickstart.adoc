@@ -29,7 +29,7 @@ The following steps describe how to get started with Minishift on a GNU/Linux op
 +
 ----
 $ minishift start
-Starting local OpenShift cluster using 'kvm' hypervisor...
+-- Starting local OpenShift cluster using 'kvm' hypervisor...
 ...
    OpenShift server started.
    The server is accessible via web console at:
@@ -50,6 +50,9 @@ To check the IP, run the `minishift ip` command.
 - By default, Minishift uses the driver most relevant to the host OS.
 To use a different driver, set the `--vm-driver` flag in `minishift start`.
 For example, to use VirtualBox instead of KVM on GNU/Linux operating systems, run `minishift start --vm-driver=virtualbox`.
+- While Minishift starts it runs several checks to make sure that the Minishift VM and the OpenShift cluster are able to start correctly.
+If any startup checks fail, see the xref:../using/troubleshooting.adoc#[troubleshooting] topic for information about possible causes and solutions.
+
 For more information about `minishift start` options, see the xref:../command-ref/minishift_start.adoc#[`minishift start`] command.
 ====
 

@@ -225,7 +225,7 @@ func performPostUpdateExecution(markerPath string) error {
 	json.Unmarshal(file, &markerData)
 	if markerData.InstallAddon {
 		fmt.Println(fmt.Sprintf("Minishift was upgraded from v%s to v%s. Running post update actions.", markerData.PreviousVersion, version.GetMinishiftVersion()))
-		fmt.Print("--- Updating default add-ons ... ")
+		fmt.Print("-- Updating default add-ons ... ")
 		util.UnpackAddons(constants.MakeMiniPath("add-ons"))
 		fmt.Println("OK")
 		fmt.Println(fmt.Sprintf("Default add-ons %s installed", strings.Join(util.DefaultAssets, ", ")))

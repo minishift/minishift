@@ -402,6 +402,10 @@ func Test_getslice_withConfig(t *testing.T) {
 	viper.ReadConfig(bytes.NewBuffer(confFile))
 
 	expectedSlice := []string{"hello", "world"}
+	if len(expectedSlice) != len(getSlice("bar")) {
+		t.Errorf("expected %+v, Got %+v", len(expectedSlice), len(getSlice("bar")))
+	}
+
 	for i, v := range getSlice("bar") {
 		if expectedSlice[i] != v {
 			t.Errorf("expected %+v. Got %+v", expectedSlice[i], v)
@@ -413,8 +417,15 @@ func Test_getslice_withCommandLine(t *testing.T) {
 	viper.Set("foo", []string{"hello", "world"})
 	defer viper.Reset()
 
-	if getSlice("foo") != nil {
-		t.Errorf("expected %+v. Got %+v", nil, getSlice("foo"))
+	expectedSlice := []string{"hello", "world"}
+	if len(expectedSlice) != len(getSlice("foo")) {
+		t.Errorf("expected %+v, Got %+v", len(expectedSlice), len(getSlice("foo")))
+	}
+
+	for i, v := range getSlice("foo") {
+		if expectedSlice[i] != v {
+			t.Errorf("expected %+v. Got %+v", expectedSlice[i], v)
+		}
 	}
 }
 

@@ -70,12 +70,39 @@ const (
 )
 
 var (
-	dockerEnv        []string
-	dockerEngineOpt  []string
-	insecureRegistry []string
-	registryMirror   []string
-	openShiftEnv     []string
-	shellProxyEnv    string
+	dockerEnv     []string
+	openShiftEnv  []string
+	shellProxyEnv string
+)
+
+var (
+	dockerEnvFlag = &flag.Flag{
+		Name:      configCmd.DockerEnv.Name,
+		Shorthand: "",
+		Usage:     "Environment variables to pass to the Docker daemon. Use the format <key>=<value>.",
+		Value:     cmdutil.NewStringSliceValue([]string{}, &[]string{}),
+	}
+
+	insecureRegistryFlag = &flag.Flag{
+		Name:      configCmd.InsecureRegistry.Name,
+		Shorthand: "",
+		Usage:     "Non-secure Docker registries to pass to the Docker daemon.",
+		Value:     cmdutil.NewStringSliceValue([]string{defaultInsecureRegistry}, &[]string{}),
+	}
+
+	dockerEngineOptFlag = &flag.Flag{
+		Name:      configCmd.DockerEngineOpt.Name,
+		Shorthand: "",
+		Usage:     "Specify arbitrary flags to pass to the Docker daemon in the form <flag>=<value>.",
+		Value:     cmdutil.NewStringSliceValue([]string{}, &[]string{}),
+	}
+
+	registryMirrorFlag = &flag.Flag{
+		Name:      configCmd.RegistryMirror.Name,
+		Shorthand: "",
+		Usage:     "Registry mirrors to pass to the Docker daemon.",
+		Value:     cmdutil.NewStringSliceValue([]string{}, &[]string{}),
+	}
 )
 
 // startCmd represents the start command
@@ -252,13 +279,10 @@ func handleProxies() *util.ProxyConfig {
 	return proxyConfig
 }
 
-// getSlice return slice for provided key if value type is []interface{} otherwise nil
+// getSlice return slice for provided key otherwise nil
 func getSlice(key string) []string {
 	if viper.IsSet(key) {
-		value := viper.Get(key)
-		if _, ok := value.([]interface{}); ok {
-			return viper.GetStringSlice(key)
-		}
+		return viper.GetStringSlice(key)
 	}
 	return nil
 }
@@ -286,9 +310,9 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 		DiskSize:         calculateDiskSizeInMB(viper.GetString(configCmd.DiskSize.Name)),
 		VMDriver:         viper.GetString(configCmd.VmDriver.Name),
 		DockerEnv:        append(dockerEnv, getSlice(configCmd.DockerEnv.Name)...),
-		DockerEngineOpt:  append(dockerEngineOpt, getSlice(configCmd.DockerEngineOpt.Name)...),
-		InsecureRegistry: append(insecureRegistry, determineInsecureRegistry(configCmd.InsecureRegistry.Name)...),
-		RegistryMirror:   append(registryMirror, getSlice(configCmd.RegistryMirror.Name)...),
+		DockerEngineOpt:  getSlice(configCmd.DockerEngineOpt.Name),
+		InsecureRegistry: determineInsecureRegistry(configCmd.InsecureRegistry.Name),
+		RegistryMirror:   getSlice(configCmd.RegistryMirror.Name),
 		HostOnlyCIDR:     viper.GetString(configCmd.HostOnlyCIDR.Name),
 		ShellProxyEnv:    shellProxyEnv,
 	}
@@ -419,10 +443,10 @@ func initStartFlags() *flag.FlagSet {
 	startFlagSet.Int(configCmd.CPUs.Name, constants.DefaultCPUS, "Number of CPU cores to allocate to the Minishift VM.")
 	startFlagSet.String(configCmd.DiskSize.Name, constants.DefaultDiskSize, "Disk size to allocate to the Minishift VM. Use the format <size><unit>, where unit = b, k, m or g.")
 	startFlagSet.String(configCmd.HostOnlyCIDR.Name, "192.168.99.1/24", "The CIDR to be used for the minishift VM. (Only supported with VirtualBox driver.)")
-	startFlagSet.StringArrayVar(&dockerEnv, configCmd.DockerEnv.Name, nil, "Environment variables to pass to the Docker daemon. Use the format <key>=<value>.")
-	startFlagSet.StringSliceVar(&dockerEngineOpt, configCmd.DockerEngineOpt.Name, nil, "Specify arbitrary flags to pass to the Docker daemon in the form <flag>=<value>.")
-	startFlagSet.StringSliceVar(&insecureRegistry, configCmd.InsecureRegistry.Name, []string{defaultInsecureRegistry}, "Non-secure Docker registries to pass to the Docker daemon.")
-	startFlagSet.StringSliceVar(&registryMirror, configCmd.RegistryMirror.Name, nil, "Registry mirrors to pass to the Docker daemon.")
+	startFlagSet.AddFlag(dockerEnvFlag)
+	startFlagSet.AddFlag(dockerEngineOptFlag)
+	startFlagSet.AddFlag(insecureRegistryFlag)
+	startFlagSet.AddFlag(registryMirrorFlag)
 	startFlagSet.AddFlag(cmdutil.AddOnEnvFlag)
 
 	return startFlagSet

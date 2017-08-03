@@ -17,8 +17,9 @@ limitations under the License.
 package util
 
 import (
-	flag "github.com/spf13/pflag"
 	"strings"
+
+	flag "github.com/spf13/pflag"
 )
 
 const (
@@ -37,7 +38,7 @@ var HttpProxyFlag = &flag.Flag{
 	Name:      HttpProxy,
 	Shorthand: "",
 	Usage:     "HTTP proxy in the format http://<username>:<password>@<proxy_host>:<proxy_port>. Overrides potential HTTP_PROXY setting in the environment.",
-	Value:     newStringValue("", new(string)),
+	Value:     NewStringValue("", new(string)),
 	DefValue:  "",
 }
 
@@ -45,7 +46,7 @@ var HttpsProxyFlag = &flag.Flag{
 	Name:      HttpsProxy,
 	Shorthand: "",
 	Usage:     "HTTPS proxy in the format https://<username>:<password>@<proxy_host>:<proxy_port>. Overrides potential HTTPS_PROXY setting in the environment.",
-	Value:     newStringValue("", new(string)),
+	Value:     NewStringValue("", new(string)),
 	DefValue:  "",
 }
 
@@ -53,10 +54,10 @@ var AddOnEnvFlag = &flag.Flag{
 	Name:      AddOnEnv,
 	Shorthand: "a",
 	Usage:     "Specify key-value pairs to be added to the add-on interpolation context.",
-	Value:     newStringSliceValue([]string{}, &[]string{}),
+	Value:     NewStringSliceValue([]string{}, &[]string{}),
 }
 
-func newStringValue(val string, p *string) *stringValue {
+func NewStringValue(val string, p *string) *stringValue {
 	*p = val
 	return (*stringValue)(p)
 }
@@ -73,7 +74,7 @@ func (s *stringValue) String() string {
 	return string(*s)
 }
 
-func newStringSliceValue(val []string, p *[]string) *stringSliceValue {
+func NewStringSliceValue(val []string, p *[]string) *stringSliceValue {
 	ssv := new(stringSliceValue)
 	ssv.value = p
 	*ssv.value = val

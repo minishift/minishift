@@ -2,20 +2,14 @@
 :icons:
 :toc: macro
 :toc-title:
-:toclevels: 1
+:toclevels: 2
 
 toc::[]
 
 [[releasing-overview]]
 == Overview
 
-The following sections describe how to release Minishift.
-
-[[release-prereqs]]
-== Prerequisites
-
-- You must have a https://help.github.com/articles/creating-an-access-token-for-command-line-use[GitHub personal access token]
-defined in your environment as _GITHUB_ACCESS_TOKEN_.
+The following sections describe how to release Minishift either via automated job or manually.
 
 [[preparing-github-milestone]]
 == Preparing the GitHub Milestone
@@ -27,8 +21,45 @@ defined in your environment as _GITHUB_ACCESS_TOKEN_.
   For example, issues with a merged pull requests should be labeled as *resolution/done*.
 . Close milestone.
 
+[[auto-release]]
+== Automated Release
+
+An automated release can be performed by:
+
+----
+$ API_KEY=<api-key> RELEASE_VERSION=<version> make ci_release
+----
+
+where
+
+  - `api-key` : Minishift CentOS CI API key
+  - `version` : Expected release version. Eg : 1.0.0 (without 'v')
+
+In case, you are not able to trigger the job via command line, try running link:https://ci.centos.org/job/minishift-release[release build] by passing required `RELEASE_VERSION` information.
+
+The automated release perform:
+
+- xref:cut-release[Cutting the Release]
+- xref:trigger-docs-build[Trigger the documentation build]
+- xref:post-release-tasks[Perform Post-Release Tasks]
+
+[[manaul-release]]
+== Manual Release
+
+[[release-prereqs]]
+=== Prerequisites
+
+- You must have a https://help.github.com/articles/creating-an-access-token-for-command-line-use[GitHub personal access token]
+defined in your environment as _GITHUB_ACCESS_TOKEN_.
+
 [[cut-release]]
-== Cutting the Release
+=== Cutting the Release
+
+. Run the required checks:
++
+----
+$ make prerelease
+----
 
 . Bump the Minishift version in the link:https://github.com/minishift/minishift/blob/master/Makefile[Makefile].
 
@@ -40,18 +71,19 @@ defined in your environment as _GITHUB_ACCESS_TOKEN_.
 $ make release
 ----
 
-. Trigger the documentation build.
-+
+[[trigger-docs-build]]
+=== Trigger the documentation build
+
 ----
 $ export API_KEY=<api-key>
 $ curl -H "$(curl --user minishift:$API_KEY 'https://ci.centos.org//crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)')" -X POST https://ci.centos.org/job/minishift-docs/build --user "minishift:$API_KEY"
 ----
-+
+
 This will build link:http://artifacts.ci.centos.org/minishift/minishift/docs/latest/[minishift-adoc.tar], which will be consumed by *docs.openshift.org* during the next nightly build.
 For more information, see xref:../contributing/writing-docs.adoc#[Writing and Publishing Minishift Documentation].
 
 [[post-release-tasks]]
-== Post-Release Tasks
+=== Post-Release Tasks
 
 As part of the release process we also send a release announcement and edit the GitHub release page.
 

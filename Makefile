@@ -84,7 +84,7 @@ $(GOPATH)/bin/go-bindata:
 	go get -u github.com/jteeuwen/go-bindata/...
 
 .PHONY: prerelease
-prerelease:
+prerelease: clean fmtcheck test cross
 	$(eval files = $(shell ./scripts/boilerplate/boilerplate.py --rootdir . --boilerplate-dir ./scripts/boilerplate | grep -v vendor))
 	@if test "$(files)" != ""; then \
 		echo "The following files don't pass the boilerplate checks:"; \
@@ -124,13 +124,19 @@ $(DOCS_SYNOPISIS_DIR)/*.md: vendor $(ADDON_ASSET_FILE)
 synopsis_docs: $(DOCS_SYNOPISIS_DIR)/*.md
 
 .PHONY: release
-release: clean fmtcheck test prerelease $(GOPATH)/bin/gh-release cross
+release: $(GOPATH)/bin/gh-release
 	mkdir -p release
 	tar -zcf release/minishift-$(MINISHIFT_VERSION)-darwin-amd64.tgz LICENSE README.adoc -C $(BUILD_DIR)/darwin-amd64 minishift
 	tar -zcf release/minishift-$(MINISHIFT_VERSION)-linux-amd64.tgz LICENSE README.adoc -C $(BUILD_DIR)/linux-amd64 minishift
 	zip -j release/minishift-$(MINISHIFT_VERSION)-windows-amd64.zip LICENSE README.adoc $(BUILD_DIR)/windows-amd64/minishift.exe
 	gh-release checksums sha256
 	gh-release create minishift/minishift $(MINISHIFT_VERSION) master v$(MINISHIFT_VERSION)
+
+.PHONY: ci_release
+ci_release:
+	curl -s -H "$(shell curl -s --user 'minishift:$(API_KEY)' 'https://ci.centos.org//crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)')" \
+	-X POST https://ci.centos.org/job/minishift-release/build --user 'minishift:$(API_KEY)' \
+	--data-urlencode json='{"parameter": [{"name":"RELEASE_VERSION", "value":'"$(RELEASE_VERSION)"'}]}'
 
 .PHONY: cross
 cross: $(BUILD_DIR)/darwin-amd64/minishift $(BUILD_DIR)/linux-amd64/minishift $(BUILD_DIR)/windows-amd64/minishift.exe

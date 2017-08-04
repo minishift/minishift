@@ -20,12 +20,15 @@ set -x
 # Exit on error
 set -e
 
+# GitHub user
+REPO_OWNER="minishift"
+
 # Source environment variables of the jenkins slave
 # that might interest this worker.
 function load_jenkins_vars() {
   if [ -e "jenkins-env" ]; then
     cat jenkins-env \
-      | grep -E "(JENKINS_URL|GIT_BRANCH|GIT_COMMIT|BUILD_NUMBER|ghprbSourceBranch|ghprbActualCommit|BUILD_URL|ghprbPullId|GH_TOKEN|CICO_API_KEY|JOB_NAME)=" \
+      | grep -E "(JENKINS_URL|GIT_BRANCH|GIT_COMMIT|BUILD_NUMBER|ghprbSourceBranch|ghprbActualCommit|BUILD_URL|ghprbPullId|GH_TOKEN|CICO_API_KEY|API_TOKEN|JOB_NAME|RELEASE_VERSION|GITHUB_TOKEN)=" \
       | sed 's/^/export /g' \
       > ~/.jenkins-env
     source ~/.jenkins-env
@@ -38,11 +41,16 @@ function install_core_deps() {
   # We need to disable selinux for now, XXX
   /usr/sbin/setenforce 0
 
+  # Install EPEL repo
+  yum -y install epel-release
   # Get all the deps in
   yum -y install gcc \
                  make \
+                 tar \
+                 zip \
                  git \
-                 curl
+                 curl \
+                 jq
 
   echo 'CICO: Core dependencies installed'
 }
@@ -124,19 +132,11 @@ function setup_glide() {
   export PATH=$PATH:/tmp/glide/${GLIDE_OS_ARCH}
 }
 
-function prepare() {
-  echo "UID in prepare: $UID"
+function prepare_repo() {
   install_and_setup_golang;
   setup_repo;
   setup_glide;
   echo "CICO: Preparation complete"
-}
-
-function run_tests() {
-  make clean test cross fmtcheck prerelease synopsis_docs link_check_docs
-  # Run integration test with 'kvm' driver
-  MINISHIFT_VM_DRIVER=kvm make integration GODOG_OPTS="-tags ~coolstore -format pretty"
-  echo "CICO: Tests ran successfully"
 }
 
 function install_docs_prerequisite_packages() {
@@ -208,27 +208,104 @@ function docs_tar_upload() {
   echo "Find docs tar here http://artifacts.ci.centos.org/minishift/minishift/docs/$LATEST."
 }
 
-if [[ "$UID" = 0 ]]; then
+function create_release_commit() {
+  # Set Terminal
+  export TERM=xterm-256color
+  # Add git a/c identity
+  git config user.email "29732253+minishift-bot@users.noreply.github.com"
+  git config user.name "Minishift Bot"
+  # Export GITHUB_ACCESS_TOKEN
+  export GITHUB_ACCESS_TOKEN=$GITHUB_TOKEN
+  # Create master branch as git clone in CI doesn't create it
+  git checkout -b master
+  # Bump version and commit
+  sed -i "s|MINISHIFT_VERSION = .*|MINISHIFT_VERSION = $RELEASE_VERSION|" Makefile
+  git add Makefile
+  git commit -m "cut v$RELEASE_VERSION"
+  git push https://$REPO_OWNER:$GITHUB_TOKEN@github.com/$REPO_OWNER/minishift master
+}
+
+function add_release_notes() {
+  release_id=$(curl -s "https://api.github.com/repos/${REPO_OWNER}/minishift/releases" | jq --arg release "v$RELEASE_VERSION" -r ' .[] | if .name == $release then .id else empty end')
+
+  if [[ "$release_id" != "" ]]; then
+    MILESTONE_ID=`curl -s https://api.github.com/repos/minishift/minishift/milestones | jq --arg version "v$RELEASE_VERSION" -r ' .[] | if .title == $version then .number else empty end'`
+    # Generate required json payload for release note
+    ./scripts/release/issue-list.sh -r minishift -m $MILESTONE_ID | jq -Rn 'inputs + "\n"' | jq -s '{body:  add }' > json_payload.json
+    # Add release notes
+    curl -H "Content-Type: application/json" -H "Authorization: token $GITHUB_TOKEN" \
+         --data @json_payload.json https://api.github.com/repos/${REPO_OWNER}/minishift/releases/$release_id
+
+    echo "Release notes of Minishift v$RELEASE_VERSION has been successfully updated. Find the release notes here https://github.com/${REPO_OWNER}/minishift/releases/tag/v$RELEASE_VERSION."
+  else
+    echo "Failed to update release notes of Minishift v$RELEASE_VERSION as couldn't find the release ID. Try to manually update the release notes here https://github.com/${REPO_OWNER}/minishift/releases/tag/v$RELEASE_VERSION."
+    exit 1
+  fi
+}
+
+function setup_build_environment() {
   load_jenkins_vars;
   prepare_ci_user;
   install_core_deps;
   install_kvm_virt;
   install_docker;
   runuser -l minishift_ci -c "/bin/bash centos_ci.sh"
+}
+
+function perform_release() {
+  setup_kvm_docker_machine_driver; # Required for integeration tests
+  cd gopath/src/github.com/minishift/minishift
+  # Test everything before bumping the version
+  make prerelease
+  MINISHIFT_VM_DRIVER=kvm make integration GODOG_OPTS="-tags ~coolstore -format pretty"
+  create_release_commit;
+  make release
+
+  if [[ "$?" = 0 ]]; then
+    echo "Minishift v$RELEASE_VERSION has been successfully released. Find the latest release here https://github.com/$REPO_OWNER/minishift/releases/tag/v$RELEASE_VERSION."
+  else
+    echo "Failed to release Minishift v$RELEASE_VERSION. Try to release manually."
+    exit 1
+  fi
+
+  add_release_notes;
+  make synopsis_docs link_check_docs # Test links
+  make gen_adoc_tar IMAGE_UID=$(id -u)
+  # Handle error on failure of doc tar generation
+  if [[ "$?" != 0 ]]; then
+    echo "Failed to create tar for Minishift doc. Try manual approach."
+    exit 1
+  fi
+
+  docs_tar_upload $1
+}
+
+function build_and_test() {
+  setup_kvm_docker_machine_driver;
+  cd $GOPATH/src/github.com/minishift/minishift
+  make prerelease synopsis_docs link_check_docs
+  # Run integration test with 'kvm' driver
+  MINISHIFT_VM_DRIVER=kvm make integration GODOG_OPTS="-tags ~coolstore -format pretty"
+  echo "CICO: Tests ran successfully"
+
+  artifacts_upload_on_pr_and_master_trigger $1;
+}
+
+if [[ "$UID" = 0 ]]; then
+  setup_build_environment;
 else
   source ~/jenkins-env # Source environment variables for minishift_ci user
-  PASS=$(echo $CICO_API_KEY | cut -d'-' -f1-2)
+  PASSWORD=$(echo $CICO_API_KEY | cut -d'-' -f1-2)
+
+  prepare_repo;
 
   if [[ "$JOB_NAME" = "minishift-docs" ]]; then
-    prepare;
     cd gopath/src/github.com/minishift/minishift
     make gen_adoc_tar IMAGE_UID=$(id -u)
-    docs_tar_upload $PASS
+    docs_tar_upload $PASSWORD;
+  elif [[ "$JOB_NAME" = "minishift-release" ]]; then
+    perform_release $PASSWORD;
   else
-    setup_kvm_docker_machine_driver;
-    prepare;
-    cd $GOPATH/src/github.com/minishift/minishift
-    run_tests;
-    artifacts_upload_on_pr_and_master_trigger $PASS;
+    build_and_test $PASSWORD;
   fi
 fi

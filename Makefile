@@ -53,6 +53,19 @@ IMAGE_UID ?= 1000
 DOCS_SYNOPISIS_DIR = docs/source/_tmp
 DOC_VARIABLES = -e OPENSHIFT_VERSION=$(OPENSHIFT_VERSION) -e MINISHIFT_VERSION=$(MINISHIFT_VERSION) -e CENTOS_ISO_VERSION=$(CENTOS_ISO_VERSION)
 
+# Check that given variables are set and all have non-empty values,
+# die with an error otherwise.
+#
+# Params:
+#   1. Variable name(s) to test.
+#   2. (optional) Error message to print.
+check_defined = \
+    $(strip $(foreach 1,$1, \
+        $(call __check_defined,$1,$(strip $(value 2)))))
+__check_defined = \
+    $(if $(value $1),, \
+      $(error Undefined $1$(if $2, ($2))))
+
 # Start of the actual build targets
 
 .PHONY: $(GOPATH)/bin/minishift$(IS_EXE)
@@ -83,15 +96,6 @@ $(GOPATH)/bin/gh-release:
 $(GOPATH)/bin/go-bindata:
 	go get -u github.com/jteeuwen/go-bindata/...
 
-.PHONY: prerelease
-prerelease: clean fmtcheck test cross
-	$(eval files = $(shell ./scripts/boilerplate/boilerplate.py --rootdir . --boilerplate-dir ./scripts/boilerplate | grep -v vendor))
-	@if test "$(files)" != ""; then \
-		echo "The following files don't pass the boilerplate checks:"; \
-		echo $(files); \
-		exit 1; \
-	fi
-
 .PHONY: build_docs_container
 build_docs_container:
 	cd docs && docker build --build-arg uid=$(IMAGE_UID) -t minishift/docs .
@@ -113,7 +117,7 @@ serve_docs: synopsis_docs build_docs_container
 	cd docs && docker run $(DOC_VARIABLES) -p 35729:35729 -p 4567:4567 -tiv $(shell pwd)/docs:/home/docs:Z minishift/docs serve[--watcher-force-polling]
 
 .PHONY: link_check_docs
-link_check_docs: build_docs_container
+link_check_docs: synopsis_docs build_docs_container
 	cd docs && docker run $(DOC_VARIABLES) -tiv $(shell pwd)/docs:/home/docs:Z minishift/docs link_check
 
 $(DOCS_SYNOPISIS_DIR)/*.md: vendor $(ADDON_ASSET_FILE)
@@ -122,6 +126,15 @@ $(DOCS_SYNOPISIS_DIR)/*.md: vendor $(ADDON_ASSET_FILE)
 
 .PHONY: synopsis_docs
 synopsis_docs: $(DOCS_SYNOPISIS_DIR)/*.md
+
+.PHONY: prerelease
+prerelease: clean fmtcheck test cross
+	$(eval files = $(shell ./scripts/boilerplate/boilerplate.py --rootdir . --boilerplate-dir ./scripts/boilerplate | grep -v vendor))
+	@if test "$(files)" != ""; then \
+		echo "The following files don't pass the boilerplate checks:"; \
+		echo $(files); \
+		exit 1; \
+	fi
 
 .PHONY: release
 release: $(GOPATH)/bin/gh-release
@@ -134,6 +147,9 @@ release: $(GOPATH)/bin/gh-release
 
 .PHONY: ci_release
 ci_release:
+	$(call check_defined, API_KEY, "To trigger the CentOS CI release build you need to specify the CentOS CI API key.")
+	$(call check_defined, RELEASE_VERSION, "You need to specify the version you want to release.")
+
 	curl -s -H "$(shell curl -s --user 'minishift:$(API_KEY)' 'https://ci.centos.org//crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)')" \
 	-X POST https://ci.centos.org/job/minishift-release/build --user 'minishift:$(API_KEY)' \
 	--data-urlencode json='{"parameter": [{"name":"RELEASE_VERSION", "value":'"$(RELEASE_VERSION)"'}]}'

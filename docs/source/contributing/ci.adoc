@@ -31,14 +31,17 @@ The following table describes the various CI systems Minishift utilizes and the 
 |Configuration files
 
 |link:https://ci.centos.org/[*CentOS CI*]
-|CentOS CIis the only CI system which can run integration tests, as it supports nested virtualization.
+|CentOS CI is the only CI system which can run integration tests, as it supports nested virtualization.
 Thus it is used to run integration tests in addition to unit tests.
 
 The artifacts of a successful master build can be found at link:http://artifacts.ci.centos.org/minishift/minishift/master/[artifacts.ci.centos.org/minishift/minishift/master/<BUILD_ID>].
 The artifacts of a successful pull request build can be found at link:http://artifacts.ci.centos.org/minishift/minishift/pr/[artifacts.ci.centos.org/minishift/minishift/pr/<PR_ID>].
 
-On top of building the master branch and pull requests, CentOS CI is also used to build the tar bundle used for xref:../contributing/writing-docs.adoc#integration-with-docs-openshift-org[integration with docs.openshift.org].
-|link:https://ci.centos.org/job/minishift/[master], link:https://ci.centos.org/job/minishift-pr/[pull requests], link:https://ci.centos.org/job/minishift-docs/[docs]
+On top of building the master branch and pull requests, CentOS CI is also used to build the tar bundle used for xref:../contributing/writing-docs.adoc#integration-with-docs-openshift-org[integration with docs.openshift.org], as well as to build xref:../contributing/releasing.adoc#automated-release[releases].
+
+
+|link:https://ci.centos.org/job/minishift/[master], link:https://ci.centos.org/job/minishift-pr/[pull requests], link:https://ci.centos.org/job/minishift-docs/[docs],
+link:https://ci.centos.org/job/minishift-release/[release]
 
 |link:https://github.com/minishift/minishift/blob/master/centos_ci.sh[centos_ci.sh]
 

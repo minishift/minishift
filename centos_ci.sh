@@ -156,6 +156,13 @@ function install_docs_prerequisite_packages() {
   echo "CICO: Ascii Binder Installed"
 }
 
+function exit_on_failure() {
+  if [[ "$1" != 0 ]]; then
+    echo "$2"
+    exit 1
+  fi
+}
+
 function build_openshift_origin_docs() {
   git clone https://github.com/openshift/openshift-docs
   cd openshift-docs
@@ -238,8 +245,7 @@ function add_release_notes() {
 
     echo "Release notes of Minishift v$RELEASE_VERSION has been successfully updated. Find the release notes here https://github.com/${REPO_OWNER}/minishift/releases/tag/v$RELEASE_VERSION."
   else
-    echo "Failed to update release notes of Minishift v$RELEASE_VERSION as couldn't find the release ID. Try to manually update the release notes here https://github.com/${REPO_OWNER}/minishift/releases/tag/v$RELEASE_VERSION."
-    exit 1
+    return 1
   fi
 }
 
@@ -255,29 +261,37 @@ function setup_build_environment() {
 function perform_release() {
   setup_kvm_docker_machine_driver; # Required for integeration tests
   cd gopath/src/github.com/minishift/minishift
+
   # Test everything before bumping the version
   make prerelease
-  MINISHIFT_VM_DRIVER=kvm make integration GODOG_OPTS="-tags ~coolstore -format pretty"
-  create_release_commit;
-  make release
+  exit_on_failure "$?" "Pre-release tests failed."
 
-  if [[ "$?" = 0 ]]; then
-    echo "Minishift v$RELEASE_VERSION has been successfully released. Find the latest release here https://github.com/$REPO_OWNER/minishift/releases/tag/v$RELEASE_VERSION."
-  else
-    echo "Failed to release Minishift v$RELEASE_VERSION. Try to release manually."
-    exit 1
-  fi
+  MINISHIFT_VM_DRIVER=kvm make integration GODOG_OPTS="-tags ~coolstore -format pretty"
+  exit_on_failure "$?" "Integration tests failed."
+
+  make link_check_docs IMAGE_UID=$(id -u) # Test docs builds and all links are valid
+  exit_on_failure "$?" "Documentation build failed."
+
+  make gen_adoc_tar IMAGE_UID=$(id -u)
+  exit_on_failure "$?" "Documentation tarball build failed."
+
+  create_release_commit
+  exit_on_failure "$?" "Unable to create release commit."
+
+  make release
+  exit_on_failure "$?" "Failed to release Minishift v$RELEASE_VERSION. Try to release manually."
+  echo "Minishift v$RELEASE_VERSION has been successfully released. Find the latest release here https://github.com/$REPO_OWNER/minishift/releases/tag/v$RELEASE_VERSION."
 
   add_release_notes;
-  make synopsis_docs link_check_docs # Test links
-  make gen_adoc_tar IMAGE_UID=$(id -u)
-  # Handle error on failure of doc tar generation
-  if [[ "$?" != 0 ]]; then
-    echo "Failed to create tar for Minishift doc. Try manual approach."
-    exit 1
-  fi
+  exit_on_failure "$?" "Failed to update release notes of Minishift v$RELEASE_VERSION. Try to manually update the release notes here - https://github.com/${REPO_OWNER}/minishift/releases/tag/v$RELEASE_VERSION."
 
   docs_tar_upload $1
+  exit_on_failure "$?" "Failed to upload tar bundle for doc.openshift.org."
+
+  # Notify Minibot
+  MESSAGE="Minishift v$RELEASE_VERSION successfully released by https://ci.centos.org/job/minishift-release/$BUILD_NUMBER."
+  URL="https://github.com/$REPO_OWNER/minishift/releases/tag/v$RELEASE_VERSION"
+  curl http://minibot.34e99f76.svc.dockerapp.io:9009/hubot/centosci -H "Content-Type: application/json" -d '{"payload":{"status":"success","message":'"\"$MESSAGE\""',"url":'"\"$URL\""'}}'
 }
 
 function build_and_test() {
@@ -295,17 +309,17 @@ if [[ "$UID" = 0 ]]; then
   setup_build_environment;
 else
   source ~/jenkins-env # Source environment variables for minishift_ci user
-  PASSWORD=$(echo $CICO_API_KEY | cut -d'-' -f1-2)
+  RSYNC_PASSWORD=$(echo $CICO_API_KEY | cut -d'-' -f1-2)
 
   prepare_repo;
 
   if [[ "$JOB_NAME" = "minishift-docs" ]]; then
     cd gopath/src/github.com/minishift/minishift
     make gen_adoc_tar IMAGE_UID=$(id -u)
-    docs_tar_upload $PASSWORD;
+    docs_tar_upload $RSYNC_PASSWORD;
   elif [[ "$JOB_NAME" = "minishift-release" ]]; then
-    perform_release $PASSWORD;
+    perform_release $RSYNC_PASSWORD;
   else
-    build_and_test $PASSWORD;
+    build_and_test $RSYNC_PASSWORD;
   fi
 fi

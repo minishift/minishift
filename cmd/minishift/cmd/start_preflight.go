@@ -25,7 +25,7 @@ import (
 	"strings"
 
 	"github.com/docker/machine/libmachine/drivers"
-	startFlags "github.com/minishift/minishift/cmd/minishift/cmd/config"
+	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
 	miniutil "github.com/minishift/minishift/pkg/minishift/util"
 
 	"github.com/minishift/minishift/pkg/util/os/atexit"
@@ -38,27 +38,27 @@ const (
 
 // preflightChecksAfterStartingHost is executed before the startHost function.
 func preflightChecksBeforeStartingHost() {
-	switch viper.GetString(startFlags.VmDriver.Name) {
+	switch viper.GetString(configCmd.VmDriver.Name) {
 	case "xhyve":
 		preflightCheckSucceedsOrFails(
-			startFlags.SkipCheckXHyveDriver.Name,
+			configCmd.SkipCheckXHyveDriver.Name,
 			checkXhyveDriver,
 			"Checking if xhyve driver is installed",
-			false, startFlags.WarnCheckXHyveDriver.Name,
+			false, configCmd.WarnCheckXHyveDriver.Name,
 			"See the 'Setting Up the Driver Plug-in' topic for more information")
 	case "kvm":
 		preflightCheckSucceedsOrFails(
-			startFlags.SkipCheckKVMDriver.Name,
+			configCmd.SkipCheckKVMDriver.Name,
 			checkKvmDriver,
 			"Checking if KVM driver is installed",
-			false, startFlags.WarnCheckXHyveDriver.Name,
+			false, configCmd.WarnCheckXHyveDriver.Name,
 			"See the 'Setting Up the Driver Plug-in' topic for more information")
 	case "hyperv":
 		preflightCheckSucceedsOrFails(
-			startFlags.SkipCheckHyperVDriver.Name,
+			configCmd.SkipCheckHyperVDriver.Name,
 			checkHypervDriver,
 			"Checking if Hyper-V driver is configured",
-			false, startFlags.WarnCheckHyperVDriver.Name,
+			false, configCmd.WarnCheckHyperVDriver.Name,
 			"Hyper-V virtual switch is not set")
 	}
 }
@@ -66,43 +66,43 @@ func preflightChecksBeforeStartingHost() {
 // preflightChecksAfterStartingHost is executed after the startHost function.
 func preflightChecksAfterStartingHost(driver drivers.Driver) {
 	preflightCheckSucceedsOrFailsWithDriver(
-		startFlags.SkipInstanceIP.Name,
+		configCmd.SkipInstanceIP.Name,
 		checkInstanceIP, driver,
 		"Checking for IP address",
-		false, startFlags.WarnInstanceIP.Name,
+		false, configCmd.WarnInstanceIP.Name,
 		"Error determining IP address")
 	/*
 		// This happens too late in the preflight, as provisioning needs an IP already
 			preflightCheckSucceedsOrFailsWithDriver(
-				startFlags.SkipCheckNetworkHost.Name,
+				configCmd.SkipCheckNetworkHost.Name,
 				checkVMConnectivity, driver,
 				"Checking if VM is reachable from host",
-				startFlags.WarnCheckNetworkHost.Name,
+				configCmd.WarnCheckNetworkHost.Name,
 				"Please check our troubleshooting guide")
 	*/
 	preflightCheckSucceedsOrFailsWithDriver(
-		startFlags.SkipCheckNetworkPing.Name,
+		configCmd.SkipCheckNetworkPing.Name,
 		checkIPConnectivity, driver,
 		"Checking if external host is reachable from the Minishift VM",
-		true, startFlags.WarnCheckNetworkPing.Name,
+		true, configCmd.WarnCheckNetworkPing.Name,
 		"VM is unable to ping external host")
 	preflightCheckSucceedsOrFailsWithDriver(
-		startFlags.SkipCheckNetworkHTTP.Name,
+		configCmd.SkipCheckNetworkHTTP.Name,
 		checkHttpConnectivity, driver,
 		"Checking HTTP connectivity from the VM",
-		true, startFlags.WarnCheckNetworkHTTP.Name,
+		true, configCmd.WarnCheckNetworkHTTP.Name,
 		"VM cannot connect to external URL with HTTP")
 	preflightCheckSucceedsOrFailsWithDriver(
-		startFlags.SkipCheckStorageMount.Name,
+		configCmd.SkipCheckStorageMount.Name,
 		checkStorageMounted, driver,
 		"Checking if persistent storage volume is mounted",
-		false, startFlags.WarnCheckStorageMount.Name,
+		false, configCmd.WarnCheckStorageMount.Name,
 		"Persistent volume storage is not mounted")
 	preflightCheckSucceedsOrFailsWithDriver(
-		startFlags.SkipCheckStorageUsage.Name,
+		configCmd.SkipCheckStorageUsage.Name,
 		checkStorageUsage, driver,
 		"Checking available disk space",
-		false, startFlags.WarnCheckStorageUsage.Name,
+		false, configCmd.WarnCheckStorageUsage.Name,
 		"Insufficient disk space on the persistent storage volume")
 }
 
@@ -250,7 +250,7 @@ func checkVMConnectivity(driver drivers.Driver) bool {
 
 // checkIPConnectivity checks if the VM has connectivity to the outside network
 func checkIPConnectivity(driver drivers.Driver) bool {
-	ipToPing := viper.GetString(startFlags.CheckNetworkPingHost.Name)
+	ipToPing := viper.GetString(configCmd.CheckNetworkPingHost.Name)
 	if ipToPing == "" {
 		ipToPing = "8.8.8.8"
 	}
@@ -261,7 +261,7 @@ func checkIPConnectivity(driver drivers.Driver) bool {
 
 // checkHttpConnectivity allows to test outside connectivity and possible proxy support
 func checkHttpConnectivity(driver drivers.Driver) bool {
-	urlToRetrieve := viper.GetString(startFlags.CheckNetworkHttpHost.Name)
+	urlToRetrieve := viper.GetString(configCmd.CheckNetworkHttpHost.Name)
 	if urlToRetrieve == "" {
 		urlToRetrieve = "http://minishift.io/index.html"
 	}

@@ -29,7 +29,7 @@ import (
 	"strings"
 	"time"
 
-	startFlags "github.com/minishift/minishift/cmd/minishift/cmd/config"
+	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minikube/kubeconfig"
 	"github.com/minishift/minishift/pkg/minishift/addon/command"
@@ -69,9 +69,9 @@ func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string, runne
 
 	// Deal with extra flags (remove from cluster up params)
 	var extraFlags string
-	if val, ok := clusterUpParams[startFlags.ExtraClusterUpFlags.Name]; ok {
+	if val, ok := clusterUpParams[configCmd.ExtraClusterUpFlags.Name]; ok {
 		extraFlags = val
-		delete(clusterUpParams, startFlags.ExtraClusterUpFlags.Name)
+		delete(clusterUpParams, configCmd.ExtraClusterUpFlags.Name)
 	}
 
 	// Check if clusterUp flags are supported

@@ -25,17 +25,17 @@ import (
 
 func ReadInputFromStdin(fieldlabel string) string {
 	var value string
-	print(fmt.Sprintf("%s: ", fieldlabel))
+	fmt.Printf("%s: ", fieldlabel)
 	fmt.Scanln(&value)
 	return value
 }
 
 func ReadPasswordFromStdin(fieldlabel string) string {
 	var value string
-	print(fmt.Sprintf("%s: ", fieldlabel))
+	fmt.Printf("%s: ", fieldlabel)
 	pwinput, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 	if err == nil {
-		println("[HIDDEN]")
+		fmt.Println("[HIDDEN]")
 		value = string(pwinput)
 	}
 	return value

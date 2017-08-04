@@ -179,7 +179,7 @@ func addToConfig(hostfolder config.HostFolder, allInstances bool) {
 		config.InstanceConfig.Write()
 	}
 
-	println(fmt.Sprintf("Added: %s", hostfolder.Name))
+	fmt.Printf("Added: %s\n", hostfolder.Name)
 }
 
 func Remove(name string) error {
@@ -193,7 +193,7 @@ func Remove(name string) error {
 	config.AllInstancesConfig.HostFolders = removeFromHostFoldersByName(name, config.AllInstancesConfig.HostFolders)
 	config.AllInstancesConfig.Write()
 
-	println(fmt.Sprintf("Removed: %s", name))
+	fmt.Printf("Removed: %s\n", name)
 
 	return nil
 }
@@ -227,7 +227,7 @@ func MountHostfolders(driver drivers.Driver) error {
 		return errors.New("No host folders defined.")
 	}
 
-	println("-- Mounting hostfolders")
+	fmt.Println("-- Mounting hostfolders")
 
 	hostfolders := config.AllInstancesConfig.HostFolders
 	hostfolders = append(hostfolders, config.InstanceConfig.HostFolders...)
@@ -306,12 +306,12 @@ func mountCifsHostfolder(driver drivers.Driver, hostfolder *config.HostFolder) e
 		hostfolder.Mountpoint()))
 
 	if isMounted, err := isHostfolderMounted(driver, hostfolder); isMounted {
-		println("Already mounted")
+		fmt.Println("Already mounted")
 		return fmt.Errorf("Host folder is already mounted. %s", err)
 	}
 
 	if !isCifsHostReachable(driver, hostfolder.Options["uncpath"]) {
-		print("Unreachable\n")
+		fmt.Print("Unreachable\n")
 		return errors.New("Host folder is unreachable")
 	}
 
@@ -332,15 +332,15 @@ func mountCifsHostfolder(driver drivers.Driver, hostfolder *config.HostFolder) e
 	}
 
 	if err := ensureMountPointExists(driver, hostfolder); err != nil {
-		println("FAIL")
+		fmt.Println("FAIL")
 		return fmt.Errorf("Error occured while creating mountpoint. %s", err)
 	}
 
 	if _, err := drivers.RunSSHCommandFromDriver(driver, cmd); err != nil {
-		println("FAIL")
+		fmt.Println("FAIL")
 		return fmt.Errorf("Error occured while mounting host folder.", err)
 	} else {
-		println("OK")
+		fmt.Println("OK")
 	}
 
 	return nil
@@ -351,10 +351,10 @@ func umountHostfolder(driver drivers.Driver, hostfolder *config.HostFolder) erro
 		errors.New("Host folder not defined")
 	}
 
-	print(fmt.Sprintf("   Unmounting '%s' ... ", hostfolder.Name))
+	fmt.Printf("   Unmounting '%s' ... ", hostfolder.Name)
 
 	if isMounted, err := isHostfolderMounted(driver, hostfolder); !isMounted {
-		print("Not mounted\n")
+		fmt.Printf("Not mounted\n")
 		return fmt.Errorf("Host folder not mounted. %s", err)
 	}
 
@@ -363,10 +363,10 @@ func umountHostfolder(driver drivers.Driver, hostfolder *config.HostFolder) erro
 		hostfolder.Mountpoint())
 
 	if _, err := drivers.RunSSHCommandFromDriver(driver, cmd); err != nil {
-		println("FAIL")
+		fmt.Println("FAIL")
 		return fmt.Errorf("Error occured while unmounting host folder.", err)
 	} else {
-		println("OK")
+		fmt.Println("OK")
 	}
 
 	return nil

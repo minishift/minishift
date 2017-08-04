@@ -29,18 +29,18 @@ func IsRetrievable(driver drivers.Driver, url string, printOutput bool) bool {
 		url)
 
 	if printOutput {
-		print(fmt.Sprintf("   Checking if '%s' is retrievable ... ", url))
+		fmt.Printf("   Checking if '%s' is retrievable ... ", url)
 	}
 
 	if _, err := drivers.RunSSHCommandFromDriver(driver, cmd); err != nil {
 		if printOutput {
-			print("FAIL\n")
+			fmt.Println("FAIL")
 		}
 		return false
 	}
 
 	if printOutput {
-		print("OK\n")
+		fmt.Println("OK")
 	}
 	return true
 }
@@ -52,18 +52,18 @@ func IsIPReachable(driver drivers.Driver, ip string, printOutput bool) bool {
 		ip)
 
 	if printOutput {
-		print(fmt.Sprintf("   Checking if '%s' is reachable ... ", ip))
+		fmt.Printf("   Checking if '%s' is reachable ... ", ip)
 	}
 
 	if _, err := drivers.RunSSHCommandFromDriver(driver, cmd); err != nil {
 		if printOutput {
-			print("FAIL\n")
+			fmt.Println("FAIL")
 		}
 		return false
 	}
 
 	if printOutput {
-		print("OK\n")
+		fmt.Println("OK")
 	}
 	return true
 }

@@ -137,7 +137,7 @@ prerelease: clean fmtcheck test cross
 	fi
 
 .PHONY: release
-release: $(GOPATH)/bin/gh-release
+release: clean $(GOPATH)/bin/gh-release cross
 	mkdir -p release
 	tar -zcf release/minishift-$(MINISHIFT_VERSION)-darwin-amd64.tgz LICENSE README.adoc -C $(BUILD_DIR)/darwin-amd64 minishift
 	tar -zcf release/minishift-$(MINISHIFT_VERSION)-linux-amd64.tgz LICENSE README.adoc -C $(BUILD_DIR)/linux-amd64 minishift

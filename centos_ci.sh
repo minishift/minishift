@@ -236,14 +236,19 @@ function add_release_notes() {
   release_id=$(curl -s "https://api.github.com/repos/${REPO_OWNER}/minishift/releases" | jq --arg release "v$RELEASE_VERSION" -r ' .[] | if .name == $release then .id else empty end')
 
   if [[ "$release_id" != "" ]]; then
-    MILESTONE_ID=`curl -s https://api.github.com/repos/minishift/minishift/milestones | jq --arg version "v$RELEASE_VERSION" -r ' .[] | if .title == $version then .number else empty end'`
-    # Generate required json payload for release note
-    ./scripts/release/issue-list.sh -r minishift -m $MILESTONE_ID | jq -Rn 'inputs + "\n"' | jq -s '{body:  add }' > json_payload.json
-    # Add release notes
-    curl -H "Content-Type: application/json" -H "Authorization: token $GITHUB_TOKEN" \
-         --data @json_payload.json https://api.github.com/repos/${REPO_OWNER}/minishift/releases/$release_id
+    MILESTONE_ID=`curl -s https://api.github.com/repos/minishift/minishift/milestones?state=all  | jq --arg version "v$RELEASE_VERSION" -r ' .[] | if .title == $version then .number else empty end'`
 
-    echo "Release notes of Minishift v$RELEASE_VERSION has been successfully updated. Find the release notes here https://github.com/${REPO_OWNER}/minishift/releases/tag/v$RELEASE_VERSION."
+    if [[ "$MILESTONE_ID" != "" ]]; then
+      # Generate required json payload for release note
+      ./scripts/release/issue-list.sh -r minishift -m $MILESTONE_ID | jq -Rn 'inputs + "\n"' | jq -s '{body:  add }' > json_payload.json
+      # Add release notes
+      curl -H "Content-Type: application/json" -H "Authorization: token $GITHUB_TOKEN" \
+           --data @json_payload.json https://api.github.com/repos/${REPO_OWNER}/minishift/releases/$release_id
+
+      echo "Release notes of Minishift v$RELEASE_VERSION has been successfully updated. Find the release notes here https://github.com/${REPO_OWNER}/minishift/releases/tag/v$RELEASE_VERSION."
+    else
+      echo "Failed to get milestone ID for Minishift v$RELEASE_VERSION. Use manual approach to update the release notes here https://github.com/${REPO_OWNER}/minishift/releases/tag/v$RELEASE_VERSION."
+    fi
   else
     return 1
   fi
@@ -272,9 +277,6 @@ function perform_release() {
   make link_check_docs IMAGE_UID=$(id -u) # Test docs builds and all links are valid
   exit_on_failure "$?" "Documentation build failed."
 
-  make gen_adoc_tar IMAGE_UID=$(id -u)
-  exit_on_failure "$?" "Documentation tarball build failed."
-
   create_release_commit
   exit_on_failure "$?" "Unable to create release commit."
 
@@ -284,6 +286,9 @@ function perform_release() {
 
   add_release_notes;
   exit_on_failure "$?" "Failed to update release notes of Minishift v$RELEASE_VERSION. Try to manually update the release notes here - https://github.com/${REPO_OWNER}/minishift/releases/tag/v$RELEASE_VERSION."
+
+  make gen_adoc_tar IMAGE_UID=$(id -u)
+  exit_on_failure "$?" "Documentation tarball build failed."
 
   docs_tar_upload $1
   exit_on_failure "$?" "Failed to upload tar bundle for doc.openshift.org."

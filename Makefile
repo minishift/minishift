@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Various versions - Minishift, default OpenShift, default B2D ISO
-MINISHIFT_VERSION = 1.4.0
+MINISHIFT_VERSION = 1.4.1
 OPENSHIFT_VERSION = v3.6.0
 B2D_ISO_VERSION = v1.1.0
 CENTOS_ISO_VERSION = v1.1.0

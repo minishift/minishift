@@ -330,6 +330,9 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 		// Should handle cached images
 		//fmt.Println("   Boot ISO:  ", machineConfig.MinikubeISO)
 	}
+
+	cacheMinishiftISO(machineConfig)
+
 	fmt.Printf("-- Starting Minishift VM ... ")
 	spinnerView.Start()
 	start := func() (err error) {
@@ -617,4 +620,12 @@ func IsOpenShiftRunning(driver drivers.Driver) bool {
 	dockerCommander := docker.NewVmDockerCommander(sshCommander)
 
 	return openshift.IsRunning(dockerCommander)
+}
+
+func cacheMinishiftISO(config *cluster.MachineConfig) {
+	if config.ShouldCacheMinikubeISO() {
+		if err := config.CacheMinikubeISOFromURL(); err != nil {
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error caching the ISO: %s", err.Error()))
+		}
+	}
 }

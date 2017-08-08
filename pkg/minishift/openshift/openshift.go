@@ -19,14 +19,13 @@ package openshift
 import (
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/golang/glog"
+	"github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/minishift/docker"
 	"github.com/pborman/uuid"
-	"strings"
 )
-
-const OPENSHIFT_CONTAINER_NAME = "origin"
-const OPENSHIFT_EXEC = "/usr/bin/openshift"
 
 type OpenShiftPatchTarget struct {
 	target              string
@@ -86,7 +85,7 @@ func (t *OpenShiftPatchTarget) localConfigFilePath() (string, error) {
 
 func RestartOpenShift(commander docker.DockerCommander) (bool, error) {
 	fmt.Println("Restarting OpenShift")
-	ok, err := commander.Restart(OPENSHIFT_CONTAINER_NAME)
+	ok, err := commander.Restart(constants.OpenshiftContainerName)
 	if err != nil {
 		return false, err
 	}
@@ -107,7 +106,7 @@ func Patch(target OpenShiftPatchTarget, patch string, commander docker.DockerCom
 	}
 
 	patchCommand := fmt.Sprintf("ex config patch %s --patch='%s'", containerConfigPath, patch)
-	result, err := commander.Exec("-t", OPENSHIFT_CONTAINER_NAME, OPENSHIFT_EXEC, patchCommand)
+	result, err := commander.Exec("-t", constants.OpenshiftContainerName, constants.OpenshiftExec, patchCommand)
 	if err != nil {
 		glog.Error("Creating patched configuration failed. Not applying the changes.", err)
 		return false, nil
@@ -136,7 +135,7 @@ func Patch(target OpenShiftPatchTarget, patch string, commander docker.DockerCom
 // IsRunning checks whether the origin container is in running state.
 // This method returns true if the origin container is running, false otherwise
 func IsRunning(commander docker.DockerCommander) bool {
-	status, err := commander.Status(OPENSHIFT_CONTAINER_NAME)
+	status, err := commander.Status(constants.OpenshiftContainerName)
 	if err != nil || status != "running" {
 		return false
 	}
@@ -150,7 +149,7 @@ func ViewConfig(target OpenShiftPatchTarget, commander docker.DockerCommander) (
 		return "", err
 	}
 
-	result, err := commander.Exec("-t", OPENSHIFT_CONTAINER_NAME, "cat", path)
+	result, err := commander.Exec("-t", constants.OpenshiftContainerName, "cat", path)
 	if err != nil {
 		return "", err
 	}
@@ -160,7 +159,7 @@ func ViewConfig(target OpenShiftPatchTarget, commander docker.DockerCommander) (
 func rollback(target OpenShiftPatchTarget, commander docker.DockerCommander, patchId string) {
 	fmt.Println("Unable to restart OpenShift after patchting it. Rolling back.")
 	restoreConfig(target, patchId, commander)
-	commander.Restart(OPENSHIFT_CONTAINER_NAME)
+	commander.Restart(constants.OpenshiftContainerName)
 	deleteBackup(target, patchId, commander)
 }
 

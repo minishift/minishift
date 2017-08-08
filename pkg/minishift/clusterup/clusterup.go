@@ -36,9 +36,10 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/addon/manager"
 	"github.com/minishift/minishift/pkg/minishift/oc"
 
+	"regexp"
+
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/version"
-	"regexp"
 )
 
 const (
@@ -106,14 +107,10 @@ func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string, runne
 
 // PostClusterUp runs the Minishift specific provisioning after 'cluster up' has run
 func PostClusterUp(clusterUpConfig *ClusterUpConfig, sshCommander provision.SSHCommander, addOnManager *manager.AddOnManager) error {
-	isOpenshift3_6 := util.VersionOrdinal(clusterUpConfig.OpenShiftVersion) >= util.VersionOrdinal("v3.6.0")
-
-	clusterName := getConfigClusterName(clusterUpConfig.Ip, clusterUpConfig.Port)
-	userName := fmt.Sprintf("system:admin/%s", clusterName)
-	// See issue https://github.com/minishift/minishift/issues/1011. Needs to be revisted whether needed with final OpensShift 3.6 (HF)
-	if isOpenshift3_6 {
-		userName = fmt.Sprintf("system:admin/127-0-0-1:%d", clusterUpConfig.Port)
-	}
+	// With oc 3.6 client, clusterName entry to kubeconfig file become 127.0.0.1:<port> and
+	// we started to use oc baseline >= 3.6 which can provision now older release version.
+	// In case there is any change happen to newer version of oc client binary then this need modification.
+	userName := fmt.Sprintf("system:admin/127-0-0-1:%d", clusterUpConfig.Port)
 
 	err := kubeconfig.CacheSystemAdminEntries(clusterUpConfig.KubeConfigPath, getConfigClusterName(clusterUpConfig.Ip, clusterUpConfig.Port), userName)
 	if err != nil {

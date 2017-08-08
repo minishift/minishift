@@ -23,7 +23,7 @@ import (
 )
 
 func Test_unix_oc_path(t *testing.T) {
-	shellConfig, err := getOcShellConfig("/Users/john/.minishift/cache/oc/v1.5.0/oc", "")
+	shellConfig, err := getOcShellConfig("/Users/john/.minishift/cache/oc/v1.5.0/oc", "bash")
 	if err != nil {
 		t.Fatalf("Unexepcted error: %s", err)
 	}

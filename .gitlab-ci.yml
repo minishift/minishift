@@ -1,0 +1,18 @@
+build:
+  image: fedora:26
+  script:
+    - dnf install -y golang glide make git python
+    - export CURRENT_BUILD_PATH=$PWD
+    - mkdir -p $HOME/gopath
+    - export GOPATH=$HOME/gopath
+    - export PATH=$PATH:$GOPATH/bin
+    - mkdir -p $HOME/gopath/src/github.com/minishift
+    - ln -s $CURRENT_BUILD_PATH $HOME/gopath/src/github.com/minishift/minishift
+    - cd $HOME/gopath/src/github.com/minishift/minishift/
+    - make prerelease
+    - rm -rf $HOME/gopath/src/github.com/minishift/minishift/out/bindata
+    - mv $HOME/gopath/src/github.com/minishift/minishift/out/ $CURRENT_BUILD_PATH/public
+  artifacts:
+    paths:
+      - public
+

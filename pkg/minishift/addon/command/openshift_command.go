@@ -19,8 +19,9 @@ package command
 import (
 	"errors"
 	"fmt"
-	"github.com/minishift/minishift/pkg/minishift/openshift"
 	"strings"
+
+	"github.com/minishift/minishift/pkg/minishift/constants"
 )
 
 type OpenShiftCommand struct {
@@ -41,7 +42,7 @@ func (c *OpenShiftCommand) doExecute(ec *ExecutionContext) error {
 	fmt.Print(".")
 
 	commander := ec.GetDockerCommander()
-	_, err := commander.Exec("-t", openshift.OPENSHIFT_CONTAINER_NAME, openshift.OPENSHIFT_EXEC, ec.Interpolate(cmd))
+	_, err := commander.Exec("-t", constants.OpenshiftContainerName, constants.OpenshiftExec, ec.Interpolate(cmd))
 	if err != nil {
 		return errors.New(fmt.Sprintf("Error executing command '%s':", err.Error()))
 	}

@@ -17,6 +17,8 @@ limitations under the License.
 package constants
 
 const (
-	B2dIsoAlias    = "b2d"
-	CentOsIsoAlias = "centos"
+	B2dIsoAlias            = "b2d"
+	CentOsIsoAlias         = "centos"
+	OpenshiftContainerName = "origin"
+	OpenshiftExec          = "/usr/bin/openshift"
 )

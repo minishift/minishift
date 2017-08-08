@@ -7,7 +7,7 @@ Feature: Basic
     When executing "minishift addons install --defaults" succeeds
     Then stdout should contain
      """
-     Default add-ons anyuid, admin-user, xpaas installed
+     Default add-ons anyuid, admin-user, xpaas, registry-route installed
      """
 
   Scenario: User can enable the anyuid add-on

@@ -24,7 +24,48 @@ import (
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 )
 
-func GetDockerRegistryInfo() (string, error) {
+func GetDockerRegistryInfo(registryAddonEnabled bool) (string, error) {
+	var registryInfo string
+	var err error
+	if isRegistryRouteEnabled(registryAddonEnabled) {
+		registryInfo, err = fetchRegistryRoute()
+	} else {
+		registryInfo, err = fetchRegistryService()
+	}
+	return registryInfo, err
+}
+
+func isRegistryRouteEnabled(registryAddonEnabled bool) bool {
+	if !registryAddonEnabled {
+		return false
+	}
+	namespace := "default"
+	cmdArgText := fmt.Sprintf("get route docker-registry -n %s --config=%s", namespace, systemKubeConfigPath)
+	tokens := strings.Split(cmdArgText, " ")
+	cmdName := instanceState.InstanceConfig.OcPath
+	_, err := runner.Output(cmdName, tokens...)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func fetchRegistryRoute() (string, error) {
+	namespace := "default"
+	route := "route/docker-registry"
+	cmdArgText := fmt.Sprintf("get -o jsonpath={.spec.host}:443 %s -n %s --config=%s", route, namespace, systemKubeConfigPath)
+	tokens := strings.Split(cmdArgText, " ")
+	cmdName := instanceState.InstanceConfig.OcPath
+	cmdOut, err := runner.Output(cmdName, tokens...)
+	if err != nil {
+		return "", err
+	}
+
+	registryInfo := string(cmdOut)
+	return registryInfo, nil
+}
+
+func fetchRegistryService() (string, error) {
 	namespace := "default"
 	service := "service/docker-registry"
 	cmdArgText := fmt.Sprintf("get -o jsonpath={.spec.clusterIP}:{.spec.ports[*].port} %s -n %s --config=%s", service, namespace, systemKubeConfigPath)
@@ -34,7 +75,6 @@ func GetDockerRegistryInfo() (string, error) {
 	if err != nil {
 		return "", errors.New(fmt.Sprintf("No information found for '%s'", service))
 	}
-
 	registryInfo := string(cmdOut)
 	return registryInfo, nil
 }

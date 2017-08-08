@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/docker/machine/libmachine"
+	"github.com/minishift/minishift/cmd/minishift/cmd/addon"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/openshift"
@@ -45,8 +46,12 @@ var registryCmd = &cobra.Command{
 		}
 
 		util.ExitIfNotRunning(host.Driver, constants.MachineName)
-
-		registryInfo, err := openshift.GetDockerRegistryInfo()
+		registryRoute := addon.GetAddOnManager().Get("registry-route")
+		registryAddonEnabled := true
+		if registryRoute == nil || !registryRoute.IsEnabled() {
+			registryAddonEnabled = false
+		}
+		registryInfo, err := openshift.GetDockerRegistryInfo(registryAddonEnabled)
 		if err != nil {
 			atexit.ExitWithMessage(1, err.Error())
 		}

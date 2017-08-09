@@ -1,5 +1,5 @@
-hash: 9331dcdebd3c68898e6841b0bc140c756c478f2325064216b89d035060cdc066
-updated: 2017-06-23T15:31:41.602757701+05:30
+hash: 8a468283a9a4675c087c7d25a00ce4a72c4fc0f5f05abe60eec93bfce22be14b
+updated: 2017-07-10T11:56:37.047777606+02:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: 7b3beb6df3c42abd3509abfc3bcacc0fbfb7c877
@@ -60,6 +60,8 @@ imports:
   - libmachine/version
   - libmachine/versioncmp
   - version
+- name: github.com/elazarl/goproxy
+  version: aacba83f36a55ac31cbb71c06547a328c0cd1604
 - name: github.com/fatih/color
   version: 62e9147c64a1ed519147b62a56a14e83e2be02c1
 - name: github.com/fsnotify/fsnotify

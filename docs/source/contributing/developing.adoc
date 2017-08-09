@@ -161,7 +161,7 @@ Depending on your operating system, the binary is in one of the following direct
 For more Minishift commands and flags, see the xref:../command-ref/minishift.adoc#[Minishift command reference] documentation.
 
 [[unit-tests]]
-=== Running Unit Tests
+=== Unit Tests
 
 Unit tests run on *Travis* before the code is merged.
 To run tests during the development cycle:
@@ -192,12 +192,26 @@ $go test -v <relative path of package> -run "Test<Regex pattern to match tests>"
 For more information about test options, run the `go test --help` command and review the documentation.
 
 [[integration-tests]]
-=== Running Integration Tests
+=== Integration Tests
 
-Integration tests utilize link:https://github.com/DATA-DOG/godog[Godog], which uses Gherkin (Cucumber) to define test cases.
-The test cases are defined in *_test/integration/features_*.
-By default, the tests are executed against the binary created by `make build`, that is *_$GOPATH/bin/minishift_*.
-To run the tests, run:
+Integration tests utilize link:https://github.com/DATA-DOG/godog[Godog], which uses Gherkin (Cucumber) to define sets of test cases, in Gherkin terminology known as _features_.
+The features are located in *_test/integration/features_* folder.
+Features for Minishift follow these basic concepts:
+
+User stories::
+Features which follow a happy path of user.
+For example, _basic.feature_ or _coolstore.feature_.
+
+Feature and command coverage::
+Features which focuses on specific fields of Minishift functionality or individual commands.
+For example, _proxy.feature_ or _cmd-version.feature_.
+
+
+[[running-integration-tests]]
+==== Running Integration Tests
+
+By default, the tests are being run against the binary created by `make build`, which is *_$GOPATH/bin/minishift_*. 
+To run the tests, use the following command:
 
 ----
 $ make integration
@@ -209,17 +223,31 @@ To run integration tests against a Minishift binary in a different location you 
 $ make integration MINISHIFT_BINARY=<path-to-custom-binary>
 ----
 
-Additional properties for Godog runner can be specified with `GODOG_OPTS` argument.
+[[godog-options]]
+==== Using Tags and Other Godog Options
+
+Additional properties for Godog runner can be specified with the `GODOG_OPTS` argument. 
 The following options are available:
 
-- `tags`: Use `tags` to ensure that scenarios and features containing at least one of the selected tags are executed.
-- `paths`: Use `paths` to define paths to different feature files or folders containing feature files.
+Tags::
+Use `tags` to ensure that scenarios and features containing at least one of the selected tags are executed.
+
+Paths::
+Use `paths` to define paths to different feature files or folders containing feature files.
 This can be used to run feature files outside of the *_test/integration/features_* folder.
-- `format`:  Use `format` to change the format of Godog's output.
+
+Format::
+Use `format` to change the format of Godog's output.
 For example, you can use `pretty` format instead of the native `progress`.
-- `stop-on-failure`: Set `stop-on-failure` to true to stop integration tests on failure.
-- `no-colors`: Set `no-colors` to true to disable ansi colors of Godog's output.
-- `definitions`: Set `definitions` to true to print all available step definitions.
+
+Stop-on-failure::
+Set `stop-on-failure` to true to stop integration tests on failure.
+
+No-colors::
+Set `no-colors` to true to disable ansi colors of Godog's output.
+
+Definitions::
+Set `definitions` to true to print all available step definitions.
 
 For example, to run integration tests on two specific feature files using only `@basic` and `@openshift` tags and without ansi colors, the following command can be used:
 

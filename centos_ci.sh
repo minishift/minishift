@@ -260,6 +260,7 @@ function setup_build_environment() {
   install_core_deps;
   install_kvm_virt;
   install_docker;
+  prepare_for_proxy;
   runuser -l minishift_ci -c "/bin/bash centos_ci.sh"
 }
 
@@ -308,6 +309,11 @@ function build_and_test() {
   echo "CICO: Tests ran successfully"
 
   artifacts_upload_on_pr_and_master_trigger $1;
+}
+
+function prepare_for_proxy() {
+  export INTEGRATION_PROXY_CUSTOM_PORT=8181 #needs to be an unused port
+  firewall-cmd --zone=public --add-port=$INTEGRATION_PROXY_CUSTOM_PORT/tcp;
 }
 
 if [[ "$UID" = 0 ]]; then

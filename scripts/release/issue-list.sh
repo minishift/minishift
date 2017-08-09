@@ -23,6 +23,13 @@ function usage()
     exit 1
 }
 
+function print_content_with_nonempty_issues() {
+  echo $1 | grep -q '[0-9]'
+  if [[ "$?" == 0 ]]; then
+    echo -e "$1"
+  fi
+}
+
 # Given a minishift repo name and a milestone, generates a sorted list of issues for this milestone.
 # Can be used to update the GitHub replease page as part of cutting a release.
 function milestone_issues()
@@ -55,7 +62,9 @@ function milestone_issues()
     if [[ "$line" == *"(task)"* ]]; then tasks="$tasks\n$line"; fi
   done <<< "$issue_list"
 
-  echo -e "$features\n$bugs\n$tasks"
+  for content in "$features" "$bugs" "$tasks"; do
+    print_content_with_nonempty_issues "$content"
+  done
 }
 
 while getopts ":r:m:" opt; do

@@ -31,7 +31,7 @@ dependencies:
 ## Customize test commands
 test:
     override:
-        - make test cross fmtcheck prerelease:
+        - make prerelease:
                 pwd:
                     ../src/github.com/minishift/minishift
 

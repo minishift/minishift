@@ -24,7 +24,7 @@ install:
 - choco install make
 
 build_script:
-- make cross test fmtcheck
+- make prerelease
 
 artifacts:
   - path: out\linux-amd64\minishift

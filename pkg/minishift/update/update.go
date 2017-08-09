@@ -251,7 +251,10 @@ func extractBinary(downloadedArchivePath, archiveDir string) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		binaryPath = filepath.Join(extract, "minishift.exe")
+		binaryPath, err = minishiftBinaryPath(extract, "minishift.exe")
+		if err != nil {
+			return "", err
+		}
 	} else {
 		ungzip := filepath.Join(archiveDir, "minishift.gzip")
 		err := archive.Ungzip(downloadedArchivePath, ungzip)
@@ -264,10 +267,28 @@ func extractBinary(downloadedArchivePath, archiveDir string) (string, error) {
 			return "", err
 		}
 
-		binaryPath = filepath.Join(extract, "minishift")
+		binaryPath, err = minishiftBinaryPath(extract, "minishift")
+		if err != nil {
+			return "", err
+		}
 	}
 
 	return binaryPath, nil
+}
+
+// minishitBinaryPath take extracted Path and os specific binary name and return
+// absolute path of the binary
+func minishiftBinaryPath(extractPath, binaryName string) (string, error) {
+	var binaryPath string
+	var err error
+	err = filepath.Walk(extractPath, func(path string, f os.FileInfo, err error) error {
+		if strings.HasSuffix(path, binaryName) {
+			binaryPath = path
+		}
+		return nil
+	})
+
+	return binaryPath, err
 }
 
 // updateBinary takes the path to the extracted binary (latest binary) and replaces the binary.

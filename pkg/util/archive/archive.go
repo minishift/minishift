@@ -58,27 +58,50 @@ func Untar(tarball, targetDir string) error {
 
 	for {
 		header, err := tarReader.Next()
-		if err == io.EOF {
-			break
-		} else if err != nil {
+		switch {
+		// if no more files are found return
+		case err == io.EOF:
+			return nil
+
+		// return any other error
+		case err != nil:
 			return err
+
+		// if the header is nil, just skip it (not sure how this happens)
+		case header == nil:
+			continue
 		}
 
+		// the target location where the dir/file should be created
 		path := filepath.Join(targetDir, header.Name)
 
-		// tar.Next() will externally only iterate files, so we might have to create intermediate directories here
-		if err = os.MkdirAll(filepath.Dir(path), 0770); err != nil {
-			return err
-		}
+		// check the file type
+		switch header.Typeflag {
 
-		file, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, header.FileInfo().Mode())
-		if err != nil {
-			return err
-		}
-		defer file.Close()
-		_, err = io.Copy(file, tarReader)
-		if err != nil {
-			return err
+		// if its a dir and it doesn't exist create it
+		case tar.TypeDir:
+			if _, err := os.Stat(path); err != nil {
+				if err := os.MkdirAll(path, 0755); err != nil {
+					return err
+				}
+			}
+
+		// if it's a file create it
+		case tar.TypeReg:
+			// tar.Next() will externally only iterate files, so we might have to create intermediate directories here
+			if err = os.MkdirAll(filepath.Dir(path), 0770); err != nil {
+				return err
+			}
+			file, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, header.FileInfo().Mode())
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			// copy over contents
+			if _, err := io.Copy(file, tarReader); err != nil {
+				return err
+			}
 		}
 	}
 	return nil

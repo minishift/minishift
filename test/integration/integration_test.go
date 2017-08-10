@@ -19,13 +19,18 @@ limitations under the License.
 package integration
 
 import (
+	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"net"
+	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -33,13 +38,9 @@ import (
 	"github.com/DATA-DOG/godog"
 	"github.com/DATA-DOG/godog/gherkin"
 
-	"crypto/tls"
-	"errors"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	testProxy "github.com/minishift/minishift/test/integration/proxy"
 	"github.com/minishift/minishift/test/integration/util"
-	"net/http"
-	"path/filepath"
-	"regexp"
 )
 
 var (
@@ -94,7 +95,7 @@ func parseFlags() {
 
 	flag.StringVar(&testDir, "test-dir", "", "Path to the directory in which to execute the tests")
 
-	flag.StringVar(&godogFormat, "format", "progress", "Sets which format godog will use")
+	flag.StringVar(&godogFormat, "format", "pretty", "Sets which format godog will use")
 	flag.StringVar(&godogTags, "tags", "", "Tags for godog test")
 	flag.BoolVar(&godogShowStepDefinitions, "definitions", false, "")
 	flag.BoolVar(&godogStopOnFailure, "stop-on-failure ", false, "Stop when failure is found")
@@ -141,33 +142,43 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^services "([^"]*)" rollout successfully$`,
 		minishift.rolloutServicesSuccessfully)
 
+	// steps for proxying
+	s.Step(`^user starts proxy server and sets MINISHIFT_HTTP_PROXY variable$`,
+		testProxy.SetProxy)
+	s.Step(`^user stops proxy server and unsets MINISHIFT_HTTP_PROXY variable$`,
+		testProxy.UnsetProxy)
+	s.Step(`^proxy log should contain "([^"]*)"$`,
+		proxyLogShouldContain)
+	s.Step(`^proxy log should contain$`,
+		proxyLogShouldContainContent)
+
 	// steps to verify `stdout`, `stderr` and `exitcode` of commands executed
-	s.Step(`([^"]*) should contain "([^"]*)"$`,
+	s.Step(`^(stdout|stderr|exitcode) should contain "([^"]*)"$`,
 		commandReturnShouldContain)
-	s.Step(`([^"]*) should not contain "([^"]*)"$`,
+	s.Step(`^(stdout|stderr|exitcode) should not contain "([^"]*)"$`,
 		commandReturnShouldNotContain)
-	s.Step(`([^"]*) should contain$`,
+	s.Step(`^(stdout|stderr|exitcode) should contain$`,
 		commandReturnShouldContainContent)
-	s.Step(`([^"]*) should not contain$`,
+	s.Step(`^(stdout|stderr|exitcode) should not contain$`,
 		commandReturnShouldNotContainContent)
-	s.Step(`([^"]*) should equal "([^"]*)"$`,
+	s.Step(`^(stdout|stderr|exitcode) should equal "([^"]*)"$`,
 		commandReturnShouldEqual)
-	s.Step(`([^"]*) should equal$`,
+	s.Step(`^(stdout|stderr|exitcode) should equal$`,
 		commandReturnShouldEqualContent)
-	s.Step(`([^"]*) should be empty$`,
+	s.Step(`^(stdout|stderr|exitcode) should be empty$`,
 		commandReturnShouldBeEmpty)
-	s.Step(`([^"]*) should not be empty$`,
+	s.Step(`^(stdout|stderr|exitcode) should not be empty$`,
 		commandReturnShouldNotBeEmpty)
-	s.Step(`([^"]*) should be valid ([^"]*)$`,
+	s.Step(`^(stdout|stderr|exitcode) should be valid ([^"]*)$`,
 		shouldBeInValidFormat)
 	// steps for matching stdout, stderr or exitcode with regular expression
-	s.Step(`([^"]*) should match "([^"]*)"$`,
+	s.Step(`^(stdout|stderr|exitcode) should match "([^"]*)"$`,
 		commandReturnShouldMatchRegex)
-	s.Step(`([^"]*) should not match "([^"]*)"$`,
+	s.Step(`^(stdout|stderr|exitcode) should not match "([^"]*)"$`,
 		commandReturnShouldNotMatchRegex)
-	s.Step(`([^"]*) should match$`,
+	s.Step(`^(stdout|stderr|exitcode) should match$`,
 		commandReturnShouldMatchRegexContent)
-	s.Step(`([^"]*) should not match$`,
+	s.Step(`^(stdout|stderr|exitcode) should not match$`,
 		commandReturnShouldNotMatchRegexContent)
 
 	// step for HTTP requests for minishift web console
@@ -196,6 +207,11 @@ func FeatureContext(s *godog.Suite) {
 	s.AfterSuite(func() {
 		minishift.runner.EnsureDeleted()
 	})
+
+	s.AfterScenario(func(interface{}, error) {
+		testProxy.ResetLog(false)
+	})
+
 }
 
 func setUp() string {
@@ -361,13 +377,11 @@ func selectFieldFromLastOutput(commandField string) string {
 		outputField = lastCommandOutput.StdErr
 	case "exitcode":
 		outputField = strconv.Itoa(lastCommandOutput.ExitCode)
-	default:
-		fmt.Errorf("Incorrect field type specified for comparison: %s", commandField)
 	}
 	return outputField
 }
 
-func shouldBeInValidFormat(commandField, format string) error {
+func shouldBeInValidFormat(commandField string, format string) error {
 	result := selectFieldFromLastOutput(commandField)
 	result = strings.TrimRight(result, "\n")
 	switch format {
@@ -380,18 +394,16 @@ func shouldBeInValidFormat(commandField, format string) error {
 		if net.ParseIP(result) == nil {
 			return fmt.Errorf("%s of previous command is not a valid IP address: %s", commandField, result)
 		}
-	default:
-		return fmt.Errorf("Format %s not implemented.", format)
 	}
 	return nil
 }
 
-func commandReturnEquals(commandField, command, expected string) error {
+func commandReturnEquals(commandField string, command string, expected string) error {
 	minishift.executingMinishiftCommand(command)
 	return compareExpectedWithActualEquals(expected+"\n", selectFieldFromLastOutput(commandField))
 }
 
-func commandReturnContains(commandField, command, expected string) error {
+func commandReturnContains(commandField string, command string, expected string) error {
 	minishift.executingMinishiftCommand(command)
 	return compareExpectedWithActualContains(expected, selectFieldFromLastOutput(commandField))
 }
@@ -483,7 +495,7 @@ func succeedsOrFails(execute commandRunner, command string, expectedResult strin
 	return nil
 }
 
-func verifyHTTPResponse(partOfResponse, url, urlSuffix, assertion, expected string) error {
+func verifyHTTPResponse(partOfResponse string, url string, urlSuffix string, assertion string, expected string) error {
 	switch url {
 	case "OpenShift":
 		url = minishift.getOpenShiftUrl() + urlSuffix
@@ -523,7 +535,7 @@ func verifyHTTPResponse(partOfResponse, url, urlSuffix, assertion, expected stri
 	return nil
 }
 
-func getRoutingUrlAndVerifyHTTPResponse(partOfResponse, urlRoot, serviceName, nameSpace, assertion, expected string) error {
+func getRoutingUrlAndVerifyHTTPResponse(partOfResponse string, urlRoot string, serviceName string, nameSpace string, assertion string, expected string) error {
 	url := minishift.getRoute(serviceName, nameSpace)
 	if urlRoot == "/" {
 		return verifyHTTPResponse(partOfResponse, url, "", assertion, expected)
@@ -534,4 +546,12 @@ func getRoutingUrlAndVerifyHTTPResponse(partOfResponse, urlRoot, serviceName, na
 		return fmt.Errorf("Wrong input format : %s. Input must start with /", urlRoot)
 	}
 	return nil
+}
+
+func proxyLogShouldContain(expected string) error {
+	return compareExpectedWithActualContains(expected, testProxy.GetLog())
+}
+
+func proxyLogShouldContainContent(expected *gherkin.DocString) error {
+	return compareExpectedWithActualContains(expected.Content, testProxy.GetLog())
 }

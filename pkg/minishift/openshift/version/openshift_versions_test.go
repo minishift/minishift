@@ -21,6 +21,9 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/version"
 )
 
 func TestPrintUpStreamVersions(t *testing.T) {
@@ -37,7 +40,12 @@ func TestPrintUpStreamVersions(t *testing.T) {
 	defer f.Close()
 
 	os.Stdout = f
-	PrintUpStreamVersions(f, "v1.5.0-rc.0")
+	defaultVersion := version.GetOpenShiftVersion()
+	err = PrintUpStreamVersions(f, constants.MinOpenshiftSupportedVersion, defaultVersion)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	if _, err := f.Seek(0, 0); err != nil {
 		t.Fatal("Error setting offset back", err)
 	}
@@ -47,8 +55,11 @@ func TestPrintUpStreamVersions(t *testing.T) {
 		t.Fatal("Error reading file", err)
 	}
 	actualStdout := string(data)
-	if strings.Contains(actualStdout, "v1.5.0-alpha.3") {
-		t.Fatalf("Shouldn't Contain v1.5.0-alpha.3 in\n %s", actualStdout)
+	if !strings.Contains(actualStdout, constants.MinOpenshiftSupportedVersion) {
+		t.Fatalf("Should Contain constants.MinOpenshiftSupportedVersion in\n %s", actualStdout)
+	}
+	if !strings.Contains(actualStdout, defaultVersion) {
+		t.Fatalf("Should Contain defaultVersion in\n %s", actualStdout)
 	}
 }
 
@@ -66,7 +77,10 @@ func TestPrintDownStreamVersions(t *testing.T) {
 	defer f.Close()
 
 	os.Stdout = f
-	PrintUpStreamVersions(f, "v3.4.1.10")
+	err = PrintDownStreamVersions(f, "v3.4.1.10")
+	if err != nil {
+		t.Fatal(err)
+	}
 	if _, err := f.Seek(0, 0); err != nil {
 		t.Fatal("Error setting offset back", err)
 	}
@@ -77,7 +91,7 @@ func TestPrintDownStreamVersions(t *testing.T) {
 	}
 
 	actualStdout := string(data)
-	if strings.Contains(actualStdout, "v3.4.1.10") {
-		t.Fatalf("Shouldn't Contain v3.4.1.10 in\n %s", actualStdout)
+	if !strings.Contains(actualStdout, "v3.4.1.10") {
+		t.Fatalf("Should Contain v3.4.1.10 in\n %s", actualStdout)
 	}
 }

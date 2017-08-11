@@ -79,12 +79,12 @@ var RootCmd = &cobra.Command{
 	Long:  `Minishift is a command-line tool that provisions and manages single-node OpenShift clusters optimized for development workflows.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		var (
-			err          error
-			isFreshStart bool
+			err                    error
+			isAddonInstallRequired bool
 		)
 
-		if !filehelper.Exists(constants.Minipath) || filehelper.IsEmptyDir(constants.Minipath) {
-			isFreshStart = true
+		if !filehelper.Exists(constants.MakeMiniPath("addons")) {
+			isAddonInstallRequired = true
 		}
 
 		for _, path := range dirs {
@@ -110,7 +110,7 @@ var RootCmd = &cobra.Command{
 		}
 
 		// Run the default addons on fresh minishift start
-		if isFreshStart {
+		if isAddonInstallRequired {
 			fmt.Print("-- Installing default add-ons ... ")
 			if err := util.UnpackAddons(constants.MakeMiniPath("addons")); err != nil {
 				atexit.ExitWithMessage(1, fmt.Sprintf("Error installing default add-ons : %s", err))

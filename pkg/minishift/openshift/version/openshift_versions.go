@@ -18,33 +18,20 @@ package version
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/minishift/minishift/pkg/util"
 	"io"
 	"net/http"
+	"regexp"
 	"sort"
 	"strings"
-	"time"
+
+	"github.com/minishift/minishift/pkg/minishift/clusterup"
+	"github.com/minishift/minishift/pkg/util"
 )
 
 type ImageTags struct {
-	Count    int         `json:"count"`
-	Next     string      `json:"next"`
-	Previous interface{} `json:"previous"`
-	Results  []Results   `json:"results"`
-}
-
-type Results struct {
-	Name        string      `json:"name"`
-	FullSize    int         `json:"full_size"`
-	Images      []ImageInfo `json:"images"`
-	ID          int         `json:"id"`
-	Repository  int         `json:"repository"`
-	Creator     int         `json:"creator"`
-	LastUpdater int         `json:"last_updater"`
-	LastUpdated time.Time   `json:"last_updated"`
-	ImageID     interface{} `json:"image_id"`
-	V2          bool        `json:"v2"`
+	Name string `json:"name"`
 }
 
 type ImageInfo struct {
@@ -57,19 +44,17 @@ type ImageInfo struct {
 	OsFeatures   interface{} `json:"os_features"`
 }
 
-func PrintDownStreamVersions(output io.Writer, minSupportedVersion string) {
+func PrintDownStreamVersions(output io.Writer, minSupportedVersion string) error {
 	resp, err := getResponseBody("https://registry.access.redhat.com/v1/repositories/openshift3/ose/tags")
 	if err != nil {
-		fmt.Println("Error Occured", err)
-		return
+		return err
 	}
 	defer resp.Body.Close()
 	decoder := json.NewDecoder(resp.Body)
 	var data map[string]string
 	err = decoder.Decode(&data)
 	if err != nil {
-		fmt.Printf("%T\n%s\n%#v\n", err, err, err)
-		return
+		return errors.New(fmt.Sprintf("%T\n%s\n%#v\n", err, err, err))
 	}
 	fmt.Fprint(output, "The following OpenShift versions are available: \n")
 	var tagsList []string
@@ -88,36 +73,43 @@ func PrintDownStreamVersions(output io.Writer, minSupportedVersion string) {
 	for _, tag := range tagsList {
 		fmt.Fprintf(output, "\t- %s\n", tag)
 	}
+	return nil
 }
 
-func PrintUpStreamVersions(output io.Writer, minSupportedVersion string) {
-	resp, err := getResponseBody("https://registry.hub.docker.com/v2/repositories/openshift/origin/tags/")
+func PrintUpStreamVersions(output io.Writer, minSupportedVersion string, defaultVersion string) error {
+	dockerRegistryUrl := "https://registry.hub.docker.com/v1/repositories/openshift/origin/tags"
+	resp, err := getResponseBody(dockerRegistryUrl)
 	if err != nil {
-		fmt.Fprintf(output, "Error Occured %s", err)
-		return
+		return err
 	}
 	defer resp.Body.Close()
 	decoder := json.NewDecoder(resp.Body)
-	var data ImageTags
+	var data []ImageTags
 	err = decoder.Decode(&data)
 	if err != nil {
-		fmt.Printf("%T\n%s\n%#v\n", err, err, err)
-		return
+		return errors.New(fmt.Sprintf("%T\n%s\n%#v\n", err, err, err))
 	}
 	fmt.Fprint(output, "The following OpenShift versions are available: \n")
 	var tagsList []string
-	for _, imageinfo := range data.Results {
+	for _, imageinfo := range data {
 		if strings.Contains(imageinfo.Name, "latest") {
 			continue
 		}
-		if util.VersionOrdinal(imageinfo.Name) >= util.VersionOrdinal(minSupportedVersion) {
-			tagsList = append(tagsList, imageinfo.Name)
+		if valid, _ := clusterup.ValidateOpenshiftMinVersion(imageinfo.Name, minSupportedVersion); valid {
+			if valid, _ := clusterup.ValidateOpenshiftMinVersion(imageinfo.Name, defaultVersion); valid {
+				tagsList = append(tagsList, imageinfo.Name)
+			} else {
+				if !isPrerelease(imageinfo.Name) {
+					tagsList = append(tagsList, imageinfo.Name)
+				}
+			}
 		}
 	}
 	sort.Strings(tagsList)
 	for _, tag := range tagsList {
 		fmt.Fprintf(output, "\t- %s\n", tag)
 	}
+	return nil
 }
 
 func getResponseBody(url string) (resp *http.Response, err error) {
@@ -126,4 +118,11 @@ func getResponseBody(url string) (resp *http.Response, err error) {
 		return nil, err
 	}
 	return resp, nil
+}
+
+func isPrerelease(tag string) bool {
+	if match, _ := regexp.MatchString("alpha|beta|rc", tag); match {
+		return true
+	}
+	return false
 }

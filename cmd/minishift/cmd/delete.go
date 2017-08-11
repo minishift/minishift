@@ -21,10 +21,12 @@ import (
 	"os"
 
 	"github.com/docker/machine/libmachine"
+	cmdProfile "github.com/minishift/minishift/cmd/minishift/cmd/profile"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
+	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
@@ -46,7 +48,6 @@ var (
 func runDelete(cmd *cobra.Command, args []string) {
 	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 	defer api.Close()
-
 	util.ExitIfUndefined(api, constants.MachineName)
 
 	// Unregistration, do not allow to be skipped
@@ -68,6 +69,7 @@ func runDelete(cmd *cobra.Command, args []string) {
 	}
 
 	removeInstanceConfigs()
+	removeProfileFromConfig()
 
 	fmt.Println("Minishift VM deleted.")
 }
@@ -94,6 +96,16 @@ func removeInstanceConfigs() {
 	if exists {
 		if err := os.Remove(constants.KubeConfigPath); err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting '%s'", constants.KubeConfigPath))
+		}
+	}
+}
+
+func removeProfileFromConfig() {
+	name := cmdProfile.GetProfileName()
+	if name != "" {
+		err := profileActions.RemoveProfile(name)
+		if err != nil {
+			atexit.ExitWithMessage(1, fmt.Sprintf("%s", err))
 		}
 	}
 }

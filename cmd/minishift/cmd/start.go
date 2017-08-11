@@ -18,10 +18,9 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
-
-	"os"
 	"time"
 
 	"github.com/asaskevich/govalidator"
@@ -34,6 +33,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/cmd/minishift/cmd/addon"
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
+	cmdProfile "github.com/minishift/minishift/cmd/minishift/cmd/profile"
 	cmdutil "github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
@@ -45,6 +45,7 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/docker/image"
 	"github.com/minishift/minishift/pkg/minishift/hostfolder"
 	"github.com/minishift/minishift/pkg/minishift/openshift"
+	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
 
 	"github.com/minishift/minishift/pkg/util"
@@ -196,6 +197,10 @@ func runStart(cmd *cobra.Command, args []string) {
 	requestedOpenShiftVersion := viper.GetString(configCmd.OpenshiftVersion.Name)
 	if !isRestart {
 		importContainerImages(hostVm, requestedOpenShiftVersion)
+
+		//Adding profile information to AllInstancesConfig
+		addProfileToConfig()
+
 	}
 
 	ocPath := cacheOc(clusterup.DetermineOcVersion(requestedOpenShiftVersion))
@@ -356,6 +361,16 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 func autoMountHostFolders(driver drivers.Driver) {
 	if hostfolder.IsAutoMount() && hostfolder.IsHostfoldersDefined() {
 		hostfolder.MountHostfolders(driver)
+	}
+}
+
+func addProfileToConfig() {
+	name := cmdProfile.GetProfileName()
+	if name != "" {
+		err := profileActions.AddProfileToConfig(name)
+		if err != nil {
+			atexit.ExitWithMessage(1, fmt.Sprintf("%s", err))
+		}
 	}
 }
 

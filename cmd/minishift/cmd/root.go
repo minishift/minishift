@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"regexp"
 	"strings"
 
 	"path/filepath"
@@ -34,6 +35,7 @@ import (
 	hostfolderCmd "github.com/minishift/minishift/cmd/minishift/cmd/hostfolder"
 	"github.com/minishift/minishift/cmd/minishift/cmd/image"
 	cmdOpenshift "github.com/minishift/minishift/cmd/minishift/cmd/openshift"
+	cmdProfile "github.com/minishift/minishift/cmd/minishift/cmd/profile"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
@@ -61,6 +63,7 @@ var dirs = [...]string{
 
 const (
 	showLibmachineLogs    = "show-libmachine-logs"
+	profile               = "profile"
 	enableExperimentalEnv = "MINISHIFT_ENABLE_EXPERIMENTAL"
 )
 
@@ -83,24 +86,60 @@ var RootCmd = &cobra.Command{
 			isFreshStart bool
 		)
 
+		//We need to initialize allinstance config as the profile information would be there
+		//To do that we need to create the directories for it.
+		for _, path := range dirs {
+			if match, _ := regexp.MatchString("config", path); match {
+				if err := os.MkdirAll(path, 0777); err != nil {
+					atexit.ExitWithMessage(1, fmt.Sprintf("Error creating minishift directory: %s", err))
+				}
+			}
+		}
+
+		// Create all instances config
+		minishiftConfig.AllInstancesConfig, err = minishiftConfig.NewAllInstancesConfig(constants.AllInstanceConfigPath)
+		if err != nil {
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error creating config for all instances: %s", err.Error()))
+		}
+
+		if cmdProfile.ProfileExists() {
+
+			//Update MachineName
+			constants.MachineName = cmdProfile.GetProfileName()
+			constants.Minipath = constants.GetMinishiftHomeDir()
+
+			//constants.Minipath := constants.Minipath
+			fmt.Println("Minipath = ", constants.Minipath)
+
+			constants.KubeConfigPath = filepath.Join(constants.Minipath, "machines", constants.MachineName+"_kubeconfig")
+
+			//we have to recalculate the paths to Minishift directories except the config
+			//As for config we are not doing anything at this point
+			dirs[0] = constants.Minipath
+			dirs[1] = constants.MakeMiniPath("certs")
+			dirs[2] = constants.MakeMiniPath("machines")
+			dirs[3] = constants.MakeMiniPath("cache")
+			dirs[4] = constants.MakeMiniPath("cache", "iso")
+			dirs[5] = constants.MakeMiniPath("cache", "oc")
+			dirs[6] = constants.MakeMiniPath("cache", "images")
+			dirs[8] = constants.MakeMiniPath("addons")
+			dirs[9] = constants.MakeMiniPath("logs")
+			dirs[10] = constants.MakeMiniPath("tmp")
+
+		}
+
 		if !filehelper.Exists(constants.Minipath) || filehelper.IsEmptyDir(constants.Minipath) {
 			isFreshStart = true
 		}
 
+		//creating all directories for minishift run
 		for _, path := range dirs {
 			if err := os.MkdirAll(path, 0777); err != nil {
-				glog.Exitf("Error creating minishift directory: %s", err)
+				atexit.ExitWithMessage(1, fmt.Sprintf("Error creating minishift directory: %s", err))
 			}
 		}
 
 		ensureConfigFileExists(constants.ConfigFile)
-
-		// Create all instances config
-		allInstanceConfigPath := filepath.Join(constants.Minipath, "config", "allinstances.json")
-		minishiftConfig.AllInstancesConfig, err = minishiftConfig.NewAllInstancesConfig(allInstanceConfigPath)
-		if err != nil {
-			atexit.ExitWithMessage(1, fmt.Sprintf("Error creating config for all instances: %s", err.Error()))
-		}
 
 		// Create MACHINE_NAME.json
 		instanceConfigPath := filepath.Join(constants.Minipath, "machines", constants.MachineName+".json")
@@ -119,7 +158,7 @@ var RootCmd = &cobra.Command{
 			fmt.Println("OK")
 		}
 
-		// Check marker file created by update command and perform post update execution steps
+		// Check marker file created by update command and perform post update execu	tion steps
 		if filehelper.Exists(filepath.Join(constants.Minipath, constants.UpdateMarkerFileName)) {
 			if err := performPostUpdateExecution(filepath.Join(constants.Minipath, constants.UpdateMarkerFileName)); err != nil {
 				atexit.ExitWithMessage(1, fmt.Sprintf("Error in performing post update exeuction: %s", err))
@@ -131,6 +170,7 @@ var RootCmd = &cobra.Command{
 		}
 
 		shouldShowLibmachineLogs := viper.GetBool(showLibmachineLogs)
+
 		if glog.V(3) {
 			log.SetDebug(true)
 		}
@@ -174,11 +214,13 @@ func init() {
 	hasEnabledExperimental = enableExperimental
 
 	RootCmd.PersistentFlags().Bool(showLibmachineLogs, false, "Show logs from libmachine.")
+	RootCmd.PersistentFlags().String(profile, "", "Profile name")
 	RootCmd.AddCommand(configCmd.ConfigCmd)
 	RootCmd.AddCommand(cmdOpenshift.OpenShiftCmd)
 	RootCmd.AddCommand(hostfolderCmd.HostfolderCmd)
 	RootCmd.AddCommand(addon.AddonsCmd)
 	RootCmd.AddCommand(image.ImageCmd)
+	RootCmd.AddCommand(cmdProfile.ProfileCmd)
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
 	logDir := pflag.Lookup("log_dir")
 	if !logDir.Changed {
@@ -186,6 +228,7 @@ func init() {
 	}
 	viper.BindPFlags(RootCmd.PersistentFlags())
 	cobra.OnInitialize(initConfig)
+
 }
 
 // initConfig reads in config file and ENV variables if set.

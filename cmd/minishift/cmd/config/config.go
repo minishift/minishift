@@ -26,6 +26,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	validations "github.com/minishift/minishift/pkg/minishift/config"
 )
 
 type configFile interface {
@@ -45,20 +46,15 @@ type Setting struct {
 
 var settingsList []Setting
 
-const (
-	B2dIsoAlias    = "b2d"
-	CentOsIsoAlias = "centos"
-)
-
 var (
 	// minishift
-	ISOUrl           = createConfigSetting("iso-url", SetString, []setFn{IsValidUrl}, []setFn{RequiresRestartMsg}, true)
-	CPUs             = createConfigSetting("cpus", SetInt, []setFn{IsPositive}, []setFn{RequiresRestartMsg}, true)
-	Memory           = createConfigSetting("memory", SetInt, []setFn{IsPositive}, []setFn{RequiresRestartMsg}, true)
-	DiskSize         = createConfigSetting("disk-size", SetString, []setFn{IsValidDiskSize}, []setFn{RequiresRestartMsg}, true)
-	VmDriver         = createConfigSetting("vm-driver", SetString, []setFn{IsValidDriver}, []setFn{RequiresRestartMsg}, true)
+	ISOUrl           = createConfigSetting("iso-url", SetString, []setFn{validations.IsValidUrl}, []setFn{RequiresRestartMsg}, true)
+	CPUs             = createConfigSetting("cpus", SetInt, []setFn{validations.IsPositive}, []setFn{RequiresRestartMsg}, true)
+	Memory           = createConfigSetting("memory", SetInt, []setFn{validations.IsPositive}, []setFn{RequiresRestartMsg}, true)
+	DiskSize         = createConfigSetting("disk-size", SetString, []setFn{validations.IsValidDiskSize}, []setFn{RequiresRestartMsg}, true)
+	VmDriver         = createConfigSetting("vm-driver", SetString, []setFn{validations.IsValidDriver}, []setFn{RequiresRestartMsg}, true)
 	OpenshiftVersion = createConfigSetting("openshift-version", SetString, nil, nil, true)
-	HostOnlyCIDR     = createConfigSetting("host-only-cidr", SetString, []setFn{IsValidCIDR}, nil, true)
+	HostOnlyCIDR     = createConfigSetting("host-only-cidr", SetString, []setFn{validations.IsValidCIDR}, nil, true)
 	DockerEnv        = createConfigSetting("docker-env", SetSlice, nil, nil, true)
 	DockerEngineOpt  = createConfigSetting("docker-opt", SetSlice, nil, nil, true)
 	InsecureRegistry = createConfigSetting("insecure-registry", SetSlice, nil, nil, true)
@@ -69,11 +65,11 @@ var (
 	SkipRegistryCheck = createConfigSetting("skip-registry-check", SetBool, nil, nil, true)
 	PublicHostname    = createConfigSetting("public-hostname", SetString, nil, nil, true)
 	RoutingSuffix     = createConfigSetting("routing-suffix", SetString, nil, nil, true)
-	HostConfigDir     = createConfigSetting("host-config-dir", SetString, []setFn{IsValidPath}, nil, true)
-	HostVolumeDir     = createConfigSetting("host-volumes-dir", SetString, []setFn{IsValidPath}, nil, true)
-	HostDataDir       = createConfigSetting("host-data-dir", SetString, []setFn{IsValidPath}, nil, true)
-	HostPvDir         = createConfigSetting("host-pv-dir", SetString, []setFn{IsValidPath}, nil, true)
-	ServerLogLevel    = createConfigSetting("server-loglevel", SetInt, []setFn{IsPositive}, nil, true)
+	HostConfigDir     = createConfigSetting("host-config-dir", SetString, []setFn{validations.IsValidPath}, nil, true)
+	HostVolumeDir     = createConfigSetting("host-volumes-dir", SetString, []setFn{validations.IsValidPath}, nil, true)
+	HostDataDir       = createConfigSetting("host-data-dir", SetString, []setFn{validations.IsValidPath}, nil, true)
+	HostPvDir         = createConfigSetting("host-pv-dir", SetString, []setFn{validations.IsValidPath}, nil, true)
+	ServerLogLevel    = createConfigSetting("server-loglevel", SetInt, []setFn{validations.IsPositive}, nil, true)
 	OpenshiftEnv      = createConfigSetting("openshift-env", nil, nil, nil, false)
 	Metrics           = createConfigSetting("metrics", SetBool, nil, nil, true)
 	Logging           = createConfigSetting("logging", SetBool, nil, nil, true)
@@ -83,8 +79,8 @@ var (
 
 	// Setting proxy
 	NoProxyList = createConfigSetting("no-proxy", SetString, nil, nil, true)
-	HttpProxy   = createConfigSetting("http-proxy", SetString, []setFn{IsValidProxy}, nil, true)
-	HttpsProxy  = createConfigSetting("https-proxy", SetString, []setFn{IsValidProxy}, nil, true)
+	HttpProxy   = createConfigSetting("http-proxy", SetString, []setFn{validations.IsValidProxy}, nil, true)
+	HttpsProxy  = createConfigSetting("https-proxy", SetString, []setFn{validations.IsValidProxy}, nil, true)
 
 	// Subscription Manager
 	Username         = createConfigSetting("username", SetString, nil, nil, true)
@@ -92,7 +88,7 @@ var (
 	SkipRegistration = createConfigSetting("skip-registration", SetBool, nil, nil, true)
 
 	// Global flags
-	LogDir             = createConfigSetting("log_dir", SetString, []setFn{IsValidPath}, nil, true)
+	LogDir             = createConfigSetting("log_dir", SetString, []setFn{validations.IsValidPath}, nil, true)
 	ShowLibmachineLogs = createConfigSetting("show-libmachine-logs", SetBool, nil, nil, true)
 
 	// Host Folders

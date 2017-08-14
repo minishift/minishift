@@ -356,6 +356,25 @@ func TestExplicitRouteSuffixGetApplied(t *testing.T) {
 	}
 }
 
+func TestCheckDiskSize(t *testing.T) {
+	var sizeTests = []struct {
+		in  string
+		out int
+	}{
+		{"20000", 20000},
+		{"20000M", 20000},
+		{"20G", 20000},
+		{"20GB", 20000},
+	}
+
+	for _, sizeTest := range sizeTests {
+		size := calculateDiskSizeInMB(sizeTest.in)
+		if size != sizeTest.out {
+			t.Errorf("Expected '%d' for disk size given input '%s'. Got '%d'.", sizeTest.out, sizeTest.in, size)
+		}
+	}
+}
+
 func TestDetermineIsoUrl(t *testing.T) {
 	var isoTests = []struct {
 		in  string

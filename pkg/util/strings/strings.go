@@ -16,7 +16,15 @@ limitations under the License.
 
 package strings
 
-import "strings"
+import (
+	"regexp"
+	"strings"
+)
+
+const (
+	lettersMatch = "[a-zA-Z]+"
+	numbersMatch = "[0-9]+"
+)
 
 // Contains returns true, if the specified slice contains the specified element, false otherwise
 func Contains(slice []string, s string) bool {
@@ -31,4 +39,31 @@ func Contains(slice []string, s string) bool {
 func EscapeSingleQuote(s string) string {
 	r := strings.NewReplacer(`'`, `'"'"'`)
 	return r.Replace(s)
+}
+
+func checkForMatch(matcher string, strValue string) bool {
+	match := regexp.MustCompile(matcher)
+	return match.FindString(strValue) != ""
+}
+
+// HasLetters returns true when string contains a letter [a-zA-Z]
+func HasLetters(yourString string) bool {
+	return checkForMatch(lettersMatch, yourString)
+}
+
+// HasOnlyLetters returns true when string contains only letters
+func HasOnlyLetters(yourString string) bool {
+	return checkForMatch(lettersMatch, yourString) &&
+		!checkForMatch(numbersMatch, yourString)
+}
+
+// HasNumbers returns true when string contains a letter [0-9]
+func HasNumbers(yourString string) bool {
+	return checkForMatch(numbersMatch, yourString)
+}
+
+// HasOnlyNumbers returns true when string contains only numbers
+func HasOnlyNumbers(yourString string) bool {
+	return checkForMatch(numbersMatch, yourString) &&
+		!checkForMatch(lettersMatch, yourString)
 }

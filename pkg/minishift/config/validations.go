@@ -24,10 +24,8 @@ import (
 	"strconv"
 
 	units "github.com/docker/go-units"
-	"github.com/docker/machine/libmachine"
-
-	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/util"
 )
 
@@ -38,23 +36,6 @@ func IsValidDriver(string, driver string) error {
 		}
 	}
 	return fmt.Errorf("Driver %s is not supported", driver)
-}
-
-func RequiresRestartMsg(name string, value string) error {
-	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
-	defer api.Close()
-
-	_, err := cluster.CheckIfApiExistsAndLoad(api)
-	if err != nil {
-		fmt.Fprintln(os.Stdout, fmt.Sprintf("No Minishift instance exists. New %s setting will be applied on next 'minishift start'", name))
-	} else {
-		fmt.Fprintln(os.Stdout, fmt.Sprintf("You currently have an existing Minishift instance. "+
-			"Changes to the %s setting are only applied when a new Minishift instance is created.\n"+
-			"To let the configuration changes take effect, "+
-			"you must delete the current instance with 'minishift delete' "+
-			"and then start a new one with 'minishift start'.", name))
-	}
-	return nil
 }
 
 func IsValidDiskSize(name string, disksize string) error {
@@ -100,7 +81,7 @@ func IsValidProxy(name string, uri string) error {
 }
 
 func IsValidUrl(_ string, isoURL string) error {
-	if isoURL == B2dIsoAlias || isoURL == CentOsIsoAlias {
+	if isoURL == minishiftConstants.B2dIsoAlias || isoURL == minishiftConstants.CentOsIsoAlias {
 		return nil
 	}
 	_, err := url.ParseRequestURI(isoURL)

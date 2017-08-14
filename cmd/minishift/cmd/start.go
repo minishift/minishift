@@ -41,6 +41,7 @@ import (
 	minishiftCluster "github.com/minishift/minishift/pkg/minishift/cluster"
 	"github.com/minishift/minishift/pkg/minishift/clusterup"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
+	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/minishift/docker"
 	"github.com/minishift/minishift/pkg/minishift/docker/image"
 	"github.com/minishift/minishift/pkg/minishift/hostfolder"
@@ -50,6 +51,7 @@ import (
 	"github.com/minishift/minishift/pkg/util"
 	inputUtils "github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
+	stringUtils "github.com/minishift/minishift/pkg/util/strings"
 	"github.com/minishift/minishift/pkg/version"
 	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
@@ -410,9 +412,14 @@ func exportContainerImages(hostVm *host.Host, version string) {
 }
 
 // calculateDiskSizeInMB converts a human specified disk size like "1000MB" or "1GB" and converts it into Megabits
-func calculateDiskSizeInMB(humanReadableDiskSize string) int {
-	diskSize, err := units.FromHumanSize(humanReadableDiskSize)
+func calculateDiskSizeInMB(humanReadableSize string) int {
+	if stringUtils.HasOnlyNumbers(humanReadableSize) {
+		humanReadableSize += "MB"
+	}
+
+	diskSize, err := units.FromHumanSize(humanReadableSize)
 	if err != nil {
+		fmt.Println()
 		atexit.ExitWithMessage(1, fmt.Sprintf("Disk size is not valid: %v", err))
 	}
 	return int(diskSize / units.MB)
@@ -423,9 +430,9 @@ func determineIsoUrl(iso string) string {
 	isoNotSpecified := ""
 
 	switch iso {
-	case configCmd.B2dIsoAlias, isoNotSpecified:
+	case minishiftConstants.B2dIsoAlias, isoNotSpecified:
 		iso = constants.DefaultB2dIsoUrl
-	case configCmd.CentOsIsoAlias:
+	case minishiftConstants.CentOsIsoAlias:
 		iso = constants.DefaultCentOsIsoUrl
 	default:
 		if !(govalidator.IsURL(iso) || strings.HasPrefix(iso, "file:")) {
@@ -440,7 +447,7 @@ func determineIsoUrl(iso string) string {
 func initStartFlags() *flag.FlagSet {
 	startFlagSet := flag.NewFlagSet(commandName, flag.ContinueOnError)
 
-	startFlagSet.String(configCmd.ISOUrl.Name, configCmd.B2dIsoAlias, "Location of the minishift ISO. Can be an URL, file URI or one of the following short names: [b2d centos].")
+	startFlagSet.String(configCmd.ISOUrl.Name, minishiftConstants.B2dIsoAlias, "Location of the minishift ISO. Can be an URL, file URI or one of the following short names: [b2d centos].")
 	startFlagSet.String(configCmd.VmDriver.Name, constants.DefaultVMDriver, fmt.Sprintf("The driver to use for the Minishift VM. Possible values: %v", constants.SupportedVMDrivers))
 	startFlagSet.Int(configCmd.Memory.Name, constants.DefaultMemory, "Amount of RAM to allocate to the Minishift VM.")
 	startFlagSet.Int(configCmd.CPUs.Name, constants.DefaultCPUS, "Number of CPU cores to allocate to the Minishift VM.")

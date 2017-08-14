@@ -16,7 +16,15 @@ limitations under the License.
 
 package strings
 
-import "testing"
+import (
+	"reflect"
+	"runtime"
+	"testing"
+)
+
+func getFunctionName(i interface{}) string {
+	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
+}
 
 func TestContains(t *testing.T) {
 	var testCases = []struct {
@@ -33,6 +41,60 @@ func TestContains(t *testing.T) {
 		actualResult := Contains(testCase.slice, testCase.element)
 		if actualResult != testCase.expectedResult {
 			t.Errorf("Unexpected result for Contains(%v, %s). Expected '%t', got '%t'", testCase.slice, testCase.element, testCase.expectedResult, actualResult)
+		}
+	}
+}
+
+func TestHasMatcher(t *testing.T) {
+	var testCases = []struct {
+		testString     string
+		matcher        func(string) bool
+		expectedResult bool
+	}{
+		{"abc", HasLetters, true},
+		{"123", HasNumbers, true},
+		{"abc", HasNumbers, false},
+		{"123", HasLetters, false},
+		{"abc123", HasLetters, true},
+		{"abc123", HasNumbers, true},
+		{"abc", HasOnlyLetters, true},
+		{"123", HasOnlyNumbers, true},
+		{"abc123", HasOnlyLetters, false},
+		{"abc123", HasOnlyNumbers, false},
+		{"!@#$%^&*()", HasLetters, false},
+		{"!@#$%^&*()", HasNumbers, false},
+		{"!@#$%^&*()", HasOnlyLetters, false},
+		{"!@#$%^&*()", HasOnlyNumbers, false},
+	}
+
+	for _, testCase := range testCases {
+		actualResult := testCase.matcher(testCase.testString)
+		if actualResult != testCase.expectedResult {
+			t.Errorf("Unexpected result for '%s'. Expected '%s' to return '%t', but got '%t'", getFunctionName(testCase.matcher), testCase.testString, testCase.expectedResult, actualResult)
+		}
+	}
+}
+
+func TestGetMatcher(t *testing.T) {
+	var testCases = []struct {
+		testString     string
+		matcher        func(string) string
+		expectedResult string
+	}{
+		{"abc", GetOnlyLetters, "abc"},
+		{"123", GetOnlyNumbers, "123"},
+		{"abc123", GetOnlyLetters, "abc"},
+		{"abc123", GetOnlyNumbers, "123"},
+		{"!@#$%^&*()", GetOnlyLetters, ""},
+		{"!@#$%^&*()", GetOnlyNumbers, ""},
+		{"123GB", GetSignedNumbers, "123"},
+		{"-123GB", GetSignedNumbers, "-123"},
+	}
+
+	for _, testCase := range testCases {
+		actualResult := testCase.matcher(testCase.testString)
+		if actualResult != testCase.expectedResult {
+			t.Errorf("Unexpected result for '%s'. Expected '%s' to return '%t', but got '%t'", getFunctionName(testCase.matcher), testCase.testString, testCase.expectedResult, actualResult)
 		}
 	}
 }

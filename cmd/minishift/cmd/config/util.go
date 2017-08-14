@@ -18,8 +18,14 @@ package config
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
+
+	"github.com/docker/machine/libmachine"
+
+	"github.com/minishift/minishift/pkg/minikube/cluster"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
 // Runs all the validation or callback functions and collects errors
@@ -80,5 +86,22 @@ func SetSlice(m MinishiftConfig, name string, val string) error {
 		}
 	}
 	m[name] = tmpSlice
+	return nil
+}
+
+func RequiresRestartMsg(name string, value string) error {
+	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+	defer api.Close()
+
+	_, err := cluster.CheckIfApiExistsAndLoad(api)
+	if err != nil {
+		fmt.Fprintln(os.Stdout, fmt.Sprintf("No Minishift instance exists. New %s setting will be applied on next 'minishift start'", name))
+	} else {
+		fmt.Fprintln(os.Stdout, fmt.Sprintf("You currently have an existing Minishift instance. "+
+			"Changes to the %s setting are only applied when a new Minishift instance is created.\n"+
+			"To let the configuration changes take effect, "+
+			"you must delete the current instance with 'minishift delete' "+
+			"and then start a new one with 'minishift start'.", name))
+	}
 	return nil
 }

@@ -31,9 +31,9 @@ const (
 	MiniShiftHomeEnv             = "MINISHIFT_HOME" // Environment variable used to change the Minishift home directory
 	VersionPrefix                = "v"
 	MinOpenshiftSupportedVersion = "v1.4.1"
-	DefaultMemory                = 2048
+	DefaultMemory                = "2G"
 	DefaultCPUS                  = 2
-	DefaultDiskSize              = "20g"
+	DefaultDiskSize              = "20GB"
 	UpdateMarkerFileName         = "updated"
 )
 

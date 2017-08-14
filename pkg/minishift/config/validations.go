@@ -24,11 +24,10 @@ import (
 	"strconv"
 
 	units "github.com/docker/go-units"
-	"github.com/docker/machine/libmachine"
 
-	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/util"
+	stringUtils "github.com/minishift/minishift/pkg/util/strings"
 )
 
 func IsValidDriver(string, driver string) error {
@@ -40,29 +39,41 @@ func IsValidDriver(string, driver string) error {
 	return fmt.Errorf("Driver %s is not supported", driver)
 }
 
-func RequiresRestartMsg(name string, value string) error {
-	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
-	defer api.Close()
+func isValidHumanSize(size string) (bool, error) {
 
-	_, err := cluster.CheckIfApiExistsAndLoad(api)
-	if err != nil {
-		fmt.Fprintln(os.Stdout, fmt.Sprintf("No Minishift instance exists. New %s setting will be applied on next 'minishift start'", name))
-	} else {
-		fmt.Fprintln(os.Stdout, fmt.Sprintf("You currently have an existing Minishift instance. "+
-			"Changes to the %s setting are only applied when a new Minishift instance is created.\n"+
-			"To let the configuration changes take effect, "+
-			"you must delete the current instance with 'minishift delete' "+
-			"and then start a new one with 'minishift start'.", name))
+	if _, err := units.FromHumanSize(size); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func isValidMemorySize(size string) (bool, error) {
+
+	if _, err := units.RAMInBytes(size); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+type sizeValidationFunc func(size string) (bool, error)
+
+func isPositiveAndValidSize(sizeValidation sizeValidationFunc, name string, size string, errorMessage string) error {
+	if err := IsPositive(name, stringUtils.GetSignedNumbers(size)); err != nil {
+		return err
+	}
+
+	if valid, err := sizeValidation(size); !valid {
+		return fmt.Errorf(errorMessage, err)
 	}
 	return nil
 }
 
-func IsValidDiskSize(name string, disksize string) error {
-	_, err := units.FromHumanSize(disksize)
-	if err != nil {
-		return fmt.Errorf("Disk size is not valid: %v", err)
-	}
-	return nil
+func IsValidDiskSize(name string, diskSize string) error {
+	return isPositiveAndValidSize(isValidHumanSize, name, diskSize, "Disk size is not valid: %v")
+}
+
+func IsValidMemorySize(name string, memorySize string) error {
+	return isPositiveAndValidSize(isValidMemorySize, name, memorySize, "Memory size is not valid: %v")
 }
 
 func IsPositive(name string, val string) error {

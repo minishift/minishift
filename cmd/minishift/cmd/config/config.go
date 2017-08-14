@@ -50,7 +50,7 @@ var (
 	// minishift
 	ISOUrl           = createConfigSetting("iso-url", SetString, []setFn{validations.IsValidUrl}, []setFn{RequiresRestartMsg}, true)
 	CPUs             = createConfigSetting("cpus", SetInt, []setFn{validations.IsPositive}, []setFn{RequiresRestartMsg}, true)
-	Memory           = createConfigSetting("memory", SetInt, []setFn{validations.IsPositive}, []setFn{RequiresRestartMsg}, true)
+	Memory           = createConfigSetting("memory", SetString, []setFn{validations.IsValidMemorySize}, []setFn{RequiresRestartMsg}, true)
 	DiskSize         = createConfigSetting("disk-size", SetString, []setFn{validations.IsValidDiskSize}, []setFn{RequiresRestartMsg}, true)
 	VmDriver         = createConfigSetting("vm-driver", SetString, []setFn{validations.IsValidDriver}, []setFn{RequiresRestartMsg}, true)
 	OpenshiftVersion = createConfigSetting("openshift-version", SetString, nil, nil, true)

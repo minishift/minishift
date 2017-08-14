@@ -356,6 +356,25 @@ func TestExplicitRouteSuffixGetApplied(t *testing.T) {
 	}
 }
 
+func TestCheckMemorySize(t *testing.T) {
+	var sizeTests = []struct {
+		in  string
+		out int
+	}{
+		{"4096", 4096},
+		{"4096M", 4096},
+		{"4G", 4096},
+		{"4GB", 4096},
+	}
+
+	for _, sizeTest := range sizeTests {
+		size := calculateMemorySize(sizeTest.in)
+		if size != sizeTest.out {
+			t.Errorf("Expected '%d' for memory size given input '%s'. Got '%d'.", sizeTest.out, sizeTest.in, size)
+		}
+	}
+}
+
 func TestCheckDiskSize(t *testing.T) {
 	var sizeTests = []struct {
 		in  string
@@ -368,7 +387,7 @@ func TestCheckDiskSize(t *testing.T) {
 	}
 
 	for _, sizeTest := range sizeTests {
-		size := calculateDiskSizeInMB(sizeTest.in)
+		size := calculateDiskSize(sizeTest.in)
 		if size != sizeTest.out {
 			t.Errorf("Expected '%d' for disk size given input '%s'. Got '%d'.", sizeTest.out, sizeTest.in, size)
 		}

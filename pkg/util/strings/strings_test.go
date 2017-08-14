@@ -45,7 +45,7 @@ func TestContains(t *testing.T) {
 	}
 }
 
-func TestMatcher(t *testing.T) {
+func TestHasMatcher(t *testing.T) {
 	var testCases = []struct {
 		testString     string
 		matcher        func(string) bool
@@ -61,6 +61,34 @@ func TestMatcher(t *testing.T) {
 		{"123", HasOnlyNumbers, true},
 		{"abc123", HasOnlyLetters, false},
 		{"abc123", HasOnlyNumbers, false},
+		{"!@#$%^&*()", HasLetters, false},
+		{"!@#$%^&*()", HasNumbers, false},
+		{"!@#$%^&*()", HasOnlyLetters, false},
+		{"!@#$%^&*()", HasOnlyNumbers, false},
+	}
+
+	for _, testCase := range testCases {
+		actualResult := testCase.matcher(testCase.testString)
+		if actualResult != testCase.expectedResult {
+			t.Errorf("Unexpected result for '%s'. Expected '%s' to return '%t', but got '%t'", getFunctionName(testCase.matcher), testCase.testString, testCase.expectedResult, actualResult)
+		}
+	}
+}
+
+func TestGetMatcher(t *testing.T) {
+	var testCases = []struct {
+		testString     string
+		matcher        func(string) string
+		expectedResult string
+	}{
+		{"abc", GetOnlyLetters, "abc"},
+		{"123", GetOnlyNumbers, "123"},
+		{"abc123", GetOnlyLetters, "abc"},
+		{"abc123", GetOnlyNumbers, "123"},
+		{"!@#$%^&*()", GetOnlyLetters, ""},
+		{"!@#$%^&*()", GetOnlyNumbers, ""},
+		{"123GB", GetSignedNumbers, "123"},
+		{"-123GB", GetSignedNumbers, "-123"},
 	}
 
 	for _, testCase := range testCases {

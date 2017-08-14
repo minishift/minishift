@@ -307,9 +307,9 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 	// Configuration used for creation/setup of the Virtual Machine
 	machineConfig := &cluster.MachineConfig{
 		MinikubeISO:      determineIsoUrl(viper.GetString(configCmd.ISOUrl.Name)),
-		Memory:           viper.GetInt(configCmd.Memory.Name),
+		Memory:           calculateMemorySize(viper.GetString(configCmd.Memory.Name)),
 		CPUs:             viper.GetInt(configCmd.CPUs.Name),
-		DiskSize:         calculateDiskSizeInMB(viper.GetString(configCmd.DiskSize.Name)),
+		DiskSize:         calculateDiskSize(viper.GetString(configCmd.DiskSize.Name)),
 		VMDriver:         viper.GetString(configCmd.VmDriver.Name),
 		DockerEnv:        append(dockerEnv, getSlice(configCmd.DockerEnv.Name)...),
 		DockerEngineOpt:  getSlice(configCmd.DockerEngineOpt.Name),
@@ -411,18 +411,34 @@ func exportContainerImages(hostVm *host.Host, version string) {
 	fmt.Println(fmt.Sprintf("-- Exporting of OpenShift images is occuring in background process with pid %d.", exportCmd.Process.Pid))
 }
 
-// calculateDiskSizeInMB converts a human specified disk size like "1000MB" or "1GB" and converts it into Megabits
-func calculateDiskSizeInMB(humanReadableSize string) int {
+func calculateMemorySize(memorySize string) int {
+	if stringUtils.HasOnlyNumbers(memorySize) {
+		memorySize += "MB"
+	}
+
+	// err := minishiftConfig.IsValidMemorySize(configCmd.Memory.Name, humanReadableSize)
+	size, err := units.RAMInBytes(memorySize)
+	if err != nil {
+		fmt.Println()
+		atexit.ExitWithMessage(1, fmt.Sprintf("Memory size is not valid: %v", err))
+	}
+
+	return int(size / units.MiB)
+}
+
+func calculateDiskSize(humanReadableSize string) int {
 	if stringUtils.HasOnlyNumbers(humanReadableSize) {
 		humanReadableSize += "MB"
 	}
 
-	diskSize, err := units.FromHumanSize(humanReadableSize)
+	// err := minishiftConfig.IsValidDiskSize(configCmd.DiskSize.Name, humanReadableSize)
+	size, err := units.FromHumanSize(humanReadableSize)
 	if err != nil {
 		fmt.Println()
 		atexit.ExitWithMessage(1, fmt.Sprintf("Disk size is not valid: %v", err))
 	}
-	return int(diskSize / units.MB)
+
+	return int(size / units.MB)
 }
 
 func determineIsoUrl(iso string) string {
@@ -436,6 +452,7 @@ func determineIsoUrl(iso string) string {
 		iso = constants.DefaultCentOsIsoUrl
 	default:
 		if !(govalidator.IsURL(iso) || strings.HasPrefix(iso, "file:")) {
+			fmt.Println()
 			atexit.ExitWithMessage(1, unsupportedIsoUrlFormat)
 		}
 	}
@@ -449,9 +466,9 @@ func initStartFlags() *flag.FlagSet {
 
 	startFlagSet.String(configCmd.ISOUrl.Name, minishiftConstants.B2dIsoAlias, "Location of the minishift ISO. Can be an URL, file URI or one of the following short names: [b2d centos].")
 	startFlagSet.String(configCmd.VmDriver.Name, constants.DefaultVMDriver, fmt.Sprintf("The driver to use for the Minishift VM. Possible values: %v", constants.SupportedVMDrivers))
-	startFlagSet.Int(configCmd.Memory.Name, constants.DefaultMemory, "Amount of RAM to allocate to the Minishift VM.")
 	startFlagSet.Int(configCmd.CPUs.Name, constants.DefaultCPUS, "Number of CPU cores to allocate to the Minishift VM.")
-	startFlagSet.String(configCmd.DiskSize.Name, constants.DefaultDiskSize, "Disk size to allocate to the Minishift VM. Use the format <size><unit>, where unit = b, k, m or g.")
+	startFlagSet.String(configCmd.Memory.Name, constants.DefaultMemory, "Amount of RAM to allocate to the Minishift VM. Use the format <size><unit>, where unit = MB or GB.")
+	startFlagSet.String(configCmd.DiskSize.Name, constants.DefaultDiskSize, "Disk size to allocate to the Minishift VM. Use the format <size><unit>, where unit = MB or GB.")
 	startFlagSet.String(configCmd.HostOnlyCIDR.Name, "192.168.99.1/24", "The CIDR to be used for the minishift VM. (Only supported with VirtualBox driver.)")
 	startFlagSet.AddFlag(dockerEnvFlag)
 	startFlagSet.AddFlag(dockerEngineOptFlag)

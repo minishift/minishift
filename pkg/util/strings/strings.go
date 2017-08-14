@@ -22,8 +22,9 @@ import (
 )
 
 const (
-	lettersMatch = "[a-zA-Z]+"
-	numbersMatch = "[0-9]+"
+	lettersMatch       = "[a-zA-Z]+"
+	numbersMatch       = "[0-9]+"
+	signedNumbersMatch = "^[-+]?[0-9]+"
 )
 
 // Contains returns true, if the specified slice contains the specified element, false otherwise
@@ -66,4 +67,24 @@ func HasNumbers(yourString string) bool {
 func HasOnlyNumbers(yourString string) bool {
 	return checkForMatch(numbersMatch, yourString) &&
 		!checkForMatch(lettersMatch, yourString)
+}
+
+func getOnlyMatch(matcher string, strValue string) string {
+	reg, _ := regexp.Compile(matcher)
+	return reg.FindString(strValue)
+}
+
+// GetOnlyLetters returns a string containing only letters from given string
+func GetOnlyLetters(yourString string) string {
+	return getOnlyMatch(lettersMatch, yourString)
+}
+
+// GetOnlyNumbers returns a string containing only numbers from given string
+func GetOnlyNumbers(yourString string) string {
+	return getOnlyMatch(numbersMatch, yourString)
+}
+
+// GetSignedNumbers returns a string containing only positive and negative numbers from given string
+func GetSignedNumbers(yourString string) string {
+	return getOnlyMatch(signedNumbersMatch, yourString)
 }

@@ -24,9 +24,11 @@ import (
 	"strconv"
 
 	units "github.com/docker/go-units"
+
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/util"
+	stringUtils "github.com/minishift/minishift/pkg/util/strings"
 )
 
 func IsValidDriver(string, driver string) error {
@@ -38,12 +40,41 @@ func IsValidDriver(string, driver string) error {
 	return fmt.Errorf("Driver %s is not supported", driver)
 }
 
-func IsValidDiskSize(name string, disksize string) error {
-	_, err := units.FromHumanSize(disksize)
-	if err != nil {
-		return fmt.Errorf("Disk size is not valid: %v", err)
+func isValidHumanSize(size string) (bool, error) {
+
+	if _, err := units.FromHumanSize(size); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func isValidMemorySize(size string) (bool, error) {
+
+	if _, err := units.RAMInBytes(size); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+type sizeValidationFunc func(size string) (bool, error)
+
+func isPositiveAndValidSize(sizeValidation sizeValidationFunc, name string, size string, errorMessage string) error {
+	if err := IsPositive(name, stringUtils.GetSignedNumbers(size)); err != nil {
+		return err
+	}
+
+	if valid, err := sizeValidation(size); !valid {
+		return fmt.Errorf(errorMessage, err)
 	}
 	return nil
+}
+
+func IsValidDiskSize(name string, diskSize string) error {
+	return isPositiveAndValidSize(isValidHumanSize, name, diskSize, "Disk size is not valid: %v")
+}
+
+func IsValidMemorySize(name string, memorySize string) error {
+	return isPositiveAndValidSize(isValidHumanSize, name, memorySize, "Memory size is not valid: %v")
 }
 
 func IsPositive(name string, val string) error {

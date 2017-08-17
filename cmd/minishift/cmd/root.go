@@ -126,7 +126,7 @@ var RootCmd = &cobra.Command{
 			}
 		}
 
-		if hasEnabledExperimental {
+		if minishiftConfig.FeatureToggles.EnableExperimental {
 			glog.Info("Experimental features are enabled")
 		}
 
@@ -171,7 +171,9 @@ func init() {
 	if err == util.BooleanFormatError {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error enabling experimental features: %s", err))
 	}
-	hasEnabledExperimental = enableExperimental
+
+	minishiftConfig.FeatureToggles = minishiftConfig.NewFeatureToggles()
+	minishiftConfig.FeatureToggles.EnableExperimental = enableExperimental
 
 	RootCmd.PersistentFlags().Bool(showLibmachineLogs, false, "Show logs from libmachine.")
 	RootCmd.AddCommand(configCmd.ConfigCmd)

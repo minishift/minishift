@@ -336,7 +336,7 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 	}
 
 	// Experimental features
-	if hasEnabledExperimental {
+	if minishiftConfig.EnableExperimental {
 		networkSettings := minishiftNetwork.NetworkSettings{
 			Device:    viper.GetString(configCmd.NetworkDevice.Name),
 			IPAddress: viper.GetString(configCmd.IPAddress.Name),
@@ -505,7 +505,7 @@ func initStartFlags() *flag.FlagSet {
 	startFlagSet.AddFlag(registryMirrorFlag)
 	startFlagSet.AddFlag(cmdUtil.AddOnEnvFlag)
 
-	if hasEnabledExperimental && runtime.GOOS == "windows" {
+	if minishiftConfig.EnableExperimental && runtime.GOOS == "windows" {
 		startFlagSet.String(configCmd.NetworkDevice.Name, "eth0", "Specify the network device to use for the IP address. Ignored if no IP address specified (experimental - Hyper-V only)")
 		startFlagSet.String(configCmd.IPAddress.Name, "", "Specify IP address to assign to the instance (experimental - Hyper-V only)")
 		startFlagSet.String(configCmd.Netmask.Name, "24", "Specify netmask to use for the IP address. Ignored if no IP address specified (experimental - Hyper-V only)")
@@ -537,7 +537,7 @@ func initClusterUpFlags() *flag.FlagSet {
 	clusterUpFlagSet.AddFlag(cmdUtil.HttpProxyFlag)
 	clusterUpFlagSet.AddFlag(cmdUtil.HttpsProxyFlag)
 
-	if hasEnabledExperimental {
+	if minishiftConfig.EnableExperimental {
 		clusterUpFlagSet.Bool(configCmd.ServiceCatalog.Name, false, "Install service catalog (experimental)")
 		clusterUpFlagSet.String(configCmd.ExtraClusterUpFlags.Name, "", "Specify optional flags for use with 'cluster up' (unsupported)")
 	}

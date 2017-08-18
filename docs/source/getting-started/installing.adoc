@@ -20,7 +20,7 @@ Verify that the hypervisor of your choice is installed and enabled on your syste
 
 Depending on your host operating system, you have the choice of the following hypervisors:
 
-Mac macOS::
+macOS::
 - link:https://github.com/mist64/xhyve[xhyve] (default)
 +
 NOTE: xhyve requires specific installation and configuration steps that are described in the xref:../getting-started/setting-up-driver-plugin.adoc#[Setting Up the Driver Plug-in] section.

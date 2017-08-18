@@ -273,5 +273,21 @@ After you define the add-on, you can install it by running:
 $ minishift addons install <ADDON_DIR_PATH>
 ----
 
+[TIP]
+====
+You can also write metadata in multiple line.
+[[example-multiline-metadata]]
+.Example: Add-on definition which contain multiline description
+----
+# Name: prometheus
+# Description: This template creates a Prometheus instance preconfigured to gather OpenShift and
+#  Kubernetes platform and node metrics and report them to admins. It is protected by an
+#  OAuth proxy that only allows access for users who have view access to the prometheus
+#  namespace. You may customize where the images (built from openshift/prometheus
+#  and openshift/oauth-proxy) are pulled from via template parameters.
+# Url: https://prometheus.io/
+----
+====
+
 NOTE: You can also edit your add-on directly in the Minishift add-on install directory *_$MINISHIFT_HOME/addons_*.
 Be aware that if there is an error in the add-on, it will not show when you run any `addons` commands, and it will not be applied during the `minishift start` process.

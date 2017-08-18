@@ -22,28 +22,42 @@ import (
 	"strings"
 )
 
-var requiredMetaTags = []string{"Name", "Description"}
+var requiredMetaTags = []string{NameMetaTagName, DescriptionMetaTagName}
 
 const (
-	requiredVars = "Required-Vars"
+	requiredVars           = "Required-Vars"
+	NameMetaTagName        = "Name"
+	DescriptionMetaTagName = "Description"
 )
 
 // AddOnMeta defines a set of meta data for an AddOn. Name and Description are required. Others are optional.
 type AddOnMeta interface {
 	Name() string
-	Description() string
+	Description() []string
 	RequiredVars() []string
 	GetValue(key string) string
 }
 
 type DefaultAddOnMeta struct {
-	headers map[string]string
+	headers map[string]interface{}
 }
 
-func NewAddOnMeta(headers map[string]string) (AddOnMeta, error) {
+func NewAddOnMeta(headers map[string]interface{}) (AddOnMeta, error) {
 	for _, tag := range requiredMetaTags {
-		if headers[tag] == "" {
+		if headers[tag] == nil {
 			return nil, errors.New(fmt.Sprintf("Metadata does not contain an mandatory entry for '%s'", tag))
+		}
+		switch v := headers[tag].(type) {
+		case string:
+			if v == "" {
+				return nil, errors.New(fmt.Sprintf("Metadata does not contain an mandatory entry for '%s'", tag))
+			}
+		case []string:
+			if len(v) == 0 {
+				return nil, errors.New(fmt.Sprintf("Metadata does not contain an mandatory entry for '%s'", tag))
+			}
+		default:
+			return nil, nil
 		}
 	}
 
@@ -56,15 +70,15 @@ func (meta *DefaultAddOnMeta) String() string {
 }
 
 func (meta *DefaultAddOnMeta) Name() string {
-	return meta.headers[requiredMetaTags[0]]
+	return meta.headers[requiredMetaTags[0]].(string)
 }
 
-func (meta *DefaultAddOnMeta) Description() string {
-	return meta.headers[requiredMetaTags[1]]
+func (meta *DefaultAddOnMeta) Description() []string {
+	return meta.headers[requiredMetaTags[1]].([]string)
 }
 
 func (meta *DefaultAddOnMeta) RequiredVars() []string {
-	if val, contains := meta.headers[requiredVars]; contains {
+	if val, contains := meta.headers[requiredVars].(string); contains {
 		return meta.splitAndTrim(val)
 	} else {
 		return []string{}
@@ -72,7 +86,7 @@ func (meta *DefaultAddOnMeta) RequiredVars() []string {
 }
 
 func (meta *DefaultAddOnMeta) GetValue(key string) string {
-	return meta.headers[key]
+	return meta.headers[key].(string)
 }
 
 func (meta *DefaultAddOnMeta) splitAndTrim(s string) []string {

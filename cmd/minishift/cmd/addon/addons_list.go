@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"io"
 	"sort"
+	"strings"
 
 	"github.com/minishift/minishift/pkg/minishift/addon"
 	"github.com/minishift/minishift/pkg/minishift/addon/manager"
@@ -88,7 +89,8 @@ func printAddOnList(manager *manager.AddOnManager, writer io.Writer, template *t
 	addOns := manager.List()
 	sort.Sort(addon.ByStatusThenPriorityThenName(addOns))
 	for _, addon := range addOns {
-		addonTemplate := DisplayAddOn{addon.MetaData().Name(), addon.MetaData().Description(), stringFromStatus(addon.IsEnabled()), addon.GetPriority()}
+		description := strings.Join(addon.MetaData().Description(), fmt.Sprintf("\n%13s", " "))
+		addonTemplate := DisplayAddOn{addon.MetaData().Name(), description, stringFromStatus(addon.IsEnabled()), addon.GetPriority()}
 		err := template.Execute(writer, addonTemplate)
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error executing the template: %s", err.Error()))

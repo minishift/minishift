@@ -203,11 +203,11 @@ No host folders defined
 NOTE: This host folder type is not supported by the `minishift hostfolder` command and requires manual configuration.
 
 You can use SSHFS-based host folders if you have an SSH daemon running on your host.
-Normally, this prerequisite is met by default on Linux and Mac macOS.
+Normally, this prerequisite is met by default on Linux and macOS.
 
 Most Linux distributions have an SSH daemon installed. If not, follow the instructions for your specific distribution to install an SSH daemon.
 
-Mac macOS also has a built-in SSH server.
+macOS also has a built-in SSH server.
 To use it, make sure that *Remote Login* is enabled in *System Preferences > Sharing*.
 
 On Windows, you can install link:https://winscp.net/eng/docs/guide_windows_openssh_server[OpenSSH for Windows].

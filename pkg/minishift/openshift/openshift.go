@@ -17,7 +17,6 @@ limitations under the License.
 package openshift
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -44,8 +43,8 @@ var (
 
 	NODE = OpenShiftPatchTarget{
 		"node",
-		"/var/lib/origin/openshift.local.config/node-%s/node-config.yaml",
-		"/var/lib/minishift/openshift.local.config/node-%s/node-config.yaml",
+		"/var/lib/origin/openshift.local.config/node-localhost/node-config.yaml",
+		"/var/lib/minishift/openshift.local.config/node-localhost/node-config.yaml",
 		"",
 	}
 
@@ -63,10 +62,7 @@ func (t *OpenShiftPatchTarget) SetIp(ip string) {
 
 func (t *OpenShiftPatchTarget) containerConfigFilePath() (string, error) {
 	if t.target == "node" {
-		if t.ip == "" {
-			return "", errors.New("Node IP was not set")
-		}
-		return fmt.Sprintf(t.containerConfigFile, t.ip), nil
+		return t.containerConfigFile, nil
 	} else {
 		return t.containerConfigFile, nil
 	}
@@ -74,10 +70,7 @@ func (t *OpenShiftPatchTarget) containerConfigFilePath() (string, error) {
 
 func (t *OpenShiftPatchTarget) localConfigFilePath() (string, error) {
 	if t.target == "node" {
-		if t.ip == "" {
-			return "", errors.New("Node IP was not set")
-		}
-		return fmt.Sprintf(t.localConfigFile, t.ip), nil
+		return t.localConfigFile, nil
 	} else {
 		return t.localConfigFile, nil
 	}

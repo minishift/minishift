@@ -30,6 +30,7 @@ import (
 
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
+	utilCmd "github.com/minishift/minishift/pkg/util/cmd"
 )
 
 type MinishiftRunner struct {
@@ -42,7 +43,7 @@ type OcRunner struct {
 }
 
 func runCommand(command string, commandPath string) (stdOut string, stdErr string, exitCode int) {
-	commandArr := strings.Split(command, " ")
+	commandArr := utilCmd.SplitCmdString(command)
 	path, _ := filepath.Abs(commandPath)
 	cmd := exec.Command(path, commandArr...)
 

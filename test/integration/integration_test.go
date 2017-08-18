@@ -37,6 +37,7 @@ import (
 
 	"github.com/DATA-DOG/godog"
 	"github.com/DATA-DOG/godog/gherkin"
+	"gopkg.in/yaml.v2"
 
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	testProxy "github.com/minishift/minishift/test/integration/proxy"
@@ -148,13 +149,13 @@ func FeatureContext(s *godog.Suite) {
 	// steps to execute `minishift` commands
 	s.Step(`Minishift (?:has|should have) state "([^"]*)"$`,
 		minishift.shouldHaveState)
-	s.Step(`^executing "minishift ([^"]*)"$`,
+	s.Step(`^executing "minishift (.*)"$`,
 		minishift.executingMinishiftCommand)
-	s.Step(`^executing "minishift ([^"]*)" (succeeds|fails)$`,
+	s.Step(`^executing "minishift (.*)" (succeeds|fails)$`,
 		executingMinishiftCommandSucceedsOrFails)
-	s.Step(`([^"]*) of command "minishift ([^"]*)" is equal to "([^"]*)"$`,
+	s.Step(`([^"]*) of command "minishift ([^"]*)" (is equal|is not equal) to "([^"]*)"$`,
 		commandReturnEquals)
-	s.Step(`([^"]*) of command "minishift ([^"]*)" contains "([^"]*)"$`,
+	s.Step(`([^"]*) of command "minishift ([^"]*)" (contains|does not contain) "([^"]*)"$`,
 		commandReturnContains)
 
 	// steps to execute `oc` commands
@@ -223,10 +224,15 @@ func FeatureContext(s *godog.Suite) {
 		getRoutingUrlAndVerifyHTTPResponse)
 
 	// steps for verifying config file content
-	s.Step(`^JSON config file "([^"]*)" (contains|does not contain) key "(.*)" with value matching "(.*)"$`,
-		matchConfigValue)
-	s.Step(`^JSON config file "([^"]*)" (has|does not have) key "(.*)"$`,
-		checkConfigKey)
+	s.Step(`^(JSON|YAML) config file "([^"]*)" (contains|does not contain) key "(.*)" with value matching "(.*)"$`,
+		configFileContainsKeyMatchingValue)
+	s.Step(`^(JSON|YAML) config file "([^"]*)" (has|does not have) key "(.*)"$`,
+		configFileContainsKey)
+
+	s.Step(`^(stdout|stderr) is (JSON|YAML) which (contains|does not contain) key "(.*)" with value matching "(.*)"$`,
+		stdoutContainsKeyMatchingValue)
+	s.Step(`^(stdout|stderr) is (JSON|YAML) which (has|does not have) key "(.*)"$`,
+		stdoutContainsKey)
 
 	// iso dependent steps
 	s.Step(`^printing Docker daemon configuration to stdout$`,
@@ -283,30 +289,59 @@ func ensureTestDirEmpty() {
 //  To get values of nested keys, use following dot formating in Scenarios: key.nestedKey
 //  If an array is expected, then expect: "[value1 value2 value3]"
 //  If empty string, non existing value are expected, then expect "<nil>"
-func getConfigValue(configPath string, keyPath string) (string, error) {
+func getConfigKeyValue(configData []byte, format string, keyPath string) (string, error) {
+	var err error
 	var keyValue string
-	data, err := ioutil.ReadFile(testDir + "/" + configPath)
-	if err != nil {
-		return "", fmt.Errorf("Cannot read config file: %v", err)
-	}
 	var values map[string]interface{}
-	json.Unmarshal(data, &values)
+
+	if format == "JSON" {
+		err = json.Unmarshal(configData, &values)
+		if err != nil {
+			return "", fmt.Errorf("Error unmarshaling JSON: %s", err)
+		}
+	} else if format == "YAML" {
+		err = yaml.Unmarshal(configData, &values)
+		if err != nil {
+			return "", fmt.Errorf("Error unmarshaling YAML: %s", err)
+		}
+	}
+
 	keyPathArray := strings.Split(keyPath, ".")
 	for _, element := range keyPathArray {
 		switch value := values[element].(type) {
 		case map[string]interface{}:
 			values = value
-		case []interface{}, nil, string, float64:
+		case map[interface{}]interface{}:
+			retypedValue := make(map[string]interface{})
+			for x := range value {
+				retypedValue[x.(string)] = value[x]
+			}
+			values = retypedValue
+		case []interface{}, nil, string, int, float64, bool:
 			keyValue = fmt.Sprintf("%v", value)
 		default:
-			return "", errors.New("Unexpected type in JSON config, not supported by testsuite")
+			return "", errors.New("Unexpected type in config file, type not supported.")
 		}
 	}
 	return keyValue, nil
 }
 
-func matchConfigValue(configPath string, condition string, keyPath string, expectedValue string) error {
-	keyValue, err := getConfigValue(configPath, keyPath)
+func getFileContent(path string) ([]byte, error) {
+	data, err := ioutil.ReadFile(testDir + "/" + path)
+	if err != nil {
+		return nil, fmt.Errorf("Cannot read file: %v", err)
+	}
+
+	return data, err
+}
+
+func configFileContainsKeyMatchingValue(format string, configPath string, condition string, keyPath string, expectedValue string) error {
+	config, err := getFileContent(configPath)
+	if err != nil {
+		return err
+	}
+
+	keyValue, err := getConfigKeyValue(config, format, keyPath)
 	if err != nil {
 		return err
 	}
@@ -323,8 +358,13 @@ func matchConfigValue(configPath string, condition string, keyPath string, expec
 	return nil
 }
 
-func checkConfigKey(configPath string, condition string, keyPath string) error {
-	keyValue, err := getConfigValue(configPath, keyPath)
+func configFileContainsKey(format string, configPath string, condition string, keyPath string) error {
+	config, err := getFileContent(configPath)
+	if err != nil {
+		return err
+	}
+
+	keyValue, err := getConfigKeyValue(config, format, keyPath)
 	if err != nil {
 		return err
 	}
@@ -333,6 +373,43 @@ func checkConfigKey(configPath string, condition string, keyPath string) error {
 		return fmt.Errorf("Config does not contain any value for key %s", keyPath)
 	} else if (condition == "does not have") && (keyValue != "<nil>") {
 		return fmt.Errorf("Config contains key %s with assigned value: %s", keyPath, keyValue)
+	}
+
+	return nil
+}
+
+func stdoutContainsKeyMatchingValue(commandField string, format string, condition string, keyPath string, expectedValue string) error {
+	config := []byte(selectFieldFromLastOutput(commandField))
+
+	keyValue, err := getConfigKeyValue(config, format, keyPath)
+	if err != nil {
+		return err
+	}
+
+	matches, err := performRegexMatch(expectedValue, keyValue)
+	if err != nil {
+		return err
+	} else if (condition == "contains") && !matches {
+		return fmt.Errorf("For key '%s' %s contains unexpected value '%s'", keyPath, commandField, keyValue)
+	} else if (condition == "does not contain") && matches {
+		return fmt.Errorf("For key '%s' %s contains value '%s', which it should not contain", keyPath, commandField, keyValue)
+	}
+
+	return nil
+}
+
+func stdoutContainsKey(commandField string, format string, condition string, keyPath string) error {
+	config := []byte(selectFieldFromLastOutput(commandField))
+
+	keyValue, err := getConfigKeyValue(config, format, keyPath)
+	if err != nil {
+		return err
+	}
+
+	if (condition == "has") && (keyValue == "<nil>") {
+		return fmt.Errorf("%s does not contain any value for key %s", commandField, keyPath)
+	} else if (condition == "does not have") && (keyValue != "<nil>") {
+		return fmt.Errorf("%s contains key %s with assigned value: %s", commandField, keyPath, keyValue)
 	}
 
 	return nil
@@ -422,28 +499,81 @@ func selectFieldFromLastOutput(commandField string) string {
 func shouldBeInValidFormat(commandField string, format string) error {
 	result := selectFieldFromLastOutput(commandField)
 	result = strings.TrimRight(result, "\n")
+	var err error
 	switch format {
 	case "URL":
-		_, err := url.ParseRequestURI(result)
-		if err != nil {
-			return fmt.Errorf("Command did not returned URL in valid format: %s", result)
-		}
+		_, err = validateURL(result)
 	case "IP":
-		if net.ParseIP(result) == nil {
-			return fmt.Errorf("%s of previous command is not a valid IP address: %s", commandField, result)
-		}
+		_, err = validateIP(result)
+	case "IP with port number":
+		_, err = validateIPWithPort(result)
+	case "YAML":
+		_, err = validateYAML(result)
+	default:
+		return fmt.Errorf("Format %s not implemented.", format)
 	}
-	return nil
+
+	return err
 }
 
-func commandReturnEquals(commandField string, command string, expected string) error {
-	minishift.executingMinishiftCommand(command)
-	return compareExpectedWithActualEquals(expected+"\n", selectFieldFromLastOutput(commandField))
+func validateIP(inputString string) (bool, error) {
+	if net.ParseIP(inputString) == nil {
+		return false, fmt.Errorf("IP address '%s' is not a valid IP address", inputString)
+	}
+
+	return true, nil
 }
 
-func commandReturnContains(commandField string, command string, expected string) error {
+func validateURL(inputString string) (bool, error) {
+	_, err := url.ParseRequestURI(inputString)
+	if err != nil {
+		return false, fmt.Errorf("URL '%s' is not an URL in valid format. Parsing error: %v", inputString, err)
+	}
+
+	return true, nil
+}
+
+func validateIPWithPort(inputString string) (bool, error) {
+	split := strings.Split(inputString, ":")
+	if len(split) != 2 {
+		return false, fmt.Errorf("String '%s' does not contain one ':' separator", inputString)
+	}
+	if _, err := strconv.Atoi(split[1]); err != nil {
+		return false, fmt.Errorf("Port must be an integer, in '%s' the port '%s' is not an integer. Conversion error: %v", inputString, split[1], err)
+	}
+	if net.ParseIP(split[0]) == nil {
+		return false, fmt.Errorf("In '%s' the IP part '%s' is not a valid IP address", inputString, split[0])
+	}
+
+	return true, nil
+}
+
+func validateYAML(inputString string) (bool, error) {
+	m := make(map[interface{}]interface{})
+	err := yaml.Unmarshal([]byte(inputString), &m)
+	if err != nil {
+		return false, fmt.Errorf("Error unmarshaling YAML: %s. YAML='%s'", err, inputString)
+	}
+
+	return true, nil
+}
+
+func commandReturnEquals(commandField string, command string, condition string, expected string) error {
 	minishift.executingMinishiftCommand(command)
-	return compareExpectedWithActualContains(expected, selectFieldFromLastOutput(commandField))
+	if condition == "is equal" {
+		return compareExpectedWithActualEquals(expected+"\n", selectFieldFromLastOutput(commandField))
+	} else {
+		return compareExpectedWithActualNotEquals(expected+"\n", selectFieldFromLastOutput(commandField))
+	}
+}
+
+func commandReturnContains(commandField string, command string, condition string, expected string) error {
+	minishift.executingMinishiftCommand(command)
+	if condition == "contains" {
+		return compareExpectedWithActualContains(expected, selectFieldFromLastOutput(commandField))
+	} else {
+		return compareExpectedWithActualNotContains(expected, selectFieldFromLastOutput(commandField))
+	}
 }
 
 func commandReturnShouldContain(commandField string, expected string) error {

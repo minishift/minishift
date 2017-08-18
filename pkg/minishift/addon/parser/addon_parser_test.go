@@ -18,7 +18,6 @@ package parser
 
 import (
 	"fmt"
-	"github.com/minishift/minishift/pkg/minishift/addon/command"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -26,6 +25,9 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/minishift/minishift/pkg/minishift/addon/command"
+	minishiftTesting "github.com/minishift/minishift/pkg/testing"
 )
 
 var anyuid string = `# Name: anyuid
@@ -48,6 +50,28 @@ oc foo
 `
 
 var noDescription string = `# Name: One command of each type
+oc foo
+`
+
+var addOnWithMultilineDescriptionWithTabAndSpace string = `# Name: foo
+# Description: This is one line
+#   This is second line
+#		This is third line
+# This is forth line
+
+# First run oc command
+oc foo
+`
+
+var addOnWithMultilineDescriptionWithComment string = `# Hello
+# Name: foo
+# first line
+#   :second line
+# Description: This is one line
+#   This is:second line
+#		This is third line
+
+# First run oc command
 oc foo
 `
 
@@ -113,6 +137,43 @@ func Test_empty_lines_and_comments_in_content_are_ignored(t *testing.T) {
 	}
 
 	expectedNumberOfCommands := 3
+	if len(commands) != expectedNumberOfCommands {
+		t.Errorf("Unexpected number of commands. Found %d, but expected %d", len(commands), expectedNumberOfCommands)
+	}
+}
+
+func Test_multiple_lines_in_description_with_tab_and_space(t *testing.T) {
+	meta, commands, err := testParser.parseAddOnContent(strings.NewReader(addOnWithMultilineDescriptionWithTabAndSpace))
+
+	if err != nil {
+		t.Fatal("Unexpected error parsing addon content: " + err.Error())
+	}
+
+	expectedDescription := []string{"This is one line", "This is second line", "This is third line", "This is forth line"}
+	minishiftTesting.AssertEqualSlice(expectedDescription, meta.Description(), t)
+
+	expectedNumberOfCommands := 1
+	if len(commands) != expectedNumberOfCommands {
+		t.Errorf("Unexpected number of commands. Found %d, but expected %d", len(commands), expectedNumberOfCommands)
+	}
+}
+
+func Test_multiple_lines_in_description_with_comment(t *testing.T) {
+	meta, commands, err := testParser.parseAddOnContent(strings.NewReader(addOnWithMultilineDescriptionWithComment))
+
+	if err != nil {
+		t.Fatal("Unexpected error parsing addon content: " + err.Error())
+	}
+
+	expectedName := "foo"
+	if meta.Name() != expectedName {
+		t.Errorf("Expected Name: %s, Got: %s", expectedName, meta.Name())
+	}
+
+	expectedDescription := []string{"This is one line", "This is:second line", "This is third line"}
+	minishiftTesting.AssertEqualSlice(expectedDescription, meta.Description(), t)
+
+	expectedNumberOfCommands := 1
 	if len(commands) != expectedNumberOfCommands {
 		t.Errorf("Unexpected number of commands. Found %d, but expected %d", len(commands), expectedNumberOfCommands)
 	}

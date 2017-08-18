@@ -17,7 +17,6 @@ limitations under the License.
 package openshift
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -31,7 +30,6 @@ type OpenShiftPatchTarget struct {
 	target              string
 	containerConfigFile string
 	localConfigFile     string
-	ip                  string
 }
 
 var (
@@ -39,34 +37,24 @@ var (
 		"master",
 		"/var/lib/origin/openshift.local.config/master/master-config.yaml",
 		"/var/lib/minishift/openshift.local.config/master/master-config.yaml",
-		"",
 	}
 
 	NODE = OpenShiftPatchTarget{
 		"node",
-		"/var/lib/origin/openshift.local.config/node-%s/node-config.yaml",
-		"/var/lib/minishift/openshift.local.config/node-%s/node-config.yaml",
-		"",
+		"/var/lib/origin/openshift.local.config/node-localhost/node-config.yaml",
+		"/var/lib/minishift/openshift.local.config/node-localhost/node-config.yaml",
 	}
 
 	UNKNOWN = OpenShiftPatchTarget{
 		"unkown",
 		"",
 		"",
-		"",
 	}
 )
 
-func (t *OpenShiftPatchTarget) SetIp(ip string) {
-	t.ip = ip
-}
-
 func (t *OpenShiftPatchTarget) containerConfigFilePath() (string, error) {
 	if t.target == "node" {
-		if t.ip == "" {
-			return "", errors.New("Node IP was not set")
-		}
-		return fmt.Sprintf(t.containerConfigFile, t.ip), nil
+		return t.containerConfigFile, nil
 	} else {
 		return t.containerConfigFile, nil
 	}
@@ -74,10 +62,7 @@ func (t *OpenShiftPatchTarget) containerConfigFilePath() (string, error) {
 
 func (t *OpenShiftPatchTarget) localConfigFilePath() (string, error) {
 	if t.target == "node" {
-		if t.ip == "" {
-			return "", errors.New("Node IP was not set")
-		}
-		return fmt.Sprintf(t.localConfigFile, t.ip), nil
+		return t.localConfigFile, nil
 	} else {
 		return t.localConfigFile, nil
 	}

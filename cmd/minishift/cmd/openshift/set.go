@@ -75,12 +75,6 @@ func runPatch(cmd *cobra.Command, args []string) {
 		atexit.ExitWithMessage(1, nonExistentMachineError)
 	}
 
-	ip, err := host.Driver.GetIP()
-	if err != nil {
-		atexit.ExitWithMessage(1, unableToRetrieveIpError)
-	}
-	patchTarget.SetIp(ip)
-
 	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
 	dockerCommander := docker.NewVmDockerCommander(sshCommander)
 

@@ -147,29 +147,29 @@ func FeatureContext(s *godog.Suite) {
 	minishift = &Minishift{runner: runner}
 
 	// steps to execute `minishift` commands
-	s.Step(`Minishift (?:has|should have) state "([^"]*)"$`,
+	s.Step(`^Minishift (?:has|should have) state "(Does Not Exist|Running|Stopped)"$`,
 		minishift.shouldHaveState)
 	s.Step(`^executing "minishift (.*)"$`,
 		minishift.executingMinishiftCommand)
 	s.Step(`^executing "minishift (.*)" (succeeds|fails)$`,
 		executingMinishiftCommandSucceedsOrFails)
-	s.Step(`([^"]*) of command "minishift ([^"]*)" (is equal|is not equal) to "([^"]*)"$`,
+	s.Step(`^([^"]*) of command "minishift (.*)" (is equal|is not equal) to "(.*)"$`,
 		commandReturnEquals)
-	s.Step(`([^"]*) of command "minishift ([^"]*)" (contains|does not contain) "([^"]*)"$`,
+	s.Step(`^([^"]*) of command "minishift (.*)" (contains|does not contain) "(.*)"$`,
 		commandReturnContains)
 
 	// steps to execute `oc` commands
-	s.Step(`^executing "oc ([^"]*)" retrying (\d+) times with wait period of (\d+) seconds$`,
+	s.Step(`^executing "oc (.*)" retrying (\d+) times with wait period of (\d+) seconds$`,
 		minishift.executingRetryingTimesWithWaitPeriodOfSeconds)
-	s.Step(`^executing "oc ([^"]*)"$`,
+	s.Step(`^executing "oc (.*)"$`,
 		minishift.executingOcCommand)
-	s.Step(`^executing "oc ([^"]*)" (succeeds|fails)$`,
+	s.Step(`^executing "oc (.*)" (succeeds|fails)$`,
 		executingOcCommandSucceedsOrFails)
 
 	// steps for scenario variables
-	s.Step(`setting scenario variable "([^"]*)" to the stdout from executing "oc ([^"]*)"$`,
+	s.Step(`^setting scenario variable "(.*)" to the stdout from executing "oc (.*)"$`,
 		minishift.setVariableExecutingOcCommand)
-	s.Step(`^scenario variable "([^"]*)" should not be empty$`,
+	s.Step(`^scenario variable "(.*)" should not be empty$`,
 		variableShouldNotBeEmpty)
 
 	// steps for rollout check
@@ -181,21 +181,21 @@ func FeatureContext(s *godog.Suite) {
 		testProxy.SetProxy)
 	s.Step(`^user stops proxy server and unsets MINISHIFT_HTTP_PROXY variable$`,
 		testProxy.UnsetProxy)
-	s.Step(`^proxy log should contain "([^"]*)"$`,
+	s.Step(`^proxy log should contain "(.*)"$`,
 		proxyLogShouldContain)
 	s.Step(`^proxy log should contain$`,
 		proxyLogShouldContainContent)
 
 	// steps to verify `stdout`, `stderr` and `exitcode` of commands executed
-	s.Step(`^(stdout|stderr|exitcode) should contain "([^"]*)"$`,
+	s.Step(`^(stdout|stderr|exitcode) should contain "(.*)"$`,
 		commandReturnShouldContain)
-	s.Step(`^(stdout|stderr|exitcode) should not contain "([^"]*)"$`,
+	s.Step(`^(stdout|stderr|exitcode) should not contain "(.*)"$`,
 		commandReturnShouldNotContain)
 	s.Step(`^(stdout|stderr|exitcode) should contain$`,
 		commandReturnShouldContainContent)
 	s.Step(`^(stdout|stderr|exitcode) should not contain$`,
 		commandReturnShouldNotContainContent)
-	s.Step(`^(stdout|stderr|exitcode) should equal "([^"]*)"$`,
+	s.Step(`^(stdout|stderr|exitcode) should equal "(.*)"$`,
 		commandReturnShouldEqual)
 	s.Step(`^(stdout|stderr|exitcode) should equal$`,
 		commandReturnShouldEqualContent)
@@ -203,12 +203,12 @@ func FeatureContext(s *godog.Suite) {
 		commandReturnShouldBeEmpty)
 	s.Step(`^(stdout|stderr|exitcode) should not be empty$`,
 		commandReturnShouldNotBeEmpty)
-	s.Step(`^(stdout|stderr|exitcode) should be valid ([^"]*)$`,
+	s.Step(`^(stdout|stderr|exitcode) should be valid (.*)$`,
 		shouldBeInValidFormat)
 	// steps for matching stdout, stderr or exitcode with regular expression
-	s.Step(`^(stdout|stderr|exitcode) should match "([^"]*)"$`,
+	s.Step(`^(stdout|stderr|exitcode) should match "(.*)"$`,
 		commandReturnShouldMatchRegex)
-	s.Step(`^(stdout|stderr|exitcode) should not match "([^"]*)"$`,
+	s.Step(`^(stdout|stderr|exitcode) should not match "(.*)"$`,
 		commandReturnShouldNotMatchRegex)
 	s.Step(`^(stdout|stderr|exitcode) should match$`,
 		commandReturnShouldMatchRegexContent)
@@ -216,17 +216,17 @@ func FeatureContext(s *godog.Suite) {
 		commandReturnShouldNotMatchRegexContent)
 
 	// step for HTTP requests for minishift web console
-	s.Step(`(body|status code) of HTTP request to "([^"]*)" (?:|at "([^"]*)" )(contains|is equal to) "([^"]*)"$`,
+	s.Step(`^(body|status code) of HTTP request to "([^"]*)" (?:|at "([^"]*)" )(contains|is equal to) "(.*)"$`,
 		verifyHTTPResponse)
 
 	// step for HTTP requests for accessing application
-	s.Step(`(body|status code) of HTTP request to "([^"]*)" of service "([^"]*)" in namespace "([^"]*)" (contains|is equal to) "([^"]*)"$`,
+	s.Step(`^(body|status code) of HTTP request to "([^"]*)" of service "([^"]*)" in namespace "([^"]*)" (contains|is equal to) "(.*)"$`,
 		getRoutingUrlAndVerifyHTTPResponse)
 
 	// steps for verifying config file content
-	s.Step(`^(JSON|YAML) config file "([^"]*)" (contains|does not contain) key "(.*)" with value matching "(.*)"$`,
+	s.Step(`^(JSON|YAML) config file "(.*)" (contains|does not contain) key "(.*)" with value matching "(.*)"$`,
 		configFileContainsKeyMatchingValue)
-	s.Step(`^(JSON|YAML) config file "([^"]*)" (has|does not have) key "(.*)"$`,
+	s.Step(`^(JSON|YAML) config file "(.*)" (has|does not have) key "(.*)"$`,
 		configFileContainsKey)
 
 	s.Step(`^(stdout|stderr) is (JSON|YAML) which (contains|does not contain) key "(.*)" with value matching "(.*)"$`,

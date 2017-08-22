@@ -1,0 +1,11 @@
+= Troubleshooting Minishift
+:icons:
+
+[[troubleshooting-overview]]
+== Overview
+
+This section contains solutions to common problems that you might encounter while setting up and using Minishift.
+
+- xref:../troubleshooting/troubleshooting-getting-started.adoc#[Troubleshooting Getting Started]
+- xref:../troubleshooting/troubleshooting-driver-plugins.adoc#[Troubleshooting Driver Plug-ins]
+- xref:../troubleshooting/troubleshooting-misc.adoc#[Troubleshooting Miscellaneous]

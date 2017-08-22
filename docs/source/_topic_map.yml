@@ -33,8 +33,6 @@ Topics:
         File: host-folders
       - Name: Minishift Docker Daemon
         File: docker-daemon
-      - Name: Troubleshooting
-        File: troubleshooting
   - Name: Interacting with OpenShift
     Dir: openshift
     Topics:
@@ -46,6 +44,17 @@ Topics:
         File: exposing-services
       - Name: Accessing the OpenShift Docker Registry
         File: openshift-docker-registry
+  - Name: Troubleshooting Minishift
+    Dir: troubleshooting
+    Topics:
+      - Name: Overview
+        File: index
+      - Name: Troubleshooting Getting Started
+        File: troubleshooting-getting-started
+      - Name: Troubleshooting Driver Plug-ins
+        File: troubleshooting-driver-plugins
+      - Name: Troubleshooting Miscellaneous
+        File: troubleshooting-misc
   - Name: Contributing to Minishift
     Dir: contributing
     Topics:

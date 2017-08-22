@@ -19,5 +19,6 @@ extend Minishift:
 - xref:./getting-started/index.adoc#[Getting Started]
 - xref:./using/index.adoc#[Using Minishift]
 - xref:./openshift/index.adoc#[Interacting with OpenShift]
+- xref:./troubleshooting/index.adoc#[Troubleshooting Minishift]
 - xref:./contributing/index.adoc#[Contributing to Minishift]
 - xref:./command-ref/minishift.adoc#[Command Reference]

@@ -48,8 +48,8 @@ For specific configuration steps see the xref:../getting-started/setting-up-driv
 +
 [NOTE]
 ====
-It is recommended to use VirtualBox 5.1.12 or later on Windows to avoid the issue xref:../using/troubleshooting.adoc#machine-doesnt-exist[Error: machine does not exist].
-If you encounter issues related to the hypervisor, see the xref:../using/troubleshooting.adoc#[Troubleshooting] section.
+It is recommended to use VirtualBox 5.1.12 or later on Windows to avoid the issue xref:../troubleshooting/troubleshooting-driver-plugins.adoc#machine-doesnt-exist[Error: machine does not exist].
+If you encounter issues related to the hypervisor, see the xref:../troubleshooting/troubleshooting-driver-plugins.adoc#[Troubleshooting Driver Plug-ins] section.
 ====
 
 [[installing-instructions]]

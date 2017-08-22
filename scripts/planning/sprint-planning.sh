@@ -28,7 +28,7 @@ function github_milestone()
 {
   milestone_data="`curl -s https://api.github.com/repos/minishift/$repository/issues?milestone=$milestone\&state=all`"
 
-  csv_raw=`echo $milestone_data | jq --arg repo "$repository" '.[] | ";;;;;;;;;"
+  csv_raw=`echo $milestone_data | jq --arg repo "$repository" '.[] | ";;;;;;;;;;;"
    + .title
    + ";"
    + (reduce .labels[] as $item (""; (if $item.color == "c2e0c6" then (. + (if . == "" then "" else "," end) + $item.name[10:]) else . end)))
@@ -54,7 +54,7 @@ function jira_milestone()
 {
   milestone_data=`curl -s -X GET -H "Content-Type: application/json" "https://issues.jboss.org/rest/api/2/search?jql=project=CDK%20AND%20component=minishift%20AND%20fixVersion=${milestone}"`
 
-  csv_raw=`echo $milestone_data | jq --compact-output --arg milestone "$milestone" --arg repo "$repository" '.issues[] | ";;;;;;;;;"
+  csv_raw=`echo $milestone_data | jq --compact-output --arg milestone "$milestone" --arg repo "$repository" '.issues[] | ";;;;;;;;;;;"
    + .fields.summary
    + ";;"
    + $repo
@@ -99,7 +99,7 @@ if [ -z "${repository}" ] || [ -z "${milestone}" ]; then
 fi
 
 if [ -n "${print_header}" ]; then
-    echo "Budh;Gerard;Hardy;Lala;Praveen;Title;Repository;Milestone;Type;Priority;Id;URL"
+    echo "Amit;Andreas;Budh;Gerard;Hardy;Lala;Praveen;Title;Repository;Milestone;Type;Priority;Id;URL"
 fi
 
 if [ "${repository}" == "cdk" ]; then

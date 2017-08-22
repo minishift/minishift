@@ -36,6 +36,7 @@ const (
 
 	noAddOnDefinitionFoundError   = "There needs to be an addon file per addon directory. Found none in %s"
 	multipleAddOnDefinitionsError = "There can only be one addon file per addon directory. Found %s"
+	regexToGetMetaTagInfo         = `^# ?([a-zA-Z-]*):(.*)`
 )
 
 // AddOnParser is responsible for loading an addon from file and converting it into an AddOn
@@ -180,12 +181,25 @@ func (parser *AddOnParser) parseCommands(scanner *bufio.Scanner) ([]command.Comm
 }
 
 func createMetaData(header []string) (addon.AddOnMeta, error) {
-	regex, _ := regexp.Compile(`^# ?(.*):(.*)`)
-	metaMap := make(map[string]string)
+	regex, _ := regexp.Compile(regexToGetMetaTagInfo)
+	metaMap := make(map[string]interface{})
+	var key string
+	var value []string
 	for _, line := range header {
 		matches := regex.FindAllStringSubmatch(line, -1)
+		if len(matches) == 0 && key == addon.DescriptionMetaTagName {
+			line = strings.TrimPrefix(line, commentChar)
+			metaMap[key] = append(metaMap[key].([]string), strings.TrimSpace(line))
+			continue
+		}
 		for _, match := range matches {
-			metaMap[strings.Trim(match[1], " ")] = strings.Trim(match[2], " ")
+			key = strings.Trim(match[1], " ")
+			if key == addon.DescriptionMetaTagName {
+				value = append(value, strings.Trim(match[2], " "))
+				metaMap[key] = value
+				continue
+			}
+			metaMap[key] = strings.Trim(match[2], " ")
 		}
 	}
 

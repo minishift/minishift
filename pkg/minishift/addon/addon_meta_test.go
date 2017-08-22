@@ -24,9 +24,9 @@ import (
 
 func Test_Metadata_creation_succeeds(t *testing.T) {
 	testName := "foo"
-	testDescription := "bar"
+	testDescription := []string{"bar"}
 
-	testMap := make(map[string]string)
+	testMap := make(map[string]interface{})
 	testMap["Name"] = testName
 	testMap["Description"] = testDescription
 
@@ -36,15 +36,13 @@ func Test_Metadata_creation_succeeds(t *testing.T) {
 		t.Fatal(fmt.Sprintf("Expected addon name '%s', but got '%s'", testName, addOnMeta.Name()))
 	}
 
-	if addOnMeta.Description() != testDescription {
-		t.Fatal(fmt.Sprintf("Expected addon description '%s', but got '%s'", testName, addOnMeta.Description()))
-	}
+	minishiftTesting.AssertEqualSlice(addOnMeta.Description(), testDescription, t)
 }
 
 func Test_missing_name_returns_error(t *testing.T) {
-	testDescription := "bar"
+	testDescription := []string{"bar"}
 
-	testMap := make(map[string]string)
+	testMap := make(map[string]interface{})
 	testMap["Description"] = testDescription
 
 	_, err := NewAddOnMeta(testMap)
@@ -62,7 +60,7 @@ func Test_missing_name_returns_error(t *testing.T) {
 func Test_missing_description_returns_error(t *testing.T) {
 	testName := "foo"
 
-	testMap := make(map[string]string)
+	testMap := make(map[string]interface{})
 	testMap["Name"] = testName
 
 	_, err := NewAddOnMeta(testMap)
@@ -79,10 +77,10 @@ func Test_missing_description_returns_error(t *testing.T) {
 
 func Test_optional_metadata_is_retained(t *testing.T) {
 	testName := "foo"
-	testDescription := "bar"
+	testDescription := []string{"bar"}
 	testUrl := "http://my.addon.io"
 
-	testMap := make(map[string]string)
+	testMap := make(map[string]interface{})
 	testMap["Name"] = testName
 	testMap["Description"] = testDescription
 	testMap["Url"] = testUrl
@@ -95,9 +93,9 @@ func Test_optional_metadata_is_retained(t *testing.T) {
 }
 
 func Test_required_vars_meta_is_extracted(t *testing.T) {
-	testMap := make(map[string]string)
+	testMap := make(map[string]interface{})
 	testMap["Name"] = "acme"
-	testMap["Description"] = "Acme Add-on"
+	testMap["Description"] = []string{"Acme Add-on"}
 	testMap["Required-Vars"] = " USER, access_token "
 
 	addOnMeta := getAddOnMeta(testMap, t)
@@ -106,16 +104,16 @@ func Test_required_vars_meta_is_extracted(t *testing.T) {
 }
 
 func Test_required_vars_empty_if_not_specified(t *testing.T) {
-	testMap := make(map[string]string)
+	testMap := make(map[string]interface{})
 	testMap["Name"] = "acme"
-	testMap["Description"] = "Acme Add-on"
+	testMap["Description"] = []string{"Acme Add-on"}
 
 	addOnMeta := getAddOnMeta(testMap, t)
 
 	minishiftTesting.AssertEqualSlice(addOnMeta.RequiredVars(), []string{}, t)
 }
 
-func getAddOnMeta(testMap map[string]string, t *testing.T) AddOnMeta {
+func getAddOnMeta(testMap map[string]interface{}, t *testing.T) AddOnMeta {
 	addOnMeta, err := NewAddOnMeta(testMap)
 
 	if err != nil {

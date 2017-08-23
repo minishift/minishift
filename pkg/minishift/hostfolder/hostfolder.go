@@ -321,7 +321,7 @@ func mountCifsHostfolder(driver drivers.Driver, hostfolder *config.HostFolder) e
 	}
 
 	cmd := fmt.Sprintf(
-		"sudo mount -t cifs %s %s -o username=%s,password=%s",
+		"sudo mount -t cifs %s %s -o username=%s,password=%s,sec=ntlm",
 		hostfolder.Options["uncpath"],
 		hostfolder.Mountpoint(),
 		hostfolder.Options["username"],

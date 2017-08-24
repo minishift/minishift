@@ -133,6 +133,7 @@ func (m *Minishift) processVariables(command string) string {
 func (m *Minishift) executingOcCommand(command string) error {
 	ocRunner := m.runner.GetOcRunner()
 	if ocRunner == nil {
+		util.LogMessage("warning", "OC binary can't be detected, minishift is not Running")
 		return errors.New("Minishift is not Running")
 	}
 

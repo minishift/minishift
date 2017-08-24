@@ -244,12 +244,27 @@ func FeatureContext(s *godog.Suite) {
 			runner.CDKSetup()
 		}
 
+		util.StartLog(testDir)
+
 		fmt.Println("Running Integration test in:", testDir)
 		fmt.Println("Using binary:", minishiftBinary)
 	})
 
 	s.AfterSuite(func() {
+		util.LogMessage("info", "----- Cleaning Up -----")
 		minishift.runner.EnsureDeleted()
+		util.CloseLog()
+	})
+
+	s.BeforeScenario(func(this interface{}) {
+		switch this.(type) {
+		case *gherkin.Scenario:
+			scenario := *this.(*gherkin.Scenario)
+			util.LogMessage("info", fmt.Sprintf("----- Scenario: %s -----", scenario.ScenarioDefinition.Name))
+		case *gherkin.ScenarioOutline:
+			scenario := *this.(*gherkin.ScenarioOutline)
+			util.LogMessage("info", fmt.Sprintf("----- Scenario Outline: %s -----", scenario.ScenarioDefinition.Name))
+		}
 	})
 
 	s.AfterScenario(func(interface{}, error) {

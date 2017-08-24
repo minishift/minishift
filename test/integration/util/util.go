@@ -19,6 +19,7 @@ limitations under the License.
 package util
 
 import (
+	//"bufio"
 	"fmt"
 	"os"
 	"os/exec"
@@ -51,7 +52,9 @@ func runCommand(command string, commandPath string) (stdOut string, stdErr strin
 	cmd.Stdout = &outbuf
 	cmd.Stderr = &errbuf
 
+	LogMessage("command", fmt.Sprintf("%s %s", commandPath, command))
 	err := cmd.Run()
+
 	stdOut = outbuf.String()
 	stdErr = errbuf.String()
 
@@ -68,6 +71,11 @@ func runCommand(command string, commandPath string) (stdOut string, stdErr strin
 	} else {
 		ws := cmd.ProcessState.Sys().(syscall.WaitStatus)
 		exitCode = ws.ExitStatus()
+	}
+
+	LogMessage("stdout", stdOut)
+	if stdErr != "" {
+		LogMessage("stderr", stdErr)
 	}
 
 	return

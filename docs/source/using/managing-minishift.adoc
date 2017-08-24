@@ -298,27 +298,27 @@ CONTAINER    IMAGE                   COMMAND                CREATED        STATU
 
 If you want to get early access to some upcoming features and experiment, you can enable some of those in Minishift.
 
-[IMPORTANT]
-====
-Experimental features are not officially supported, and might break or result in unexpected behavior.
-To share your feedback on these features, you are welcome to link:https://github.com/minishift/minishift#community[contact the Minishift community].
-====
-
 You do this by setting the environment variable `MINISHIFT_ENABLE_EXPERIMENTAL`, which makes additional flags available:
 
 ----
 $ export MINISHIFT_ENABLE_EXPERIMENTAL=y
 ----
 
+[IMPORTANT]
+====
+Experimental features are not officially supported, and might break or result in unexpected behavior.
+To share your feedback on these features, you are welcome to link:https://github.com/minishift/minishift#community[contact the Minishift community].
+====
+
 [[enabling-experimental-oc-flags]]
 === Enabling experimental `oc cluster up` flags in `minishift start`
 
-By default, Minishift does not expose all xref:../openshift/openshift-client-binary.adoc#[`oc cluster up`] flags in the CLI, either because certain features are not considered stable or because Minishift does not yet support the latest options in `oc cluster up`.
+By default, Minishift does not expose all link:https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md[`oc cluster up`] flags in the Minishift CLI.
 
-You can set the environment variable to enable the following options for the xref:../command-ref/minishift_start.adoc#[`minishift start`] command:
+You can set the `MINISHIFT_ENABLE_EXPERIMENTAL` environment variable to enable the following options for the xref:../command-ref/minishift_start.adoc#[`minishift start`] command:
 
 `service-catalog`::
 Enables provisioning the OpenShift link:https://docs.openshift.org/latest/architecture/service_catalog/index.html[service catalog].
 
 `extra-clusterup-flags`::
-Enables passing any extra flags to `oc cluster up`.
+Enables passing flags that are not directly exposed in the Minishift CLI directly to `oc cluster up`.

@@ -34,9 +34,10 @@ import (
 const (
 	commentChar = "#"
 
-	noAddOnDefinitionFoundError   = "There needs to be an addon file per addon directory. Found none in %s"
-	multipleAddOnDefinitionsError = "There can only be one addon file per addon directory. Found %s"
-	regexToGetMetaTagInfo         = `^# ?([a-zA-Z-]*):(.*)`
+	noAddOnDefinitionFoundError         = "There needs to be an addon file per addon directory. Found none in %s"
+	multipleAddOnDefinitionsError       = "There can only be one addon file per addon directory. Found %s"
+	multipleAddOnRemoveDefinitionsError = "There can only be one addon.remove file per addon directory. Found %s"
+	regexToGetMetaTagInfo               = `^# ?([a-zA-Z-]*):(.*)`
 )
 
 // AddOnParser is responsible for loading an addon from file and converting it into an AddOn
@@ -73,12 +74,15 @@ func NewAddOnParser() *AddOnParser {
 // Parse takes as parameter a reader containing an addon definition and returns an AddOn instance.
 // If an error occurs nil and the error are returned.
 func (parser *AddOnParser) Parse(addOnDir string) (addon.AddOn, error) {
-	reader, err := parser.getAddOnContentReader(addOnDir)
+	addonInstallReader, err := parser.getAddOnContentReader(addOnDir, ".addon")
 	if err != nil {
 		return nil, err
 	}
-
-	meta, commands, err := parser.parseAddOnContent(reader)
+	addonRemoveReader, err := parser.getAddOnContentReader(addOnDir, ".addon.remove")
+	if err != nil {
+		return nil, err
+	}
+	meta, commands, err := parser.parseAddOnContent(addonInstallReader)
 	if err != nil {
 		name := ""
 		if meta != nil {
@@ -87,11 +91,24 @@ func (parser *AddOnParser) Parse(addOnDir string) (addon.AddOn, error) {
 		return nil, NewParseError(err.Error(), name, addOnDir)
 	}
 
-	addOn := addon.NewAddOn(meta, commands, addOnDir)
+	var removecommands []command.Command
+	if addonRemoveReader != nil {
+		_, removecommands, err = parser.parseAddOnContent(addonRemoveReader)
+		if err != nil {
+			name := ""
+			if meta != nil {
+				name = meta.Name()
+			}
+			return nil, NewParseError(err.Error(), name, addOnDir)
+		}
+	}
+
+	addOn := addon.NewAddOn(meta, commands, removecommands, addOnDir)
+
 	return addOn, nil
 }
 
-func (parser *AddOnParser) getAddOnContentReader(addOnDir string) (io.Reader, error) {
+func (parser *AddOnParser) getAddOnContentReader(addOnDir string, fileSuffix string) (io.Reader, error) {
 	if !filehelper.Exists(addOnDir) {
 		return nil, NewParseError("Addon directory does not exist", addOnDir, "")
 	}
@@ -103,8 +120,14 @@ func (parser *AddOnParser) getAddOnContentReader(addOnDir string) (io.Reader, er
 
 	var addOnFiles []string
 	for _, fileInfo := range files {
-		if strings.HasSuffix(fileInfo.Name(), ".addon") {
+		if strings.HasSuffix(fileInfo.Name(), fileSuffix) {
 			addOnFiles = append(addOnFiles, fileInfo.Name())
+		}
+	}
+
+	if fileSuffix == ".addon.remove" {
+		if len(addOnFiles) == 0 {
+			return nil, nil
 		}
 	}
 
@@ -113,7 +136,10 @@ func (parser *AddOnParser) getAddOnContentReader(addOnDir string) (io.Reader, er
 	}
 
 	if len(addOnFiles) > 1 {
-		return nil, NewParseError(fmt.Sprintf(multipleAddOnDefinitionsError, strings.Join(addOnFiles, ", ")), addOnDir, "")
+		if fileSuffix == ".addon" {
+			return nil, NewParseError(fmt.Sprintf(multipleAddOnDefinitionsError, strings.Join(addOnFiles, ", ")), addOnDir, "")
+		}
+		return nil, NewParseError(fmt.Sprintf(multipleAddOnRemoveDefinitionsError, strings.Join(addOnFiles, ", ")), addOnDir, "")
 	}
 
 	file, err := os.Open(filepath.Join(addOnDir, addOnFiles[0]))

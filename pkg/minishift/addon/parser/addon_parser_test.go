@@ -105,7 +105,7 @@ var (
 	basepath   = filepath.Dir(b)
 )
 
-func Test_successful_parsing_of_addon_dir(t *testing.T) {
+func Test_successful_parsing_of_addon_dir_without_remove_addon_file(t *testing.T) {
 	path := filepath.Join(basepath, "..", "..", "..", "..", "addons", "anyuid")
 	addOn, err := testParser.Parse(path)
 
@@ -121,6 +121,40 @@ func Test_successful_parsing_of_addon_dir(t *testing.T) {
 	expectedNumberOfCommands := 5
 	if len(addOn.Commands()) != expectedNumberOfCommands {
 		t.Errorf("Unexpected number of commands. Found %d, but expected %d", len(addOn.Commands()), expectedNumberOfCommands)
+	}
+
+	expectedNumberOfRemoveCommands := 0
+	if len(addOn.RemoveCommands()) != expectedNumberOfRemoveCommands {
+		t.Errorf("Unexpected number of commands. Found %d, but expected %d", len(addOn.RemoveCommands()), expectedNumberOfRemoveCommands)
+	}
+
+	_, ok := addOn.Commands()[0].(*command.OcCommand)
+	if !ok {
+		t.Fatalf("Expected an OcCommand. Got %s", reflect.TypeOf(addOn.Commands()[0]).Name())
+	}
+}
+
+func Test_successful_parsing_of_addon_dir_with_remove_addon_file(t *testing.T) {
+	path := filepath.Join(basepath, "..", "..", "..", "..", "addons", "admin-user")
+	addOn, err := testParser.Parse(path)
+
+	if err != nil {
+		t.Fatal("Unexpected error parsing addon content: " + err.Error())
+	}
+
+	expectedName := "admin-user"
+	if addOn.MetaData().Name() != expectedName {
+		t.Fatalf("Unexpected addon name: '%s'. Expected '%s'", addOn.MetaData().Name(), expectedName)
+	}
+
+	expectedNumberOfCommands := 2
+	if len(addOn.Commands()) != expectedNumberOfCommands {
+		t.Errorf("Unexpected number of commands. Found %d, but expected %d", len(addOn.Commands()), expectedNumberOfCommands)
+	}
+
+	expectedNumberOfRemoveCommands := 2
+	if len(addOn.RemoveCommands()) != expectedNumberOfRemoveCommands {
+		t.Errorf("Unexpected number of commands. Found %d, but expected %d", len(addOn.RemoveCommands()), expectedNumberOfRemoveCommands)
 	}
 
 	_, ok := addOn.Commands()[0].(*command.OcCommand)

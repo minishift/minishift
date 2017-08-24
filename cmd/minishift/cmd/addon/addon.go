@@ -23,8 +23,9 @@ import (
 const (
 	addOnConfigKey = "addons"
 
-	emptyAddOnError = "You must specify an add-on name. Run `minishift addons list` to view installed add-ons."
-	noAddOnMessage  = "No add-on with the name %s is installed."
+	emptyAddOnError      = "You must specify an add-on name. Run `minishift addons list` to view installed add-ons."
+	noAddOnMessage       = "No add-on with the name %s is installed."
+	noRemoveAddOnMessage = "No %s.addon.remove file found for %s addon"
 )
 
 var AddonsCmd = &cobra.Command{

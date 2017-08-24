@@ -258,6 +258,14 @@ $ make integration GODOG_OPTS="-paths ~/tests/custom.feature,~/my.feature -tags 
 NOTE: When multiple values are used for options in `GODOG_OPTS`, then they have to be separated by a comma without whitespace.
 While `-tags basic,openshift` will be parsed properly by make, `-tags basic, openshift` will result in only `@basic` being used.
 
+==== Viewing Results
+
+Integration test logs its progress directly into a console with accent of providing additional useful information when failures of individual Gherkin steps happen.
+This information is often enough to find and debug the reason of failure.
+
+However for cases which needs further investigation the integration test also logs more detailed progress into a log file. This file is located at `$GOPATH/github.com/minishift/minishift/out/integration-test/integration.log`.
+Please note that this file is being deleted on start of each subsequent test run.
+
 [[format-source-code]]
 === Formatting the Source Code
 

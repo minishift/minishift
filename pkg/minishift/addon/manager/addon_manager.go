@@ -23,13 +23,13 @@ import (
 	"path/filepath"
 	"sort"
 
-	"github.com/golang/glog"
+	"strings"
+
 	"github.com/minishift/minishift/pkg/minishift/addon"
 	"github.com/minishift/minishift/pkg/minishift/addon/command"
 	"github.com/minishift/minishift/pkg/minishift/addon/parser"
 	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/pkg/errors"
-	"strings"
 )
 
 // AddOnManager is the central point for all operations around managing addons. An addon
@@ -63,7 +63,7 @@ func NewAddOnManager(baseDir string, configMap map[string]*addon.AddOnConfig) (*
 		if err != nil {
 			_, ok := err.(parser.ParseError)
 			if ok {
-				glog.Warning(fmt.Sprintf("Skipping addon '%s' in '%s' due to parse error: %s", f.Name(), fullPath, err.Error()))
+				fmt.Println(fmt.Sprintf("Skipping addon '%s' in '%s' due to parse error: %s", f.Name(), fullPath, err.Error()))
 				continue
 			} else {
 				return nil, errors.Wrapf(err, "Unable to create addon manager for %s. ", baseDir)
@@ -187,6 +187,33 @@ func (m *AddOnManager) ApplyAddOn(addOn addon.AddOn, context *command.ExecutionC
 
 	os.Chdir(addOn.InstallPath())
 	for _, c := range addOn.Commands() {
+		err := c.Execute(context)
+		if err != nil {
+			return err
+		}
+	}
+	fmt.Print("\n\n")
+	return nil
+}
+
+func (m *AddOnManager) RemoveAddOn(addOn addon.AddOn, context *command.ExecutionContext) error {
+	fmt.Print(fmt.Sprintf("-- Removing addon '%s':", addOn.MetaData().Name()))
+	context.AddToContext("addon-name", addOn.MetaData().Name())
+	defer context.RemoveFromContext("addon-name")
+
+	err := m.verifyRequiredVariablesInContext(context, addOn.MetaData())
+	if err != nil {
+		return err
+	}
+
+	oldDir, err := os.Getwd()
+	if err != nil {
+		return errors.Wrap(err, "Unable to remove addon due to failing IO operation")
+	}
+	defer os.Chdir(oldDir)
+
+	os.Chdir(addOn.InstallPath())
+	for _, c := range addOn.RemoveCommands() {
 		err := c.Execute(context)
 		if err != nil {
 			return err

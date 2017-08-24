@@ -293,12 +293,10 @@ CONTAINER    IMAGE                   COMMAND                CREATED        STATU
 71fe8ff16548 openshift/origin:v1.5.1 "/usr/bin/openshift s" 4 minutes ago  Up 4 minutes  origin
 ----
 
-[[enabling-experimental-openshift-features]]
-== Enabling Experimental OpenShift Features
+[[experimental-features]]
+== Experimental Features
 
-By default, Minishift does not expose all `oc cluster up` flags in the CLI, either because certain features are not considered stable or because Minishift does not yet support the latest options in `oc cluster up`.
-
-However, if you want to get early access to some upcoming features and experiment, you can enable some of those in Minishift.
+If you want to get early access to some upcoming features and experiment, you can enable some of those in Minishift.
 
 [IMPORTANT]
 ====
@@ -312,10 +310,12 @@ You do this by setting the environment variable `MINISHIFT_ENABLE_EXPERIMENTAL`,
 $ export MINISHIFT_ENABLE_EXPERIMENTAL=y
 ----
 
-Currently this environment variable controls additional options only for the xref:../command-ref/minishift_start.adoc#[`minishift start`] command.
-The additional options are related to  xref:../openshift/openshift-client-binary.adoc#[`oc cluster up`].
+[[enabling-experimental-oc-flags]]
+=== Enabling experimental `oc cluster up` flags in `minishift start`
 
-When you set the environment variable, you get access to the following flags:
+By default, Minishift does not expose all xref:../openshift/openshift-client-binary.adoc#[`oc cluster up`] flags in the CLI, either because certain features are not considered stable or because Minishift does not yet support the latest options in `oc cluster up`.
+
+You can set the environment variable to enable the following options for the xref:../command-ref/minishift_start.adoc#[`minishift start`] command:
 
 `service-catalog`::
 Enables provisioning the OpenShift link:https://docs.openshift.org/latest/architecture/service_catalog/index.html[service catalog].

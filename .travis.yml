@@ -22,4 +22,4 @@ script:
 - make prerelease
 
 notifications:
-  webhooks: http://minibot.34e99f76.svc.dockerapp.io:9009/hubot/travis-ci
+  webhooks: http://minibot.19cf262c.svc.dockerapp.io:9009/hubot/travis-ci

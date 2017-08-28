@@ -297,7 +297,7 @@ function perform_release() {
   # Notify Minibot
   MESSAGE="Minishift v$RELEASE_VERSION successfully released by https://ci.centos.org/job/minishift-release/$BUILD_NUMBER."
   URL="https://github.com/$REPO_OWNER/minishift/releases/tag/v$RELEASE_VERSION"
-  curl http://minibot.34e99f76.svc.dockerapp.io:9009/hubot/centosci -H "Content-Type: application/json" -d '{"payload":{"status":"success","message":'"\"$MESSAGE\""',"url":'"\"$URL\""'}}'
+  curl http://minibot.19cf262c.svc.dockerapp.io:9009/hubot/centosci -H "Content-Type: application/json" -d '{"payload":{"status":"success","message":'"\"$MESSAGE\""',"url":'"\"$URL\""'}}'
 }
 
 function build_and_test() {

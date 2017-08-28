@@ -91,9 +91,9 @@ func (parser *AddOnParser) Parse(addOnDir string) (addon.AddOn, error) {
 		return nil, NewParseError(err.Error(), name, addOnDir)
 	}
 
-	var removecommands []command.Command
+	var removeCommands []command.Command
 	if addonRemoveReader != nil {
-		_, removecommands, err = parser.parseAddOnContent(addonRemoveReader)
+		_, removeCommands, err = parser.parseAddOnContent(addonRemoveReader)
 		if err != nil {
 			name := ""
 			if meta != nil {
@@ -103,7 +103,7 @@ func (parser *AddOnParser) Parse(addOnDir string) (addon.AddOn, error) {
 		}
 	}
 
-	addOn := addon.NewAddOn(meta, commands, removecommands, addOnDir)
+	addOn := addon.NewAddOn(meta, commands, removeCommands, addOnDir)
 
 	return addOn, nil
 }

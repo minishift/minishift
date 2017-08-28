@@ -252,10 +252,10 @@ $ minishift addons apply anyuid admin-user
 == Removing Add-ons
 
 Add-ons can be removed with the xref:../command-ref/minishift_addons_remove.adoc#[`minishift addons remove`] command.
-Add-ons remove execute commands which are part of `<addon_name>.addon.remove` file, if file not exist then remove command complain same.
-You can use the `remove` command for both enabled and applied add-ons.
-To remove multiple add-ons with a single command, specify add-on names separated by space.
+It is the mirror command to xref:../using/addons.adoc#apply-addons[`minishift addons apply`] command and similarly can be used regardless whether the add-on is enabled or not.
+Provided it exists, `minishift addons apply` will execute the commands specified in the file `<addon_name>.addon.remove`.
 
+To remove multiple add-ons with a single command, specify the add-on names separated by space.
 The following example shows how to explicitly remove the *admin-user* add-on.
 
 [[example-remove-admin-user]]
@@ -263,6 +263,8 @@ The following example shows how to explicitly remove the *admin-user* add-on.
 
 ----
 $ minishift addons remove admin-user
+-- Removing addon 'admin-user':.
+admin user deleted
 ----
 
 [[custom-addons]]
@@ -309,3 +311,7 @@ You can also write metadata in multiple line.
 
 NOTE: You can also edit your add-on directly in the Minishift add-on install directory *_$MINISHIFT_HOME/addons_*.
 Be aware that if there is an error in the add-on, it will not show when you run any `addons` commands, and it will not be applied during the `minishift start` process.
+
+To provide add-on remove instructions, you can create text file with the extension *_.addon.remove_*, for example *_admin-user.addon.remove_*.
+Similar to the *_.addon_* file, it needs the *Name* and *Description* metadata fields.
+If a *_.addon.remove_* file exist, it can be applied via the xref:../using/addons.adoc#remove-addons[`remove`] command.

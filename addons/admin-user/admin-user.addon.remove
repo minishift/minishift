@@ -1,0 +1,5 @@
+# Name: admin-user
+# Description: Remove admin user addon
+
+oc delete user admin
+echo admin user deleted

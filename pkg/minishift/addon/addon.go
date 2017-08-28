@@ -18,6 +18,7 @@ package addon
 
 import (
 	"fmt"
+
 	"github.com/minishift/minishift/pkg/minishift/addon/command"
 )
 
@@ -29,6 +30,9 @@ type AddOn interface {
 
 	// Commands returns a Command slice of the commands this addon consists of.
 	Commands() []command.Command
+
+	// RemoveCommands returns a Command slice of the commands which use for remove this addon.
+	RemoveCommands() []command.Command
 
 	// InstallPath returns the path under which the addon is installed.
 	InstallPath() string
@@ -52,24 +56,30 @@ type AddOn interface {
 type DefaultAddOn struct {
 	AddOn
 
-	metaData AddOnMeta
-	commands []command.Command
-	enabled  bool
-	path     string
-	priority int
+	metaData       AddOnMeta
+	commands       []command.Command
+	removeCommands []command.Command
+	enabled        bool
+	path           string
+	priority       int
 }
 
-func NewAddOn(meta AddOnMeta, commands []command.Command, path string) AddOn {
+func NewAddOn(meta AddOnMeta, commands []command.Command, removeCommands []command.Command, path string) AddOn {
 	addOn := DefaultAddOn{
-		metaData: meta,
-		commands: commands,
-		path:     path,
+		metaData:       meta,
+		commands:       commands,
+		removeCommands: removeCommands,
+		path:           path,
 	}
 	return &addOn
 }
 
 func (a *DefaultAddOn) Commands() []command.Command {
 	return a.commands
+}
+
+func (a *DefaultAddOn) RemoveCommands() []command.Command {
+	return a.removeCommands
 }
 
 func (a *DefaultAddOn) MetaData() AddOnMeta {

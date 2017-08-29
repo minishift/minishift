@@ -253,7 +253,7 @@ $ minishift addons apply anyuid admin-user
 
 Add-ons can be removed with the xref:../command-ref/minishift_addons_remove.adoc#[`minishift addons remove`] command.
 It is the mirror command to xref:../using/addons.adoc#apply-addons[`minishift addons apply`] command and similarly can be used regardless whether the add-on is enabled or not.
-Provided it exists, `minishift addons apply` will execute the commands specified in the file `<addon_name>.addon.remove`.
+Provided it exists, `minishift addons remove` will execute the commands specified in the file `<addon_name>.addon.remove`.
 
 To remove multiple add-ons with a single command, specify the add-on names separated by space.
 The following example shows how to explicitly remove the *admin-user* add-on.
@@ -265,6 +265,23 @@ The following example shows how to explicitly remove the *admin-user* add-on.
 $ minishift addons remove admin-user
 -- Removing addon 'admin-user':.
 admin user deleted
+----
+
+[[uninstall-addons]]
+== Uninstalling Add-ons
+
+Add-ons can be uninstall with the xref:../command-ref/minishift_addons_uninstall.adoc#[`minishift addons uninstall`] command.
+It is the mirror command to xref:../command-ref/minishift_addons_install.adoc#[`minishift addons install`] command and can be used regardless whether the add-on is enabled or not.
+Provided it exists, `minishift addons uninstall` will delete add-on specific directory.
+
+The following example shows how to explicitly uninstall the *admin-user* add-on.
+
+[[example-uninstall-admin-user]]
+.Example: Uninstalling admin-user add-on
+
+----
+$ minishift addons uninstall admin-user
+Add-on 'admin-user' Uninstalled
 ----
 
 [[custom-addons]]

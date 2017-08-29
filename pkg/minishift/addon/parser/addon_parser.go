@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -142,12 +141,12 @@ func (parser *AddOnParser) getAddOnContentReader(addOnDir string, fileSuffix str
 		return nil, NewParseError(fmt.Sprintf(multipleAddOnRemoveDefinitionsError, strings.Join(addOnFiles, ", ")), addOnDir, "")
 	}
 
-	file, err := os.Open(filepath.Join(addOnDir, addOnFiles[0]))
+	file, err := ioutil.ReadFile(filepath.Join(addOnDir, addOnFiles[0]))
 	if err != nil {
 		return nil, NewParseError(fmt.Sprintf("Unable to open addon definition '%s'", addOnFiles[0]), addOnDir, "")
 	}
-
-	return bufio.NewReader(file), nil
+	reader := strings.NewReader(string(file))
+	return bufio.NewReader(reader), nil
 }
 
 func (parser *AddOnParser) parseAddOnContent(reader io.Reader) (addon.AddOnMeta, []command.Command, error) {

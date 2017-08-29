@@ -86,3 +86,10 @@ func fillStruct(data map[string]interface{}, result interface{}) {
 		val.Set(reflect.ValueOf(v))
 	}
 }
+
+// RemoveAddOnFromConfig remove given add-on name entry from config file
+func RemoveAddOnFromConfig(addOnName string) {
+	addOnConfigMap := GetAddOnConfiguration()
+	delete(addOnConfigMap, addOnName)
+	WriteAddOnConfig(addOnConfigMap)
+}

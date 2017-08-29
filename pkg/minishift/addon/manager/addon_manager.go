@@ -132,6 +132,23 @@ func (m *AddOnManager) Enable(addonName string, priority int) (*addon.AddOnConfi
 	return &addon.AddOnConfig{addonName, true, float64(priority)}, nil
 }
 
+// UnInstall uninstalls the addon specified via addonName.
+func (m *AddOnManager) UnInstall(addonName string) error {
+	addOn := m.addOns[addonName]
+	if addOn == nil {
+		return errors.New(fmt.Sprintf("Unable to find addon %s in addon directory %s", addonName, m.baseDir))
+	}
+
+	targetPath := filepath.Join(m.baseDir, addonName)
+	if filehelper.IsDirectory(targetPath) {
+		if err := os.RemoveAll(targetPath); err != nil {
+			return err
+		}
+		return nil
+	}
+	return errors.New(fmt.Sprintf("Unable to find addon directory %s", targetPath))
+}
+
 // Disable disables the addon with the specified name.
 func (m *AddOnManager) Disable(addonName string) (*addon.AddOnConfig, error) {
 	addOn := m.addOns[addonName]

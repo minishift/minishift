@@ -209,8 +209,20 @@ func checkKvmDriver() bool {
 	if err != nil {
 		return false
 	}
-	fmt.Printf(fmt.Sprintf("\n   Driver is available at %s ... ", path))
+	fi, _ := os.Stat(path)
+	// follow symlinks
+	if fi.Mode()&os.ModeSymlink != 0 {
+		path, err = os.Readlink(path)
+		if err != nil {
+			return false
+		}
+	}
+	fmt.Println(fmt.Sprintf("\n   Driver is available at %s ... ", path))
 
+	fmt.Printf("   Checking driver binary is executable ... ")
+	if fi.Mode()&0011 == 0 {
+		return false
+	}
 	return true
 }
 

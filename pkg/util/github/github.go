@@ -18,6 +18,7 @@ package github
 
 import (
 	"bufio"
+	"encoding/hex"
 	"io"
 	"net/http"
 	"os"
@@ -33,11 +34,12 @@ import (
 
 	"crypto/sha256"
 	"fmt"
-	"github.com/minishift/minishift/pkg/util/archive"
-	minishiftos "github.com/minishift/minishift/pkg/util/os"
 	"io/ioutil"
 	"path/filepath"
 	"regexp"
+
+	"github.com/minishift/minishift/pkg/util/archive"
+	minishiftos "github.com/minishift/minishift/pkg/util/os"
 )
 
 type OpenShiftBinaryType string
@@ -172,19 +174,19 @@ func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minis
 		return errors.Wrapf(err, "Unexpected error occured while copying %s to %s", assetTmpFile, tmpDir)
 	}
 
-	// Disabling hash verification due to inconsistent checksums on OpenShift download page - https://github.com/openshift/origin/issues/12025
-	//hash := hex.EncodeToString(hasher.Sum(nil))
-	//downloadedHash, err := downloadHash(release, assetFilename)
-	//if err != nil {
-	//	return errors.Wrap(err, "Failed to download hash")
-	//}
-	//if len(downloadedHash) == 0 {
-	//	return errors.New("File has no hash to validate - not downloading")
-	//}
-	//
-	//if hash != downloadedHash {
-	//	return errors.Errorf("Failed to validate hash - expected: %s, actual: %s", hash, downloadedHash)
-	//}
+	// Hash verification for download oc binary
+	hash := hex.EncodeToString(hasher.Sum(nil))
+	downloadedHash, err := downloadHash(release, assetFilename)
+	if err != nil {
+		return errors.Wrap(err, "Failed to download hash")
+	}
+	if len(downloadedHash) == 0 {
+		return errors.New("File has no hash to validate - not downloading")
+	}
+
+	if hash != downloadedHash {
+		return errors.Errorf("Failed to validate hash - expected: %s, actual: %s", hash, downloadedHash)
+	}
 
 	// Unpack the asset
 	binaryPath := ""
@@ -311,7 +313,7 @@ func downloadHash(release *github.RepositoryRelease, filename string) (string, e
 		return "", errors.Wrap(err, "Cannot download the OpenShift release checksum asset.")
 	}
 	if len(url) > 0 {
-		glog.V(2).Infof("Downloading OpenShift %s checksums\n", *release.TagName)
+		fmt.Printf("-- Downloading OpenShift %s checksums ... ", *release.TagName)
 		httpResp, err := http.Get(url)
 		if err != nil {
 			return "", errors.Wrap(err, "Cannot download the OpenShift release checksum asset.")
@@ -319,21 +321,12 @@ func downloadHash(release *github.RepositoryRelease, filename string) (string, e
 		defer func() { _ = httpResp.Body.Close() }()
 
 		asset = httpResp.Body
-		if httpResp.ContentLength > 0 {
-			bar := pb.New64(httpResp.ContentLength).SetUnits(pb.U_BYTES)
-			bar.Start()
-			asset = bar.NewProxyReader(asset)
-			defer func() {
-				<-time.After(bar.RefreshRate)
-				fmt.Println()
-			}()
-		}
 	}
-
 	scanner := bufio.NewScanner(asset)
 	for scanner.Scan() {
 		spl := strings.Fields(scanner.Text())
-		if len(spl) == 2 && spl[1] == filename {
+		if len(spl) == 2 && strings.Contains(spl[1], filename) {
+			fmt.Printf("OK")
 			return spl[0], nil
 		}
 	}

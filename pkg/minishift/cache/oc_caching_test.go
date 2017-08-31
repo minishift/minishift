@@ -17,14 +17,15 @@ limitations under the License.
 package cache
 
 import (
-	"github.com/minishift/minishift/pkg/minikube/constants"
-	minitesting "github.com/minishift/minishift/pkg/testing"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
+
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	minitesting "github.com/minishift/minishift/pkg/testing"
 )
 
 var (
@@ -93,6 +94,12 @@ func addMockResponses(mockTransport *minitesting.MockRoundTripper) {
 		ResponseType: minitesting.SERVE_FILE,
 		Response:     filepath.Join(testDataDir, "openshift-1.3.1-release-tag.json"),
 		ContentType:  minitesting.JSON,
+	})
+
+	mockTransport.RegisterResponse("https://api.github.com/repos/openshift/origin/releases/assets/2489308", &minitesting.CannedResponse{
+		ResponseType: minitesting.SERVE_FILE,
+		Response:     filepath.Join(testDataDir, "CHECKSUM"),
+		ContentType:  minitesting.TEXT,
 	})
 
 	var assetContent string

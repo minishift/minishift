@@ -18,9 +18,6 @@ package github
 
 import (
 	"fmt"
-	"github.com/google/go-github/github"
-	minitesting "github.com/minishift/minishift/pkg/testing"
-	minishiftos "github.com/minishift/minishift/pkg/util/os"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -28,6 +25,10 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/google/go-github/github"
+	minitesting "github.com/minishift/minishift/pkg/testing"
+	minishiftos "github.com/minishift/minishift/pkg/util/os"
 )
 
 var (
@@ -47,7 +48,6 @@ var assetSet = []struct {
 	expectedAssetId  int
 	expectedFilename string
 }{
-	{OPENSHIFT, minishiftos.LINUX, testVersion, 2489309, "openshift-origin-server-v1.3.1-dad658de7465ba8a234a4fb40b5b446a45a4cee1-linux-64bit.tar.gz"},
 	{OC, minishiftos.LINUX, testVersion, 2489310, "openshift-origin-client-tools-v1.3.1-dad658de7465ba8a234a4fb40b5b446a45a4cee1-linux-64bit.tar.gz"},
 	{OC, minishiftos.DARWIN, testVersion, 2586147, "openshift-origin-client-tools-v1.3.1-2748423-mac.zip"},
 	{OC, minishiftos.WINDOWS, testVersion, 2489312, "openshift-origin-client-tools-v1.3.1-dad658de7465ba8a234a4fb40b5b446a45a4cee1-windows.zip"},
@@ -96,11 +96,6 @@ func TestDownloadOc(t *testing.T) {
 	defer os.RemoveAll(testDir)
 
 	for _, testAsset := range assetSet {
-		// don't test with openshift binary
-		if testAsset.binary == OPENSHIFT {
-			continue
-		}
-
 		err = DownloadOpenShiftReleaseBinary(testAsset.binary, testAsset.os, testAsset.version, testDir)
 		if err != nil {
 			t.Fatal(err)
@@ -221,6 +216,12 @@ func EnsureGitHubApiAccessTokenSet(t *testing.T) {
 
 func addMockResponses(mockTransport *minitesting.MockRoundTripper) {
 	testDataDir := filepath.Join(basepath, "..", "..", "..", "test", "testdata")
+
+	mockTransport.RegisterResponse("https://.*CHECKSUM", &minitesting.CannedResponse{
+		ResponseType: minitesting.SERVE_FILE,
+		Response:     filepath.Join(testDataDir, "CHECKSUM"),
+		ContentType:  minitesting.TEXT,
+	})
 
 	url := "https://.*openshift-origin-client-tools-v1.3.1-2748423-mac.zip"
 	mockTransport.RegisterResponse(url, &minitesting.CannedResponse{

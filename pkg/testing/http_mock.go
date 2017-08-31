@@ -31,6 +31,7 @@ import (
 const (
 	OCTET_STREAM = "application/octet-stream"
 	JSON         = "application/json; charset=utf-8"
+	TEXT         = "text/plain"
 )
 
 var DefaultRoundTripper http.RoundTripper = &http.Transport{

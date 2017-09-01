@@ -21,6 +21,7 @@ import (
 	"os"
 
 	"github.com/docker/machine/libmachine"
+	registrationUtil "github.com/minishift/minishift/cmd/minishift/cmd/registration"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
@@ -49,9 +50,6 @@ func runDelete(cmd *cobra.Command, args []string) {
 
 	util.ExitIfUndefined(api, constants.MachineName)
 
-	// Unregistration, do not allow to be skipped
-	unregisterHost(api, false)
-
 	if clearCache {
 		cachePath := constants.MakeMiniPath("cache")
 		err := os.RemoveAll(cachePath)
@@ -62,6 +60,8 @@ func runDelete(cmd *cobra.Command, args []string) {
 		}
 	}
 
+	// Unregistration, do not allow to be skipped
+	registrationUtil.UnregisterHost(api, false)
 	fmt.Println("Deleting the Minishift VM...")
 	if err := cluster.DeleteHost(api); err != nil {
 		handleFailedHostDeletion(err)

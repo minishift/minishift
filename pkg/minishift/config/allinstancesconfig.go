@@ -27,7 +27,8 @@ var AllInstancesConfig *GlobalConfigType
 type GlobalConfigType struct {
 	FilePath string `json:"-"`
 
-	HostFolders []HostFolder
+	HostFolders   []HostFolder
+	ActiveProfile string
 }
 
 // Create new object with data if file exists or

@@ -18,15 +18,18 @@ package cmd
 
 import (
 	"os"
+	"reflect"
 	"testing"
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
-	"github.com/minishift/minishift/pkg/minikube/constants"
-	"github.com/minishift/minishift/pkg/testing/cli"
 	"io/ioutil"
 	"path/filepath"
+
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
+	"github.com/minishift/minishift/pkg/testing/cli"
 )
 
 var configTests = []cli.TestOption{
@@ -83,6 +86,10 @@ func TestPreRunDirectories(t *testing.T) {
 	// Need to create since Minishift config get created in root command
 	os.Mkdir(filepath.Join(testDir, "config"), 0755)
 	os.Mkdir(filepath.Join(testDir, "machines"), 0755)
+
+	allInstanceConfigPath := filepath.Join(testDir, "config", "allinstances.json")
+	minishiftConfig.AllInstancesConfig, err = minishiftConfig.NewAllInstancesConfig(allInstanceConfigPath)
+
 	if err != nil {
 		t.Error(err)
 	}
@@ -91,7 +98,9 @@ func TestPreRunDirectories(t *testing.T) {
 	constants.Minipath = testDir
 	cli.RunCommand(RootCmd.PersistentPreRun)
 
-	for _, dir := range dirs {
+	dirPaths := reflect.ValueOf(*minishiftConfig.InstanceDirs)
+	for i := 0; i < dirPaths.NumField(); i++ {
+		dir := dirPaths.Field(i).Interface().(string)
 		_, err := os.Stat(dir)
 		if os.IsNotExist(err) {
 			t.Fatalf("Directory %s does not exist.", dir)

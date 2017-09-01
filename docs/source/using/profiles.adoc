@@ -1,0 +1,64 @@
+= Minishift Profiles
+:icons:
+:toc: macro
+:toc-title:
+:toclevels: 1
+
+toc::[]
+
+[[pofile-overview]]
+== Overview
+
+Minishift allows to create multiple instances of Minishift.
+Each Minishift instance can be created with different configurations and users can switch between different instances.
+
+[[create-profile]]
+== Create profile
+
+You can create a new instance of Minishift with xref:../command-ref/minishift_start.adoc#[`minishift start --profile`] command.
+
+NOTE: The default profile is `minishift`. It will be present by-default and user does not need to create it specifically.
+
+To create a new profile, run:
+
+----
+$ minishift --profile PROFILE_NAME start
+----
+
+[[List-profiles]]
+== List profiles
+
+You can list all existing profiles with xref:../command-ref/minishift_profile_list.adoc#[`minishift profile list`] command.
+You can also see the active profile in the output.
+
+To list profiles, run:
+
+----
+$ minishift profile list
+----
+
+
+[[set-active-profiles]]
+== Switch between profiles
+
+With the help of xref:../command-ref/minishift_profile_set.adoc#[`minishift profile set`] you can switch between profiles or set a profile as active.
+When a profile is active, it is not required to pass `--profile` flag to run minishift commands against that profile.
+
+To switch between profiles or to set a profile as active, run:
+
+----
+$ minishift profile set PROFILE_NAME
+----
+
+When you have multiple profiles you can use `--profile` flag with any minishift command to run the command against a specific profile.
+
+[[delete-profiles]]
+== Delete a profile
+
+To delete a profile, run:
+
+----
+$ minishift profile delete PROFILE_NAME
+----
+
+NOTE: The default profile 'minishift'  can not be deleted.

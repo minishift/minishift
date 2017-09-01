@@ -47,7 +47,7 @@ func doRegistrationHostAction(actionMessage string, registrationAction Registrat
 		return false, err
 	}
 
-	// was succesfully
+	// was successful
 	return true, nil
 }
 
@@ -71,7 +71,7 @@ func RegisterHostVM(host *host.Host, param *RegistrationParameters) (bool, error
 	}
 
 	return doRegistrationHostAction(
-		"Registering machine using subscription-manager",
+		"-- Registering machine using subscription-manager",
 		registrator.Register,
 		param)
 }

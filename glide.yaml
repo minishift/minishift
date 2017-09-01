@@ -68,6 +68,3 @@ import:
   version: 335da9dda11408a34b64344f82e9c03779b71673
   repo: https://github.com/openshift/glog.git
   vcs: git
-- package: github.com/briandowns/spinner
-  version: v1.0
-  vcs: git

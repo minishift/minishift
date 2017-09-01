@@ -157,3 +157,23 @@ func FriendlyDuration(d time.Duration) time.Duration {
 	d2 := (d / time.Nanosecond) * (time.Nanosecond)
 	return d2
 }
+
+// StartProgressDots starts the dots
+func StartProgressDots(progressDots chan bool) {
+	go func() {
+		for {
+			select {
+			case <-progressDots:
+				return
+			default:
+				fmt.Print(".")
+				time.Sleep(2 * time.Second)
+			}
+		}
+	}()
+}
+
+// StopProgressDots stops the dots
+func StopProgressDots(progressDots chan bool) {
+	progressDots <- true
+}

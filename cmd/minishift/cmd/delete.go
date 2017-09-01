@@ -22,6 +22,7 @@ import (
 
 	"github.com/docker/machine/libmachine"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
+	cmdUtil "github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
@@ -50,7 +51,7 @@ func runDelete(cmd *cobra.Command, args []string) {
 	util.ExitIfUndefined(api, constants.MachineName)
 
 	// Unregistration, do not allow to be skipped
-	unregisterHost(api, false)
+	cmdUtil.UnregisterHost(api, false)
 
 	if clearCache {
 		cachePath := constants.MakeMiniPath("cache")

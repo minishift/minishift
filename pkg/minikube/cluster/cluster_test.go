@@ -17,12 +17,13 @@ limitations under the License.
 package cluster
 
 import (
+	"path/filepath"
+	"testing"
+
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/host"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minikube/tests"
-	"path/filepath"
-	"testing"
 )
 
 func TestRemoteBoot2DockerURL(t *testing.T) {

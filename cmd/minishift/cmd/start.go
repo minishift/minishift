@@ -335,7 +335,7 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 
 	cacheMinishiftISO(machineConfig)
 
-	fmt.Printf("-- Starting Minishift VM ... ")
+	fmt.Print("-- Starting Minishift VM ... ")
 	spinnerView.Start()
 	start := func() (err error) {
 		hostVm, err = cluster.StartHost(libMachineClient, *machineConfig)

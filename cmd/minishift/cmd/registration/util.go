@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cmd
+package registration
 
 import (
 	"fmt"
@@ -28,8 +28,8 @@ import (
 )
 
 var (
-	skipRegistration   bool
-	skipUnRegistration bool
+	SkipRegistration   bool
+	SkipUnRegistration bool
 )
 
 func isRegistered() bool {
@@ -41,8 +41,8 @@ func setRegistered(state bool) {
 	minishiftConfig.InstanceConfig.Write()
 }
 
-func registerHost(libMachineClient *libmachine.Client) {
-	if skipRegistration {
+func RegisterHost(libMachineClient *libmachine.Client) {
+	if SkipRegistration {
 		log.Debug("Skipping registration due to enabled '--skip-registration' flag")
 		return
 	}
@@ -55,8 +55,8 @@ func registerHost(libMachineClient *libmachine.Client) {
 	}
 }
 
-func unregisterHost(api libmachine.API, allowToSkipUnregistration bool) {
-	if allowToSkipUnregistration && skipUnRegistration {
+func UnregisterHost(api libmachine.API, allowToSkipUnregistration bool) {
+	if allowToSkipUnregistration && SkipUnRegistration {
 		log.Debug("Skipping unregistration due to enabled '--skip-unregistration' flag")
 		return
 	}

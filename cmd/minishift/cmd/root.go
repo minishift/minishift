@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"reflect"
 	"strings"
 
 	"path/filepath"
@@ -34,9 +35,12 @@ import (
 	hostfolderCmd "github.com/minishift/minishift/cmd/minishift/cmd/hostfolder"
 	"github.com/minishift/minishift/cmd/minishift/cmd/image"
 	cmdOpenshift "github.com/minishift/minishift/cmd/minishift/cmd/openshift"
+	cmdProfile "github.com/minishift/minishift/cmd/minishift/cmd/profile"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
+	cmdUtil "github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
+	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/minishift/minishift/pkg/version"
@@ -45,22 +49,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-var dirs = [...]string{
-	constants.Minipath,
-	constants.MakeMiniPath("certs"),
-	constants.MakeMiniPath("machines"),
-	constants.MakeMiniPath("cache"),
-	constants.MakeMiniPath("cache", "iso"),
-	constants.MakeMiniPath("cache", "oc"),
-	constants.MakeMiniPath("cache", "images"),
-	constants.MakeMiniPath("config"),
-	constants.MakeMiniPath("addons"),
-	constants.MakeMiniPath("logs"),
-	constants.MakeMiniPath("tmp"),
-}
-
 const (
 	showLibmachineLogs    = "show-libmachine-logs"
+	profileFlag           = "profile"
 	enableExperimentalEnv = "MINISHIFT_ENABLE_EXPERIMENTAL"
 )
 
@@ -83,24 +74,21 @@ var RootCmd = &cobra.Command{
 			isAddonInstallRequired bool
 		)
 
-		if !filehelper.Exists(constants.MakeMiniPath("addons")) {
+		constants.MachineName = constants.ProfileName
+
+		// Initialize the instance directory structure
+		minishiftConfig.InstanceDirs = minishiftConfig.NewMinishiftDirs()
+
+		constants.KubeConfigPath = filepath.Join(constants.Minipath, "machines", constants.MachineName+"_kubeconfig")
+
+		if !filehelper.Exists(minishiftConfig.InstanceDirs.Addons) {
 			isAddonInstallRequired = true
 		}
 
-		for _, path := range dirs {
-			if err := os.MkdirAll(path, 0777); err != nil {
-				glog.Exitf("Error creating minishift directory: %s", err)
-			}
-		}
+		// creating all directories for minishift run
+		createMinishiftDirs(minishiftConfig.InstanceDirs)
 
 		ensureConfigFileExists(constants.ConfigFile)
-
-		// Create all instances config
-		allInstanceConfigPath := filepath.Join(constants.Minipath, "config", "allinstances.json")
-		minishiftConfig.AllInstancesConfig, err = minishiftConfig.NewAllInstancesConfig(allInstanceConfigPath)
-		if err != nil {
-			atexit.ExitWithMessage(1, fmt.Sprintf("Error creating config for all instances: %s", err.Error()))
-		}
 
 		// Create MACHINE_NAME.json
 		instanceConfigPath := filepath.Join(constants.Minipath, "machines", constants.MachineName+".json")
@@ -112,7 +100,7 @@ var RootCmd = &cobra.Command{
 		// Run the default addons on fresh minishift start
 		if isAddonInstallRequired {
 			fmt.Print("-- Installing default add-ons ... ")
-			if err := util.UnpackAddons(constants.MakeMiniPath("addons")); err != nil {
+			if err := util.UnpackAddons(minishiftConfig.InstanceDirs.Addons); err != nil {
 				atexit.ExitWithMessage(1, fmt.Sprintf("Error installing default add-ons : %s", err))
 			}
 
@@ -138,6 +126,8 @@ var RootCmd = &cobra.Command{
 			log.SetOutWriter(ioutil.Discard)
 			log.SetErrWriter(ioutil.Discard)
 		}
+
+		setDefaultActiveProfile()
 	},
 }
 
@@ -177,11 +167,13 @@ func processEnvVariables() {
 func init() {
 	processEnvVariables()
 	RootCmd.PersistentFlags().Bool(showLibmachineLogs, false, "Show logs from libmachine.")
+	RootCmd.PersistentFlags().String(profileFlag, constants.DefaultProfileName, "Profile name")
 	RootCmd.AddCommand(configCmd.ConfigCmd)
 	RootCmd.AddCommand(cmdOpenshift.OpenShiftCmd)
 	RootCmd.AddCommand(hostfolderCmd.HostfolderCmd)
 	RootCmd.AddCommand(addon.AddonsCmd)
 	RootCmd.AddCommand(image.ImageCmd)
+	RootCmd.AddCommand(cmdProfile.ProfileCmd)
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
 	logDir := pflag.Lookup("log_dir")
 	if !logDir.Changed {
@@ -193,6 +185,11 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	profile := initializeProfile()
+	if (profile != "") && (profile != constants.DefaultProfileName) {
+		constants.ProfileName = profile
+		constants.ConfigFile = constants.MakeMiniPath("profiles", profile, "config", "config.json")
+	}
 	configPath := constants.ConfigFile
 	viper.SetConfigFile(configPath)
 	viper.SetConfigType("json")
@@ -201,6 +198,36 @@ func initConfig() {
 		glog.Warningf("Error reading config file at %s: %s", configPath, err)
 	}
 	setupViper()
+}
+
+func initializeProfile() string {
+	var (
+		profileName string
+		err         error
+	)
+
+	for i, arg := range os.Args {
+		if arg == "--"+profileFlag {
+			profileName = os.Args[i+1]
+			break
+		}
+	}
+
+	// We need to initialize allinstance config as the active profile information present in it.
+	ensureAllInstanceConfigPath(constants.AllInstanceConfigPath)
+	minishiftConfig.AllInstancesConfig, err = minishiftConfig.NewAllInstancesConfig(constants.AllInstanceConfigPath)
+	if err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error creating all instance config: %s", err.Error()))
+	}
+
+	activeProfile := profileActions.GetActiveProfile()
+	if profileName != "" {
+		return profileName
+	}
+	if activeProfile != "" {
+		return activeProfile
+	}
+	return ""
 }
 
 func setupViper() {
@@ -242,7 +269,7 @@ func performPostUpdateExecution(markerPath string) error {
 	if markerData.InstallAddon {
 		fmt.Println(fmt.Sprintf("Minishift was upgraded from v%s to v%s. Running post update actions.", markerData.PreviousVersion, version.GetMinishiftVersion()))
 		fmt.Print("--- Updating default add-ons ... ")
-		util.UnpackAddons(constants.MakeMiniPath("add-ons"))
+		util.UnpackAddons(minishiftConfig.InstanceDirs.Addons)
 		fmt.Println("OK")
 		fmt.Println(fmt.Sprintf("Default add-ons %s installed", strings.Join(util.DefaultAssets, ", ")))
 	}
@@ -253,4 +280,44 @@ func performPostUpdateExecution(markerPath string) error {
 	}
 
 	return nil
+}
+
+func ensureAllInstanceConfigPath(configPath string) {
+	configDir := filepath.Dir(configPath)
+	if err := os.MkdirAll(configDir, 0777); err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error creating directory: %s", configDir))
+	}
+}
+
+func createMinishiftDirs(dirs *minishiftConfig.MinishiftDirs) {
+	dirPaths := reflect.ValueOf(*dirs)
+
+	for i := 0; i < dirPaths.NumField(); i++ {
+		path := dirPaths.Field(i).Interface().(string)
+		if err := os.MkdirAll(path, 0777); err != nil {
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error creating directory: %s", path))
+		}
+	}
+}
+
+// If there is no active profile we need to set minishift as the default profile.
+// Because this will make the profile behaviour backward compatible and consistent with user expectation.
+func setDefaultActiveProfile() {
+	if minishiftConfig.AllInstancesConfig == nil {
+		atexit.ExitWithMessage(1, "Error: All instance config is not initialized")
+	}
+	activeProfile := profileActions.GetActiveProfile()
+	if activeProfile == "" {
+		err := profileActions.SetDefaultProfileActive()
+		if err != nil {
+			atexit.ExitWithMessage(1, err.Error())
+		}
+
+		// Only set oc context to default profile when user is looking for default profile
+		// i.e. "minishift start" with minishift as active profile or "minishift start --profile minishift"
+		// Otherwise minishift will be the active profile irrespective of what user chooses
+		if constants.ProfileName == constants.DefaultProfileName {
+			cmdUtil.SetOcContext(constants.DefaultProfileName)
+		}
+	}
 }

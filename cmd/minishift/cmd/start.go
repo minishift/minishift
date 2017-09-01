@@ -168,7 +168,7 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	fmt.Printf("-- Starting local OpenShift cluster")
 	hostVm := startHost(libMachineClient)
-	registerHost(libMachineClient)
+	cmdUtil.RegisterHost(libMachineClient)
 
 	// preflight checks (after start)
 	preflightChecksAfterStartingHost(hostVm.Driver)
@@ -534,7 +534,7 @@ func initSubscriptionManagerFlags() *flag.FlagSet {
 	subscriptionManagerFlagSet := flag.NewFlagSet(commandName, flag.ContinueOnError)
 	subscriptionManagerFlagSet.String(configCmd.Username.Name, "", "Username for the virtual machine registration.")
 	subscriptionManagerFlagSet.String(configCmd.Password.Name, "", "Password for the virtual machine registration.")
-	subscriptionManagerFlagSet.BoolVar(&skipRegistration, configCmd.SkipRegistration.Name, false, "Skip the virtual machine registration.")
+	subscriptionManagerFlagSet.BoolVar(&cmdUtil.SkipRegistration, configCmd.SkipRegistration.Name, false, "Skip the virtual machine registration.")
 
 	return subscriptionManagerFlagSet
 }

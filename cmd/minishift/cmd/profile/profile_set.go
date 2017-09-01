@@ -33,11 +33,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-const (
-	emptyProfileError  = "You must provide the profile name. Run `minishift profile list` to view profiles"
-	extraArgumentError = "You have provided more arguments than required. You must provide a single profile name"
-)
-
 var profileSetCmd = &cobra.Command{
 	Use:   "set PROFILE_NAME",
 	Short: "Sets the active profile for Minishift.",
@@ -85,6 +80,7 @@ func setOcCliContext(profileName string) {
 	constants.ProfileName = profileName
 	constants.MachineName = constants.ProfileName
 	constants.Minipath = constants.GetProfileHomeDir()
+
 	constants.KubeConfigPath = filepath.Join(constants.Minipath, "machines", constants.MachineName+"_kubeconfig")
 
 	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))

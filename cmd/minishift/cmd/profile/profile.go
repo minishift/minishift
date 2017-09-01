@@ -20,6 +20,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	emptyProfileError  = "You must provide the profile name. Run `minishift profile list` to view profiles"
+	extraArgumentError = "You have provided more arguments than required. You must provide a single profile name"
+)
+
 var ProfileCmd = &cobra.Command{
 	Use:     "profile SUBCOMMAND [flags]",
 	Aliases: []string{"instance"},

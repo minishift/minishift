@@ -1,13 +1,10 @@
-hash: 8a468283a9a4675c087c7d25a00ce4a72c4fc0f5f05abe60eec93bfce22be14b
-updated: 2017-07-10T11:56:37.047777606+02:00
+hash: 675036c36eaf7c64def2072063154d6e2f3d670a2c09c4396db9b2359b83bdcc
+updated: 2017-09-04T20:16:55.757240937+05:30
 imports:
 - name: github.com/asaskevich/govalidator
   version: 7b3beb6df3c42abd3509abfc3bcacc0fbfb7c877
 - name: github.com/blang/semver
   version: b38d23b8782a487059e8fc8773e9a5b228a77cb6
-- name: github.com/briandowns/spinner
-  version: 48dbb65d7bd5c74ab50d53d04c949f20e3d14944
-  vcs: git
 - name: github.com/cpuguy83/go-md2man
   version: bcc0a711c5e6bbe72c7cb13d81c7109b45267fd2
   subpackages:
@@ -62,8 +59,6 @@ imports:
   - version
 - name: github.com/elazarl/goproxy
   version: aacba83f36a55ac31cbb71c06547a328c0cd1604
-- name: github.com/fatih/color
-  version: 62e9147c64a1ed519147b62a56a14e83e2be02c1
 - name: github.com/fsnotify/fsnotify
   version: 4da3e2cfbabc9f751898f250b49f2439785783a1
 - name: github.com/golang/glog
@@ -106,12 +101,6 @@ imports:
   version: ae77be60afb1dcacde03767a8c37337fad28ac14
 - name: github.com/magiconair/properties
   version: 51463bfca2576e06c62a8504b5c0f06d61312647
-- name: github.com/mattn/go-colorable
-  version: 5411d3eea5978e6cdc258b30de592b60df6aba96
-  repo: https://github.com/mattn/go-colorable
-- name: github.com/mattn/go-isatty
-  version: 57fdcb988a5c543893cc61bce354a6e24ab70022
-  repo: https://github.com/mattn/go-isatty
 - name: github.com/mattn/go-runewidth
   version: 97311d9f7767e3d6f422ea06661bc2c7a19e8a5d
 - name: github.com/mitchellh/mapstructure

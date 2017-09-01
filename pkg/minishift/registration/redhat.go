@@ -22,15 +22,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/briandowns/spinner"
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/pkg/util"
 	minishiftStrings "github.com/minishift/minishift/pkg/util/strings"
 )
 
 const (
-	SPINNER_SPEED = 200 // In milliseconds
-	RHSMName      = "Red Hat Developers or Red Hat Subscription Management (RHSM)"
+	RHSMName = "   Red Hat Developers or Red Hat Subscription Management (RHSM)"
 )
 
 func init() {
@@ -63,9 +61,9 @@ func (registrator *RedHatRegistrator) CompatibleWithDistribution(osReleaseInfo *
 
 // Register attempts to register the system with RHSM
 func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) error {
-	if isRegistered, err := registrator.isRegistered(); !isRegistered && err == nil {
-		spinnerView := spinner.New(spinner.CharSets[9], SPINNER_SPEED*time.Millisecond)
+	progressDots := make(chan bool)
 
+	if isRegistered, err := registrator.isRegistered(); !isRegistered && err == nil {
 		for i := 1; i < 4; i++ {
 			// request username (disallow empty value)
 			if param.Username == "" {
@@ -87,17 +85,18 @@ func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) er
 				param.Username,
 				minishiftStrings.EscapeSingleQuote(param.Password))
 
-			// start timed SSH command to register
-			spinnerView.Start()
+			fmt.Print("   Registration in progress ")
+			util.StartProgressDots(progressDots)
 			startTime := time.Now()
+			// start timed SSH command to register
 			_, err = registrator.SSHCommand(subscriptionCommand)
-			spinnerView.Stop()
+			util.StopProgressDots(progressDots)
 			if err == nil {
-				fmt.Print("Registration successful ")
+				fmt.Print(" OK ")
 			} else {
-				fmt.Print("Registration unsuccessful ")
+				fmt.Print(" FAIL ")
 			}
-			fmt.Println(util.TimeElapsed(startTime, true))
+			fmt.Printf("[%s]\n", util.TimeElapsed(startTime, true))
 
 			if err == nil {
 				return nil
@@ -105,7 +104,7 @@ func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) er
 
 			// general error when registration fails
 			if strings.Contains(err.Error(), "Invalid username or password") {
-				fmt.Println("Invalid username or password. Retry:", i)
+				fmt.Println("   Invalid username or password. Retry:", i)
 			} else {
 				return err
 			}

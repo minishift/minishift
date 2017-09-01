@@ -70,7 +70,7 @@ var viperWhiteList = []string{
 	"log_dir",
 }
 
-var hasEnabledExperimental bool = false
+var hasEnabledExperimental bool
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
@@ -166,13 +166,16 @@ func setFlagsUsingViper() {
 	}
 }
 
-func init() {
+func processEnvVariables() {
 	enableExperimental, err := util.GetBoolEnv(enableExperimentalEnv)
 	if err == util.BooleanFormatError {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error enabling experimental features: %s", err))
 	}
 	hasEnabledExperimental = enableExperimental
+}
 
+func init() {
+	processEnvVariables()
 	RootCmd.PersistentFlags().Bool(showLibmachineLogs, false, "Show logs from libmachine.")
 	RootCmd.AddCommand(configCmd.ConfigCmd)
 	RootCmd.AddCommand(cmdOpenshift.OpenShiftCmd)

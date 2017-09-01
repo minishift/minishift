@@ -22,10 +22,8 @@ import (
 	"strings"
 
 	"os"
-	"time"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/briandowns/spinner"
 	units "github.com/docker/go-units"
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/drivers"
@@ -34,7 +32,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/cmd/minishift/cmd/addon"
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
-	cmdutil "github.com/minishift/minishift/cmd/minishift/cmd/util"
+	cmdUtil "github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/cache"
@@ -49,7 +47,6 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
 
 	"github.com/minishift/minishift/pkg/util"
-	inputUtils "github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	stringUtils "github.com/minishift/minishift/pkg/util/strings"
 	"github.com/minishift/minishift/pkg/version"
@@ -67,8 +64,6 @@ const (
 	defaultInsecureRegistry = "172.30.0.0/16"
 
 	unsupportedIsoUrlFormat = "Unsupported value for iso-url. It can be an URL, file URI or one of the following short names: [b2d centos]."
-
-	SPINNER_SPEED = 200 // In milliseconds
 )
 
 var (
@@ -82,28 +77,28 @@ var (
 		Name:      configCmd.DockerEnv.Name,
 		Shorthand: "",
 		Usage:     "Environment variables to pass to the Docker daemon. Use the format <key>=<value>.",
-		Value:     cmdutil.NewStringSliceValue([]string{}, &[]string{}),
+		Value:     cmdUtil.NewStringSliceValue([]string{}, &[]string{}),
 	}
 
 	insecureRegistryFlag = &flag.Flag{
 		Name:      configCmd.InsecureRegistry.Name,
 		Shorthand: "",
 		Usage:     "Non-secure Docker registries to pass to the Docker daemon.",
-		Value:     cmdutil.NewStringSliceValue([]string{defaultInsecureRegistry}, &[]string{}),
+		Value:     cmdUtil.NewStringSliceValue([]string{defaultInsecureRegistry}, &[]string{}),
 	}
 
 	dockerEngineOptFlag = &flag.Flag{
 		Name:      configCmd.DockerEngineOpt.Name,
 		Shorthand: "",
 		Usage:     "Specify arbitrary flags to pass to the Docker daemon in the form <flag>=<value>.",
-		Value:     cmdutil.NewStringSliceValue([]string{}, &[]string{}),
+		Value:     cmdUtil.NewStringSliceValue([]string{}, &[]string{}),
 	}
 
 	registryMirrorFlag = &flag.Flag{
 		Name:      configCmd.RegistryMirror.Name,
 		Shorthand: "",
 		Usage:     "Registry mirrors to pass to the Docker daemon.",
-		Value:     cmdutil.NewStringSliceValue([]string{}, &[]string{}),
+		Value:     cmdUtil.NewStringSliceValue([]string{}, &[]string{}),
 	}
 )
 
@@ -170,7 +165,7 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	// to determine whether we need to run post cluster up actions,
 	// we need to determine whether this is a restart prior to potentially creating a new VM
-	isRestart := cmdutil.VMExists(libMachineClient, constants.MachineName)
+	isRestart := cmdUtil.VMExists(libMachineClient, constants.MachineName)
 
 	fmt.Printf("-- Starting local OpenShift cluster")
 	hostVm := startHost(libMachineClient)
@@ -212,7 +207,7 @@ func runStart(cmd *cobra.Command, args []string) {
 		Project:          defaultProject,
 		KubeConfigPath:   constants.KubeConfigPath,
 		OcPath:           ocPath,
-		AddonEnv:         viper.GetStringSlice(cmdutil.AddOnEnv),
+		AddonEnv:         viper.GetStringSlice(cmdUtil.AddOnEnv),
 	}
 
 	clusterUpParams := determineClusterUpParameters(clusterUpConfig)
@@ -255,7 +250,7 @@ func getRequiredHostDirectories() []string {
 }
 
 func handleProxies() *util.ProxyConfig {
-	proxyConfig, err := util.NewProxyConfig(viper.GetString(cmdutil.HttpProxy), viper.GetString(cmdutil.HttpsProxy), viper.GetString(configCmd.NoProxyList.Name))
+	proxyConfig, err := util.NewProxyConfig(viper.GetString(cmdUtil.HttpProxy), viper.GetString(cmdUtil.HttpsProxy), viper.GetString(configCmd.NoProxyList.Name))
 
 	if err != nil {
 		atexit.ExitWithMessage(1, err.Error())
@@ -269,11 +264,11 @@ func handleProxies() *util.ProxyConfig {
 		// It could be that the proxy config is retrieved from the environment. To make sure that
 		// proxy settings are properly passed to cluster up we need to explicitly set the values.
 		if proxyConfig.HttpProxy() != "" {
-			viper.Set(cmdutil.HttpProxy, proxyConfig.HttpProxy())
+			viper.Set(cmdUtil.HttpProxy, proxyConfig.HttpProxy())
 		}
 
 		if proxyConfig.HttpsProxy() != "" {
-			viper.Set(cmdutil.HttpsProxy, proxyConfig.HttpsProxy())
+			viper.Set(cmdUtil.HttpsProxy, proxyConfig.HttpsProxy())
 		}
 		viper.Set(configCmd.NoProxyList.Name, proxyConfig.NoProxy())
 	}
@@ -302,7 +297,7 @@ func determineInsecureRegistry(key string) []string {
 }
 
 func startHost(libMachineClient *libmachine.Client) *host.Host {
-	spinnerView := spinner.New(spinner.CharSets[9], SPINNER_SPEED*time.Millisecond)
+	progressDots := make(chan bool)
 
 	// Configuration used for creation/setup of the Virtual Machine
 	machineConfig := &cluster.MachineConfig{
@@ -323,7 +318,7 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 	var hostVm *host.Host
 
 	// configuration with these settings only happen on create
-	isRestart := cmdutil.VMExists(libMachineClient, constants.MachineName)
+	isRestart := cmdUtil.VMExists(libMachineClient, constants.MachineName)
 	if !isRestart {
 		fmt.Println("-- Minishift VM will be configured with ...")
 		fmt.Println("   Memory:   ", units.HumanSize(float64((machineConfig.Memory/units.KiB)*units.GB)))
@@ -335,12 +330,12 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 
 	cacheMinishiftISO(machineConfig)
 
-	fmt.Print("-- Starting Minishift VM ... ")
-	spinnerView.Start()
+	fmt.Print("-- Starting Minishift VM ...")
+	util.StartProgressDots(progressDots)
 	start := func() (err error) {
 		hostVm, err = cluster.StartHost(libMachineClient, *machineConfig)
 		if err != nil {
-			fmt.Printf("FAIL ")
+			fmt.Print(" FAIL ")
 			glog.Errorf("Error starting the VM: %s. Retrying.\n", err)
 		}
 		return err
@@ -349,9 +344,9 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error starting the VM: %v", err))
 	}
-	spinnerView.Stop()
-	fmt.Println("OK")
+	util.StopProgressDots(progressDots)
 
+	fmt.Println(" OK")
 	return hostVm
 }
 
@@ -474,7 +469,7 @@ func initStartFlags() *flag.FlagSet {
 	startFlagSet.AddFlag(dockerEngineOptFlag)
 	startFlagSet.AddFlag(insecureRegistryFlag)
 	startFlagSet.AddFlag(registryMirrorFlag)
-	startFlagSet.AddFlag(cmdutil.AddOnEnvFlag)
+	startFlagSet.AddFlag(cmdUtil.AddOnEnvFlag)
 
 	return startFlagSet
 }
@@ -497,8 +492,8 @@ func initClusterUpFlags() *flag.FlagSet {
 	clusterUpFlagSet.Bool(configCmd.Logging.Name, false, "Install logging (experimental)")
 	clusterUpFlagSet.String(configCmd.OpenshiftVersion.Name, version.GetOpenShiftVersion(), fmt.Sprintf("The OpenShift version to run, eg. %s", version.GetOpenShiftVersion()))
 	clusterUpFlagSet.String(configCmd.NoProxyList.Name, "", "List of hosts or subnets for which no proxy should be used.")
-	clusterUpFlagSet.AddFlag(cmdutil.HttpProxyFlag)
-	clusterUpFlagSet.AddFlag(cmdutil.HttpsProxyFlag)
+	clusterUpFlagSet.AddFlag(cmdUtil.HttpProxyFlag)
+	clusterUpFlagSet.AddFlag(cmdUtil.HttpsProxyFlag)
 
 	if hasEnabledExperimental {
 		clusterUpFlagSet.Bool(configCmd.ServiceCatalog.Name, false, "Install service catalog (experimental)")
@@ -573,7 +568,7 @@ func getDefaultRoutingPrefix(ip string) string {
 }
 
 func ensureNotRunning(client *libmachine.Client, machineName string) {
-	if !cmdutil.VMExists(client, machineName) {
+	if !cmdUtil.VMExists(client, machineName) {
 		return
 	}
 
@@ -582,7 +577,7 @@ func ensureNotRunning(client *libmachine.Client, machineName string) {
 		atexit.ExitWithMessage(1, err.Error())
 	}
 
-	if cmdutil.IsHostRunning(hostVm.Driver) {
+	if cmdUtil.IsHostRunning(hostVm.Driver) {
 		atexit.ExitWithMessage(0, fmt.Sprintf("The '%s' VM is already running.", machineName))
 	}
 }
@@ -621,11 +616,11 @@ func setSubscriptionManagerParameters() {
 }
 
 func getUsernameInteractive(message string) string {
-	return inputUtils.ReadInputFromStdin(message)
+	return util.ReadInputFromStdin(message)
 }
 
 func getPasswordInteractive(message string) string {
-	return inputUtils.ReadPasswordFromStdin(message)
+	return util.ReadPasswordFromStdin(message)
 }
 
 func applyDockerEnvToProcessEnv(libMachineClient *libmachine.Client) {

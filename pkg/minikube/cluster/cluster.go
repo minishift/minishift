@@ -368,7 +368,7 @@ func createHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 	}
 
 	if config.ShellProxyEnv != "" {
-		fmt.Printf("-- Setting proxy information ... ")
+		fmt.Print("-- Setting proxy information ... ")
 		if err := minishiftUtil.SetProxyToShellEnv(h, config.ShellProxyEnv); err != nil {
 			fmt.Println("FAIL")
 			return nil, fmt.Errorf("Error setting proxy to VM: %s", err)

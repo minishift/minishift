@@ -24,10 +24,16 @@ import (
 
 var AllInstancesConfig *GlobalConfigType
 
+type Profile struct {
+	Name   string
+	Active bool
+}
+
 type GlobalConfigType struct {
 	FilePath string `json:"-"`
 
 	HostFolders []HostFolder
+	Profiles    []Profile
 }
 
 // Create new object with data if file exists or

@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"fmt"
+
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/viper"

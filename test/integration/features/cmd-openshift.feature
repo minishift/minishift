@@ -115,5 +115,5 @@ cluster in VM provided by Minishift.
 
   Scenario: Deleting the Minishift instance
      Given Minishift has state "Running"
-      When executing "minishift delete" succeeds
+      When executing "minishift delete --force" succeeds
       Then Minishift should have state "Does Not Exist"

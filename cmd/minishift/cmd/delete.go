@@ -25,6 +25,7 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
+	pkgUtil "github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
@@ -49,8 +50,12 @@ func runDelete(cmd *cobra.Command, args []string) {
 
 	util.ExitIfUndefined(api, constants.MachineName)
 
-	// Unregistration, do not allow to be skipped
-	unregisterHost(api, false)
+	if !forceMachineDeletion {
+		hasConfirmed := pkgUtil.AskForConfirmation("You are deleting the Minishift instance.")
+		if !hasConfirmed {
+			atexit.Exit(1)
+		}
+	}
 
 	if clearCache {
 		cachePath := constants.MakeMiniPath("cache")
@@ -62,17 +67,21 @@ func runDelete(cmd *cobra.Command, args []string) {
 		}
 	}
 
+	// Unregistration, do not allow to be skipped
+	unregisterHost(api, false)
+
 	fmt.Println("Deleting the Minishift VM...")
 	if err := cluster.DeleteHost(api); err != nil {
 		handleFailedHostDeletion(err)
 	}
 
 	removeInstanceConfigs()
-
 	fmt.Println("Minishift VM deleted.")
+
 }
 
 func handleFailedHostDeletion(err error) {
+
 	if forceMachineDeletion {
 		err := os.RemoveAll(constants.MakeMiniPath("machines"))
 		if err != nil {

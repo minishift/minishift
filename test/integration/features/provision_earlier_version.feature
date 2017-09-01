@@ -33,7 +33,7 @@ Feature: Provision an older major release
 
   Scenario: Deleting Minishift
     Given Minishift has state "Running"
-     When executing "minishift delete" succeeds
+     When executing "minishift delete --force" succeeds
      Then Minishift should have state "Does Not Exist"
      When executing "minishift ip"
      Then exitcode should equal "1"

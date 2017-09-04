@@ -34,6 +34,7 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/kubeconfig"
 	"github.com/minishift/minishift/pkg/minishift/addon/command"
 	"github.com/minishift/minishift/pkg/minishift/addon/manager"
+	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/minishift/oc"
 
 	"regexp"
@@ -88,13 +89,15 @@ func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string, runne
 		cmdArgs = append(cmdArgs, value)
 	}
 
-	// Deal with extra flags (add to command arguments)
-	if len(extraFlags) > 0 {
-		fmt.Println("-- Extra `oc` cluster up flags (experimental) ... ")
-		fmt.Printf("   '%s'\n", extraFlags)
-		extraFlagFields := strings.Fields(extraFlags)
-		for _, extraFlag := range extraFlagFields {
-			cmdArgs = append(cmdArgs, extraFlag)
+	if minishiftConfig.FeatureToggles.EnableExperimental {
+		// Deal with extra flags (add to command arguments)
+		if len(extraFlags) > 0 {
+			fmt.Println("-- Extra `oc` cluster up flags (experimental) ... ")
+			fmt.Printf("   '%s'\n", extraFlags)
+			extraFlagFields := strings.Fields(extraFlags)
+			for _, extraFlag := range extraFlagFields {
+				cmdArgs = append(cmdArgs, extraFlag)
+			}
 		}
 	}
 

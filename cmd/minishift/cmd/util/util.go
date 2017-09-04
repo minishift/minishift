@@ -75,7 +75,7 @@ func UnpackAddons(addonsDir string) error {
 
 func IsValidProfile(profileName string) bool {
 	var doesProfileExist bool
-	profileList := profileActions.GetProfileNameList()
+	profileList := profileActions.GetProfileList()
 	for i := range profileList {
 		if profileList[i] == profileName {
 			doesProfileExist = true

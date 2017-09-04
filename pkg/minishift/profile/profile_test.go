@@ -24,6 +24,9 @@ import (
 
 	"reflect"
 
+	"fmt"
+
+	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 )
 
@@ -32,43 +35,10 @@ var (
 	configFilePath string
 )
 
-func TestAdditionOfProfileToConfig(t *testing.T) {
-	setup(t)
-	defer teardown()
-	profileName := "foo"
-
-	configFilePath = filepath.Join(testDir, "fake-machine.json")
-	minishiftConfig.AllInstancesConfig, _ = minishiftConfig.NewAllInstancesConfig(configFilePath)
-
-	AddProfileToConfig(profileName)
-	profileList := GetProfileNameList()
-	if len(profileList) > 1 {
-		t.Errorf("Number of profiles is more than expected")
-	}
-	if profileName != profileList[0] {
-		t.Errorf("Expected profile name %s but actual found %s", profileName, profileList[0])
-	}
-}
-
-func TestRemovableOfProfileToConfig(t *testing.T) {
-	setup(t)
-	defer teardown()
-	profileName := "foo"
-
-	AddProfileToConfig(profileName)
-	RemoveProfile(profileName)
-	profileList := GetProfileNameList()
-	if len(profileList) > 0 {
-		t.Errorf("There was no profile expected")
-	}
-}
-
 func TestSetingActiveProfile(t *testing.T) {
 	setup(t)
 	defer teardown()
 	profileName := "foo"
-
-	AddProfileToConfig(profileName)
 	SetActiveProfile(profileName)
 	actualProfileName := GetActiveProfile()
 	if actualProfileName != profileName {
@@ -76,31 +46,30 @@ func TestSetingActiveProfile(t *testing.T) {
 	}
 }
 
-func TestSetingGetProfileNameList(t *testing.T) {
+func TestSetingGetProfileList(t *testing.T) {
 	setup(t)
 	defer teardown()
-	profileList := []string{"abc", "xyz"}
+	miniPath, err := ioutil.TempDir("", "minishift-test-profile-")
+	if err != nil {
+		t.Error(err)
+	}
+	os.Setenv("MINISHIFT_HOME", miniPath)
+	defer os.Unsetenv("MINISHIFT_HOME")
+
+	profileList := []string{constants.DefaultProfileName, "abc", "xyz"}
 
 	for _, profile := range profileList {
-		AddProfileToConfig(profile)
+		if profile != constants.DefaultProfileName {
+			dirPath := filepath.Join(miniPath, "profiles", profile)
+			err := os.MkdirAll(dirPath, os.ModePerm)
+			if err != nil {
+				fmt.Println(fmt.Sprintf("%", err.Error()))
+			}
+		}
 	}
-	actualProfileList := GetProfileNameList()
+	actualProfileList := GetProfileList()
 	if !reflect.DeepEqual(profileList, actualProfileList) {
 		t.Errorf("Expected profile name does not match actual profile name")
-	}
-}
-
-func TestSetingGetProfileMap(t *testing.T) {
-	setup(t)
-	defer teardown()
-	profileMap := map[string]bool{"abc": false, "xyz": false}
-
-	for name := range profileMap {
-		AddProfileToConfig(name)
-	}
-	actualProfileMap := GetProfileMap()
-	if !reflect.DeepEqual(profileMap, actualProfileMap) {
-		t.Errorf("Expected profile information does not match actual profile information")
 	}
 }
 

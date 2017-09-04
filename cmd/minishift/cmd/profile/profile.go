@@ -27,9 +27,9 @@ const (
 
 var ProfileCmd = &cobra.Command{
 	Use:     "profile SUBCOMMAND [flags]",
-	Aliases: []string{"instance"},
+	Aliases: []string{"instance", "profiles"},
 	Short:   "Manages Minishift profiles.",
-	Long:    "Allows you to create and manage multiple Minishift instances (profiles). Use the sub-commands to set active and list existing profiles.",
+	Long:    "Allows you to create and manage multiple Minishift instances (profiles). Use the sub-commands to list, activate or delete existing profiles.",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

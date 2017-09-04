@@ -107,7 +107,7 @@ var RootCmd = &cobra.Command{
 			fmt.Println("OK")
 		}
 
-		// Check marker file created by update command and perform post update execu	tion steps
+		// Check marker file created by update command and perform post update execution steps
 		if filehelper.Exists(filepath.Join(constants.Minipath, constants.UpdateMarkerFileName)) {
 			if err := performPostUpdateExecution(filepath.Join(constants.Minipath, constants.UpdateMarkerFileName)); err != nil {
 				atexit.ExitWithMessage(1, fmt.Sprintf("Error in performing post update exeuction: %s", err))
@@ -127,7 +127,6 @@ var RootCmd = &cobra.Command{
 			log.SetErrWriter(ioutil.Discard)
 		}
 
-		addDefaultProfile()
 		setDefaultActiveProfile()
 	},
 }
@@ -311,7 +310,7 @@ func setDefaultActiveProfile() {
 	}
 	activeProfile := profileActions.GetActiveProfile()
 	if activeProfile == "" {
-		profileList := profileActions.GetProfileNameList()
+		profileList := profileActions.GetProfileList()
 		for _, profile := range profileList {
 			if profile == constants.DefaultProfileName {
 				setDefaultProfile = true
@@ -326,21 +325,5 @@ func setDefaultActiveProfile() {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error while setting default profile '%s': %s", profile, err.Error()))
 		}
 		cmdUtil.SetOcContext(constants.DefaultProfileName)
-	}
-}
-func addDefaultProfile() {
-	var defaultExists bool
-	profileList := profileActions.GetProfileNameList()
-	for _, profile := range profileList {
-		if profile == constants.DefaultProfileName {
-			defaultExists = true
-			break
-		}
-	}
-	if !defaultExists {
-		err := profileActions.AddProfileToConfig(constants.DefaultProfileName)
-		if err != nil {
-			atexit.ExitWithMessage(1, fmt.Sprintf("Error while adding default profile '%s'", constants.DefaultProfileName))
-		}
 	}
 }

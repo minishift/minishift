@@ -17,15 +17,17 @@ With the help of profile feature you can create multiple instances of Minishift 
 
 When you have multiple profiles you can run Minishift commands  against a specific profile using `--profile` flag.
 
-If you do not want to pass `--profile` flag everytime with commands you can set a profile as the default with `minishift profile set` command.
-`minishift profile set` is also should be used to switch between profiles.
+If you do not want to pass `--profile` flag everytimei, you can activate a profile persistently with `minishift profile set` command.
+`minishift profile set`  is also used to switch between profiles.
 
 The default profile is `minishift`. `minishift start` and `minishift start --profile minishift` will create the default minishift profile.
 
 ----
- minishift profile list
+ $ minishift --profile foo start
 
- minishift profile set <profile_name>
+ $ minishift profile list
+
+ $ minishift profile set <profile_name>
 ----
 
 To set the profile to the default, run

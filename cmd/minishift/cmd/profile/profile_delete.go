@@ -88,16 +88,12 @@ func runProfileDelete(cmd *cobra.Command, args []string) {
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting '%s': %v", baseDir, err.Error()))
 	} else {
-		removeProfileFromConfig()
 		fmt.Println("Deleted: ", baseDir)
 	}
-}
 
-func removeProfileFromConfig() {
-	name := constants.ProfileName
-	err := profileActions.RemoveProfile(name)
-	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("%s", err))
+	//When active profile is deleted, reset the active profile
+	if profileActions.GetActiveProfile() == profileName {
+		err = profileActions.SetActiveProfile(constants.DefaultProfileName)
 	}
 }
 

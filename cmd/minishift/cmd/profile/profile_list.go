@@ -35,21 +35,21 @@ var profileListCmd = &cobra.Command{
 	Short: "Lists profiles.",
 	Long:  "Lists the existing profiles.",
 	Run: func(cmd *cobra.Command, args []string) {
-		profiles := profileActions.GetProfileMap()
+		profiles := profileActions.GetProfileList()
 		displayProfiles(profiles)
 	},
 }
 
-func displayProfiles(profiles map[string]bool) {
+func displayProfiles(profiles []string) {
 	display := new(tabwriter.Writer)
 	display.Init(os.Stdout, 0, 8, 0, '\t', 0)
 
-	for name, isActive := range profiles {
-		vmStatus := getVmStatus(name)
-		if isActive {
-			fmt.Fprintln(display, fmt.Sprintf("- %s\t%s\t(Active profile)", name, vmStatus))
+	for _, profile := range profiles {
+		vmStatus := getVmStatus(profile)
+		if profile == profileActions.GetActiveProfile() {
+			fmt.Fprintln(display, fmt.Sprintf("- %s\t%s\t(active)", profile, vmStatus))
 		} else {
-			fmt.Fprintln(display, fmt.Sprintf("- %s\t%s", name, vmStatus))
+			fmt.Fprintln(display, fmt.Sprintf("- %s\t%s", profile, vmStatus))
 		}
 	}
 	display.Flush()

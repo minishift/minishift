@@ -28,7 +28,7 @@ import (
 var profileSetCmd = &cobra.Command{
 	Use:   "set PROFILE_NAME",
 	Short: "Sets the active profile for Minishift.",
-	Long:  "Sets the active profile for Minishift. After you set the profile, all commands will use the profile by default",
+	Long:  "Sets the active profile for Minishift. After you set the profile, all commands will use the specified profile by default.",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			atexit.ExitWithMessage(1, emptyProfileError)

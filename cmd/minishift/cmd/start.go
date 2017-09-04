@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/asaskevich/govalidator"
 	units "github.com/docker/go-units"
@@ -173,8 +172,8 @@ func runStart(cmd *cobra.Command, args []string) {
 	// preflight checks (after start)
 	preflightChecksAfterStartingHost(hostVm.Driver)
 
-	//Adding required profile information to all instance config
-	addProfileInformation()
+	//Adding active profile information to all instance config
+	addActiveProfileInformation()
 
 	ip, _ := hostVm.Driver.GetIP()
 
@@ -198,7 +197,7 @@ func runStart(cmd *cobra.Command, args []string) {
 		importContainerImages(hostVm, requestedOpenShiftVersion)
 	}
 
-	ocPath := cmdutil.CacheOc(clusterup.DetermineOcVersion(requestedOpenShiftVersion))
+	ocPath := cmdUtil.CacheOc(clusterup.DetermineOcVersion(requestedOpenShiftVersion))
 	clusterUpConfig := &clusterup.ClusterUpConfig{
 		OpenShiftVersion: requestedOpenShiftVersion,
 		MachineName:      constants.MachineName,
@@ -356,26 +355,10 @@ func autoMountHostFolders(driver drivers.Driver) {
 	}
 }
 
-func addProfileInformation() {
-	var addProfile = true
-	profileName := constants.ProfileName
-	profileList := profileActions.GetProfileNameList()
-	for _, profile := range profileList {
-		if profile == profileName {
-			addProfile = false
-		}
-		break
-	}
-	if addProfile {
-		err := profileActions.AddProfileToConfig(profileName)
-		if err != nil {
-			atexit.ExitWithMessage(1, err.Error())
-		}
-	}
-
-	if profileName != profileActions.GetActiveProfile() {
-		fmt.Println(fmt.Sprintf("-- Switching active profile to '%s'", profileName))
-		err := profileActions.SetActiveProfile(profileName)
+func addActiveProfileInformation() {
+	if constants.ProfileName != profileActions.GetActiveProfile() {
+		fmt.Println(fmt.Sprintf("-- Switching active profile to '%s'", constants.ProfileName))
+		err := profileActions.SetActiveProfile(constants.ProfileName)
 		if err != nil {
 			atexit.ExitWithMessage(1, err.Error())
 		}

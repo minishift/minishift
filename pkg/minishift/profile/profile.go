@@ -18,90 +18,47 @@ package profile
 
 import (
 	"fmt"
+	"io/ioutil"
+	"path/filepath"
 
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/config"
+	"github.com/minishift/minishift/pkg/util/filehelper"
 )
 
-// Add profile information to allinstancesconfig
-func AddProfileToConfig(name string) error {
-	var doesProfileExist bool
-	existingProfiles := config.AllInstancesConfig.Profiles
-	for i := range existingProfiles {
-		if name == existingProfiles[i].Name {
-			doesProfileExist = true
-			return nil
-		}
-	}
-	if !doesProfileExist {
-		profile := newProfile(name)
-		config.AllInstancesConfig.Profiles = append(config.AllInstancesConfig.Profiles, profile)
-		err := config.AllInstancesConfig.Write()
-		if err != nil {
-			return fmt.Errorf("Error adding profile information. %s", err)
-		}
-	}
-	return nil
-}
-
-func newProfile(name string) config.Profile {
-	return config.Profile{
-		Name:   name,
-		Active: false,
-	}
-}
-
 // Returns the list of profile names
-func GetProfileNameList() []string {
+func GetProfileList() []string {
 	var profileList []string
-	profiles := config.AllInstancesConfig.Profiles
-	for i := range profiles {
-		profile := profiles[i]
-		profileList = append(profileList, profile.Name)
+	baseDir := constants.GetMinishiftHomeDir()
+	profileBaseDir := filepath.Join(baseDir, "profiles")
+
+	if !filehelper.IsDirectory(baseDir) {
+		return profileList
+	} else {
+		profileList = append(profileList, constants.DefaultProfileName)
+	}
+
+	if !filehelper.IsDirectory(profileBaseDir) {
+		return profileList
+	}
+	files, err := ioutil.ReadDir(profileBaseDir)
+	if err != nil {
+		return profileList
+	}
+
+	for _, f := range files {
+		profileList = append(profileList, f.Name())
 	}
 	return profileList
-}
-
-// Returns a map of profile name and if it is Active
-func GetProfileMap() map[string]bool {
-	profileMap := make(map[string]bool)
-	profiles := config.AllInstancesConfig.Profiles
-	for i := range profiles {
-		profileMap[profiles[i].Name] = profiles[i].Active
-	}
-	return profileMap
-}
-
-func RemoveProfile(name string) error {
-	profiles := config.AllInstancesConfig.Profiles
-	for i := range profiles {
-		profile := profiles[i]
-		if profile.Name == name {
-			profiles = append(profiles[:i], profiles[i+1:]...)
-			break
-		}
-	}
-	config.AllInstancesConfig.Profiles = profiles
-	err := config.AllInstancesConfig.Write()
-	if err != nil {
-		return fmt.Errorf("Error removing profile information from config. %s", err)
-	}
-	return nil
 }
 
 //Set Active Profile and also it makes sure that we have one
 // active profile at one point of time.
 func SetActiveProfile(name string) error {
-	profiles := config.AllInstancesConfig.Profiles
-	for i := range profiles {
-		if profiles[i].Name == name {
-			profiles[i].Active = true
-		} else {
-			profiles[i].Active = false
-		}
+	activeProfile := config.AllInstancesConfig.ActiveProfile
+	if name != activeProfile {
+		config.AllInstancesConfig.ActiveProfile = name
 	}
-
-	config.AllInstancesConfig.Profiles = profiles
 	err := config.AllInstancesConfig.Write()
 	if err != nil {
 		return fmt.Errorf("Error updating profile information in config. %s", err)
@@ -111,14 +68,7 @@ func SetActiveProfile(name string) error {
 
 // Get Active Profile from AllInstancesConfig
 func GetActiveProfile() string {
-	profiles := config.AllInstancesConfig.Profiles
-	for i := range profiles {
-		profile := profiles[i]
-		if profile.Active == true {
-			return profile.Name
-		}
-	}
-	return ""
+	return config.AllInstancesConfig.ActiveProfile
 }
 
 // Placeholder function to change constants related to a VM instance

@@ -84,18 +84,8 @@ On macOS you can also use link:https://caskroom.github.io[Homebrew Cask] to inst
   $ brew cask install minishift
 ----
 
-[[homebrew-latest-install]]
-==== Latest Beta
-
-If you want to install the latest beta version of Minishift use the homebrew-cask versions tap.
-After you install *homebrew-cask*, run the following command:
+To update the binary, run following command:
 
 ----
-  $ brew tap caskroom/versions
-----
-
-You can now install the latest beta version of Minishift.
-
-----
-  $ brew cask install minishift-beta
+  $ brew cask install --force minishift
 ----

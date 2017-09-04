@@ -22,6 +22,7 @@ import (
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/state"
+	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 
 	"github.com/minishift/minishift/out/bindata"
@@ -70,4 +71,18 @@ func UnpackAddons(addonsDir string) error {
 	}
 
 	return nil
+}
+
+func IsValidProfile(profileName string) bool {
+	var doesProfileExist bool
+	profileList := profileActions.GetProfileNameList()
+	for i := range profileList {
+		if profileList[i] == profileName {
+			doesProfileExist = true
+		}
+	}
+	if !doesProfileExist {
+		return false
+	}
+	return true
 }

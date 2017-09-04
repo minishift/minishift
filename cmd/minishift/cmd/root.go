@@ -37,6 +37,7 @@ import (
 	cmdOpenshift "github.com/minishift/minishift/cmd/minishift/cmd/openshift"
 	cmdProfile "github.com/minishift/minishift/cmd/minishift/cmd/profile"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
+	cmdUtil "github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
@@ -319,13 +320,12 @@ func setDefaultActiveProfile() {
 		}
 	}
 
-	//TBD: We need to set the constants and OC context here. So that it would be a proper profile change
-
 	if setDefaultProfile {
 		err := profileActions.SetActiveProfile(constants.DefaultProfileName)
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error while setting default profile '%s': %s", profile, err.Error()))
 		}
+		cmdUtil.SetOcContext(constants.DefaultProfileName)
 	}
 }
 func addDefaultProfile() {

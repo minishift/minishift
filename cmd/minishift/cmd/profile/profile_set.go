@@ -18,19 +18,11 @@ package profile
 
 import (
 	"fmt"
-	"path/filepath"
 
-	"github.com/docker/machine/libmachine"
-	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
-	"github.com/minishift/minishift/cmd/minishift/cmd/util"
-	cmdutil "github.com/minishift/minishift/cmd/minishift/cmd/util"
-	"github.com/minishift/minishift/pkg/minikube/constants"
-	"github.com/minishift/minishift/pkg/minishift/clusterup"
-	"github.com/minishift/minishift/pkg/minishift/oc"
+	cmdUtil "github.com/minishift/minishift/cmd/minishift/cmd/util"
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var profileSetCmd = &cobra.Command{
@@ -38,7 +30,6 @@ var profileSetCmd = &cobra.Command{
 	Short: "Sets the active profile for Minishift.",
 	Long:  "Sets the active profile for Minishift. After you set the profile, all commands will use the profile by default",
 	Run: func(cmd *cobra.Command, args []string) {
-		var doesProfileExist = false
 		if len(args) == 0 {
 			atexit.ExitWithMessage(1, emptyProfileError)
 		} else if len(args) > 1 {
@@ -47,70 +38,21 @@ var profileSetCmd = &cobra.Command{
 
 		profileName := args[0]
 
-		//check if the profile is present in the AllInstancesConfig
-		profileList := profileActions.GetProfileNameList()
-		for i := range profileList {
-			if profileList[i] == profileName {
-				doesProfileExist = true
-			}
-		}
-		if !doesProfileExist {
+		if !cmdUtil.IsValidProfile(profileName) {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error: '%s' is not a valid profile", profileName))
 		}
 
-		setOcCliContext(profileName)
 		err := profileActions.SetActiveProfile(profileName)
 		if err != nil {
 			atexit.ExitWithMessage(1, err.Error())
 		} else {
-			fmt.Println(fmt.Sprintf("Profile set to '%s' successfully", profileName))
+			fmt.Println(fmt.Sprintf("Profile '%s' set as active profile", profileName))
 		}
-
+		err = cmdUtil.SetOcContext(profileName)
+		if err != nil {
+			fmt.Println(fmt.Sprintf("oc cli context could not set to '%s': %s", profileName, err.Error()))
+		}
 	},
-}
-
-func setOcCliContext(profileName string) {
-	const (
-		defaultProject = "myproject"
-		defaultUser    = "developer"
-	) //This needs to be fixed
-
-	//We need to reassign ProfileName, MachineName, KubeConfigPath as it would have values for the previous
-	// profile
-	constants.ProfileName = profileName
-	constants.MachineName = constants.ProfileName
-	constants.Minipath = constants.GetProfileHomeDir()
-
-	constants.KubeConfigPath = filepath.Join(constants.Minipath, "machines", constants.MachineName+"_kubeconfig")
-
-	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
-	defer api.Close()
-	util.ExitIfUndefined(api, constants.MachineName)
-
-	host, err := api.Load(constants.MachineName)
-	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Error getting information for VM: %s", profileName))
-	}
-
-	util.ExitIfNotRunning(host.Driver, constants.MachineName)
-
-	ip, err := host.Driver.GetIP()
-	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Error getting the IP address: %s", err.Error()))
-	}
-
-	requestedOpenShiftVersion := viper.GetString(configCmd.OpenshiftVersion.Name)
-	ocPath := cmdutil.CacheOc(clusterup.DetermineOcVersion(requestedOpenShiftVersion))
-
-	ocRunner, err := oc.NewOcRunner(ocPath, constants.KubeConfigPath)
-	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Error during setting '%s' as active profile: %s", profileName, err.Error()))
-	}
-	err = ocRunner.AddCliContext(constants.MachineName, ip, defaultUser, defaultProject)
-	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Error during setting '%s' as active profile: %s", profileName, err.Error()))
-	}
-
 }
 
 func init() {

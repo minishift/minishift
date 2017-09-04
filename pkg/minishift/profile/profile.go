@@ -19,6 +19,7 @@ package profile
 import (
 	"fmt"
 
+	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/config"
 )
 
@@ -118,4 +119,15 @@ func GetActiveProfile() string {
 		}
 	}
 	return ""
+}
+
+// Placeholder function to change constants related to a VM instance
+// This needs a better solution than this as these constats should not be
+// touched outside of cmd/root.go. However cluster.GetHostStatus(api) uses
+// constants.MachineName inside the function.
+// This function should not be used outside profile set, list and delete
+func UpdateMiniConstants(profileName string) {
+	constants.ProfileName = profileName
+	constants.MachineName = constants.ProfileName
+	constants.Minipath = constants.GetProfileHomeDir()
 }

@@ -55,10 +55,8 @@ func displayProfiles(profiles map[string]bool) {
 	display.Flush()
 }
 
-func getVmStatus(name string) string {
-	constants.ProfileName = name
-	constants.MachineName = constants.ProfileName
-	constants.Minipath = constants.GetProfileHomeDir()
+func getVmStatus(profileName string) string {
+	profileActions.UpdateMiniConstants(profileName)
 	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 	defer api.Close()
 	status, err := cluster.GetHostStatus(api)

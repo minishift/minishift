@@ -49,28 +49,26 @@ func runProfileDelete(cmd *cobra.Command, args []string) {
 
 	profileName := args[0]
 	var defultProfile bool
+
+	if !cmdUtil.IsValidProfile(profileName) {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error: '%s' is not a valid profile", profileName))
+	}
+
+	profileActions.UpdateMiniConstants(profileName)
 	baseDir := constants.GetProfileHomeDir()
 
 	if profileName == constants.DefaultProfileName {
 		defultProfile = true
 	}
-
 	if defultProfile {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Default profile '%s' can not be deleted.", profileName))
 	}
-
 	if !force {
 		hasConfirmed := pkgUtil.AskForConfirmation("Will remove the VM and all the artifacts related to the profile.")
 		if !hasConfirmed {
 			atexit.Exit(1)
 		}
 	}
-
-	//We need to reassign ProfileName, MachineName, KubeConfigPath as it would have values for the previous
-	// profile
-	constants.ProfileName = profileName
-	constants.MachineName = constants.ProfileName
-	constants.Minipath = constants.GetProfileHomeDir()
 
 	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
 	defer api.Close()

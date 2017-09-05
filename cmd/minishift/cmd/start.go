@@ -48,6 +48,7 @@ import (
 
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
+	"github.com/minishift/minishift/pkg/util/progressdots"
 	stringUtils "github.com/minishift/minishift/pkg/util/strings"
 	"github.com/minishift/minishift/pkg/version"
 	"github.com/spf13/cobra"
@@ -297,8 +298,7 @@ func determineInsecureRegistry(key string) []string {
 }
 
 func startHost(libMachineClient *libmachine.Client) *host.Host {
-	progressDots := make(chan bool)
-
+	progressDots := progressdots.New()
 	// Configuration used for creation/setup of the Virtual Machine
 	machineConfig := &cluster.MachineConfig{
 		MinikubeISO:      determineIsoUrl(viper.GetString(configCmd.ISOUrl.Name)),
@@ -331,7 +331,7 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 	cacheMinishiftISO(machineConfig)
 
 	fmt.Print("-- Starting Minishift VM ...")
-	util.StartProgressDots(progressDots)
+	progressDots.Start()
 	start := func() (err error) {
 		hostVm, err = cluster.StartHost(libMachineClient, *machineConfig)
 		if err != nil {
@@ -344,7 +344,7 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error starting the VM: %v", err))
 	}
-	util.StopProgressDots(progressDots)
+	progressDots.Stop()
 
 	fmt.Println(" OK")
 	return hostVm

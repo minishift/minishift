@@ -24,6 +24,7 @@ import (
 
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/pkg/util"
+	"github.com/minishift/minishift/pkg/util/progress"
 	minishiftStrings "github.com/minishift/minishift/pkg/util/strings"
 )
 
@@ -61,7 +62,7 @@ func (registrator *RedHatRegistrator) CompatibleWithDistribution(osReleaseInfo *
 
 // Register attempts to register the system with RHSM
 func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) error {
-	progressDots := make(chan bool)
+	progressDots := progress.New()
 
 	if isRegistered, err := registrator.isRegistered(); !isRegistered && err == nil {
 		for i := 1; i < 4; i++ {
@@ -86,11 +87,11 @@ func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) er
 				minishiftStrings.EscapeSingleQuote(param.Password))
 
 			fmt.Print("   Registration in progress ")
-			util.StartProgressDots(progressDots)
+			progressDots.Start()
 			startTime := time.Now()
 			// start timed SSH command to register
 			_, err = registrator.SSHCommand(subscriptionCommand)
-			util.StopProgressDots(progressDots)
+			progressDots.Stop()
 			if err == nil {
 				fmt.Print(" OK ")
 			} else {

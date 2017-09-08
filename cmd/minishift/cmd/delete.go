@@ -52,7 +52,7 @@ func runDelete(cmd *cobra.Command, args []string) {
 	util.ExitIfUndefined(api, constants.MachineName)
 
 	if !forceMachineDeletion {
-		hasConfirmed := pkgUtil.AskForConfirmation("You are deleting the Minishift instance.")
+		hasConfirmed := pkgUtil.AskForConfirmation(fmt.Sprintf("You are deleting the Minishift VM: '%s'.", constants.MachineName))
 		if !hasConfirmed {
 			atexit.Exit(1)
 		}
@@ -78,7 +78,6 @@ func runDelete(cmd *cobra.Command, args []string) {
 
 	removeInstanceConfigs()
 	fmt.Println("Minishift VM deleted.")
-
 }
 
 func handleFailedHostDeletion(err error) {

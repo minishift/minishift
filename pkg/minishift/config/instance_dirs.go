@@ -37,7 +37,8 @@ type MinishiftDirs struct {
 var InstanceDirs *MinishiftDirs
 
 //constructor for MinsihiftDirs
-func NewMinishiftDirs(profileName string) *MinishiftDirs {
+func NewMinishiftDirs() *MinishiftDirs {
+	constants.Minipath = constants.GetProfileHomeDir()
 
 	dirs := &MinishiftDirs{}
 	dirs.Home = constants.Minipath

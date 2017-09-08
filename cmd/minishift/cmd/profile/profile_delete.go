@@ -42,25 +42,25 @@ var (
 
 func runProfileDelete(cmd *cobra.Command, args []string) {
 	if len(args) == 0 {
-		atexit.ExitWithMessage(1, emptyProfileError)
+		atexit.ExitWithMessage(1, emptyProfileMessage)
 	} else if len(args) > 1 {
-		atexit.ExitWithMessage(1, extraArgumentError)
+		atexit.ExitWithMessage(1, extraArgumentMessage)
 	}
 
 	profileName := args[0]
-	var defultProfile bool
+	var defaultProfile bool
 
 	if !cmdUtil.IsValidProfile(profileName) {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error: '%s' is not a valid profile", profileName))
 	}
 
-	profileActions.UpdateMiniConstants(profileName)
-	baseDir := constants.GetProfileHomeDir()
+	profileActions.UpdateProfileConstants(profileName)
+	profileBaseDir := constants.GetProfileHomeDir()
 
 	if profileName == constants.DefaultProfileName {
-		defultProfile = true
+		defaultProfile = true
 	}
-	if defultProfile {
+	if defaultProfile {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Default profile '%s' can not be deleted.", profileName))
 	}
 	if !force {
@@ -84,14 +84,14 @@ func runProfileDelete(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	err := os.RemoveAll(baseDir)
+	err := os.RemoveAll(profileBaseDir)
 	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting '%s': %v", baseDir, err.Error()))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting '%s': %v", profileBaseDir, err.Error()))
 	} else {
-		fmt.Println("Deleted: ", baseDir)
+		fmt.Println("Deleted: ", profileBaseDir)
 	}
 
-	//When active profile is deleted, reset the active profile
+	//When active profile is deleted, reset the active profile to default profile
 	if profileActions.GetActiveProfile() == profileName {
 		err = profileActions.SetActiveProfile(constants.DefaultProfileName)
 	}

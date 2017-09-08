@@ -58,7 +58,7 @@ func SetOcContext(profileName string) error {
 		defaultUser    = "developer"
 	) //This needs to be fixed
 
-	profileActions.UpdateMiniConstants(profileName)
+	profileActions.UpdateProfileConstants(profileName)
 
 	// Need create the kube config path for the profile for ocrunner to use it.
 	kubeConfigPath := filepath.Join(constants.Minipath, "machines", constants.MachineName+"_kubeconfig")

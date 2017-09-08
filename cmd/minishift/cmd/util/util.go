@@ -22,6 +22,8 @@ import (
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/state"
+	"github.com/minishift/minishift/pkg/minikube/cluster"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 
@@ -60,6 +62,18 @@ func ExitIfNotRunning(driver drivers.Driver, machineName string) {
 	if !running {
 		atexit.ExitWithMessage(0, fmt.Sprintf("Running this command requires a running '%s' VM, but no VM is running.", machineName))
 	}
+}
+
+func GetVmStatus(profileName string) string {
+	var status string
+	profileActions.UpdateProfileConstants(profileName)
+	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+	defer api.Close()
+	status, err := cluster.GetHostStatus(api)
+	if err != nil {
+		status = fmt.Sprintf("Error getting the VM status: %s", err.Error())
+	}
+	return status
 }
 
 // UnpackAddons will unpack the default addons into addons default dir

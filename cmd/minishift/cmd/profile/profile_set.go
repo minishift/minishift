@@ -19,10 +19,15 @@ package profile
 import (
 	"fmt"
 
+	"github.com/golang/glog"
 	cmdUtil "github.com/minishift/minishift/cmd/minishift/cmd/util"
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
+)
+
+const (
+	unableToSetOcContextErrorMessage = "Make sure the profile is in running state or restart if the problem persists."
 )
 
 var profileSetCmd = &cobra.Command{
@@ -31,9 +36,9 @@ var profileSetCmd = &cobra.Command{
 	Long:  "Sets the active profile for Minishift. After you set the profile, all commands will use the specified profile by default.",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			atexit.ExitWithMessage(1, emptyProfileError)
+			atexit.ExitWithMessage(1, emptyProfileMessage)
 		} else if len(args) > 1 {
-			atexit.ExitWithMessage(1, extraArgumentError)
+			atexit.ExitWithMessage(1, extraArgumentMessage)
 		}
 
 		profileName := args[0]
@@ -50,7 +55,10 @@ var profileSetCmd = &cobra.Command{
 		}
 		err = cmdUtil.SetOcContext(profileName)
 		if err != nil {
-			fmt.Println(fmt.Sprintf("oc cli context could not set to '%s': %s", profileName, err.Error()))
+			if glog.V(2) {
+				fmt.Println(fmt.Sprintf("%s", err.Error()))
+			}
+			fmt.Println(fmt.Sprintf("oc cli context could not changed for '%s'. %s", profileName, unableToSetOcContextErrorMessage))
 		}
 	},
 }

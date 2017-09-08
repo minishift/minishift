@@ -21,12 +21,8 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/minishift/minishift/pkg/minikube/cluster"
-
-	"github.com/docker/machine/libmachine"
-	"github.com/minishift/minishift/pkg/minikube/constants"
+	cmdUtil "github.com/minishift/minishift/cmd/minishift/cmd/util"
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
-	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
 
@@ -44,9 +40,10 @@ func displayProfiles(profiles []string) {
 	display := new(tabwriter.Writer)
 	display.Init(os.Stdout, 0, 8, 0, '\t', 0)
 
+	activeProfile := profileActions.GetActiveProfile()
 	for _, profile := range profiles {
-		vmStatus := getVmStatus(profile)
-		if profile == profileActions.GetActiveProfile() {
+		vmStatus := cmdUtil.GetVmStatus(profile)
+		if profile == activeProfile {
 			fmt.Fprintln(display, fmt.Sprintf("- %s\t%s\t(active)", profile, vmStatus))
 		} else {
 			fmt.Fprintln(display, fmt.Sprintf("- %s\t%s", profile, vmStatus))
@@ -55,16 +52,6 @@ func displayProfiles(profiles []string) {
 	display.Flush()
 }
 
-func getVmStatus(profileName string) string {
-	profileActions.UpdateMiniConstants(profileName)
-	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
-	defer api.Close()
-	status, err := cluster.GetHostStatus(api)
-	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Error getting cluster status: %s", err.Error()))
-	}
-	return status
-}
 func init() {
 	ProfileCmd.AddCommand(profileListCmd)
 }

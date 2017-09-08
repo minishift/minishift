@@ -75,18 +75,18 @@ var RootCmd = &cobra.Command{
 		)
 
 		constants.MachineName = constants.ProfileName
-		constants.Minipath = constants.GetProfileHomeDir()
-		constants.KubeConfigPath = filepath.Join(constants.Minipath, "machines", constants.MachineName+"_kubeconfig")
 
-		//Initilize the instance directory structure
-		minishiftConfig.InstanceDirs = minishiftConfig.NewMinishiftDirs(constants.ProfileName)
+		// Initilize the instance directory structure
+		minishiftConfig.InstanceDirs = minishiftConfig.NewMinishiftDirs()
+
+		constants.KubeConfigPath = filepath.Join(constants.Minipath, "machines", constants.MachineName+"_kubeconfig")
 
 		if !filehelper.Exists(minishiftConfig.InstanceDirs.Addons) {
 			isAddonInstallRequired = true
 		}
 
-		//creating all directories for minishift run
-		createDirForMinishiftRun(minishiftConfig.InstanceDirs)
+		// creating all directories for minishift run
+		createMinishiftDirs(minishiftConfig.InstanceDirs)
 
 		ensureConfigFileExists(constants.ConfigFile)
 
@@ -167,7 +167,7 @@ func processEnvVariables() {
 func init() {
 	processEnvVariables()
 	RootCmd.PersistentFlags().Bool(showLibmachineLogs, false, "Show logs from libmachine.")
-	RootCmd.PersistentFlags().String(profile, "minishift", "Profile name")
+	RootCmd.PersistentFlags().String(profile, constants.DefaultProfileName, "Profile name")
 	RootCmd.AddCommand(configCmd.ConfigCmd)
 	RootCmd.AddCommand(cmdOpenshift.OpenShiftCmd)
 	RootCmd.AddCommand(hostfolderCmd.HostfolderCmd)
@@ -290,7 +290,7 @@ func ensureAllInstanceConfigPath(configPath string) {
 	}
 }
 
-func createDirForMinishiftRun(dirs *minishiftConfig.MinishiftDirs) {
+func createMinishiftDirs(dirs *minishiftConfig.MinishiftDirs) {
 	dirPaths := reflect.ValueOf(*dirs)
 
 	for i := 0; i < dirPaths.NumField(); i++ {
@@ -304,26 +304,16 @@ func createDirForMinishiftRun(dirs *minishiftConfig.MinishiftDirs) {
 //If there is no active profiles we need to set
 // minishift as the default profile if minishift profile exists
 func setDefaultActiveProfile() {
-	var setDefaultProfile bool
 	if minishiftConfig.AllInstancesConfig == nil {
 		atexit.ExitWithMessage(1, "Error: All instance config is not initialized")
 	}
 	activeProfile := profileActions.GetActiveProfile()
 	if activeProfile == "" {
-		profileList := profileActions.GetProfileList()
-		for _, profile := range profileList {
-			if profile == constants.DefaultProfileName {
-				setDefaultProfile = true
-				break
-			}
-		}
-	}
-
-	if setDefaultProfile {
 		err := profileActions.SetActiveProfile(constants.DefaultProfileName)
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error while setting default profile '%s': %s", profile, err.Error()))
 		}
 		cmdUtil.SetOcContext(constants.DefaultProfileName)
+
 	}
 }

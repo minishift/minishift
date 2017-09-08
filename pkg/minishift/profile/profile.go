@@ -76,7 +76,7 @@ func GetActiveProfile() string {
 // touched outside of cmd/root.go. However cluster.GetHostStatus(api) uses
 // constants.MachineName inside the function.
 // This function should not be used outside profile set, list and delete
-func UpdateMiniConstants(profileName string) {
+func UpdateProfileConstants(profileName string) {
 	constants.ProfileName = profileName
 	constants.MachineName = constants.ProfileName
 	constants.Minipath = constants.GetProfileHomeDir()

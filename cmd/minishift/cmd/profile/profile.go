@@ -21,15 +21,15 @@ import (
 )
 
 const (
-	emptyProfileError  = "You must provide the profile name. Run `minishift profile list` to view profiles"
-	extraArgumentError = "You have provided more arguments than required. You must provide a single profile name"
+	emptyProfileMessage  = "You must provide the profile name. Run `minishift profile list` to view profiles"
+	extraArgumentMessage = "You have provided more arguments than required. You must provide a single profile name"
 )
 
 var ProfileCmd = &cobra.Command{
 	Use:     "profile SUBCOMMAND [flags]",
 	Aliases: []string{"instance", "profiles"},
 	Short:   "Manages Minishift profiles.",
-	Long:    "Allows you to create and manage multiple Minishift instances (profiles). Use the sub-commands to list, activate or delete existing profiles.",
+	Long:    "Allows you to create and manage multiple Minishift instances. Use the sub-commands to list, activate or delete existing profiles.",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

@@ -327,6 +327,10 @@ func mountCifsHostfolder(driver drivers.Driver, hostfolder *config.HostFolder) e
 		hostfolder.Options["username"],
 		password)
 
+	if !miniutils.IsB2d(driver) {
+		cmd = fmt.Sprintf("%s,context=system_u:object_r:svirt_sandbox_file_t:s0", cmd)
+	}
+
 	if len(hostfolder.Options["domain"]) > 0 { // != ""
 		cmd = fmt.Sprintf("%s,domain=%s", cmd, hostfolder.Options["domain"])
 	}

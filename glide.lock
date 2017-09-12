@@ -1,5 +1,5 @@
-hash: 675036c36eaf7c64def2072063154d6e2f3d670a2c09c4396db9b2359b83bdcc
-updated: 2017-09-04T20:16:55.757240937+05:30
+hash: d66e28f0f33659f3b56118791260b21a2de64f7de9b5e38bbc77644fe75cdfa1
+updated: 2017-09-12T06:45:38.1375513Z
 imports:
 - name: github.com/asaskevich/govalidator
   version: 7b3beb6df3c42abd3509abfc3bcacc0fbfb7c877
@@ -77,6 +77,11 @@ imports:
   version: 30f7a39f4a218feb5325f3aebc60c32a572a8274
   subpackages:
   - query
+- name: github.com/gorillalabs/go-powershell
+  version: 3bc7a60b1df80a5766820c4a53d59668f4553f75
+  subpackages:
+  - backend
+  - utils
 - name: github.com/hashicorp/hcl
   version: 392dba7d905ed5d04a5794ba89f558b27e2ba1ca
   subpackages:
@@ -97,6 +102,8 @@ imports:
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/jteeuwen/go-bindata
   version: bbd0c6e271208dce66d8fda4bc536453cd27fc4a
+- name: github.com/juju/errors
+  version: c7d06af17c68cd34c835053720b21f6549d9b0ee
 - name: github.com/kardianos/osext
   version: ae77be60afb1dcacde03767a8c37337fad28ac14
 - name: github.com/magiconair/properties
@@ -149,7 +156,6 @@ imports:
   version: 4f2fc6c1e69d41baf187332ee08fbd2b296f21ed
   subpackages:
   - context
-  - context/ctxhttp
 - name: golang.org/x/oauth2
   version: 442624c9ec9243441e83b374a9e22ac549b5c51d
   subpackages:
@@ -168,11 +174,9 @@ imports:
   version: 6a436539be38c296a8075a871cc536686b458371
   subpackages:
   - internal
-  - internal/app_identity
   - internal/base
   - internal/datastore
   - internal/log
-  - internal/modules
   - internal/remote_api
   - internal/urlfetch
   - urlfetch

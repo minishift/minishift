@@ -26,7 +26,8 @@ import (
 
 	"github.com/docker/machine/libmachine/drivers"
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
-	miniutil "github.com/minishift/minishift/pkg/minishift/util"
+	"github.com/minishift/minishift/pkg/minishift/shell/powershell"
+	miniUtil "github.com/minishift/minishift/pkg/minishift/util"
 
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/viper"
@@ -38,6 +39,8 @@ const (
 
 // preflightChecksAfterStartingHost is executed before the startHost function.
 func preflightChecksBeforeStartingHost() {
+	driverErrorMessage := "See the 'Setting Up the Driver Plug-in' topic for more information"
+
 	switch viper.GetString(configCmd.VmDriver.Name) {
 	case "xhyve":
 		preflightCheckSucceedsOrFails(
@@ -45,21 +48,21 @@ func preflightChecksBeforeStartingHost() {
 			checkXhyveDriver,
 			"Checking if xhyve driver is installed",
 			false, configCmd.WarnCheckXHyveDriver.Name,
-			"See the 'Setting Up the Driver Plug-in' topic for more information")
+			driverErrorMessage)
 	case "kvm":
 		preflightCheckSucceedsOrFails(
 			configCmd.SkipCheckKVMDriver.Name,
 			checkKvmDriver,
 			"Checking if KVM driver is installed",
 			false, configCmd.WarnCheckXHyveDriver.Name,
-			"See the 'Setting Up the Driver Plug-in' topic for more information")
+			driverErrorMessage)
 	case "hyperv":
 		preflightCheckSucceedsOrFails(
 			configCmd.SkipCheckHyperVDriver.Name,
 			checkHypervDriver,
 			"Checking if Hyper-V driver is configured",
 			false, configCmd.WarnCheckHyperVDriver.Name,
-			"Hyper-V virtual switch is not set")
+			driverErrorMessage)
 	}
 }
 
@@ -232,6 +235,21 @@ func checkHypervDriver() bool {
 	if switchEnv == "" {
 		return false
 	}
+
+	posh := powershell.New()
+
+	checkIfHyperVInstalled := `@(Get-Command Get-VM).ModuleName`
+	stdOut, _ := posh.Execute(checkIfHyperVInstalled)
+	if !strings.Contains(stdOut, "Hyper-V") {
+		return false
+	}
+
+	checkIfMemberOfHyperVAdmins := `@([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole("Hyper-V Administrators")`
+	stdOut, _ = posh.Execute(checkIfMemberOfHyperVAdmins)
+	if !strings.Contains(stdOut, "True") {
+		return false
+	}
+
 	return true
 }
 
@@ -268,7 +286,7 @@ func checkIPConnectivity(driver drivers.Driver) bool {
 	}
 
 	fmt.Printf("\n   Pinging %s ... ", ipToPing)
-	return miniutil.IsIPReachable(driver, ipToPing, false)
+	return miniUtil.IsIPReachable(driver, ipToPing, false)
 }
 
 // checkHttpConnectivity allows to test outside connectivity and possible proxy support
@@ -279,7 +297,7 @@ func checkHttpConnectivity(driver drivers.Driver) bool {
 	}
 
 	fmt.Printf("\n   Retrieving %s ... ", urlToRetrieve)
-	return miniutil.IsRetrievable(driver, urlToRetrieve, false)
+	return miniUtil.IsRetrievable(driver, urlToRetrieve, false)
 }
 
 // checkStorageMounted checks if the peristent storage volume, storageDisk, is

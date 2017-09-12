@@ -22,6 +22,9 @@ import (
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/state"
+	"github.com/minishift/minishift/pkg/minikube/cluster"
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 
 	"github.com/minishift/minishift/out/bindata"
@@ -61,6 +64,18 @@ func ExitIfNotRunning(driver drivers.Driver, machineName string) {
 	}
 }
 
+func GetVmStatus(profileName string) string {
+	var status string
+	profileActions.UpdateProfileConstants(profileName)
+	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+	defer api.Close()
+	status, err := cluster.GetHostStatus(api)
+	if err != nil {
+		status = fmt.Sprintf("Error getting the VM status: %s", err.Error())
+	}
+	return status
+}
+
 // UnpackAddons will unpack the default addons into addons default dir
 func UnpackAddons(addonsDir string) error {
 	for _, asset := range DefaultAssets {
@@ -70,4 +85,18 @@ func UnpackAddons(addonsDir string) error {
 	}
 
 	return nil
+}
+
+func IsValidProfile(profileName string) bool {
+	var doesProfileExist bool
+	profileList := profileActions.GetProfileList()
+	for i := range profileList {
+		if profileList[i] == profileName {
+			doesProfileExist = true
+		}
+	}
+	if !doesProfileExist {
+		return false
+	}
+	return true
 }

@@ -26,6 +26,7 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
+	pkgUtil "github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
@@ -49,6 +50,13 @@ func runDelete(cmd *cobra.Command, args []string) {
 	defer api.Close()
 
 	util.ExitIfUndefined(api, constants.MachineName)
+
+	if !forceMachineDeletion {
+		hasConfirmed := pkgUtil.AskForConfirmation(fmt.Sprintf("You are deleting the Minishift VM: '%s'.", constants.MachineName))
+		if !hasConfirmed {
+			atexit.Exit(1)
+		}
+	}
 
 	if clearCache {
 		cachePath := constants.MakeMiniPath("cache")

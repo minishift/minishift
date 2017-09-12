@@ -18,10 +18,8 @@ package cmd
 
 import (
 	"fmt"
-	"path/filepath"
-	"strings"
-
 	"os"
+	"strings"
 
 	"github.com/asaskevich/govalidator"
 	units "github.com/docker/go-units"
@@ -35,15 +33,14 @@ import (
 	cmdUtil "github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
-	"github.com/minishift/minishift/pkg/minishift/cache"
 	minishiftCluster "github.com/minishift/minishift/pkg/minishift/cluster"
 	"github.com/minishift/minishift/pkg/minishift/clusterup"
-	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/minishift/docker"
 	"github.com/minishift/minishift/pkg/minishift/docker/image"
 	"github.com/minishift/minishift/pkg/minishift/hostfolder"
 	"github.com/minishift/minishift/pkg/minishift/openshift"
+	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
 
 	"github.com/minishift/minishift/pkg/util"
@@ -170,10 +167,14 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	fmt.Printf("-- Starting local OpenShift cluster")
 	hostVm := startHost(libMachineClient)
-	registerHost(libMachineClient)
+	cmdUtil.RegisterHost(libMachineClient)
 
 	// preflight checks (after start)
 	preflightChecksAfterStartingHost(hostVm.Driver)
+
+	//Adding active profile information to all instance config
+	addActiveProfileInformation()
+
 	ip, _ := hostVm.Driver.GetIP()
 
 	if proxyConfig.IsEnabled() {
@@ -196,7 +197,7 @@ func runStart(cmd *cobra.Command, args []string) {
 		importContainerImages(hostVm, requestedOpenShiftVersion)
 	}
 
-	ocPath := cacheOc(clusterup.DetermineOcVersion(requestedOpenShiftVersion))
+	ocPath := cmdUtil.CacheOc(clusterup.DetermineOcVersion(requestedOpenShiftVersion))
 	clusterUpConfig := &clusterup.ClusterUpConfig{
 		OpenShiftVersion: requestedOpenShiftVersion,
 		MachineName:      constants.MachineName,
@@ -324,8 +325,6 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 		fmt.Println("   Memory:   ", units.HumanSize(float64((machineConfig.Memory/units.KiB)*units.GB)))
 		fmt.Println("   vCPUs :   ", machineConfig.CPUs)
 		fmt.Println("   Disk size:", units.HumanSize(float64(machineConfig.DiskSize*units.MB)))
-		// Should handle cached images
-		//fmt.Println("   Boot ISO:  ", machineConfig.MinikubeISO)
 	}
 
 	cacheMinishiftISO(machineConfig)
@@ -353,6 +352,16 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 func autoMountHostFolders(driver drivers.Driver) {
 	if hostfolder.IsAutoMount() && hostfolder.IsHostfoldersDefined() {
 		hostfolder.MountHostfolders(driver)
+	}
+}
+
+func addActiveProfileInformation() {
+	if constants.ProfileName != profileActions.GetActiveProfile() {
+		fmt.Println(fmt.Sprintf("-- Switching active profile to '%s'", constants.ProfileName))
+		err := profileActions.SetActiveProfile(constants.ProfileName)
+		if err != nil {
+			atexit.ExitWithMessage(1, err.Error())
+		}
 	}
 }
 
@@ -508,7 +517,7 @@ func initSubscriptionManagerFlags() *flag.FlagSet {
 	subscriptionManagerFlagSet := flag.NewFlagSet(commandName, flag.ContinueOnError)
 	subscriptionManagerFlagSet.String(configCmd.Username.Name, "", "Username for the virtual machine registration.")
 	subscriptionManagerFlagSet.String(configCmd.Password.Name, "", "Password for the virtual machine registration.")
-	subscriptionManagerFlagSet.BoolVar(&skipRegistration, configCmd.SkipRegistration.Name, false, "Skip the virtual machine registration.")
+	subscriptionManagerFlagSet.BoolVar(&cmdUtil.SkipRegistration, configCmd.SkipRegistration.Name, false, "Skip the virtual machine registration.")
 
 	return subscriptionManagerFlagSet
 }
@@ -537,25 +546,6 @@ func determineClusterUpParameters(config *clusterup.ClusterUpConfig) map[string]
 	})
 
 	return clusterUpParams
-}
-
-// cacheOc ensures that the oc binary matching the requested OpenShift version is cached on the host
-func cacheOc(openShiftVersion string) string {
-	ocBinary := cache.Oc{
-		OpenShiftVersion:  openShiftVersion,
-		MinishiftCacheDir: filepath.Join(constants.Minipath, "cache"),
-	}
-	if err := ocBinary.EnsureIsCached(); err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Error starting the cluster: %v", err))
-	}
-
-	// Update MACHINE_NAME.json for oc path
-	minishiftConfig.InstanceConfig.OcPath = filepath.Join(ocBinary.GetCacheFilepath(), constants.OC_BINARY_NAME)
-	if err := minishiftConfig.InstanceConfig.Write(); err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Error updating oc path in config of VM: %v", err))
-	}
-
-	return minishiftConfig.InstanceConfig.OcPath
 }
 
 func getDefaultRoutingPrefix(ip string) string {

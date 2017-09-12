@@ -54,7 +54,7 @@ Feature: Minishift can run behind proxy
      And proxy log should contain "Accepting CONNECT to rubygems.org:443"
 
   Scenario: Delete behind the proxy
-    When executing "minishift delete" succeeds
+    When executing "minishift delete --force" succeeds
     Then Minishift has state "Does Not Exist"
 
   Scenario: User stops proxy

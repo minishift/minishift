@@ -68,5 +68,5 @@ Feature: Cool Store
     Given Minishift has state "Running"
      When executing "minishift stop" succeeds
      Then Minishift should have state "Stopped"
-     When executing "minishift delete" succeeds
+     When executing "minishift delete --force" succeeds
      Then Minishift should have state "Does Not Exist"

@@ -322,3 +322,59 @@ Enables provisioning the OpenShift link:https://docs.openshift.org/latest/archit
 
 `extra-clusterup-flags`::
 Enables passing flags that are not directly exposed in the Minishift CLI directly to `oc cluster up`.
+
+
+[[hyperv-static-ip]]
+=== Assign IP address to Hyper-V (experimental)
+
+Since the Internal Virtual Switch for Hyper-V does not provide a DHCP offer option, an IP address needs to be provided in a different way.
+For Hyper-V a functionality is provided to assign an IP address on startup using the Data Exchange Service.
+
+[IMPORTANT]
+====
+-  While the default image is B2D, this only works with the CentOS/RHEL based image in combination with Hyper-V. The B2D image experiences
+   a problem when the values are being send to the Minishift instance and consumed by the B2D iso. We are looking into the issue and hope
+   to provide a solution in the coming future.
+====
+
+To make this work you need to create a Virtual Switch using NAT
+
+- link:https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/user-guide/setup-nat-network[Set up a NAT network]
+
+
+[NOTE]
+====
+WinNAT is limited to one NAT network per host. For more details about capabilities, and limitations, please see the link:https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/user-guide/setup-nat-network[WinNAT capabilities and limitations blog]
+====
+
+The following command will attempt to assign an IP address for use on the Internal Virtual Switch 'MyInternal'.
+
+----
+PS> $env:MINISHIFT_ENABLE_EXPERIMENTAL="y"
+PS> $env:HYPERV_VIRTUAL_SWITCH="MyInternal"
+PS> minishift.exe start `
+  --iso-url centos `
+  --network-ipaddress 192.168.1.10 `
+  --network-gateway 192.168.1.1 `
+  --network-nameserver 8.8.8.8
+----
+
+
+If you want to use the 'DockerNAT' network, the following commands are needed to setup the correct NAT networking and assigning an IP in the range expected.
+
+----
+PS> New-NetNat -Name SharedNAT -InternalIPInterfaceAddressPrefix 10.0.75.1/24
+PS> $env:MINISHIFT_ENABLE_EXPERIMENTAL="y"
+PS> $env:HYPERV_VIRTUAL_SWITCH="DockerNAT"
+PS> minishift.exe start `
+  --iso-url centos `
+  --network-ipaddress 10.0.75.128 `
+  --network-gateway 10.0.75.1 `
+  --network-nameserver 8.8.8.8
+----
+
+[NOTE]
+====
+- Be sure to specify a valid gateway and nameserver. Failing to do so will result in connectivity issuesi
+====
+

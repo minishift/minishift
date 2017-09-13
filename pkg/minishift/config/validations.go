@@ -121,3 +121,36 @@ func IsValidUrl(_ string, isoURL string) error {
 	}
 	return nil
 }
+
+func IsValidIPv4Address(name string, address string) error {
+	ip := net.ParseIP(address).To4()
+	if ip == nil {
+		return fmt.Errorf("%s IPv4 address is not valid: %s", name, address)
+	}
+
+	return nil
+}
+
+func IsValidNetmask(name string, mask string) error {
+	err := fmt.Errorf("%s netmask is not valid: %s", name, mask)
+
+	if stringUtils.HasOnlyNumbers(mask) {
+		prefixSize, _ := strconv.Atoi(mask)
+		if prefixSize == 0 || prefixSize > 25 {
+			return err
+		}
+		return nil
+	}
+
+	// got something like '255.255.255.0' instead
+	ip := net.ParseIP(mask).To4()
+	if ip == nil {
+		return err
+	}
+	prefixSize, _ := net.IPMask(ip).Size()
+	if prefixSize == 0 {
+		return err
+	}
+
+	return nil
+}

@@ -28,7 +28,7 @@ import (
 	"github.com/docker/machine/libmachine/drivers"
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
 	"github.com/minishift/minishift/pkg/minishift/shell/powershell"
-	miniUtil "github.com/minishift/minishift/pkg/minishift/util"
+	minishiftUtil "github.com/minishift/minishift/pkg/minishift/util"
 
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/viper"
@@ -101,15 +101,6 @@ func preflightChecksAfterStartingHost(driver drivers.Driver) {
 		"Checking for IP address",
 		false, configCmd.WarnInstanceIP.Name,
 		"Error determining IP address")
-	/*
-		// This happens too late in the preflight, as provisioning needs an IP already
-			preflightCheckSucceedsOrFailsWithDriver(
-				configCmd.SkipCheckNetworkHost.Name,
-				checkVMConnectivity, driver,
-				"Checking if VM is reachable from host",
-				configCmd.WarnCheckNetworkHost.Name,
-				"Please check our troubleshooting guide")
-	*/
 	preflightCheckSucceedsOrFailsWithDriver(
 		configCmd.SkipCheckNetworkPing.Name,
 		checkIPConnectivity, driver,
@@ -341,20 +332,6 @@ func checkInstanceIP(driver drivers.Driver) bool {
 	return false
 }
 
-// checkVMConnectivity checks if VM instance IP is reachable from the host
-func checkVMConnectivity(driver drivers.Driver) bool {
-	// used to check if the host can reach the VM
-	ip, _ := driver.GetIP()
-
-	cmd := exec.Command("ping", "-n 1", ip)
-	stdoutStderr, err := cmd.CombinedOutput()
-	if err != nil {
-		return false
-	}
-	fmt.Printf("%s\n", stdoutStderr)
-	return false
-}
-
 // checkIPConnectivity checks if the VM has connectivity to the outside network
 func checkIPConnectivity(driver drivers.Driver) bool {
 	ipToPing := viper.GetString(configCmd.CheckNetworkPingHost.Name)
@@ -363,7 +340,7 @@ func checkIPConnectivity(driver drivers.Driver) bool {
 	}
 
 	fmt.Printf("\n   Pinging %s ... ", ipToPing)
-	return miniUtil.IsIPReachable(driver, ipToPing, false)
+	return minishiftUtil.IsIPReachable(driver, ipToPing, false)
 }
 
 // checkHttpConnectivity allows to test outside connectivity and possible proxy support
@@ -374,7 +351,7 @@ func checkHttpConnectivity(driver drivers.Driver) bool {
 	}
 
 	fmt.Printf("\n   Retrieving %s ... ", urlToRetrieve)
-	return miniUtil.IsRetrievable(driver, urlToRetrieve, false)
+	return minishiftUtil.IsRetrievable(driver, urlToRetrieve, false)
 }
 
 // checkStorageMounted checks if the peristent storage volume, storageDisk, is

@@ -209,6 +209,7 @@ func runStart(cmd *cobra.Command, args []string) {
 		KubeConfigPath:   constants.KubeConfigPath,
 		OcPath:           ocPath,
 		AddonEnv:         viper.GetStringSlice(cmdUtil.AddOnEnv),
+		PublicHostname:   viper.GetString(configCmd.PublicHostname.Name),
 	}
 
 	clusterUpParams := determineClusterUpParameters(clusterUpConfig)

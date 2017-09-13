@@ -158,11 +158,17 @@ For more information, see the link:https://github.com/zchee/docker-machine-drive
 To use Minishift with Hyper-V:
 
 . Install link:https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v[Hyper-V].
+
+. Add the user to the local Hyper-V Administrators group.
++
+NOTE: This is required to allow the user to create and delete virtual machines with the Hyper-V Management API. 
+For more information, see xref:../troubleshooting/troubleshooting-driver-plugins.adoc#insufficient-privileges[Hyper-V commands must be run as an Administrator]
+
 . Add an link:https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/connect-to-network[External Virtual Switch].
 +
 NOTE: Verify that you pair the virtual switch with a network card (wired or wireless) that is connected to the network.
 
-. If you have multiple virtual switches, set the environment variable `HYPERV_VIRTUAL_SWITCH` to the name of the external virtual switch you want to use for Minishift.
+. Set the environment variable `HYPERV_VIRTUAL_SWITCH` to the name of the external virtual switch you want to use for Minishift.
 For more information, see xref:../using/managing-minishift.adoc#driver-specific-environment-variables[driver-specific environment variables].
 +
 For example, on Command Prompt use:

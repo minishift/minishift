@@ -188,3 +188,81 @@ func TestValidProxyURL(t *testing.T) {
 	}
 	runValidations(t, tests, "iso-url", IsValidProxy)
 }
+
+func TestValidIPv4Address(t *testing.T) {
+
+	var tests = []validationTest{
+		{
+			value:     "",
+			shouldErr: true,
+		},
+		{
+			value:     "10.0.75.128",
+			shouldErr: false,
+		},
+		{
+			value:     "localhost",
+			shouldErr: true,
+		},
+		{
+			value:     "::1",
+			shouldErr: true,
+		},
+		{
+			value:     "fe80::200:5aee:feaa:20a2",
+			shouldErr: true,
+		},
+	}
+	runValidations(t, tests, "ipaddress", IsValidIPv4Address)
+}
+
+func TestValidNetmask(t *testing.T) {
+
+	var tests = []validationTest{
+		{
+			value:     "",
+			shouldErr: true,
+		},
+		{
+			value:     "0",
+			shouldErr: true,
+		},
+		{
+			value:     "1",
+			shouldErr: false,
+		},
+		{
+			value:     "24",
+			shouldErr: false,
+		},
+		{
+			value:     "25",
+			shouldErr: false,
+		},
+		{
+			value:     "26",
+			shouldErr: true,
+		},
+		{
+			value:     "255.255.255.0",
+			shouldErr: false,
+		},
+		{
+			value:     "255.255.255.128",
+			shouldErr: false,
+		},
+		{
+			value:     "128.0.0.0",
+			shouldErr: false,
+		},
+		{
+			value:     "255.255.225.0",
+			shouldErr: true,
+		},
+		{
+			value:     "127.0.0.0",
+			shouldErr: true,
+		},
+	}
+	runValidations(t, tests, "netmask", IsValidNetmask)
+}

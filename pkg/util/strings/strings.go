@@ -25,6 +25,7 @@ const (
 	lettersMatch       = "[a-zA-Z]+"
 	numbersMatch       = "[0-9]+"
 	signedNumbersMatch = "^[-+]?[0-9]+"
+	punctuationMatch   = "[.,/#!$%^&*;:{}=-_`~()]"
 )
 
 // Contains returns true, if the specified slice contains the specified element, false otherwise
@@ -55,7 +56,8 @@ func HasLetters(yourString string) bool {
 // HasOnlyLetters returns true when string contains only letters
 func HasOnlyLetters(yourString string) bool {
 	return checkForMatch(lettersMatch, yourString) &&
-		!checkForMatch(numbersMatch, yourString)
+		!checkForMatch(numbersMatch, yourString) &&
+		!checkForMatch(punctuationMatch, yourString)
 }
 
 // HasNumbers returns true when string contains a letter [0-9]
@@ -66,7 +68,8 @@ func HasNumbers(yourString string) bool {
 // HasOnlyNumbers returns true when string contains only numbers
 func HasOnlyNumbers(yourString string) bool {
 	return checkForMatch(numbersMatch, yourString) &&
-		!checkForMatch(lettersMatch, yourString)
+		!checkForMatch(lettersMatch, yourString) &&
+		!checkForMatch(punctuationMatch, yourString)
 }
 
 func getOnlyMatch(matcher string, strValue string) string {

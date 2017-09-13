@@ -120,6 +120,13 @@ var (
 	// Preflight values
 	CheckNetworkHttpHost = createConfigSetting("check-network-http-host", SetString, nil, nil, true)
 	CheckNetworkPingHost = createConfigSetting("check-network-ping-host", SetString, nil, nil, true)
+
+	// Network settings (Hyper-V only)
+	NetworkDevice = createConfigSetting("network-device", SetString, nil, nil, true)
+	IPAddress     = createConfigSetting("network-ipaddress", SetString, []setFn{validations.IsValidIPv4Address}, nil, true)
+	Netmask       = createConfigSetting("network-netmask", SetString, []setFn{validations.IsValidNetmask}, nil, true)
+	Gateway       = createConfigSetting("network-gateway", SetString, []setFn{validations.IsValidIPv4Address}, nil, true)
+	Nameserver    = createConfigSetting("network-nameserver", SetString, []setFn{validations.IsValidIPv4Address}, nil, true)
 )
 
 func createConfigSetting(name string, set func(MinishiftConfig, string, string) error, validations []setFn, callbacks []setFn, isApply bool) *Setting {

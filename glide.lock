@@ -104,6 +104,8 @@ imports:
   version: bbd0c6e271208dce66d8fda4bc536453cd27fc4a
 - name: github.com/juju/errors
   version: c7d06af17c68cd34c835053720b21f6549d9b0ee
+- name: github.com/gbraad/go-hvkvp
+  version: a692e030379b6de28a10b7697decdf8109899f6e
 - name: github.com/kardianos/osext
   version: ae77be60afb1dcacde03767a8c37337fad28ac14
 - name: github.com/magiconair/properties

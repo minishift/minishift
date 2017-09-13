@@ -65,6 +65,8 @@ import:
   version: 3bc7a60b1df80a5766820c4a53d59668f4553f75
 - package: github.com/juju/errors
   version: c7d06af17c68cd34c835053720b21f6549d9b0ee
+- package: github.com/gbraad/go-hvkvp
+  version: 0.3
 # The following repositories need to be specified explicitly, since the versions referenced by the openshift/origin dependency
 # refer to forks of these projects within the openshift organizaton
 # This needs to be manually updated after upgrading the openshift/origin dependnecy

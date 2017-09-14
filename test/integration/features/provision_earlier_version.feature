@@ -1,4 +1,4 @@
-@minishift-only
+@provision-earlier-version @openshift @minishift-only
 Feature: Provision an older major release
   As a user I can provision an older major version of minishift
 

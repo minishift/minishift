@@ -21,18 +21,30 @@ import (
 	"time"
 )
 
-const DefaultInterval = 2 * time.Second
+const (
+	DefaultInterval = 2 * time.Second
+	DefaultEasing   = 10
+)
 
 type ProgressDots struct {
-	interval time.Duration
-	handler  chan bool
+	interval   time.Duration
+	easing     int
+	dotCounter int
+	handler    chan bool
 }
 
-// NewProgressDots creates the channel to handle progress dots
-func New() *ProgressDots {
+// New creates the channel to handle progress dots
+// It takes easingOptional as optional parameter to control dots interval
+func New(easingOptional ...int) *ProgressDots {
+	easing := DefaultEasing
+	if len(easingOptional) > 0 {
+		easing = easingOptional[0]
+	}
 	return &ProgressDots{
-		interval: DefaultInterval,
-		handler:  make(chan bool),
+		interval:   DefaultInterval,
+		easing:     easing,
+		dotCounter: 0,
+		handler:    make(chan bool),
 	}
 }
 
@@ -45,7 +57,12 @@ func (s *ProgressDots) Start() {
 				return
 			default:
 				fmt.Print(".")
+				s.dotCounter++
 				time.Sleep(s.interval)
+				if s.easing != 0 && s.dotCounter%s.easing == 0 {
+					s.dotCounter = 0
+					s.interval = s.interval + 1*time.Second
+				}
 			}
 		}
 	}()
@@ -53,6 +70,7 @@ func (s *ProgressDots) Start() {
 
 // Stop stops the dots
 func (s *ProgressDots) Stop() {
+	defer close(s.handler)
 	s.handler <- true
 }
 

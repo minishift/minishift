@@ -60,6 +60,7 @@ type ClusterUpConfig struct {
 	KubeConfigPath   string
 	OcPath           string
 	AddonEnv         []string
+	PublicHostname   string
 }
 
 // ClusterUp downloads and installs the oc binary in order to run 'cluster up'
@@ -112,7 +113,7 @@ func PostClusterUp(clusterUpConfig *ClusterUpConfig, sshCommander provision.SSHC
 	// In case there is any change happen to newer version of oc client binary then this need modification.
 	userName := fmt.Sprintf("system:admin/127-0-0-1:%d", clusterUpConfig.Port)
 
-	err := kubeconfig.CacheSystemAdminEntries(clusterUpConfig.KubeConfigPath, getConfigClusterName(clusterUpConfig.Ip, clusterUpConfig.Port), userName)
+	err := kubeconfig.CacheSystemAdminEntries(clusterUpConfig.KubeConfigPath, getConfigClusterName(clusterUpConfig.PublicHostname, clusterUpConfig.Ip, clusterUpConfig.Port), userName)
 	if err != nil {
 		return err
 	}
@@ -275,7 +276,10 @@ func applyAddOns(addOnManager *manager.AddOnManager, ip string, routingSuffix st
 	return nil
 }
 
-func getConfigClusterName(ip string, port int) string {
+func getConfigClusterName(hostname string, ip string, port int) string {
+	if hostname != "" {
+		return "local-cluster"
+	}
 	return fmt.Sprintf("%s:%d", strings.Replace(ip, ".", "-", -1), port)
 }
 

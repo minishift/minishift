@@ -86,7 +86,7 @@ var serviceCmd = &cobra.Command{
 func init() {
 	serviceCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "The namespace of the service.")
 	serviceCmd.Flags().BoolVar(&inbrowser, "in-browser", false, "Access the service in the default browser.")
-	serviceCmd.Flags().BoolVar(&url, "url", false, "Print the service URL to standard output.")
+	serviceCmd.Flags().BoolVarP(&url, "url", "u", false, "Print the service URL to standard output.")
 	serviceCmd.Flags().BoolVar(&https, "https", false, "Access the service with HTTPS instead of HTTP.")
 	OpenShiftCmd.AddCommand(serviceCmd)
 }

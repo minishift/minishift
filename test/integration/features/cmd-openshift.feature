@@ -1,4 +1,4 @@
-@cmd-openshift
+@cmd-openshift @command @openshift 
 Feature: Openshift commands
 Commands "minishift openshift [sub-command]" are used for interaction with Openshift
 cluster in VM provided by Minishift.

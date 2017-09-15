@@ -1,5 +1,5 @@
-hash: d66e28f0f33659f3b56118791260b21a2de64f7de9b5e38bbc77644fe75cdfa1
-updated: 2017-09-12T06:45:38.1375513Z
+hash: 4dcea7e59c722447b3db8e60b4f19e1f7fe3929efe20277bc097f04919a39661
+updated: 2017-09-15T11:47:18.585986969+02:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: 7b3beb6df3c42abd3509abfc3bcacc0fbfb7c877
@@ -10,7 +10,7 @@ imports:
   subpackages:
   - md2man
 - name: github.com/DATA-DOG/godog
-  version: c3f5ce27930fff8efffaaf0acab7f24d5deecdbc
+  version: 4dc98b0e2b130c3c9d06868a050320e5b310d3e7
   subpackages:
   - colors
   - gherkin
@@ -156,6 +156,7 @@ imports:
   version: 4f2fc6c1e69d41baf187332ee08fbd2b296f21ed
   subpackages:
   - context
+  - context/ctxhttp
 - name: golang.org/x/oauth2
   version: 442624c9ec9243441e83b374a9e22ac549b5c51d
   subpackages:
@@ -174,9 +175,11 @@ imports:
   version: 6a436539be38c296a8075a871cc536686b458371
   subpackages:
   - internal
+  - internal/app_identity
   - internal/base
   - internal/datastore
   - internal/log
+  - internal/modules
   - internal/remote_api
   - internal/urlfetch
   - urlfetch

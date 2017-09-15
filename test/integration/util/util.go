@@ -98,8 +98,8 @@ func (m *MinishiftRunner) CDKSetup() {
 }
 
 func (m *MinishiftRunner) IsCDK() bool {
-	cmdOut, _, _ := m.RunCommand("-h")
-	return strings.Contains(cmdOut, "setup-cdk")
+	cmdOut, _, _ := m.RunCommand("setup-cdk -h")
+	return strings.Contains(cmdOut, "minishift setup-cdk [flags]")
 }
 
 func (m *MinishiftRunner) EnsureRunning() {

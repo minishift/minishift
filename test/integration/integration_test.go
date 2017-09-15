@@ -240,12 +240,7 @@ func FeatureContext(s *godog.Suite) {
 
 	s.BeforeSuite(func() {
 		testDir = setUp()
-		if runner.IsCDK() {
-			runner.CDKSetup()
-		}
-
 		util.StartLog(testDir)
-
 		fmt.Println("Running Integration test in:", testDir)
 		fmt.Println("Using binary:", minishiftBinary)
 	})
@@ -254,6 +249,22 @@ func FeatureContext(s *godog.Suite) {
 		util.LogMessage("info", "----- Cleaning Up -----")
 		minishift.runner.EnsureDeleted()
 		util.CloseLog()
+	})
+
+	s.BeforeFeature(func(this *gherkin.Feature) {
+		util.LogMessage("info", "----- Preparing for feature -----")
+		if runner.IsCDK() {
+			runner.CDKSetup()
+		} else {
+			runner.RunCommand("addons list")
+		}
+
+		util.LogMessage("info", fmt.Sprintf("----- Feature: %s -----", this.Name))
+	})
+
+	s.AfterFeature(func(this *gherkin.Feature) {
+		util.LogMessage("info", "----- Cleaning after feature -----")
+		cleanTestDirConfiguration()
 	})
 
 	s.BeforeScenario(func(this interface{}) {
@@ -299,6 +310,13 @@ func ensureTestDirEmpty() {
 		}
 		os.RemoveAll(fullPath)
 	}
+}
+
+func cleanTestDirConfiguration() {
+	configPath := filepath.Join(testDir, "config")
+	addonsPath := filepath.Join(testDir, "addons")
+	os.RemoveAll(configPath)
+	os.RemoveAll(addonsPath)
 }
 
 //  To get values of nested keys, use following dot formating in Scenarios: key.nestedKey

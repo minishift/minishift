@@ -1,4 +1,4 @@
-@cmd-version @command @openshift @minishift-only
+@cmd-version @command @minishift-only
 Feature: Version command
 Command "minishift version" shows version of minishift binary.
 

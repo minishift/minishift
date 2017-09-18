@@ -99,7 +99,7 @@ func addMockResponses(mockTransport *minitesting.MockRoundTripper) {
 	mockTransport.RegisterResponse("https://api.github.com/repos/openshift/origin/releases/assets/2489308", &minitesting.CannedResponse{
 		ResponseType: minitesting.SERVE_FILE,
 		Response:     filepath.Join(testDataDir, "CHECKSUM"),
-		ContentType:  minitesting.TEXT,
+		ContentType:  minitesting.JSON,
 	})
 
 	var assetContent string

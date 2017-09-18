@@ -37,7 +37,7 @@ KVM has a standing issue. You might face an error like
 ----
 error: Network not found: no network with matching name 'default'
 ----
-Start a default network using virt-manager(virt-manager > edit > connection details > virtual networks > default), more link:https://github.com/kubernetes/minikube/issues/828[here]
+If so, start a default network using virt-manager(virt-manager > edit > connection details > virtual networks > default), more link:https://github.com/kubernetes/minikube/issues/828[here]
 
 [[kvm-driver-debian]]
 === On Debian/Ubuntu

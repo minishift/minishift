@@ -6,7 +6,7 @@ Feature: Minishift can run behind proxy
         to set MINISHIFT_HTTP_PROXY for this feature only.
         However one can override port number or set IP manually if needed.
         To use custom port number run this test with environmental variable
-        INTEGRATION_PROXY_CUSTOM_PORT.       
+        INTEGRATION_PROXY_CUSTOM_PORT.
         To use custom IP address please set INTEGRATION_PROXY_CUSTOM_IP
         environmental variable.
 

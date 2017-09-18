@@ -438,10 +438,9 @@ func calculateDiskSize(humanReadableSize string) int {
 }
 
 func determineIsoUrl(iso string) string {
-	iso = strings.ToLower(iso)
 	isoNotSpecified := ""
 
-	switch iso {
+	switch strings.ToLower(iso) {
 	case minishiftConstants.B2dIsoAlias, isoNotSpecified:
 		iso = constants.DefaultB2dIsoUrl
 	case minishiftConstants.CentOsIsoAlias:

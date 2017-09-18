@@ -238,5 +238,5 @@ user defined options which changes default behaviour of Minishift.
      Then stdout should contain "test-registry:5000"
 
   Scenario: Deleting Minishift instance
-     When executing "minishift delete" succeeds
+     When executing "minishift delete --force" succeeds
      Then Minishift should have state "Does Not Exist"

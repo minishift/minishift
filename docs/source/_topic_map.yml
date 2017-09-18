@@ -33,6 +33,8 @@ Topics:
         File: host-folders
       - Name: Minishift Docker Daemon
         File: docker-daemon
+      - Name: Profiles
+        File: profiles
   - Name: Interacting with OpenShift
     Dir: openshift
     Topics:

@@ -21,4 +21,6 @@ const (
 	CentOsIsoAlias         = "centos"
 	OpenshiftContainerName = "origin"
 	OpenshiftExec          = "/usr/bin/openshift"
+	DefaultProject         = "myproject"
+	DefaultUser            = "developer"
 )

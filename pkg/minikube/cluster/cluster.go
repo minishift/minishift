@@ -427,7 +427,6 @@ func getDriverOptions(config MachineConfig) (drivers.DriverOptions, error) {
 			"xhyve-cpu-count":       config.CPUs,
 			"xhyve-disk-size":       config.DiskSize,
 			"xhyve-virtio-9p":       "true",
-			"xhyve-uuid":            "F4BB3F79-AB4E-4708-95CA-E32FBFCDEFD3",
 		}
 
 		return createDriverOptions(h.Driver, machineConfigOptions)

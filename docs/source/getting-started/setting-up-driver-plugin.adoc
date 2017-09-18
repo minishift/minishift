@@ -32,12 +32,11 @@ $ sudo chmod +x /usr/local/bin/docker-machine-driver-kvm
 ----
 
 For more information, see the GitHub documentation of the link:https://github.com/dhiltgen/docker-machine-kvm#quick-start-instructions[docker machine KVM driver].
-KVM has a know issue. You might face an error like
-+
+
+KVM has a standing issue. You might face an error like
 ----
 error: Network not found: no network with matching name 'default'
 ----
-+
 Start a default network using virt-manager(virt-manager > edit > connection details > virtual networks > default), more link:https://github.com/kubernetes/minikube/issues/828[here]
 
 [[kvm-driver-debian]]

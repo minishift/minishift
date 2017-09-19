@@ -96,24 +96,34 @@ func addMockResponses(mockTransport *minitesting.MockRoundTripper) {
 		ContentType:  minitesting.JSON,
 	})
 
-	mockTransport.RegisterResponse("https://api.github.com/repos/openshift/origin/releases/assets/2489308", &minitesting.CannedResponse{
-		ResponseType: minitesting.SERVE_FILE,
-		Response:     filepath.Join(testDataDir, "CHECKSUM"),
-		ContentType:  minitesting.TEXT,
-	})
-
 	var assetContent string
 	switch runtime.GOOS {
 	case "windows":
 		assetContent = filepath.Join(testDataDir, "openshift-origin-client-tools-v1.3.1-dad658de7465ba8a234a4fb40b5b446a45a4cee1-windows.zip")
+		mockTransport.RegisterResponse("https://api.github.com/repos/openshift/origin/releases/assets/2489312", &minitesting.CannedResponse{
+			ResponseType: minitesting.SERVE_FILE,
+			Response:     assetContent,
+			ContentType:  minitesting.OCTET_STREAM,
+		})
 	case "darwin":
 		assetContent = filepath.Join(testDataDir, "openshift-origin-client-tools-v1.3.1-2748423-mac.zip")
+		mockTransport.RegisterResponse("https://api.github.com/repos/openshift/origin/releases/assets/2586147", &minitesting.CannedResponse{
+			ResponseType: minitesting.SERVE_FILE,
+			Response:     assetContent,
+			ContentType:  minitesting.OCTET_STREAM,
+		})
 	case "linux":
 		assetContent = filepath.Join(testDataDir, "openshift-origin-client-tools-v1.3.1-dad658de7465ba8a234a4fb40b5b446a45a4cee1-linux-64bit.tar.gz")
+		mockTransport.RegisterResponse("https://api.github.com/repos/openshift/origin/releases/assets/2489310", &minitesting.CannedResponse{
+			ResponseType: minitesting.SERVE_FILE,
+			Response:     assetContent,
+			ContentType:  minitesting.OCTET_STREAM,
+		})
 	}
-	mockTransport.RegisterResponse("https://api.github.com/repos/openshift/origin/releases/assets/.*", &minitesting.CannedResponse{
+
+	mockTransport.RegisterResponse("https://api.github.com/repos/openshift/origin/releases/assets/2489308", &minitesting.CannedResponse{
 		ResponseType: minitesting.SERVE_FILE,
-		Response:     assetContent,
-		ContentType:  minitesting.OCTET_STREAM,
+		Response:     filepath.Join(testDataDir, "CHECKSUM"),
+		ContentType:  minitesting.TEXT,
 	})
 }

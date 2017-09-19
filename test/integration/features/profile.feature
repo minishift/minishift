@@ -1,4 +1,4 @@
-@profile
+@profile @command
 Feature: Profile
   As a user I can perform basic operations of Minishift with profile feature
 

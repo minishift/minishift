@@ -36,7 +36,6 @@ import (
 	"github.com/minishift/minishift/cmd/minishift/cmd/image"
 	cmdOpenshift "github.com/minishift/minishift/cmd/minishift/cmd/openshift"
 	cmdProfile "github.com/minishift/minishift/cmd/minishift/cmd/profile"
-	"github.com/minishift/minishift/cmd/minishift/cmd/util"
 	cmdUtil "github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
@@ -70,8 +69,7 @@ var RootCmd = &cobra.Command{
 	Long:  `Minishift is a command-line tool that provisions and manages single-node OpenShift clusters optimized for development workflows.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		var (
-			err                    error
-			isAddonInstallRequired bool
+			err error
 		)
 
 		constants.MachineName = constants.ProfileName
@@ -80,10 +78,6 @@ var RootCmd = &cobra.Command{
 		minishiftConfig.InstanceDirs = minishiftConfig.NewMinishiftDirs()
 
 		constants.KubeConfigPath = filepath.Join(constants.Minipath, "machines", constants.MachineName+"_kubeconfig")
-
-		if !filehelper.Exists(minishiftConfig.InstanceDirs.Addons) {
-			isAddonInstallRequired = true
-		}
 
 		// creating all directories for minishift run
 		createMinishiftDirs(minishiftConfig.InstanceDirs)
@@ -95,16 +89,6 @@ var RootCmd = &cobra.Command{
 		minishiftConfig.InstanceConfig, err = minishiftConfig.NewInstanceConfig(instanceConfigPath)
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error creating config for VM: %s", err.Error()))
-		}
-
-		// Run the default addons on fresh minishift start
-		if isAddonInstallRequired {
-			fmt.Print("-- Installing default add-ons ... ")
-			if err := util.UnpackAddons(minishiftConfig.InstanceDirs.Addons); err != nil {
-				atexit.ExitWithMessage(1, fmt.Sprintf("Error installing default add-ons : %s", err))
-			}
-
-			fmt.Println("OK")
 		}
 
 		// Check marker file created by update command and perform post update execution steps
@@ -157,8 +141,8 @@ func setFlagsUsingViper() {
 }
 
 func processEnvVariables() {
-	enableExperimental, err := util.GetBoolEnv(enableExperimentalEnv)
-	if err == util.BooleanFormatError {
+	enableExperimental, err := cmdUtil.GetBoolEnv(enableExperimentalEnv)
+	if err == cmdUtil.BooleanFormatError {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error enabling experimental features: %s", err))
 	}
 	hasEnabledExperimental = enableExperimental
@@ -269,9 +253,9 @@ func performPostUpdateExecution(markerPath string) error {
 	if markerData.InstallAddon {
 		fmt.Println(fmt.Sprintf("Minishift was upgraded from v%s to v%s. Running post update actions.", markerData.PreviousVersion, version.GetMinishiftVersion()))
 		fmt.Print("--- Updating default add-ons ... ")
-		util.UnpackAddons(minishiftConfig.InstanceDirs.Addons)
+		cmdUtil.UnpackAddons(minishiftConfig.InstanceDirs.Addons)
 		fmt.Println("OK")
-		fmt.Println(fmt.Sprintf("Default add-ons %s installed", strings.Join(util.DefaultAssets, ", ")))
+		fmt.Println(fmt.Sprintf("Default add-ons %s installed", strings.Join(cmdUtil.DefaultAssets, ", ")))
 	}
 
 	// Delete the marker file once post update execution is done

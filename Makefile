@@ -139,9 +139,19 @@ prerelease: clean fmtcheck test cross
 .PHONY: release
 release: clean $(GOPATH)/bin/gh-release cross
 	mkdir -p release
-	tar -zcf release/minishift-$(MINISHIFT_VERSION)-darwin-amd64.tgz LICENSE README.adoc -C $(BUILD_DIR)/darwin-amd64 minishift
-	tar -zcf release/minishift-$(MINISHIFT_VERSION)-linux-amd64.tgz LICENSE README.adoc -C $(BUILD_DIR)/linux-amd64 minishift
-	zip -j release/minishift-$(MINISHIFT_VERSION)-windows-amd64.zip LICENSE README.adoc $(BUILD_DIR)/windows-amd64/minishift.exe
+
+	@mkdir -p $(BUILD_DIR)/minishift-$(MINISHIFT_VERSION)-darwin-amd64
+	@cp LICENSE README.adoc $(BUILD_DIR)/darwin-amd64/minishift $(BUILD_DIR)/minishift-$(MINISHIFT_VERSION)-darwin-amd64
+	tar -zcf release/minishift-$(MINISHIFT_VERSION)-darwin-amd64.tgz -C $(BUILD_DIR) minishift-$(MINISHIFT_VERSION)-darwin-amd64/
+
+	@mkdir -p $(BUILD_DIR)/minishift-$(MINISHIFT_VERSION)-linux-amd64
+	@cp LICENSE README.adoc $(BUILD_DIR)/linux-amd64/minishift $(BUILD_DIR)/minishift-$(MINISHIFT_VERSION)-linux-amd64
+	tar -zcf release/minishift-$(MINISHIFT_VERSION)-linux-amd64.tgz -C $(BUILD_DIR) minishift-$(MINISHIFT_VERSION)-linux-amd64/
+
+	@mkdir -p $(BUILD_DIR)/minishift-$(MINISHIFT_VERSION)-windows-amd64
+	@cp LICENSE README.adoc $(BUILD_DIR)/windows-amd64/minishift.exe $(BUILD_DIR)/minishift-$(MINISHIFT_VERSION)-windows-amd64
+	cd $(BUILD_DIR) && zip -r $(CURDIR)/release/minishift-$(MINISHIFT_VERSION)-windows-amd64.zip minishift-$(MINISHIFT_VERSION)-windows-amd64
+
 	gh-release checksums sha256
 	gh-release create minishift/minishift $(MINISHIFT_VERSION) master v$(MINISHIFT_VERSION)
 

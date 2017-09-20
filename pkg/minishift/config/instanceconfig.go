@@ -28,6 +28,7 @@ type InstanceConfigType struct {
 	FilePath     string `json:"-"`
 	OcPath       string
 	IsRegistered bool
+	IsRHELBased  bool
 
 	HostFolders []HostFolder
 }

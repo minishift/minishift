@@ -55,9 +55,8 @@ func (registrator *RedHatRegistrator) CompatibleWithDistribution(osReleaseInfo *
 	}
 	if _, err := registrator.SSHCommand("sudo -E subscription-manager"); err != nil {
 		return false
-	} else {
-		return true
 	}
+	return true
 }
 
 // Register attempts to register the system with RHSM

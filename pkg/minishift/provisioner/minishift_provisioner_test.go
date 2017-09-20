@@ -18,14 +18,19 @@ package provisioner
 
 import (
 	"bytes"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"testing"
+	"text/template"
+
 	"github.com/docker/machine/drivers/fakedriver"
 	"github.com/docker/machine/libmachine/auth"
 	"github.com/docker/machine/libmachine/engine"
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/docker/machine/libmachine/provision/provisiontest"
 	"github.com/docker/machine/libmachine/swarm"
-	"testing"
-	"text/template"
+	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 )
 
 func TestMinishiftLogLevel(t *testing.T) {
@@ -47,6 +52,8 @@ func TestMinishiftDefaultStorageDriver(t *testing.T) {
 }
 
 func TestRhelImage(t *testing.T) {
+	testDir := setup(t)
+	defer os.RemoveAll(testDir)
 	p := NewMinishiftProvisioner("", &fakedriver.Driver{})
 	p.SSHCommander = provisiontest.NewFakeSSHCommander(provisiontest.FakeSSHCommanderOptions{})
 	info := &provision.OsRelease{
@@ -127,4 +134,17 @@ func TestMinishiftProvisionerGenerateDockerOptionsForCentOS(t *testing.T) {
 	if dockerOptions.EngineOptions != engineCfg.String() {
 		t.Fatalf("Expected %s, Got %s", engineCfg.String(), dockerOptions.EngineOptions)
 	}
+}
+
+func setup(t *testing.T) string {
+	// Make sure we create the required directories.
+	testDir, err := ioutil.TempDir("", "minishift-provision")
+	if err != nil {
+		t.Error(err)
+	}
+	// Need to create since Minishift config get created in root command
+	os.Mkdir(filepath.Join(testDir, "machines"), 0755)
+	instanceConfigPath := filepath.Join(testDir, "machines", "test.json")
+	minishiftConfig.InstanceConfig, err = minishiftConfig.NewInstanceConfig(instanceConfigPath)
+	return testDir
 }

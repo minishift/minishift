@@ -102,19 +102,16 @@ func (m *MinishiftRunner) IsCDK() bool {
 	return strings.Contains(cmdOut, "minishift setup-cdk [flags]")
 }
 
-func (m *MinishiftRunner) EnsureRunning() {
-	if m.GetStatus() != "Running" {
-		m.Start()
-	}
-	m.CheckStatus("Running")
+func (m *MinishiftRunner) IsMinishiftRunning() bool {
+	return strings.Contains(m.GetStatus(), "Minishift:  Running")
 }
 
-func (m *MinishiftRunner) IsRunning() bool {
-	return m.GetStatus() == "Running"
+func (m *MinishiftRunner) IsOpenshiftRunning() bool {
+	return strings.Contains(m.GetStatus(), "OpenShift:  Running")
 }
 
 func (m *MinishiftRunner) GetOcRunner() *OcRunner {
-	if m.IsRunning() {
+	if m.IsMinishiftRunning() {
 		return NewOcRunner()
 	}
 	return nil
@@ -152,7 +149,7 @@ func (m *MinishiftRunner) GetStatus() string {
 }
 
 func (m *MinishiftRunner) CheckStatus(desired string) bool {
-	return m.GetStatus() == desired
+	return strings.Contains(m.GetStatus(), desired)
 }
 
 func NewOcRunner() *OcRunner {

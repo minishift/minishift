@@ -26,7 +26,11 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/docker/machine/libmachine/host"
+	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/pkg/minishift/clusterup"
+	"github.com/minishift/minishift/pkg/minishift/constants"
+	"github.com/minishift/minishift/pkg/minishift/docker"
 	"github.com/minishift/minishift/pkg/util"
 )
 
@@ -42,6 +46,12 @@ type ImageInfo struct {
 	Os           interface{} `json:"os"`
 	OsVersion    interface{} `json:"os_version"`
 	OsFeatures   interface{} `json:"os_features"`
+}
+
+func GetOpenshiftVersion(host *host.Host) (string, error) {
+	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
+	dockerCommander := docker.NewVmDockerCommander(sshCommander)
+	return dockerCommander.Exec(" ", constants.OpenshiftContainerName, "openshift", "version")
 }
 
 func PrintDownStreamVersions(output io.Writer, minSupportedVersion string) error {

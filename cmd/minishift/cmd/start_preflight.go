@@ -335,7 +335,7 @@ func checkStorageMounted(driver drivers.Driver) bool {
 // checkStorageUsage checks if the peristent storage volume has enough storage
 // space available.
 func checkStorageUsage(driver drivers.Driver) bool {
-	usedPercentage := getDiskUsage(driver, StorageDisk)
+	_, usedPercentage := getDiskUsage(driver, StorageDisk)
 	fmt.Printf("%s used ", usedPercentage)
 	usage, err := strconv.Atoi(stringUtils.GetOnlyNumbers(usedPercentage))
 	if err != nil {
@@ -352,18 +352,20 @@ func checkStorageUsage(driver drivers.Driver) bool {
 }
 
 // isMounted checks returns usage of mountpoint known to the VM instance
-func getDiskUsage(driver drivers.Driver, mountpoint string) string {
+func getDiskUsage(driver drivers.Driver, mountpoint string) (string, string) {
 	cmd := fmt.Sprintf(
-		"df -h %s | awk 'FNR > 1 {print $5}'",
+		"df -h %s | awk 'FNR > 1 {print $2,$5}'",
 		mountpoint)
 
 	out, err := drivers.RunSSHCommandFromDriver(driver, cmd)
 
 	if err != nil {
-		return "ERR"
+		return "", "ERR"
 	}
-
-	return strings.Trim(out, "\n")
+	diskDetails := strings.Split(strings.Trim(out, "\n"), " ")
+	diskSize := diskDetails[0]
+	diskUsage := diskDetails[1]
+	return diskSize, diskUsage
 }
 
 // isMounted checks if mountpoint is mounted to the VM instance

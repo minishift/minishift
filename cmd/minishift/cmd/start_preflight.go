@@ -31,6 +31,8 @@ import (
 
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/viper"
+
+	stringUtils "github.com/minishift/minishift/pkg/util/strings"
 )
 
 const (
@@ -311,9 +313,8 @@ func checkStorageMounted(driver drivers.Driver) bool {
 // space available.
 func checkStorageUsage(driver drivers.Driver) bool {
 	usedPercentage := getDiskUsage(driver, StorageDisk)
-	fmt.Printf("%s ", usedPercentage)
-	usedPercentage = strings.TrimRight(usedPercentage, "%")
-	usage, err := strconv.ParseInt(usedPercentage, 10, 8)
+	fmt.Printf("%s used ", usedPercentage)
+	usage, err := strconv.Atoi(stringUtils.GetOnlyNumbers(usedPercentage))
 	if err != nil {
 		return false
 	}

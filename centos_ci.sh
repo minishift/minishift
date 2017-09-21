@@ -180,20 +180,12 @@ function artifacts_upload_on_pr_and_master_trigger() {
   set +x
   # For PR build, GIT_BRANCH is set to branch name other than origin/master
   if [[ "$GIT_BRANCH" = "origin/master" ]]; then
-    install_docs_prerequisite_packages;
-    make gen_adoc_tar IMAGE_UID=$(id -u)
-    build_openshift_origin_docs $(pwd)/docs/build/minishift-adoc.tar;
-
     mkdir -p minishift/master/$BUILD_NUMBER/
     cp -r out/*-amd64 minishift/master/$BUILD_NUMBER/
-    # Copy the openshift-docs
-    cp -r openshift-docs/_preview/openshift-origin minishift/master/$BUILD_NUMBER/openshift-docs
     # http://stackoverflow.com/a/22908437/1120530; Using --relative as --rsync-path not working
     RSYNC_PASSWORD=$1 rsync -av --delete --relative minishift/master/$BUILD_NUMBER/ minishift@artifacts.ci.centos.org::minishift/
     echo "Find Artifacts here http://artifacts.ci.centos.org/minishift/minishift/master/$BUILD_NUMBER ."
-    echo "Minishift docs is hosted at http://artifacts.ci.centos.org/minishift/minishift/master/$BUILD_NUMBER/openshift-docs/latest/minishift/index.html ."
   else
-
     mkdir -p minishift/pr/$ghprbPullId/
     cp -r out/*-amd64 minishift/pr/$ghprbPullId/
     # http://stackoverflow.com/a/22908437/1120530; Using --relative as --rsync-path not working

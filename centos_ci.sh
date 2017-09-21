@@ -22,6 +22,7 @@ set -e
 
 # GitHub user
 REPO_OWNER="minishift"
+LATEST="latest"
 
 # Source environment variables of the jenkins slave
 # that might interest this worker.
@@ -180,10 +181,11 @@ function artifacts_upload_on_pr_and_master_trigger() {
   set +x
   # For PR build, GIT_BRANCH is set to branch name other than origin/master
   if [[ "$GIT_BRANCH" = "origin/master" ]]; then
-    mkdir -p minishift/master/$BUILD_NUMBER/
+    mkdir -p minishift/master/$BUILD_NUMBER/ minishift/master/$LATEST
     cp -r out/*-amd64 minishift/master/$BUILD_NUMBER/
+    cp -r out/*-amd64 minishift/master/$LATEST/
     # http://stackoverflow.com/a/22908437/1120530; Using --relative as --rsync-path not working
-    RSYNC_PASSWORD=$1 rsync -av --delete --relative minishift/master/$BUILD_NUMBER/ minishift@artifacts.ci.centos.org::minishift/
+    RSYNC_PASSWORD=$1 rsync -av --relative minishift/master minishift@artifacts.ci.centos.org::minishift/
     echo "Find Artifacts here http://artifacts.ci.centos.org/minishift/minishift/master/$BUILD_NUMBER ."
   else
     mkdir -p minishift/pr/$ghprbPullId/
@@ -198,7 +200,6 @@ function docs_tar_upload() {
   set +x
 
   version=$(cat docs/source/variables.adoc | cut -d' ' -f2 | head -n1)
-  LATEST=latest
   mkdir -p minishift/docs/$version minishift/docs/$LATEST
   cp docs/build/minishift-adoc.tar minishift/docs/$version/
   cp docs/build/minishift-adoc.tar minishift/docs/$LATEST/
@@ -297,7 +298,7 @@ function build_and_test() {
   cd $GOPATH/src/github.com/minishift/minishift
   make prerelease synopsis_docs link_check_docs
   # Run integration test with 'kvm' driver
-  MINISHIFT_VM_DRIVER=kvm make integration GODOG_OPTS="-tags=basic,openshift,version,cmd-config,profile -format pretty"
+  MINISHIFT_VM_DRIVER=kvm make integration GODOG_OPTS="-tags=basic,openshift,cmd-version,cmd-config,profile -format pretty"
   echo "CICO: Tests ran successfully"
 
   artifacts_upload_on_pr_and_master_trigger $1;

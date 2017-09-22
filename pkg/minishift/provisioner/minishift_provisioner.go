@@ -31,6 +31,7 @@ import (
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/docker/machine/libmachine/provision/pkgaction"
 	"github.com/docker/machine/libmachine/swarm"
+	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 )
 
 func NewMinishiftProvisioner(osReleaseID string, d drivers.Driver) *MinishiftProvisioner {
@@ -73,6 +74,10 @@ func (provisioner *MinishiftProvisioner) SetHostname(hostname string) error {
 }
 
 func (provisioner *MinishiftProvisioner) GetRedhatRelease() bool {
+	// Add ISO (RHEL, CentOS, ...etc.) type detail to config
+	minishiftConfig.InstanceConfig.IsRHELBased = true
+	minishiftConfig.InstanceConfig.Write()
+
 	OsRelease, _ := provisioner.GetOsReleaseInfo()
 	if strings.Contains(OsRelease.Name, "Red Hat Enterprise") {
 		return true
@@ -147,11 +152,9 @@ func (provisioner *MinishiftProvisioner) GenerateDockerOptions(dockerPort int) (
 
 	// systemd / redhat will not load options if they are on newlines
 	// instead, it just continues with a different set of options; yeah...
-	engineConfigTemplate := ""
+	engineConfigTemplate := engineConfigTemplateCentOS
 	if provisioner.GetRedhatRelease() {
 		engineConfigTemplate = engineConfigTemplateRHEL
-	} else {
-		engineConfigTemplate = engineConfigTemplateCentOS
 	}
 
 	t, err := template.New("engineConfig").Parse(engineConfigTemplate)

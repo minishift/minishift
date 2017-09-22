@@ -19,7 +19,7 @@ Feature: Basic
      """
 
   @minishift-only
-  Scenario: User can list enabled plugins
+  Scenario: User can list enabled add-ons
    Given Minishift has state "Does Not Exist"
     When executing "minishift addons list" succeeds
     Then stdout should contain

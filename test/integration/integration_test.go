@@ -24,6 +24,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -238,14 +239,13 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^printing Docker daemon configuration to stdout$`,
 		catDockerConfigFile)
 
+	// steps for download of minishift-addons repository
+	s.Step(`^file from "(.*)" is downloaded into location "(.*)"$`,
+		downloadFileIntoLocation)
+
 	s.BeforeSuite(func() {
 		testDir = setUp()
-		if runner.IsCDK() {
-			runner.CDKSetup()
-		}
-
 		util.StartLog(testDir)
-
 		fmt.Println("Running Integration test in:", testDir)
 		fmt.Println("Using binary:", minishiftBinary)
 	})
@@ -254,6 +254,22 @@ func FeatureContext(s *godog.Suite) {
 		util.LogMessage("info", "----- Cleaning Up -----")
 		minishift.runner.EnsureDeleted()
 		util.CloseLog()
+	})
+
+	s.BeforeFeature(func(this *gherkin.Feature) {
+		util.LogMessage("info", "----- Preparing for feature -----")
+		if runner.IsCDK() {
+			runner.CDKSetup()
+		} else {
+			runner.RunCommand("addons list")
+		}
+
+		util.LogMessage("info", fmt.Sprintf("----- Feature: %s -----", this.Name))
+	})
+
+	s.AfterFeature(func(this *gherkin.Feature) {
+		util.LogMessage("info", "----- Cleaning after feature -----")
+		cleanTestDirConfiguration()
 	})
 
 	s.BeforeScenario(func(this interface{}) {
@@ -298,6 +314,20 @@ func ensureTestDirEmpty() {
 			continue
 		}
 		os.RemoveAll(fullPath)
+	}
+}
+
+func cleanTestDirConfiguration() {
+	var foldersToClean []string
+	foldersToClean = append(foldersToClean, filepath.Join(testDir, "addons"))
+	foldersToClean = append(foldersToClean, filepath.Join(testDir, "config"))
+
+	for index := range foldersToClean {
+		err := os.RemoveAll(foldersToClean[index])
+		if err != nil {
+			fmt.Println(fmt.Sprintf("Unable to remove folder %v: %v", foldersToClean[index], err))
+			os.Exit(1)
+		}
 	}
 }
 
@@ -752,4 +782,34 @@ func catDockerConfigFile() error {
 	}
 
 	return err
+}
+
+func downloadFileIntoLocation(downloadURL string, destinationFolder string) error {
+	destinationFolder = filepath.Join(testDir, destinationFolder)
+	err := os.MkdirAll(destinationFolder, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	slice := strings.Split(downloadURL, "/")
+	fileName := slice[len(slice)-1]
+	filePath := filepath.Join(destinationFolder, fileName)
+	out, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	resp, err := http.Get(downloadURL)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -1,6 +1,6 @@
 # Name: xpaas
 # Description: Imports xPaaS templates
-# Url: https://github.com/openshift/openshift-ansible/tree/master/roles/openshift_examples/files/examples/v3.6
+# Url: https://github.com/openshift/openshift-ansible/tree/master/roles/openshift_examples/files/examples/v3.7
 
 oc apply -f xpaas-streams/fis-image-streams.json -n openshift
 oc apply -f xpaas-streams/jboss-image-streams.json -n openshift
@@ -102,4 +102,4 @@ oc create -f xpaas-templates/sso70-postgresql-persistent.json -n openshift
 oc create -f xpaas-templates/sso70-postgresql.json -n openshift
 
 echo XPaaS OpenShift imagestream and templates installed
-echo See https://github.com/openshift/openshift-ansible/tree/master/roles/openshift_examples/files/examples/v3.6
+echo See https://github.com/openshift/openshift-ansible/tree/master/roles/openshift_examples/files/examples/v3.7

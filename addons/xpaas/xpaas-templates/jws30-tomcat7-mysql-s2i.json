@@ -5,129 +5,152 @@
         "annotations": {
             "iconClass": "icon-tomcat",
             "description": "Application template for JWS MySQL applications built using S2I.",
-            "tags": "tomcat,tomcat7,mysql,java,database,jboss,xpaas",
-            "version": "1.2.0"
+            "tags": "tomcat,tomcat7,java,jboss,xpaas",
+            "version": "1.4.0",
+            "openshift.io/display-name": "Red Hat JBoss Web Server 3.0 Tomcat 7 + MySQL (Ephemeral with https)"
         },
         "name": "jws30-tomcat7-mysql-s2i"
     },
     "labels": {
         "template": "jws30-tomcat7-mysql-s2i",
-        "xpaas": "1.2.0"
+        "xpaas": "1.4.0"
     },
+    "message": "A new JWS application for Tomcat 7 (using MySQL) has been created in your project. The username/password for administering your JWS is ${JWS_ADMIN_USERNAME}/${JWS_ADMIN_PASSWORD}. For accessing the MySQL database \"${DB_DATABASE}\" use the credentials ${DB_USERNAME}/${DB_PASSWORD}. Please be sure to create the \"jws-service-account\" service account and the secret named \"${JWS_HTTPS_SECRET}\" containing the ${JWS_HTTPS_CERTIFICATE} file used for serving secure content.",
     "parameters": [
         {
+            "displayName": "Application Name",
             "description": "The name for the application.",
             "name": "APPLICATION_NAME",
             "value": "jws-app",
             "required": true
         },
         {
+            "displayName": "Custom http Route Hostname",
             "description": "Custom hostname for http service route.  Leave blank for default hostname, e.g.: <application-name>-<project>.<default-domain-suffix>",
             "name": "HOSTNAME_HTTP",
             "value": "",
             "required": false
         },
         {
+            "displayName": "Custom https Route Hostname",
             "description": "Custom hostname for https service route.  Leave blank for default hostname, e.g.: secure-<application-name>-<project>.<default-domain-suffix>",
             "name": "HOSTNAME_HTTPS",
             "value": "",
             "required": false
         },
         {
+            "displayName": "Git Repository URL",
             "description": "Git source URI for application",
             "name": "SOURCE_REPOSITORY_URL",
             "value": "https://github.com/jboss-openshift/openshift-quickstarts",
             "required": true
         },
         {
+            "displayName": "Git Reference",
             "description": "Git branch/tag reference",
             "name": "SOURCE_REPOSITORY_REF",
             "value": "1.2",
             "required": false
         },
         {
+            "displayName": "Context Directory",
             "description": "Path within Git project to build; empty for root project directory.",
             "name": "CONTEXT_DIR",
             "value": "todolist/todolist-jdbc",
             "required": false
         },
         {
+            "displayName": "Database JNDI Name",
             "description": "Database JNDI name used by application to resolve the datasource, e.g. jboss/datasources/mysqlDS",
             "name": "DB_JNDI",
             "value": "jboss/datasources/defaultDS",
             "required": false
         },
         {
+            "displayName": "Database Name",
             "description": "Database name",
             "name": "DB_DATABASE",
             "value": "root",
             "required": true
         },
         {
+            "displayName": "Secret Name",
             "description": "The name of the secret containing the certificate files",
             "name": "JWS_HTTPS_SECRET",
             "value": "jws-app-secret",
             "required": true
         },
         {
+            "displayName": "Certificate Name",
             "description": "The name of the certificate file within the secret",
             "name": "JWS_HTTPS_CERTIFICATE",
             "value": "server.crt",
             "required": false
         },
         {
+            "displayName": "Certificate Key Name",
             "description": "The name of the certificate key file within the secret",
             "name": "JWS_HTTPS_CERTIFICATE_KEY",
             "value": "server.key",
             "required": false
         },
         {
+            "displayName": "Certificate Password",
             "description": "The certificate password",
             "name": "JWS_HTTPS_CERTIFICATE_PASSWORD",
             "value": "",
             "required": false
         },
         {
+            "displayName": "Datasource Minimum Pool Size",
             "description": "Sets xa-pool/min-pool-size for the configured datasource.",
             "name": "DB_MIN_POOL_SIZE",
             "required": false
         },
         {
+            "displayName": "Datasource Maximum Pool Size",
             "description": "Sets xa-pool/max-pool-size for the configured datasource.",
             "name": "DB_MAX_POOL_SIZE",
             "required": false
         },
         {
+            "displayName": "Datasource Transaction Isolation",
             "description": "Sets transaction-isolation for the configured datasource.",
             "name": "DB_TX_ISOLATION",
             "required": false
         },
         {
+            "displayName": "MySQL Lower Case Table Names",
             "description": "Sets how the table names are stored and compared.",
             "name": "MYSQL_LOWER_CASE_TABLE_NAMES",
             "required": false
         },
         {
+            "displayName": "MySQL Maximum number of connections",
             "description": "The maximum permitted number of simultaneous client connections.",
             "name": "MYSQL_MAX_CONNECTIONS",
             "required": false
         },
         {
+            "displayName": "MySQL FullText Minimum Word Length",
             "description": "The minimum length of the word to be included in a FULLTEXT index.",
             "name": "MYSQL_FT_MIN_WORD_LEN",
             "required": false
         },
         {
+            "displayName": "MySQL FullText Maximum Word Length",
             "description": "The maximum length of the word to be included in a FULLTEXT index.",
             "name": "MYSQL_FT_MAX_WORD_LEN",
             "required": false
         },
         {
+            "displayName": "MySQL AIO",
             "description": "Controls the innodb_use_native_aio setting value if the native AIO is broken.",
             "name": "MYSQL_AIO",
             "required": false
         },
         {
+            "displayName": "Database Username",
             "description": "Database user name",
             "name": "DB_USERNAME",
             "from": "user[a-zA-Z0-9]{3}",
@@ -135,6 +158,7 @@
             "required": true
         },
         {
+            "displayName": "Database Password",
             "description": "Database user password",
             "name": "DB_PASSWORD",
             "from": "[a-zA-Z0-9]{8}",
@@ -142,6 +166,7 @@
             "required": true
         },
         {
+            "displayName": "JWS Admin Username",
             "description": "JWS Admin User",
             "name": "JWS_ADMIN_USERNAME",
             "from": "[a-zA-Z0-9]{8}",
@@ -149,6 +174,7 @@
             "required": true
         },
         {
+            "displayName": "JWS Admin Password",
             "description": "JWS Admin Password",
             "name": "JWS_ADMIN_PASSWORD",
             "from": "[a-zA-Z0-9]{8}",
@@ -156,6 +182,7 @@
             "required": true
         },
         {
+            "displayName": "Github Webhook Secret",
             "description": "GitHub trigger secret",
             "name": "GITHUB_WEBHOOK_SECRET",
             "from": "[a-zA-Z0-9]{8}",
@@ -163,6 +190,7 @@
             "required": true
         },
         {
+            "displayName": "Generic Webhook Secret",
             "description": "Generic build trigger secret",
             "name": "GENERIC_WEBHOOK_SECRET",
             "from": "[a-zA-Z0-9]{8}",
@@ -170,9 +198,30 @@
             "required": true
         },
         {
+            "displayName": "ImageStream Namespace",
             "description": "Namespace in which the ImageStreams for Red Hat Middleware images are installed. These ImageStreams are normally installed in the openshift namespace. You should only need to modify this if you've installed the ImageStreams in a different namespace/project.",
             "name": "IMAGE_STREAM_NAMESPACE",
             "value": "openshift",
+            "required": true
+        },
+        {
+            "displayName": "Maven mirror URL",
+            "description": "Maven mirror to use for S2I builds",
+            "name": "MAVEN_MIRROR_URL",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "List of directories from which archives will be copied into the deployment folder. If unspecified, all archives in /target will be copied.",
+            "name": "ARTIFACT_DIR",
+            "value": "",
+            "required": false
+        },
+        {
+            "displayName": "MySQL Image Stream Tag",
+            "description": "The tag to use for the \"mysql\" image stream.  Typically, this aligns with the major.minor version of MySQL.",
+            "name": "MYSQL_IMAGE_STREAM_TAG",
+            "value": "5.7",
             "required": true
         }
     ],
@@ -197,7 +246,8 @@
                     "application": "${APPLICATION_NAME}"
                 },
                 "annotations": {
-                    "description": "The web server's http port."
+                    "description": "The web server's http port.",
+                    "service.alpha.openshift.io/dependencies": "[{\"name\": \"${APPLICATION_NAME}-mysql\", \"kind\": \"Service\"}]"
                 }
             }
         },
@@ -221,7 +271,8 @@
                     "application": "${APPLICATION_NAME}"
                 },
                 "annotations": {
-                    "description": "The web server's https port."
+                    "description": "The web server's https port.",
+                    "service.alpha.openshift.io/dependencies": "[{\"name\": \"${APPLICATION_NAME}-mysql\", \"kind\": \"Service\"}]"
                 }
             }
         },
@@ -323,11 +374,21 @@
                 "strategy": {
                     "type": "Source",
                     "sourceStrategy": {
+                        "env": [
+                            {
+                                "name": "MAVEN_MIRROR_URL",
+                                "value": "${MAVEN_MIRROR_URL}"
+                            },
+                            {
+                                "name": "ARTIFACT_DIR",
+                                "value": "${ARTIFACT_DIR}"
+                            }
+                        ],
                         "forcePull": true,
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-webserver30-tomcat7-openshift:1.2"
+                            "name": "jboss-webserver30-tomcat7-openshift:1.3"
                         }
                     }
                 },
@@ -416,7 +477,7 @@
                                         "command": [
                                             "/bin/bash",
                                             "-c",
-                                            "curl -s -u ${JWS_ADMIN_USERNAME}:${JWS_ADMIN_PASSWORD} 'http://localhost:8080/manager/jmxproxy/?get=Catalina%3Atype%3DServer&att=stateName' |grep -iq 'stateName *= *STARTED'"
+                                            "curl --noproxy '*' -s -u ${JWS_ADMIN_USERNAME}:${JWS_ADMIN_PASSWORD} 'http://localhost:8080/manager/jmxproxy/?get=Catalina%3Atype%3DServer&att=stateName' |grep -iq 'stateName *= *STARTED'"
                                         ]
                                     }
                                 },
@@ -540,7 +601,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "mysql:latest"
+                                "name": "mysql:${MYSQL_IMAGE_STREAM_TAG}"
                             }
                         }
                     },

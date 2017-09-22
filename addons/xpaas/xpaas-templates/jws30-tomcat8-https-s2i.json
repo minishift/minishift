@@ -6,76 +6,89 @@
             "iconClass": "icon-tomcat",
             "description": "Application template for JWS applications built using S2I.",
             "tags": "tomcat,tomcat8,java,jboss,xpaas",
-            "version": "1.2.0"
+            "version": "1.4.0",
+            "openshift.io/display-name": "Red Hat JBoss Web Server 3.0 Tomcat 8 (with https)"
         },
         "name": "jws30-tomcat8-https-s2i"
     },
     "labels": {
         "template": "jws30-tomcat8-https-s2i",
-        "xpaas": "1.2.0"
+        "xpaas": "1.4.0"
     },
+    "message": "A new JWS application for Tomcat 8 has been created in your project. The username/password for administering your JWS is ${JWS_ADMIN_USERNAME}/${JWS_ADMIN_PASSWORD}. Please be sure to create the \"jws-service-account\" service account and the secret named \"${JWS_HTTPS_SECRET}\" containing the ${JWS_HTTPS_CERTIFICATE} file used for serving secure content.",
     "parameters": [
         {
+            "displayName": "Application Name",
             "description": "The name for the application.",
             "name": "APPLICATION_NAME",
             "value": "jws-app",
             "required": true
         },
         {
+            "displayName": "Custom http Route Hostname",
             "description": "Custom hostname for http service route.  Leave blank for default hostname, e.g.: <application-name>-<project>.<default-domain-suffix>",
             "name": "HOSTNAME_HTTP",
             "value": "",
             "required": false
         },
         {
+            "displayName": "Custom https Route Hostname",
             "description": "Custom hostname for https service route.  Leave blank for default hostname, e.g.: secure-<application-name>-<project>.<default-domain-suffix>",
             "name": "HOSTNAME_HTTPS",
             "value": "",
             "required": false
         },
         {
+            "displayName": "Git Repository URL",
             "description": "Git source URI for application",
             "name": "SOURCE_REPOSITORY_URL",
             "value": "https://github.com/jboss-openshift/openshift-quickstarts.git",
             "required": true
         },
         {
+            "displayName": "Git Reference",
             "description": "Git branch/tag reference",
             "name": "SOURCE_REPOSITORY_REF",
             "value": "1.2",
             "required": false
         },
         {
+            "displayName": "Context Directory",
             "description": "Path within Git project to build; empty for root project directory.",
             "name": "CONTEXT_DIR",
             "value": "tomcat-websocket-chat",
             "required": false
         },
         {
+            "displayName": "Secret Name",
             "description": "The name of the secret containing the certificate files",
             "name": "JWS_HTTPS_SECRET",
             "value": "jws-app-secret",
             "required": true
         },
         {
+            "displayName": "Certificate Name",
             "description": "The name of the certificate file within the secret",
             "name": "JWS_HTTPS_CERTIFICATE",
             "value": "server.crt",
             "required": false
         },
         {
+            "displayName": "Certificate Key Name",
             "description": "The name of the certificate key file within the secret",
             "name": "JWS_HTTPS_CERTIFICATE_KEY",
             "value": "server.key",
             "required": false
         },
         {
+            "displayName": "Certificate Password",
             "description": "The certificate password",
             "name": "JWS_HTTPS_CERTIFICATE_PASSWORD",
             "value": "",
             "required": false
         },
         {
+            "displayName": "JWS Admin Username",
             "description": "JWS Admin User",
             "name": "JWS_ADMIN_USERNAME",
             "from": "[a-zA-Z0-9]{8}",
@@ -83,6 +96,7 @@
             "required": true
         },
         {
+            "displayName": "JWS Admin Password",
             "description": "JWS Admin Password",
             "name": "JWS_ADMIN_PASSWORD",
             "from": "[a-zA-Z0-9]{8}",
@@ -90,6 +104,7 @@
             "required": true
         },
         {
+            "displayName": "Github Webhook Secret",
             "description": "GitHub trigger secret",
             "name": "GITHUB_WEBHOOK_SECRET",
             "from": "[a-zA-Z0-9]{8}",
@@ -97,6 +112,7 @@
             "required": true
         },
         {
+            "displayName": "Generic Webhook Secret",
             "description": "Generic build trigger secret",
             "name": "GENERIC_WEBHOOK_SECRET",
             "from": "[a-zA-Z0-9]{8}",
@@ -104,10 +120,24 @@
             "required": true
         },
         {
+            "displayName": "ImageStream Namespace",
             "description": "Namespace in which the ImageStreams for Red Hat Middleware images are installed. These ImageStreams are normally installed in the openshift namespace. You should only need to modify this if you've installed the ImageStreams in a different namespace/project.",
             "name": "IMAGE_STREAM_NAMESPACE",
             "value": "openshift",
             "required": true
+        },
+        {
+            "displayName": "Maven mirror URL",
+            "description": "Maven mirror to use for S2I builds",
+            "name": "MAVEN_MIRROR_URL",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "List of directories from which archives will be copied into the deployment folder. If unspecified, all archives in /target will be copied.",
+            "name": "ARTIFACT_DIR",
+            "value": "",
+            "required": false
         }
     ],
     "objects": [
@@ -233,11 +263,21 @@
                 "strategy": {
                     "type": "Source",
                     "sourceStrategy": {
+                        "env": [
+                            {
+                                "name": "MAVEN_MIRROR_URL",
+                                "value": "${MAVEN_MIRROR_URL}"
+                            },
+                            {
+                                "name": "ARTIFACT_DIR",
+                                "value": "${ARTIFACT_DIR}"
+                            }
+                        ],
                         "forcePull": true,
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-webserver30-tomcat8-openshift:1.2"
+                            "name": "jboss-webserver30-tomcat8-openshift:1.3"
                         }
                     }
                 },
@@ -326,7 +366,7 @@
                                         "command": [
                                             "/bin/bash",
                                             "-c",
-                                            "curl -s -u ${JWS_ADMIN_USERNAME}:${JWS_ADMIN_PASSWORD} 'http://localhost:8080/manager/jmxproxy/?get=Catalina%3Atype%3DServer&att=stateName' |grep -iq 'stateName *= *STARTED'"
+                                            "curl --noproxy '*' -s -u ${JWS_ADMIN_USERNAME}:${JWS_ADMIN_PASSWORD} 'http://localhost:8080/manager/jmxproxy/?get=Catalina%3Atype%3DServer&att=stateName' |grep -iq 'stateName *= *STARTED'"
                                         ]
                                     }
                                 },

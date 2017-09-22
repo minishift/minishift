@@ -56,8 +56,8 @@ func runStop(cmd *cobra.Command, args []string) {
 
 	fmt.Println("Stopping local OpenShift cluster...")
 
-	// Unregister, allow to be skipped
-	registrationUtil.UnregisterHost(api, true)
+	// Unregister, allow to be skipped and force deletion is ignored
+	registrationUtil.UnregisterHost(api, true, false)
 
 	if err := cluster.StopHost(api); err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error stopping cluster: %s", err.Error()))

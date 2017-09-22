@@ -88,6 +88,9 @@ func (t *MockRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) 
 	for url, cannedResponse := range t.responses {
 		matched, _ := regexp.Match(url, []byte(req.URL.String()))
 		if !matched {
+			if t.verbose {
+				fmt.Println(fmt.Sprintf("Not get registered response for '%s'", []byte(req.URL.String())))
+			}
 			continue
 		}
 

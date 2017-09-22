@@ -47,5 +47,5 @@ Feature: Flags
 
   Scenario: Deleting Minishift
     Given Minishift has state "Running"
-     When executing "minishift delete" succeeds
+     When executing "minishift delete --force" succeeds
      Then Minishift should have state "Does Not Exist"

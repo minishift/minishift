@@ -29,6 +29,7 @@ import (
 	"github.com/spf13/viper"
 
 	config "github.com/minishift/minishift/pkg/minishift/config"
+	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	miniutil "github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/util"
 )
@@ -326,6 +327,10 @@ func mountCifsHostfolder(driver drivers.Driver, hostfolder *config.HostFolder) e
 		hostfolder.Mountpoint(),
 		hostfolder.Options["username"],
 		password)
+
+	if minishiftConfig.InstanceConfig.IsRHELBased {
+		cmd = fmt.Sprintf("%s,context=system_u:object_r:svirt_sandbox_file_t:s0", cmd)
+	}
 
 	if len(hostfolder.Options["domain"]) > 0 { // != ""
 		cmd = fmt.Sprintf("%s,domain=%s", cmd, hostfolder.Options["domain"])

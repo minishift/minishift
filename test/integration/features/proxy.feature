@@ -6,7 +6,7 @@ Feature: Minishift can run behind proxy
         to set MINISHIFT_HTTP_PROXY for this feature only.
         However one can override port number or set IP manually if needed.
         To use custom port number run this test with environmental variable
-        INTEGRATION_PROXY_CUSTOM_PORT.       
+        INTEGRATION_PROXY_CUSTOM_PORT.
         To use custom IP address please set INTEGRATION_PROXY_CUSTOM_IP
         environmental variable.
 
@@ -54,7 +54,7 @@ Feature: Minishift can run behind proxy
      And proxy log should contain "Accepting CONNECT to rubygems.org:443"
 
   Scenario: Delete behind the proxy
-    When executing "minishift delete" succeeds
+    When executing "minishift delete --force" succeeds
     Then Minishift has state "Does Not Exist"
 
   Scenario: User stops proxy

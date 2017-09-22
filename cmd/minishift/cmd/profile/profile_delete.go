@@ -38,7 +38,7 @@ var (
 		Long:  "deletes an existing profile.",
 		Run:   runProfileDelete,
 	}
-	force bool
+	forceProfileDeletion bool
 )
 
 func runProfileDelete(cmd *cobra.Command, args []string) {
@@ -56,7 +56,7 @@ func runProfileDelete(cmd *cobra.Command, args []string) {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Default profile '%s' can not be deleted", profileName))
 	}
 
-	if !force {
+	if !forceProfileDeletion {
 		var hasConfirmed bool
 		if profileActions.GetActiveProfile() == profileName {
 			hasConfirmed = pkgUtil.AskForConfirmation("You are deleting the active profile. It will remove the VM and all related artifacts.")
@@ -75,7 +75,7 @@ func runProfileDelete(cmd *cobra.Command, args []string) {
 	if !exists {
 		fmt.Println(fmt.Sprintf("VM for profile '%s' does not exist", profileName))
 	} else {
-		registrationUtil.UnregisterHost(api, false)
+		registrationUtil.UnregisterHost(api, false, forceProfileDeletion)
 		err := cluster.DeleteHost(api)
 		if err != nil {
 			fmt.Println(fmt.Sprintf("Error deleting '%s': %v", constants.MakeMiniPath("machines"), err.Error()))
@@ -100,6 +100,6 @@ func runProfileDelete(cmd *cobra.Command, args []string) {
 }
 
 func init() {
-	profileDeleteCmd.Flags().BoolVar(&force, "force", false, "Forces the deletion of profile and related files in MINISHIFT_HOME.")
+	profileDeleteCmd.Flags().BoolVar(&forceProfileDeletion, "force", false, "Forces the deletion of profile and related files in MINISHIFT_HOME.")
 	ProfileCmd.AddCommand(profileDeleteCmd)
 }

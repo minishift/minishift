@@ -5,110 +5,129 @@
         "annotations": {
             "description": "Application template for SSO 7.0",
             "iconClass" : "icon-jboss",
-            "tags" : "sso,keycloak,java,jboss,xpaas",
-            "version" : "1.3.2"
+            "tags" : "sso,keycloak,jboss,xpaas",
+            "version": "1.4.0",
+            "openshift.io/display-name": "Red Hat Single Sign-On 7.0"
         },
         "name": "sso70-https"
     },
     "labels": {
         "template": "sso70-https",
-        "xpaas" : "1.3.2"
+        "xpaas": "1.4.0"
     },
+    "message": "A new SSO service has been created in your project. The admin username/password for accessing the master realm via the SSO console is ${SSO_ADMIN_USERNAME}/${SSO_ADMIN_PASSWORD}. Please be sure to create the \"${SERVICE_ACCOUNT_NAME}\" service account and the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications; \"${SSO_TRUSTSTORE_SECRET}\" containing the ${SSO_TRUSTSTORE} file used for securing SSO requests.",
     "parameters": [
         {
+            "displayName": "Application Name",
             "description": "The name for the application.",
             "name": "APPLICATION_NAME",
             "value": "sso",
             "required": true
         },
         {
+            "displayName": "Custom http Route Hostname",
             "description": "Custom hostname for http service route.  Leave blank for default hostname, e.g.: <application-name>.<project>.<default-domain-suffix>",
             "name": "HOSTNAME_HTTP",
             "value": "",
             "required": false
         },
         {
+            "displayName": "Custom https Route Hostname",
             "description": "Custom hostname for https service route.  Leave blank for default hostname, e.g.: <application-name>.<project>.<default-domain-suffix>",
             "name": "HOSTNAME_HTTPS",
             "value": "",
             "required": false
         },
         {
+            "displayName": "Service Account Name",
             "description": "The name of the service account to use for the deployment.  The service account should be configured to allow useage of the secret(s) specified by HTTPS_SECRET and JGROUPS_ENCRYPT_SECRET.",
             "name": "SERVICE_ACCOUNT_NAME",
             "value": "sso-service-account",
             "required": true
         },
         {
+            "displayName": "Server Keystore Secret Name",
             "description": "The name of the secret containing the keystore file",
             "name": "HTTPS_SECRET",
             "value": "sso-app-secret",
             "required": false
         },
         {
+            "displayName": "Server Keystore Filename",
             "description": "The name of the keystore file within the secret",
             "name": "HTTPS_KEYSTORE",
             "value": "keystore.jks",
             "required": false
         },
         {
+            "displayName": "Server Keystore Type",
             "description": "The type of the keystore file (JKS or JCEKS)",
             "name": "HTTPS_KEYSTORE_TYPE",
             "value": "",
             "required": false
         },
         {
+            "displayName": "Server Certificate Name",
             "description": "The name associated with the server certificate (e.g. jboss)",
             "name": "HTTPS_NAME",
             "value": "",
             "required": false
         },
         {
+            "displayName": "Server Keystore Password",
             "description": "The password for the keystore and certificate (e.g. mykeystorepass)",
             "name": "HTTPS_PASSWORD",
             "value": "",
             "required": false
         },
         {
+            "displayName": "Datasource Minimum Pool Size",
             "description": "Sets xa-pool/min-pool-size for the configured datasource.",
             "name": "DB_MIN_POOL_SIZE",
-	    "required": false
+            "required": false
         },
         {
+            "displayName": "Datasource Maximum Pool Size",
             "description": "Sets xa-pool/max-pool-size for the configured datasource.",
             "name": "DB_MAX_POOL_SIZE",
             "required": false
         },
         {
+            "displayName": "Datasource Transaction Isolation",
             "description": "Sets transaction-isolation for the configured datasource.",
             "name": "DB_TX_ISOLATION",
             "required": false
         },
         {
+            "displayName": "JGroups Secret Name",
             "description": "The name of the secret containing the keystore file",
             "name": "JGROUPS_ENCRYPT_SECRET",
             "value": "sso-app-secret",
             "required": false
         },
         {
+            "displayName": "JGroups Keystore Filename",
             "description": "The name of the keystore file within the secret",
             "name": "JGROUPS_ENCRYPT_KEYSTORE",
             "value": "jgroups.jceks",
             "required": false
         },
         {
+            "displayName": "JGroups Certificate Name",
             "description": "The name associated with the server certificate (e.g. secret-key)",
             "name": "JGROUPS_ENCRYPT_NAME",
             "value": "",
             "required": false
         },
         {
+            "displayName": "JGroups Keystore Password",
             "description": "The password for the keystore and certificate (e.g. password)",
             "name": "JGROUPS_ENCRYPT_PASSWORD",
             "value": "",
             "required": false
         },
         {
+            "displayName": "JGroups Cluster Password",
             "description": "JGroups cluster password",
             "name": "JGROUPS_CLUSTER_PASSWORD",
             "from": "[a-zA-Z0-9]{8}",
@@ -116,54 +135,65 @@
             "required": true
         },
         {
+            "displayName": "ImageStream Namespace",
             "description": "Namespace in which the ImageStreams for Red Hat Middleware images are installed. These ImageStreams are normally installed in the openshift namespace. You should only need to modify this if you've installed the ImageStreams in a different namespace/project.",
             "name": "IMAGE_STREAM_NAMESPACE",
             "value": "openshift",
             "required": true
         },
         {
+            "displayName": "SSO Admin Username",
             "description": "SSO Server admin username",
             "name": "SSO_ADMIN_USERNAME",
-            "value": "admin",
-            "required": false
+            "from": "[a-zA-Z0-9]{8}",
+            "generate": "expression",
+            "required": true
         },
         {
+            "displayName": "SSO Admin Password",
             "description": "SSO Server admin  password",
             "name": "SSO_ADMIN_PASSWORD",
-            "value": "admin",
-            "required": false
+            "from": "[a-zA-Z0-9]{8}",
+            "generate": "expression",
+            "required": true
         },
         {
+            "displayName": "SSO Realm",
             "description": "Realm to be created in the SSO server (e.g. demo).",
             "name": "SSO_REALM",
             "value": "",
             "required": false
         },
         {
+            "displayName": "SSO Service Username",
             "description": "The username used to access the SSO service.  This is used by clients to create the appliction client(s) within the specified SSO realm.",
             "name": "SSO_SERVICE_USERNAME",
             "value": "",
             "required": false
         },
         {
+            "displayName": "SSO Service Password",
             "description": "The password for the SSO service user.",
             "name": "SSO_SERVICE_PASSWORD",
             "value": "",
             "required": false
         },
         {
+            "displayName": "SSO Trust Store",
             "description": "The name of the truststore file within the secret (e.g. truststore.jks)",
             "name": "SSO_TRUSTSTORE",
             "value": "",
             "required": false
         },
         {
+            "displayName": "SSO Trust Store Password",
             "description": "The password for the truststore and certificate (e.g. mykeystorepass)",
             "name": "SSO_TRUSTSTORE_PASSWORD",
             "value": "",
             "required": false
         },
         {
+            "displayName": "SSO Trust Store Secret",
             "description": "The name of the secret containing the truststore file (e.g. truststore-secret). Used for volume secretName",
             "name": "SSO_TRUSTSTORE_SECRET",
             "value": "sso-app-secret",
@@ -283,10 +313,10 @@
                             "containerNames": [
                                 "${APPLICATION_NAME}"
                             ],
-                             "from": {
+                            "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "redhat-sso70-openshift:1.3" 
+                                "name": "redhat-sso70-openshift:1.4"
                             }
                         }
                     },

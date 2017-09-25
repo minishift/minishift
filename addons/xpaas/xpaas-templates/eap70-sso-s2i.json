@@ -3,103 +3,120 @@
     "apiVersion": "v1",
     "metadata": {
         "annotations": {
-            "iconClass" : "icon-jboss",
+            "iconClass": "icon-jboss",
             "description": "Application template for EAP 6 applications built using S2I, enabled for SSO.",
-            "tags": "eap,javaee,java,jboss,xpaas,sso,keycloak",
-            "version": "1.3.2"
+            "tags": "eap,javaee,java,jboss,xpaas",
+            "version": "1.4.0",
+            "openshift.io/display-name": "Red Hat JBoss EAP 7.0 + Single Sign-On (with https)"
         },
         "name": "eap70-sso-s2i"
     },
     "labels": {
         "template": "eap70-sso-s2i",
-        "xpaas": "1.3.2"
+        "xpaas": "1.4.0"
     },
+    "message": "A new EAP 7 based application with SSL and SSO support has been created in your project. Please be sure to create the \"${SERVICE_ACCOUNT_NAME}\" service account and the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications.",
     "parameters": [
         {
+            "displayName": "Application Name",
             "description": "The name for the application.",
             "name": "APPLICATION_NAME",
             "value": "eap-app",
             "required": true
         },
         {
+            "displayName": "Custom http Route Hostname",
             "description": "Hostname for http service route (e.g. eap-app-myproject.example.com).  Required for SSO-enabled applications.  This is added to the white list of redirects in the SSO server.",
             "name": "HOSTNAME_HTTP",
             "value": "",
             "required": true
         },
         {
+            "displayName": "Custom https Route Hostname",
             "description": "Hostname for https service route (e.g. secure-eap-app-myproject.example.com).  Required for SSO-enabled applications.  This is added to the white list of redirects in the SSO server.",
             "name": "HOSTNAME_HTTPS",
             "value": "",
             "required": true
         },
         {
+            "displayName": "Git Repository URL",
             "description": "Git source URI for application",
             "name": "SOURCE_REPOSITORY_URL",
             "value": "https://github.com/redhat-developer/redhat-sso-quickstarts",
             "required": true
         },
         {
+            "displayName": "Git Reference",
             "description": "Git branch/tag reference",
             "name": "SOURCE_REPOSITORY_REF",
             "value": "7.0.x-ose",
             "required": false
         },
         {
+            "displayName": "Context Directory",
             "description": "Path within Git project to build; empty for root project directory.",
             "name": "CONTEXT_DIR",
             "value": "",
             "required": false
         },
         {
+            "displayName": "Queues",
             "description": "Queue names",
             "name": "HORNETQ_QUEUES",
             "value": "",
             "required": false
         },
         {
+            "displayName": "Topics",
             "description": "Topic names",
             "name": "HORNETQ_TOPICS",
             "value": "",
             "required": false
         },
         {
+            "displayName": "Service Account Name",
             "description": "The name of the service account to use for the deployment.  The service account should be configured to allow useage of the secret(s) specified by HTTPS_SECRET and JGROUPS_ENCRYPT_SECRET.",
             "name": "SERVICE_ACCOUNT_NAME",
             "value": "eap7-service-account",
             "required": true
         },
         {
+            "displayName": "Server Keystore Secret Name",
             "description": "The name of the secret containing the keystore file",
             "name": "HTTPS_SECRET",
             "value": "eap7-app-secret",
             "required": true
         },
         {
+            "displayName": "Server Keystore Filename",
             "description": "The name of the keystore file within the secret",
             "name": "HTTPS_KEYSTORE",
             "value": "keystore.jks",
             "required": false
         },
         {
+            "displayName": "Server Keystore Type",
             "description": "The type of the keystore file (JKS or JCEKS)",
             "name": "HTTPS_KEYSTORE_TYPE",
             "value": "",
             "required": false
         },
         {
+            "displayName": "Server Certificate Name",
             "description": "The name associated with the server certificate (e.g. jboss)",
             "name": "HTTPS_NAME",
             "value": "",
             "required": false
         },
         {
+            "displayName": "Server Keystore Password",
             "description": "The password for the keystore and certificate (e.g. mykeystorepass)",
             "name": "HTTPS_PASSWORD",
             "value": "",
             "required": false
         },
         {
+            "displayName": "HornetQ Password",
             "description": "HornetQ cluster admin password",
             "name": "HORNETQ_CLUSTER_PASSWORD",
             "from": "[a-zA-Z0-9]{8}",
@@ -107,6 +124,7 @@
             "required": true
         },
         {
+            "displayName": "Github Webhook Secret",
             "description": "GitHub trigger secret",
             "name": "GITHUB_WEBHOOK_SECRET",
             "from": "[a-zA-Z0-9]{8}",
@@ -114,6 +132,7 @@
             "required": true
         },
         {
+            "displayName": "Generic Webhook Secret",
             "description": "Generic build trigger secret",
             "name": "GENERIC_WEBHOOK_SECRET",
             "from": "[a-zA-Z0-9]{8}",
@@ -121,36 +140,42 @@
             "required": true
         },
         {
+            "displayName": "ImageStream Namespace",
             "description": "Namespace in which the ImageStreams for Red Hat Middleware images are installed. These ImageStreams are normally installed in the openshift namespace. You should only need to modify this if you've installed the ImageStreams in a different namespace/project.",
             "name": "IMAGE_STREAM_NAMESPACE",
             "value": "openshift",
             "required": true
         },
         {
+            "displayName": "JGroups Secret Name",
             "description": "The name of the secret containing the keystore file",
             "name": "JGROUPS_ENCRYPT_SECRET",
             "value": "eap7-app-secret",
             "required": false
         },
         {
+            "displayName": "JGroups Keystore Filename",
             "description": "The name of the keystore file within the secret",
             "name": "JGROUPS_ENCRYPT_KEYSTORE",
             "value": "jgroups.jceks",
             "required": false
         },
         {
+            "displayName": "JGroups Certificate Name",
             "description": "The name associated with the server certificate (e.g. secret-key)",
             "name": "JGROUPS_ENCRYPT_NAME",
             "value": "",
             "required": false
         },
         {
+            "displayName": "JGroups Keystore Password",
             "description": "The password for the keystore and certificate (e.g. password)",
             "name": "JGROUPS_ENCRYPT_PASSWORD",
             "value": "",
             "required": false
         },
         {
+            "displayName": "JGroups Cluster Password",
             "description": "JGroups cluster password",
             "name": "JGROUPS_CLUSTER_PASSWORD",
             "from": "[a-zA-Z0-9]{8}",
@@ -158,84 +183,98 @@
             "required": true
         },
         {
+            "displayName": "Deploy Exploded Archives",
             "description": "Controls whether exploded deployment content should be automatically deployed",
             "name": "AUTO_DEPLOY_EXPLODED",
             "value": "false",
             "required": false
         },
         {
+            "displayName": "URL for SSO",
             "description": "The URL for the SSO server (e.g. https://secure-sso-myproject.example.com/auth).  This is the URL through which the user will be redirected when a login or token is required by the application.",
             "name": "SSO_URL",
             "value": "",
             "required": true
         },
         {
-            "description": "The URL for the interal SSO service, where secure-sso (the default) is the kubernetes service exposed by the SSO server.  This is used to create the application client(s) (see SSO_USERNAME).  This can also be the same as SSO_URL.",
+            "displayName": "URL for SSO (internal service)",
+            "description": "The URL for the internal SSO service, where secure-sso (the default) is the kubernetes service exposed by the SSO server.  This is used to create the application client(s) (see SSO_USERNAME).  This can also be the same as SSO_URL.",
             "name": "SSO_SERVICE_URL",
             "value": "https://secure-sso:8443/auth",
             "required": false
         },
         {
+            "displayName": "SSO Realm",
             "description": "The SSO realm to which the application client(s) should be associated (e.g. demo).",
             "name": "SSO_REALM",
             "value": "",
             "required": true
         },
         {
+            "displayName": "SSO Username",
             "description": "The username used to access the SSO service.  This is used to create the appliction client(s) within the specified SSO realm. This should match the SSO_SERVICE_USERNAME specified through one of the sso70-* templates.",
             "name": "SSO_USERNAME",
             "value": "",
             "required": false
         },
         {
+            "displayName": "SSO Password",
             "description": "The password for the SSO service user.",
             "name": "SSO_PASSWORD",
             "value": "",
             "required": false
         },
         {
+            "displayName": "SSO Public Key",
             "description": "SSO Public Key. Public key is recommended to be passed into the template to avoid man-in-the-middle security vulnerability",
             "name": "SSO_PUBLIC_KEY",
             "value": "",
             "required": false
         },
         {
+            "displayName": "SSO Bearer Only?",
             "description": "SSO Client Access Type",
             "name": "SSO_BEARER_ONLY",
             "value": "",
             "required": false
         },
         {
+            "displayName": "Artifact Directories",
             "description": "List of directories from which archives will be copied into the deployment folder.  If unspecified, all archives in /target will be copied.",
             "name": "ARTIFACT_DIR",
             "value": "app-jee-jsp/target,service-jee-jaxrs/target,app-profile-jee-jsp/target,app-profile-saml-jee-jsp/target",
             "required": false
         },
         {
+            "displayName": "SSO SAML Keystore Secret",
             "description": "The name of the secret containing the keystore file",
             "name": "SSO_SAML_KEYSTORE_SECRET",
             "value": "eap7-app-secret",
             "required": false
         },
         {
+            "displayName": "SSO SAML Keystore",
             "description": "The name of the keystore file within the secret",
             "name": "SSO_SAML_KEYSTORE",
             "value": "keystore.jks",
             "required": false
         },
         {
+            "displayName": "SSO SAML Certificate Name",
             "description": "The name associated with the server certificate",
             "name": "SSO_SAML_CERTIFICATE_NAME",
             "value": "jboss",
             "required": false
         },
         {
+            "displayName": "SSO SAML Keystore Password",
             "description": "The password for the keystore and certificate",
             "name": "SSO_SAML_KEYSTORE_PASSWORD",
             "value": "mykeystorepass",
             "required": false
         },
         {
+            "displayName": "SSO Client Secret",
             "description": "The SSO Client Secret for Confidential Access",
             "name": "SSO_SECRET",
             "from": "[a-zA-Z0-9]{8}",
@@ -243,42 +282,55 @@
             "required": true
         },
         {
+            "displayName": "Enable CORS for SSO?",
             "description": "Enable CORS for SSO applications",
             "name": "SSO_ENABLE_CORS",
             "value": "false",
             "required": false
         },
         {
+            "displayName": "SSO SAML Logout Page",
             "description": "SSO logout page for SAML applications",
             "name": "SSO_SAML_LOGOUT_PAGE",
             "value": "/",
             "required": false
         },
         {
+            "displayName": "Disable SSL Validation in EAP->SSO communication",
             "description": "If true SSL communication between EAP and the SSO Server will be insecure (i.e. certificate validation is disabled with curl)",
             "name": "SSO_DISABLE_SSL_CERTIFICATE_VALIDATION",
             "value": "true",
             "required": false
         },
         {
+            "displayName": "SSO Trust Store",
             "description": "The name of the truststore file within the secret (e.g. truststore.jks)",
             "name": "SSO_TRUSTSTORE",
             "value": "",
             "required": false
         },
         {
+            "displayName": "SSO Trust Store Password",
             "description": "The password for the truststore and certificate (e.g. mykeystorepass)",
             "name": "SSO_TRUSTSTORE_PASSWORD",
             "value": "",
             "required": false
         },
         {
+            "displayName": "SSO Trust Store Secret",
             "description": "The name of the secret containing the truststore file (e.g. truststore-secret). Used for volume secretName",
             "name": "SSO_TRUSTSTORE_SECRET",
             "value": "eap7-app-secret",
             "required": false
+        },
+        {
+            "displayName": "Maven mirror URL",
+            "description": "Maven mirror to use for S2I builds",
+            "name": "MAVEN_MIRROR_URL",
+            "value": "",
+            "required": false
         }
-   ],
+    ],
     "objects": [
         {
             "kind": "Service",
@@ -406,7 +458,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-eap70-openshift:1.4"
+                            "name": "jboss-eap70-openshift:1.5"
                         },
                         "env": [
                             {
@@ -416,6 +468,10 @@
                             {
                                 "name": "MAVEN_ARGS_APPEND",
                                 "value": ""
+                            },
+                            {
+                                "name": "MAVEN_MIRROR_URL",
+                                "value": "${MAVEN_MIRROR_URL}"
                             }
                         ]
                     }
@@ -593,7 +649,7 @@
                                     {
                                         "name": "HOSTNAME_HTTPS",
                                         "value": "${HOSTNAME_HTTPS}"
-                                    }, 
+                                    },
                                     {
                                         "name": "HTTPS_KEYSTORE_DIR",
                                         "value": "/etc/eap-secret-volume"
@@ -626,7 +682,7 @@
                                         "name": "HORNETQ_TOPICS",
                                         "value": "${HORNETQ_TOPICS}"
                                     },
-				                    {
+                                    {
                                         "name": "JGROUPS_ENCRYPT_SECRET",
                                         "value": "${JGROUPS_ENCRYPT_SECRET}"
                                     },

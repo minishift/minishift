@@ -31,6 +31,8 @@ import (
 
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/viper"
+
+	stringUtils "github.com/minishift/minishift/pkg/util/strings"
 )
 
 const (
@@ -59,8 +61,20 @@ func preflightChecksBeforeStartingHost() {
 	case "hyperv":
 		preflightCheckSucceedsOrFails(
 			configCmd.SkipCheckHyperVDriver.Name,
-			checkHypervDriver,
-			"Checking if Hyper-V driver is configured",
+			checkHypervDriverInstalled,
+			"Checking if Hyper-V driver is installed",
+			false, configCmd.WarnCheckHyperVDriver.Name,
+			driverErrorMessage)
+		preflightCheckSucceedsOrFails(
+			configCmd.SkipCheckHyperVDriver.Name,
+			checkHypervDriverSwitch,
+			"Checking if Hyper-V driver is configured to use a Virtual Switch",
+			false, configCmd.WarnCheckHyperVDriver.Name,
+			driverErrorMessage)
+		preflightCheckSucceedsOrFails(
+			configCmd.SkipCheckHyperVDriver.Name,
+			checkHypervDriverUser,
+			"Checking if user is a member of the Hyper-V Administrators group",
 			false, configCmd.WarnCheckHyperVDriver.Name,
 			driverErrorMessage)
 	}
@@ -229,13 +243,18 @@ func checkKvmDriver() bool {
 	return true
 }
 
-// checkHypervDriver returns true if Virtual Switch has been selected
-func checkHypervDriver() bool {
+// checkHypervDriverSwitch returns true if Virtual Switch has been selected
+func checkHypervDriverSwitch() bool {
 	switchEnv := os.Getenv("HYPERV_VIRTUAL_SWITCH")
 	if switchEnv == "" {
 		return false
 	}
 
+	return true
+}
+
+// checkHypervDriverInstalled returns true if Hyper-V driver is installed
+func checkHypervDriverInstalled() bool {
 	posh := powershell.New()
 
 	checkIfHyperVInstalled := `@(Get-Command Get-VM).ModuleName`
@@ -243,9 +262,15 @@ func checkHypervDriver() bool {
 	if !strings.Contains(stdOut, "Hyper-V") {
 		return false
 	}
+	return true
+}
+
+// checkHypervDriverUser returns true if user is member of Hyper-V admin
+func checkHypervDriverUser() bool {
+	posh := powershell.New()
 
 	checkIfMemberOfHyperVAdmins := `@([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole("Hyper-V Administrators")`
-	stdOut, _ = posh.Execute(checkIfMemberOfHyperVAdmins)
+	stdOut, _ := posh.Execute(checkIfMemberOfHyperVAdmins)
 	if !strings.Contains(stdOut, "True") {
 		return false
 	}
@@ -311,9 +336,8 @@ func checkStorageMounted(driver drivers.Driver) bool {
 // space available.
 func checkStorageUsage(driver drivers.Driver) bool {
 	usedPercentage := getDiskUsage(driver, StorageDisk)
-	fmt.Printf("%s ", usedPercentage)
-	usedPercentage = strings.TrimRight(usedPercentage, "%")
-	usage, err := strconv.ParseInt(usedPercentage, 10, 8)
+	fmt.Printf("%s used ", usedPercentage)
+	usage, err := strconv.Atoi(stringUtils.GetOnlyNumbers(usedPercentage))
 	if err != nil {
 		return false
 	}

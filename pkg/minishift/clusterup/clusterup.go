@@ -24,6 +24,7 @@ import (
 	"github.com/blang/semver"
 	"github.com/docker/machine/libmachine/host"
 	"github.com/docker/machine/libmachine/provision"
+	"github.com/golang/glog"
 
 	"os"
 	"strings"
@@ -99,6 +100,9 @@ func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string, runne
 		}
 	}
 
+	if glog.V(2) {
+		fmt.Printf("-- Running `oc` with: '%s'\n", strings.Join(cmdArgs, " "))
+	}
 	exitCode := runner.Run(os.Stdout, os.Stderr, config.OcPath, cmdArgs...)
 	if exitCode != 0 {
 		return errors.New("Error starting the cluster.")

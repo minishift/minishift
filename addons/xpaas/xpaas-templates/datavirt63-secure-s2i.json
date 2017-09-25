@@ -6,7 +6,8 @@
             "iconClass": "icon-jboss",
             "description": "Application template for JBoss Data Virtualization 6.3 services built using S2I.  Includes ability to configure certificates for serving secure content.",
             "tags": "jdv,datavirt,jboss,xpaas",
-            "version": "1.4.0"
+            "version": "1.4.0",
+            "openshift.io/display-name": "Red Hat JBoss Data Virtualization 6.3 (with SSL)"
         },
         "name": "datavirt63-secure-s2i"
     },
@@ -74,6 +75,7 @@
         },
         {
             "description": "The name of the service account to use for the deployment.  The service account should be configured to allow usage of the secret(s) specified by CONFIGURATION_NAME, HTTPS_SECRET and JGROUPS_ENCRYPT_SECRET.",
+            "displayName": "Service Account Name",
             "name": "SERVICE_ACCOUNT_NAME",
             "value": "datavirt-service-account",
             "required": true
@@ -209,6 +211,168 @@
             "displayName": "Deploy Exploded Archives",
             "name": "AUTO_DEPLOY_EXPLODED",
             "value": "false",
+            "required": false
+        },
+        {
+            "description": "Comma delimited list of source directories containing VDBs for deployment",
+            "displayName": "VDB Deployment Directories",
+            "name": "VDB_DIRS",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "The URL for the SSO server (e.g. https://secure-sso-myproject.example.com/auth).  This is the URL through which the user will be redirected when a login or token is required by the application.",
+            "displayName": "SSO Server URL",
+            "name": "SSO_URL",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "The URL for the interal SSO service, where secure-sso is the kubernetes service exposed by the SSO server.  This is used to create the application client(s) (see SSO_USERNAME).  This can also be the same as SSO_URL.",
+            "displayName": "SSO Server Service URL",
+            "name": "SSO_SERVICE_URL",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "The SSO realm to which the application client(s) should be associated (e.g. demo).",
+            "displayName": "SSO Realm",
+            "name": "SSO_REALM",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "The username used to access the SSO service.  This is used to create the appliction client(s) within the specified SSO realm. This should match the SSO_SERVICE_USERNAME specified through one of the sso70-* templates.",
+            "displayName": "SSO Username",
+            "name": "SSO_USERNAME",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "The password for the SSO service user.",
+            "displayName": "SSO User's Password",
+            "name": "SSO_PASSWORD",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "SSO Realm Public Key. Public key is recommended to be passed into the template to avoid man-in-the-middle security vulnerability.  This can be retrieved from the SSO server, for the specified realm.",
+            "displayName": "SSO Realm Public Key",
+            "name": "SSO_PUBLIC_KEY",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "SSO Client Access Type. true or false",
+            "displayName": "SSO Bearer Only",
+            "name": "SSO_BEARER_ONLY",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "The name of the secret containing the keystore file",
+            "displayName": "SSO SAML Keystore Secret",
+            "name": "SSO_SAML_KEYSTORE_SECRET",
+            "value": "datavirt-app-secret",
+            "required": false
+        },
+        {
+            "description": "The name of the keystore file within the secret",
+            "displayName": "SSO SAML Keystore File",
+            "name": "SSO_SAML_KEYSTORE",
+            "value": "keystore.jks",
+            "required": false
+        },
+        {
+            "description": "The name associated with the server certificate",
+            "displayName": "SSO SAML Certificate Alias",
+            "name": "SSO_SAML_CERTIFICATE_NAME",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "The password for the keystore and certificate",
+            "name": "SSO_SAML_KEYSTORE_PASSWORD",
+            "displayName": "SSO SAML Keystore Password",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "The SSO Client Secret for Confidential Access",
+            "name": "SSO_SECRET",
+            "displayName": "SSO Client Secret",
+            "from": "[a-zA-Z0-9]{8}",
+            "generate": "expression",
+            "required": false
+        },
+        {
+            "description": "Enable CORS for SSO applications. true or false",
+            "name": "SSO_ENABLE_CORS",
+            "displayName": "SSO Enable CORS",
+            "value": "false",
+            "required": false
+        },
+        {
+            "description": "SSO logout page for SAML applications",
+            "name": "SSO_SAML_LOGOUT_PAGE",
+            "displayName": "SSO SAML Logout Page",
+            "value": "/",
+            "required": false
+        },
+        {
+            "description": "If true SSL communication between EAP and the SSO Server will be insecure (i.e. certificate validation is disabled with curl)",
+            "name": "SSO_DISABLE_SSL_CERTIFICATE_VALIDATION",
+            "displayName": "SSO Disable SSL Certificate Validation",
+            "value": "true",
+            "required": false
+        },
+        {
+            "description": "The name of the truststore file within the secret (e.g. truststore.jks)",
+            "name": "SSO_TRUSTSTORE",
+            "displayName": "SSO Truststore File",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "The password for the truststore and certificate (e.g. mykeystorepass)",
+            "name": "SSO_TRUSTSTORE_PASSWORD",
+            "displayName": "SSO Truststore Password",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "The name of the secret containing the truststore file (e.g. truststore-secret). Used for volume secretName",
+            "name": "SSO_TRUSTSTORE_SECRET",
+            "displayName": "SSO Truststore Secret",
+            "value": "datavirt-app-secret",
+            "required": false
+        },
+        {
+            "description": "Comma delimited list of deployments that shoulds be exploded and enabled for SSO OpenIDConnect via auth-method",
+            "name": "SSO_OPENIDCONNECT_DEPLOYMENTS",
+            "displayName": "SSO OpenIDConnect Deployments",
+            "value": "",
+            "required": false
+        },
+        {
+            "description": "Comma delimited list of deployments that shoulds be exploded and enabled for SSO SAML via auth-method",
+            "name": "SSO_SAML_DEPLOYMENTS",
+            "displayName": "SSO SAML Deployments",
+            "value": "",
+            "required": false
+        },
+        {
+            "displayName": "Maven mirror URL",
+            "description": "Maven mirror to use for S2I builds",
+            "name": "MAVEN_MIRROR_URL",
+            "value": "",
+            "required": false
+        },
+        {
+            "displayName": "Artifact Directories",
+            "description": "List of directories from which archives will be copied into the deployment folder. If unspecified, all archives in /target will be copied.",
+            "name": "ARTIFACT_DIR",
+            "value": "",
             "required": false
         }
     ],
@@ -354,7 +518,22 @@
                         "uri": "${SOURCE_REPOSITORY_URL}",
                         "ref": "${SOURCE_REPOSITORY_REF}"
                     },
-                    "contextDir": "${CONTEXT_DIR}"
+                    "contextDir": "${CONTEXT_DIR}",
+                    "images": [
+                        {
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "namespace": "${IMAGE_STREAM_NAMESPACE}",
+                                "name": "jboss-datagrid65-client-openshift:1.0"
+                            },
+                            "paths": [
+                                {
+                                    "destinationDir": "./${CONTEXT_DIR}/extensions/datagrid65",
+                                    "sourcePath": "/extensions/."
+                                }
+                            ]
+                        }
+                    ]
                 },
                 "strategy": {
                     "type": "Source",
@@ -363,8 +542,26 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-datavirt63-openshift:1.0"
-                        }
+                            "name": "jboss-datavirt63-openshift:1.2"
+                        },
+                        "env": [
+                            {
+                                "name": "MAVEN_MIRROR_URL",
+                                "value": "${MAVEN_MIRROR_URL}"
+                            },
+                            {
+                                "name": "CUSTOM_INSTALL_DIRECTORIES",
+                                "value": "extensions/*"
+                            },
+                            {
+                                "name": "VDB_DIRS",
+                                "value": "${VDB_DIRS}"
+                            },
+                            {
+                                "name": "ARTIFACT_DIR",
+                                "value": "${ARTIFACT_DIR}"
+                            }
+                        ]
                     }
                 },
                 "output": {
@@ -389,6 +586,15 @@
                     {
                         "type": "ImageChange",
                         "imageChange": {}
+                    },
+                    {
+                        "type": "ImageChange",
+                        "imageChange": {
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "jboss-datagrid65-client-openshift:1.0"
+                            }
+                        }
                     },
                     {
                         "type": "ConfigChange"
@@ -597,7 +803,7 @@
                                     },
                                     {
                                         "name": "DATAVIRT_TRANSPORT_KEYSTORE",
-                                        "value": "/etc/datavirt-secret-volume/${HTTPS_KEYSTORE}"
+                                        "value": "${HTTPS_KEYSTORE}"
                                     },
                                     {
                                         "name": "DATAVIRT_TRANSPORT_KEYSTORE_TYPE",
@@ -610,6 +816,98 @@
                                     {
                                         "name": "DATAVIRT_TRANSPORT_KEYSTORE_PASSWORD",
                                         "value": "${HTTPS_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "SSO_URL",
+                                        "value": "${SSO_URL}"
+                                    },
+                                    {
+                                        "name": "SSO_SERVICE_URL",
+                                        "value": "${SSO_SERVICE_URL}"
+                                    },
+                                    {
+                                        "name": "SSO_REALM",
+                                        "value": "${SSO_REALM}"
+                                    },
+                                    {
+                                        "name": "SSO_USERNAME",
+                                        "value": "${SSO_USERNAME}"
+                                    },
+                                    {
+                                        "name": "SSO_PASSWORD",
+                                        "value": "${SSO_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "SSO_PUBLIC_KEY",
+                                        "value": "${SSO_PUBLIC_KEY}"
+                                    },
+                                    {
+                                        "name": "SSO_BEARER_ONLY",
+                                        "value": "${SSO_BEARER_ONLY}"
+                                    },
+                                    {
+                                        "name": "SSO_SAML_KEYSTORE_SECRET",
+                                        "value": "${SSO_SAML_KEYSTORE_SECRET}"
+                                    },
+                                    {
+                                        "name": "SSO_SAML_KEYSTORE",
+                                        "value": "${SSO_SAML_KEYSTORE}"
+                                    },
+                                    {
+                                        "name": "SSO_SAML_KEYSTORE_DIR",
+                                        "value": "/etc/sso-saml-secret-volume"
+                                    },
+                                    {
+                                        "name": "SSO_SAML_CERTIFICATE_NAME",
+                                        "value": "${SSO_SAML_CERTIFICATE_NAME}"
+                                    },
+                                    {
+                                        "name": "SSO_SAML_KEYSTORE_PASSWORD",
+                                        "value": "${SSO_SAML_KEYSTORE_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "SSO_SECRET",
+                                        "value": "${SSO_SECRET}"
+                                    },
+                                    {
+                                        "name": "SSO_ENABLE_CORS",
+                                        "value": "${SSO_ENABLE_CORS}"
+                                    },
+                                    {
+                                        "name": "SSO_SAML_LOGOUT_PAGE",
+                                        "value": "${SSO_SAML_LOGOUT_PAGE}"
+                                    },
+                                    {
+                                        "name": "SSO_DISABLE_SSL_CERTIFICATE_VALIDATION",
+                                        "value": "${SSO_DISABLE_SSL_CERTIFICATE_VALIDATION}"
+                                    },
+                                    {
+                                        "name": "SSO_TRUSTSTORE",
+                                        "value": "${SSO_TRUSTSTORE}"
+                                    },
+                                    {
+                                        "name": "SSO_TRUSTSTORE_DIR",
+                                        "value": "/etc/sso-secret-volume"
+                                    },
+                                    {
+                                        "name": "SSO_TRUSTSTORE_PASSWORD",
+                                        "value": "${SSO_TRUSTSTORE_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "SSO_OPENIDCONNECT_DEPLOYMENTS",
+                                        "value": "${SSO_OPENIDCONNECT_DEPLOYMENTS}"
+                                    },
+                                    {
+                                        "name": "SSO_SAML_DEPLOYMENTS",
+                                        "value": "${SSO_SAML_DEPLOYMENTS}"
+                                    },
+                                    {
+                                        "name": "HOSTNAME_HTTP",
+                                        "value": "${HOSTNAME_HTTP}"
+                                    },
+                                    {
+                                        "name": "HOSTNAME_HTTPS",
+                                        "value": "${HOSTNAME_HTTPS}"
                                     }
                                 ]
                             }

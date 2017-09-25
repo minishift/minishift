@@ -25,7 +25,7 @@ import (
 
 func Test_non_existent_directory_returns_false(t *testing.T) {
 	path := filepath.Join("this", "path", "really", "should", "not", "exists", "unless", "you", "have", "a", "crazy", "setup")
-	if Exists(path) == true {
+	if Exists(path) {
 		t.Fatalf("The path '%s' should not exist", path)
 	}
 }
@@ -38,7 +38,7 @@ func Test_existent_directory_returns_true(t *testing.T) {
 		t.Fatal("Unexpected error: " + err.Error())
 	}
 
-	if Exists(testDir) == false {
+	if !Exists(testDir) {
 		t.Fatalf("The path '%s' should exist", testDir)
 	}
 }
@@ -51,7 +51,7 @@ func Test_testDir_is_directory(t *testing.T) {
 		t.Fatal("Unexpected error: " + err.Error())
 	}
 
-	if IsDirectory(testDir) == false {
+	if !IsDirectory(testDir) {
 		t.Fatalf("The path '%s' should be a directory", testDir)
 	}
 }
@@ -64,7 +64,7 @@ func Test_non_existing_file_is_not_a_directory(t *testing.T) {
 		t.Fatal("Unexpected error: " + err.Error())
 	}
 
-	if IsDirectory(filepath.Join(testDir, "foo")) == true {
+	if IsDirectory(filepath.Join(testDir, "foo")) {
 		t.Fatalf("The path '%s' should not be a directory", testDir)
 	}
 }
@@ -88,7 +88,7 @@ func Test_file_is_not_a_directory(t *testing.T) {
 		t.Fatal("Unexpected error: " + err.Error())
 	}
 
-	if IsDirectory(tmpfile.Name()) == true {
+	if IsDirectory(tmpfile.Name()) {
 		t.Fatalf("The path '%s' should not be a directory", testDir)
 	}
 }

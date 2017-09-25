@@ -32,7 +32,6 @@ ifeq ($(GOOS),windows)
 endif
 MINISHIFT_BINARY ?= $(GOPATH)/bin/minishift$(IS_EXE)
 TIMEOUT ?= 3600s
-GODOG_OPTS ?= -tags basic
 PACKAGES := go list ./... | grep -v /vendor
 SOURCE_DIRS = cmd pkg test
 
@@ -184,12 +183,12 @@ test: vendor $(ADDON_ASSET_FILE)
 .PHONY: integration
 integration: $(MINISHIFT_BINARY)
 	mkdir -p $(INTEGRATION_TEST_DIR)
-	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) $(GODOG_OPTS)
+	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) -tags basic $(GODOG_OPTS)
 
 .PHONY: integration_all
 integration_all: $(MINISHIFT_BINARY)
 	mkdir -p $(INTEGRATION_TEST_DIR)
-	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) -tags ~coolstore
+	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) $(GODOG_OPTS) -tags ~coolstore
 
 .PHONY: fmt
 fmt:

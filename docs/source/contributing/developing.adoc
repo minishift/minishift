@@ -210,7 +210,7 @@ For example, _proxy.feature_ or _cmd-version.feature_.
 [[running-integration-tests]]
 ==== Running Integration Tests
 
-By default, the tests are being run against the binary created by `make build`, which is *_$GOPATH/bin/minishift_*. 
+By default, the tests are being run against the binary created by `make build`, which is *_$GOPATH/bin/minishift_*.
 To run the basic test, use the following command:
 
 ----
@@ -225,7 +225,8 @@ To run all the test, use the following command:
 $ make integration_all
 ----
 
-Flag *_TIMEOUT_* can be used to overwrite the default timeout 3600s. To run all the test with timeout 7200s, use the following command:
+Flag *_TIMEOUT_* can be used to override the default timeout `3600s`.
+To run all the test with timeout `7200s`, use the following command:
 
 ----
 $ make integration_all TIMEOUT=7200s
@@ -240,7 +241,7 @@ $ make integration MINISHIFT_BINARY=<path-to-custom-binary>
 [[godog-options]]
 ==== Using Tags and Other Godog Options
 
-Additional properties for Godog runner can be specified with the `GODOG_OPTS` argument. 
+Additional properties for Godog runner can be specified with the `GODOG_OPTS` argument.
 The following options are available:
 
 Tags::
@@ -252,7 +253,7 @@ This can be used to run feature files outside of the *_test/integration/features
 
 Format::
 Use `format` to change the format of Godog's output.
-For example, you can use `pretty` format instead of the native `progress`.
+For example, you can set `progress` format instead of the default `pretty`.
 
 Stop-on-failure::
 Set `stop-on-failure` to true to stop integration tests on failure.

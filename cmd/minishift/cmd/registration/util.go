@@ -55,7 +55,7 @@ func RegisterHost(libMachineClient *libmachine.Client) {
 	}
 }
 
-func UnregisterHost(api libmachine.API, allowToSkipUnregistration bool) {
+func UnregisterHost(api libmachine.API, allowToSkipUnregistration bool, forceDeletionIgnoringUnregister bool) {
 	if allowToSkipUnregistration && SkipUnRegistration {
 		log.Debug("Skipping unregistration due to enabled '--skip-unregistration' flag")
 		return
@@ -65,8 +65,10 @@ func UnregisterHost(api libmachine.API, allowToSkipUnregistration bool) {
 		return
 	}
 
-	if wasSuccessful, err := cluster.UnRegister(api); err != nil || !wasSuccessful {
-		handleFailedRegistrationAction()
+	if !forceDeletionIgnoringUnregister {
+		if wasSuccessful, err := cluster.UnRegister(api); err != nil || !wasSuccessful {
+			handleFailedRegistrationAction()
+		}
 	}
 
 	// if continued, we remove the IsRegistered state

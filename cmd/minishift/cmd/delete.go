@@ -69,7 +69,7 @@ func runDelete(cmd *cobra.Command, args []string) {
 	}
 
 	// Unregistration, do not allow to be skipped
-	registrationUtil.UnregisterHost(api, false)
+	registrationUtil.UnregisterHost(api, false, forceMachineDeletion)
 	fmt.Println("Deleting the Minishift VM...")
 	if err := cluster.DeleteHost(api); err != nil {
 		handleFailedHostDeletion(err)

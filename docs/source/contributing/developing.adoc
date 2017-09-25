@@ -211,10 +211,24 @@ For example, _proxy.feature_ or _cmd-version.feature_.
 ==== Running Integration Tests
 
 By default, the tests are being run against the binary created by `make build`, which is *_$GOPATH/bin/minishift_*. 
-To run the tests, use the following command:
+To run the basic test, use the following command:
 
 ----
 $ make integration
+----
+
+NOTE: By default `make integration` only runs tests which are tagged as `@basic`.
+
+To run all the test, use the following command:
+
+----
+$ make integration_all
+----
+
+Flag *_TIMEOUT_* can be used to overwrite the default timeout 3600s. To run all the test with timeout 7200s, use the following command:
+
+----
+$ make integration_all TIMEOUT=7200s
 ----
 
 To run integration tests against a Minishift binary in a different location you can use the `MINISHIFT_BINARY` argument:

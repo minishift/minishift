@@ -6,7 +6,8 @@
             "iconClass": "icon-jboss",
             "description": "Application template for JBoss Data Virtualization 6.3 services built using S2I.",
             "tags": "jdv,datavirt,jboss,xpaas",
-            "version": "1.4.0"
+            "version": "1.4.0",
+            "openshift.io/display-name": "Red Hat JBoss Data Virtualization 6.3 (no SSL)"
         },
         "name": "datavirt63-basic-s2i"
     },
@@ -60,6 +61,7 @@
         },
         {
             "description": "The name of the service account to use for the deployment.  The service account should be configured to allow usage of the secret specified by CONFIGURATION_NAME.",
+            "displayName": "Service Account Name",
             "name": "SERVICE_ACCOUNT_NAME",
             "value": "datavirt-service-account",
             "required": true
@@ -132,6 +134,27 @@
             "displayName": "Deploy Exploded Archives",
             "name": "AUTO_DEPLOY_EXPLODED",
             "value": "false",
+            "required": false
+        },
+        {
+            "description": "Comma delimited list of source directories containing VDBs for deployment",
+            "displayName": "VDB Deployment Directories",
+            "name": "VDB_DIRS",
+            "value": "",
+            "required": false
+        },
+        {
+            "displayName": "Maven mirror URL",
+            "description": "Maven mirror to use for S2I builds",
+            "name": "MAVEN_MIRROR_URL",
+            "value": "",
+            "required": false
+        },
+        {
+            "displayName": "Artifact Directories",
+            "description": "List of directories from which archives will be copied into the deployment folder. If unspecified, all archives in /target will be copied.",
+            "name": "ARTIFACT_DIR",
+            "value": "",
             "required": false
         }
     ],
@@ -215,7 +238,22 @@
                         "uri": "${SOURCE_REPOSITORY_URL}",
                         "ref": "${SOURCE_REPOSITORY_REF}"
                     },
-                    "contextDir": "${CONTEXT_DIR}"
+                    "contextDir": "${CONTEXT_DIR}",
+                    "images": [
+                        {
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "namespace": "${IMAGE_STREAM_NAMESPACE}",
+                                "name": "jboss-datagrid65-client-openshift:1.0"
+                            },
+                            "paths": [
+                                {
+                                    "destinationDir": "./${CONTEXT_DIR}/extensions/datagrid65",
+                                    "sourcePath": "/extensions/."
+                                }
+                            ]
+                        }
+                    ]
                 },
                 "strategy": {
                     "type": "Source",
@@ -224,8 +262,26 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-datavirt63-openshift:1.0"
-                        }
+                            "name": "jboss-datavirt63-openshift:1.2"
+                        },
+                        "env": [
+                            {
+                                "name": "MAVEN_MIRROR_URL",
+                                "value": "${MAVEN_MIRROR_URL}"
+                            },
+                            {
+                                "name": "CUSTOM_INSTALL_DIRECTORIES",
+                                "value": "extensions/*"
+                            },
+                            {
+                                "name": "VDB_DIRS",
+                                "value": "${VDB_DIRS}"
+                            },
+                            {
+                                "name": "ARTIFACT_DIR",
+                                "value": "${ARTIFACT_DIR}"
+                            }
+                        ]
                     }
                 },
                 "output": {
@@ -250,6 +306,15 @@
                     {
                         "type": "ImageChange",
                         "imageChange": {}
+                    },
+                    {
+                        "type": "ImageChange",
+                        "imageChange": {
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "jboss-datagrid65-client-openshift:1.0"
+                            }
+                        }
                     },
                     {
                         "type": "ConfigChange"

@@ -1,5 +1,7 @@
 build:
   image: fedora:26
+  tags:
+    - docker
   script:
     - dnf install -y golang glide make git python
     - export CURRENT_BUILD_PATH=$PWD

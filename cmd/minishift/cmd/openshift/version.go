@@ -21,10 +21,9 @@ import (
 	"os"
 
 	"github.com/docker/machine/libmachine"
-	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
-	"github.com/minishift/minishift/pkg/minishift/docker"
+	openshiftVersions "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
@@ -45,11 +44,9 @@ func runVersion(cmd *cobra.Command, args []string) {
 	if err != nil {
 		atexit.ExitWithMessage(1, nonExistentMachineError)
 	}
-	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
-	dockerCommander := docker.NewVmDockerCommander(sshCommander)
-	version, err := dockerCommander.Exec(" ", "origin", "openshift", "version")
+	version, err := openshiftVersions.GetOpenshiftVersion(host)
 	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Error restarting the OpenShift cluster: %s", err.Error()))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error getting the OpenShift cluster version: %s", err.Error()))
 	}
 	fmt.Fprintln(os.Stdout, version)
 }

@@ -61,10 +61,10 @@ func (registrator *RedHatRegistrator) CompatibleWithDistribution(osReleaseInfo *
 
 // Register attempts to register the system with RHSM
 func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) error {
-	progressDots := progressdots.New()
-
 	if isRegistered, err := registrator.isRegistered(); !isRegistered && err == nil {
 		for i := 1; i < 4; i++ {
+			// Initialize progressDots channel
+			progressDots := progressdots.New()
 			// request username (disallow empty value)
 			if param.Username == "" {
 				for param.Username == "" {

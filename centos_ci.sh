@@ -81,7 +81,8 @@ function install_docker() {
 
 # Create a docs user which has NOPASSWD sudoer role
 function prepare_ci_user() {
-  groupadd -r minishift_ci && useradd -g minishift_ci minishift_ci
+  # 1000 as id of user in docker image (https://github.com/minishift/minishift/blob/master/docs/Dockerfile#L25)
+  groupadd -g 1000 -r minishift_ci && useradd -g minishift_ci -u 1000 minishift_ci
   chmod +w /etc/sudoers && echo "minishift_ci ALL=(ALL)    NOPASSWD: ALL" >> /etc/sudoers && chmod -w /etc/sudoers
 
   # Copy centos_ci.sh to newly created user home dir
@@ -296,7 +297,8 @@ function perform_release() {
 function build_and_test() {
   setup_kvm_docker_machine_driver;
   cd $GOPATH/src/github.com/minishift/minishift
-  make prerelease synopsis_docs link_check_docs
+  make prerelease
+  make link_check_docs
   # Run integration test with 'kvm' driver
   MINISHIFT_VM_DRIVER=kvm make integration_all
   echo "CICO: Tests ran successfully"

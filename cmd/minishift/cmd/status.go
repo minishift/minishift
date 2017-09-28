@@ -19,29 +19,82 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
+	"text/template"
 
 	"github.com/docker/machine/libmachine"
-	"github.com/spf13/cobra"
-
+	"github.com/docker/machine/libmachine/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	openshiftVersion "github.com/minishift/minishift/pkg/minishift/openshift/version"
+	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
+	"github.com/spf13/cobra"
 )
+
+var statusFormat = `Minishift:  {{.MinishiftStatus}}
+Profile:    {{.ProfileName}}
+OpenShift:  {{.ClusterStatus}}
+DiskUsage:  {{.DiskUsage}}
+`
+
+type Status struct {
+	MinishiftStatus string
+	ProfileName     string
+	ClusterStatus   string
+	DiskUsage       string
+}
 
 // statusCmd represents the status command
 var statusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "Gets the status of the local OpenShift cluster.",
 	Long:  `Gets the status of the local OpenShift cluster.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
-		defer api.Close()
+	Run:   runStatus,
+}
+
+func runStatus(cmd *cobra.Command, args []string) {
+	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+	defer api.Close()
+
+	host, err := api.Load(constants.MachineName)
+	if err != nil {
 		s, err := cluster.GetHostStatus(api)
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error getting cluster status: %s", err.Error()))
 		}
-		fmt.Fprintln(os.Stdout, s)
-	},
+		atexit.ExitWithMessage(0, s)
+	}
+
+	openshiftStatus := "Stopped"
+	diskUsage := "Unknown"
+	profileName := profileActions.GetActiveProfile()
+
+	vmStatus, err := cluster.GetHostStatus(api)
+	if err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error getting cluster status: %s", err.Error()))
+	}
+
+	if vmStatus == state.Running.String() {
+		openshiftVersion, err := openshiftVersion.GetOpenshiftVersion(host)
+		if err == nil {
+			openshiftStatus = fmt.Sprintf("Running (%s)", strings.Split(openshiftVersion, "\n")[0])
+		}
+
+		diskSize, diskUse := getDiskUsage(host.Driver, StorageDisk)
+		diskUsage = fmt.Sprintf("%s of %s", diskUse, diskSize)
+	}
+
+	status := Status{vmStatus, profileName, openshiftStatus, diskUsage}
+
+	tmpl, err := template.New("status").Parse(statusFormat)
+	if err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error creating status template: %s", err.Error()))
+	}
+	err = tmpl.Execute(os.Stdout, status)
+	if err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error executing status template:: %s", err.Error()))
+	}
 }
 
 func init() {

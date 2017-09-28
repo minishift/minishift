@@ -117,7 +117,7 @@ serve_docs: synopsis_docs build_docs_container
 	cd docs && docker run $(DOC_VARIABLES) -p 35729:35729 -p 4567:4567 -tiv $(shell pwd)/docs:/home/docs:Z minishift/docs serve[--watcher-force-polling]
 
 .PHONY: link_check_docs
-link_check_docs: synopsis_docs build_docs_container
+link_check_docs: synopsis_docs
 	cd docs && docker run $(DOC_VARIABLES) -tiv $(shell pwd)/docs:/home/docs:Z minishift/docs link_check
 
 $(DOCS_SYNOPISIS_DIR)/*.md: vendor $(ADDON_ASSET_FILE)

@@ -80,6 +80,15 @@ var RootCmd = &cobra.Command{
 		// creating all directories for minishift run
 		createMinishiftDirs(minishiftConfig.InstanceDirs)
 
+		// If AllInstanceConfig is not defined we should define it now.
+		if minishiftConfig.AllInstancesConfig == nil {
+			ensureAllInstanceConfigPath(constants.AllInstanceConfigPath)
+			minishiftConfig.AllInstancesConfig, err = minishiftConfig.NewAllInstancesConfig(constants.AllInstanceConfigPath)
+			if err != nil {
+				atexit.ExitWithMessage(1, fmt.Sprintf("Error creating all instance config: %s", err.Error()))
+			}
+		}
+
 		ensureConfigFileExists(constants.ConfigFile)
 
 		// Create MACHINE_NAME.json
@@ -185,8 +194,9 @@ func initConfig() {
 
 func initializeProfile() string {
 	var (
-		profileName string
-		err         error
+		profileName   string
+		err           error
+		activeProfile string
 	)
 
 	for i, arg := range os.Args {
@@ -196,14 +206,16 @@ func initializeProfile() string {
 		}
 	}
 
-	// We need to initialize allinstance config as the active profile information present in it.
-	ensureAllInstanceConfigPath(constants.AllInstanceConfigPath)
-	minishiftConfig.AllInstancesConfig, err = minishiftConfig.NewAllInstancesConfig(constants.AllInstanceConfigPath)
-	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Error creating all instance config: %s", err.Error()))
+	// Check if the allinstance config is present. If present we need to check active profile information.
+	_, err = os.Stat(constants.AllInstanceConfigPath)
+	if !os.IsNotExist(err) {
+		minishiftConfig.AllInstancesConfig, err = minishiftConfig.NewAllInstancesConfig(constants.AllInstanceConfigPath)
+		if err != nil {
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error initializing all instance config: %s", err.Error()))
+		}
+		activeProfile = profileActions.GetActiveProfile()
 	}
 
-	activeProfile := profileActions.GetActiveProfile()
 	if profileName != "" {
 		return profileName
 	}

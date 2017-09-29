@@ -225,23 +225,39 @@ To run all the test, use the following command:
 $ make integration_all
 ----
 
-Flag *_TIMEOUT_* can be used to override the default timeout `3600s`.
-To run all the test with timeout `7200s`, use the following command:
+===== Additional Parameters
 
-----
-$ make integration_all TIMEOUT=7200s
-----
+To provide more flexibility the default targets `integration` and `integration_all` can be further customized using several parameters.
 
-To run integration tests against a Minishift binary in a different location you can use the `MINISHIFT_BINARY` argument:
+MINISHIFT_BINARY::
+Parameter `MINISHIFT_BINARY` can be used to run integration tests against Minishift binary located in different directory:
 
 ----
 $ make integration MINISHIFT_BINARY=<path-to-custom-binary>
 ----
 
-[[godog-options]]
-==== Using Tags and Other Godog Options
+TIMEOUT::
+Parameter `TIMEOUT` can be used to override the default timeout of `3600s`.
+To run all the tests with timeout `7200s`, use the following command:
 
-Additional properties for Godog runner can be specified with the `GODOG_OPTS` argument.
+----
+$ make integration_all TIMEOUT=7200s
+----
+
+RUN_BEFORE_FEATURE::
+Parameter `RUN_BEFORE_FEATURE` specifies Minishift commands to be run before each feature.
+This provides ability to run integration tests against Minishift which is not in default state.
+When multiple commands are specified, they must be delimited by a semicolon.
+For example, tests can be run against stopped Minishift with _image caching_ option turned on by running:
+
+----
+$ make integration_all RUN_BEFORE_FEATURE="start; stop; config set image-caching true"
+----
+
+[[godog-options]]
+==== Using GODOG_OPTS Parameter
+
+Parameter `GODOG_OPTS` specifies additional arguments for Godog runner.
 The following options are available:
 
 Tags::

@@ -50,10 +50,11 @@ var (
 	minishiftArgs   string
 	minishiftBinary string
 
-	runBeforeFeature string
+	testDir       string
+	testResultDir string
+	isoName       string
 
-	testDir string
-	isoName string
+	runBeforeFeature string
 
 	// Godog options
 	godogFormat              string
@@ -251,7 +252,13 @@ func FeatureContext(s *godog.Suite) {
 
 	s.BeforeSuite(func() {
 		testDir = setUp()
-		util.StartLog(testDir)
+		testResultDir = filepath.Join(testDir, "..", "test-results")
+		err := os.MkdirAll(testResultDir, os.ModePerm)
+		if err != nil {
+			fmt.Errorf("Error creating directory for test results: %v", err)
+		}
+
+		util.StartLog(testResultDir)
 		fmt.Println("Running Integration test in:", testDir)
 		fmt.Println("Using binary:", minishiftBinary)
 	})

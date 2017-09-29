@@ -50,6 +50,8 @@ var (
 	minishiftArgs   string
 	minishiftBinary string
 
+	runBeforeFeature string
+
 	testDir string
 	isoName string
 
@@ -60,6 +62,10 @@ var (
 	godogStopOnFailure       bool
 	godogNoColors            bool
 	godogPaths               string
+)
+
+const (
+	delimiterConst = ";"
 )
 
 func TestMain(m *testing.M) {
@@ -112,7 +118,7 @@ func TestMain(m *testing.M) {
 func parseFlags() {
 	flag.StringVar(&minishiftArgs, "minishift-args", "", "Arguments to pass to minishift")
 	flag.StringVar(&minishiftBinary, "binary", "", "Path to minishift binary")
-
+	flag.StringVar(&runBeforeFeature, "run-before-feature", "", "Set of minishift commands to be executed before every feature. Individual commands must be delimited by a semicolon.")
 	flag.StringVar(&testDir, "test-dir", "", "Path to the directory in which to execute the tests")
 
 	flag.StringVar(&godogFormat, "format", "pretty", "Sets which format godog will use")
@@ -262,6 +268,16 @@ func FeatureContext(s *godog.Suite) {
 			runner.CDKSetup()
 		} else {
 			runner.RunCommand("addons list")
+		}
+
+		var splittedCommands []string
+		if runBeforeFeature != "" {
+			splittedCommands = strings.Split(runBeforeFeature, delimiterConst)
+			fmt.Println("Running commands:", runBeforeFeature)
+		}
+
+		for index := range splittedCommands {
+			runner.RunCommand(splittedCommands[index])
 		}
 
 		util.LogMessage("info", fmt.Sprintf("----- Feature: %s -----", this.Name))

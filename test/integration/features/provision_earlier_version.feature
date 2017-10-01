@@ -1,7 +1,8 @@
-@provision-earlier-version @openshift @minishift-only
+@provision-earlier-version @openshift
 Feature: Provision an older major release
   As a user I can provision an older major version of minishift
 
+  @minishift-only
   Scenario: Starting Minishift with v1.5.1
     Given Minishift has state "Does Not Exist"
      When executing "minishift start --openshift-version v1.5.1" succeeds
@@ -10,6 +11,19 @@ Feature: Provision an older major release
      Then stdout should contain
      """
      openshift v1.5.1
+     """
+
+  @cdk-only
+  Scenario: Starting Minishift with ocp v3.5
+    Given Minishift has state "Does Not Exist"
+     When executing "minishift start --ocp-tag v3.5" succeeds
+     Then Minishift should have state "Running"
+     When executing "minishift openshift version" succeeds
+     Then stdout should match
+     """
+     ^openshift v3\.5\.[0-9]{1,2}\.[0-9]{1,3}\.[0-9]{1,3}
+     kubernetes v[0-9]+\.[0-9]+\.[0-9]+\+[0-9a-z]{7}
+     etcd [0-9]+\.[0-9]+\.[0-9]+
      """
 
   Scenario: OpenShift is ready after startup

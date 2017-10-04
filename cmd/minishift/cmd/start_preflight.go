@@ -61,6 +61,12 @@ func preflightChecksBeforeStartingHost() {
 			driverErrorMessage)
 		preflightCheckSucceedsOrFails(
 			configCmd.SkipCheckKVMDriver.Name,
+			checkLibvirtInstalled,
+			"Checking if Libvirt is installed",
+			false, configCmd.WarnCheckKVMDriver.Name,
+			driverErrorMessage)
+		preflightCheckSucceedsOrFails(
+			configCmd.SkipCheckKVMDriver.Name,
 			checkLibvirtDefaultNetwork,
 			"Checking if Libvirt default network is present and active",
 			false, configCmd.WarnCheckKVMDriver.Name,
@@ -246,6 +252,22 @@ func checkKvmDriver() bool {
 	fmt.Printf("   Checking driver binary is executable ... ")
 	if fi.Mode()&0011 == 0 {
 		return false
+	}
+	return true
+}
+
+//checkLibvirtInstalled returns true if Libvirt is installed
+func checkLibvirtInstalled() bool {
+	path, err := exec.LookPath("virsh")
+	if err != nil {
+		return false
+	}
+	fi, _ := os.Stat(path)
+	if fi.Mode()&os.ModeSymlink != 0 {
+		path, err = os.Readlink(path)
+		if err != nil {
+			return false
+		}
 	}
 	return true
 }

@@ -48,7 +48,7 @@ func runVersion(cmd *cobra.Command, args []string) {
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error getting the OpenShift cluster version: %s", err.Error()))
 	}
-	fmt.Fprintln(os.Stdout, version)
+	fmt.Fprint(os.Stdout, version)
 }
 
 func init() {

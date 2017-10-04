@@ -17,6 +17,7 @@ MINISHIFT_VERSION = 1.6.0
 OPENSHIFT_VERSION = v3.6.0
 B2D_ISO_VERSION = v1.2.0
 CENTOS_ISO_VERSION = v1.2.0
+MINIKUBE_ISO_VERSION = v0.24.0
 COMMIT_SHA=$(shell git rev-parse --short HEAD)
 
 # Go and compilation related variables
@@ -39,6 +40,7 @@ SOURCE_DIRS = cmd pkg test
 VERSION_VARIABLES := -X $(REPOPATH)/pkg/version.minishiftVersion=$(MINISHIFT_VERSION) \
 	-X $(REPOPATH)/pkg/version.b2dIsoVersion=$(B2D_ISO_VERSION) \
 	-X $(REPOPATH)/pkg/version.centOsIsoVersion=$(CENTOS_ISO_VERSION) \
+	-X $(REPOPATH)/pkg/version.minikubeIsoVersion=$(MINIKUBE_ISO_VERSION) \
 	-X $(REPOPATH)/pkg/version.openshiftVersion=$(OPENSHIFT_VERSION) \
 	-X $(REPOPATH)/pkg/version.commitSha=$(COMMIT_SHA)
 LDFLAGS := $(VERSION_VARIABLES) -s -w -extldflags '-static'
@@ -51,7 +53,7 @@ ADDON_ASSET_FILE = $(ADDON_BINDATA_DIR)/addon_assets.go
 # Setup for the docs tasks
 IMAGE_UID ?= 1000
 DOCS_SYNOPISIS_DIR = docs/source/_tmp
-DOC_VARIABLES = -e OPENSHIFT_VERSION=$(OPENSHIFT_VERSION) -e MINISHIFT_VERSION=$(MINISHIFT_VERSION) -e CENTOS_ISO_VERSION=$(CENTOS_ISO_VERSION)
+DOC_VARIABLES = -e OPENSHIFT_VERSION=$(OPENSHIFT_VERSION) -e MINISHIFT_VERSION=$(MINISHIFT_VERSION) -e CENTOS_ISO_VERSION=$(CENTOS_ISO_VERSION) -e MINIKUBE_ISO_VERSION=$(MINIKUBE_ISO_VERSION)
 
 # Check that given variables are set and all have non-empty values,
 # die with an error otherwise.

@@ -24,6 +24,8 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/minishift/minishift/pkg/minikube/assets"
+
 	"github.com/docker/machine/libmachine/drivers"
 	machinessh "github.com/docker/machine/libmachine/ssh"
 	"github.com/pkg/errors"
@@ -59,6 +61,12 @@ func NewSSHClient(d drivers.Driver) (*ssh.Client, error) {
 		return nil, err
 	}
 	return client, nil
+}
+
+func TransferFile(f assets.CopyableFile, client *ssh.Client) error {
+	return Transfer(f, f.GetLength(),
+		f.GetTargetDir(), f.GetTargetName(),
+		f.GetPermissions(), client)
 }
 
 // Transfer uses an SSH session to copy a file to the remote machine.

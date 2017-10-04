@@ -36,6 +36,7 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftCluster "github.com/minishift/minishift/pkg/minishift/cluster"
 	"github.com/minishift/minishift/pkg/minishift/clusterup"
+	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/minishift/docker"
 	"github.com/minishift/minishift/pkg/minishift/docker/image"
@@ -45,6 +46,7 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
 
 	"github.com/minishift/minishift/pkg/util"
+	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/minishift/minishift/pkg/util/progressdots"
 	stringUtils "github.com/minishift/minishift/pkg/util/strings"
@@ -150,16 +152,22 @@ func runStart(cmd *cobra.Command, args []string) {
 	ensureNotRunning(libMachineClient, constants.MachineName)
 	validateOpenshiftVersion()
 
+	// to determine whether we need to run post cluster up actions,
+	// we need to determine whether this is a restart prior to potentially creating a new VM
+	isRestart := cmdUtil.VMExists(libMachineClient, constants.MachineName)
+
+	// Install default add-ons when it is a fresh start. For a restart
+	// we should not install as user might have deleted them intentionally.
+	if !isRestart {
+		installDefaultAddons()
+	}
+
 	// preflight check (before start)
 	preflightChecksBeforeStartingHost()
 
 	setSubscriptionManagerParameters()
 
 	proxyConfig := handleProxies()
-
-	// to determine whether we need to run post cluster up actions,
-	// we need to determine whether this is a restart prior to potentially creating a new VM
-	isRestart := cmdUtil.VMExists(libMachineClient, constants.MachineName)
 
 	fmt.Printf("-- Starting local OpenShift cluster")
 	hostVm := startHost(libMachineClient)
@@ -450,6 +458,8 @@ func determineIsoUrl(iso string) string {
 		iso = constants.DefaultB2dIsoUrl
 	case minishiftConstants.CentOsIsoAlias:
 		iso = constants.DefaultCentOsIsoUrl
+	case minishiftConstants.MinikubeIsoAlias:
+		iso = constants.DefaultMinikubeIsoURL
 	default:
 		if !(govalidator.IsURL(iso) || strings.HasPrefix(iso, "file:")) {
 			fmt.Println()
@@ -632,5 +642,16 @@ func cacheMinishiftISO(config *cluster.MachineConfig) {
 		if err := config.CacheMinikubeISOFromURL(); err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error caching the ISO: %s", err.Error()))
 		}
+	}
+}
+
+// Run the default addons on fresh minishift start
+func installDefaultAddons() {
+	if filehelper.IsEmptyDir(minishiftConfig.InstanceDirs.Addons) {
+		fmt.Print("-- Installing default add-ons ... ")
+		if err := cmdUtil.UnpackAddons(minishiftConfig.InstanceDirs.Addons); err != nil {
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error installing default add-ons : %s", err))
+		}
+		fmt.Println("OK")
 	}
 }

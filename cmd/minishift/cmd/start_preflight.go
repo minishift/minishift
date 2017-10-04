@@ -21,6 +21,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -56,7 +57,19 @@ func preflightChecksBeforeStartingHost() {
 			configCmd.SkipCheckKVMDriver.Name,
 			checkKvmDriver,
 			"Checking if KVM driver is installed",
-			false, configCmd.WarnCheckXHyveDriver.Name,
+			false, configCmd.WarnCheckKVMDriver.Name,
+			driverErrorMessage)
+		preflightCheckSucceedsOrFails(
+			configCmd.SkipCheckKVMDriver.Name,
+			checkLibvirtInstalled,
+			"Checking if Libvirt is installed",
+			false, configCmd.WarnCheckKVMDriver.Name,
+			driverErrorMessage)
+		preflightCheckSucceedsOrFails(
+			configCmd.SkipCheckKVMDriver.Name,
+			checkLibvirtDefaultNetwork,
+			"Checking if Libvirt default network is present and active",
+			false, configCmd.WarnCheckKVMDriver.Name,
 			driverErrorMessage)
 	case "hyperv":
 		preflightCheckSucceedsOrFails(
@@ -241,6 +254,45 @@ func checkKvmDriver() bool {
 		return false
 	}
 	return true
+}
+
+//checkLibvirtInstalled returns true if Libvirt is installed
+func checkLibvirtInstalled() bool {
+	path, err := exec.LookPath("virsh")
+	if err != nil {
+		return false
+	}
+	fi, _ := os.Stat(path)
+	if fi.Mode()&os.ModeSymlink != 0 {
+		path, err = os.Readlink(path)
+		if err != nil {
+			return false
+		}
+	}
+	return true
+}
+
+//checkLibvirtDefaultNetwork returns true if the "default" network is present and active
+func checkLibvirtDefaultNetwork() bool {
+	cmd := exec.Command("virsh", "--connect", "qemu:///system", "net-list")
+	stdOutStdError, err := cmd.CombinedOutput()
+	if err != nil {
+		return false
+	}
+	stdOut := fmt.Sprintf("%s", stdOutStdError)
+	outputSlice := strings.Split(stdOut, "\n")
+
+	for _, stdOut = range outputSlice {
+		stdOut = strings.TrimSpace(stdOut)
+		match, err := regexp.MatchString("^default\\s", stdOut)
+		if err != nil {
+			return false
+		}
+		if match && strings.Contains(stdOut, "active") {
+			return true
+		}
+	}
+	return false
 }
 
 // checkHypervDriverSwitch returns true if Virtual Switch has been selected

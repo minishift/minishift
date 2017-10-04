@@ -38,6 +38,9 @@ var (
 	// The default version of the CentOS ISO version
 	centOsIsoVersion = "0.0.0-unset"
 
+	// The default version of the Minikube ISO version
+	minikubeIsoVersion = "0.0.0-unset"
+
 	// The SHA-1 of the commit this binary is build off
 	commitSha = "sha-unset"
 )
@@ -60,6 +63,10 @@ func GetB2dIsoVersion() string {
 
 func GetCentOsIsoVersion() string {
 	return centOsIsoVersion
+}
+
+func GetMinikubeIsoVersion() string {
+	return minikubeIsoVersion
 }
 
 func GetCommitSha() string {

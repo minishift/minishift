@@ -8,9 +8,12 @@ Feature: Addons command and its subcommands
       And executing "minishift add-ons" fails
       And executing "minishift add-on" fails
 
-  @minishift-only
-  Scenario: Default add-ons are installed but not enabled by default
-  Note: default addons were installed during previous commands automatically.
+ Scenario: Installing default add-ons manually
+     When executing "minishift addons install --defaults" succeeds
+     Then stdout should contain
+      """
+      Default add-ons anyuid, admin-user, xpaas, registry-route installed
+      """
      When executing "minishift addons list"
      Then stdout should match "admin-user\s*: disabled\s*P\(0\)"
       And stdout should match "anyuid\s*: disabled\s*P\(0\)"

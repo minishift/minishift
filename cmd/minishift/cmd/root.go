@@ -67,7 +67,8 @@ var RootCmd = &cobra.Command{
 	Long:  `Minishift is a command-line tool that provisions and manages single-node OpenShift clusters optimized for development workflows.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		var (
-			err error
+			err                    error
+			isAddonInstallRequired bool
 		)
 
 		constants.MachineName = constants.ProfileName
@@ -76,6 +77,10 @@ var RootCmd = &cobra.Command{
 		minishiftConfig.InstanceDirs = minishiftConfig.NewMinishiftDirs()
 
 		constants.KubeConfigPath = filepath.Join(constants.Minipath, "machines", constants.MachineName+"_kubeconfig")
+
+		if !filehelper.Exists(minishiftConfig.InstanceDirs.Addons) {
+			isAddonInstallRequired = true
+		}
 
 		// creating all directories for minishift run
 		createMinishiftDirs(minishiftConfig.InstanceDirs)
@@ -96,6 +101,12 @@ var RootCmd = &cobra.Command{
 		minishiftConfig.InstanceConfig, err = minishiftConfig.NewInstanceConfig(instanceConfigPath)
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error creating config for VM: %s", err.Error()))
+		}
+
+		if isAddonInstallRequired {
+			if err := cmdUtil.UnpackAddons(minishiftConfig.InstanceDirs.Addons); err != nil {
+				atexit.ExitWithMessage(1, fmt.Sprintf("Error installing default add-ons : %s", err))
+			}
 		}
 
 		// Check marker file created by update command and perform post update execution steps

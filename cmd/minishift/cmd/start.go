@@ -48,7 +48,6 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
 
 	"github.com/minishift/minishift/pkg/util"
-	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/minishift/minishift/pkg/util/progressdots"
 	stringUtils "github.com/minishift/minishift/pkg/util/strings"
@@ -157,12 +156,6 @@ func runStart(cmd *cobra.Command, args []string) {
 	// to determine whether we need to run post cluster up actions,
 	// we need to determine whether this is a restart prior to potentially creating a new VM
 	isRestart := cmdUtil.VMExists(libMachineClient, constants.MachineName)
-
-	// Install default add-ons when it is a fresh start. For a restart
-	// we should not install as user might have deleted them intentionally.
-	if !isRestart {
-		installDefaultAddons()
-	}
 
 	// preflight check (before start)
 	preflightChecksBeforeStartingHost()
@@ -669,16 +662,5 @@ func cacheMinishiftISO(config *cluster.MachineConfig) {
 		if err := config.CacheMinikubeISOFromURL(); err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error caching the ISO: %s", err.Error()))
 		}
-	}
-}
-
-// Run the default addons on fresh minishift start
-func installDefaultAddons() {
-	if filehelper.IsEmptyDir(minishiftConfig.InstanceDirs.Addons) {
-		fmt.Print("-- Installing default add-ons ... ")
-		if err := cmdUtil.UnpackAddons(minishiftConfig.InstanceDirs.Addons); err != nil {
-			atexit.ExitWithMessage(1, fmt.Sprintf("Error installing default add-ons : %s", err))
-		}
-		fmt.Println("OK")
 	}
 }

@@ -1,19 +1,9 @@
 @cmd-addons @command
 Feature: Addons command and its subcommands
 
-  Scenario: Command "addons" has "adddon" alias
-    Given Minishift has state "Does Not Exist"
-     When executing "minishift addons" succeeds
-     Then executing "minishift addon" succeeds
-      And executing "minishift add-ons" fails
-      And executing "minishift add-on" fails
-
- Scenario: Installing default add-ons manually
-     When executing "minishift addons install --defaults" succeeds
-     Then stdout should contain
-      """
-      Default add-ons anyuid, admin-user, xpaas, registry-route installed
-      """
+  @minishift-only
+  Scenario: Default add-ons are installed but not enabled by default
+     Note: default addons were installed during previous commands automatically.
      When executing "minishift addons list"
      Then stdout should match "admin-user\s*: disabled\s*P\(0\)"
       And stdout should match "anyuid\s*: disabled\s*P\(0\)"

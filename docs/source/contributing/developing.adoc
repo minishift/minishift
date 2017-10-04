@@ -294,8 +294,7 @@ While `-tags basic,openshift` will be parsed properly by make, `-tags basic, ope
 Integration test logs its progress directly into a console with accent of providing additional useful information when failures of individual Gherkin steps happen.
 This information is often enough to find and debug the reason of failure.
 
-However for cases which needs further investigation the integration test also logs more detailed progress into a log file. This file is located at `$GOPATH/github.com/minishift/minishift/out/integration-test/integration.log`.
-Please note that this file is being deleted on start of each subsequent test run.
+However for cases which needs further investigation the integration test also logs more detailed progress into a log file. This file is located at `$GOPATH/github.com/minishift/minishift/out/test-results/integration_YYYY-MM-DD_HH:MM:SS.log`.
 
 [[format-source-code]]
 === Formatting the Source Code

@@ -27,18 +27,39 @@ The following example shows the contents of an add-on file, including the name a
 ----
 # Name: anyuid                                                                          // <1>
 # Description: Allows authenticated users to run images under a non pre-allocated UID   // <2>
-# Required-vars: ACME_TOKEN                                                             // <3>
+# Required-Vars: ACME_TOKEN                                                             // <3>
+# OpenShift-Version: >3.6.0                                                             // <4>
 
-oc adm policy add-scc-to-group anyuid system:authenticated                              // <4>
+oc adm policy add-scc-to-group anyuid system:authenticated                              // <5>
 ----
 <1> (Required) Name of the add-on.
 <2> (Required) Description of the add-on.
 <3> (Optional) Comma separated list of required interpolation variables. See xref:../using/addons.adoc#addon-variable-interpolation[Variable Interpolation]
-<4> Actual add-on command. In this case, the command executes the *oc* binary.
+<4> (Optional) OpenShift version required to run a specific add-on. See xref:../using/addons.adoc#addon-openshift-version-semantics[OpenShift Version Semantic]
+<5> Actual add-on command. In this case, the command executes the *oc* binary.
 
 NOTE: Comment lines, starting with the '#' character, can be inserted at anywhere in the file.
 
 Enabled add-ons are applied during xref:../command-ref/minishift_start.adoc#[`minishift start`], immediately after the initial cluster provisioning is successfully completed.
+
+[[addon-openshift-version-semantics]]
+== OpenShift-Version Semantics
+
+As part of the add-on metadata you can specify the OpenShift version which needs to be running in order to apply the add-on.
+To do so you can specify the optional _OpenShift-Version_ metadata field. The semantics are as follow:
+
+[cols="1,3"]
+|===
+| >3.6.0           | OpenShift version higher than 3.6.0 needs to be running in order to apply the add-on.
+| >=3.6.0          | OpenShift version 3.6.0 or higher needs to be running in order to apply the add-on. 
+| 3.6.0            | OpenShift version 3.6.0 needs to be running in order to apply the add-on. 
+| >=3.5.0, <3.8.0  | OpenShift version should higher or equal to 3.5.0 but lower than 3.8.0. 
+| >=3.5.0, <=3.8.0 | OpenShift version should higher or equal to 3.5.0 but lower or equal to 3.8.0. 
+|===
+
+NOTE: If the metadata field _OpenShift-Version_ is not specified in the add-on header, the add-on is applied against any version of OpenShift.
+
+NOTE: OpenShift-Version supports only versions in the form of <major>.<minor>.<patch>.
 
 [[addon-commands]]
 == Add-on Commands

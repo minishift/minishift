@@ -19,15 +19,18 @@ package addon
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 )
 
 var requiredMetaTags = []string{NameMetaTagName, DescriptionMetaTagName}
 
 const (
-	requiredVars           = "Required-Vars"
-	NameMetaTagName        = "Name"
-	DescriptionMetaTagName = "Description"
+	requiredVars             = "Required-Vars"
+	NameMetaTagName          = "Name"
+	DescriptionMetaTagName   = "Description"
+	RequiredOpenShiftVersion = "OpenShift-Version"
+	anyOpenShiftVersion      = ""
 )
 
 // AddOnMeta defines a set of meta data for an AddOn. Name and Description are required. Others are optional.
@@ -36,6 +39,7 @@ type AddOnMeta interface {
 	Description() []string
 	RequiredVars() []string
 	GetValue(key string) string
+	OpenShiftVersion() string
 }
 
 type DefaultAddOnMeta struct {
@@ -58,6 +62,11 @@ func NewAddOnMeta(headers map[string]interface{}) (AddOnMeta, error) {
 			}
 		default:
 			return nil, nil
+		}
+	}
+	if headers[RequiredOpenShiftVersion] != nil {
+		if !checkVersionSemantic(headers[RequiredOpenShiftVersion].(string)) {
+			return nil, errors.New("Add-on only support OpenShift version semantics eg. 3.6.0 or >3.6.0, <3.9.0 or >=3.5 etc.")
 		}
 	}
 
@@ -89,6 +98,13 @@ func (meta *DefaultAddOnMeta) GetValue(key string) string {
 	return meta.headers[key].(string)
 }
 
+func (meta *DefaultAddOnMeta) OpenShiftVersion() string {
+	if val, contains := meta.headers[RequiredOpenShiftVersion].(string); contains {
+		return val
+	}
+	return anyOpenShiftVersion
+}
+
 func (meta *DefaultAddOnMeta) splitAndTrim(s string) []string {
 	// Trims the stream and then splits
 	trimmed := strings.TrimSpace(s)
@@ -98,4 +114,11 @@ func (meta *DefaultAddOnMeta) splitAndTrim(s string) []string {
 		cleanSplit[i] = strings.TrimSpace(val)
 	}
 	return cleanSplit
+}
+
+func checkVersionSemantic(version string) bool {
+	// Strict match for <major> or <major>.<minor> or <major>.<minor>.<patch>
+	// (>=|>|<|<=)3.6.0, (>=|>|<|<=)3.6.0
+	match, _ := regexp.MatchString("^(|>|>=|<|<=)[0-9]+(.[0-9]+){0,2}(|\\s*,\\s*(|>|>=|<|<=)[0-9]+(.[0-9]+){0,2})$", version)
+	return match
 }

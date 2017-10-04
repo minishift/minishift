@@ -25,12 +25,17 @@ import (
 
 	"strings"
 
+	minikubeConstants "github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/addon"
 	"github.com/minishift/minishift/pkg/minishift/addon/command"
 	"github.com/minishift/minishift/pkg/minishift/addon/parser"
+	"github.com/minishift/minishift/pkg/minishift/constants"
+	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/pkg/errors"
 )
+
+const versionRangeSeparator = ","
 
 // AddOnManager is the central point for all operations around managing addons. An addon
 // manager is created for the base directory of a addon collection.
@@ -191,7 +196,12 @@ func (m *AddOnManager) ApplyAddOn(addOn addon.AddOn, context *command.ExecutionC
 	context.AddToContext("addon-name", addOn.MetaData().Name())
 	defer context.RemoveFromContext("addon-name")
 
-	err := m.verifyRequiredVariablesInContext(context, addOn.MetaData())
+	err := m.verifyRequiredOpenshiftVersion(context, addOn.MetaData())
+	if err != nil {
+		return err
+	}
+
+	err = m.verifyRequiredVariablesInContext(context, addOn.MetaData())
 	if err != nil {
 		return err
 	}
@@ -218,7 +228,12 @@ func (m *AddOnManager) RemoveAddOn(addOn addon.AddOn, context *command.Execution
 	context.AddToContext("addon-name", addOn.MetaData().Name())
 	defer context.RemoveFromContext("addon-name")
 
-	err := m.verifyRequiredVariablesInContext(context, addOn.MetaData())
+	err := m.verifyRequiredOpenshiftVersion(context, addOn.MetaData())
+	if err != nil {
+		return err
+	}
+
+	err = m.verifyRequiredVariablesInContext(context, addOn.MetaData())
 	if err != nil {
 		return err
 	}
@@ -266,9 +281,37 @@ func (m *AddOnManager) verifyRequiredVariablesInContext(context *command.Executi
 
 	if len(missingVars) > 0 {
 		missing := strings.TrimSpace(strings.Join(missingVars, ", "))
-		return errors.New(fmt.Sprintf("The variable(s) %s are required by the add-on, but are not defined in the context.", missing))
+		return fmt.Errorf("The variable(s) %s are required by the add-on, but are not defined in the context", missing)
 	}
 
+	return nil
+}
+
+func (m *AddOnManager) verifyRequiredOpenshiftVersion(context *command.ExecutionContext, meta addon.AddOnMeta) error {
+	dockerCommander := context.GetDockerCommander()
+	versionInfo, err := dockerCommander.Exec(" ", constants.OpenshiftContainerName, "openshift", "version")
+	if err != nil {
+		return err
+	}
+
+	// verionInfo variable have below string as value along with new line
+	// openshift v3.6.0+c4dd4cf
+	// kubernetes v1.6.1+5115d708d7
+	// etcd 3.2.1
+	// openShiftVersionAlongWithCommitSha is contain *v3.6.0+c4dd4cf* (first split on new line and second on space)
+	openShiftVersionAlongWithCommitSha := strings.Split(strings.Split(versionInfo, "\n")[0], " ")[1]
+	// openshiftVersion is contain *3.6.0* (split on *+* string and then trim the *v* as perfix)
+	// TrimSpace is there to make sure no whitespace around version string
+	openShiftVersion := strings.TrimSpace(strings.TrimPrefix(strings.Split(openShiftVersionAlongWithCommitSha, "+")[0], minikubeConstants.VersionPrefix))
+	requiredOpenshiftVersions := strings.TrimSpace(meta.OpenShiftVersion())
+	if requiredOpenshiftVersions != "" {
+		for _, requiredOpenshiftVersion := range strings.Split(requiredOpenshiftVersions, versionRangeSeparator) {
+			if err = compareOpenshiftVersions(openShiftVersion, strings.TrimSpace(requiredOpenshiftVersion)); err != nil {
+				return err
+			}
+		}
+
+	}
 	return nil
 }
 
@@ -279,4 +322,41 @@ func setStateAndPriority(addOn addon.AddOn, configMap map[string]*addon.AddOnCon
 	}
 	addOn.SetEnabled(addOnConfig.Enabled)
 	addOn.SetPriority(int(addOnConfig.Priority))
+}
+
+func compareOpenshiftVersions(openShiftVersion, requiredOpenshiftVersion string) error {
+	if strings.HasPrefix(requiredOpenshiftVersion, ">=") {
+		// This will work for both upstream and downstream.
+		if util.VersionOrdinal(openShiftVersion) < util.VersionOrdinal(strings.TrimPrefix(requiredOpenshiftVersion, ">=")) {
+			return fmt.Errorf("\nAdd-on does not support OpenShift version %s. "+
+				"You need to use a version %s", openShiftVersion, requiredOpenshiftVersion)
+		}
+		return nil
+	}
+	if strings.HasPrefix(requiredOpenshiftVersion, ">") {
+		if util.VersionOrdinal(openShiftVersion) <= util.VersionOrdinal(strings.TrimPrefix(requiredOpenshiftVersion, ">")) {
+			return fmt.Errorf("\nAdd-on does not support OpenShift version %s. "+
+				"You need to use a version %s", openShiftVersion, requiredOpenshiftVersion)
+		}
+		return nil
+	}
+	if strings.HasPrefix(requiredOpenshiftVersion, "<=") {
+		if util.VersionOrdinal(openShiftVersion) > util.VersionOrdinal(strings.TrimPrefix(requiredOpenshiftVersion, "<=")) {
+			return fmt.Errorf("\nAdd-on does not support OpenShift version %s. "+
+				"You need to use a version %s", openShiftVersion, requiredOpenshiftVersion)
+		}
+		return nil
+	}
+	if strings.HasPrefix(requiredOpenshiftVersion, "<") {
+		if util.VersionOrdinal(openShiftVersion) >= util.VersionOrdinal(strings.TrimPrefix(requiredOpenshiftVersion, "<")) {
+			return fmt.Errorf("\nAdd-on does not support OpenShift version %s. "+
+				"You need to use a version %s", openShiftVersion, requiredOpenshiftVersion)
+		}
+		return nil
+	}
+	if openShiftVersion != requiredOpenshiftVersion {
+		return fmt.Errorf("\nAddon does not support OpenShift version %s. "+
+			"You need to use a version %s", openShiftVersion, requiredOpenshiftVersion)
+	}
+	return nil
 }

@@ -18,8 +18,9 @@ package addon
 
 import (
 	"fmt"
-	minishiftTesting "github.com/minishift/minishift/pkg/testing"
 	"testing"
+
+	minishiftTesting "github.com/minishift/minishift/pkg/testing"
 )
 
 func Test_Metadata_creation_succeeds(t *testing.T) {
@@ -121,4 +122,31 @@ func getAddOnMeta(testMap map[string]interface{}, t *testing.T) AddOnMeta {
 	}
 
 	return addOnMeta
+}
+
+func Test_check_openshift_version_sematic(t *testing.T) {
+	var versionTestData = []struct {
+		OpenshiftVersion string
+		expectedResult   bool
+	}{
+		{"3.6.0", true},
+		{"3.4", true},
+		{"<3.6.0", true},
+		{"3.7.1.1", false},
+		{"3.5.3=", false},
+		{"3.5.30", true},
+		{"3.10.3", true},
+		{">=3.5.0, <=3.7.0", true},
+		{">3.5, <=3.7.0", true},
+		{"3.5.0, <=3.7.0", true},
+		{">=3.5.0, <=3.7", true},
+		{"v3", false},
+		{"p3.6.0", false},
+	}
+
+	for _, versionTest := range versionTestData {
+		if checkVersionSemantic(versionTest.OpenshiftVersion) != versionTest.expectedResult {
+			t.Errorf("Expected: '%t', Got 'true' for version: %s", versionTest.expectedResult, versionTest.OpenshiftVersion)
+		}
+	}
 }

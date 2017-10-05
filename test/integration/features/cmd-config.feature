@@ -211,7 +211,7 @@ user defined options which changes default behaviour of Minishift.
 
   Scenario: Checking that memory value was applied
      When executing "minishift ssh -- less /proc/meminfo" succeeds
-     Then stdout should match "MemTotal:\s*35[0-1][0-9]{4} kB"
+     Then stdout should match "MemTotal:\s*3[4-5][0-9]{5} kB"
 
   Scenario: Checking that disk-size value was applied
      When executing "minishift ssh -- sudo fdisk -l | grep Disk" succeeds

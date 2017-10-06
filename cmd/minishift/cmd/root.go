@@ -60,8 +60,6 @@ var viperWhiteList = []string{
 	"log_dir",
 }
 
-var hasEnabledExperimental bool
-
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "minishift",
@@ -107,7 +105,7 @@ var RootCmd = &cobra.Command{
 			}
 		}
 
-		if hasEnabledExperimental {
+		if minishiftConfig.EnableExperimental {
 			glog.Info("Experimental features are enabled")
 		}
 
@@ -154,7 +152,8 @@ func processEnvVariables() {
 	if err == cmdUtil.BooleanFormatError {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error enabling experimental features: %s", err))
 	}
-	hasEnabledExperimental = enableExperimental
+
+	minishiftConfig.EnableExperimental = enableExperimental
 }
 
 func init() {

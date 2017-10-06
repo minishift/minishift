@@ -65,6 +65,8 @@ func TestHasMatcher(t *testing.T) {
 		{"!@#$%^&*()", HasNumbers, false},
 		{"!@#$%^&*()", HasOnlyLetters, false},
 		{"!@#$%^&*()", HasOnlyNumbers, false},
+		{"Hello, World!", HasOnlyLetters, false},
+		{"255.255.255.0", HasOnlyNumbers, false},
 	}
 
 	for _, testCase := range testCases {

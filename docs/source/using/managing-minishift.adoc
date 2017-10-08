@@ -61,6 +61,13 @@ The image size is small and optimized for development but not for production.
 This ISO image is based on link:https://www.centos.org/[CentOS], which is an enterprise-ready Linux distribution that more closely resembles a production environment.
 The image size is larger than the Boot2Docker ISO image.
 
+- link:https://github.com/kubernetes/minikube/tree/master/deploy/iso/minikube-iso[minikube ISO].
+This ISO image is provided by link:https://github.com/kubernetes/minikube/[Minikube project]. It is a customized Linux and based on link:https://www.kernel.org/[upstream kernel].
+Minikube ISO image also provides alternate container runtime e.g. cri-o and rkt along with docker.
+Please check link:https://github.com/kubernetes/minikube/blob/master/docs/contributors/minikube_iso.md[Minikube documentation] for details.
+
+NOTE: Minikube ISO image use is experimental in Minishift. Work is in progress to make it as stable as CentOS and Boot2Docker ISO images.
+
 By default, Minishift uses the Minishift Boot2Docker ISO image.
 To choose the Minishift CentOS ISO image instead, you can do one of the following:
 

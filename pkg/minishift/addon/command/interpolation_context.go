@@ -33,7 +33,7 @@ type InterpolationContext interface {
 	// Interpolate the cmd in the current context
 	Interpolate(cmd string) string
 
-	// Keys returns a list of variables  available for interpolation in a sorted slice
+	// Keys returns a list of variables available for interpolation in a sorted slice
 	Vars() []string
 }
 
@@ -44,8 +44,8 @@ type defaultInterpolationContext struct {
 }
 
 type regExpAndValue struct {
-	regexp      *regexp.Regexp
-	subsitution string
+	regexp       *regexp.Regexp
+	substitution string
 }
 
 // NewInterpolationContext creates a new interpolation context
@@ -59,7 +59,7 @@ func (c *defaultInterpolationContext) AddToContext(key string, value string) err
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("Unable to add %s/%s to interpolation context", key, value))
 	}
-	c.context[key] = regExpAndValue{regexp: r, subsitution: value}
+	c.context[key] = regExpAndValue{regexp: r, substitution: value}
 	return nil
 }
 
@@ -70,13 +70,13 @@ func (c *defaultInterpolationContext) RemoveFromContext(key string) error {
 
 func (c *defaultInterpolationContext) Interpolate(cmd string) string {
 	for _, v := range c.context {
-		cmd = v.regexp.ReplaceAllLiteralString(cmd, v.subsitution)
+		cmd = v.regexp.ReplaceAllLiteralString(cmd, v.substitution)
 	}
 	return cmd
 }
 
 func (c *defaultInterpolationContext) Vars() []string {
-	keys := make([]string, len(c.context))
+	keys := make([]string, 0, len(c.context))
 	for k := range c.context {
 		keys = append(keys, k)
 	}

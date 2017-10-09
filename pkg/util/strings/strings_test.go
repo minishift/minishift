@@ -17,6 +17,7 @@ limitations under the License.
 package strings
 
 import (
+	minishiftTesting "github.com/minishift/minishift/pkg/testing"
 	"reflect"
 	"runtime"
 	"testing"
@@ -111,5 +112,24 @@ func TestEscapeSingleQuote(t *testing.T) {
 		if EscapeSingleQuote(pass) != expected {
 			t.Fatalf("Expected '%s' Got '%s'", expected, EscapeSingleQuote(pass))
 		}
+	}
+}
+
+func TestSplitAndTrim(t *testing.T) {
+	var testCases = []struct {
+		testString    string
+		separator     string
+		expectedSlice []string
+	}{
+		{"foo bar", " ", []string{"foo", "bar"}},
+		{"foo=bar", "=", []string{"foo", "bar"}},
+		{"foobar", "", []string{"f", "o"}},
+		{"foo:bar-baz", "-", []string{"foo:bar", "baz"}},
+	}
+
+	for _, testCase := range testCases {
+		tokens, _ := SplitAndTrim(testCase.testString, testCase.separator)
+		actualSlice := []string{tokens[0], tokens[1]}
+		minishiftTesting.AssertEqualSlice(actualSlice, testCase.expectedSlice, t)
 	}
 }

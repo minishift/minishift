@@ -32,6 +32,7 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/filehelper"
+	utilStrings "github.com/minishift/minishift/pkg/util/strings"
 	"github.com/pkg/errors"
 )
 
@@ -81,7 +82,7 @@ func NewAddOnManager(baseDir string, configMap map[string]*addon.AddOnConfig) (*
 	return &AddOnManager{baseDir: baseDir, addOns: detectedAddOns}, nil
 }
 
-// BaseDir returns the base directory against which this addon mananager was initialised
+// BaseDir returns the base directory against which this addon manager was initialised
 func (m *AddOnManager) BaseDir() string {
 	return m.baseDir
 }
@@ -201,8 +202,15 @@ func (m *AddOnManager) ApplyAddOn(addOn addon.AddOn, context *command.ExecutionC
 		return err
 	}
 
-	err = m.verifyRequiredVariablesInContext(context, addOn.MetaData())
+	varDefaults, err := addOn.MetaData().VarDefaults()
 	if err != nil {
+		return err
+	}
+	if err := addVarDefaultsToContext(context, varDefaults); err != nil {
+		return err
+	}
+
+	if err := m.verifyRequiredVariablesInContext(context, addOn.MetaData()); err != nil {
 		return err
 	}
 
@@ -273,7 +281,11 @@ func (m *AddOnManager) verifyRequiredVariablesInContext(context *command.Executi
 		check[v] = true
 	}
 
-	for _, requiredVar := range meta.RequiredVars() {
+	requiredVars, err := meta.RequiredVars()
+	if err != nil {
+		return err
+	}
+	for _, requiredVar := range requiredVars {
 		if !check[requiredVar] {
 			missingVars = append(missingVars, requiredVar)
 		}
@@ -358,5 +370,17 @@ func compareOpenshiftVersions(openShiftVersion, requiredOpenshiftVersion string)
 		return fmt.Errorf("\nAddon does not support OpenShift version %s. "+
 			"You need to use a version %s", openShiftVersion, requiredOpenshiftVersion)
 	}
+
+	return nil
+}
+
+func addVarDefaultsToContext(context *command.ExecutionContext, varDefaults []addon.RequiredVar) error {
+	for _, varDefault := range varDefaults {
+		// Don't add context if env already present
+		if !utilStrings.Contains(context.Vars(), varDefault.Key) {
+			context.AddToContext(varDefault.Key, varDefault.Value)
+		}
+	}
+
 	return nil
 }

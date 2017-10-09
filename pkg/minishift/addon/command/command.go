@@ -16,7 +16,7 @@ limitations under the License.
 
 package command
 
-// Command defines a single command to be executes as part of an addon definition.
+// Command defines a single command to be executed as part of an addon definition.
 // Minishift supports various types of commands as part of its addon DSL, eg oc, openshift or docker commands.
 type Command interface {
 	// Executes the command

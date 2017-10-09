@@ -190,7 +190,7 @@ integration: $(MINISHIFT_BINARY)
 .PHONY: integration_all
 integration_all: $(MINISHIFT_BINARY)
 	mkdir -p $(INTEGRATION_TEST_DIR)
-	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) --run-before-feature="$(RUN_BEFORE_FEATURE)" $(GODOG_OPTS) --tags ~coolstore
+	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) --run-before-feature="$(RUN_BEFORE_FEATURE)" $(GODOG_OPTS)
 
 .PHONY: fmt
 fmt:

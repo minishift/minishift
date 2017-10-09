@@ -27,7 +27,6 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	openshiftVersion "github.com/minishift/minishift/pkg/minishift/openshift/version"
-	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
@@ -68,7 +67,7 @@ func runStatus(cmd *cobra.Command, args []string) {
 
 	openshiftStatus := "Stopped"
 	diskUsage := "Unknown"
-	profileName := profileActions.GetActiveProfile()
+	profileName := constants.ProfileName
 
 	vmStatus, err := cluster.GetHostStatus(api)
 	if err != nil {

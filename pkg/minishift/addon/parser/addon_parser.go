@@ -71,7 +71,7 @@ func NewAddOnParser() *AddOnParser {
 }
 
 // Parse takes as parameter a reader containing an addon definition and returns an AddOn instance.
-// If an error occurs nil and the error are returned.
+// If an error occurs, the error is returned.
 func (parser *AddOnParser) Parse(addOnDir string) (addon.AddOn, error) {
 	addonInstallReader, err := parser.getAddOnContentReader(addOnDir, ".addon")
 	if err != nil {
@@ -116,7 +116,6 @@ func (parser *AddOnParser) getAddOnContentReader(addOnDir string, fileSuffix str
 	if err != nil {
 		return nil, NewParseError(fmt.Sprintf("Unexpected error reading addon content in '%s'", addOnDir), addOnDir, "")
 	}
-
 	var addOnFiles []string
 	for _, fileInfo := range files {
 		if strings.HasSuffix(fileInfo.Name(), fileSuffix) {

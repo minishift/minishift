@@ -18,6 +18,7 @@ package clusterup
 
 import (
 	"fmt"
+	utilStrings "github.com/minishift/minishift/pkg/util/strings"
 	"github.com/pkg/errors"
 	"os"
 	"testing"
@@ -113,7 +114,7 @@ func assertInterpolation(variables []string, testString string, expectedResult s
 func resetEnv(env []string) {
 	os.Clearenv()
 	for _, envSetting := range env {
-		key, value := splitKeyValue(envSetting, "=")
-		os.Setenv(key, value)
+		envTokens, _ := utilStrings.SplitAndTrim(envSetting, "=")
+		os.Setenv(envTokens[0], envTokens[1])
 	}
 }

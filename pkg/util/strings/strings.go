@@ -91,3 +91,16 @@ func GetOnlyNumbers(yourString string) string {
 func GetSignedNumbers(yourString string) string {
 	return getOnlyMatch(signedNumbersMatch, yourString)
 }
+
+// SplitAndTrim split the string based on the separator passed
+func SplitAndTrim(s string, separator string) ([]string, error) {
+	// Trims the spaces and then splits
+	trimmed := strings.TrimSpace(s)
+	split := strings.Split(trimmed, separator)
+	cleanSplit := make([]string, len(split))
+	for i, val := range split {
+		cleanSplit[i] = strings.TrimSpace(val)
+	}
+
+	return cleanSplit, nil
+}

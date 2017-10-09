@@ -20,11 +20,16 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/docker/machine/libmachine/drivers"
+	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/cmd/minishift/cmd/config"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/addon"
 	"github.com/minishift/minishift/pkg/minishift/addon/manager"
+	"github.com/minishift/minishift/pkg/minishift/docker"
+	"github.com/minishift/minishift/pkg/minishift/openshift"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
+	"gopkg.in/yaml.v2"
 )
 
 // GetAddOnManager returns the addon manager
@@ -92,4 +97,29 @@ func RemoveAddOnFromConfig(addOnName string) {
 	addOnConfigMap := GetAddOnConfiguration()
 	delete(addOnConfigMap, addOnName)
 	WriteAddOnConfig(addOnConfigMap)
+}
+
+func determineRoutingSuffix(driver drivers.Driver) string {
+	defer func() {
+		if r := recover(); r != nil {
+			atexit.ExitWithMessage(1, "Cannot determine the routing suffix from the OpenShift master configuration.")
+		}
+	}()
+
+	sshCommander := provision.GenericSSHCommander{Driver: driver}
+	dockerCommander := docker.NewVmDockerCommander(sshCommander)
+
+	raw, err := openshift.ViewConfig(openshift.MASTER, dockerCommander)
+	if err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot get the OpenShift master configuration: %s", err.Error()))
+	}
+
+	var config map[interface{}]interface{}
+	err = yaml.Unmarshal([]byte(raw), &config)
+	if err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot parse the OpenShift master configuration: %s", err.Error()))
+	}
+
+	// making assumptions about the master config here. In case the config structure changes, the code might panic here
+	return config["routingConfig"].(map[interface{}]interface{})["subdomain"].(string)
 }

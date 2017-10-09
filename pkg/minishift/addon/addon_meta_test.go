@@ -52,7 +52,7 @@ func Test_missing_name_returns_error(t *testing.T) {
 		t.Fatal("Expected an error, got none")
 	}
 
-	expectedError := "Metadata does not contain an mandatory entry for 'Name'"
+	expectedError := "Metadata does not contain a mandatory entry for 'Name'"
 	if err.Error() != expectedError {
 		t.Fatal(fmt.Sprintf("Expected error '%s', but got '%s'", expectedError, err.Error()))
 	}
@@ -70,7 +70,7 @@ func Test_missing_description_returns_error(t *testing.T) {
 		t.Fatal("Expected an error, got none")
 	}
 
-	expectedError := "Metadata does not contain an mandatory entry for 'Description'"
+	expectedError := "Metadata does not contain a mandatory entry for 'Description'"
 	if err.Error() != expectedError {
 		t.Fatal(fmt.Sprintf("Expected error '%s', but got '%s'", expectedError, err.Error()))
 	}
@@ -100,8 +100,8 @@ func Test_required_vars_meta_is_extracted(t *testing.T) {
 	testMap["Required-Vars"] = " USER, access_token "
 
 	addOnMeta := getAddOnMeta(testMap, t)
-
-	minishiftTesting.AssertEqualSlice(addOnMeta.RequiredVars(), []string{"USER", "access_token"}, t)
+	requiredVars, _ := addOnMeta.RequiredVars()
+	minishiftTesting.AssertEqualSlice(requiredVars, []string{"USER", "access_token"}, t)
 }
 
 func Test_required_vars_empty_if_not_specified(t *testing.T) {
@@ -110,15 +110,83 @@ func Test_required_vars_empty_if_not_specified(t *testing.T) {
 	testMap["Description"] = []string{"Acme Add-on"}
 
 	addOnMeta := getAddOnMeta(testMap, t)
+	requiredVars, _ := addOnMeta.RequiredVars()
+	minishiftTesting.AssertEqualSlice(requiredVars, []string{}, t)
+}
 
-	minishiftTesting.AssertEqualSlice(addOnMeta.RequiredVars(), []string{}, t)
+func Test_var_defaults_empty_if_not_specified(t *testing.T) {
+	testMap := make(map[string]interface{})
+	testMap["Name"] = "acme"
+	testMap["Description"] = []string{"Acme Add-on"}
+
+	addOnMeta := getAddOnMeta(testMap, t)
+	varDefaults, _ := addOnMeta.VarDefaults()
+	if len(varDefaults) != 0 {
+		t.Fatal(fmt.Sprintf("Expected empty var default, but got: '%s'", len(varDefaults)))
+	}
+}
+
+func Test_var_defaults_meta_is_extracted(t *testing.T) {
+	testMap := make(map[string]interface{})
+	testMap["Name"] = "acme"
+	testMap["Description"] = []string{"Acme Add-on"}
+	expectedDefaultEnv := "USER=foo"
+	testMap["Var-Defaults"] = expectedDefaultEnv
+
+	addOnMeta := getAddOnMeta(testMap, t)
+	varDefaults, _ := addOnMeta.VarDefaults()
+	if len(varDefaults) != 1 {
+		t.Fatal(fmt.Sprintf("Expected one var default, but got: '%s'", len(varDefaults)))
+	}
+}
+
+type varDefaultTestCase struct {
+	expectedVarDefault string
+	expectedError      string
+}
+
+func Test_invalid_var_defaults_meta(t *testing.T) {
+	testCases := []varDefaultTestCase{
+		{
+			expectedVarDefault: "",
+			expectedError:      "'' is not a well formed Var-Defaults definition.",
+		},
+		{
+			expectedVarDefault: "USER=foo,,",
+			expectedError:      "'USER=foo,,' is not a well formed Var-Defaults definition.",
+		},
+		{
+			expectedVarDefault: "=ABC",
+			expectedError:      "'=ABC' is not a well formed Var-Defaults definition.",
+		},
+		{
+			expectedVarDefault: "USER=",
+			expectedError:      "'USER=' is not a well formed Var-Defaults definition.",
+		},
+	}
+
+	testMap := make(map[string]interface{})
+	testMap["Name"] = "acme"
+	testMap["Description"] = []string{"Acme Add-on"}
+
+	for _, testCase := range testCases {
+		testMap["Var-Defaults"] = testCase.expectedVarDefault
+		_, err := NewAddOnMeta(testMap)
+		if err == nil {
+			t.Fatalf("Expected an error, got none for var default \"%s\"", testCase.expectedVarDefault)
+		}
+
+		if err.Error() != testCase.expectedError {
+			t.Fatalf("Expected error \"%s\", but got \"%s\"", testCase.expectedError, err.Error())
+		}
+	}
 }
 
 func getAddOnMeta(testMap map[string]interface{}, t *testing.T) AddOnMeta {
 	addOnMeta, err := NewAddOnMeta(testMap)
 
 	if err != nil {
-		t.Fatal(fmt.Sprintf("No error expected, but got: '%s'", err.Error()))
+		t.Fatal(fmt.Sprintf("No error expected, but got: \"%s\"", err.Error()))
 	}
 
 	return addOnMeta

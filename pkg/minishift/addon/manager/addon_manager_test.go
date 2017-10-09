@@ -26,6 +26,8 @@ import (
 	"testing"
 
 	"github.com/minishift/minishift/pkg/minishift/addon"
+	"github.com/minishift/minishift/pkg/minishift/addon/command"
+	minishiftTesting "github.com/minishift/minishift/pkg/testing"
 )
 
 var (
@@ -128,6 +130,16 @@ func Test_invalid_addons_get_skipped(t *testing.T) {
 	expectedNumberOfAddOns := 1
 	actualNumberOfAddOns := len(addOns)
 	if actualNumberOfAddOns != expectedNumberOfAddOns {
-		t.Fatal(fmt.Sprintf("Unexpected number of addons. Expected %d, got %d", expectedNumberOfAddOns, actualNumberOfAddOns))
+		t.Fatal(fmt.Sprintf("Unexpected number of add-ons. Expected %d, got %d", expectedNumberOfAddOns, actualNumberOfAddOns))
 	}
+}
+
+func Test_add_var_defaults_to_context(t *testing.T) {
+	context, _ := command.NewExecutionContext(nil, nil)
+	expectedVarName := "foo"
+	varDefaults := []addon.RequiredVar{
+		{Key: expectedVarName, Value: "bar"},
+	}
+	addVarDefaultsToContext(context, varDefaults)
+	minishiftTesting.AssertEqualSlice(context.Vars(), []string{expectedVarName}, t)
 }

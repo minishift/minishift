@@ -6,11 +6,16 @@ clone_folder: C:\gopath\src\github.com\minishift\minishift
 
 environment:
   GOPATH: C:\gopath
+  GOVERSION: 1.8.3
 
 platform:
 - x64
 
 install:
+# Install the specific Go version.
+- rmdir c:\go /s /q
+- appveyor DownloadFile https://storage.googleapis.com/golang/go%GOVERSION%.windows-amd64.msi
+- msiexec /i go%GOVERSION%.windows-amd64.msi /q
 # Dump some info
 - go version
 - go env

@@ -45,7 +45,10 @@ function install_core_deps() {
   # Install EPEL repo
   yum -y install epel-release
   # Get all the deps in
+  # We are installing golang from offical repository to make sure our downstream builds works as expected.
+  # CDK side golang always comes from the offical RHEL repository.
   yum -y install gcc \
+                 golang \
                  make \
                  tar \
                  zip \
@@ -103,14 +106,9 @@ function setup_kvm_docker_machine_driver() {
   echo 'CICO: Setup KVM docker-machine driver setup successfully'
 }
 
-function install_and_setup_golang() {
-  # Install Go 1.7
-  curl -LO https://storage.googleapis.com/golang/go1.7.linux-amd64.tar.gz
-  tar -xf go1.7.linux-amd64.tar.gz
-  sudo mv go /usr/local
-
-  # Setup GOROOT
-  export GOROOT=/usr/local/go
+function setup_golang() {
+  # Show which version of golang in the offical repo.
+  go version
   # Setup GOPATH
   mkdir $HOME/gopath $HOME/gopath/src $HOME/gopath/bin $HOME/gopath/pkg
   export GOPATH=$HOME/gopath
@@ -135,7 +133,7 @@ function setup_glide() {
 }
 
 function prepare_repo() {
-  install_and_setup_golang;
+  setup_golang;
   setup_repo;
   setup_glide;
   echo "CICO: Preparation complete"

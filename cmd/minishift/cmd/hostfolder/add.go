@@ -28,6 +28,11 @@ import (
 var (
 	instanceOnly bool
 	usersShare   bool
+	unc          string
+	username     string
+	password     string
+	mountPoint   string
+	domain       string
 )
 
 var hostfolderAddCmd = &cobra.Command{
@@ -39,12 +44,20 @@ var hostfolderAddCmd = &cobra.Command{
 		var err error = nil
 		if usersShare && runtime.GOOS == "windows" {
 			// Windows-only (CIFS), all instances
-			err = hostfolderActions.SetupUsers(true)
+			if username != "" {
+				err = hostfolderActions.SetupUsersViaFlag(true, mountPoint, username, password, domain)
+			} else {
+				err = hostfolderActions.SetupUsers(true)
+			}
 		} else {
 			if len(args) < 1 {
 				atexit.ExitWithMessage(1, "Usage: minishift hostfolder add HOSTFOLDER_NAME")
 			}
-			err = hostfolderActions.Add(args[0], !instanceOnly)
+			if username != "" || unc != "" {
+				err = hostfolderActions.AddViaFlag(args[0], !instanceOnly, unc, username, password, mountPoint, domain)
+			} else {
+				err = hostfolderActions.Add(args[0], !instanceOnly)
+			}
 		}
 
 		if err != nil {
@@ -56,6 +69,11 @@ var hostfolderAddCmd = &cobra.Command{
 func init() {
 	HostfolderCmd.AddCommand(hostfolderAddCmd)
 	hostfolderAddCmd.Flags().BoolVarP(&instanceOnly, "instance-only", "", false, "Defines the host folder only for the current OpenShift cluster.")
+	hostfolderAddCmd.Flags().StringVarP(&unc, "unc", "", "", "The UNC remote path of the share")
+	hostfolderAddCmd.Flags().StringVarP(&username, "username", "", "", "Username of the shared CIFS server")
+	hostfolderAddCmd.Flags().StringVarP(&password, "password", "", "", "Password of the shared CIFS server")
+	hostfolderAddCmd.Flags().StringVarP(&mountPoint, "mountpoint", "", "", "Target mount point inside the VM")
+	hostfolderAddCmd.Flags().StringVarP(&domain, "domain", "", "", "Domain")
 
 	// Windows-only
 	if runtime.GOOS == "windows" {

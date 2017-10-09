@@ -15,7 +15,7 @@ The following sections describe how to build and test Minishift.
 == Prerequisites
 
 - Git
-- A recent Go distribution (>1.7)
+- A recent Go distribution (>=1.8)
 
 NOTE: You should be able to develop Minishift on any operating system, such as GNU/Linux, macOS or Windows.
 The Windows operating system might require additional steps or have some limitations.

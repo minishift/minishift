@@ -1,8 +1,11 @@
 ## Machine specific variable
 machine:
+    xcode:
+        version: 9.0
     environment:
         GOPATH: $HOME
-        PATH: $GOPATH/bin:$PATH
+        GOVERSION: 1.8.3
+        PATH: $GOPATH/bin:/usr/local/go/bin/:$PATH
         XCODE_SCHEME: symbolicator
         XCODE_WORKSPACE: symbolicator
 
@@ -14,8 +17,11 @@ checkout:
 ## Customize dependencies
 dependencies:
     override:
+        - sudo rm -rf /usr/local/go
+        - curl https://storage.googleapis.com/golang/go${GOVERSION}.darwin-amd64.tar.gz | sudo tar -C /usr/local -xz
         - go version
         - go env
+        - mkdir $HOME/bin
         # Install Glide
         - curl -sL ${GLIDE_LATEST_RELEASE_URL} -o /tmp/glide.tar.gz:
             environment:

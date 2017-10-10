@@ -34,28 +34,33 @@ var profileSetCmd = &cobra.Command{
 	Use:   "set PROFILE_NAME",
 	Short: "Sets the active profile for Minishift.",
 	Long:  "Sets the active profile for Minishift. After you set the profile, all commands will use the specified profile by default.",
-	Run: func(cmd *cobra.Command, args []string) {
-		validateArgs(args)
-		profileName := args[0]
+	Run:   runProfile,
+}
 
-		if !cmdUtil.IsValidProfile(profileName) {
-			atexit.ExitWithMessage(1, fmt.Sprintf("Error: '%s' is not a valid profile", profileName))
-		}
+func runProfile(cmd *cobra.Command, args []string) {
+	validateArgs(args)
+	profileName := args[0]
 
+	if !cmdUtil.IsValidProfile(profileName) {
 		err := profileActions.SetActiveProfile(profileName)
 		if err != nil {
 			atexit.ExitWithMessage(1, err.Error())
 		}
-		fmt.Println(fmt.Sprintf("Profile '%s' set as active profile", profileName))
-
-		err = cmdUtil.SetOcContext(profileName)
+	} else {
+		err := cmdUtil.SetOcContext(profileName)
 		if err != nil {
 			if glog.V(2) {
 				fmt.Println(fmt.Sprintf("%s", err.Error()))
 			}
-			fmt.Println(fmt.Sprintf("oc cli context could not changed for '%s'. %s", profileName, unableToSetOcContextErrorMessage))
+			atexit.ExitWithMessage(1, fmt.Sprintf("oc cli context could not changed for '%s'. %s", profileName, unableToSetOcContextErrorMessage))
 		}
-	},
+
+		err = profileActions.SetActiveProfile(profileName)
+		if err != nil {
+			atexit.ExitWithMessage(1, err.Error())
+		}
+	}
+	fmt.Printf("Profile '%s' set as active profile\n", profileName)
 }
 
 func init() {

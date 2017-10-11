@@ -27,10 +27,10 @@ cluster in VM provided by Minishift.
         finished last time. When container is new and had never finished then this time value is set to 0001-01-01T00:00:00Z.
         On restart of OpenShift cluster containers are terminated, which sets FinishedAt to actual time. This value persist
         after next start of container.
-     Given stdout of command "minishift ssh -- docker inspect --format={{.State.FinishedAt}} origin" is equal to "0001-01-01T00:00:00Z"
+     Given stdout of command "minishift ssh -- "docker inspect --format={{.State.FinishedAt}} origin"" is equal to "0001-01-01T00:00:00Z"
       When executing "minishift openshift restart" succeeds
       Then stdout should contain "Restarting OpenShift"
-       And stdout of command "minishift ssh -- docker inspect --format={{.State.FinishedAt}} origin" is not equal to "0001-01-01T00:00:00Z"
+       And stdout of command "minishift ssh -- "docker inspect --format={{.State.FinishedAt}} origin"" is not equal to "0001-01-01T00:00:00Z"
 
   Scenario: User deploys nodejs example application from OpenShift repository
       When executing "oc new-app https://github.com/openshift/nodejs-ex -l name=myapp" succeeds

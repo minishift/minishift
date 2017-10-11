@@ -1,5 +1,7 @@
+include::variables.adoc[]
+
 [[uninstall-minishift]]
-= Uninstalling Minishift
+= Uninstalling {project}
 :icons:
 :toc: macro
 :toc-title:
@@ -9,12 +11,12 @@ toc::[]
 
 [[uninstall-overview]]
 == Overview
-This section describes how you can uninstall Minishift and delete associated files.
+This section describes how you can uninstall {project} and delete associated files.
 
 [[uninstall-instructions]]
-== Uninstalling Minishift
+== Uninstalling {project}
 
-.  Delete the Minishift VM and any VM-specific files.
+.  Delete the {project} VM and any VM-specific files.
 +
 ----
 $ minishift delete
@@ -23,12 +25,12 @@ $ minishift delete
 This command deletes everything in the *_MINISHIFT_HOME/.minishift/machines/minishift_* directory.
 Other cached data and the xref:../using/managing-minishift.adoc#persistent-configuration[persistent configuration] are not removed.
 
-.  To completely uninstall Minishift, delete everything in the *_MINISHIFT_HOME_* directory (default *_~/.minishift_*) and *_~/.kube_*, run the following commands:
+.  To completely uninstall {project}, delete everything in the *_MINISHIFT_HOME_* directory (default *_~/.minishift_*) and *_~/.kube_*, run the following commands:
 +
 ----
 $ rm -rf ~/.minishift
 $ rm -rf ~/.kube
 ----
 
-.  With your hypervisor management tool, confirm that there are no remaining artifacts related to the Minishift VM.
+.  With your hypervisor management tool, confirm that there are no remaining artifacts related to the {project} VM.
 For example, if you use KVM, you need to run the `virsh` command.

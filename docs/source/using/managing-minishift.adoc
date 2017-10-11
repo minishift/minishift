@@ -1,6 +1,6 @@
 include::variables.adoc[]
 
-= Managing Minishift
+= Managing {project}
 :icons:
 :toc: macro
 :toc-title:
@@ -11,53 +11,53 @@ toc::[]
 [[managing-minishift-overview]]
 == Overview
 
-When you use Minishift, you interact with two components:
+When you use {project}, you interact with two components:
 
-- a virtual machine (VM) created by Minishift
-- the OpenShift cluster provisioned by Minishift within the VM
+- a virtual machine (VM) created by {project}
+- the OpenShift cluster provisioned by {project} within the VM
 
-The following sections contain information about managing the Minishift VM.
-For details about using Minishift to manage your local OpenShift cluster, see the xref:../openshift/index.adoc#[Interacting with OpenShift] section.
+The following sections contain information about managing the {project} VM.
+For details about using {project} to manage your local OpenShift cluster, see the xref:../openshift/index.adoc#[Interacting with OpenShift] section.
 
 [[minishift-life-cycle]]
-== Minishift Life-cycle
+== {project} Life-cycle
 
 [[minishift-start-overview]]
-=== Minishift start Command
+=== {project} start Command
 
-The xref:../command-ref/minishift_start.adoc#[`minishift start`] command creates and configures the Minishift VM and provisions a local, single-node OpenShift cluster within the Minishift VM.
+The xref:../command-ref/minishift_start.adoc#[`minishift start`] command creates and configures the {project} VM and provisions a local, single-node OpenShift cluster within the {project} VM.
 
 The command also copies the *oc* binary to your host so that you can interact with OpenShift through the `oc` command-line tool or through the Web console, which can be accessed through the URL provided in the output of the `minishift start` command.
 
 [[minishift-stop-overview]]
-=== Minishift stop Command
+=== {project} stop Command
 
-The xref:../command-ref/minishift_stop.adoc#[`minishift stop`] command stops your OpenShift cluster and shuts down the Minishift VM, but preserves the OpenShift cluster state.
+The xref:../command-ref/minishift_stop.adoc#[`minishift stop`] command stops your OpenShift cluster and shuts down the {project} VM, but preserves the OpenShift cluster state.
 
-Starting Minishift again will restore the OpenShift cluster, allowing you to continue working from the last session.
+Starting {project} again will restore the OpenShift cluster, allowing you to continue working from the last session.
 However, you must enter the same parameters that you used in the original start command.
 
 Efforts to further refine this experience are in progress.
 For details, see the GitHub issue link:https://github.com/minishift/minishift/issues/179[#179].
 
 [[minishift-delete-overview]]
-=== Minishift delete Command
+=== {project} delete Command
 
-The xref:../command-ref/minishift_delete.adoc#[`minishift delete`] command deletes the OpenShift cluster, and also shuts down and deletes the Minishift VM.
+The xref:../command-ref/minishift_delete.adoc#[`minishift delete`] command deletes the OpenShift cluster, and also shuts down and deletes the {project} VM.
 No data or state are preserved.
 
 [[choosing-iso-image]]
 == Choosing the ISO Image
 
-When you start Minishift, it downloads a live ISO image that the hypervisor uses to provision the Minishift VM.
+When you start {project}, it downloads a live ISO image that the hypervisor uses to provision the {project} VM.
 
 The following ISO images are available:
 
-- link:https://github.com/minishift/minishift-b2d-iso/releases[Minishift Boot2Docker] (Default).
+- link:https://github.com/minishift/minishift-b2d-iso/releases[{project} Boot2Docker] (Default).
 This ISO image is based on link:https://github.com/boot2docker/boot2docker[Boot2Docker], which is a lightweight Linux distribution customized to run Docker containers.
 The image size is small and optimized for development but not for production.
 
-- link:https://github.com/minishift/minishift-centos-iso/releases[Minishift CentOS].
+- link:https://github.com/minishift/minishift-centos-iso/releases[{project} CentOS].
 This ISO image is based on link:https://www.centos.org/[CentOS], which is an enterprise-ready Linux distribution that more closely resembles a production environment.
 The image size is larger than the Boot2Docker ISO image.
 
@@ -66,10 +66,10 @@ This ISO image is provided by link:https://github.com/kubernetes/minikube/[Minik
 Minikube ISO image also provides alternate container runtime e.g. cri-o and rkt along with docker.
 Please check link:https://github.com/kubernetes/minikube/blob/master/docs/contributors/minikube_iso.md[Minikube documentation] for details.
 
-NOTE: Minikube ISO image use is experimental in Minishift. Work is in progress to make it as stable as CentOS and Boot2Docker ISO images.
+NOTE: Minikube ISO image use is experimental in {project}. Work is in progress to make it as stable as CentOS and Boot2Docker ISO images.
 
-By default, Minishift uses the Minishift Boot2Docker ISO image.
-To choose the Minishift CentOS ISO image instead, you can do one of the following:
+By default, {project} uses the {project} Boot2Docker ISO image.
+To choose the {project} CentOS ISO image instead, you can do one of the following:
 
 - Use the *centos* alias to download and use the latest CentOS ISO:
 +
@@ -77,39 +77,39 @@ To choose the Minishift CentOS ISO image instead, you can do one of the followin
 $ minishift start --iso-url centos
 ----
 
-- Specify explicitly the download URL of the Minishift CentOS ISO image. For example:
+- Specify explicitly the download URL of the {project} CentOS ISO image. For example:
 +
 [subs="attributes"]
 ----
 $ minishift start --iso-url https://github.com/minishift/minishift-centos-iso/releases/download/{centos-iso-version}/minishift-centos7.iso
 ----
 
-- Manually download the Minishift CentSO ISO image from the link:https://github.com/minishift/minishift-centos-iso/releases[releases page] and enter the file URI to the image:
+- Manually download the {project} CentSO ISO image from the link:https://github.com/minishift/minishift-centos-iso/releases[releases page] and enter the file URI to the image:
 +
 ----
 $ minishift start --iso-url file:///<path_to_ISO_image>
 ----
 
-NOTE: You cannot run Minishift with both ISO images concurrently.
-To switch between ISO images, delete the Minishift instance and start a new instance with the ISO image that you want to use.
+NOTE: You cannot run {project} with both ISO images concurrently.
+To switch between ISO images, delete the {project} instance and start a new instance with the ISO image that you want to use.
 
 [[runtime-options]]
 == Runtime Options
 
-The runtime behavior of Minishift can be controlled through flags, environment variables, and persistent configuration options.
+The runtime behavior of {project} can be controlled through flags, environment variables, and persistent configuration options.
 
-The following precedence order is applied to control the behavior of Minishift.
+The following precedence order is applied to control the behavior of {project}.
 Each action in the following list takes precedence over the action below it:
 
 .  Use command-line flags as specified in the xref:flags[Flags] section.
 .  Set environment variables as described in the xref:environment-variables[Environment Variables] section.
 .  Use persistent configuration options as described in the xref:persistent-configuration[Persistent Configuration] section.
-.  Accept the default value as defined by Minishift.
+.  Accept the default value as defined by {project}.
 
 [[flags]]
 === Flags
 
-You can use command line flags with Minishift to specify options and direct its behavior.
+You can use command line flags with {project} to specify options and direct its behavior.
 This has the highest precedence.
 Almost all commands have flags, although different commands might have different flags.
 Some of the commonly-used command line flags of the `minishift start` command are `cpus`, `memory` or `vm-driver`.
@@ -117,7 +117,7 @@ Some of the commonly-used command line flags of the `minishift start` command ar
 [[environment-variables]]
 === Environment Variables
 
-Minishift allows you to specify command-line flags you commonly use through environment variables.
+{project} allows you to specify command-line flags you commonly use through environment variables.
 To do so, apply the following rules to the flag you want to set as an environment variable.
 
 .  Apply `MINISHIFT_` as a prefix to the flag you want to set as an environment variable.
@@ -125,21 +125,21 @@ For example, the `vm-driver` flag of the xref:../command-ref/minishift_start.ado
 .  Use uppercase characters for the flag, so `MINISHIFT_vm-driver` in the above example becomes `MINISHIFT_VM-DRIVER`.
 .  Replace `-` with `_`, so `MINISHIFT_VM-DRIVER` becomes `MINISHIFT_VM_DRIVER`.
 
-Environment variables can be used to replace any option of any Minishift command.
+Environment variables can be used to replace any option of any {project} command.
 A common example is the URL of the ISO to be used.
 Usually, you specify it with the `iso-url` flag of the `minishift start` command.
 Applying the above rules, you can also specify this URL by setting the environment variable as `MINISHIFT_ISO_URL`.
 
-NOTE: You can also use the `MINISHIFT_HOME` environment variable, to choose a different home directory for Minishift.
-By default, Minishift places all runtime state into *_~/.minishift_*.
+NOTE: You can also use the `MINISHIFT_HOME` environment variable, to choose a different home directory for {project}.
+By default, {project} places all runtime state into *_~/.minishift_*.
 This environment variable is currently experimental and semantics might change in future releases.
 
 [[persistent-configuration]]
 === Persistent Configuration
 
-Using persistent configuration allows you to control the Minishift behavior without specifying actual command line flags, similar to the way you use environment variables.
+Using persistent configuration allows you to control the {project} behavior without specifying actual command line flags, similar to the way you use environment variables.
 
-Minishift maintains a configuration file in *_$MINISHIFT_HOME/config/config.json_*.
+{project} maintains a configuration file in *_$MINISHIFT_HOME/config/config.json_*.
 This file can be used to set commonly-used command-line flags persistently.
 
 NOTE: Persistent configuration can only be applied to the set of supported configuration options that are listed in the synopsis of the xref:../command-ref/minishift_config.adoc#[`minishift config`] sub-command.
@@ -210,9 +210,9 @@ $ export XHYVE_EXPERIMENTAL_NFS_SHARE=true
 $ minishift start --vm-driver xhyve
 ----
 
-CAUTION: Driver-specific options might overlap with values specified using Minishift-specific flags and environment variables.
+CAUTION: Driver-specific options might overlap with values specified using {project}-specific flags and environment variables.
 Examples are boot2docker URL, memory size, cpu count, and so on.
-In this case, driver-specific environment variables will override Minishift-specific settings.
+In this case, driver-specific environment variables will override {project}-specific settings.
 
 [[caching-openshift-images]]
 == Caching OpenShift images (experimental)
@@ -225,7 +225,7 @@ $ minishift config set image-caching true
 ----
 
 Once enabled, caching occurs transparently, in a background process, the first time you use the xref:../command-ref/minishift_start#[`minishift start`] command.
-Once the images are cached under _$MINISHIFT_HOME/cache/images_, successive Minishift VM creations will use these cached images.
+Once the images are cached under _$MINISHIFT_HOME/cache/images_, successive {project} VM creations will use these cached images.
 
 Each time an image exporting background process runs, a log file is generated under _$MINISHIFT_HOME/logs_ which can be used to verify the progress of the export.
 
@@ -244,7 +244,7 @@ You can track the progress on this feature on the GitHub issue link:https://gith
 
 As part of the OpenShift cluster provisioning, 100 link:https://docs.openshift.org/latest/dev_guide/persistent_volumes.html[persistent volumes] are created for your OpenShift cluster.
 This allows applications to make link:https://docs.openshift.org/latest/dev_guide/persistent_volumes.html#persistent-volumes-claims-as-volumes-in-pods[persistent volumes claims].
-The location of the persistent data is determined in the `host-pv-dir` flag of the xref:../command-ref/minishift_start.adoc#[`minishift start`] command and defaults to *_/var/lib/minishift/openshift.local.pv_* on the Minishift VM.
+The location of the persistent data is determined in the `host-pv-dir` flag of the xref:../command-ref/minishift_start.adoc#[`minishift start`] command and defaults to *_/var/lib/minishift/openshift.local.pv_* on the {project} VM.
 
 [[http-s-proxies]]
 == HTTP/HTTPS Proxies
@@ -276,22 +276,22 @@ If these variables are set, they are implicitly used during `minishift start` un
 
 - Using the proxy options requires that you run OpenShift version 1.5.0 or later.
 Use the `openshift-version` option to request a specific version of OpenShift.
-You can list all Minishift-compatible OpenShift versions with the xref:../command-ref/minishift_openshift_version_list.adoc#[`minishift openshift version list`] command.
+You can list all {project}-compatible OpenShift versions with the xref:../command-ref/minishift_openshift_version_list.adoc#[`minishift openshift version list`] command.
 ====
 
 [[networking]]
 == Networking
 
-The Minishift VM is exposed to the host system with a host-only IP address that can be obtained with the xref:../command-ref/minishift_ip.adoc#[`minishift ip`] command.
+The {project} VM is exposed to the host system with a host-only IP address that can be obtained with the xref:../command-ref/minishift_ip.adoc#[`minishift ip`] command.
 
 [[connecting-with-ssh]]
-== Connecting to the Minishift VM with SSH
+== Connecting to the {project} VM with SSH
 
-You can use the xref:../command-ref/minishift_ssh.adoc#[`minishift ssh`] command to interact with the Minishift VM.
+You can use the xref:../command-ref/minishift_ssh.adoc#[`minishift ssh`] command to interact with the {project} VM.
 
-You can run `minishift ssh` without a sub-command to open an interactive shell and run commands on the Minishift VM in the same way that you run commands interactively on any remote machine using SSH.
+You can run `minishift ssh` without a sub-command to open an interactive shell and run commands on the {project} VM in the same way that you run commands interactively on any remote machine using SSH.
 
-You can also run `minishift ssh` with a sub-command to send the sub-command directly to the Minishift VM and return the result to your local shell.
+You can also run `minishift ssh` with a sub-command to send the sub-command directly to the {project} VM and return the result to your local shell.
 For example:
 
 ----
@@ -303,7 +303,7 @@ CONTAINER    IMAGE                   COMMAND                CREATED        STATU
 [[experimental-features]]
 == Experimental Features
 
-If you want to get early access to some upcoming features and experiment, you can enable some of those in Minishift.
+If you want to get early access to some upcoming features and experiment, you can enable some of those in {project}.
 
 You do this by setting the environment variable `MINISHIFT_ENABLE_EXPERIMENTAL`, which makes additional flags available:
 
@@ -314,13 +314,13 @@ $ export MINISHIFT_ENABLE_EXPERIMENTAL=y
 [IMPORTANT]
 ====
 Experimental features are not officially supported, and might break or result in unexpected behavior.
-To share your feedback on these features, you are welcome to link:https://github.com/minishift/minishift#community[contact the Minishift community].
+To share your feedback on these features, you are welcome to link:https://github.com/minishift/minishift#community[contact the {project} community].
 ====
 
 [[enabling-experimental-oc-flags]]
 === Enabling experimental `oc cluster up` flags in `minishift start`
 
-By default, Minishift does not expose all link:https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md[`oc cluster up`] flags in the Minishift CLI.
+By default, {project} does not expose all link:https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md[`oc cluster up`] flags in the {project} CLI.
 
 You can set the `MINISHIFT_ENABLE_EXPERIMENTAL` environment variable to enable the following options for the xref:../command-ref/minishift_start.adoc#[`minishift start`] command:
 
@@ -328,7 +328,7 @@ You can set the `MINISHIFT_ENABLE_EXPERIMENTAL` environment variable to enable t
 Enables provisioning the OpenShift link:https://docs.openshift.org/latest/architecture/service_catalog/index.html[service catalog].
 
 `extra-clusterup-flags`::
-Enables passing flags that are not directly exposed in the Minishift CLI directly to `oc cluster up`.
+Enables passing flags that are not directly exposed in the {project} CLI directly to `oc cluster up`.
 
 
 [[hyperv-static-ip]]
@@ -340,7 +340,7 @@ For Hyper-V a functionality is provided to assign an IP address on startup using
 [IMPORTANT]
 ====
 -  While the default image is B2D, this only works with the CentOS/RHEL based image in combination with Hyper-V. The B2D image experiences
-   a problem when the values are being send to the Minishift instance and consumed by the B2D iso. We are looking into the issue and hope
+   a problem when the values are being send to the {project} instance and consumed by the B2D iso. We are looking into the issue and hope
    to provide a solution in the coming future.
 ====
 

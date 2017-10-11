@@ -1,10 +1,12 @@
-= Getting Started with Minishift
+include::variables.adoc[]
+
+= Getting Started with {project}
 :icons:
 
-This section contains information about installing Minishift, quickstart steps, and sample application deployment.
+This section contains information about installing {project}, quickstart steps, and sample application deployment.
 
-- xref:../getting-started/installing.adoc#[Installing Minishift]
-- xref:../getting-started/quickstart.adoc#[Minishift Quickstart]
+- xref:../getting-started/installing.adoc#[Installing {project}]
+- xref:../getting-started/quickstart.adoc#[{project} Quickstart]
 - xref:../getting-started/setting-up-driver-plugin.adoc#[Setting Up the Driver Plug-in]
-- xref:../getting-started/updating.adoc#[Updating Minishift]
-- xref:../getting-started/uninstalling.adoc#[Uninstalling Minishift]
+- xref:../getting-started/updating.adoc#[Updating {project}]
+- xref:../getting-started/uninstalling.adoc#[Uninstalling {project}]

@@ -22,6 +22,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -33,6 +34,7 @@ import (
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/viper"
 
+	"github.com/minishift/minishift/pkg/minishift/constants"
 	stringUtils "github.com/minishift/minishift/pkg/util/strings"
 )
 
@@ -91,6 +93,13 @@ func preflightChecksBeforeStartingHost() {
 			false, configCmd.WarnCheckHyperVDriver.Name,
 			driverErrorMessage)
 	}
+
+	preflightCheckSucceedsOrFails(
+		configCmd.SkipCheckIsoUrl.Name,
+		checkIsoUrl,
+		"Checking the ISO URL",
+		false, configCmd.WarnCheckIsoUrl.Name,
+		"See the 'Managing Minishift' topic for more information")
 }
 
 // preflightChecksAfterStartingHost is executed after the startHost function.
@@ -416,4 +425,37 @@ func isMounted(driver drivers.Driver, mountpoint string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+// checkIsoUrl checks the Iso url and returns true if the iso file exists
+func checkIsoUrl() bool {
+	isoUrl := viper.GetString(configCmd.ISOUrl.Name)
+	for _, isoAlias := range constants.ValidIsoAliases {
+		if isoUrl == isoAlias {
+			return true
+		}
+	}
+	if !strings.HasSuffix(isoUrl, ".iso") {
+		return false
+	}
+
+	if runtime.GOOS == "windows" {
+		match, _ := regexp.MatchString("^file://[a-zA-Z]:/.+", isoUrl)
+		if !match {
+			return false
+		}
+	} else {
+		match, _ := regexp.MatchString("^file:///.+", isoUrl)
+		if !match {
+			return false
+		}
+	}
+
+	fmt.Printf("\n   Checking if %s exists ... ", strings.TrimPrefix(isoUrl, "file://"))
+	_, err := os.Stat(strings.TrimPrefix(isoUrl, "file://"))
+	if err != nil {
+		return false
+	}
+
+	return true
 }

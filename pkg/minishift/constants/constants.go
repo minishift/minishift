@@ -25,3 +25,7 @@ const (
 	DefaultProject         = "myproject"
 	DefaultUser            = "developer"
 )
+
+var (
+	ValidIsoAliases = []string{"b2d", "centos", "minikube"}
+)

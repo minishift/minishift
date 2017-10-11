@@ -85,9 +85,21 @@ $ minishift start --iso-url https://github.com/minishift/minishift-centos-iso/re
 ----
 
 - Manually download the {project} CentSO ISO image from the link:https://github.com/minishift/minishift-centos-iso/releases[releases page] and enter the file URI to the image:
+
+[NOTE]
+====
+The path given for a file URI must be an absolute path.
+====
+- On GNU/Linux or macOS, the path must begin with *_/_*. For example:
 +
 ----
-$ minishift start --iso-url file:///<path_to_ISO_image>
+$ minishift start --iso-url file:///path/to/image.iso
+----
+
+- On Windows, the path must begin with a drive letter (*_C:_*, *_D:_*). For example:
++
+----
+$ minishift start --iso-url file://c:/path/to/image.iso
 ----
 
 NOTE: You cannot run {project} with both ISO images concurrently.

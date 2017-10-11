@@ -60,13 +60,14 @@ import (
 const (
 	commandName             = "start"
 	defaultInsecureRegistry = "172.30.0.0/16"
-	unsupportedIsoUrlFormat = "Unsupported value for iso-url. It can be an URL, file URI or one of the following short names: [b2d centos]."
 )
 
 var (
-	dockerEnv     []string
-	openShiftEnv  []string
-	shellProxyEnv string
+	dockerEnv               []string
+	openShiftEnv            []string
+	shellProxyEnv           string
+	unsupportedIsoUrlFormat = fmt.Sprintf("Unsupported value for iso-url. It can be a URL, file URI or one of the following aliases: [%s].",
+		strings.Join(minishiftConstants.ValidIsoAliases, ","))
 )
 
 var (

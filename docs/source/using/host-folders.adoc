@@ -1,3 +1,5 @@
+include::variables.adoc[]
+
 = Host Folders
 :icons:
 :toc: macro
@@ -9,7 +11,7 @@ toc::[]
 [[host-folders-overview]]
 == Overview
 
-Host folders are directories on the host which are shared between the host and the Minishift VM.
+Host folders are directories on the host which are shared between the host and the {project} VM.
 They allow for a two way file synchronization between host and VM.
 The following sections discuss the various types of host folders, driver provided host folders, as well as the `minishift hostfolder` command.
 
@@ -46,9 +48,9 @@ It requires VirtualBox link:https://www.virtualbox.org/manual/ch04.html[Guest Ad
 ====
 
 [[minishift-hostfolder-command]]
-== Minishift hostfolder Command
+== {project} hostfolder Command
 
-Minishift provides the xref:../command-ref/minishift_hostfolder.adoc#[`minishift hostfolder`] command to list, add, mount, unmount and remove host folders.
+{project} provides the xref:../command-ref/minishift_hostfolder.adoc#[`minishift hostfolder`] command to list, add, mount, unmount and remove host folders.
 In contrast to the driver-provided host folders, you can use the `hostfolder` command to mount multiple shared folders onto custom specified mount points.
 
 [NOTE]
@@ -84,7 +86,7 @@ Name        Mountpoint            Remote path              Mounted
 myshare     /mnt/sda1/myshare     //192.168.1.82/MYSHARE   N
 ----
 
-In this example, there is a host folder with the name *_myshare_* which mounts *_//192.168.1.82/MYSHARE_* onto *_/mnt/sda1/myshare_* in the Minishift VM.
+In this example, there is a host folder with the name *_myshare_* which mounts *_//192.168.1.82/MYSHARE_* onto *_/mnt/sda1/myshare_* in the {project} VM.
 The share is currently not mounted.
 
 NOTE: The remote path must be reachable from within the VM.
@@ -124,9 +126,9 @@ WARNING: When you use the Boot2Docker ISO with the VirtualBox driver, VirtualBox
 ==== Instance-Specific Host Folders
 
 By default, host folder definitions are persistent, similar to other xref:../using/managing-minishift.adoc#persistent-configuration[persistent configuration] options.
-This means that these host folder definitions will survive the deletion and subsequent re-creation of a Minishift VM.
+This means that these host folder definitions will survive the deletion and subsequent re-creation of a {project} VM.
 
-In some cases you might want to define a host folder just for a specific Minishift instance.
+In some cases you might want to define a host folder just for a specific {project} instance.
 To do so, you can use the `instance-only` flag of the xref:../command-ref/minishift_hostfolder_add.adoc#[`minishift hostfolder add`] command.
 Host folder definition that are created with the `instance-only` flag will be removed together with any other instance-specific state during xref:../command-ref/minishift_delete.adoc#[`minishift delete`].
 
@@ -158,13 +160,13 @@ $ minishift ssh "ls -al /mnt/sda1/myshare"
 ==== Auto-Mounting Host Folders
 
 Host folders can also be mounted automatically each time you run xref:../command-ref/minishift_start.adoc#[`minishift start`].
-To set auto-mounting, you need to set the `hostfolder-automount` option in the Minishift configuration file.
+To set auto-mounting, you need to set the `hostfolder-automount` option in the {project} configuration file.
 
 ----
 $ minishift config set hostfolders-automount true
 ----
 
-After the `hostfolders-automount` option is set, Minishift will attempt to mount all defined host folders during `minishift start`.
+After the `hostfolders-automount` option is set, {project} will attempt to mount all defined host folders during `minishift start`.
 
 [[umounting-host-folders]]
 === Unmounting Host Folders
@@ -214,7 +216,7 @@ On Windows, you can install link:https://winscp.net/eng/docs/guide_windows_opens
 
 The following steps demonstrate how to mount host folders with SSHFS.
 
-. Run `ifconfig` (or `Get-NetIPAddress` on Windows) to determine the local IP address from the same network segment as your Minishift instance.
+. Run `ifconfig` (or `Get-NetIPAddress` on Windows) to determine the local IP address from the same network segment as your {project} instance.
 
 . Create a mountpoint and mount the shared folder.
 +

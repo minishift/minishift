@@ -1,3 +1,5 @@
+include::variables.adoc[]
+
 [[set-up-driver-plugin]]
 = Setting Up the Driver Plug-in
 :icons:
@@ -9,15 +11,15 @@ toc::[]
 
 [[setup-driver-plugin-overview]]
 == Overview
-Minishift uses Docker Machine and its driver plug-in architecture to provide a consistent way to manage the OpenShift VM.
-Minishift embeds VirtualBox and VMware Fusion drivers so no additional steps are required to use them.
+{project} uses Docker Machine and its driver plug-in architecture to provide a consistent way to manage the OpenShift VM.
+{project} embeds VirtualBox and VMware Fusion drivers so no additional steps are required to use them.
 
 However, other drivers require manual installation and setup that are described in the following sections.
 
 [[kvm-driver-install]]
 == KVM Driver
 
-Minishift is currently tested against *docker-machine-driver-kvm* version 0.7.0.
+{project} is currently tested against *docker-machine-driver-kvm* version 0.7.0.
 
 . Install the KVM binary as follows:
 +
@@ -78,7 +80,7 @@ $ newgrp libvirt
 [[xhyve-driver-install]]
 == xhyve Driver
 
-Minishift is currently tested against *docker-machine-driver-xhyve* version 0.3.1.
+{project} is currently tested against *docker-machine-driver-xhyve* version 0.3.1.
 
 [[homebrew-install-xhyve]]
 === Homebrew Install
@@ -155,7 +157,7 @@ For more information, see the link:https://github.com/zchee/docker-machine-drive
 ====
 
 == Hyper-V Driver
-To use Minishift with Hyper-V:
+To use {project} with Hyper-V:
 
 . Install link:https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v[Hyper-V].
 
@@ -168,7 +170,7 @@ For more information, see xref:../troubleshooting/troubleshooting-driver-plugins
 +
 NOTE: Verify that you pair the virtual switch with a network card (wired or wireless) that is connected to the network.
 
-. Set the environment variable `HYPERV_VIRTUAL_SWITCH` to the name of the external virtual switch you want to use for Minishift.
+. Set the environment variable `HYPERV_VIRTUAL_SWITCH` to the name of the external virtual switch you want to use for {project}.
 For more information, see xref:../using/managing-minishift.adoc#driver-specific-environment-variables[driver-specific environment variables].
 +
 For example, on Command Prompt use:

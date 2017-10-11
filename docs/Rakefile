@@ -10,6 +10,7 @@ ADOC_VARIABLES     = FileList.new('source/variables.adoc',
  'source/contributing/variables.adoc',
  'source/getting-started/variables.adoc',
  'source/openshift/variables.adoc',
+ 'source/troubleshooting/variables.adoc',
  'source/using/variables.adoc'
 )
 GENERATED_ADOC_DIR = "source/command-ref"
@@ -98,15 +99,18 @@ end
 
 desc 'Create adoc variables'
 task :adoc_variables => :init do
-  minishift_version  = ENV['MINISHIFT_VERSION'] || 'unset'
-  openshift_version  = ENV['OPENSHIFT_VERSION'] || 'unset'
-  centos_iso_version = ENV['CENTOS_ISO_VERSION'] || 'unset'
+  minishift_version    = ENV['MINISHIFT_VERSION']    || 'unset'
+  openshift_version    = ENV['OPENSHIFT_VERSION']    || 'unset'
+  centos_iso_version   = ENV['CENTOS_ISO_VERSION']   || 'unset'
+  minikube_iso_version = ENV['MINIKUBE_ISO_VERSION'] || 'unset'
 
   ADOC_VARIABLES.each do |f|
     File.open(f, "w+") do |f|
+      f.write(":project: Minishift\n")
       f.write(":minishift-version: #{minishift_version}\n")
       f.write(":openshift-version: #{openshift_version}\n")
       f.write(":centos-iso-version: #{centos_iso_version}\n")
+      f.write(":minikube-iso-version: #{minikube_iso_version}\n")
     end
   end
 end

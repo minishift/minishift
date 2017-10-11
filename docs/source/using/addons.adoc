@@ -1,3 +1,5 @@
+include::variables.adoc[]
+
 = Add-ons
 :icons:
 :toc: macro
@@ -11,7 +13,7 @@ toc::[]
 
 NOTE: This feature is still considered experimental and might change in future releases.
 
-Minishift allows to extend the vanilla OpenShift setup provided by *cluster up* with an add-on mechanism.
+{project} allows to extend the vanilla OpenShift setup provided by *cluster up* with an add-on mechanism.
 
 Add-ons are directories that contain a text file with the *_.addon_* extension.
 The directory can also contain other resource files such as JSON template files.
@@ -42,12 +44,12 @@ Enabled add-ons are applied during xref:../command-ref/minishift_start.adoc#[`mi
 == Add-on Commands
 
 This section describes the commands that an add-on file can contain.
-They are forming a mini-DSL for Minishift add-ons:
+They are forming a mini-DSL for {project} add-ons:
 
 ssh::
-If the add-on command starts with `ssh`, you can run any command within the Minishift-managed VM.
+If the add-on command starts with `ssh`, you can run any command within the {project}-managed VM.
 This is similar to running xref:../command-ref/minishift_ssh.adoc#[`minishift ssh`] and then executing any command on the VM.
-For more information about the `minishift ssh` command usage, see xref:../using/managing-minishift.adoc#connecting-with-ssh[Connecting to the Minishift VM with SSH].
+For more information about the `minishift ssh` command usage, see xref:../using/managing-minishift.adoc#connecting-with-ssh[Connecting to the {project} VM with SSH].
 
 oc::
 If the add-on command starts with `oc`, it uses the *oc* binary that is cached on your host to execute the specified `oc` command.
@@ -60,7 +62,7 @@ If the add-on command starts with `openshift`, you can run the *openshift* binar
 This means that any file parameters or other system-specific parameters must match the environment of the container instead of your host.
 
 docker::
-If the add-on command starts with `docker`, it executes a `docker` command against the Docker daemon within the Minishift VM.
+If the add-on command starts with `docker`, it executes a `docker` command against the Docker daemon within the {project} VM.
 This is the same daemon on which the single-node OpenShift cluster is running as well.
 This is similar to running `eval $(minishift docker-env)` on your host and then executing any `docker` command.
 See also xref:../command-ref/minishift_docker-env.adoc#[`minishift docker-env`].
@@ -78,7 +80,7 @@ NOTE: Trying to use an undefined command will cause an error when the add-on get
 [[addon-variable-interpolation]]
 == Variable Interpolation
 
-Minishift allows the use of variables within the add-on commands.
+{project} allows the use of variables within the add-on commands.
 Variables have the format `#{<variable-name>}`.
 The following example shows how the OpenShift routing suffix can be interpolated into an `openshift` command to create a new certificate as part of securing the OpenShift registry.
 The used variable `#{routing-suffix}` is part of the built-in add-on variables.
@@ -109,7 +111,7 @@ The following table shows these variables.
 |Variable |Description
 
 |ip
-|IP of the Minishift VM.
+|IP of the {project} VM.
 
 |routing-suffix
 |OpenShift routing suffix for the application.
@@ -160,7 +162,7 @@ Multiple variables need to be comma separated.
 [[default-addons]]
 == Default Add-ons
 
-Minishift provides a set of built-in add-ons that offer some common OpenShift customization to assist with development.
+{project} provides a set of built-in add-ons that offer some common OpenShift customization to assist with development.
 To install the default add-ons, run:
 
 ----
@@ -326,7 +328,7 @@ You can also write metadata in multiple line.
 ----
 ====
 
-NOTE: You can also edit your add-on directly in the Minishift add-on install directory *_$MINISHIFT_HOME/addons_*.
+NOTE: You can also edit your add-on directly in the {project} add-on install directory *_$MINISHIFT_HOME/addons_*.
 Be aware that if there is an error in the add-on, it will not show when you run any `addons` commands, and it will not be applied during the `minishift start` process.
 
 To provide add-on remove instructions, you can create text file with the extension *_.addon.remove_*, for example *_admin-user.addon.remove_*.

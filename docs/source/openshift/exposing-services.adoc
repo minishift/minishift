@@ -1,3 +1,5 @@
+include::variables.adoc[]
+
 = Exposing Services
 :icons:
 :toc: macro
@@ -23,17 +25,17 @@ You can create a route using the Web console or the CLI:
 oc expose svc/frontend --hostname=www.example.com
 ----
 
-To see a full example of creating an application and exposing it with a route, see the xref:../getting-started/quickstart.adoc#deploy-sample-app[Minishift Quickstart] section.
+To see a full example of creating an application and exposing it with a route, see the xref:../getting-started/quickstart.adoc#deploy-sample-app[{project} Quickstart] section.
 
 [[nodeport-services]]
 == NodePort Services
 
 In case the service you want to expose is not HTTP based, you can create a link:https://docs.openshift.org/latest/architecture/core_concepts/pods_and_services.html#service-nodeport[*NodePort*] service.
 In this case, each OpenShift node will proxy that port into your service.
-To access this port on your Minishift VM, you need to configure an link:https://docs.openshift.org/latest/dev_guide/getting_traffic_into_cluster.html#using-ingress-IP-self-service[Ingress IP Self-Service] using `oc expose` with the parameter `type=LoadBalancer`.
+To access this port on your {project} VM, you need to configure an link:https://docs.openshift.org/latest/dev_guide/getting_traffic_into_cluster.html#using-ingress-IP-self-service[Ingress IP Self-Service] using `oc expose` with the parameter `type=LoadBalancer`.
 
 A common use-case for Ingress IP Self-Service is the ability to expose a database service.
-The following example shows the complete workflow to create and expose a link:https://mariadb.org[MariaDB] instance using Minishift:
+The following example shows the complete workflow to create and expose a link:https://mariadb.org[MariaDB] instance using {project}:
 
 ----
 $ minishift start
@@ -48,7 +50,7 @@ ports:
  ....
 ----
 
-After the service is exposed, you can access MariaDB with the `mysql` CLI using the Minishift VM IP and the exposed NodePort service.
+After the service is exposed, you can access MariaDB with the `mysql` CLI using the {project} VM IP and the exposed NodePort service.
 
 ----
 $ mysql --user=root --password=foo --host=$(minishift ip) --port=30907

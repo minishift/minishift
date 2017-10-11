@@ -1,4 +1,6 @@
-= Developing Minishift
+include::variables.adoc[]
+
+= Developing {project}
 :icons:
 :toc: macro
 :toc-title:
@@ -9,7 +11,7 @@ toc::[]
 [[developing-overview]]
 == Overview
 
-The following sections describe how to build and test Minishift.
+The following sections describe how to build and test {project}.
 
 [[develop-prerequisites]]
 == Prerequisites
@@ -17,7 +19,7 @@ The following sections describe how to build and test Minishift.
 - Git
 - A recent Go distribution (>=1.8)
 
-NOTE: You should be able to develop Minishift on any operating system, such as GNU/Linux, macOS or Windows.
+NOTE: You should be able to develop {project} on any operating system, such as GNU/Linux, macOS or Windows.
 The Windows operating system might require additional steps or have some limitations.
 
 [[set-up-dev-env]]
@@ -58,7 +60,7 @@ NOTE: On Windows operating systems, you use the UI or use `setx` to set the envi
 [[cloning-repository]]
 === Cloning the Repository
 
-Get the Minishift sources from GitHub:
+Get the {project} sources from GitHub:
 
 ----
 $ cd $GOPATH/src
@@ -69,7 +71,7 @@ $ git clone https://github.com/minishift/minishift.git github.com/minishift/mini
 === Using an IDE
 
 You can use any editor you want.
-However, most of the core maintainers of Minishift use IntelliJ link:https://www.jetbrains.com/idea/[IDEA] with the latest Go plug-in.
+However, most of the core maintainers of {project} use IntelliJ link:https://www.jetbrains.com/idea/[IDEA] with the latest Go plug-in.
 This IDE indexes your whole workspace and allows for easy navigation of the sources, and also integrates with the Go debugger link:https://github.com/derekparker/delve[Delve].
 
 For instructions on setting up IDEA, see link:http://hadihariri.com/2015/09/30/setting-up-go-on-intellij/[Setting up Go on IntelliJ].
@@ -77,7 +79,7 @@ For instructions on setting up IDEA, see link:http://hadihariri.com/2015/09/30/s
 [[manage-dependencies]]
 == Dependency Management
 
-Minishift uses link:https://github.com/Masterminds/glide[Glide] for dependency management.
+{project} uses link:https://github.com/Masterminds/glide[Glide] for dependency management.
 
 [[install-glide]]
 === Installing Glide
@@ -94,7 +96,7 @@ Make sure to use Glide version 0.12.3 or later.
 [[bootstrap-dependencies]]
 === Bootstrapping Dependencies
 
-After a clean checkout or after a `make clean`, there won't be a *_vendor_* directory containing the needed Minishift dependencies.
+After a clean checkout or after a `make clean`, there won't be a *_vendor_* directory containing the needed {project} dependencies.
 
 To install the dependencies, you can run the following command:
 
@@ -127,10 +129,10 @@ TIP: In some cases the Glide cache located under *_~/.glide/cache_* can get corr
 If you seeing Glide errors during `make vendor`, you can clear the Glide cache via `glide cc`.
 
 [[build-minishift]]
-== Building Minishift
+== Building {project}
 
 [[build-minishift-binary]]
-=== Building the Minishift Binary
+=== Building the {project} Binary
 
 Run the following command to create a platform-specific binary and copy it to *_$GOPATH/bin_*.
 
@@ -141,7 +143,7 @@ $ make
 NOTE: Use `make cross` to cross-compile for other platforms.
 
 [[run-minishift-binary]]
-=== Running the Minishift Binary
+=== Running the {project} Binary
 
 Start the OpenShift cluster with your built minishift binary:
 
@@ -149,7 +151,7 @@ Start the OpenShift cluster with your built minishift binary:
 $ minishift start
 ----
 
-This command will run Minishift from *_$GOPATH/bin/minishift_*, if you set up your Go workspace as described in the xref:create-go-workspace[Creating the Go workspace] section.
+This command will run {project} from *_$GOPATH/bin/minishift_*, if you set up your Go workspace as described in the xref:create-go-workspace[Creating the Go workspace] section.
 
 You can also execute the binaries directly from the *_out_* directory of the checkout.
 Depending on your operating system, the binary is in one of the following directories:
@@ -158,7 +160,7 @@ Depending on your operating system, the binary is in one of the following direct
 * *_out/linux-amd64_*
 * *_out/windows-amd64_*
 
-For more Minishift commands and flags, see the xref:../command-ref/minishift.adoc#[Minishift command reference] documentation.
+For more {project} commands and flags, see the xref:../command-ref/minishift.adoc#[{project} command reference] documentation.
 
 [[unit-tests]]
 === Unit Tests
@@ -196,14 +198,14 @@ For more information about test options, run the `go test --help` command and re
 
 Integration tests utilize link:https://github.com/DATA-DOG/godog[Godog], which uses Gherkin (Cucumber) to define sets of test cases, in Gherkin terminology known as _features_.
 The features are located in *_test/integration/features_* folder.
-Features for Minishift follow these basic concepts:
+Features for {project} follow these basic concepts:
 
 User stories::
 Features which follow a happy path of user.
 For example, _basic.feature_ or _coolstore.feature_.
 
 Feature and command coverage::
-Features which focuses on specific fields of Minishift functionality or individual commands.
+Features which focuses on specific fields of {project} functionality or individual commands.
 For example, _proxy.feature_ or _cmd-version.feature_.
 
 
@@ -230,7 +232,7 @@ $ make integration_all
 To provide more flexibility the default targets `integration` and `integration_all` can be further customized using several parameters.
 
 MINISHIFT_BINARY::
-Parameter `MINISHIFT_BINARY` can be used to run integration tests against Minishift binary located in different directory:
+Parameter `MINISHIFT_BINARY` can be used to run integration tests against {project} binary located in different directory:
 
 ----
 $ make integration MINISHIFT_BINARY=<path-to-custom-binary>
@@ -245,10 +247,10 @@ $ make integration_all TIMEOUT=7200s
 ----
 
 RUN_BEFORE_FEATURE::
-Parameter `RUN_BEFORE_FEATURE` specifies Minishift commands to be run before each feature.
-This provides ability to run integration tests against Minishift which is not in default state.
+Parameter `RUN_BEFORE_FEATURE` specifies {project} commands to be run before each feature.
+This provides ability to run integration tests against {project} which is not in default state.
 When multiple commands are specified, they must be delimited by a semicolon.
-For example, tests can be run against stopped Minishift with _image caching_ option turned on by running:
+For example, tests can be run against stopped {project} with _image caching_ option turned on by running:
 
 ----
 $ make integration_all RUN_BEFORE_FEATURE="start; stop; config set image-caching true"
@@ -299,7 +301,7 @@ However for cases which needs further investigation the integration test also lo
 [[format-source-code]]
 === Formatting the Source Code
 
-Minishift adheres to the Go link:https://golang.org/doc/effective_go.html#formatting[formatting guidelines].
+{project} adheres to the Go link:https://golang.org/doc/effective_go.html#formatting[formatting guidelines].
 Code with incorrect formatting will fail the CI builds.
 You can check whether any of your files violate the guidelines with the following command:
 
@@ -325,6 +327,6 @@ $ make clean
 [[godoc]]
 == Godoc
 
-When developing Minishift, it is encouraged to use link:https://godoc.org/golang.org/x/tools/cmd/godoc[Godoc] to document the source code.
+When developing {project}, it is encouraged to use link:https://godoc.org/golang.org/x/tools/cmd/godoc[Godoc] to document the source code.
 You can find guidelines on how to use godoc in link:https://blog.golang.org/godoc-documenting-go-code[this blog post].
-You can browse the Minishift Godoc documentation under link:https://godoc.org/github.com/minishift/minishift[https://godoc.org/github.com/minishift/minishift].
+You can browse the {project} Godoc documentation under link:https://godoc.org/github.com/minishift/minishift[https://godoc.org/github.com/minishift/minishift].

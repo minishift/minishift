@@ -1,24 +1,24 @@
 include::variables.adoc[]
 
 [[minishift-index]]
-= Minishift
+= {project}
 :icons:
 :toc: macro
 :toc-title:
 :toclevels: 1
 
 [[welcome-minishift]]
-== Welcome to Minishift {minishift-version}!
+== Welcome to {project} {minishift-version}!
 
-Minishift is a tool that helps you run OpenShift locally by running a single-node OpenShift
+{project} is a tool that helps you run OpenShift locally by running a single-node OpenShift
 cluster inside a VM.
 
 This documentation library contains the following sections to help you get started with, use, and
-extend Minishift:
+extend {project}:
 
 - xref:./getting-started/index.adoc#[Getting Started]
-- xref:./using/index.adoc#[Using Minishift]
+- xref:./using/index.adoc#[Using {project}]
 - xref:./openshift/index.adoc#[Interacting with OpenShift]
-- xref:./troubleshooting/index.adoc#[Troubleshooting Minishift]
-- xref:./contributing/index.adoc#[Contributing to Minishift]
+- xref:./troubleshooting/index.adoc#[Troubleshooting {project}]
+- xref:./contributing/index.adoc#[Contributing to {project}]
 - xref:./command-ref/minishift.adoc#[Command Reference]

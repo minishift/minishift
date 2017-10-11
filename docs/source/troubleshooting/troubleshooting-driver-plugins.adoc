@@ -1,3 +1,5 @@
+include::variables.adoc[]
+
 [[troubleshooting-driver-plugins]]
 = Troubleshooting Driver Plug-ins
 :icons:
@@ -10,7 +12,7 @@ toc::[]
 [[troubleshooting-driver-plugins-overview]]
 == Overview
 
-This section contains solutions to common problems that you might encounter while configuring the driver plug-ins for Minishift.
+This section contains solutions to common problems that you might encounter while configuring the driver plug-ins for {project}.
 
 [[troubleshooting-driver-kvm]]
 == KVM/libvirt
@@ -22,7 +24,7 @@ If you use `virsh` on KVM/libvirt to create snapshots in your development workfl
 
 ----
 $ minishift delete
-Deleting the Minishift VM...
+Deleting the {project} VM...
 Error deleting the VM:  [Code-55] [Domain-10] Requested operation is not valid: cannot delete inactive domain with 4 snapshots
 ----
 
@@ -37,7 +39,7 @@ Workaround: To delete the snapshots, you need to perform the following steps.
 $ sudo virsh snapshot-delete --metadata minishift <snapshot-name>
 ----
 
-.  Undefine the Minishift domain.
+.  Undefine the {project} domain.
 +
 
 ----
@@ -45,7 +47,7 @@ $ sudo virsh undefine minishift
 ----
 +
 
-You can now run `minishft delete` to delete the VM and restart Minishift.
+You can now run `minishift delete` to delete the VM and restart {project}.
 
 [NOTE]
 ====
@@ -102,16 +104,16 @@ $ systemctl enable virtlogd
 === Domain 'minishift' already exists...
 
 If you try `minishift start` and the this error appears, ensure that you use `minishift delete` to delete the VMs that you created earlier.
-However, if this fails and you want to completely clean up Minishift and start fresh, do the following:
+However, if this fails and you want to completely clean up {project} and start fresh, do the following:
 
-. Check if any existing Minishift VM are running:
+. Check if any existing {project} VM are running:
 +
 
 ----
 $ sudo virsh list --all
 ----
 
-. If any Minishift VM is running, stop it:
+. If any {project} VM is running, stop it:
 +
 
 ----
@@ -132,7 +134,7 @@ $ sudo virsh undefine minishift
  $ rm -rf ~/.minishift/machines
 ----
 
-In case all of this fails, you might want to xref:../getting-started/uninstalling.adoc#[uninstall Minishift] and do a fresh install of Minishift.
+In case all of this fails, you might want to xref:../getting-started/uninstalling.adoc#[uninstall {project}] and do a fresh install of {project}.
 
 [[troubleshooting-driver-xhyve]]
 == xhyve
@@ -146,7 +148,7 @@ The problem is likely that the xhyve driver is not able to clean up *vmnet* when
 * *_/var/db/dhcpd_leases_*
 * *_/Library/Preferences/SystemConfiguration/com.apple.vmnet.plist_*
 
-Reset the Minishift-specific IP database, ensure that you remove the `minishift` entry section from the `dhcpd_leases` file, and reboot your system.
+Reset the {project}-specific IP database, ensure that you remove the `minishift` entry section from the `dhcpd_leases` file, and reboot your system.
 
 ----
 {
@@ -177,7 +179,7 @@ To avoid this issue, it is recommended to use VirtualBox 5.1.12 or later.
 [[insufficient-privileges]]
 === Hyper-V commands must be run as an Administrator
 
-If you run Minishift with Hyper-V on Windows as a normal user or as a user with Administrator privileges, you might encounter the following error:
+If you run {project} with Hyper-V on Windows as a normal user or as a user with Administrator privileges, you might encounter the following error:
 
 ----
 Error starting the VM: Error creating the VM. Error with pre-create check: "Hyper-V commands must be run as an Administrator".
@@ -207,9 +209,9 @@ Now you can run the Hyper-V commands as a normal user.
 For more options for Hyper-V see link:https://blogs.msdn.microsoft.com/virtual_pc_guy/2010/09/28/creating-a-hyper-v-administrators-local-group-through-powershell[creating Hyper-V administrators local group].
 
 [[hyperv-fails-openvpn]]
-=== Minishift running with Hyper-V fails when connected to OpenVPN
+=== {project} running with Hyper-V fails when connected to OpenVPN
 
-If you try to use Minishift with Hyper-V using an external virtual switch while you are connected to a VPN such as OpenVPN, Minishift might fail to provision the VM.
+If you try to use {project} with Hyper-V using an external virtual switch while you are connected to a VPN such as OpenVPN, {project} might fail to provision the VM.
 
 Cause: Hyper-V networking might not route the network traffic in both directions properly when connected to a VPN.
 

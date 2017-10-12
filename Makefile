@@ -55,6 +55,9 @@ IMAGE_UID ?= 1000
 DOCS_SYNOPISIS_DIR = docs/source/_tmp
 DOC_VARIABLES = -e OPENSHIFT_VERSION=$(OPENSHIFT_VERSION) -e MINISHIFT_VERSION=$(MINISHIFT_VERSION) -e CENTOS_ISO_VERSION=$(CENTOS_ISO_VERSION) -e MINIKUBE_ISO_VERSION=$(MINIKUBE_ISO_VERSION)
 
+# MISC
+START_COMMIT_MESSAGE_VALIDATION = 204ce1930e8a86d0c5b5eabd1d8b8dbf8d9edac3
+
 # Check that given variables are set and all have non-empty values,
 # die with an error otherwise.
 #
@@ -97,6 +100,9 @@ $(GOPATH)/bin/gh-release:
 
 $(GOPATH)/bin/go-bindata:
 	go get -u github.com/jteeuwen/go-bindata/...
+
+$(GOPATH)/bin/git-validation:
+	go get -u github.com/vbatts/git-validation/...
 
 .PHONY: build_docs_container
 build_docs_container:
@@ -199,3 +205,7 @@ fmt:
 .PHONY: fmtcheck
 fmtcheck:
 	@gofmt -l -s $(SOURCE_DIRS) | grep ".*\.go"; if [ "$$?" = "0" ]; then exit 1; fi
+
+.PHONY: validate_commits
+validate_commits: $(GOPATH)/bin/git-validation
+	git-validation -q -run short-subject,message_regexp='(Issue #[0-9]+ .*|cut v[0-9]+.[0-9]+.[0-9]+)' -range $(START_COMMIT_MESSAGE_VALIDATION)...

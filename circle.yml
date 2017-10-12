@@ -40,6 +40,9 @@ test:
         - make prerelease:
                 pwd:
                     ../src/github.com/minishift/minishift
+        - make validate_commits:
+                pwd:
+                    ../src/github.com/minishift/minishift
 
 ## Artifacts
 general:

@@ -1,6 +1,6 @@
 @provision-earlier-version @openshift @minishift-only
 Feature: Provision an older major release
-  As a user I can provision an older major version of minishift
+  As a user I can provision an older major version of openshift
 
   Scenario: Starting Minishift with v1.5.1
     Given Minishift has state "Does Not Exist"

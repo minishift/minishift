@@ -215,7 +215,7 @@ user defined options which changes default behaviour of Minishift.
 
   Scenario: Checking that disk-size value was applied
      When executing "minishift ssh -- sudo fdisk -l | grep Disk" succeeds
-     Then stdout should match "Disk \/dev\/sda: 2[4-6]\.?[0-9]{0,2} GB"
+     Then stdout should match "Disk \/dev\/sda: 2[4-6]\.?[0-9]{0,2} (GB|GiB)"
 
   Scenario: Checking that cpus value was applied
      When executing "minishift ssh -- cat /proc/cpuinfo" succeeds

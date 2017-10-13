@@ -101,6 +101,7 @@ func getIP() (string, error) {
 }
 
 func SetProxy() error {
+	var err error
 	port := getPort()
 	ip, err := getIP()
 	if err != nil {
@@ -110,17 +111,26 @@ func SetProxy() error {
 	go startProxy(port)
 
 	address := fmt.Sprintf("http://%v:%v", ip, port)
-	os.Setenv("MINISHIFT_HTTP_PROXY", address)
+	err = os.Setenv("MINISHIFT_HTTP_PROXY", address)
+	if err != nil {
+		return err
+	}
+
 	fmt.Printf("  INFO: this feature is now using MINISHIFT_HTTP_PROXY=%s\n", os.Getenv("MINISHIFT_HTTP_PROXY"))
 
 	return nil
 }
 
 func UnsetProxy() error {
-	os.Unsetenv("MINISHIFT_HTTP_PROXY")
-	if proxyListener != nil {
-		proxyListener.Close()
+	var err error
+	err = os.Unsetenv("MINISHIFT_HTTP_PROXY")
+	if err != nil {
+		return err
 	}
 
-	return nil
+	if proxyListener != nil {
+		err = proxyListener.Close()
+	}
+
+	return err
 }

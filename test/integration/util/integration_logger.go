@@ -61,8 +61,7 @@ func StartLog(logPath string) error {
 }
 
 func CloseLog() error {
-	err := logFile.Close()
-	return err
+	return logFile.Close()
 }
 
 func LogMessage(messageInfo, message string) error {

@@ -255,10 +255,16 @@ func FeatureContext(s *godog.Suite) {
 		testResultDir = filepath.Join(testDir, "..", "test-results")
 		err := os.MkdirAll(testResultDir, os.ModePerm)
 		if err != nil {
-			fmt.Errorf("Error creating directory for test results: %v", err)
+			fmt.Println("Error creating directory for test results:", err)
+			os.Exit(1)
 		}
 
-		util.StartLog(testResultDir)
+		err = util.StartLog(testResultDir)
+		if err != nil {
+			fmt.Println("Error starting the log:", err)
+			os.Exit(1)
+		}
+
 		fmt.Println("Running Integration test in:", testDir)
 		fmt.Println("Using binary:", minishiftBinary)
 	})
@@ -266,7 +272,10 @@ func FeatureContext(s *godog.Suite) {
 	s.AfterSuite(func() {
 		util.LogMessage("info", "----- Cleaning Up -----")
 		minishift.runner.EnsureDeleted()
-		util.CloseLog()
+		err := util.CloseLog()
+		if err != nil {
+			fmt.Println("Error closing the log:", err)
+		}
 	})
 
 	s.BeforeFeature(func(this *gherkin.Feature) {
@@ -274,7 +283,7 @@ func FeatureContext(s *godog.Suite) {
 		if runner.IsCDK() {
 			runner.CDKSetup()
 		} else {
-			runner.RunCommand("addons list")
+			runner.RunCommandAndPrintError("addons list")
 		}
 
 		var splittedCommands []string
@@ -284,7 +293,7 @@ func FeatureContext(s *godog.Suite) {
 		}
 
 		for index := range splittedCommands {
-			runner.RunCommand(splittedCommands[index])
+			runner.RunCommandAndPrintError(splittedCommands[index])
 		}
 
 		util.LogMessage("info", fmt.Sprintf("----- Feature: %s -----", this.Name))
@@ -313,13 +322,22 @@ func FeatureContext(s *godog.Suite) {
 }
 
 func setUp() string {
+	var err error
 	if testDir == "" {
-		testDir, _ = ioutil.TempDir("", "minishift-integration-test-")
+		testDir, err = ioutil.TempDir("", "minishift-integration-test-")
+		if err != nil {
+			fmt.Println("Error creating temporary directory:", err)
+			os.Exit(1)
+		}
 	} else {
 		ensureTestDirEmpty()
 	}
 
-	os.Setenv(constants.MiniShiftHomeEnv, testDir)
+	err = os.Setenv(constants.MiniShiftHomeEnv, testDir)
+	if err != nil {
+		fmt.Printf("Error setting up environmental variable %v: %v\n", constants.MiniShiftHomeEnv, err)
+	}
+
 	return testDir
 }
 

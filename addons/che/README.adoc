@@ -1,0 +1,26 @@
+= Eclipse Che Addon
+
+This addon create Eclipse Che templates and image streams on OpenShift. In short this helps in setting up Eclipse Che 
+on minishift inline with https://www.eclipse.org/che/docs/setup/openshift/index.html#deploy-che-on-minishift[Deploy Che on Minishift]
+
+== Enable 
+
+[source,sh]
+----
+minishift addon enable che
+----
+
+== Apply 
+
+[source,sh]
+----
+minishift addon apply che
+----
+
+== Removes 
+
+[source,sh]
+----
+minishift addon remove che
+---
+

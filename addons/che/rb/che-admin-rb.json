@@ -1,0 +1,16 @@
+{
+    "apiVersion": "v1",
+    "kind": "RoleBinding",
+    "metadata": {
+        "name": "che"
+    },
+    "roleRef": {
+        "name": "admin"
+    },
+    "subjects": [
+        {
+            "kind": "ServiceAccount",
+            "name": "che"
+        }
+    ]
+}

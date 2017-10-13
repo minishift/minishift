@@ -1,0 +1,81 @@
+{
+    "kind": "ImageStreamList",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "che-server-image-streams",
+        "annotations": {
+            "description": "ImageStream definitions for Eclipse Che Servers.",
+            "openshift.io/display-name": "Eclipse Che IDE"
+        }
+    },
+    "items": [
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "che-server",
+                "annotations": {
+                    "description": " Eclipse Che Servers 5.x"
+                }
+            },
+            "spec": {
+                "tags": [
+                    {
+                        "name": "latest",
+                        "annotations": {
+                            "name": " Eclipse Che Server (latest)",
+                            "description": "Eclipse Che server centos images.",
+                            "iconClass": "icon-che",
+                            "tags": "java,ide,eclipse,che"
+                        },
+                        "from": {
+                            "kind": "ImageStreamTag",
+                            "name": "5.18.0-centos"
+                        }
+                    },
+                    {
+                        "name": "5.18.0-centos",
+                        "annotations": {
+                            "openshift.io/display-name": "Eclipse Che Server  5.18.0",
+                            "description": "Eclipse Che server centos images.",
+                            "iconClass": "icon-che",
+                            "tags": "java,ide,eclipse,che",
+                            "version": "5.18.0-centos"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "eclipse/che-server:5.18.0-centos"
+                        }
+                    },
+                    {
+                        "name": "nightly",
+                        "annotations": {
+                            "name": " Eclipse Che Server (nightly)",
+                            "description": "Eclipse Che server nightly centos images.",
+                            "iconClass": "icon-che",
+                            "tags": "java,ide,eclipse,che"
+                        },
+                        "from": {
+                            "kind": "ImageStreamTag",
+                            "name": "nightly-centos"
+                        }
+                    },
+                    {
+                        "name": "nightly-centos",
+                        "annotations": {
+                            "openshift.io/display-name": "Eclipse Che Server 5.19.0-SNAPSHOT",
+                            "description": "Eclipse Che server nightly centos images.",
+                            "iconClass": "icon-che",
+                            "tags": "java,ide,eclipse,che",
+                            "version": "nightly-centos"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "eclipse/che-server:nightly-centos"
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}

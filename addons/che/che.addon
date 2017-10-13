@@ -1,0 +1,12 @@
+# Name: che
+# Description: Setup and Configure Eclipse Che Template and Image Streams
+# Url: https://www.eclipse.org/che/docs/setup/openshift/index.html
+
+# Apply role binding
+oc apply -f rb/che-admin-rb.json
+
+# Create Image Stream
+oc apply -f streams/che-server-streams.json -n openshift
+
+# Create the Che server Template 
+oc apply -f templates/che-single-user.json -n openshift

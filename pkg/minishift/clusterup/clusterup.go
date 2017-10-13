@@ -257,10 +257,10 @@ func configurePersistentVolumes(hostPvDir string, addOnManager *manager.AddOnMan
 	// if we have SELinux enabled we need to sort things out there as well
 	// 'cluster up' does this as well, but we do it here as well to have all required actions collected in one
 	// place, instead of relying on some implicit knowledge on what 'cluster up does (HF)
-	cmd = fmt.Sprintf("sudo which chcon; if [ $? -eq 0 ]; then chcon -R -t svirt_sandbox_file_t %s/*; fi", hostPvDir)
+	cmd = fmt.Sprintf("sudo which chcon; if [ $? -eq 0 ]; then chcon -R -t svirt_sandbox_file_t %s/pv*; fi", hostPvDir)
 	sshCommander.SSHCommand(cmd)
 
-	cmd = fmt.Sprintf("sudo which restorecon; if [ $? -eq 0 ]; then restorecon -R %s; fi", hostPvDir)
+	cmd = fmt.Sprintf("sudo which restorecon; if [ $? -eq 0 ]; then restorecon -R %s/pv*; fi", hostPvDir)
 	sshCommander.SSHCommand(cmd)
 
 	fmt.Println("OK")

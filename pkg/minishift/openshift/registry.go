@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/minishift/minishift/pkg/minikube/constants"
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 )
 
@@ -40,7 +41,7 @@ func isRegistryRouteEnabled(registryAddonEnabled bool) bool {
 		return false
 	}
 	namespace := "default"
-	cmdArgText := fmt.Sprintf("get route docker-registry -n %s --config=%s", namespace, systemKubeConfigPath)
+	cmdArgText := fmt.Sprintf("get route docker-registry -n %s --config=%s", namespace, constants.KubeConfigPath)
 	tokens := strings.Split(cmdArgText, " ")
 	cmdName := instanceState.InstanceConfig.OcPath
 	_, err := runner.Output(cmdName, tokens...)
@@ -53,7 +54,7 @@ func isRegistryRouteEnabled(registryAddonEnabled bool) bool {
 func fetchRegistryRoute() (string, error) {
 	namespace := "default"
 	route := "route/docker-registry"
-	cmdArgText := fmt.Sprintf("get -o jsonpath={.spec.host}:443 %s -n %s --config=%s", route, namespace, systemKubeConfigPath)
+	cmdArgText := fmt.Sprintf("get -o jsonpath={.spec.host}:443 %s -n %s --config=%s", route, namespace, constants.KubeConfigPath)
 	tokens := strings.Split(cmdArgText, " ")
 	cmdName := instanceState.InstanceConfig.OcPath
 	cmdOut, err := runner.Output(cmdName, tokens...)
@@ -68,7 +69,7 @@ func fetchRegistryRoute() (string, error) {
 func fetchRegistryService() (string, error) {
 	namespace := "default"
 	service := "service/docker-registry"
-	cmdArgText := fmt.Sprintf("get -o jsonpath={.spec.clusterIP}:{.spec.ports[*].port} %s -n %s --config=%s", service, namespace, systemKubeConfigPath)
+	cmdArgText := fmt.Sprintf("get -o jsonpath={.spec.clusterIP}:{.spec.ports[*].port} %s -n %s --config=%s", service, namespace, constants.KubeConfigPath)
 	tokens := strings.Split(cmdArgText, " ")
 	cmdName := instanceState.InstanceConfig.OcPath
 	cmdOut, err := runner.Output(cmdName, tokens...)

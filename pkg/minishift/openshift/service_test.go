@@ -21,9 +21,10 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/minishift/minishift/pkg/minikube/constants"
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 	test "github.com/minishift/minishift/pkg/testing"
-	testdata "github.com/minishift/minishift/pkg/testing/testdata"
+	"github.com/minishift/minishift/pkg/testing/testdata"
 )
 
 //
@@ -93,15 +94,15 @@ func setup(t *testing.T, namespace string) {
 	fakeRunner := test.NewFakeRunner(t)
 	runner = fakeRunner.Runner
 
-	args := fmt.Sprintf("get projects --config=%s %s", systemKubeConfigPath, ProjectsCustomCol)
+	args := fmt.Sprintf("get projects --config=%s %s", constants.KubeConfigPath, ProjectsCustomCol)
 	expectString := fmt.Sprintf("NAME\n%s", namespace)
 	fakeRunner.ExpectAndReturn(args, expectString)
 
-	args = fmt.Sprintf("get svc -o json --config=%s -n %s", systemKubeConfigPath, namespace)
+	args = fmt.Sprintf("get svc -o json --config=%s -n %s", constants.KubeConfigPath, namespace)
 	expectString = testdata.ServiceSpec
 	fakeRunner.ExpectAndReturn(args, expectString)
 
-	args = fmt.Sprintf("get route -o json --config=%s -n %s", systemKubeConfigPath, namespace)
+	args = fmt.Sprintf("get route -o json --config=%s -n %s", constants.KubeConfigPath, namespace)
 	expectString = testdata.RouteSpec
 	fakeRunner.ExpectAndReturn(args, expectString)
 }

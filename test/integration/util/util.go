@@ -85,6 +85,14 @@ func (m *MinishiftRunner) RunCommand(command string) (stdOut string, stdErr stri
 	return
 }
 
+func (m *MinishiftRunner) RunCommandAndPrintError(command string) (stdOut string, stdErr string, exitCode int) {
+	stdOut, stdErr, exitCode = runCommand(command, m.CommandPath)
+	if exitCode != 0 {
+		fmt.Printf("Command 'minishift %v' returned non-zero exit code: %v, StdOut: %v, StdErr: %v", command, exitCode, stdOut, stdErr)
+	}
+	return
+}
+
 func (m *MinishiftRunner) Start() {
 	m.RunCommand(fmt.Sprintf("start %s", m.CommandArgs))
 }
@@ -94,7 +102,8 @@ func (m *MinishiftRunner) CDKSetup() {
 		fmt.Println("Either MINISHIFT_USERNAME or MINISHIFT_PASSWORD is not set as environment variable")
 		os.Exit(1)
 	}
-	m.RunCommand(fmt.Sprintf("setup-cdk --force --minishift-home %s", os.Getenv(constants.MiniShiftHomeEnv)))
+
+	m.RunCommandAndPrintError(fmt.Sprintf("setup-cdk --force --minishift-home %s", os.Getenv(constants.MiniShiftHomeEnv)))
 }
 
 func (m *MinishiftRunner) IsCDK() bool {
@@ -118,8 +127,12 @@ func (m *MinishiftRunner) GetOcRunner() *OcRunner {
 }
 
 func (m *MinishiftRunner) EnsureDeleted() {
-	m.RunCommand("delete")
-	m.CheckStatus("Does Not Exist")
+	m.RunCommandAndPrintError("delete --force")
+
+	deleted := m.CheckStatus("Does Not Exist")
+	if deleted == false {
+		fmt.Println("Deletion of minishift instance was not successful! Minishift status is not 'Does Not Exist'.")
+	}
 }
 
 func (m *MinishiftRunner) SetEnvFromEnvCmdOutput(dockerEnvVars string) error {

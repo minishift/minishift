@@ -1,14 +1,16 @@
-= Contributing to Minishift
+include::variables.adoc[]
+
+= Contributing to {project}
 :icons:
 
-Join the Minishift community! Learn about the link:https://github.com/minishift/minishift/blob/master/README.adoc[project] and how to link:https://github.com/minishift/minishift/blob/master/CONTRIBUTING.adoc[contribute].
+Join the {project} community! Learn about the link:https://github.com/minishift/minishift/blob/master/README.adoc[project] and how to link:https://github.com/minishift/minishift/blob/master/CONTRIBUTING.adoc[contribute].
 
-- xref:../contributing/developing.adoc#[Developing Minishift]
-- xref:../contributing/ci.adoc#[Minishift CI]
+- xref:../contributing/developing.adoc#[Developing {project}]
+- xref:../contributing/ci.adoc#[{project} CI]
 - xref:../contributing/writing-docs.adoc#[Writing Documentation]
-- xref:../contributing/releasing.adoc#[Releasing Minishift]
+- xref:../contributing/releasing.adoc#[Releasing {project}]
 
-You can reach the Minishift community by:
+You can reach the {project} community by:
 
 - Signing up to our link:https://lists.minishift.io/admin/lists/minishift.lists.minishift.io[mailing list]
 - Joining the #minishift channel on link:https://freenode.net/[Freenode IRC]

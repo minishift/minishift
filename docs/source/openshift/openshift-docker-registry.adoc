@@ -1,3 +1,5 @@
+include::variables.adoc[]
+
 = Accessing the OpenShift Docker Registry
 :icons:
 :toc: macro
@@ -15,8 +17,8 @@ Images present in the registry can directly be used for applications, speeding u
 [[login-to-registry]]
 == Logging Into the Registry
 
-. Start Minishift and add the *oc* binary to the PATH. For a detailed example, see the xref:../getting-started/quickstart.adoc#[Minishift Quickstart] section.
-. Make sure your shell is configured to xref:../using/docker-daemon.adoc#[reuse the Minishift docker daemon].
+. Start {project} and add the *oc* binary to the PATH. For a detailed example, see the xref:../getting-started/quickstart.adoc#[{project} Quickstart] section.
+. Make sure your shell is configured to xref:../using/docker-daemon.adoc#[reuse the {project} docker daemon].
 . Log into the OpenShift Docker registry.
 +
 ----
@@ -29,7 +31,7 @@ Images present in the registry can directly be used for applications, speeding u
 The following example shows how to deploy an OpenShift application directly from a locally-built docker image.
 This example uses the OpenShift project *myproject*. This project is automatically created by `minishift start`.
 
-. Make sure your shell is configured to xref:../using/docker-daemon.adoc#[reuse the Minishift docker daemon].
+. Make sure your shell is configured to xref:../using/docker-daemon.adoc#[reuse the {project} docker daemon].
 . Build the docker image as usual.
 . Tag the image against the OpenShift registry.
 +

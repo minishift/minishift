@@ -1,4 +1,6 @@
-= Minishift Profiles
+include::variables.adoc[]
+
+= {project} Profiles
 :icons:
 :toc: macro
 :toc-title:
@@ -9,13 +11,13 @@ toc::[]
 [[pofile-overview]]
 == Overview
 
-Minishift allows to create multiple instances of Minishift.
-Each Minishift instance can be created with different configurations and users can switch between different instances.
+{project} allows to create multiple instances of {project}.
+Each {project} instance can be created with different configurations and users can switch between different instances.
 
 [[create-profile]]
 == Create profile
 
-You can create a new instance of Minishift with xref:../command-ref/minishift_start.adoc#[`minishift start --profile`] command.
+You can create a new instance of {project} with xref:../command-ref/minishift_start.adoc#[`minishift start --profile`] command.
 
 NOTE: The default profile is `minishift`. It will be present by-default and user does not need to create it specifically.
 

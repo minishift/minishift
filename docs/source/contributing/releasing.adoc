@@ -1,4 +1,6 @@
-= Releasing Minishift
+include::variables.adoc[]
+
+= Releasing {project}
 :icons:
 :toc: macro
 :toc-title:
@@ -9,7 +11,7 @@ toc::[]
 [[releasing-overview]]
 == Overview
 
-The following sections describe how to release Minishift either via automated job or manually.
+The following sections describe how to release {project} either via automated job or manually.
 
 [[preparing-github-milestone]]
 == Preparing the GitHub Milestone
@@ -32,7 +34,7 @@ $ make ci_release API_KEY=<api-key> RELEASE_VERSION=<version>
 
 where
 
-  - `api-key` : Minishift CentOS CI API key
+  - `api-key` : {project} CentOS CI API key
   - `version` : Expected release version. Eg : 1.0.0 (without 'v')
 
 Once triggered you can follow the release process link:https://ci.centos.org/job/minishift-release/[here].
@@ -61,7 +63,7 @@ defined in your environment as _GITHUB_ACCESS_TOKEN_.
 $ make prerelease
 ----
 
-. Bump the Minishift version in the link:https://github.com/minishift/minishift/blob/master/Makefile[Makefile].
+. Bump the {project} version in the link:https://github.com/minishift/minishift/blob/master/Makefile[Makefile].
 
 . Commit and push your changes with a message of the form `cut v1.0.0`.
 
@@ -80,7 +82,7 @@ $ curl -H "$(curl --user minishift:$API_KEY 'https://ci.centos.org//crumbIssuer/
 ----
 
 This will build link:http://artifacts.ci.centos.org/minishift/minishift/docs/latest/[minishift-adoc.tar], which will be consumed by *docs.openshift.org* during the next nightly build.
-For more information, see xref:../contributing/writing-docs.adoc#[Writing and Publishing Minishift Documentation].
+For more information, see xref:../contributing/writing-docs.adoc#[Writing and Publishing {project} Documentation].
 
 [[post-release-tasks]]
 === Post-Release Tasks

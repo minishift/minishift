@@ -14,7 +14,7 @@ toc::[]
 The `minishift start` command creates an OpenShift cluster using the link:https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md[cluster up] approach.
 For this purpose it copies the *oc* binary onto your host.
 
-The *oc* binary is located in the  *_~/.minishift/cache/oc/{openshift-version}_* directory, assuming that you use Minishift's default version of OpenShift.
+The *oc* binary is located in the  *_~/.minishift/cache/oc/{openshift-version}_* directory, assuming that you use {project}'s default version of OpenShift.
 You can add this binary to your `PATH` using xref:../command-ref/minishift_oc-env.adoc#[`minishift oc-env`], which displays the command you need to type into your shell.
 
 The output of `minishift oc-env` differs depending on the operating system and the shell type.
@@ -27,12 +27,12 @@ export PATH="/Users/john/.minishift/cache/oc/v1.5.0:$PATH"
 ----
 
 [[minishift-oc-context]]
-== Minishift CLI Profile
+== {project} CLI Profile
 
-As a part of the `minishift start` command, a Minishift https://docs.openshift.org/latest/cli_reference/manage_cli_profiles.html[CLI profile] is also created.
+As part of the `minishift start` command, a https://docs.openshift.org/latest/cli_reference/manage_cli_profiles.html[CLI profile] named *minishift* is also created.
 This profile, also known as a _context_, contains the configuration to communicate with your OpenShift cluster.
 
-Minishift activates this context automatically, but if you need to switch back to it after, for example, logging into another OpenShift instance, you can run:
+{project} activates this context automatically, but if you need to switch back to it after, for example, logging into another OpenShift instance, you can run:
 
 ----
 $ oc config use-context minishift
@@ -74,13 +74,13 @@ $ oc config view
 [[access-web-console]]
 == Accessing the Web Console
 
-To access the link:https://docs.openshift.org/latest/architecture/infrastructure_components/web_console.html[OpenShift Web console], you can run this command in a shell after starting Minishift to get the URL of the Web console:
+To access the link:https://docs.openshift.org/latest/architecture/infrastructure_components/web_console.html[OpenShift Web console], you can run this command in a shell after starting {project} to get the URL of the Web console:
 
 ----
 $ minishift console --url
 ----
 
-Alternatively, after starting Minishift, you can use the following command to directly open the console in a browser:
+Alternatively, after starting {project}, you can use the following command to directly open the console in a browser:
 
 ----
 $ minishift console
@@ -100,7 +100,7 @@ For more information refer also to xref:../openshift/exposing-services.adoc#[Exp
 [[view-openshift-logs]]
 == Viewing OpenShift Logs
 
-To access OpenShift logs, run the `logs` command after starting Minishift:
+To access OpenShift logs, run the `logs` command after starting {project}:
 
 ----
 $ minishift logs
@@ -161,7 +161,7 @@ $ minishift openshift config set --patch "{\"corsAllowedOrigins\": [\".*\"]}"
 In this example, you change the OpenShift routing suffix in the master configuration.
 
 If you use a static routing suffix, you can set the `routing-suffix` flag as part of the xref:../command-ref/minishift_start.adoc#[`minishift start`] command.
-By default, Minishift uses a dynamic routing prefix based on http://nip.io/[nip.io], in which the IP address of the VM is a part of the routing suffix, for example *192.168.99.103.nip.io*.
+By default, {project} uses a dynamic routing prefix based on http://nip.io/[nip.io], in which the IP address of the VM is a part of the routing suffix, for example *192.168.99.103.nip.io*.
 
 If you experience issues with *nip.io*, you can use http://xip.io/[xip.io], which is based on the same principles.
 
@@ -171,5 +171,5 @@ To set the routing suffix to *xip.io*, run the following command:
 $ minishift openshift config set --patch '{"routingConfig": {"subdomain": "<IP-ADDRESS>.xip.io"}}'
 ----
 
-Make sure to replace `IP-ADDRESS` in the above example with the IP address of your Minishift VM.
+Make sure to replace `IP-ADDRESS` in the above example with the IP address of your {project} VM.
 You can retrieve the IP address by running the xref:../command-ref/minishift_ip.adoc#[`minishift ip`] command.

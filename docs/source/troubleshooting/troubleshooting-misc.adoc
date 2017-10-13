@@ -1,3 +1,5 @@
+include::variables.adoc[]
+
 [[troubleshooting-general]]
 = Troubleshooting Miscellaneous 
 :icons:
@@ -10,20 +12,20 @@ toc::[]
 [[troubleshooting-general-overview]]
 == Overview
 
-This section contains solutions to common problems that you might encounter while using various components of Minishift.
+This section contains solutions to common problems that you might encounter while using various components of {project}.
 
 [[root-filesystem-exceeds-overlay-size]]
-== The root filesystem of the Minishift VM exceeds overlay size
+== The root filesystem of the {project} VM exceeds overlay size
 
-Installing additional packages or copying large files to the root filesystem of the Minishift VM might exceed the allocated overlay size and lock the Minishift VM.
+Installing additional packages or copying large files to the root filesystem of the {project} VM might exceed the allocated overlay size and lock the {project} VM.
 
-Cause: The Minishift VM root filesystem contains core packages that are configured to optimize running the Minishift VM and containers.
+Cause: The {project} VM root filesystem contains core packages that are configured to optimize running the {project} VM and containers.
 The available storage on the root filesystem is determined by the overlay size, which is smaller than the total available storage.
 
-Workaround: Avoid installing packages or storing large files in the root filesystem of the Minishift VM.
-Instead, you can create a sub-directory in the *_mnt/sda1/_* persistent storage volume or define and mount xref:../using/host-folders.adoc#[host folders] that can share storage space between the host and the Minishift VM.
+Workaround: Avoid installing packages or storing large files in the root filesystem of the {project} VM.
+Instead, you can create a sub-directory in the *_mnt/sda1/_* persistent storage volume or define and mount xref:../using/host-folders.adoc#[host folders] that can share storage space between the host and the {project} VM.
 
-If you want to perform development tasks inside the Minishift VM, it is recommended that you use containers, which are stored in persistent storage volumes, and reuse the xref:../using/docker-daemon.adoc#[Minishift Docker daemon].
+If you want to perform development tasks inside the {project} VM, it is recommended that you use containers, which are stored in persistent storage volumes, and reuse the xref:../using/docker-daemon.adoc#[{project} Docker daemon].
 
 [[special-characters-passwords]]
 == Special characters cause passwords to fail

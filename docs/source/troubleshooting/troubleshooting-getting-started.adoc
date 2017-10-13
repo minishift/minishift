@@ -1,3 +1,5 @@
+include::variables.adoc[]
+
 [[troubleshooting-getting-started]]
 = Troubleshooting Getting Started
 :icons:
@@ -10,12 +12,12 @@ toc::[]
 [[troubleshooting-getting-started-overview]]
 == Overview
 
-This section contains solutions to common problems that you might encounter while installing, configuring, and updating Minishift.
+This section contains solutions to common problems that you might encounter while installing, configuring, and updating {project}.
 
 [[github-api-rate-limit-exceeded]]
 == GitHub API rate limit exceeded
 
-When you run `minishift start` or `minishift update`, it makes requests to the GitHub API to check for new version and potentially download new versions of Minishift or the OpenShift client tool `oc`.
+When you run `minishift start` or `minishift update`, it makes requests to the GitHub API to check for new version and potentially download new versions of {project} or the OpenShift client tool `oc`.
 
 Sometimes, during these requests, you might receive a 403 forbidden status from GitHub if your request exceeds the rate limit for your IP address. In this case, the command will fail and you will receive an error message. For example:
 
@@ -37,13 +39,13 @@ After you generate the API token, you need to set the `MINISHIFT_GITHUB_API_TOKE
 $ export MINISHIFT_GITHUB_API_TOKEN=<token_ID>
 ----
 
-Replace `<token_ID>` with your token. You can also add this variable in your shell profile so you don't need to manually set the variable every time you run a Minishift command.
+Replace `<token_ID>` with your token. You can also add this variable in your shell profile so you don't need to manually set the variable every time you run a {project} command.
 
 [[minshift-startup-check-failed]]
-== Minishift startup check failed
+== {project} startup check failed
 
-While Minishift starts, it runs several startup checks to make sure that the Minishift VM and the OpenShift Cluster are able to start without any issues.
-If any configuration is incorrect or missing, the startup checks fail and Minishift does not start.
+While {project} starts, it runs several startup checks to make sure that the {project} VM and the OpenShift Cluster are able to start without any issues.
+If any configuration is incorrect or missing, the startup checks fail and {project} does not start.
 
 The following sections describe the different startup checks.
 
@@ -53,7 +55,7 @@ The following sections describe the different startup checks.
 One of the startup checks verifies that the relevant driver plug-in is configured correctly.
 If this startup check fails, review the xref:../getting-started/setting-up-driver-plugin.adoc#[setting up the driver plug-in] topic and configure the driver.
 
-If you want to force Minishift to start despite a failing driver plugin-in check, you can instruct Minishift to treat these errors as warnings:
+If you want to force {project} to start despite a failing driver plugin-in check, you can instruct {project} to treat these errors as warnings:
 
 - For KVM/Libvirt on Linux, run the following command:
 +
@@ -76,10 +78,10 @@ $ minishift config set warn-check-hyperv-driver true
 [[persistent-storage-check]]
 === Persistent storage volume configuration and usage
 
-Minishift checks whether the persistent storage volume is mounted and that enough disk space is available.
-If the persistent storage volume, for example, uses more than 95% of the available disk space, Minishift will not start.
+{project} checks whether the persistent storage volume is mounted and that enough disk space is available.
+If the persistent storage volume, for example, uses more than 95% of the available disk space, {project} will not start.
 
-If you want to recover the data, you can skip this test and start Minishift to access the persistent volume:
+If you want to recover the data, you can skip this test and start {project} to access the persistent volume:
 
 ----
 $ minishift config set skip-check-storage-usage true
@@ -88,7 +90,7 @@ $ minishift config set skip-check-storage-usage true
 [[external-network-check]]
 === External network connectivity
 
-After the Minishift VM starts, it runs several network checks to verify whether external connectivity is possible from within the Minishift VM.
+After the {project} VM starts, it runs several network checks to verify whether external connectivity is possible from within the {project} VM.
 
 By default, network checks are configured to treat any errors as warnings, because of the diversity of the development environments.
 You can configure the network checks to optimize them for your environment.
@@ -109,13 +111,13 @@ $ minishift config set check-network-http-host <URL>
 ----
 
 [[minshift-update-failed-due-to-permission-denied]]
-== Permission denied error when updating Minishift
+== Permission denied error when updating {project}
 
-When updating Minishift using `minishift update`, the update process needs write permissions for the Minishift binary as well as the directory in which it is located.
+When updating {project} using `minishift update`, the update process needs write permissions for the {project} binary as well as the directory in which it is located.
 Without these permisions `minishift update` will fail.
-For example, this issue might occur when installing Minishift as root.
+For example, this issue might occur when installing {project} as root.
 
-Workaround: When updating minishift, use `sudo minishift update` (Linux/macOS).
+Workaround: When updating {project}, use `sudo minishift update` (Linux/macOS).
 
 ----
 $ which minishift

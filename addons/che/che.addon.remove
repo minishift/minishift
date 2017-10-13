@@ -1,0 +1,11 @@
+# Name: che
+# Description: Remove add on
+# Url: https://www.eclipse.org/che/docs/setup/openshift/index.html
+
+oc login -u system:admin
+
+# Remove Image stream
+oc delete -f streams/che-server-streams.json -n openshift
+
+# Uninstall Image stream
+oc delete -f templates/che-single-user.json -n openshift

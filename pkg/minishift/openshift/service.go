@@ -18,7 +18,6 @@ package openshift
 
 import (
 	"fmt"
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -31,13 +30,8 @@ import (
 )
 
 var (
-	systemKubeConfigPath string
-	runner               util.Runner = &util.RealRunner{}
+	runner util.Runner = &util.RealRunner{}
 )
-
-func init() {
-	systemKubeConfigPath = filepath.Join(constants.Minipath, "machines", constants.MachineName+"_kubeconfig")
-}
 
 type Service struct {
 	Items []struct {
@@ -158,7 +152,7 @@ func getValidNamespaces(serviceListNamespace string) ([]string, error) {
 // value be ServiceWeight struct
 func getRouteSpec(namespace string) (map[string][]ServiceWeight, error) {
 	routeSpec := make(map[string][]ServiceWeight)
-	cmdArgText := fmt.Sprintf("get route -o json --config=%s -n %s", systemKubeConfigPath, namespace)
+	cmdArgText := fmt.Sprintf("get route -o json --config=%s -n %s", constants.KubeConfigPath, namespace)
 	tokens := strings.Split(cmdArgText, " ")
 	cmdName := instanceState.InstanceConfig.OcPath
 	cmdOut, err := runner.Output(cmdName, tokens...)
@@ -260,7 +254,7 @@ func emptyFilter(data []string) []string {
 // Get service provide service name and node-port as map data structure
 func getService(namespace string) (map[string]string, error) {
 	serviceNodePort := make(map[string]string)
-	cmdArgText := fmt.Sprintf("get svc -o json --config=%s -n %s", systemKubeConfigPath, namespace)
+	cmdArgText := fmt.Sprintf("get svc -o json --config=%s -n %s", constants.KubeConfigPath, namespace)
 	tokens := strings.Split(cmdArgText, " ")
 	cmdName := instanceState.InstanceConfig.OcPath
 	cmdOut, err := runner.Output(cmdName, tokens...)
@@ -292,7 +286,7 @@ func getService(namespace string) (map[string]string, error) {
 
 // Get all projects a user belongs to
 func getProjects() ([]string, error) {
-	cmdArgText := fmt.Sprintf("get projects --config=%s %s", systemKubeConfigPath, ProjectsCustomCol)
+	cmdArgText := fmt.Sprintf("get projects --config=%s %s", constants.KubeConfigPath, ProjectsCustomCol)
 	tokens := strings.Split(cmdArgText, " ")
 	cmdName := instanceState.InstanceConfig.OcPath
 	cmdOut, err := runner.Output(cmdName, tokens...)

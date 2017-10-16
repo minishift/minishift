@@ -5,19 +5,68 @@ include::variables.adoc[]
 :toc: macro
 :toc-title:
 :toclevels: 2
+:imagesdir: images
 
 toc::[]
 
 [[basic-usage-overview]]
 == Overview
 
-When you use {project}, you interact with two components:
+When you use {project}, you interact with the following components:
 
-- a virtual machine (VM) created by {project}
-- the OpenShift cluster provisioned by {project} within the VM
+- the {project} virtual machine (VM)
+- the Docker daemon running on the VM
+- the OpenShift cluster running on the Docker daemon
 
-The following sections contain information about managing the {project} VM.
-For details about using {project} to manage your local OpenShift cluster, see the xref:../openshift/index.adoc#[Interacting with OpenShift] section.
+The xref:../using/basic-usage.adoc#diagram-minishift-architecture[{project} architecture] diagram outlines these components.
+The `minishift` binary, placed on the `PATH` for easy execution, is used to xref:../using/basic-usage.adoc#minishift-start-overview[`start`], xref:../using/basic-usage.adoc#minishift-stop-overview[`stop`] and xref:../using/basic-usage.adoc#minishift-delete-overview[`delete`] the {project} VM.
+The VM itself is bootstrapping off a xref:../using/basic-usage.adoc#choosing-iso-image[pluggable] Live ISO.
+
+Some {project} commands, for example xref:../using/docker-daemon.adoc#[`docker-env`], interact with the Docker daemon, whilst others communicate with the OpenShift cluster, for example the xref:../command-ref/minishift_openshift.adoc#[`openshift`] command.
+
+Once the OpenShift cluster is up and running, you interact with it using the `oc` binary.
+{project} caches this binary under `$MINISHIFT_HOME` (per default *_~/.minishift_*).
+xref:../openshift/openshift-client-binary.adoc#openshift-client-binary-overview[`minishift oc-env`] is an easy way to add the `oc` binary to your `PATH`.
+
+For more details about using {project} to manage your local OpenShift cluster, see the xref:../openshift/index.adoc#[Interacting with OpenShift] section.
+
+[[diagram-minishift-architecture]]
+.: Minishift architecture
+[ditaa, "minishift-architecture"]
+----
+
+ host machine
+ +-------------------------------------------------------------------------------------+
+ |                      /-------------> Minishift VM                                   |
+ |                      |                                                              |
+ |                      |         /--->  o boots from pluggable Live ISO               |
+ | $PATH                |         |      o runs on VirtualBox, HyperV, xhyve or KVM    |
+ | └── minishift -=-----|         |                                                    |
+ |                      |         |   /------------------------------------------\     |
+ |                      |         |   |c1AB                                      |     |
+ |                      |-=-------|=--|-=->  Docker                              |     |
+ |                      :         |   |   /-----------------------------\        |     |
+ |                      |         |   |   | c1FF                        |        |     |
+ |~/.minishift/         \-=-------|=--|-=-|-=---> OpenShift             |        |     |
+ | |                              |   |   |  |  /-------------------\   |        |     |
+ | +-- cache                      |   |   |  |  |                   |   |        |     |
+ |     |                          |   |   |  |  | master   node     |   |        |     |
+ |     +-- iso                    |   |   |  |  | +-----+  +-----+  |   |        |     |
+ |     |   |                      |   |   |  |  | | {d} |  | {d} |  |   |        |     |
+ |     |   +-- minishift_b2d.iso -/   |   |  |  | |     |  |     |  |   |        |     |
+ |     |                              |   |  |  | |     |  |     |  |   |        |     |
+ |     +-- oc                         |   |  |  | |     |  |     |  |   |        |     |
+ |         |                          |   |  |  | |     |  |     |  |   |        |     |
+ |         +-- v3.6.0                 |   |  |  | |     |  |     |  |   |        |     |
+ |             |                      |   |  |  | |     |  |     |  |   |        |     |
+ |             +-- oc  -=-------------|-=-|-=+  | +-----+  +-----+  |   |        |     |
+ |                                    |   |     \-------------------/   |        |     |
+ |                                    |   \-----------------------------/        |     |
+ |                                    \------------------------------------------/     |
+ |                                                                                     |
+ +-------+-----------------------------------------------------------------------------+
+
+----
 
 [[minishift-life-cycle]]
 == {project} Life-cycle

@@ -8,7 +8,7 @@ include::variables.adoc[]
 
 toc::[]
 
-[[openShift-client-binary-overview]]
+[[openshift-client-binary-overview]]
 == Overview
 
 The `minishift start` command creates an OpenShift cluster using the link:https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md[cluster up] approach.

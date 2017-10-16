@@ -45,5 +45,7 @@ docs/build
 docs/source/_tmp/*.md
 docs/source/command-ref/*.adoc
 docs/source/**/variables.adoc
+docs/source/using/images/minishift-architecture*
 docs/.bundle/
 docs/.sass-cache/
+docs/.java

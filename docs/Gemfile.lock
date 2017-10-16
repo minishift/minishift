@@ -9,6 +9,8 @@ GEM
     addressable (2.5.0)
       public_suffix (~> 2.0, >= 2.0.2)
     asciidoctor (1.5.5)
+    asciidoctor-diagram (1.4.0)
+      asciidoctor (~> 1.5.0)
     backports (3.6.8)
     coffee-script (2.4.1)
       coffee-script-source
@@ -140,6 +142,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  asciidoctor-diagram (~> 1.4.0)
   font-awesome-middleman
   html-proofer
   middleman (~> 4.2)

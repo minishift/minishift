@@ -56,7 +56,7 @@ rule ".adoc" => ->(f){source_for_adoc(f)} do |t|
   File.open(adoc_file, "w") {|file| file.puts adoc_new }
 
   # update topic map
-  File.open(TOPIC_MAP, "a") do |file|
+  File.open(TOPIC_MAP, "ab:UTF-8") do |file|
     file.puts "      - Name: #{base_name.gsub('_',' ')}"
     file.puts "        File: #{base_name}"
   end

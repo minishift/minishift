@@ -57,7 +57,7 @@ func SetOcContext(profileName string) error {
 
 	profileActions.UpdateProfileConstants(profileName)
 
-	// Need create the kube config path for the profile for ocrunner to use it.
+	// Need to create the kube config path for the profile for ocrunner to use it.
 	kubeConfigPath := filepath.Join(constants.Minipath, "machines", constants.MachineName+"_kubeconfig")
 
 	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))

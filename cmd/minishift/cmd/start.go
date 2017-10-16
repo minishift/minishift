@@ -171,7 +171,7 @@ func runStart(cmd *cobra.Command, args []string) {
 	// preflight checks (after start)
 	preflightChecksAfterStartingHost(hostVm.Driver)
 
-	//Adding active profile information to all instance config
+	// Adding active profile information to all instance config
 	addActiveProfileInformation()
 
 	ip, _ := hostVm.Driver.GetIP()

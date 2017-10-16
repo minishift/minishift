@@ -84,17 +84,17 @@ func TestMain(m *testing.M) {
 		godogTags += "~cdk-only"
 		isoUrl := os.Getenv("MINISHIFT_ISO_URL")
 		switch isoUrl {
-		case "b2d":
+		case "", "b2d":
 			fmt.Println("Test run using Boot2Docker iso image.")
 			isoName = "b2d"
+		case "minikube":
+			fmt.Println("Test run using Minikube iso image.")
+			isoName = "minikube"
 		case "centos":
 			fmt.Println("Test run using CentOS iso image.")
 			isoName = "centos"
-		case "":
-			fmt.Println("Test run using Boot2Docker iso image.")
-			isoName = "b2d"
 		default:
-			fmt.Print("Using full path for iso image. ")
+			fmt.Print("Using full path for iso image.")
 			isoName = determineIsoFromFile(isoUrl)
 		}
 	}
@@ -134,14 +134,17 @@ func parseFlags() {
 
 func determineIsoFromFile(isoUrl string) string {
 	var isoName string
-	if matched, _ := regexp.MatchString(".*centos7\\.iso", isoUrl); matched {
-		fmt.Println("CentOS variant was assumed from the filename of ISO.")
-		isoName = "centos"
-	} else if matched, _ := regexp.MatchString(".*b2d\\.iso", isoUrl); matched {
+	if matched, _ := regexp.MatchString(".*b2d\\.iso", isoUrl); matched {
 		fmt.Println("Boot2docker variant was assumed from the filename of ISO.")
 		isoName = "b2d"
+	} else if matched, _ := regexp.MatchString(".*minikube\\.iso", isoUrl); matched {
+		fmt.Println("Minikube variant was assumed from the filename of ISO.")
+		isoName = "minikube"
+	} else if matched, _ := regexp.MatchString(".*centos7\\.iso", isoUrl); matched {
+		fmt.Println("CentOS variant was assumed from the filename of ISO.")
+		isoName = "centos"
 	} else {
-		fmt.Println("Can't assume ISO variant from its filename. Will use Boot2Docker. To avoid this situation please name your ISO to end with 'b2d.iso' or 'centos7.iso'.")
+		fmt.Println("Can't assume ISO variant from its filename. Will use Boot2Docker. To avoid this situation please name your ISO to end with 'b2d.iso', 'centos7.iso' or 'minikube.iso'.")
 		isoName = "b2d"
 	}
 	return isoName
@@ -812,14 +815,15 @@ func proxyLogShouldContainContent(expected *gherkin.DocString) error {
 
 func catDockerConfigFile() error {
 	var err error
-	if isoName == "b2d" {
+	switch isoName {
+	case "b2d":
 		err = executingMinishiftCommandSucceedsOrFails("ssh -- cat /var/lib/boot2docker/profile", "succeeds")
-
-	} else if isoName == "centos" || isoName == "rhel" {
+	case "minikube":
+		err = executingMinishiftCommandSucceedsOrFails("ssh -- cat /usr/lib/systemd/system/docker.service", "succeeds")
+	case "centos", "rhel":
 		err = executingMinishiftCommandSucceedsOrFails("ssh -- cat /etc/systemd/system/docker.service.d/10-machine.conf", "succeeds")
-
-	} else {
-		return errors.New("ISO name not supported.")
+	default:
+		err = errors.New("ISO name not supported.")
 	}
 
 	return err

@@ -98,6 +98,24 @@ This can be useful in cases where you know that a command such as `oc` might tak
 
 NOTE: Trying to use an undefined command will cause an error when the add-on gets parsed.
 
+[[addon-openshift-version-semantics]]
+== OpenShift Version Semantics
+
+As part of the add-on metadata you can specify the OpenShift version which needs to be running in order to apply the add-on.
+To do so you can specify the optional OpenShift-Version metadata field. The semantics are as follow:
+
+----
+- >3.6.0           : OpenShift version higher than 3.6.0 needs to be running in order to apply the add-on.
+- >=3.6.0          : OpenShift version 3.6.0 or higher needs to be running in order to apply the add-on.
+- 3.6.0            : OpenShift version 3.6.0 needs to be running in order to apply the add-on.
+- >=3.5.0, <3.8.0  : OpenShift version should higher or equal to 3.5.0 but lower than 3.8.0
+- >=3.5.0, <=3.8.0 : OpenShift version should higher or equal to 3.5.0 but lower or equal to 3.8.0
+----
+
+NOTE: If the metadata field OpenShift-Version is not specified in the add-on header, the add-on is applied against any version of OpenShift.
+
+NOTE: OpenShift-Version should be in form of <major>.<minor>.<patch>
+
 [[addon-variable-interpolation]]
 == Variable Interpolation
 

@@ -312,7 +312,10 @@ func checkHypervDriverInstalled() bool {
 func checkHypervDriverUser() bool {
 	posh := powershell.New()
 
-	checkIfMemberOfHyperVAdmins := `@([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole("Hyper-V Administrators")`
+	// Use RID to prevent issues with localized groups: https://github.com/minishift/minishift/issues/1541
+	// https://support.microsoft.com/en-us/help/243330/well-known-security-identifiers-in-windows-operating-systems
+	// BUILTIN\Hyper-V Administrators => S-1-5-32-578
+	checkIfMemberOfHyperVAdmins := `@([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole("S-1-5-32-578")`
 	stdOut, _ := posh.Execute(checkIfMemberOfHyperVAdmins)
 	if !strings.Contains(stdOut, "True") {
 		return false

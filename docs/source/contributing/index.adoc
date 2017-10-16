@@ -5,6 +5,7 @@ include::variables.adoc[]
 
 Join the {project} community! Learn about the link:https://github.com/minishift/minishift/blob/master/README.adoc[project] and how to link:https://github.com/minishift/minishift/blob/master/CONTRIBUTING.adoc[contribute].
 
+- link:https://github.com/minishift/minishift/blob/master/CONTRIBUTING.adoc#contribution-guidelines[Contribution guidelines]
 - xref:../contributing/developing.adoc#[Developing {project}]
 - xref:../contributing/ci.adoc#[{project} CI]
 - xref:../contributing/writing-docs.adoc#[Writing Documentation]

@@ -52,7 +52,7 @@ func runProfile(cmd *cobra.Command, args []string) {
 			if glog.V(2) {
 				fmt.Println(fmt.Sprintf("%s", err.Error()))
 			}
-			atexit.ExitWithMessage(1, fmt.Sprintf("oc cli context could not changed for '%s'. %s", profileName, unableToSetOcContextErrorMessage))
+			fmt.Println(fmt.Sprintf("oc cli context could not changed for '%s'. %s", profileName, unableToSetOcContextErrorMessage))
 		}
 
 		err = profileActions.SetActiveProfile(profileName)

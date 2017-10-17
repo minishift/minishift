@@ -71,3 +71,21 @@ Scenario: Deleting Minishift
     Then Minishift should have state "Does Not Exist"
     When executing "minishift ip"
     Then exitcode should equal "1"
+
+Scenario: User should be able to switch between non existing profiles
+    When executing "minishift profile list" succeeds
+    Then stdout should contain
+    """
+    - minishift	Does Not Exist	(active)
+    """
+    When executing "minishift profile set abc" succeeds
+      Then stdout should contain
+      """
+      Profile 'abc' set as active profile
+      """
+    When executing "minishift profile set minishift" succeeds
+      Then stdout should contain
+      """
+      oc cli context could not changed for 'minishift'. Make sure the profile is in running state or restart if the problem persists.
+      Profile 'minishift' set as active profile
+      """

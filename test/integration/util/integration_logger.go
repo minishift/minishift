@@ -45,7 +45,7 @@ func init() {
 
 func StartLog(logPath string) error {
 	t := time.Now()
-	logFileName := fmt.Sprintf("integration_%d-%d-%d_%02d:%02d:%02d.log", t.Year(), t.Month(),
+	logFileName := fmt.Sprintf("integration_%d-%d-%d_%02d-%02d-%02d.log", t.Year(), t.Month(),
 		t.Day(), t.Hour(), t.Minute(), t.Second())
 	logPath = path.Join(logPath, logFileName)
 	logFile, err := os.OpenFile(logPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)

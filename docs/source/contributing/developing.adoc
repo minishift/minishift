@@ -280,6 +280,17 @@ For example, tests can be run against a stopped {project} instance with the imag
 $ make integration_all RUN_BEFORE_FEATURE="start; stop; config set image-caching true"
 ----
 
+COPY_OC_FROM::
+
+To test {project} with a non-default `oc` binary you can use the `COPY_OC_FROM` parameter.
+This parameter specifies the path to the `oc` binary which will be copied into the `$MINISHIFT_HOME` folder before each feature run.
+Note that the `oc` binary must be contained in the same directory structure which {project} uses for the storage of `oc` binaries, for example: `<version>/<platform>/oc(.exe)`.
+For example, to test {project} with locally stored `oc v3.7.23` run:
+
+----
+$ make integration COPY_OC_FROM=<path-to-oc-directory>/v3.7.23/<linux or windows or darwin>/oc RUN_BEFORE_FEATURE="config set openshift-version v3.7.23"
+----
+
 TEST_WITH_SHELL::
 
 About:::

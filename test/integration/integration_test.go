@@ -57,6 +57,7 @@ var (
 
 	runBeforeFeature string
 	testWithShell    string
+	copyOcFrom       string
 
 	// Godog options
 	godogFormat              string
@@ -65,10 +66,6 @@ var (
 	godogStopOnFailure       bool
 	godogNoColors            bool
 	godogPaths               string
-)
-
-const (
-	delimiterConst = ";"
 )
 
 func TestMain(m *testing.M) {
@@ -123,6 +120,7 @@ func parseFlags() {
 	flag.StringVar(&minishiftBinary, "binary", "", "Path to minishift binary")
 	flag.StringVar(&runBeforeFeature, "run-before-feature", "", "Set of minishift commands to be executed before every feature. Individual commands must be delimited by a semicolon.")
 	flag.StringVar(&testWithShell, "test-with-specified-shell", "", "Name of shell to be used for steps which executes commands directly in persistent shell instance.")
+	flag.StringVar(&copyOcFrom, "copy-oc-from", "", "Path to binary, the binary will $MINISHIFT_HOME/cache/oc.")
 	flag.StringVar(&testDir, "test-dir", "", "Path to the directory in which to execute the tests")
 
 	flag.StringVar(&godogFormat, "format", "pretty", "Sets which format godog will use")
@@ -344,14 +342,20 @@ func FeatureContext(s *godog.Suite) {
 			runner.RunCommandAndPrintError("addons list")
 		}
 
-		var splittedCommands []string
 		if runBeforeFeature != "" {
-			splittedCommands = strings.Split(runBeforeFeature, delimiterConst)
-			fmt.Println("Running commands:", runBeforeFeature)
+			err := util.RunBeforeFeature(runBeforeFeature, &runner)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
 		}
 
-		for index := range splittedCommands {
-			runner.RunCommandAndPrintError(splittedCommands[index])
+		if copyOcFrom != "" {
+			err := util.CopyOc(copyOcFrom, testDir)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
 		}
 
 		util.LogMessage("info", fmt.Sprintf("----- Feature: %s -----", this.Name))

@@ -35,6 +35,7 @@ import (
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/viper"
 
+	cmdUtils "github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minishift/constants"
 	stringUtils "github.com/minishift/minishift/pkg/util/strings"
 )
@@ -77,9 +78,15 @@ func preflightChecksBeforeStartingHost() {
 			driverErrorMessage)
 		preflightCheckSucceedsOrFails(
 			configCmd.SkipCheckKVMDriver.Name,
-			checkLibvirtDefaultNetwork,
-			"Checking if Libvirt default network is present and active",
+			checkLibvirtDefaultNetworkExists,
+			"Checking if Libvirt default network is present",
 			false, configCmd.WarnCheckKVMDriver.Name,
+			driverErrorMessage)
+		preflightCheckSucceedsOrFails(
+			configCmd.SkipCheckKVMDriver.Name,
+			checkLibvirtDefaultNetworkActive,
+			"Checking if Libvirt default network is active",
+			true, configCmd.WarnCheckKVMDriver.Name,
 			driverErrorMessage)
 	case "hyperv":
 		preflightCheckSucceedsOrFails(
@@ -280,9 +287,33 @@ func checkLibvirtInstalled() bool {
 	return true
 }
 
-//checkLibvirtDefaultNetwork returns true if the "default" network is present and active
-func checkLibvirtDefaultNetwork() bool {
+//checkLibvirtDefaultNetworkExists returns true if the "default" network is present
+func checkLibvirtDefaultNetworkExists() bool {
 	cmd := exec.Command("virsh", "--connect", "qemu:///system", "net-list")
+	stdOutStdError, err := cmd.CombinedOutput()
+	if err != nil {
+		return false
+	}
+	stdOut := fmt.Sprintf("%s", stdOutStdError)
+	outputSlice := strings.Split(stdOut, "\n")
+
+	for _, stdOut = range outputSlice {
+		stdOut = strings.TrimSpace(stdOut)
+		match, err := regexp.MatchString("^default\\s", stdOut)
+		if err != nil {
+			return false
+		}
+		if match {
+			return true
+		}
+	}
+	return false
+}
+
+//checkLibvirtDefaultNetworkActive returns true if the "default" network is active
+func checkLibvirtDefaultNetworkActive() bool {
+	cmd := exec.Command("virsh", "--connect", "qemu:///system", "net-list")
+	cmd.Env = cmdUtils.ReplaceEnv(os.Environ(), "LC_ALL", "C")
 	stdOutStdError, err := cmd.CombinedOutput()
 	if err != nil {
 		return false

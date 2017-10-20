@@ -18,8 +18,10 @@ package util
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"regexp"
+	"strings"
 )
 
 const (
@@ -31,6 +33,22 @@ var (
 	BooleanFormatError  = errors.New("Invalid format for boolean value.")
 	BooleanNoValueError = errors.New("No value given.")
 )
+
+// ReplaceEnv changes the value of an environment variable
+// It drops the existing value and appends the new value in-place
+func ReplaceEnv(variables []string, varName string, value string) []string {
+	var result []string
+	for _, e := range variables {
+		pair := strings.Split(e, "=")
+		if pair[0] != varName {
+			result = append(result, e)
+		} else {
+			result = append(result, fmt.Sprintf("%s=%s", varName, value))
+		}
+	}
+
+	return result
+}
 
 // GetBoolEnv returns truthy or falsy value of given environmental variable.
 // It returns an error on failure with a default of false.

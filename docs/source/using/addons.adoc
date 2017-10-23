@@ -51,10 +51,10 @@ To do so you can specify the optional _OpenShift-Version_ metadata field. The se
 [cols="1,3"]
 |===
 | >3.6.0           | OpenShift version higher than 3.6.0 needs to be running in order to apply the add-on.
-| >=3.6.0          | OpenShift version 3.6.0 or higher needs to be running in order to apply the add-on. 
-| 3.6.0            | OpenShift version 3.6.0 needs to be running in order to apply the add-on. 
-| >=3.5.0, <3.8.0  | OpenShift version should higher or equal to 3.5.0 but lower than 3.8.0. 
-| >=3.5.0, <=3.8.0 | OpenShift version should higher or equal to 3.5.0 but lower or equal to 3.8.0. 
+| >=3.6.0          | OpenShift version 3.6.0 or higher needs to be running in order to apply the add-on.
+| 3.6.0            | OpenShift version 3.6.0 needs to be running in order to apply the add-on.
+| >=3.5.0, <3.8.0  | OpenShift version should higher or equal to 3.5.0 but lower than 3.8.0.
+| >=3.5.0, <=3.8.0 | OpenShift version should higher or equal to 3.5.0 but lower or equal to 3.8.0.
 |===
 
 NOTE: If the metadata field _OpenShift-Version_ is not specified in the add-on header, the add-on is applied against any version of OpenShift.
@@ -70,7 +70,7 @@ They are forming a mini-DSL for {project} add-ons:
 ssh::
 If the add-on command starts with `ssh`, you can run any command within the {project}-managed VM.
 This is similar to running xref:../command-ref/minishift_ssh.adoc#[`minishift ssh`] and then executing any command on the VM.
-For more information about the `minishift ssh` command usage, see xref:../using/managing-minishift.adoc#connecting-with-ssh[Connecting to the {project} VM with SSH].
+For more information about the `minishift ssh` command usage, see xref:../using/basic-usage.adoc#connecting-with-ssh[Connecting to the {project} VM with SSH].
 
 oc::
 If the add-on command starts with `oc`, it uses the *oc* binary that is cached on your host to execute the specified `oc` command.
@@ -152,7 +152,7 @@ $ minishift addons apply --addon-env PROJECT_USER=john acme
 
 The `--addon-env` flag can be specified multiple times to define more than one variables for interpolation.
 
-Specifying dynamic variables also works in conjunction with xref:../using/managing-minishift.adoc#setting-persistent-configuration-values[setting persistent configuration values].
+Specifying dynamic variables also works in conjunction with xref:../using/basic-usage.adoc#setting-persistent-configuration-values[setting persistent configuration values].
 
 ----
 $ minishift config set addon-env PROJECT_USER=john

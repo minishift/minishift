@@ -13,7 +13,7 @@ toc::[]
 == Overview
 
 This section contains a brief demo of {project} and of the provisioned OpenShift cluster.
-For details on the usage of {project}, see the xref:../using/managing-minishift.adoc#[Managing {project}] section.
+For details on the usage of {project}, see the xref:../using/basic-usage.adoc#[Basic Usage] section.
 
 The interaction with OpenShift is with the command-line tool _oc_ which is copied to your host.
 For more information on how {project} can assist you in interacting with and configuring your local OpenShift instance, see the xref:../openshift/openshift-client-binary.adoc#[OpenShift Client Binary] section.

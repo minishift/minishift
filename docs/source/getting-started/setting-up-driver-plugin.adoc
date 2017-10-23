@@ -163,7 +163,7 @@ To use {project} with Hyper-V:
 
 . Add the user to the local Hyper-V Administrators group.
 +
-NOTE: This is required to allow the user to create and delete virtual machines with the Hyper-V Management API. 
+NOTE: This is required to allow the user to create and delete virtual machines with the Hyper-V Management API.
 For more information, see xref:../troubleshooting/troubleshooting-driver-plugins.adoc#insufficient-privileges[Hyper-V commands must be run as an Administrator]
 
 . Add an link:https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/connect-to-network[External Virtual Switch].
@@ -171,7 +171,7 @@ For more information, see xref:../troubleshooting/troubleshooting-driver-plugins
 NOTE: Verify that you pair the virtual switch with a network card (wired or wireless) that is connected to the network.
 
 . Set the environment variable `HYPERV_VIRTUAL_SWITCH` to the name of the external virtual switch you want to use for {project}.
-For more information, see xref:../using/managing-minishift.adoc#driver-specific-environment-variables[driver-specific environment variables].
+For more information, see xref:../using/basic-usage.adoc#driver-specific-environment-variables[driver-specific environment variables].
 +
 For example, on Command Prompt use:
 +

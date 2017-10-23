@@ -1,6 +1,6 @@
 include::variables.adoc[]
 
-= Managing {project}
+= Basic Usage
 :icons:
 :toc: macro
 :toc-title:
@@ -8,7 +8,7 @@ include::variables.adoc[]
 
 toc::[]
 
-[[managing-minishift-overview]]
+[[basic-usage-overview]]
 == Overview
 
 When you use {project}, you interact with two components:
@@ -226,31 +226,6 @@ CAUTION: Driver-specific options might overlap with values specified using {proj
 Examples are boot2docker URL, memory size, cpu count, and so on.
 In this case, driver-specific environment variables will override {project}-specific settings.
 
-[[caching-openshift-images]]
-== Caching OpenShift images (experimental)
-
-To speed up provisioning of the OpenShift cluster and to minimize network traffic, the core OpenShift images can be cached on the host.
-This feature is considered experimental and needs to be explicitly enabled using the xref:../command-ref/minishift_config_set#[`minishift config set`] command:
-
-----
-$ minishift config set image-caching true
-----
-
-Once enabled, caching occurs transparently, in a background process, the first time you use the xref:../command-ref/minishift_start#[`minishift start`] command.
-Once the images are cached under _$MINISHIFT_HOME/cache/images_, successive {project} VM creations will use these cached images.
-
-Each time an image exporting background process runs, a log file is generated under _$MINISHIFT_HOME/logs_ which can be used to verify the progress of the export.
-
-You can disable the caching of the OpenShift images by setting `image-caching` to `false` or removing the setting altogether using xref:../command-ref/minishift_config_unset#[`minishift config unset`]:
-
-----
-$ minishift config unset image-caching
-----
-
-NOTE: Image caching is considered experimental and its semantics and API is subject to change.
-The aim is to allow caching of arbitrary images, as well as using a better format for storing the images on the host.
-You can track the progress on this feature on the GitHub issue link:https://github.com/minishift/minishift/issues/952[#952].
-
 [[persistent-volumes]]
 == Persistent Volumes
 
@@ -311,89 +286,3 @@ $ minishift ssh -- docker ps
 CONTAINER    IMAGE                   COMMAND                CREATED        STATUS        NAMES
 71fe8ff16548 openshift/origin:v1.5.1 "/usr/bin/openshift s" 4 minutes ago  Up 4 minutes  origin
 ----
-
-[[experimental-features]]
-== Experimental Features
-
-If you want to get early access to some upcoming features and experiment, you can enable some of those in {project}.
-
-You do this by setting the environment variable `MINISHIFT_ENABLE_EXPERIMENTAL`, which makes additional flags available:
-
-----
-$ export MINISHIFT_ENABLE_EXPERIMENTAL=y
-----
-
-[IMPORTANT]
-====
-Experimental features are not officially supported, and might break or result in unexpected behavior.
-To share your feedback on these features, you are welcome to link:https://github.com/minishift/minishift#community[contact the {project} community].
-====
-
-[[enabling-experimental-oc-flags]]
-=== Enabling experimental `oc cluster up` flags in `minishift start`
-
-By default, {project} does not expose all link:https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md[`oc cluster up`] flags in the {project} CLI.
-
-You can set the `MINISHIFT_ENABLE_EXPERIMENTAL` environment variable to enable the following options for the xref:../command-ref/minishift_start.adoc#[`minishift start`] command:
-
-`service-catalog`::
-Enables provisioning the OpenShift link:https://docs.openshift.org/latest/architecture/service_catalog/index.html[service catalog].
-
-`extra-clusterup-flags`::
-Enables passing flags that are not directly exposed in the {project} CLI directly to `oc cluster up`.
-
-
-[[hyperv-static-ip]]
-=== Assign IP address to Hyper-V (experimental)
-
-Since the Internal Virtual Switch for Hyper-V does not provide a DHCP offer option, an IP address needs to be provided in a different way.
-For Hyper-V a functionality is provided to assign an IP address on startup using the Data Exchange Service.
-
-[IMPORTANT]
-====
--  While the default image is B2D, this only works with the CentOS/RHEL based image in combination with Hyper-V. The B2D image experiences
-   a problem when the values are being send to the {project} instance and consumed by the B2D iso. We are looking into the issue and hope
-   to provide a solution in the coming future.
-====
-
-To make this work you need to create a Virtual Switch using NAT
-
-- link:https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/user-guide/setup-nat-network[Set up a NAT network]
-
-
-[NOTE]
-====
-WinNAT is limited to one NAT network per host. For more details about capabilities, and limitations, please see the link:https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/user-guide/setup-nat-network[WinNAT capabilities and limitations blog]
-====
-
-The following command will attempt to assign an IP address for use on the Internal Virtual Switch 'MyInternal'.
-
-----
-PS> $env:MINISHIFT_ENABLE_EXPERIMENTAL="y"
-PS> $env:HYPERV_VIRTUAL_SWITCH="MyInternal"
-PS> minishift.exe start `
-  --iso-url centos `
-  --network-ipaddress 192.168.1.10 `
-  --network-gateway 192.168.1.1 `
-  --network-nameserver 8.8.8.8
-----
-
-
-If you want to use the 'DockerNAT' network, the following commands are needed to setup the correct NAT networking and assigning an IP in the range expected.
-
-----
-PS> New-NetNat -Name SharedNAT -InternalIPInterfaceAddressPrefix 10.0.75.1/24
-PS> $env:MINISHIFT_ENABLE_EXPERIMENTAL="y"
-PS> $env:HYPERV_VIRTUAL_SWITCH="DockerNAT"
-PS> minishift.exe start `
-  --iso-url centos `
-  --network-ipaddress 10.0.75.128 `
-  --network-gateway 10.0.75.1 `
-  --network-nameserver 8.8.8.8
-----
-
-[NOTE]
-====
-- Be sure to specify a valid gateway and nameserver. Failing to do so will result in connectivity issuesi
-====
-

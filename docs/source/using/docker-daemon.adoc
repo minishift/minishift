@@ -8,13 +8,16 @@ include::variables.adoc[]
 
 toc::[]
 
-[[reusing-docker-daemon]]
-== Reusing the Docker Daemon
+[[docker-daemon-overview]]
+== Overview
 
 When running OpenShift in a single VM, you can reuse the Docker daemon managed by {project} for other Docker use-cases as well.
 By using the same docker daemon as {project}, you can speed up your local development.
 
-In order to configure your console to reuse the {project} Docker dameon, follow these steps:
+[[docker-daemon-configuration]]
+== Console configuration
+
+In order to configure your console to reuse the {project} Docker daemon, follow these steps:
 
 . Make sure that you have the Docker client binary installed on your machine.
 For information about specific binary installations for your operating system, see the link:https://docs.docker.com/engine/installation/[Docker installation] site.

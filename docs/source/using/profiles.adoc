@@ -14,8 +14,8 @@ toc::[]
 {project} allows to create multiple instances of {project}.
 Each {project} instance can be created with different configurations and users can switch between different instances.
 
-[[create-profile]]
-== Create profile
+[[creating-profile]]
+== Creating Profiles
 
 You can create a new instance of {project} with xref:../command-ref/minishift_start.adoc#[`minishift start --profile`] command.
 
@@ -27,8 +27,8 @@ To create a new profile, run:
 $ minishift --profile PROFILE_NAME start
 ----
 
-[[List-profiles]]
-== List profiles
+[[listing-profiles]]
+== Listing Profiles
 
 You can list all existing profiles with xref:../command-ref/minishift_profile_list.adoc#[`minishift profile list`] command.
 You can also see the active profile in the output.
@@ -40,8 +40,8 @@ $ minishift profile list
 ----
 
 
-[[set-active-profiles]]
-== Switch between profiles
+[[switching-profiles]]
+== Switching Profiles
 
 With the help of xref:../command-ref/minishift_profile_set.adoc#[`minishift profile set`] you can switch between profiles or set a profile as active.
 When a profile is active, it is not required to pass `--profile` flag to run minishift commands against that profile.
@@ -54,8 +54,8 @@ $ minishift profile set PROFILE_NAME
 
 When you have multiple profiles you can use `--profile` flag with any minishift command to run the command against a specific profile.
 
-[[delete-profiles]]
-== Delete a profile
+[[deleting-profiles]]
+== Deleting Profiles
 
 To delete a profile, run:
 

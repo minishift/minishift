@@ -23,4 +23,12 @@ $ minishift update
 This command checks whether there is a newer version of Minishift available.
 If so, it prompts user to confirm the update, downloads the new binary and replaces the current version of Minishift.
 
-NOTE: It is recommended to run the `minishift update` command after the xref:../command-ref/minishift_delete.adoc#[`minishift delete`] to avoid backward compatibility issues.
+[NOTE]
+====
+We recommend to run xref:../command-ref/minishift_delete.adoc#[`minishift delete`] before running the update command to avoid backward compatibility issues.
+====
+
+[NOTE]
+====
+`minishift update` will only work for versions *_1.5.0_* and above (*_>=v1.5.0_*).
+====

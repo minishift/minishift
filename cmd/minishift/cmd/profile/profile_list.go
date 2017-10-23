@@ -19,6 +19,7 @@ package profile
 import (
 	"fmt"
 	"os"
+	"sort"
 	"text/tabwriter"
 
 	cmdUtil "github.com/minishift/minishift/cmd/minishift/cmd/util"
@@ -38,13 +39,17 @@ var profileListCmd = &cobra.Command{
 
 func displayProfiles(profiles []string) {
 	display := new(tabwriter.Writer)
-	display.Init(os.Stdout, 0, 8, 0, '\t', 0)
+	display.Init(os.Stdout, 0, 8, 2, '\t', 0)
 
 	activeProfile := profileActions.GetActiveProfile()
+	vmStatus := cmdUtil.GetVMStatus(activeProfile)
+	fmt.Fprintln(display, fmt.Sprintf("- %s\t%s\t%s", activeProfile, vmStatus, "(Active)"))
+
+	sort.Strings(profiles)
 	for _, profile := range profiles {
-		vmStatus := cmdUtil.GetVMStatus(profile)
+		vmStatus = cmdUtil.GetVMStatus(profile)
 		if profile == activeProfile {
-			fmt.Fprintln(display, fmt.Sprintf("- %s\t%s\t(active)", profile, vmStatus))
+			continue
 		} else {
 			fmt.Fprintln(display, fmt.Sprintf("- %s\t%s", profile, vmStatus))
 		}

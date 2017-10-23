@@ -23,7 +23,7 @@ $ minishift delete
 ----
 +
 This command deletes everything in the *_MINISHIFT_HOME/.minishift/machines/minishift_* directory.
-Other cached data and the xref:../using/managing-minishift.adoc#persistent-configuration[persistent configuration] are not removed.
+Other cached data and the xref:../using/basic-usage.adoc#persistent-configuration[persistent configuration] are not removed.
 
 .  To completely uninstall {project}, delete everything in the *_MINISHIFT_HOME_* directory (default *_~/.minishift_*) and *_~/.kube_*, run the following commands:
 +

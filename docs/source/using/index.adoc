@@ -3,12 +3,15 @@ include::variables.adoc[]
 = Using {project}
 :icons:
 
-This section describes how to use the {project} CLI and manage your {project} VM. It also helps troubleshooting common issues.
+This section describes how to use the {project} CLI.
+It covers the basic commands as well as advanced features like image caching, add-ons, host folders and profiles.
 
-For details about using {project} to manage your local OpenShift cluster, see the xref:../openshift/index.adoc#[Interacting with OpenShift] section.
-
-- xref:../using/managing-minishift.adoc#[Managing {project}]
+- xref:../using/basic-usage.adoc#[Basic Usage]
+- xref:../using/image-caching.adoc#[Image Caching]
 - xref:../using/addons.adoc#[Add-ons]
 - xref:../using/host-folders.adoc#[Host Folders]
-- xref:../using/docker-daemon.adoc#[{project} Docker Daemon]
 - xref:../using/profiles.adoc#[Profiles]
+- xref:../using/docker-daemon.adoc#[{project} Docker Daemon]
+- xref:../using/experimental-features.adoc#[Experimental Features]
+
+For details about using {project} to manage your local OpenShift cluster, see the xref:../openshift/index.adoc#[Interacting with OpenShift] section.

@@ -65,7 +65,7 @@ By default, the documentation is built in a Docker container.
 This way you do not need to install all the required dependencies on your development machine.
 All you need is a running Docker daemon.
 In case you don't have one, use {project} itself.
-For more information, see xref:../using/docker-daemon.adoc#reusing-docker-daemon[reusing the Docker daemon].
+For more information, see xref:../using/docker-daemon.adoc#[reusing the Docker daemon].
 
 To generate the documentation into the *_docs/build_* directory, run:
 

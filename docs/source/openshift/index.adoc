@@ -6,8 +6,8 @@ include::variables.adoc[]
 {project} creates a virtual machine and provisions a local, single-node OpenShift cluster in this VM.
 The following sections describe how {project} can assist you in interacting and configuring your local OpenShift cluster.
 
-For details about managing the {project} VM, see the xref:../using/managing-minishift.adoc#[Managing {project}] section.
-
 - xref:../openshift/openshift-client-binary.adoc#[Using the OpenShift Client Binary]
 - xref:../openshift/exposing-services.adoc#[Exposing Services]
 - xref:../openshift/openshift-docker-registry.adoc#[Accessing the OpenShift Docker Registry]
+
+For details about the basic commands to interact with the {project} VM, see the xref:../using/basic-usage.adoc#[Basic Usage] section.

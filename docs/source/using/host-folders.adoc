@@ -125,7 +125,7 @@ WARNING: When you use the Boot2Docker ISO with the VirtualBox driver, VirtualBox
 [[instance-host-folders]]
 ==== Instance-Specific Host Folders
 
-By default, host folder definitions are persistent, similar to other xref:../using/managing-minishift.adoc#persistent-configuration[persistent configuration] options.
+By default, host folder definitions are persistent, similar to other xref:../using/basic-usage.adoc#persistent-configuration[persistent configuration] options.
 This means that these host folder definitions will survive the deletion and subsequent re-creation of a {project} VM.
 
 In some cases you might want to define a host folder just for a specific {project} instance.

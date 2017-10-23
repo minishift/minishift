@@ -12,7 +12,7 @@ Scenario: User should be able to list default profile 'minishift'
     When executing "minishift profile list" succeeds
     Then stdout should contain
     """
-    - minishift	Running	(active)
+    - minishift	Running		(Active)
     """
   Scenario: Getting default profile internal docker registry address
      Given Minishift has state "Running"
@@ -32,8 +32,8 @@ Scenario: Starting Minishift with profile foo
       When executing "minishift profile list" succeeds
       Then stdout should contain
       """
+      - foo		Running		(Active)
       - minishift	Running
-      - foo		Running	(active)
       """
 
   Scenario: User should be able set 'minishift' as the active profile
@@ -47,7 +47,7 @@ Scenario: User should be able to list 'minishift' as the active profile
     When executing "minishift profile list" succeeds
     Then stdout should contain
     """
-    - minishift	Running	(active)
+    - minishift	Running		(Active)
     """
 
 Scenario: User should be able to delete profile 'foo'
@@ -76,7 +76,7 @@ Scenario: User should be able to switch between non existing profiles
     When executing "minishift profile list" succeeds
     Then stdout should contain
     """
-    - minishift	Does Not Exist	(active)
+    - minishift	Does Not Exist	(Active)
     """
     When executing "minishift profile set abc" succeeds
       Then stdout should contain

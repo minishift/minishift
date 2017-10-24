@@ -69,9 +69,6 @@ If you encounter issues related to the hypervisor, see the xref:../troubleshooti
 ====
 - On Windows operating system, due to issue link:https://github.com/minishift/minishift/issues/236[#236], you need to execute the {project} binary from your local C:/ drive.
 You cannot run {project} from a network drive.
-
-- Automatic update of the {project} binary and the virtual machine ISO is currently disabled.
-See also issue link:https://github.com/minishift/minishift/issues/204[#204].
 ====
 
 [[homebrew-install-minishift]]

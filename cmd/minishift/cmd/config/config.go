@@ -106,6 +106,8 @@ var (
 	WarnCheckHyperVDriver = createConfigSetting("warn-check-hyperv-driver", SetBool, nil, nil, true)
 	SkipCheckIsoUrl       = createConfigSetting("skip-check-iso-url", SetBool, nil, nil, true)
 	WarnCheckIsoUrl       = createConfigSetting("warn-check-iso-url", SetBool, nil, nil, true)
+	SkipCheckVMDriver     = createConfigSetting("skip-check-vm-driver", SetBool, nil, nil, true)
+	WarnCheckVMDriver     = createConfigSetting("warn-check-vm-driver", SetBool, nil, nil, true)
 	// Preflight checks (after start)
 	SkipInstanceIP        = createConfigSetting("skip-check-instance-ip", SetBool, nil, nil, true)
 	WarnInstanceIP        = createConfigSetting("warn-check-instance-ip", SetBool, nil, nil, true)

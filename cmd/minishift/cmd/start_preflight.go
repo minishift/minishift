@@ -28,6 +28,7 @@ import (
 
 	"github.com/docker/machine/libmachine/drivers"
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
+	validations "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/minishift/shell/powershell"
 	minishiftUtil "github.com/minishift/minishift/pkg/minishift/util"
 
@@ -45,6 +46,13 @@ const (
 // preflightChecksAfterStartingHost is executed before the startHost function.
 func preflightChecksBeforeStartingHost() {
 	driverErrorMessage := "See the 'Setting Up the Driver Plug-in' topic for more information"
+
+	preflightCheckSucceedsOrFails(
+		configCmd.SkipCheckVMDriver.Name,
+		checkVMDriver,
+		fmt.Sprintf("Checking if requested hypervisor '%s' is supported on this platform", viper.GetString(configCmd.VmDriver.Name)),
+		false, configCmd.WarnCheckVMDriver.Name,
+		driverErrorMessage)
 
 	switch viper.GetString(configCmd.VmDriver.Name) {
 	case "xhyve":
@@ -457,5 +465,13 @@ func checkIsoUrl() bool {
 		return false
 	}
 
+	return true
+}
+
+func checkVMDriver() bool {
+	err := validations.IsValidDriver(configCmd.VmDriver.Name, viper.GetString(configCmd.VmDriver.Name))
+	if err != nil {
+		return false
+	}
 	return true
 }

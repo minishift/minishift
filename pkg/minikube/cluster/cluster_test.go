@@ -31,12 +31,12 @@ func TestRemoteBoot2DockerURL(t *testing.T) {
 		MinikubeISO: "http://github.com/fake/boot2docker.iso",
 	}
 
-	isoPath := filepath.Join(constants.Minipath, "cache", "iso", filepath.Base(machineConfig.MinikubeISO))
+	isoPath := filepath.Join(constants.Minipath, "cache", "iso", "unnamed", filepath.Base(machineConfig.MinikubeISO))
 	expectedURL := "file://" + filepath.ToSlash(isoPath)
 	url := machineConfig.GetISOFileURI()
 
 	if url != expectedURL {
-		t.Fatalf("Expected URL : %s", expectedURL)
+		t.Fatalf("Expected URL : %s, Got : %s", expectedURL, url)
 	}
 }
 

@@ -199,12 +199,6 @@ func createDriverOptions(driver drivers.Driver, explicitOptions map[string]inter
 // It also checks sha256sum if present and then put ISO to cached directory.
 func (m *MachineConfig) CacheMinikubeISOFromURL() error {
 	fmt.Println(fmt.Sprintf("\n   Downloading ISO '%s'", m.MinikubeISO))
-	tmpISOFile, err := os.Create(m.GetISOCacheFilepath() + ".part")
-	if err != nil {
-		return err
-	}
-	defer tmpISOFile.Close()
-
 	response, err := http.Get(m.MinikubeISO)
 	if err != nil {
 		return err
@@ -214,6 +208,16 @@ func (m *MachineConfig) CacheMinikubeISOFromURL() error {
 	if response.StatusCode != http.StatusOK {
 		return fmt.Errorf("Received %d response from %s while trying to download the ISO", response.StatusCode, m.MinikubeISO)
 	}
+
+	err = os.MkdirAll(filepath.Join(constants.Minipath, "cache", "iso", minishiftUtil.GetIsoPath(m.MinikubeISO)), os.ModePerm)
+	if err != nil {
+		return err
+	}
+	tmpISOFile, err := os.Create(m.GetISOCacheFilepath() + ".part")
+	if err != nil {
+		return err
+	}
+	defer tmpISOFile.Close()
 
 	var iso io.Reader
 	iso = response.Body
@@ -303,7 +307,7 @@ func (m *MachineConfig) ShouldCacheMinikubeISO() bool {
 }
 
 func (m *MachineConfig) GetISOCacheFilepath() string {
-	return filepath.Join(constants.Minipath, "cache", "iso", filepath.Base(m.MinikubeISO))
+	return filepath.Join(constants.Minipath, "cache", "iso", minishiftUtil.GetIsoPath(m.MinikubeISO), filepath.Base(m.MinikubeISO))
 }
 
 func (m *MachineConfig) GetISOFileURI() string {
@@ -314,7 +318,7 @@ func (m *MachineConfig) GetISOFileURI() string {
 	if urlObj.Scheme == fileScheme {
 		return m.MinikubeISO
 	}
-	isoPath := filepath.Join(constants.Minipath, "cache", "iso", filepath.Base(m.MinikubeISO))
+	isoPath := m.GetISOCacheFilepath()
 	// As this is a file URL there should be no backslashes regardless of platform running on.
 	return "file://" + filepath.ToSlash(isoPath)
 }

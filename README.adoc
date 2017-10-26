@@ -48,6 +48,7 @@ using, and contributing to Minishift:
 - https://docs.openshift.org/latest/minishift/getting-started/index.html[Getting started with Minishift]
 - https://docs.openshift.org/latest/minishift/using/index.html[Using Minishift]
 - https://docs.openshift.org/latest/minishift/contributing/index.html[Contributing to Minishift]
+- https://docs.openshift.org/latest/minishift/contributing/developing.html[Developing and building Minishift locally]
 - https://docs.openshift.org/latest/minishift/command-ref/minishift.html[Command Reference]
 
 In addition, you can review the release notes and project roadmap here on GitHub:

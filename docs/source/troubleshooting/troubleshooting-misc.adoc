@@ -23,7 +23,7 @@ Cause: The {project} VM root filesystem contains core packages that are configur
 The available storage on the root filesystem is determined by the overlay size, which is smaller than the total available storage.
 
 Workaround: Avoid installing packages or storing large files in the root filesystem of the {project} VM.
-Instead, you can create a sub-directory in the *_mnt/sda1/_* persistent storage volume or define and mount xref:../using/host-folders.adoc#[host folders] that can share storage space between the host and the {project} VM.
+Instead, you can create a sub-directory in the *_/mnt/sda1/_* persistent storage volume or define and mount xref:../using/host-folders.adoc#[host folders] that can share storage space between the host and the {project} VM.
 
 If you want to perform development tasks inside the {project} VM, it is recommended that you use containers, which are stored in persistent storage volumes, and reuse the xref:../using/docker-daemon.adoc#[{project} Docker daemon].
 

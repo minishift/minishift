@@ -283,6 +283,9 @@ func checkLibvirtInstalled() bool {
 //checkLibvirtDefaultNetwork returns true if the "default" network is present and active
 func checkLibvirtDefaultNetwork() bool {
 	cmd := exec.Command("virsh", "--connect", "qemu:///system", "net-list")
+	cmd.Env = append(os.Environ(),
+		"LC_ALL=C",
+	)
 	stdOutStdError, err := cmd.CombinedOutput()
 	if err != nil {
 		return false

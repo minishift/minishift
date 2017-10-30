@@ -21,26 +21,17 @@ ENV LANG C.UTF-8
 ENV LANGUAGE C.UTF-8
 ENV LC_ALL C.UTF-8
 
-ARG uid
-ENV UID=${uid:-1000}
-
-RUN groupadd -r docs && useradd -g docs -u $UID docs
-RUN mkdir -p /home/docs
-RUN chown docs:docs /home/docs
-
-# From here we run everything as dev user
-USER docs
-
-RUN echo locale
-
 ADD Gemfile .
 ADD Gemfile.lock .
 RUN /bin/bash -l -c "bundle install;"
 
-WORKDIR /home/docs
+ENV     DOCS_CONTENT /minishift-docs
+RUN     mkdir $DOCS_CONTENT
+VOLUME  $DOCS_CONTENT
 
 EXPOSE 35729:35729
 EXPOSE 4567:4567
 
-ENTRYPOINT ["rake"]
+COPY docker-entrypoint.sh /usr/local/bin
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["-T"]

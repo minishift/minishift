@@ -75,25 +75,19 @@ $ make gen_docs
 
 [NOTE]
 ====
-Your local checkout of the sources are going to be mounted into the container in order to built the docs.
-Depending on your UID on the host, you might see file permissions problems when trying to run `make gen_docs`.
-This is caused by the fact, that the *docs* user used within the container has a UID of 1000 by default.
-This might conflict with the user id of the mounted docs sources.
-
-Your output might look like:
+The image to build the documentation is downloaded from link:https://hub.docker.com/r/minishift/minishift-docs-builder/:[minishift/minishift-docs-builder].
+In case you need to make changes to the link:https://github.com/minishift/minishift/blob/master/docs/Dockerfile[Dockerfile] and want to build a local version of the image run:
 
 ----
-$ make gen_docs
-mkdir -p build
-rake aborted!
-Errno::EACCES: Permission denied @ dir_s_mkdir - build
+$ make build_docs_container
 ----
 
-In this case you need to build the container with a different user ID.
-This will ensure that the *docs* user in the container will be able to create files and directories.
+If changes to the Dockerfile become part of a pull request, make sure to
+deploy a new version of the image to link:https://hub.docker.com/r/minishift/minishift-docs-builder/:[minishift/minishift-docs-builder].
+First increment the version of the image in the _DOCS_BUILDER_IMAGE_ variable of the Makefile. Then run:
 
 ----
-$ make build_docs_container IMAGE_UID=$(id -u)
+$ make push_docs_container
 ----
 
 ====

@@ -51,8 +51,11 @@ ADDON_BINDATA_DIR = $(CURDIR)/$(BUILD_DIR)/bindata
 ADDON_ASSET_FILE = $(ADDON_BINDATA_DIR)/addon_assets.go
 
 # Setup for the docs tasks
-IMAGE_UID ?= 1000
+DOCS_BUILDER_IMAGE = minishift/minishift-docs-builder:1.0.0
+LOCAL_DOCS_DIR ?= $(CURDIR)/docs
+CONTAINER_DOCS_DIR = /minishift-docs
 DOCS_SYNOPISIS_DIR = docs/source/_tmp
+DOCS_UID ?= $(shell docker run -tiv $(LOCAL_DOCS_DIR):$(CONTAINER_DOCS_DIR) $(DOCS_BUILDER_IMAGE) id)
 DOC_VARIABLES = -e OPENSHIFT_VERSION=$(OPENSHIFT_VERSION) -e MINISHIFT_VERSION=$(MINISHIFT_VERSION) -e CENTOS_ISO_VERSION=$(CENTOS_ISO_VERSION) -e MINIKUBE_ISO_VERSION=$(MINIKUBE_ISO_VERSION)
 
 # MISC
@@ -106,27 +109,31 @@ $(GOPATH)/bin/git-validation:
 
 .PHONY: build_docs_container
 build_docs_container:
-	cd docs && docker build --build-arg uid=$(IMAGE_UID) -t minishift/docs .
+	cd docs && docker build -t $(DOCS_BUILDER_IMAGE) .
+
+.PHONY: push_docs_container
+push_docs_container: build_docs_container
+	cd docs && docker push $(DOCS_BUILDER_IMAGE)
 
 .PHONY: gen_adoc_tar
-gen_adoc_tar: synopsis_docs build_docs_container
-	cd docs && docker run $(DOC_VARIABLES) -tiv $(shell pwd)/docs:/home/docs:Z minishift/docs clean adoc_tar
+gen_adoc_tar: synopsis_docs
+	cd docs && docker run -u $(DOCS_UID) $(DOC_VARIABLES) -tiv $(LOCAL_DOCS_DIR):$(CONTAINER_DOCS_DIR):Z $(DOCS_BUILDER_IMAGE) clean adoc_tar
 
 .PHONY: gen_docs
-gen_docs: synopsis_docs build_docs_container
-	cd docs && docker run $(DOC_VARIABLES) -tiv $(shell pwd)/docs:/home/docs:Z minishift/docs gen
+gen_docs: synopsis_docs
+	cd docs && docker run -u $(DOCS_UID) $(DOC_VARIABLES) -tiv $(LOCAL_DOCS_DIR):$(CONTAINER_DOCS_DIR):Z $(DOCS_BUILDER_IMAGE) gen
 
 .PHONY: clean_docs
-clean_docs: build_docs_container
-	cd docs && docker run $(DOC_VARIABLES) -tiv $(shell pwd)/docs:/home/docs:Z minishift/docs clean
+clean_docs:
+	cd docs && docker run -u $(DOCS_UID) $(DOC_VARIABLES) -tiv $(LOCAL_DOCS_DIR):$(CONTAINER_DOCS_DIR):Z $(DOCS_BUILDER_IMAGE) clean
 
 .PHONY: serve_docs
-serve_docs: synopsis_docs build_docs_container
-	cd docs && docker run $(DOC_VARIABLES) -p 35729:35729 -p 4567:4567 -tiv $(shell pwd)/docs:/home/docs:Z minishift/docs serve[--watcher-force-polling]
+serve_docs: synopsis_docs
+	cd docs && docker run -u $(DOCS_UID) $(DOC_VARIABLES) -p 35729:35729 -p 4567:4567 -tiv $(LOCAL_DOCS_DIR):$(CONTAINER_DOCS_DIR):Z $(DOCS_BUILDER_IMAGE) serve[--watcher-force-polling]
 
 .PHONY: link_check_docs
 link_check_docs: gen_docs
-	cd docs && docker run $(DOC_VARIABLES) -tiv $(shell pwd)/docs:/home/docs:Z minishift/docs link_check
+	cd docs && docker run -u $(DOCS_UID) $(DOC_VARIABLES) -tiv $(LOCAL_DOCS_DIR):$(CONTAINER_DOCS_DIR):Z $(DOCS_BUILDER_IMAGE) link_check
 
 $(DOCS_SYNOPISIS_DIR)/*.md: vendor $(ADDON_ASSET_FILE)
 	@# https://github.com/golang/go/issues/15038#issuecomment-207631885 ( CGO_ENABLED=0 )

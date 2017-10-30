@@ -45,7 +45,7 @@ const (
 
 // preflightChecksAfterStartingHost is executed before the startHost function.
 func preflightChecksBeforeStartingHost() {
-	driverErrorMessage := "See the 'Setting Up the Driver Plug-in' topic for more information"
+	driverErrorMessage := "See the 'Setting Up the Driver Plug-in' topic (https://docs.openshift.org/latest/minishift/getting-started/setting-up-driver-plugin.html) for more information"
 
 	preflightCheckSucceedsOrFails(
 		configCmd.SkipCheckVMDriver.Name,
@@ -107,7 +107,7 @@ func preflightChecksBeforeStartingHost() {
 		checkIsoUrl,
 		"Checking the ISO URL",
 		false, configCmd.WarnCheckIsoUrl.Name,
-		"See the 'Managing Minishift' topic for more information")
+		"See the 'Basic Usage' topic (https://docs.openshift.org/latest/minishift/using/basic-usage.html) for more information")
 }
 
 // preflightChecksAfterStartingHost is executed after the startHost function.

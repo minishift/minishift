@@ -29,7 +29,7 @@ These commands are described in the following sections.
 
 There are two ways to create a new profile.
 
-==== Using The `--profile` Flag
+=== Using The `--profile` Flag
 
 When you run any {project} command with the `--profile` flag the profile gets created if it does not exist, for example:
 

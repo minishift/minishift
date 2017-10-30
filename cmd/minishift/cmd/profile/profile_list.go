@@ -42,14 +42,11 @@ func displayProfiles(profiles []string) {
 	display.Init(os.Stdout, 0, 8, 2, '\t', 0)
 
 	activeProfile := profileActions.GetActiveProfile()
-	vmStatus := cmdUtil.GetVMStatus(activeProfile)
-	fmt.Fprintln(display, fmt.Sprintf("- %s\t%s\t%s", activeProfile, vmStatus, "(Active)"))
-
 	sort.Strings(profiles)
 	for _, profile := range profiles {
-		vmStatus = cmdUtil.GetVMStatus(profile)
+		vmStatus := cmdUtil.GetVMStatus(profile)
 		if profile == activeProfile {
-			continue
+			fmt.Fprintln(display, fmt.Sprintf("- %s\t%s\t%s", activeProfile, vmStatus, "(Active)"))
 		} else {
 			fmt.Fprintln(display, fmt.Sprintf("- %s\t%s", profile, vmStatus))
 		}

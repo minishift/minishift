@@ -77,6 +77,33 @@ $ sudo usermod -a -G libvirt <username>
 $ newgrp libvirt
 ----
 
+[[kvm-driver-arch-linux]]
+=== On Arch Linux
+
+. Install *libvirt*, *qemu*, *dnsmasq* and *ebtables* on your system:
++
+----
+$ sudo pacman -S libvirt qemu dnsmasq ebtables
+----
+
+. Add yourself to *kvm* and *libvirt* groups:
++
+----
+$ sudo usemod -a -G kvm,libvirt <username>
+----
+
+. Update libvirt configuration in */etc/libvirt/qemu.conf*:
++
+----
+$ sudo sed -r 's/group=".+"/group="kvm"/1' /etc/libvirt/qemu.conf > /etc/libvirt/qemu.conf
+---- 
+
+.  Update your current session to apply the group change:
++
+----
+$ newgrp libvirt
+----
+
 [[xhyve-driver-install]]
 == xhyve Driver
 

@@ -241,6 +241,47 @@ You should at least see the *anyuid* add-on listed.
 This is an important add-on that allows you to run images that do not use a pre-allocated UID.
 By default, this is not allowed in OpenShift.
 
+[[table-list-of-default-addons]]
+.Default add-ons
+
+[cols="1,3"]
+|===
+|Add-on Name    | Description
+
+| anyuid
+| Changes the default security context constraints to allow pods to run with arbitrary UID.
+
+| admin-user
+| Creates a user named 'admin' and assigns the *cluster-admin* role to it.  
+| registry-route
+| Creates an edge terminated route for the OpenShift registry.
+
+| xpaas
+| Imports xPaaS templates.
+|===
+
+[[addons-by-community]]
+=== Add-ons by the Community
+
+Apart from the several default add-ons, there are a number of community developed add-ons for {project}.
+Community add-ons can be found in the link:https://github.com/minishift/minishift-addons/tree/master/add-ons[minishift-addons] repository.
+You can get all the information about these add-ons in the link:https://github.com/minishift/minishift-addons[repository].
+The instructions for installing them can be found in the link:https://github.com/minishift/minishift-addons/blob/master/README.adoc[README].
+
+[[installing-addons]]
+== Installing Add-ons
+
+Add-ons are installed with the xref:../command-ref/minishift_addons_install.adoc#[`minishift addons install`] command.
+
+The following example shows how to install an add-on.
+
+[[example-install-addon]]
+.Example: Installing an add-on
+
+----
+$ minishift addons install <path_to_addon_directory>
+----
+
 [[enabling-disabling-addons]]
 == Enabling and Disabling Add-ons
 

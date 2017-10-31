@@ -136,6 +136,28 @@ $ sudo virsh undefine minishift
 
 In case all of this fails, you might want to xref:../getting-started/uninstalling.adoc#[uninstall {project}] and do a fresh install of {project}.
 
+[[Network-not-found-no-network-with-matching-name-default]]
+=== Network not found: no network with matching name 'default'
+
+At present, the KVM driver doesn't attempt to create the default network - it assumes it's already present. If you create a VM with another tool like virt-manager first it will create it (or you can create it from the command line.) Try the following to create the network
+
+[[using-command-line]]
+==== Using Commnad Line
+----
+virsh net-undefine default
+virsh net-destroy default
+virsh net-list # This will list all the networks
+virsh net-define /usr/share/libvirt/networks/default.xml
+virsh net-start default
+virsh net-autostart default
+----
+
+[[using-virt-manager]]
+==== Using virt-manager
+----
+virt-manager > edit > connection details > virtual networks > default
+----
+
 [[troubleshooting-driver-xhyve]]
 == xhyve
 

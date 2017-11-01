@@ -28,7 +28,6 @@ macOS::
 NOTE: xhyve requires specific installation and configuration steps that are described in the xref:../getting-started/setting-up-driver-plugin.adoc#[Setting Up the Driver Plug-in] section.
 
 - link:https://www.virtualbox.org/wiki/Downloads[VirtualBox]
-- link:https://www.vmware.com/products/fusion[VMware Fusion]
 
 GNU/Linux::
 - link:https://en.wikipedia.org/wiki/Kernel-based_Virtual_Machine[KVM] (default)

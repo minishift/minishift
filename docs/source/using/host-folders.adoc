@@ -33,8 +33,6 @@ These folders are currently not configurable and differ for each driver and OS.
 
 |Virtualbox |Windows |C://Users |/c/Users
 
-|VMWare Fusion |OSX |/Users |/Users
-
 |Xhyve |OSX |/Users |/Users
 |===
 

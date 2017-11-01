@@ -22,14 +22,14 @@
 [[projects]]
   name = "github.com/Microsoft/go-winio"
   packages = [".","archive/tar","backuptar"]
-  revision = "78439966b38d69bf38227fbf57ac8a6fee70f69a"
-  version = "v0.4.5"
+  revision = "7da180ee92d8bd8bb8c37fc560e673e6557c392f"
+  version = "v0.4.7"
 
 [[projects]]
   name = "github.com/Microsoft/hcsshim"
   packages = ["."]
-  revision = "34a629f78a5d50f7de07727e41a948685c45e026"
-  version = "v0.6.7"
+  revision = "45ef15484298b76abeb9513ea0ea0abd2b5b84b3"
+  version = "v0.6.8"
 
 [[projects]]
   name = "github.com/asaskevich/govalidator"
@@ -52,13 +52,13 @@
   branch = "master"
   name = "github.com/containers/storage"
   packages = [".","drivers","drivers/aufs","drivers/btrfs","drivers/devmapper","drivers/overlay","drivers/overlayutils","drivers/quota","drivers/register","drivers/vfs","drivers/windows","drivers/zfs","pkg/archive","pkg/chrootarchive","pkg/devicemapper","pkg/directory","pkg/dmesg","pkg/fileutils","pkg/fsutils","pkg/homedir","pkg/idtools","pkg/ioutils","pkg/locker","pkg/longpath","pkg/loopback","pkg/mount","pkg/parsers","pkg/parsers/kernel","pkg/pools","pkg/promise","pkg/reexec","pkg/stringid","pkg/system","pkg/truncindex"]
-  revision = "46ef35348492d492e4671938a1993a315e4ad30f"
+  revision = "477e551dd493e5c80999d3690d3a201fd26ba2f1"
 
 [[projects]]
   name = "github.com/cpuguy83/go-md2man"
   packages = ["md2man"]
-  revision = "1d903dcb749992f3741d744c0f8376b4bd7eb3e1"
-  version = "v1.0.7"
+  revision = "20f5889cbdc3c73dbd2862796665e7c465ade7d1"
+  version = "v1.0.8"
 
 [[projects]]
   name = "github.com/davecgh/go-spew"
@@ -113,8 +113,8 @@
 [[projects]]
   name = "github.com/fsnotify/fsnotify"
   packages = ["."]
-  revision = "629574ca2a5df945712d3079857300b5e4da0236"
-  version = "v1.4.2"
+  revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
+  version = "v1.4.7"
 
 [[projects]]
   name = "github.com/gbraad/go-hvkvp"
@@ -131,8 +131,8 @@
 [[projects]]
   name = "github.com/gogo/protobuf"
   packages = ["proto"]
-  revision = "342cbe0a04158f6dcb03ca0079991a51a4248c02"
-  version = "v0.5"
+  revision = "1adfc126b41513cc696b209667c8656ea7aac67c"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/golang/glog"
@@ -141,10 +141,10 @@
   source = "https://github.com/openshift/glog.git"
 
 [[projects]]
-  branch = "master"
   name = "github.com/golang/protobuf"
   packages = ["proto"]
-  revision = "1e59b77b52bf8e4b449a57e6f79f21226d571845"
+  revision = "925541529c1fa6821df4e44ce2723319eb2be768"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/google/go-github"
@@ -166,8 +166,8 @@
 [[projects]]
   name = "github.com/gorilla/mux"
   packages = ["."]
-  revision = "7f08801859139f86dfafd1c296e2cba9a80d292e"
-  version = "v1.6.0"
+  revision = "53c1911da2b537f792e7cafcb446b05ffe33b996"
+  version = "v1.6.1"
 
 [[projects]]
   name = "github.com/gorillalabs/go-powershell"
@@ -183,8 +183,8 @@
 [[projects]]
   name = "github.com/imdario/mergo"
   packages = ["."]
-  revision = "7fe0c75c13abdee74b09fcacef5ea1c6bba6a874"
-  version = "0.2.4"
+  revision = "163f41321a19dd09362d4c63cc2489db2015f1f4"
+  version = "0.3.2"
 
 [[projects]]
   name = "github.com/inconshreveable/go-update"
@@ -209,10 +209,16 @@
   revision = "ae77be60afb1dcacde03767a8c37337fad28ac14"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/kr/fs"
+  packages = ["."]
+  revision = "2788f0dbd16903de03cb8186e5c7d97b69ad387b"
+
+[[projects]]
   name = "github.com/magiconair/properties"
   packages = ["."]
-  revision = "be5ece7dd465ab0765a9682137865547526d1dfb"
-  version = "v1.7.3"
+  revision = "c3beff4c2358b44d0493c7dda585e7db7ff28ae6"
+  version = "v1.7.6"
 
 [[projects]]
   name = "github.com/mattn/go-runewidth"
@@ -236,7 +242,7 @@
   branch = "master"
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
-  revision = "06020f85339e21b2478f756a78e295255ffa4d6a"
+  revision = "00c29f56e2386353d58c599509e8dc3801b0d716"
 
 [[projects]]
   branch = "master"
@@ -287,8 +293,8 @@
 [[projects]]
   name = "github.com/pelletier/go-toml"
   packages = ["."]
-  revision = "16398bac157da96aa88f98a2df640c7f32af1da2"
-  version = "v1.0.1"
+  revision = "acdc4509485b587f5e675510c4f2c63e90ff68a8"
+  version = "v1.1.0"
 
 [[projects]]
   name = "github.com/pkg/browser"
@@ -300,6 +306,12 @@
   packages = ["."]
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
   version = "v0.8.0"
+
+[[projects]]
+  name = "github.com/pkg/sftp"
+  packages = ["."]
+  revision = "0159c83e42a88e5c35180f73b84298a6bdde1ec1"
+  version = "1.4.0"
 
 [[projects]]
   name = "github.com/pmezard/go-difflib"
@@ -316,8 +328,8 @@
 [[projects]]
   name = "github.com/russross/blackfriday"
   packages = ["."]
-  revision = "4048872b16cc0fc2c5fd9eacf0ed2c2fedaa0c8c"
-  version = "v1.5"
+  revision = "55d61fa8aa702f59229e6cff85793c22e580eaf5"
+  version = "v1.5.1"
 
 [[projects]]
   branch = "master"
@@ -334,14 +346,14 @@
 [[projects]]
   name = "github.com/spf13/afero"
   packages = [".","mem"]
-  revision = "8d919cbe7e2627e417f3e45c3c0e489a5b7e2536"
-  version = "v1.0.0"
+  revision = "bb8f1927f2a9d3ab41c9340aa034f6b803f4359c"
+  version = "v1.0.2"
 
 [[projects]]
   name = "github.com/spf13/cast"
   packages = ["."]
-  revision = "acbeb36b902d72a7a4c18e8f3241075e7ab763e4"
-  version = "v1.1.0"
+  revision = "8965335b8c7107321228e3e3702cab9832751bac"
+  version = "v1.2.0"
 
 [[projects]]
   name = "github.com/spf13/cobra"
@@ -352,7 +364,7 @@
   branch = "master"
   name = "github.com/spf13/jwalterweatherman"
   packages = ["."]
-  revision = "12bd96e66386c1960ab0f74ced1362f66f552f7b"
+  revision = "7c0cea34c8ece3fbeb2b27ab9b59511d360fb394"
 
 [[projects]]
   name = "github.com/spf13/pflag"
@@ -391,7 +403,7 @@
   branch = "master"
   name = "golang.org/x/net"
   packages = ["context","context/ctxhttp","http2","http2/hpack","idna","lex/httplex","proxy"]
-  revision = "d866cfc389cec985d6fda2859936a575a55a3ab6"
+  revision = "cbe0f9307d0156177f9dd5dc85da1a31abc5f2fb"
 
 [[projects]]
   name = "golang.org/x/oauth2"
@@ -404,10 +416,10 @@
   revision = "43e60d72a8e2bd92ee98319ba9a384a0e9837c08"
 
 [[projects]]
-  branch = "master"
   name = "golang.org/x/text"
   packages = ["collate","collate/build","internal/colltab","internal/gen","internal/tag","internal/triegen","internal/ucd","language","secure/bidirule","transform","unicode/bidi","unicode/cldr","unicode/norm","unicode/rangetable"]
-  revision = "3b24cac7bc3a458991ab409aa2a339ac9e0d60d6"
+  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
+  version = "v0.3.0"
 
 [[projects]]
   name = "google.golang.org/appengine"
@@ -429,12 +441,12 @@
 [[projects]]
   name = "k8s.io/client-go"
   packages = ["util/homedir"]
-  revision = "2ae454230481a7cb5544325e12ad7658ecccd19b"
-  version = "v5.0.1"
+  revision = "78700dec6369ba22221b72770783300f143df150"
+  version = "v6.0.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "aedc48e3f2b2aa6a4d8a06551c985859e75ee66a41a29ff5608f3378011f0fec"
+  inputs-digest = "56f18a532b86c7741de018c586555a7e21d193213d341c08dad3a3c296eaaa90"
   solver-name = "gps-cdcl"
   solver-version = 1

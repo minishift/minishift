@@ -18,6 +18,7 @@ package config
 
 import (
 	"encoding/json"
+	"github.com/minishift/minishift/pkg/minishift/hostfolder/config"
 	"io/ioutil"
 	"os"
 )
@@ -27,14 +28,15 @@ var AllInstancesConfig *GlobalConfigType
 type GlobalConfigType struct {
 	FilePath string `json:"-"`
 
-	HostFolders   []HostFolder
+	HostFolders   []config.HostFolderConfig
 	ActiveProfile string
+	SftpdPID      int
 }
 
 // Create new object with data if file exists or
 // Create json file and return object if doesn't exists
 func NewAllInstancesConfig(path string) (*GlobalConfigType, error) {
-	cfg := &GlobalConfigType{HostFolders: []HostFolder{}}
+	cfg := &GlobalConfigType{HostFolders: []config.HostFolderConfig{}}
 	cfg.FilePath = path
 
 	// Check json file existence

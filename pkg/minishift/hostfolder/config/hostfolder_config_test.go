@@ -14,13 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package hostfolder
+package config
 
 import (
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func Test_type_string(t *testing.T) {
-	assert.Equal(t, CIFS.String(), "cifs", "unexpected string representation of host folder type")
+func TestHostFolderConfig(t *testing.T) {
+	hostFolderConfigActual := HostFolderConfig{
+		Name: "Users",
+		Type: "cifs",
+		Options: map[string]string{
+			MountPoint: "/mnt/data",
+			UncPath:    "//127.0.0.1/Users",
+			UserName:   "joe@pillow.us",
+			Password:   "am!g@4ever",
+			Domain:     "DESKTOP-RHAIMSWIN",
+		},
+	}
+
+	assert.Equal(t, "/mnt/data", hostFolderConfigActual.MountPoint())
+	assert.Equal(t, "joe@pillow.us", hostFolderConfigActual.Option(UserName))
+	assert.Equal(t, "am!g@4ever", hostFolderConfigActual.Option(Password))
+	assert.Equal(t, "DESKTOP-RHAIMSWIN", hostFolderConfigActual.Option(Domain))
 }

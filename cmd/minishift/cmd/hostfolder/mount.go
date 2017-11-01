@@ -23,7 +23,6 @@ import (
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/constants"
-	hostfolderActions "github.com/minishift/minishift/pkg/minishift/hostfolder"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
@@ -32,10 +31,10 @@ var (
 	mountAll bool
 )
 
-var hostfolderMountCmd = &cobra.Command{
-	Use:   "mount HOSTFOLDER_NAME",
-	Short: "Mounts the specified host folder to the running OpenShift cluster.",
-	Long:  `Mounts the specified host folder to the running OpenShift cluster. You can set the 'all' flag to mount all of the defined host folders.`,
+var mountCmd = &cobra.Command{
+	Use:   "mount HOST_FOLDER_NAME",
+	Short: "Mounts the specified host folder into the Minishift VM.",
+	Long:  `Mounts the specified host folder into the Minishift VM. You can set the 'all' flag to mount all of the defined host folders.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		api := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
 		defer api.Close()
@@ -49,24 +48,26 @@ var hostfolderMountCmd = &cobra.Command{
 
 		util.ExitIfNotRunning(host.Driver, constants.MachineName)
 
+		hostFolderManager := getHostFolderManager()
 		err = nil
 		if mountAll {
-			err = hostfolderActions.MountHostfolders(host.Driver)
+			fmt.Println("-- Mounting host folders")
+			err = hostFolderManager.MountAll(host.Driver)
 		} else {
 			if len(args) < 1 {
-				atexit.ExitWithMessage(1, "Usage: minishift hostfolder mount [HOSTFOLDER_NAME|--all]")
+				atexit.ExitWithMessage(1, "Usage: minishift hostfolder mount [HOST_FOLDER_NAME|--all]")
 			}
-			err = hostfolderActions.Mount(host.Driver, args[0])
+			err = hostFolderManager.Mount(host.Driver, args[0])
 		}
 
 		if err != nil {
-			atexit.ExitWithMessage(1, fmt.Sprintf("Error mounting the host folder: %s", err.Error()))
+			atexit.ExitWithMessage(1, err.Error())
 		}
 
 	},
 }
 
 func init() {
-	HostfolderCmd.AddCommand(hostfolderMountCmd)
-	hostfolderMountCmd.Flags().BoolVarP(&mountAll, "all", "a", false, "Mounts all defined host folders to the running OpenShift cluster.")
+	HostFolderCmd.AddCommand(mountCmd)
+	mountCmd.Flags().BoolVarP(&mountAll, "all", "a", false, "Mounts all defined host folders into the Minishift VM.")
 }

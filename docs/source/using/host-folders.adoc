@@ -23,15 +23,22 @@ You can use the `hostfolder` command to mount multiple shared folders onto custo
 
 [NOTE]
 ====
-Currently only link:https://en.wikipedia.org/wiki/Server_Message_Block[CIFS] is supported as a host folder type.
-Support for link:https://en.wikipedia.org/wiki/SSHFS[SSHFS]-based host folders is in progress, as described in GitHub issue link:https://github.com/minishift/minishift/issues/317[#317].
-If you want to manually set up SSHFS, see xref:sshfs-folder-mount[SSHFS Host Folders].
+Currently link:https://en.wikipedia.org/wiki/Server_Message_Block[CIFS] and link:https://en.wikipedia.org/wiki/SSHFS[SSHFS] based host folders are supported.
+SSHFS support is experimental.
+====
+
+[NOTE]
+====
+SSHFS based host folders are not working with the xref:../using/basic-usage#choosing-iso-image[minikube ISO] for now, because it is missing the sshfs dependency.
+This will be addressed in a future release of the minikube ISO.
 ====
 
 [[host-folder-prerequisite]]
 === Prerequisites
 
-To use the `minishift hostfolder` command, you need to be able to share directories using CIFS.
+==== CIFS
+
+To use the `minishift hostfolder` command for CIFS based host folders, you need to be able to share directories using CIFS.
 On Windows, CIFS is the default technology for sharing directories.
 For example, on Windows 10 the *_C:\Users_* directory is shared by default and can be accessed by locally-authenticated users.
 
@@ -40,6 +47,10 @@ On macOS, you can enable CIFS-based shares under *System Preferences > Sharing*.
 See link:https://support.apple.com/en-us/HT204445[How to connect with File Sharing on your Mac] for detailed setup instructions.
 
 On Linux, follow your distribution-specific instructions to install link:https://www.samba.org[Samba].
+
+==== SSHFS
+
+SSHFS based host folders work without prerequisite.
 
 [[displaying-host-folders]]
 === Displaying Host Folders
@@ -50,43 +61,40 @@ An example output could look like:
 
 ----
 $ minishift hostfolder list
-Name        Mountpoint            Remote path              Mounted
-myshare     /mnt/sda1/myshare     //192.168.1.82/MYSHARE   N
+Name    Type    Source               Mountpoint       Mounted
+test    sshfs   /Users/john/test     /mnt/sda1/test   N
 ----
 
-In this example, there is a host folder with the name **myshare** which mounts *_//192.168.1.82/MYSHARE_* onto *_/mnt/sda1/myshare_* in the {project} VM.
+In this example, there is a sshfs based host folder with the name **test** which mounts *_/Users/john/test_* onto *_/mnt/sda1/test_* in the {project} VM.
 The share is currently not mounted.
-
-[NOTE]
-====
-The remote path must be reachable from within the VM.
-In the example above, *192.168.1.82* is the IP of the host within the LAN, which is one option you can use.
-You can use `ifconfig` (or `Get-NetIPAddress | Format-Table` on Windows) to determine a routable IP address.
-====
 
 [[adding-host-folders]]
 === Adding Host Folders
 
 The xref:../command-ref/minishift_hostfolder_add.adoc#[`minishift hostfolder add`] command allows you to define a new host folder.
-This is an interactive process that queries the relevant details for a host folder based on CIFS.
+
+The exact syntax to use depends on the host folder type.
+Independent of the type you can choose between non-interactive and interactive configuration.
+The default it non-interactive.
+By specifying the `--interactive` you can select the interactive configuration mode.
+
+The following sections give examples for configuring CIFS and SSHFS host folders.
+
+==== CIFS
 
 [[adding-cifs-hostfolder]]
 .Adding a CIFS based hostfolder
 ----
-$ minishift hostfolder add myshare // <1>
-UNC path: //192.168.99.1/MYSHARE   // <2>
-Mountpoint [/mnt/sda1/myshare]:    // <3>
-Username: john                     // <4>
-Password: [HIDDEN]                 // <5>
-Domain:                            // <6>
-Added: myshare
+$ minishift hostfolder add -t cifs --source //192.168.99.1/MYSHARE --target /mnt/sda1/myshare --options username=john,password=mysecret,domain=MYDOMAIN myshare
 ----
-<1> (Required) Actual `minishift hostfolder add` command that specifies a host folder with the name of **myshare**.
-<2> (Required) The UNC path for the share.
-<3> The mount point within the VM. The default is *_/mnt/sda1/<host folder name>_*.
-<4> (Required) The user name for the CIFS share.
-<5> (Required) The password for the CIFS share.
-<6> The domain of the share. Often this can be left blank, but for example on Windows, when your account is linked to a Microsoft account, you must use the Microsoft account email address as user name as well as your machine name as displayed by `$env:COMPUTERNAME` as a domain.
+
+The above command will create a new host folder with the name of **myshare**.
+The source of the host folder is the UNC path *_//192.168.99.1/MYSHARE_* which is required.
+The target or mount point is *_/mnt/sda1/myshare_* within the {project} VM.
+Using the `--options` flag host folder type specific options can be specified using a list of comma separated key/value pairs.
+In the case of a CIFS host folder the required options are the user name for the CIFS share as well as the password.
+Via the the `--options` flag the domain of the share can be specified as well.
+Often this can be left out, but for example on Windows, when your account is linked to a Microsoft account, you must use the Microsoft account email address as user name as well as your machine name as displayed by `$env:COMPUTERNAME` as a domain.
 
 [TIP]
 ====
@@ -98,6 +106,16 @@ When this option is specified, no UNC path needs to be specified and *_C:\Users_
 ====
 When you use the Boot2Docker ISO with the VirtualBox driver, VirtualBox guest additions are automatically enabled and occupy the *_/Users_* mount point.
 ====
+
+==== SSHFS
+
+[[adding-cifs-hostfolder]]
+.Adding a SSHFS based hostfolder
+----
+$ minishift hostfolder add -t sshfs --source /Users/john/myshare --target /mnt/sda1/myshare myshare
+----
+
+For the case of a SSHFS based host folder only the source and target of the host folder need to be specified.
 
 [[instance-host-folders]]
 ==== Instance-Specific Host Folders
@@ -112,11 +130,10 @@ Host folder definitions that are created with the `--instance-only` flag will be
 [[mounting-host-folders]]
 === Mounting Host Folders
 
-After you add host folders, you use the xref:../command-ref/minishift_hostfolder_mount.adoc#[`minishift hostfolder mount`] command to mount a host folder by its name:
+After you have added host folders, you use the xref:../command-ref/minishift_hostfolder_mount.adoc#[`minishift hostfolder mount`] command to mount a host folder by its name:
 
 ----
 $ minishift hostfolder mount myshare
-Mounting 'myshare': '//192.168.99.1/MYSHARE' as '/mnt/sda1/myshare' ... OK
 ----
 
 You can verify that the host folder is mounted by running:
@@ -132,6 +149,17 @@ Alternatively, you can list the actual content of the mounted host folder:
 ----
 $ minishift ssh "ls -al /mnt/sda1/myshare"
 ----
+
+[TIP]
+====
+When mounting SSHFS based host folders a SFTP server process is started on port 2022 of the host.
+Make sure that your network and firewall settings allow this port to be opened.
+If you need to configure this port you can make use of {project}'s xref:../using/basic-usage.adoc#persistent-configuration[persistent configuration] using the key `hostfolders-sftp-port`, for example:
+
+----
+$ minishift config set hostfolders-sftp-port 2222
+----
+====
 
 [[auto-mounting-host-folders]]
 ==== Auto-Mounting Host Folders
@@ -152,7 +180,6 @@ You use the xref:../command-ref/minishift_hostfolder_umount.adoc#[`minishift hos
 
 ----
 $ minishift hostfolder umount myshare
-Unmounting 'myshare' ... OK
 
 $ minishift hostfolder list
 Name       Mountpoint          Remote path              Mounted
@@ -170,46 +197,7 @@ Name        Mountpoint            Remote path              Mounted
 myshare     /mnt/sda1/myshare     //192.168.1.82/MYSHARE   N
 
 $ minishift hostfolder remove myshare
-Removed: myshare
 
 $ minishift hostfolder list
 No host folders defined
-----
-
-[[sshfs-folder-mount]]
-=== SSHFS Host Folders
-
-[NOTE]
-====
-This host folder type is not supported by the `minishift hostfolder` command and requires manual configuration.
-====
-
-You can use SSHFS-based host folders if you have an SSH daemon running on your host.
-Normally, this prerequisite is met by default on Linux and macOS.
-
-Most Linux distributions have an SSH daemon installed.
-If not, follow the instructions for your specific distribution to install an SSH daemon.
-
-macOS also has a built-in SSH server.
-To use it, make sure that *Remote Login* is enabled in *System Preferences > Sharing*.
-
-On Windows, you can install link:https://winscp.net/eng/docs/guide_windows_openssh_server[OpenSSH for Windows].
-
-The following steps demonstrate how to mount host folders with SSHFS.
-
-. Run `ifconfig` (or `Get-NetIPAddress` on Windows) to determine the local IP address from the same network segment as your {project} instance.
-
-. Create a mountpoint and mount the shared folder.
-+
-----
-$ minishift ssh "sudo mkdir -p /Users/<username>"
-$ minishift ssh "sudo chown -R docker /Users"
-$ minishift ssh
-$ sshfs <username>@<IP>:/Users/<username>/ /Users
-----
-
-. Verify the share mount.
-+
-----
-$ minishift ssh "ls -al /Users/<username>"
 ----

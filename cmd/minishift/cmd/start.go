@@ -61,6 +61,7 @@ import (
 const (
 	commandName             = "start"
 	defaultInsecureRegistry = "172.30.0.0/16"
+	hostfoldersAutoMountKey = "hostfolders-automount"
 )
 
 var (
@@ -381,9 +382,18 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 }
 
 func autoMountHostFolders(driver drivers.Driver) {
-	if hostfolder.IsAutoMount() && hostfolder.IsHostfoldersDefined() {
-		hostfolder.MountHostfolders(driver)
+	hostFolderManager, err := hostfolder.NewManager(minishiftConfig.InstanceConfig, minishiftConfig.AllInstancesConfig)
+	if err != nil {
+		atexit.ExitWithMessage(1, err.Error())
 	}
+	if isAutoMount() && hostFolderManager.ExistAny() {
+		fmt.Println("-- Mounting host folders")
+		hostFolderManager.MountAll(driver)
+	}
+}
+
+func isAutoMount() bool {
+	return viper.GetBool(hostfoldersAutoMountKey)
 }
 
 func addActiveProfileInformation() {

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2017 Red Hat, Inc.
+Copyright (C) 2018 Red Hat, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,17 +14,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package hostfolder
+package config
 
-import (
-	"github.com/spf13/cobra"
+const (
+	Source     = "source"
+	UncPath    = "uncpath"
+	MountPoint = "mountpoint"
+	UserName   = "username"
+	Password   = "password"
+	Domain     = "domain"
 )
 
-var HostFolderCmd = &cobra.Command{
-	Use:   "hostfolder SUBCOMMAND [flags]",
-	Short: "Manages host folders for the Minishift VM.",
-	Long:  `Manages host folders for the Minishift VM. Use the sub-commands to define, mount, umount, and list host folders.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
-	},
+type HostFolderConfig struct {
+	Name    string
+	Type    string
+	Options map[string]string
+}
+
+func (hf *HostFolderConfig) Option(key string) string {
+	return hf.Options[key]
+}
+
+func (hf *HostFolderConfig) MountPoint() string {
+	return hf.Options[MountPoint]
 }

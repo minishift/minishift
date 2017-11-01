@@ -18,6 +18,7 @@ package config
 
 import (
 	"encoding/json"
+	"github.com/minishift/minishift/pkg/minishift/hostfolder/config"
 	"io/ioutil"
 	"os"
 )
@@ -30,13 +31,13 @@ type InstanceConfigType struct {
 	IsRegistered bool
 	IsRHELBased  bool
 
-	HostFolders []HostFolder
+	HostFolders []config.HostFolderConfig
 }
 
 // Create new object with data if file exists or
 // Create json file and return object if doesn't exists
 func NewInstanceConfig(path string) (*InstanceConfigType, error) {
-	cfg := &InstanceConfigType{HostFolders: []HostFolder{}}
+	cfg := &InstanceConfigType{HostFolders: []config.HostFolderConfig{}}
 	cfg.FilePath = path
 
 	// Check json file existence

@@ -17,24 +17,21 @@ limitations under the License.
 package hostfolder
 
 import (
-	"fmt"
-
 	"github.com/docker/machine/libmachine"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/constants"
-	hostfolderActions "github.com/minishift/minishift/pkg/minishift/hostfolder"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
 
-var hostfolderUmountCmd = &cobra.Command{
-	Use:   "umount HOSTFOLDER_NAME",
-	Short: "Unmount a host folder from the running OpenShift cluster.",
-	Long:  `Unmount a host folder from the running OpenShift cluster. This command does not remove the host folder definition or the host folder itself.`,
+var umountCmd = &cobra.Command{
+	Use:   "umount HOST_FOLDER_NAME",
+	Short: "Umount a host folder from the running Minishift VM.",
+	Long:  `Umount a host folder from the running Minishift VM. This command does not remove the host folder config or the host folder itself.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 1 {
-			atexit.ExitWithMessage(1, "Usage: minishift hostfolder umount HOSTFOLDER_NAME")
+			atexit.ExitWithMessage(1, "Usage: minishift hostfolder umount HOST_FOLDER_NAME")
 		}
 
 		api := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
@@ -49,13 +46,16 @@ var hostfolderUmountCmd = &cobra.Command{
 
 		util.ExitIfNotRunning(host.Driver, constants.MachineName)
 
-		err = hostfolderActions.Umount(host.Driver, args[0])
+		hostFolderManager := getHostFolderManager()
+
+		name := args[0]
+		err = hostFolderManager.Umount(host.Driver, name)
 		if err != nil {
-			atexit.ExitWithMessage(1, fmt.Sprintf("Error unmounting the host folder: %s", err.Error()))
+			atexit.ExitWithMessage(1, err.Error())
 		}
 	},
 }
 
 func init() {
-	HostfolderCmd.AddCommand(hostfolderUmountCmd)
+	HostFolderCmd.AddCommand(umountCmd)
 }

@@ -17,21 +17,23 @@ limitations under the License.
 package hostfolder
 
 import (
-	hostfolderActions "github.com/minishift/minishift/pkg/minishift/hostfolder"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
 
-var hostfolderRemoveCmd = &cobra.Command{
-	Use:   "remove HOSTFOLDER_NAME",
-	Short: "Removes the specified host folder definition.",
-	Long:  `Removes the specified host folder definition. This command does not remove the host folder or any data.`,
+var removeCmd = &cobra.Command{
+	Use:   "remove HOST_FOLDER_NAME",
+	Short: "Removes the specified host folder config.",
+	Long:  `Removes the specified host folder config. This command does not remove the host folder or any data.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 1 {
-			atexit.ExitWithMessage(1, "Usage: minishift hostfolder remove HOSTFOLDER_NAME")
+			atexit.ExitWithMessage(1, "Usage: minishift hostfolder remove HOST_FOLDER_NAME")
 		}
 
-		err := hostfolderActions.Remove(args[0])
+		hostFolderManager := getHostFolderManager()
+
+		name := args[0]
+		err := hostFolderManager.Remove(name)
 		if err != nil {
 			atexit.ExitWithMessage(1, err.Error())
 		}
@@ -39,5 +41,5 @@ var hostfolderRemoveCmd = &cobra.Command{
 }
 
 func init() {
-	HostfolderCmd.AddCommand(hostfolderRemoveCmd)
+	HostFolderCmd.AddCommand(removeCmd)
 }

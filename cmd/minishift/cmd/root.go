@@ -188,7 +188,7 @@ func init() {
 	RootCmd.PersistentFlags().String(profileFlag, constants.DefaultProfileName, "Profile name")
 	RootCmd.AddCommand(configCmd.ConfigCmd)
 	RootCmd.AddCommand(cmdOpenshift.OpenShiftCmd)
-	RootCmd.AddCommand(hostfolderCmd.HostfolderCmd)
+	RootCmd.AddCommand(hostfolderCmd.HostFolderCmd)
 	RootCmd.AddCommand(addon.AddonsCmd)
 	RootCmd.AddCommand(image.ImageCmd)
 	RootCmd.AddCommand(cmdProfile.ProfileCmd)

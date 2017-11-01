@@ -115,3 +115,7 @@ func SplitAndTrim(s string, separator string) ([]string, error) {
 
 	return cleanSplit, nil
 }
+
+func ConvertSlashes(input string) string {
+	return strings.Replace(input, "\\", "/", -1)
+}

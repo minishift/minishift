@@ -17,38 +17,68 @@ limitations under the License.
 package hostfolder
 
 import (
+	"fmt"
 	"github.com/docker/machine/libmachine"
+	"github.com/docker/machine/libmachine/drivers"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/constants"
-	hostfolderActions "github.com/minishift/minishift/pkg/minishift/hostfolder"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
+	"os"
+	"text/tabwriter"
 )
 
-var hostfolderListCmd = &cobra.Command{
+var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "Lists the defined host folders.",
-	Long:  `Lists an overview of the defined host folders that can be mounted to a running OpenShift cluster.`,
+	Long:  `Lists an overview of the defined host folders that can be mounted into the Minishift VM.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		hostFolderManager := getHostFolderManager()
+
 		api := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
 		defer api.Close()
 
-		util.ExitIfUndefined(api, constants.MachineName)
-
-		host, err := api.Load(constants.MachineName)
+		mountInfos, err := hostFolderManager.List(getDriver(api))
 		if err != nil {
 			atexit.ExitWithMessage(1, err.Error())
 		}
 
-		isRunning := util.IsHostRunning(host.Driver)
-		err = hostfolderActions.List(host.Driver, isRunning)
-		if err != nil {
-			atexit.ExitWithMessage(1, err.Error())
+		w := tabwriter.NewWriter(os.Stdout, 4, 8, 3, ' ', 0)
+		fmt.Fprintln(w, "Name\tType\tSource\tMountpoint\tMounted")
+
+		for _, info := range mountInfos {
+			mounted := "N"
+			if info.Mounted {
+				mounted = "Y"
+			}
+
+			fmt.Fprintln(w,
+				fmt.Sprintf("%s\t%s\t%s\t%s\t%s",
+					info.Name,
+					info.Type,
+					info.Source,
+					info.MountPoint,
+					mounted))
 		}
+
+		w.Flush()
 	},
 }
 
+func getDriver(api *libmachine.Client) drivers.Driver {
+	if !util.VMExists(api, constants.MachineName) {
+		return nil
+	}
+
+	host, err := api.Load(constants.MachineName)
+	if err != nil {
+		return nil
+	}
+
+	return host.Driver
+}
+
 func init() {
-	HostfolderCmd.AddCommand(hostfolderListCmd)
+	HostFolderCmd.AddCommand(listCmd)
 }

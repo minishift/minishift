@@ -12,7 +12,7 @@ toc::[]
 [[setup-driver-plugin-overview]]
 == Overview
 {project} uses Docker Machine and its driver plug-in architecture to provide a consistent way to manage the OpenShift VM.
-{project} embeds VirtualBox and VMware Fusion drivers so no additional steps are required to use them.
+{project} embeds the VirtualBox driver plugin. No additional steps are required to use it.
 
 However, other drivers require manual installation and setup that are described in the following sections.
 

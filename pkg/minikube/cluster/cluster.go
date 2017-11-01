@@ -397,6 +397,7 @@ func getDriverOptions(config MachineConfig) (drivers.DriverOptions, error) {
 
 		return createDriverOptions(d, machineConfigOptions)
 	case "vmwarefusion":
+		fmt.Println("VMWare Fusion driver will be deprecated soon. Please consider using other drivers.")
 		if minishiftOs.CurrentOS() != minishiftOs.DARWIN {
 			atexit.ExitWithMessage(1, "vmwarefusion driver is only supported on macOS hosts.")
 		}

@@ -15,46 +15,54 @@ A profile is an instance of the Minishift VM along with all of its configuration
 The profile feature allows you to create and manage these isolated instances of Minishift.
 
 Each {project} profile is created with its own configuration (memory, CPU, disk size, add-ons, and so on) and completely independent of other profiles.
-See xref:../using/basic-usage.adoc#environment-variables[environment variables], if you want to apply some common configurations (CPU, memory etc) to all profiles.
+Refer to the use of xref:../using/basic-usage.adoc#environment-variables[environment variables] if you want to make sure that certain configuration settings, for example `cpus` or `memory`, get applied to all profiles.
 
-The current profile being used is called the active profile.
-Unless the global `--profile` flag is used, {project} commands are executed against the active profile.
-You can determine the active profile by using the xref:../command-ref/minishift_profile_list.adoc#[`minishift profile list`] command. 
-You can execute single commands against a non-active profile, by using the `--profile` flag.
-Example:
+The _active_ profile is the profile against which all commands are executed, unless the global `--profile` flag is used.
+You can determine the active profile by using the xref:../command-ref/minishift_profile_list.adoc#[`minishift profile list`] command.
+You can execute single commands against a non-active profile by using the `--profile` flag, for example `minishift --profile profile-demo console` to open the OpenShift console for the specified _profile-demo_ profile.
 
-----
-$ minishift --profile my-profile console --url
-----
-
-On top of the `--profile` flag, there are xref:../command-ref/minishift_profile.adoc#[commands] for listing, deleting and setting the active profile.
+On top of the `--profile` flag, there are xref:../command-ref/minishift_profile.adoc#[commands] for xref:../command-ref/minishift_profile_list.adoc#[listing], xref:../command-ref/minishift_profile_delete.adoc#[deleting] and xref:../command-ref/minishift_profile_set.adoc#[setting] the active profile.
 These commands are described in the following sections.
 
 [[creating-profiles]]
 == Creating Profiles
 
-A profile is created when the configuration files associated with it gets created.
 There are two ways to create a new profile.
 
 ==== Using The `--profile` Flag
 
-When you run any {project} command with the `--profile` flag the profile gets created if it does not exist.
-
-Example:
-----
-$ minishift --profile PROFILE_NAME config set PROPERTY_NAME PROPERTY_VALUE
-----
-
-=== Using `profile set` Command
-
-You can run the `profile set` command for a non existing profile to set it as the active profile.
-The profile is automatically created when you subsequently run any `minishift` command.
-See xref:../command-ref/minishift_profile_set.adoc#[`minishift profile set`].
-
-Example:
+When you run any {project} command with the `--profile` flag the profile gets created if it does not exist, for example:
 
 ----
-$ minishift profile set PROFILE_NAME
+$ minishift --profile profile-demo start
+-- Checking if requested hypervisor 'xhyve' is supported on this platform ... OK
+-- Checking if xhyve driver is installed ...
+   Driver is available at /usr/local/bin/docker-machine-driver-xhyve
+   Checking for setuid bit ... OK
+-- Checking the ISO URL ... OK
+-- Starting local OpenShift cluster using 'xhyve' hypervisor ...
+-- Minishift VM will be configured with ...
+   Memory:    2 GB
+   vCPUs :    2
+   Disk size: 20 GB
+...
+----
+
+See also xref:../using/profiles.adoc#example-workflows-profiles[workflow for profile configuration].
+
+[NOTE]
+====
+ A profile automatically becomes the active profile when a {project} instance is started successfully via `minishift start`.
+====
+
+=== Using the `profile set` Command
+
+The other option to create a profile is to use the `profile set` command.
+If the specified profile does not exist, it is implicitly created:
+
+----
+$ minishift profile set demo
+Profile 'demo' set as active profile
 ----
 
 [NOTE]
@@ -63,43 +71,29 @@ The default profile is *minishift*.
 It will be present by default and it does not need to be created.
 ====
 
-[[starting-a-profile]]
-== Starting A Profile
-
-You can start the active profile with xref:../command-ref/minishift_start.adoc#[`minishift start`] command.
-To start a non active profile, you need to use the `--profile` flag.
-
-To start a non active profile, run:
-
-----
-$ minishift --profile PROFILE_NAME start
-----
-
-NOTE: A profile is automatically set to active profile when the VM instance is started successfully.
-
 [[listing-profiles]]
 == Listing Profiles
 
 You can list all existing profiles with the xref:../command-ref/minishift_profile_list.adoc#[`minishift profile list`] command.
-You can also see the active profile is highlighted in the output.
-
-To list profiles, run:
+You can also see the active profile highlighted in the output.
 
 ----
 $ minishift profile list
+- minishift     Running     	(Active)
+- profile-demo  Does Not Exist
 ----
 
 [[switching-profiles]]
 == Switching Profiles
 
-You can switch between profiles with the xref:../command-ref/minishift_profile_set.adoc#[`minishift profile set`] command.
-Only one profile can be active at any time.
-
-To switch between profiles, run:
+To switch between profiles use the xref:../command-ref/minishift_profile_set.adoc#[`minishift profile set`] command:
 
 ----
-$ minishift profile set PROFILE_NAME
+$ minishift profile set profile-demo
+Profile 'profile-demo' set as active profile
 ----
+
+NOTE: Only one profile can be active at any time.
 
 [[deleting-profiles]]
 == Deleting Profiles
@@ -107,31 +101,36 @@ $ minishift profile set PROFILE_NAME
 To delete a profile, run:
 
 ----
-$ minishift profile delete PROFILE_NAME
+$ minishift profile delete profile-demo
+You are deleting the active profile. It will remove the VM and all related artifacts. Do you want to continue [y/N]?: y
+Deleted:  /Users/john/.minishift/profiles/profile-demo
+Profile 'profile-demo' deleted successfully
+Switching to default profile 'minishift' as the active profile.
 ----
 
 NOTE: The default profile *minishift* cannot be deleted.
 
 [[example-workflows-profiles]]
-== Example Workflows
+== Example Workflow for Profile Configuration
 
-To create a new profile with specific configurations, run:
+You have two options to create a new profile and configure its xref:../using/basic-usage.adoc#persistent-configuration[persistent configuration].
+The first option is to implicitly create the new profile by making it the active profile using the `profile set` command.
+Once the profile is active you can run any `minishift config` command.
+Lastly, start the instance:
 
 ----
-$ minishift profile set foo
-$ minishift config set memory 4GB
-$ minishift config set cpus 2
+$ minishift profile set profile-demo
+$ minishift config set memory 8GB
+$ minishift config set cpus 4
 $ minishift addon enable anyuid
 $ minishift start
 ----
 
-The alternative is to execute a series of commands each specifying the targeted profile explicitly using the `--profile` flag.
-
-Example:
+The alternative is to execute a series of commands each specifying the targeted profile explicitly using the `--profile` flag:
 
 ----
-$ minishift --profile foo config set memory 4GB
-$ minishift --profile foo config set cpus 2
-$ minishift --profile foo addon enable anyuid
-$ minishift --profile foo minishift start
+$ minishift --profile profile-demo config set memory 8GB
+$ minishift --profile profile-demo config set cpus 4
+$ minishift --profile profile-demo addon enable anyuid
+$ minishift --profile profile-demo minishift start
 ----

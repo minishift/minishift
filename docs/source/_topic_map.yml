@@ -27,6 +27,8 @@ Topics:
         File: index
       - Name: Basic Usage
         File: basic-usage
+      - Name: Profiles
+        File: profiles
       - Name: Image Caching
         File: image-caching
       - Name: Add-ons
@@ -35,8 +37,6 @@ Topics:
         File: host-folders
       - Name: Minishift Docker Daemon
         File: docker-daemon
-      - Name: Profiles
-        File: profiles
       - Name: Experimental Features
         File: experimental-features
   - Name: Interacting with OpenShift

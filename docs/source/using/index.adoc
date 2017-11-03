@@ -4,13 +4,13 @@ include::variables.adoc[]
 :icons:
 
 This section describes how to use the {project} CLI.
-It covers the basic commands as well as advanced features like image caching, add-ons, host folders and profiles.
+It covers the basic commands as well as advanced features like profiles, image caching, add-ons and host folders.
 
 - xref:../using/basic-usage.adoc#[Basic Usage]
+- xref:../using/profiles.adoc#[Profiles]
 - xref:../using/image-caching.adoc#[Image Caching]
 - xref:../using/addons.adoc#[Add-ons]
 - xref:../using/host-folders.adoc#[Host Folders]
-- xref:../using/profiles.adoc#[Profiles]
 - xref:../using/docker-daemon.adoc#[{project} Docker Daemon]
 - xref:../using/experimental-features.adoc#[Experimental Features]
 

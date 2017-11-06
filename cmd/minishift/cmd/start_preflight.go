@@ -111,7 +111,7 @@ func preflightChecksBeforeStartingHost() {
 
 	preflightCheckSucceedsOrFails(
 		configCmd.SkipCheckIsoUrl.Name,
-		checkIsoUrl,
+		checkIsoURL,
 		"Checking the ISO URL",
 		false, configCmd.WarnCheckIsoUrl.Name,
 		"See the 'Basic Usage' topic (https://docs.openshift.org/latest/minishift/using/basic-usage.html) for more information")
@@ -467,15 +467,21 @@ func isMounted(driver drivers.Driver, mountpoint string) (bool, error) {
 }
 
 // checkIsoUrl checks the Iso url and returns true if the iso file exists
-func checkIsoUrl() bool {
+func checkIsoURL() bool {
 	isoUrl := viper.GetString(configCmd.ISOUrl.Name)
 	for _, isoAlias := range constants.ValidIsoAliases {
 		if isoUrl == isoAlias {
 			return true
 		}
 	}
+
 	if !strings.HasSuffix(isoUrl, ".iso") {
 		return false
+	}
+
+	match, _ := regexp.MatchString(`^https?://`, isoUrl)
+	if match {
+		return true
 	}
 
 	if runtime.GOOS == "windows" {
@@ -490,7 +496,6 @@ func checkIsoUrl() bool {
 		}
 	}
 
-	fmt.Printf("\n   Checking if %s exists ... ", strings.TrimPrefix(isoUrl, "file://"))
 	_, err := os.Stat(strings.TrimPrefix(isoUrl, "file://"))
 	if err != nil {
 		return false

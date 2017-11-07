@@ -72,7 +72,7 @@ $ minishift config set warn-check-xhyve-driver true
 - For Hyper-V on Windows, run the following command:
 +
 ----
-$ minishift config set warn-check-hyperv-driver true
+C:\> minishift.exe config set warn-check-hyperv-driver true
 ----
 
 [[persistent-storage-check]]

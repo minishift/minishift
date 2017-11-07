@@ -144,13 +144,13 @@ If you get the error _The specified patch need to be a valid JSON._ when you run
 For example, if you use PowerShell on Windows 7 or 10, modify the above command to:
 
 ----
-$ minishift openshift config set --patch '{\"corsAllowedOrigins\": [\".*\"]}'
+PS> minishift.exe openshift config set --patch '{\"corsAllowedOrigins\": [\".*\"]}'
 ----
 
-If you use Command Prompt you might need to use:
+If you use Command Prompt, you might need to use the following:
 
 ----
-$ minishift openshift config set --patch "{\"corsAllowedOrigins\": [\".*\"]}"
+C:\> minishift.exe openshift config set --patch "{\"corsAllowedOrigins\": [\".*\"]}"
 ----
 
 ====

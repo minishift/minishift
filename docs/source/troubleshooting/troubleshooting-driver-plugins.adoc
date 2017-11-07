@@ -192,7 +192,7 @@ If you are using PowerShell, you can add yourself to the Hyper-V Administrators 
 . As an administrator, run the following command:
 +
 ----
-([adsi]”WinNT://./Hyper-V Administrators,group”).Add(“WinNT://$env:UserDomain/$env:Username,user”)
+PS> ([adsi]”WinNT://./Hyper-V Administrators,group”).Add(“WinNT://$env:UserDomain/$env:Username,user”)
 ----
 
 . Log out and log back in for the change to take effect.

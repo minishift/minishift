@@ -26,6 +26,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/minishift/minishift/pkg/util/filehelper"
+
 	"github.com/docker/machine/libmachine/drivers"
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
 	validations "github.com/minishift/minishift/pkg/minishift/config"
@@ -489,19 +491,19 @@ func checkIsoURL() bool {
 		if !match {
 			return false
 		}
+		if filehelper.Exists(strings.Replace(strings.TrimPrefix(isoUrl, "file://"), "/", "\\", -1)) {
+			return true
+		}
 	} else {
 		match, _ := regexp.MatchString("^file:///.+", isoUrl)
 		if !match {
 			return false
 		}
+		if filehelper.Exists(strings.TrimPrefix(isoUrl, "file://")) {
+			return true
+		}
 	}
-
-	_, err := os.Stat(strings.TrimPrefix(isoUrl, "file://"))
-	if err != nil {
-		return false
-	}
-
-	return true
+	return false
 }
 
 func checkVMDriver() bool {

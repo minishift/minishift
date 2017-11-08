@@ -41,6 +41,7 @@ import (
 	"regexp"
 
 	"github.com/minishift/minishift/pkg/util"
+	minishiftStrings "github.com/minishift/minishift/pkg/util/strings"
 	"github.com/minishift/minishift/pkg/version"
 )
 
@@ -191,8 +192,13 @@ func GetExecutionContext(ip string, routingSuffix string, addOnEnv []string, ocR
 		if !match {
 			return nil, errors.New(fmt.Sprintf("Add-on interpolation variables need to be specified in the format <key>=<value>.'%s' is not.", env))
 		}
-		key, value := splitKeyValue(env, "=")
 
+		envTokens, err := minishiftStrings.SplitAndTrim(env, "=")
+		if err != nil {
+			return nil, err
+		}
+
+		key, value := envTokens[0], envTokens[1]
 		if strings.HasPrefix(value, envPrefix) {
 			if os.Getenv(strings.TrimPrefix(value, envPrefix)) != "" {
 				value = os.Getenv(strings.TrimPrefix(value, envPrefix))
@@ -205,11 +211,6 @@ func GetExecutionContext(ip string, routingSuffix string, addOnEnv []string, ocR
 	}
 
 	return context, nil
-}
-
-func splitKeyValue(s string, separator string) (string, string) {
-	x := strings.Split(s, separator)
-	return strings.TrimSpace(x[0]), strings.TrimSpace(x[1])
 }
 
 // TODO - persistent volume creation should really be fixed upstream, aka 'cluster up'. See https://github.com/openshift/origin/issues/14076 (HF)

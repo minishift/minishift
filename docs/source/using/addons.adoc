@@ -171,7 +171,7 @@ $ minishift addons apply acme                                 // <2>
 If the environment variable is not set not, interpolation does not occur.
 <2> When the add-on is applied, each occurrence of `#{PROJECT_USER}` within an add-on command gets replaced with the value of the environment variable `USER`.
 
-As add-on developer, you can enforce that a variable value is provided when the add-on gets applied by adding the varaible name to the _Required-Vars_ metadata header.
+As an add-on developer, you can enforce that a variable value is provided when the add-on gets applied by adding the variable name to the _Required-Vars_ metadata header.
 Multiple variables need to be comma separated.
 
 ----
@@ -179,6 +179,21 @@ Multiple variables need to be comma separated.
 # Description: ACME add-on
 # Required-Vars: PROJECT_USER
 ----
+
+You can set a default value for a variable using the _Var-Defaults_ metadata header.
+_Var-Defaults_ needs to be specified in the format of `<key>=<value>`.
+Multiple default key/value pairs can be separated by comma.
+
+NOTE: `=` and `,` are metacharacters and cannot be used as part of keys or values.
+
+----
+# Name: acme
+# Description: ACME add-on
+# Required-Vars: PROJECT_USER
+# Var-Defaults: PROJECT_USER=john
+----
+
+NOTE: Variable values specified via the command line using the `--addon-env` or set via `minishift config set addon-env` have precedence over _Var-Defaults_.
 
 [[default-addons]]
 == Default Add-ons

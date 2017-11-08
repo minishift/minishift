@@ -18,67 +18,45 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
-	"path/filepath"
-	"strings"
-	"testing"
-
-	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
-	"github.com/spf13/viper"
 )
 
-func TestIsoUrl(t *testing.T) {
-	var dummyIsoFile = createDummyIsoFile()
-
-	var isoURLCheck = []struct {
-		in  string
-		out bool
-	}{
-		{"http://github.com/minishift/minishift-centos/minishift-centos.iso", true},
-		{"https://github.com/minishift//minishift/minishift-b2d.iso", true},
-		{"blahblah/http://b2d.iso", false},
-		{"blabityblah", false},
-		{strings.Replace("file://"+dummyIsoFile, "\\", "/", -1), true},
-		{"file://home/bar/baz.iso", false},
-		{"file://minishift/hoxier/foo", false},
-		{"/home/joey/chandler/iso.iso", false},
-		{"file:///home/homie/foo", false},
-		{"ram/rahim/anthony.iso", false},
-		{"gopher/minishift/b2d", false},
-		{"file://d:/gopher/minishift/b2d", false},
-		{"c:/gohome/foo.iso", false},
-		{"http:/github.com/minishift/minishift.iso", false},
-		{"file:/home/gopher/minishift-b2d.iso", false},
-	}
-
-	for _, urlTest := range isoURLCheck {
-		viper.Set(configCmd.ISOUrl.Name, urlTest.in)
-		defer viper.Reset()
-		ret := checkIsoURL()
-		if ret != urlTest.out {
-			t.Errorf("Expected '%t' for given url '%s'. Got '%t'.", urlTest.out, urlTest.in, ret)
-		}
-	}
-
-	defer removeDummyIsoFile(dummyIsoFile)
+type testData struct {
+	in  string
+	out bool
 }
 
-func createDummyIsoFile() string {
-	dir, err := ioutil.TempDir("", "minishift-test-")
-	if err != nil {
-		fmt.Errorf("Failed to create directory")
-	}
-	f, err := os.Create(filepath.Join(dir, "foo.iso"))
+var sharedIsoURLChecks = []testData{
+	// valid URLs (based on protocol only)
+	{"http://github.com/minishift/minishift-centos/minishift-centos.iso", true},
+	{"https://github.com/minishift/minishift/minishift-b2d.iso", true},
+
+	// invalid URLs
+	{"http:/github.com/minishift/minishift.iso", false},
+
+	// wrong file protocol and non existent paths
+	{"file:/home/gopher/minishift-b2d.iso", false},
+	{"file://home/bar/baz.iso", false},
+	{"file://minishift/hoxier/foo", false},
+
+	// no protocol
+	{"ram/rahim/anthony.iso", false},
+	{"blahblah/http://b2d.iso", false},
+	{"blabityblah", false},
+	{"/home/joey/chandler/iso.iso", false},
+}
+
+func createDummyIsoFile(dummyIsoFile string) error {
+	f, err := os.Create(dummyIsoFile)
 	defer f.Close()
 	if err != nil {
-		fmt.Errorf("Failed to create dummy ISO file")
+		return err
 	}
-	return filepath.Join(dir, "foo.iso")
+	return nil
 }
 
 func removeDummyIsoFile(dummyIsoFile string) {
-	err := os.RemoveAll(strings.TrimSuffix(dummyIsoFile, "foo.iso"))
+	err := os.Remove(dummyIsoFile)
 	if err != nil {
 		fmt.Errorf("Failed to remove temporary directory")
 	}

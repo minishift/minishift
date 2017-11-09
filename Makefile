@@ -198,12 +198,21 @@ test: vendor $(ADDON_ASSET_FILE)
 .PHONY: integration
 integration: $(MINISHIFT_BINARY)
 	mkdir -p $(INTEGRATION_TEST_DIR)
-	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) --run-before-feature="$(RUN_BEFORE_FEATURE)" --tags basic $(GODOG_OPTS)
+	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) \
+	--run-before-feature="$(RUN_BEFORE_FEATURE)" --tags basic $(GODOG_OPTS)
 
 .PHONY: integration_all
 integration_all: $(MINISHIFT_BINARY)
 	mkdir -p $(INTEGRATION_TEST_DIR)
-	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) --run-before-feature="$(RUN_BEFORE_FEATURE)" $(GODOG_OPTS) --tags ~coolstore
+	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) \
+	--run-before-feature="$(RUN_BEFORE_FEATURE)" $(GODOG_OPTS) --tags ~coolstore
+
+.PHONY: integration_pr
+integration_pr: $(MINISHIFT_BINARY)
+	mkdir -p $(INTEGRATION_TEST_DIR)
+	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) \
+	--run-before-feature="$(RUN_BEFORE_FEATURE)" $(GODOG_OPTS) --tags basic,cmd-addons,cmd-config,cmd-openshift,cmd-version,flags,profile,provision-earlier-version,proxy
+
 
 .PHONY: fmt
 fmt:

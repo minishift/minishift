@@ -298,7 +298,7 @@ function build_and_test() {
   cd $GOPATH/src/github.com/minishift/minishift
   make prerelease synopsis_docs link_check_docs
   # Run integration test with 'kvm' driver
-  MINISHIFT_VM_DRIVER=kvm make integration_all
+  MINISHIFT_VM_DRIVER=kvm make integration_pr
   echo "CICO: Tests ran successfully"
 
   artifacts_upload_on_pr_and_master_trigger $1;

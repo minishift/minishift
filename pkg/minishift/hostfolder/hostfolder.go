@@ -129,6 +129,26 @@ func SetupUsers(allInstances bool) error {
 	return nil
 }
 
+func SetupUsersViaFlag(allInstances bool, mountpoint string, username string, password string, domain string) error {
+	name := "Users"
+	if isHostfolderDefinedByName(name) {
+		return fmt.Errorf("Already have a host folder defined for: %s", name)
+	}
+	password, err := util.EncryptText(password)
+	if err != nil {
+		return err
+	}
+
+	addToConfig(newCifsHostFolder(
+		name,
+		"[determined on startup]",
+		mountpoint,
+		username, password, domain),
+		allInstances)
+
+	return nil
+}
+
 func Add(name string, allInstances bool) error {
 	if isHostfolderDefinedByName(name) {
 		return fmt.Errorf("Already have a host folder defined for: %s", name)
@@ -142,6 +162,30 @@ func Add(name string, allInstances bool) error {
 	username := util.ReadInputFromStdin("Username")
 	password := util.ReadPasswordFromStdin("Password")
 	domain := util.ReadInputFromStdin("Domain")
+	password, err := util.EncryptText(password)
+	if err != nil {
+		return err
+	}
+
+	addToConfig(newCifsHostFolder(
+		name,
+		uncpath,
+		mountpoint,
+		username, password, domain),
+		allInstances)
+
+	return nil
+}
+
+func AddViaFlag(name string, allInstances bool, uncpath string, username string, password string, mountpoint string, domain string) error {
+	if isHostfolderDefinedByName(name) {
+		return fmt.Errorf("Already have a host folder defined for: %s", name)
+	}
+
+	if len(uncpath) == 0 {
+		return fmt.Errorf("No remote path has been given")
+	}
+
 	password, err := util.EncryptText(password)
 	if err != nil {
 		return err

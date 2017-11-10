@@ -11,9 +11,7 @@ toc::[]
 [[add-ons-overview]]
 == Overview
 
-NOTE: This feature is still considered experimental and might change in future releases.
-
-{project} allows to extend the vanilla OpenShift setup provided by *cluster up* with an add-on mechanism.
+{project} allows you to extend the vanilla OpenShift setup provided by *cluster up* with an add-on mechanism.
 
 Add-ons are directories that contain a text file with the *_.addon_* extension.
 The directory can also contain other resource files such as JSON template files.
@@ -38,7 +36,10 @@ oc adm policy add-scc-to-group anyuid system:authenticated                      
 <4> (Optional) OpenShift version required to run a specific add-on. See xref:../using/addons.adoc#addon-openshift-version-semantics[OpenShift Version Semantic]
 <5> Actual add-on command. In this case, the command executes the *oc* binary.
 
-NOTE: Comment lines, starting with the '#' character, can be inserted at anywhere in the file.
+[NOTE]
+====
+Comment lines, starting with the '#' character, can be inserted anywhere in the file.
+====
 
 Enabled add-ons are applied during xref:../command-ref/minishift_start.adoc#[`minishift start`], immediately after the initial cluster provisioning is successfully completed.
 
@@ -46,7 +47,8 @@ Enabled add-ons are applied during xref:../command-ref/minishift_start.adoc#[`mi
 == OpenShift-Version Semantics
 
 As part of the add-on metadata you can specify the OpenShift version which needs to be running in order to apply the add-on.
-To do so you can specify the optional _OpenShift-Version_ metadata field. The semantics are as follow:
+To do so, you can specify the optional *OpenShift-Version* metadata field.
+The semantics are as follows:
 
 [cols="1,3"]
 |===
@@ -57,26 +59,35 @@ To do so you can specify the optional _OpenShift-Version_ metadata field. The se
 | >=3.5.0, <=3.8.0 | OpenShift version should higher or equal to 3.5.0 but lower or equal to 3.8.0.
 |===
 
-NOTE: If the metadata field _OpenShift-Version_ is not specified in the add-on header, the add-on is applied against any version of OpenShift.
+[NOTE]
+====
+If the metadata field *OpenShift-Version* is not specified in the add-on header, the add-on can be applied against any version of OpenShift.
+====
 
-NOTE: OpenShift-Version supports only versions in the form of <major>.<minor>.<patch>.
+[NOTE]
+====
+*OpenShift-Version* only supports versions in the form of <major>.<minor>.<patch>.
+====
 
 [[addon-commands]]
 == Add-on Commands
 
 This section describes the commands that an add-on file can contain.
-They are forming a mini-DSL for {project} add-ons:
+They form a small domain-specific language for {project} add-ons:
 
 ssh::
 If the add-on command starts with `ssh`, you can run any command within the {project}-managed VM.
 This is similar to running xref:../command-ref/minishift_ssh.adoc#[`minishift ssh`] and then executing any command on the VM.
-For more information about the `minishift ssh` command usage, see xref:../using/basic-usage.adoc#connecting-with-ssh[Connecting to the {project} VM with SSH].
+For more information about `minishift ssh` command usage, see xref:../using/basic-usage.adoc#connecting-with-ssh[Connecting to the {project} VM with SSH].
 
 oc::
-If the add-on command starts with `oc`, it uses the *oc* binary that is cached on your host to execute the specified `oc` command.
-This is similar to running `oc --as system:admin ...` from the command-line.
+If the add-on command starts with `oc`, it uses the `oc` binary that is cached on your host to execute the specified `oc` command.
+This is similar to running `oc --as system:admin ...` from the command line.
 +
-NOTE: The `oc` command is executed as *system:admin*.
+[NOTE]
+====
+The `oc` command is executed as *system:admin*.
+====
 
 openshift::
 If the add-on command starts with `openshift`, you can run the *openshift* binary within the container that runs OpenShift.
@@ -96,7 +107,10 @@ sleep::
 If the add-on command starts with `sleep`, it waits for the specified number of seconds.
 This can be useful in cases where you know that a command such as `oc` might take a few seconds before a certain resource can be queried.
 
-NOTE: Trying to use an undefined command will cause an error when the add-on gets parsed.
+[NOTE]
+====
+Trying to use an undefined command will cause an error when the add-on gets parsed.
+====
 
 [[addon-variable-interpolation]]
 == Variable Interpolation
@@ -159,9 +173,13 @@ $ minishift config set addon-env PROJECT_USER=john
 $ minishift addons apply acme
 ----
 
-TIP: Multiple variables need to be comma separated when the xref:../command-ref/minishift_config_set.adoc#[`minishift config set`] is used.
+[TIP]
+====
+Multiple variables need to be comma separated when the xref:../command-ref/minishift_config_set.adoc#[`minishift config set`] command is used.
+====
 
-There is also the possibility to dynamically interpolate a variable with the value of an environment variable at the time the add-on gets applied. For this the variable value needs to be prefixed with _env_.
+There is also the possibility to dynamically interpolate a variable with the value of an environment variable at the time the add-on gets applied.
+For this the variable value needs to be prefixed with _env_.
 
 ----
 $ minishift config set addon-env PROJECT_USER=env.USER        // <1>
@@ -191,9 +209,15 @@ Multiple default key/value pairs need to be comma separated.
 # Var-Defaults: PROJECT_USER=john
 ----
 
-NOTE: `=` and `,` are metacharacters and cannot be used as part of keys or values.
+[NOTE]
+====
+`=` and `,` are metacharacters and cannot be used as part of keys or values.
+====
 
-NOTE: Variable values specified via the command line using the `--addon-env` or set via `minishift config set addon-env` have precedence over _Var-Defaults_.
+[NOTE]
+====
+Variable values specified via the command line using the `--addon-env` or set via `minishift config set addon-env` have precedence over _Var-Defaults_.
+====
 
 [[default-addons]]
 == Default Add-ons
@@ -212,7 +236,8 @@ To view the list of installed add-ons, you can then run:
 $ minishift addons list --verbose=true
 ----
 
-This command prints a list of installed add-ons. You should at least see the *anyuid* add-on listed.
+This command prints a list of installed add-ons.
+You should at least see the *anyuid* add-on listed.
 This is an important add-on that allows you to run images that do not use a pre-allocated UID.
 By default, this is not allowed in OpenShift.
 
@@ -253,7 +278,8 @@ $ minishift addons enable registry --priority=5
 ----
 
 The add-on priority attribute determines the order in which add-ons are applied.
-By default, an add-on has the priority 0. Add-ons with a lower priority value are applied first.
+By default, an add-on has the priority 0.
+Add-ons with a lower priority value are applied first.
 
 In the following example, the *anyuid*, *registry*, and *eap* add-ons are enabled with the respective priorities of 0, 5 and 10.
 This means that *anyuid* is applied first, followed by *registry*, and lastly the *eap* add-on.
@@ -268,7 +294,10 @@ $ minishift addons list
 - eap            : enabled    P(10)
 ----
 
-NOTE: If two add-ons have the same priority the order in which they are getting applied is not determined.
+[NOTE]
+====
+If two add-ons have the same priority the order in which they are getting applied is not determined.
+====
 
 [[apply-addons]]
 == Applying Add-ons
@@ -297,7 +326,7 @@ To remove multiple add-ons with a single command, specify the add-on names separ
 The following example shows how to explicitly remove the *admin-user* add-on.
 
 [[example-remove-admin-user]]
-.Example: Removing admin-user add-ons
+.Example: Removing admin-user add-on
 
 ----
 $ minishift addons remove admin-user
@@ -349,7 +378,7 @@ $ minishift addons install <ADDON_DIR_PATH>
 
 [TIP]
 ====
-You can also write metadata in multiple line.
+You can also write metadata with multiple lines.
 
 [[example-multiline-metadata]]
 .Example: Add-on definition which contain multiline description
@@ -364,9 +393,12 @@ You can also write metadata in multiple line.
 ----
 ====
 
-NOTE: You can also edit your add-on directly in the {project} add-on install directory *_$MINISHIFT_HOME/addons_*.
+[NOTE]
+====
+You can also edit your add-on directly in the {project} add-on install directory *_$MINISHIFT_HOME/addons_*.
 Be aware that if there is an error in the add-on, it will not show when you run any `addons` commands, and it will not be applied during the `minishift start` process.
+====
 
 To provide add-on remove instructions, you can create text file with the extension *_.addon.remove_*, for example *_admin-user.addon.remove_*.
 Similar to the *_.addon_* file, it needs the *Name* and *Description* metadata fields.
-If a *_.addon.remove_* file exist, it can be applied via the xref:../using/addons.adoc#remove-addons[`remove`] command.
+If a *_.addon.remove_* file exists, it can be applied via the xref:../using/addons.adoc#remove-addons[`remove`] command.

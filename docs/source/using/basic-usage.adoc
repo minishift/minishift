@@ -77,7 +77,7 @@ For more details about using {project} to manage your local OpenShift cluster, s
 
 The xref:../command-ref/minishift_start.adoc#[`minishift start`] command creates and configures the {project} VM and provisions a local, single-node OpenShift cluster within the {project} VM.
 
-The command also copies the *oc* binary to your host so that you can interact with OpenShift through the `oc` command-line tool or through the Web console, which can be accessed through the URL provided in the output of the `minishift start` command.
+The command also copies the *oc* binary to your host so that you can interact with OpenShift through the `oc` command line tool or through the Web console, which can be accessed through the URL provided in the output of the `minishift start` command.
 
 [[minishift-stop-overview]]
 === {project} stop Command
@@ -116,7 +116,10 @@ This ISO image is provided by link:https://github.com/kubernetes/minikube/[Minik
 Minikube ISO image also provides alternate container runtime e.g. cri-o and rkt along with docker.
 Please check link:https://github.com/kubernetes/minikube/blob/master/docs/contributors/minikube_iso.md[Minikube documentation] for details.
 
-NOTE: Minikube ISO image use is experimental in {project}. Work is in progress to make it as stable as CentOS and Boot2Docker ISO images.
+[NOTE]
+====
+Minikube ISO image use is experimental in {project}. Work is in progress to make it as stable as CentOS and Boot2Docker ISO images.
+====
 
 By default, {project} uses the {project} Boot2Docker ISO image.
 To choose the {project} CentOS ISO image instead, you can do one of the following:
@@ -140,20 +143,25 @@ $ minishift start --iso-url https://github.com/minishift/minishift-centos-iso/re
 ====
 The path given for a file URI must be an absolute path.
 ====
-- On GNU/Linux or macOS, the path must begin with *_/_*. For example:
+- On Linux or macOS, the path must begin with *_/_*.
+For example:
 +
 ----
 $ minishift start --iso-url file:///path/to/image.iso
 ----
 
-- On Windows, the path must begin with a drive letter (*_C:_*, *_D:_*). For example:
+- On Windows, the path must begin with a drive letter (*_C:_*, *_D:_*).
+For example:
 +
 ----
 C:\> minishift.exe start --iso-url file://c:/path/to/image.iso
 ----
 
-NOTE: You cannot run {project} with both ISO images concurrently.
+[NOTE]
+====
+You cannot run {project} with both ISO images concurrently.
 To switch between ISO images, delete the {project} instance and start a new instance with the ISO image that you want to use.
+====
 
 [[runtime-options]]
 == Runtime Options
@@ -163,7 +171,7 @@ The runtime behavior of {project} can be controlled through flags, environment v
 The following precedence order is applied to control the behavior of {project}.
 Each action in the following list takes precedence over the action below it:
 
-.  Use command-line flags as specified in the xref:flags[Flags] section.
+.  Use command line flags as specified in the xref:flags[Flags] section.
 .  Set environment variables as described in the xref:environment-variables[Environment Variables] section.
 .  Use persistent configuration options as described in the xref:persistent-configuration[Persistent Configuration] section.
 .  Accept the default value as defined by {project}.
@@ -179,7 +187,7 @@ Some of the commonly-used command line flags of the `minishift start` command ar
 [[environment-variables]]
 === Environment Variables
 
-{project} allows you to specify command-line flags you commonly use through environment variables.
+{project} allows you to specify command line flags you commonly use through environment variables.
 To do so, apply the following rules to the flag you want to set as an environment variable.
 
 .  Apply `MINISHIFT_` as a prefix to the flag you want to set as an environment variable.
@@ -192,20 +200,26 @@ A common example is the URL of the ISO to be used.
 Usually, you specify it with the `iso-url` flag of the `minishift start` command.
 Applying the above rules, you can also specify this URL by setting the environment variable as `MINISHIFT_ISO_URL`.
 
-NOTE: You can also use the `MINISHIFT_HOME` environment variable, to choose a different home directory for {project}.
+[NOTE]
+====
+You can also use the `MINISHIFT_HOME` environment variable, to choose a different home directory for {project}.
 By default, {project} places all runtime state into *_~/.minishift_*.
 This environment variable is currently experimental and semantics might change in future releases.
+====
 
 [[persistent-configuration]]
 === Persistent Configuration
 
-Using persistent configuration allows you to control the {project} behavior without specifying actual command line flags, similar to the way you use environment variables.
+Using persistent configuration allows you to control {project} behavior without specifying actual command line flags, similar to the way you use environment variables.
 
 {project} maintains a configuration file in *_$MINISHIFT_HOME/config/config.json_*.
-This file can be used to set commonly-used command-line flags persistently.
+This file can be used to set commonly-used command line flags persistently.
 
-NOTE: Persistent configuration can only be applied to the set of supported configuration options that are listed in the synopsis of the xref:../command-ref/minishift_config.adoc#[`minishift config`] sub-command.
+[NOTE]
+====
+Persistent configuration can only be applied to the set of supported configuration options that are listed in the synopsis of the xref:../command-ref/minishift_config.adoc#[`minishift config`] sub-command.
 This is different from environment variables, which can be used to replace any option of any command.
+====
 
 [[setting-persistent-configuration-values]]
 ==== Setting Persistent Configuration Values
@@ -259,8 +273,8 @@ $ minishift config unset memory
 === Driver-Specific Environment Variables
 
 You can also set driver-specific environment variables.
-Each docker-machine driver supports its own set of options and variables.
-A good starting point is the official docker-machine link:https://docs.docker.com/machine/drivers/[driver documentation].
+Each Docker Machine driver supports its own set of options and variables.
+A good starting point is the official Docker Machine link:https://docs.docker.com/machine/drivers/[driver documentation].
 
 xhyve and KVM documentation is available under their respective GitHub repository link:https://github.com/zchee/docker-machine-driver-xhyve[docker-machine-driver-xhyve] and https://github.com/dhiltgen/docker-machine-kvm[docker-machine-kvm].
 
@@ -272,9 +286,12 @@ $ export XHYVE_EXPERIMENTAL_NFS_SHARE=true
 $ minishift start --vm-driver xhyve
 ----
 
-CAUTION: Driver-specific options might overlap with values specified using {project}-specific flags and environment variables.
+[CAUTION]
+====
+Driver-specific options might overlap with values specified using {project}-specific flags and environment variables.
 Examples are boot2docker URL, memory size, cpu count, and so on.
 In this case, driver-specific environment variables will override {project}-specific settings.
+====
 
 [[persistent-volumes]]
 == Persistent Volumes

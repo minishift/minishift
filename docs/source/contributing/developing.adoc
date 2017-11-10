@@ -19,8 +19,11 @@ The following sections describe how to build and test {project}.
 - Git
 - A recent Go distribution (>=1.8)
 
-NOTE: You should be able to develop {project} on any operating system, such as GNU/Linux, macOS or Windows.
+[NOTE]
+====
+You should be able to develop {project} on Linux, macOS or Windows.
 The Windows operating system might require additional steps or have some limitations.
+====
 
 [[set-up-dev-env]]
 == Setting Up the Development Environment
@@ -55,7 +58,14 @@ $ export GOPATH=$HOME/work
 $ export PATH=$PATH:$GOPATH/bin
 ----
 
-NOTE: On Windows operating systems, you use the UI or use `setx` to set the environment variables.
+[NOTE]
+====
+On Windows operating systems, you use the UI or a shell-specific approach to set environment variables.
+
+For Command Prompt, see link:https://technet.microsoft.com/en-us/library/cc754250.aspx[`set`] and link:https://technet.microsoft.com/en-us/library/cc755104.aspx[`setx`].
+
+For PowerShell, see link:https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_environment_variables[About Environment Variables].
+====
 
 [[cloning-repository]]
 === Cloning the Repository
@@ -90,7 +100,7 @@ Before you can use Glide you need to download and install it from GitHub:
 $ go get github.com/Masterminds/glide
 ----
 
-This will install the *glide* binary into *_$GOPATH/bin_*.
+This will install the `glide` binary into *_$GOPATH/bin_*.
 Make sure to use Glide version 0.12.3 or later.
 
 [[bootstrap-dependencies]]
@@ -119,20 +129,23 @@ If your work requires a change to the dependencies, you need to update the Glide
 . Edit *_glide.yaml_* to change the dependencies as needed.
 
 . Delete *_glide.lock_* and re-create the vendor directory by running `make vendor`.
- Glide will recognize that there is no lock file and recalculate the required dependencies.
+Glide will recognize that there is no lock file and recalculate the required dependencies.
 
 . Check-in the updated *_glide.yaml_* and *_glide.lock_* files.
 
 . Test that everything still compiles with the new lock file in place by running `make clean && make`.
 
-TIP: In some cases the Glide cache located under *_~/.glide/cache_* can get corrupted.
-If you seeing Glide errors during `make vendor`, you can clear the Glide cache via `glide cc`.
+[TIP]
+====
+The Glide cache located under *_~/.glide/cache_* can get corrupted in some cases.
+If you see Glide errors during `make vendor`, you can clear the Glide cache via `glide cc`.
+====
 
 [[build-minishift]]
 == Building {project}
 
 [[build-minishift-binary]]
-=== Building the {project} Binary
+=== Building the minishift Binary
 
 Run the following command to create a platform-specific binary and copy it to *_$GOPATH/bin_*.
 
@@ -140,12 +153,15 @@ Run the following command to create a platform-specific binary and copy it to *_
 $ make
 ----
 
-NOTE: Use `make cross` to cross-compile for other platforms.
+[NOTE]
+====
+Use `make cross` to cross-compile for other platforms.
+====
 
 [[run-minishift-binary]]
-=== Running the {project} Binary
+=== Running the minishift Binary
 
-Start the OpenShift cluster with your built minishift binary:
+Start the OpenShift cluster with your built `minishift` binary:
 
 ----
 $ minishift start
@@ -196,32 +212,35 @@ For more information about test options, run the `go test --help` command and re
 [[integration-tests]]
 === Integration Tests
 
-Integration tests utilize link:https://github.com/DATA-DOG/godog[Godog], which uses Gherkin (Cucumber) to define sets of test cases, in Gherkin terminology known as _features_.
-The features are located in *_test/integration/features_* folder.
+Integration tests utilize link:https://github.com/DATA-DOG/godog[Godog], which uses Gherkin (Cucumber) to define sets of test cases.
+These test cases are known as _features_ in Gherkin terminology.
+Features are located in the *_test/integration/features_* directory.
 Features for {project} follow these basic concepts:
 
 User stories::
 Features which follow a happy path of user.
-For example, _basic.feature_ or _coolstore.feature_.
+For example, *basic.feature* or *coolstore.feature*.
 
 Feature and command coverage::
 Features which focuses on specific fields of {project} functionality or individual commands.
-For example, _proxy.feature_ or _cmd-version.feature_.
-
+For example, *proxy.feature* or *cmd-version.feature*.
 
 [[running-integration-tests]]
 ==== Running Integration Tests
 
-By default, the tests are being run against the binary created by `make build`, which is *_$GOPATH/bin/minishift_*.
+By default, tests are run against the binary created by `make build` (*_$GOPATH/bin/minishift_*).
 To run the basic test, use the following command:
 
 ----
 $ make integration
 ----
 
-NOTE: By default `make integration` only runs tests which are tagged as `@basic`.
+[NOTE]
+====
+`make integration` only runs tests which are tagged as `@basic` by default.
+====
 
-To run all tests, use the following command:
+To run all of the tests, use the following command:
 
 ----
 $ make integration_all
@@ -234,37 +253,37 @@ There is also a `make integration_pr` target which is being run as part of pull 
 
 ===== Additional Parameters
 
-To provide more flexibility the default targets `integration` and `integration_all` can be further customized using several parameters.
+The default targets `integration` and `integration_all` can be further customized using several parameters to provide more flexibility.
 
 MINISHIFT_BINARY::
-Parameter `MINISHIFT_BINARY` can be used to run integration tests against {project} binary located in different directory:
+The `MINISHIFT_BINARY` parameter can be used to run integration tests against a `minishift` binary located in a different directory:
 
 ----
 $ make integration MINISHIFT_BINARY=<path-to-custom-binary>
 ----
 
 TIMEOUT::
-Parameter `TIMEOUT` can be used to override the default timeout of `3600s`.
-To run all the tests with timeout `7200s`, use the following command:
+The `TIMEOUT` parameter can be used to override the default timeout of `3600s`.
+To run all the tests with a timeout of `7200s`, use the following command:
 
 ----
 $ make integration_all TIMEOUT=7200s
 ----
 
 RUN_BEFORE_FEATURE::
-Parameter `RUN_BEFORE_FEATURE` specifies {project} commands to be run before each feature.
-This provides ability to run integration tests against {project} which is not in default state.
+The `RUN_BEFORE_FEATURE` parameter specifies {project} commands to be run before each feature.
+This provides the ability to run integration tests against a {project} instance which is not in its default state.
 When multiple commands are specified, they must be delimited by a semicolon.
-For example, tests can be run against stopped {project} with _image caching_ option turned on by running:
+For example, tests can be run against a stopped {project} instance with the image caching option turned on by running the following:
 
 ----
 $ make integration_all RUN_BEFORE_FEATURE="start; stop; config set image-caching true"
 ----
 
 [[godog-options]]
-==== Using GODOG_OPTS Parameter
+==== Using the GODOG_OPTS Parameter
 
-Parameter `GODOG_OPTS` specifies additional arguments for Godog runner.
+The `GODOG_OPTS` parameter specifies additional arguments for the Godog runner.
 The following options are available:
 
 Tags::
@@ -276,16 +295,16 @@ This can be used to run feature files outside of the *_test/integration/features
 
 Format::
 Use `format` to change the format of Godog's output.
-For example, you can set `progress` format instead of the default `pretty`.
+For example, you can set the format to `progress` instead of the default `pretty`.
 
 Stop-on-failure::
-Set `stop-on-failure` to true to stop integration tests on failure.
+Set `stop-on-failure` to `true` to stop integration tests on failure.
 
 No-colors::
-Set `no-colors` to true to disable ansi colors of Godog's output.
+Set `no-colors` to `true` to disable ANSI colorization of Godog's output.
 
 Definitions::
-Set `definitions` to true to print all available step definitions.
+Set `definitions` to `true` to print all available step definitions.
 
 [NOTE]
 ====
@@ -293,21 +312,25 @@ Passing any value via `GODOG_OPTS` overrides the default tag definition on each 
 Thus in this case `--tags` must be specified manually, otherwise all features will be run.
 ====
 
-For example, to run integration tests on two specific feature files using only `@basic` and `@openshift` tags and without ansi colors, the following command can be used:
+For example, to run integration tests on two specific feature files using only `@basic` and `@openshift` tags and without ANSI colors, the following command can be used:
 
 ----
 $ make integration GODOG_OPTS="-paths ~/tests/custom.feature,~/my.feature -tags basic,openshift -no-colors true"
 ----
 
-NOTE: When multiple values are used for options in `GODOG_OPTS`, then they have to be separated by a comma without whitespace.
-While `-tags basic,openshift` will be parsed properly by make, `-tags basic, openshift` will result in only `@basic` being used.
+[NOTE]
+====
+Multiple values for a `GODOG_OPTS` option must be separated by a comma without whitespace.
+For example, `-tags basic,openshift` will be parsed properly by `make`, whereas `-tags basic, openshift` will result in only `@basic` being used.
+====
 
 ==== Viewing Results
 
-Integration test logs its progress directly into a console with accent of providing additional useful information when failures of individual Gherkin steps happen.
-This information is often enough to find and debug the reason of failure.
+The integration test logs its progress directly into a console.
+This information is often enough to find and debug the reason for a failure.
 
-However for cases which needs further investigation the integration test also logs more detailed progress into a log file. This file is located at `$GOPATH/github.com/minishift/minishift/out/test-results/integration_YYYY-MM-DD_HH:MM:SS.log`.
+However, for cases which require further investigation, the integration test also logs more detailed progress into a log file.
+This file is located at *_$GOPATH/github.com/minishift/minishift/out/test-results/integration_YYYY-MM-DD_HH:MM:SS.log_*.
 
 [[format-source-code]]
 === Formatting the Source Code
@@ -334,8 +357,8 @@ $ make vet
 
 Similar to `make fmtcheck`, failures in `make vet` will fail the CI builds.
 
-[[commit-messages]]
-=== Commit messages
+[[commit-message-requirements]]
+=== Commit Message Requirements
 
 Each commit message must meet two requirements:
 
@@ -349,7 +372,7 @@ $ make validate_commits
 ----
 
 [[clean-workspace]]
-=== Cleaning the workspace
+=== Cleaning the Workspace
 
 To remove all generated artifacts and installed dependencies, run the following command:
 
@@ -361,5 +384,5 @@ $ make clean
 == Godoc
 
 When developing {project}, it is encouraged to use link:https://godoc.org/golang.org/x/tools/cmd/godoc[Godoc] to document the source code.
-You can find guidelines on how to use godoc in link:https://blog.golang.org/godoc-documenting-go-code[this blog post].
+You can find guidelines on how to use Godoc in link:https://blog.golang.org/godoc-documenting-go-code[this blog post].
 You can browse the {project} Godoc documentation under link:https://godoc.org/github.com/minishift/minishift[https://godoc.org/github.com/minishift/minishift].

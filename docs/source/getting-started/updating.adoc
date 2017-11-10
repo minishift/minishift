@@ -25,7 +25,7 @@ If so, it prompts user to confirm the update, downloads the new binary and repla
 
 [NOTE]
 ====
-We recommend to run xref:../command-ref/minishift_delete.adoc#[`minishift delete`] before running the update command to avoid backward compatibility issues.
+We recommend running xref:../command-ref/minishift_delete.adoc#[`minishift delete`] before running the update command to avoid backward compatibility issues.
 ====
 
 [NOTE]

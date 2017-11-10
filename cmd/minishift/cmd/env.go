@@ -37,7 +37,7 @@ import (
 )
 
 const (
-	envTmpl = `{{ .Prefix }}DOCKER_TLS_VERIFY{{ .Delimiter }}{{ .DockerTLSVerify }}{{ .Suffix }}{{ .Prefix }}DOCKER_HOST{{ .Delimiter }}{{ .DockerHost }}{{ .Suffix }}{{ .Prefix }}DOCKER_CERT_PATH{{ .Delimiter }}{{ .DockerCertPath }}{{ .Suffix }}{{ .Prefix }}DOCKER_API_VERSION{{ .Delimiter }}{{ .DockerAPIVersion }}{{ .Suffix }}{{ if .NoProxyVar }}{{ .Prefix }}{{ .NoProxyVar }}{{ .Delimiter }}{{ .NoProxyValue }}{{ .Suffix }}{{end}}{{ .UsageHint }}`
+	envTmpl = `{{ .Prefix }}DOCKER_TLS_VERIFY{{ .Delimiter }}{{ .DockerTLSVerify }}{{ .Suffix }}{{ .Prefix }}DOCKER_HOST{{ .Delimiter }}{{ .DockerHost }}{{ .Suffix }}{{ .Prefix }}DOCKER_CERT_PATH{{ .Delimiter }}{{ .DockerCertPath }}{{ .Suffix }}{{ if .NoProxyVar }}{{ .Prefix }}{{ .NoProxyVar }}{{ .Delimiter }}{{ .NoProxyValue }}{{ .Suffix }}{{end}}{{ .UsageHint }}`
 )
 
 var (
@@ -48,13 +48,12 @@ var (
 
 type DockerShellConfig struct {
 	shell.ShellConfig
-	DockerCertPath   string
-	DockerHost       string
-	DockerTLSVerify  string
-	DockerAPIVersion string
-	UsageHint        string
-	NoProxyVar       string
-	NoProxyValue     string
+	DockerCertPath  string
+	DockerHost      string
+	DockerTLSVerify string
+	UsageHint       string
+	NoProxyVar      string
+	NoProxyValue    string
 }
 
 func getConfigSet(api libmachine.API, forceShell string, noProxy bool) (*DockerShellConfig, error) {
@@ -70,11 +69,10 @@ func getConfigSet(api libmachine.API, forceShell string, noProxy bool) (*DockerS
 
 	cmdLine := "minishift docker-env"
 	shellCfg := &DockerShellConfig{
-		DockerCertPath:   envMap["DOCKER_CERT_PATH"],
-		DockerHost:       envMap["DOCKER_HOST"],
-		DockerTLSVerify:  envMap["DOCKER_TLS_VERIFY"],
-		DockerAPIVersion: envMap["DOCKER_API_VERSION"],
-		UsageHint:        shell.GenerateUsageHint(userShell, cmdLine),
+		DockerCertPath:  envMap["DOCKER_CERT_PATH"],
+		DockerHost:      envMap["DOCKER_HOST"],
+		DockerTLSVerify: envMap["DOCKER_TLS_VERIFY"],
+		UsageHint:       shell.GenerateUsageHint(userShell, cmdLine),
 	}
 
 	if noProxy {

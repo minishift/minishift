@@ -47,13 +47,15 @@ func GetOpenShiftImageNames(version string) []string {
 	}
 }
 
-func CreateExportCommand(version string) (*exec.Cmd, error) {
+func CreateExportCommand(version string, profile string) (*exec.Cmd, error) {
 	cmd, err := os.CurrentExecutable()
 	if err != nil {
 		return nil, err
 	}
 
 	exportArgs := []string{
+		"--profile",
+		profile,
 		"image",
 		"export"}
 	exportArgs = append(exportArgs, GetOpenShiftImageNames(version)...)

@@ -435,7 +435,7 @@ func exportContainerImages(driver drivers.Driver, api libmachine.API, version st
 		return
 	}
 
-	exportCmd, err := image.CreateExportCommand(version)
+	exportCmd, err := image.CreateExportCommand(version, constants.ProfileName)
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error creating export command: %v", err))
 	}

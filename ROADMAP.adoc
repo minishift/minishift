@@ -71,28 +71,41 @@ version name of a given release.
 
 [[minishift-140]]
 === Minishift 1.4.0
-
-- [ ] Ability to create and manage multiple clusters https://github.com/minishift/minishift/issues/126[#126]
-
-[[minishift-150]]
-=== Minishift 1.5.0
-
-- [ ] Ability to manage users https://github.com/minishift/minishift/issues/390[#390]
-- [ ] Add a profile parameter https://github.com/minishift/minishift/issues/549[#549]
-- [ ] Provide caching of docker images https://github.com/minishift/minishift/issues/952[#952]
+- [x] Improve feedback to the user during startup  https://github.com/minishift/minishift/issues/485[#485]
 
 [[minishift-160]]
 === Minishift 1.6.0
-
-- [ ] Implement host folder mounts using sshfs https://github.com/minishift/minishift/issues/317[#317]
-- [ ] Ability to use you own certificates for the cluster https://github.com/minishift/minishift/issues/391[#391]
-- [ ] Ability on running on existing Docker daemon https://github.com/minishift/minishift/issues/392[#392]
-- [ ] Use Minikube as dependency https://github.com/minishift/minishift/issues/1063[#1063]
+- [x] Ability to create and manage multiple clusters https://github.com/minishift/minishift/issues/126[#126]
 
 [[minishift-170]]
 === Minishift 1.7.0
+- [x] Assign Static IP address for Hyper-V https://github.com/minishift/minishift/issues/1316[#1316]
+- [x] Add support for Minikube ISO https://github.com/minishift/minishift/issues/1058[#1058]
 
+[[minishift-180]]
+=== Minishift 1.8.0
+- [x] Add a minimum Openshift version for executing add-ons https://github.com/minishift/minishift/issues/1134[#1134]
+
+[[minishift-190]]
+=== Minishift 1.9.0
+- [x] Provide notation for default value for addon-envs https://github.com/minishift/minishift/issues/1135[#1135]
+- [ ] Ability to use you own certificates for the cluster https://github.com/minishift/minishift/issues/391[#391]
+- [ ] Global cache which can be shared among profiles https://github.com/minishift/minishift/issues/1408[#1408]
+
+[[minishift-1100]]
+=== Minishift 1.10.0
+- [ ] Provide caching of docker images https://github.com/minishift/minishift/issues/952[#952]
+- [ ] Implement host folder mounts using sshfs https://github.com/minishift/minishift/issues/317[#317]
+
+[[minishift-1110]]
+=== Minishift 1.11.0
+- [ ] Add profile clone/copy command to reuse configs from existing profiles https://github.com/minishift/minishift/issues/1649[#1649]
+
+[[future]]
+=== Beyond Minishift 1.11.0
+- [ ] Use Minikube as dependency https://github.com/minishift/minishift/issues/1063[#1063]
+- [ ] Ability to manage users https://github.com/minishift/minishift/issues/390[#390]
+- [ ] Ability on running on existing Docker daemon https://github.com/minishift/minishift/issues/392[#392]
 - [ ] Ability interactively select OpenShift version https://github.com/minishift/minishift/issues/197[#197]
 - [ ] Ability to provide and use custom a host- and domain-name https://github.com/minishift/minishift/issues/201[#201]
-- [ ] Bundle custom libmachine drivers into Minishift https://github.com/minishift/minishift/issues/217[#217]
 - [ ] Ability to pack&go your current Minishift configuration https://github.com/minishift/minishift/issues/397[#397]

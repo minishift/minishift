@@ -44,7 +44,7 @@ For more information, see the GitHub documentation of the link:https://github.co
 $ sudo apt install libvirt-bin qemu-kvm
 ----
 
-.  Add yourself to the **libvirtd** group (this may vary according to the Linux distribution) so that you do not need to use `sudo`:
+.  Add yourself to the *libvirtd* group (this may vary according to the Linux distribution) so that you do not need to use `sudo`:
 +
 ----
 $ sudo usermod -a -G libvirtd <username>
@@ -150,7 +150,7 @@ The following steps explain the installation of the *docker-machine-driver-xhyve
 $ sudo curl -L  https://github.com/zchee/docker-machine-driver-xhyve/releases/download/v0.3.1/docker-machine-driver-xhyve -o /usr/local/bin/docker-machine-driver-xhyve
 ----
 
-. Enable root access for the *docker-machine-driver-xhyve* binary and add it to the default wheel group:
+. Enable root access for the *docker-machine-driver-xhyve* binary and add it to the default *wheel* group:
 +
 ----
 $ sudo chown root:wheel /usr/local/bin/docker-machine-driver-xhyve
@@ -164,8 +164,8 @@ $ sudo chmod u+s,+x /usr/local/bin/docker-machine-driver-xhyve
 
 [NOTE]
 ====
-The downloaded *docker-machine-driver-xhyve* binaries are compiled against a specific version of macOS.
-It is possible that the driver fails to work after an macOS version upgrade.
+The downloaded *docker-machine-driver-xhyve* binary is compiled against a specific version of macOS.
+It is possible that the driver will fail to work after a macOS version upgrade.
 In this case you can try to compile the driver from source:
 
 ----
@@ -190,12 +190,18 @@ To use {project} with Hyper-V:
 
 . Add the user to the local Hyper-V Administrators group.
 +
-NOTE: This is required to allow the user to create and delete virtual machines with the Hyper-V Management API.
-For more information, see xref:../troubleshooting/troubleshooting-driver-plugins.adoc#insufficient-privileges[Hyper-V commands must be run as an Administrator]
+[NOTE]
+====
+This is required to allow the user to create and delete virtual machines with the Hyper-V Management API.
+For more information, see xref:../troubleshooting/troubleshooting-driver-plugins.adoc#insufficient-privileges[Hyper-V commands must be run as an Administrator].
+====
 
 . Add an link:https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/connect-to-network[External Virtual Switch].
 +
-NOTE: Verify that you pair the virtual switch with a network card (wired or wireless) that is connected to the network.
+[NOTE]
+====
+Verify that you pair the virtual switch with a network card (wired or wireless) that is connected to the network.
+====
 
 . Set the environment variable `HYPERV_VIRTUAL_SWITCH` to the name of the external virtual switch you want to use for {project}.
 For more information, see xref:../using/basic-usage.adoc#driver-specific-environment-variables[driver-specific environment variables].

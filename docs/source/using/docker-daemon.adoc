@@ -12,7 +12,7 @@ toc::[]
 == Overview
 
 When running OpenShift in a single VM, you can reuse the Docker daemon managed by {project} for other Docker use-cases as well.
-By using the same docker daemon as {project}, you can speed up your local development.
+By using the same Docker daemon as {project}, you can speed up your local development.
 
 [[docker-daemon-configuration]]
 == Console configuration

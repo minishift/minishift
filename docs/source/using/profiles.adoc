@@ -19,7 +19,7 @@ Refer to the use of xref:../using/basic-usage.adoc#environment-variables[environ
 
 The _active_ profile is the profile against which all commands are executed, unless the global `--profile` flag is used.
 You can determine the active profile by using the xref:../command-ref/minishift_profile_list.adoc#[`minishift profile list`] command.
-You can execute single commands against a non-active profile by using the `--profile` flag, for example `minishift --profile profile-demo console` to open the OpenShift console for the specified _profile-demo_ profile.
+You can execute single commands against a non-active profile by using the `--profile` flag, for example `minishift --profile profile-demo console` to open the OpenShift console for the specified *profile-demo* profile.
 
 On top of the `--profile` flag, there are xref:../command-ref/minishift_profile.adoc#[commands] for xref:../command-ref/minishift_profile_list.adoc#[listing], xref:../command-ref/minishift_profile_delete.adoc#[deleting] and xref:../command-ref/minishift_profile_set.adoc#[setting] the active profile.
 These commands are described in the following sections.
@@ -29,7 +29,7 @@ These commands are described in the following sections.
 
 There are two ways to create a new profile.
 
-=== Using The `--profile` Flag
+=== Using the `--profile` Flag
 
 When you run any {project} command with the `--profile` flag the profile gets created if it does not exist, for example:
 
@@ -48,11 +48,11 @@ $ minishift --profile profile-demo start
 ...
 ----
 
-See also xref:../using/profiles.adoc#example-workflows-profiles[workflow for profile configuration].
+See also xref:../using/profiles.adoc#example-workflow-profile-config[workflow for profile configuration].
 
 [NOTE]
 ====
- A profile automatically becomes the active profile when a {project} instance is started successfully via `minishift start`.
+A profile automatically becomes the active profile when a {project} instance is started successfully via `minishift start`.
 ====
 
 === Using the `profile set` Command
@@ -93,7 +93,10 @@ $ minishift profile set profile-demo
 Profile 'profile-demo' set as active profile
 ----
 
-NOTE: Only one profile can be active at any time.
+[NOTE]
+====
+Only one profile can be active at any time.
+====
 
 [[deleting-profiles]]
 == Deleting Profiles
@@ -108,9 +111,12 @@ Profile 'profile-demo' deleted successfully
 Switching to default profile 'minishift' as the active profile.
 ----
 
-NOTE: The default profile *minishift* cannot be deleted.
+[NOTE]
+====
+The default profile *minishift* cannot be deleted.
+====
 
-[[example-workflows-profiles]]
+[[example-workflow-profile-config]]
 == Example Workflow for Profile Configuration
 
 You have two options to create a new profile and configure its xref:../using/basic-usage.adoc#persistent-configuration[persistent configuration].

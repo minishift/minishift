@@ -29,4 +29,7 @@ type ImageHandler interface {
 
 	// AreImagesCached returns true if all images specified in the config are cached, false otherwise.
 	AreImagesCached(config *ImageCacheConfig) bool
+
+	// GetCachedImages returns a map of cached image names. A map is used to make lookup for a specific image easier.
+	GetCachedImages(config *ImageCacheConfig) map[string]bool
 }

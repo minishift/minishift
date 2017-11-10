@@ -397,8 +397,12 @@ func importContainerImages(driver drivers.Driver, api libmachine.API, openShiftV
 	config := &image.ImageCacheConfig{
 		HostCacheDir: constants.MakeMiniPath(imageCmd.CacheDir...),
 		CachedImages: image.GetOpenShiftImageNames(openShiftVersion),
+		Out:          os.Stdout,
 	}
-	handler.ImportImages(config)
+	err = handler.ImportImages(config)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("  WARN: Import of cached images failed. Continuing without importing images. Error: %s ", err.Error()))
+	}
 }
 
 func getImageHandler(driver drivers.Driver, envMap map[string]string) image.ImageHandler {

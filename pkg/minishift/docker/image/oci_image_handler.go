@@ -78,6 +78,12 @@ func NewOciImageHandler(driver drivers.Driver, dockerEnv map[string]string) (*Oc
 	return &OciImageHandler{driver: driver, dockerClientSettings: settings}, nil
 }
 
+// NewLocalOnlyOciImageHandler creates  a new ImageHandler which can only interact with the local cache.
+// No connection information to the Docker daemon are provided. Functions interacting with the Docker daemon will fail.
+func NewLocalOnlyOciImageHandler() (*OciImageHandler, error) {
+	return &OciImageHandler{driver: nil, dockerClientSettings: nil}, nil
+}
+
 // ImportImages imports cached images from the host into the Docker daemon of the VM.
 func (handler *OciImageHandler) ImportImages(config *ImageCacheConfig) error {
 	out := handler.getOutputWriter(config)
@@ -95,6 +101,10 @@ func (handler *OciImageHandler) ImportImages(config *ImageCacheConfig) error {
 
 	for _, imageName := range config.CachedImages {
 		if _, found := availableImages[imageName]; found {
+			continue
+		}
+
+		if !handler.IsImageCached(config, imageName) {
 			continue
 		}
 
@@ -131,14 +141,14 @@ func (handler *OciImageHandler) ExportImages(config *ImageCacheConfig) error {
 
 // IsImageCached returns true if the specified image is cached, false otherwise.
 func (handler *OciImageHandler) IsImageCached(config *ImageCacheConfig, image string) bool {
-	cachedImages := handler.getCachedImages(config)
+	cachedImages := handler.GetCachedImages(config)
 	_, found := cachedImages[image]
 	return found
 }
 
 // AreImagesCached returns true if all images specified in the config are cached, false otherwise.
 func (handler *OciImageHandler) AreImagesCached(config *ImageCacheConfig) bool {
-	cachedImages := handler.getCachedImages(config)
+	cachedImages := handler.GetCachedImages(config)
 
 	for _, image := range config.CachedImages {
 		if _, found := cachedImages[image]; !found {
@@ -149,7 +159,7 @@ func (handler *OciImageHandler) AreImagesCached(config *ImageCacheConfig) bool {
 	return true
 }
 
-func (handler *OciImageHandler) getCachedImages(config *ImageCacheConfig) map[string]bool {
+func (handler *OciImageHandler) GetCachedImages(config *ImageCacheConfig) map[string]bool {
 	cachedImages := make(map[string]bool)
 
 	index, err := handler.getIndex(config)

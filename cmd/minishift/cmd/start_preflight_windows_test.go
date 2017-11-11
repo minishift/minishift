@@ -37,12 +37,6 @@ func TestIsoUrlOnWindows(t *testing.T) {
 	dummyIsoFile := filepath.Join(currentDir, "..", "..", "..", "test", "testdata", "dummy.iso")
 	dummyIsoFileWithForwardSlash := strings.Replace(dummyIsoFile, "\\", "/", -1)
 
-	err = createDummyIsoFile(dummyIsoFile)
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-	defer removeDummyIsoFile(dummyIsoFile)
-
 	var isoURLCheck = sharedIsoURLChecks
 	// right path, but wrong path seperator
 	isoURLCheck = append(isoURLCheck, testData{"file://" + dummyIsoFile, false})

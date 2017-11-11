@@ -16,11 +16,6 @@ limitations under the License.
 
 package cmd
 
-import (
-	"fmt"
-	"os"
-)
-
 type testData struct {
 	in  string
 	out bool
@@ -44,20 +39,4 @@ var sharedIsoURLChecks = []testData{
 	{"blahblah/http://b2d.iso", false},
 	{"blabityblah", false},
 	{"/home/joey/chandler/iso.iso", false},
-}
-
-func createDummyIsoFile(dummyIsoFile string) error {
-	f, err := os.Create(dummyIsoFile)
-	defer f.Close()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func removeDummyIsoFile(dummyIsoFile string) {
-	err := os.Remove(dummyIsoFile)
-	if err != nil {
-		fmt.Errorf("Failed to remove temporary directory")
-	}
 }

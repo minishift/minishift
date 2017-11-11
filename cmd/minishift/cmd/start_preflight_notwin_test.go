@@ -35,12 +35,6 @@ func TestIsoUrl(t *testing.T) {
 	}
 	dummyIsoFile := filepath.Join(currentDir, "..", "..", "..", "test", "testdata", "dummy.iso")
 
-	err = createDummyIsoFile(dummyIsoFile)
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-	defer removeDummyIsoFile(dummyIsoFile)
-
 	var isoURLCheck = sharedIsoURLChecks
 	isoURLCheck = append(isoURLCheck, testData{"file://" + dummyIsoFile, true})
 

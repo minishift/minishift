@@ -135,49 +135,134 @@ Feature: Basic
       172.30.1.1:5000
       """
 
-  # User can deploy the example Ruby application ruby-ex
   Scenario: User can login to the server
    Given Minishift has state "Running"
     When executing "oc login --username=developer --password=developer" succeeds
     Then stdout should contain
-     """
-     Login successful
-     """
+    """
+    Login successful
+    """
 
-  Scenario: User can create new namespace ruby for application ruby-ex
-   Given Minishift has state "Running"
-    When executing "oc new-project ruby" succeeds
-    Then stdout should contain
-     """
-     Now using project "ruby"
-     """
+  # User can interact with OpenShift
+  Scenario: Service list sub-command
+     Given Minishift has state "Running"
+      When executing "minishift openshift service list" succeeds
+      Then stdout should contain "docker-registry"
+       And stdout should contain "kubernetes"
+       And stdout should contain "router"
 
-  Scenario: User can deploy application ruby-ex to namespace ruby
-   Given Minishift has state "Running"
-    When executing "oc new-app centos/ruby-22-centos7~https://github.com/openshift/ruby-ex.git" succeeds
-    Then stdout should contain
-     """
-     Success
-     """
-     And services "ruby-ex" rollout successfully
+  Scenario: Restarting the OpenShift cluster
+  Note: This step is based on observation and might be unstable in some environments. It checks for the time when container
+        finished last time. When container is new and had never finished then this time value is set to 0001-01-01T00:00:00Z.
+        On restart of OpenShift cluster containers are terminated, which sets FinishedAt to actual time. This value persist
+        after next start of container.
+     Given stdout of command "minishift ssh -- "docker inspect --format={{.State.FinishedAt}} origin"" is equal to "0001-01-01T00:00:00Z"
+      When executing "minishift openshift restart" succeeds
+      Then stdout should contain "Restarting OpenShift"
+       And stdout of command "minishift ssh -- "docker inspect --format={{.State.FinishedAt}} origin"" is not equal to "0001-01-01T00:00:00Z"
 
-  Scenario: User can create route for ruby-ex to make it visiable outside of the cluster
-   Given Minishift has state "Running"
-    When executing "oc expose svc/ruby-ex" succeeds
-    Then stdout should contain
-     """
-     exposed
-     """
-    And status code of HTTP request to "/" of service "ruby-ex" in namespace "ruby" is equal to "200"
-    And body of HTTP request to "/" of service "ruby-ex" in namespace "ruby" contains "Welcome to your Ruby application on OpenShift"
+  @minishift-only
+  Scenario: Getting information about OpenShift and kubernetes versions
+  Prints the current running OpenShift version to the standard output.
+     Given Minishift has state "Running"
+      When executing "minishift openshift version" succeeds
+      Then stdout should match
+      """
+      ^openshift v[0-9]+\.[0-9]+\.[0-9]+\+[0-9a-z]{7}
+      kubernetes v[0-9]+\.[0-9]+\.[0-9]+\+[0-9a-z]{10}
+      etcd [0-9]+\.[0-9]+\.[0-9]+
+      """
 
-  Scenario: User can delete namespace ruby
+  Scenario: Getting address of internal docker registry
+  Prints the host name and port number of the OpenShift registry to the standard output.
+     Given Minishift has state "Running"
+      When executing "minishift openshift registry" succeeds
+      Then stdout should be valid IP with port number
+
+  Scenario: User can create new namespace node for application nodejs-ex
    Given Minishift has state "Running"
-    When executing "oc delete project ruby" succeeds
+    When executing "oc new-project node" succeeds
     Then stdout should contain
-     """
-     "ruby" deleted
-     """
+    """
+    Now using project "node"
+    """
+
+  Scenario: User deploys nodejs example application to namespace node
+     Given Minishift has state "Running"
+      When executing "oc new-app https://github.com/openshift/nodejs-ex -l name=myapp" succeeds
+      Then stdout should contain
+      """
+      Success
+      """
+      And services "nodejs-ex" rollout successfully
+
+
+  Scenario: Getting existing service without route
+      When executing "minishift openshift service nodejs-ex" succeeds
+      Then stdout should contain "nodejs-ex"
+       And stdout should not match
+       """
+       ^http:\/\/nodejs-ex-node\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.nip\.io
+       """
+
+  Scenario: Getting non-existing service
+  If service does not exist, user gets an empty table.
+      When executing "minishift openshift service not-present" succeeds
+      Then stdout should not contain "not-present"
+
+  Scenario: Getting service from non-existing namespace
+      When executing "minishift openshift service nodejs-ex --namespace does-not-exist" fails
+      Then stderr should contain "Namespace does-not-exist doesn't exist"
+
+  Scenario: Forgotten service name
+      When executing "minishift openshift service --namespace myapp" fails
+      Then stderr should contain "You must specify the name of the service."
+
+  Scenario: User creates route to the service
+      When executing "oc expose svc/nodejs-ex" succeeds
+      Then stdout should contain
+      """
+      route "nodejs-ex" exposed
+      """
+      And status code of HTTP request to "/" of service "nodejs-ex" in namespace "node" is equal to "200"
+      And body of HTTP request to "/" of service "nodejs-ex" in namespace "node" contains "Welcome to your Node.js application on OpenShift"
+
+  Scenario: Getting existing service with route
+      When executing "minishift openshift service nodejs-ex" succeeds
+      Then stdout should contain "nodejs-ex"
+       And stdout should match
+       """
+       http:\/\/nodejs-ex-node\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.nip\.io
+       """
+
+  Scenario: Getting URL of service using --url flag
+      When executing "minishift openshift service nodejs-ex --url" succeeds
+      Then stdout should be valid URL
+
+  Scenario: Seeing configuration of OpenShift master
+  Minishift openshift config view prints YAML configuration of OpenShift cluster.
+  Note: --target=master is default value for minishift openshift config command
+      When executing "minishift openshift config view" succeeds
+      Then stdout should be valid YAML
+
+  Scenario: Seeing configuration of OpenShift node
+      When executing "minishift openshift config view --target node" succeeds
+      Then stdout should be valid YAML
+
+  Scenario: Setting configuration on OpenShift master
+      When executing "minishift openshift config set --patch '{"assetConfig": {"logoutURL": "http://www.minishift.io"}}'" succeeds
+      Then stdout should contain "Patching OpenShift configuration"
+      When executing "minishift openshift config view" succeeds
+      Then stdout is YAML which contains key "assetConfig.logoutURL" with value matching "http://www\.minishift\.io"
+
+  Scenario: User can delete namespace node
+   Given Minishift has state "Running"
+    When executing "oc delete project node" succeeds
+    Then stdout should contain
+    """
+    "node" deleted
+    """
+  # End of user interaction with OpenShift
 
   Scenario: User can log out the session
    Given Minishift has state "Running"
@@ -186,7 +271,6 @@ Feature: Basic
      """
      Logged "developer" out
      """
-  # End of Ruby application ruby-ex deployment
 
   Scenario: Stopping Minishift
     Given Minishift has state "Running"

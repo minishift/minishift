@@ -23,6 +23,7 @@ import (
 	"github.com/pkg/errors"
 	"os"
 	"path/filepath"
+	"runtime"
 )
 
 const OC_CACHE_DIR = "oc"
@@ -45,7 +46,7 @@ func (oc *Oc) EnsureIsCached() error {
 }
 
 func (oc *Oc) GetCacheFilepath() string {
-	return filepath.Join(oc.MinishiftCacheDir, OC_CACHE_DIR, oc.OpenShiftVersion)
+	return filepath.Join(oc.MinishiftCacheDir, OC_CACHE_DIR, oc.OpenShiftVersion, runtime.GOOS)
 }
 
 func (oc *Oc) isCached() bool {

@@ -122,7 +122,7 @@ func Test_var_defaults_empty_if_not_specified(t *testing.T) {
 	addOnMeta := getAddOnMeta(testMap, t)
 	varDefaults, _ := addOnMeta.VarDefaults()
 	if len(varDefaults) != 0 {
-		t.Fatal(fmt.Sprintf("Expected empty var default, but got: '%s'", len(varDefaults)))
+		t.Fatal(fmt.Sprintf("Expected empty var default, but got: '%d'", len(varDefaults)))
 	}
 }
 
@@ -136,7 +136,7 @@ func Test_var_defaults_meta_is_extracted(t *testing.T) {
 	addOnMeta := getAddOnMeta(testMap, t)
 	varDefaults, _ := addOnMeta.VarDefaults()
 	if len(varDefaults) != 1 {
-		t.Fatal(fmt.Sprintf("Expected one var default, but got: '%s'", len(varDefaults)))
+		t.Fatal(fmt.Sprintf("Expected one var default, but got: '%d'", len(varDefaults)))
 	}
 }
 

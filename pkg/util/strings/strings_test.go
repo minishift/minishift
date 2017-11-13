@@ -97,7 +97,7 @@ func TestGetMatcher(t *testing.T) {
 	for _, testCase := range testCases {
 		actualResult := testCase.matcher(testCase.testString)
 		if actualResult != testCase.expectedResult {
-			t.Errorf("Unexpected result for '%s'. Expected '%s' to return '%t', but got '%t'", getFunctionName(testCase.matcher), testCase.testString, testCase.expectedResult, actualResult)
+			t.Errorf("Unexpected result for '%s'. Expected '%s' to return '%s', but got '%s'", getFunctionName(testCase.matcher), testCase.testString, testCase.expectedResult, actualResult)
 		}
 	}
 }

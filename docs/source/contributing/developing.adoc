@@ -315,6 +315,14 @@ You can correct the formatting errors yourself or instruct the violations to be 
 $ make fmt
 ----
 
+You can also check for common coding mistakes by using:
+
+----
+$ make vet
+----
+
+Similar to `make fmtcheck`, failures in `make vet` will fail the CI builds.
+
 [[commit-messages]]
 === Commit messages
 

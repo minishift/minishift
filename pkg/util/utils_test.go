@@ -132,7 +132,7 @@ func TestFriendlyDuration(t *testing.T) {
 		got := FriendlyDuration(tt.in)
 		expected, _ := time.ParseDuration(tt.want)
 		if got != expected {
-			t.Errorf("Expected %v but got %v", tt.in, got, expected)
+			t.Errorf("Expected %v but got %v", got, expected)
 		}
 	}
 }

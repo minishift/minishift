@@ -67,12 +67,12 @@ func TestGetAssetIdAndFilename(t *testing.T) {
 
 		actualAssetID, actualFilename := getAssetIdAndFilename(testAsset.binary, testAsset.os, release)
 		if actualAssetID != testAsset.expectedAssetId {
-			t.Fatalf("Unexpected asset id for binary %d for OS %d. Expected %d, got %d",
+			t.Fatalf("Unexpected asset id for binary %s for OS %s. Expected %d, got %d",
 				testAsset.binary, testAsset.os, testAsset.expectedAssetId, actualAssetID)
 		}
 
 		if actualFilename != testAsset.expectedFilename {
-			t.Fatalf("Unexpected filename for binary %d for OS %d. Expected %s, got %s",
+			t.Fatalf("Unexpected filename for binary %s for OS %s. Expected %s, got %s",
 				testAsset.binary, testAsset.os, testAsset.expectedFilename, actualFilename)
 		}
 	}

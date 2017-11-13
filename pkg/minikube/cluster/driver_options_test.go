@@ -89,7 +89,7 @@ func Test_driver_options_from_environment_int_type(t *testing.T) {
 
 	actualCount := driverOptions.Int("test-cpu-count")
 	if actualCount != expectedCpuCount {
-		t.Fatalf("Expected %s but got %s", expectedCpuCount, actualCount)
+		t.Fatalf("Expected %d but got %d", expectedCpuCount, actualCount)
 	}
 }
 

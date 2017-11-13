@@ -104,7 +104,6 @@ func Untar(tarball, targetDir string) error {
 			}
 		}
 	}
-	return nil
 }
 
 func Unzip(archive, target string) error {

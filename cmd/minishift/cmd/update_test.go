@@ -47,6 +47,6 @@ func TestCreateUpdateMarker(t *testing.T) {
 		t.Fatalf("Expected allow installation of addon to be %t but got %t.", expectedInstallAddon, markerData.InstallAddon)
 	}
 	if markerData.PreviousVersion != expectedPreviousVersion {
-		t.Fatalf("Expected previous version to be %t but got %t.", expectedPreviousVersion, markerData.PreviousVersion)
+		t.Fatalf("Expected previous version to be %s but got %s.", expectedPreviousVersion, markerData.PreviousVersion)
 	}
 }

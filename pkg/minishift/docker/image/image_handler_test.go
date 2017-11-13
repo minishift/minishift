@@ -60,7 +60,7 @@ func Test_is_image_name(t *testing.T) {
 	for _, testCase := range testData {
 		isImage := testHandler.isImageFile(testCase.fileName)
 		if testCase.isImage != isImage {
-			t.Fatalf("Expected isImageFile for '%s' to return %b, but got %b", testCase.fileName, testCase.isImage, isImage)
+			t.Fatalf("Expected isImageFile for '%s' to return %t, but got %t", testCase.fileName, testCase.isImage, isImage)
 		}
 
 	}

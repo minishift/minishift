@@ -17,7 +17,6 @@ limitations under the License.
 package registration
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -143,6 +142,4 @@ func (registrator *RedHatRegistrator) isRegistered() (bool, error) {
 		}
 		return false, nil
 	}
-
-	return false, errors.New("Unable to determine registration state")
 }

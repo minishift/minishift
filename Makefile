@@ -33,7 +33,7 @@ ifeq ($(GOOS),windows)
 endif
 MINISHIFT_BINARY ?= $(GOPATH)/bin/minishift$(IS_EXE)
 TIMEOUT ?= 3600s
-PACKAGES := go list ./... | grep -v /vendor
+PACKAGES := go list ./... | grep -v /vendor | grep -v /out
 SOURCE_DIRS = cmd pkg test
 
 # Linker flags
@@ -143,7 +143,7 @@ $(DOCS_SYNOPISIS_DIR)/*.md: vendor $(ADDON_ASSET_FILE)
 synopsis_docs: $(DOCS_SYNOPISIS_DIR)/*.md
 
 .PHONY: prerelease
-prerelease: clean fmtcheck test cross
+prerelease: clean fmtcheck vet test cross
 	$(eval files = $(shell ./scripts/boilerplate/boilerplate.py --rootdir . --boilerplate-dir ./scripts/boilerplate | grep -v vendor))
 	@if test "$(files)" != ""; then \
 		echo "The following files don't pass the boilerplate checks:"; \
@@ -208,6 +208,10 @@ integration_all: $(MINISHIFT_BINARY)
 .PHONY: fmt
 fmt:
 	@gofmt -l -s -w $(SOURCE_DIRS)
+
+.PHONY: vet
+vet:
+	@go vet $(shell $(PACKAGES))
 
 .PHONY: fmtcheck
 fmtcheck:

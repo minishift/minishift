@@ -28,7 +28,7 @@ import (
 	"github.com/docker/machine/libmachine/state"
 	"github.com/spf13/viper"
 
-	config "github.com/minishift/minishift/pkg/minishift/config"
+	"github.com/minishift/minishift/pkg/minishift/config"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	miniutil "github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/util"
@@ -62,7 +62,7 @@ func List(driver drivers.Driver, isRunning bool) error {
 
 	procMounts := ""
 	if isRunning {
-		cmd := fmt.Sprintf("cat /proc/mounts")
+		cmd := "cat /proc/mounts"
 		procMounts, _ = drivers.RunSSHCommandFromDriver(driver, cmd)
 	}
 
@@ -343,7 +343,7 @@ func mountCifsHostfolder(driver drivers.Driver, hostfolder *config.HostFolder) e
 
 	if _, err := drivers.RunSSHCommandFromDriver(driver, cmd); err != nil {
 		fmt.Println("FAIL")
-		return fmt.Errorf("Error occured while mounting host folder.", err)
+		return fmt.Errorf("Error occured while mounting host folder. %s", err)
 	} else {
 		fmt.Println("OK")
 	}
@@ -353,13 +353,13 @@ func mountCifsHostfolder(driver drivers.Driver, hostfolder *config.HostFolder) e
 
 func umountHostfolder(driver drivers.Driver, hostfolder *config.HostFolder) error {
 	if hostfolder == nil {
-		errors.New("Host folder not defined")
+		return errors.New("Host folder not defined")
 	}
 
 	fmt.Printf("   Unmounting '%s' ... ", hostfolder.Name)
 
 	if isMounted, err := isHostfolderMounted(driver, hostfolder); !isMounted {
-		fmt.Printf("Not mounted\n")
+		fmt.Print("Not mounted\n")
 		return fmt.Errorf("Host folder not mounted. %s", err)
 	}
 
@@ -369,7 +369,7 @@ func umountHostfolder(driver drivers.Driver, hostfolder *config.HostFolder) erro
 
 	if _, err := drivers.RunSSHCommandFromDriver(driver, cmd); err != nil {
 		fmt.Println("FAIL")
-		return fmt.Errorf("Error occured while unmounting host folder.", err)
+		return fmt.Errorf("Error occured while unmounting host folder. %s", err)
 	} else {
 		fmt.Println("OK")
 	}
@@ -415,7 +415,7 @@ func isCifsHostReachable(driver drivers.Driver, uncpath string) bool {
 
 func ensureMountPointExists(driver drivers.Driver, hostfolder *config.HostFolder) error {
 	if hostfolder == nil {
-		errors.New("Host folder is not defined")
+		return errors.New("Host folder is not defined")
 	}
 
 	cmd := fmt.Sprintf(

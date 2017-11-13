@@ -278,10 +278,10 @@ func renameFile(oldFile, newFile *os.File) error {
 func (m *MachineConfig) getChecksum(baseUrl string) string {
 	checksumURL := fmt.Sprintf(baseUrl + ".sha256")
 	checksumResp, err := http.Get(checksumURL)
-	defer checksumResp.Body.Close()
 	if err != nil {
 		return ""
 	}
+	defer checksumResp.Body.Close()
 
 	if checksumResp.StatusCode != 200 {
 		return ""

@@ -55,7 +55,6 @@ func (detector *MinishiftProvisionerDetector) DetectProvisioner(driver drivers.D
 	} else {
 		return detector.Delegate.DetectProvisioner(driver)
 	}
-	return nil, provision.ErrDetectionFailed
 }
 
 func (detector *MinishiftProvisionerDetector) isMinishiftIso(osReleaseInfo *provision.OsRelease) bool {

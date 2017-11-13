@@ -29,17 +29,15 @@ import (
 )
 
 var (
-	_, b, _, _ = runtime.Caller(0)
-	basepath   = filepath.Dir(b)
-	testDir    string
-	testOc     Oc
+	testDir string
+	testOc  Oc
 )
 
 func TestIsCached(t *testing.T) {
 	setUp(t)
 	defer os.RemoveAll(testDir)
 
-	ocDir := filepath.Join(testDir, "cache", "oc", "v1.3.1")
+	ocDir := filepath.Join(testDir, "cache", "oc", "v1.3.1", runtime.GOOS)
 	os.MkdirAll(ocDir, os.ModePerm)
 
 	if testOc.isCached() != false {
@@ -88,7 +86,7 @@ func setUp(t *testing.T) {
 }
 
 func addMockResponses(mockTransport *minitesting.MockRoundTripper) {
-	testDataDir := filepath.Join(basepath, "..", "..", "..", "test", "testdata")
+	testDataDir := filepath.Join("..", "..", "..", "test", "testdata")
 
 	mockTransport.RegisterResponse("https://api.github.com/repos/openshift/origin/releases/tags/v1.3.1", &minitesting.CannedResponse{
 		ResponseType: minitesting.SERVE_FILE,

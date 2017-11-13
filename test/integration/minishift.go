@@ -56,6 +56,28 @@ func (m *Minishift) shouldHaveState(expected string) error {
 	return nil
 }
 
+func (m *Minishift) profileShouldHaveState(profile string, expected string) error {
+	actual := m.runner.GetProfileStatus(profile)
+	if !strings.Contains(actual, expected) {
+		return fmt.Errorf("Profile %s of Minishift state did not match. Expected: %s, Actual: %s", profile, expected, actual)
+	}
+
+	return nil
+}
+
+func (m *Minishift) isTheActiveProfile(profileName string) error {
+	profileList := m.runner.GetProfileList()
+	profileNameWtquote := strings.Replace(profileName, "\"", "", -1)
+	stringArr := strings.Split(profileList, "\n")
+	for i := 0; i < len(stringArr); i++ {
+		if strings.Contains(stringArr[i], profileNameWtquote) && !strings.Contains(stringArr[i], "(Active)") {
+			return fmt.Errorf("Profile %s is not an active profile, Actual : %s", profileName, stringArr[i])
+		}
+	}
+
+	return nil
+}
+
 func (m *Minishift) executingRetryingTimesWithWaitPeriodOfSeconds(command string, retry, sleep int) error {
 	for i := 0; i < retry; i++ {
 		err := m.executingOcCommand(command)

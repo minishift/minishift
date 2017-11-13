@@ -160,6 +160,10 @@ func FeatureContext(s *godog.Suite) {
 	// steps to execute `minishift` commands
 	s.Step(`^Minishift (?:has|should have) state "(Does Not Exist|Running|Stopped)"$`,
 		minishift.shouldHaveState)
+	s.Step(`^profile (.*) (?:has|should have) state "(Does Not Exist|Running|Stopped)"$`,
+		minishift.profileShouldHaveState)
+	s.Step(`profile (.*) (?:is the|should be the) active profile$`,
+		minishift.isTheActiveProfile)
 	s.Step(`^executing "minishift (.*)"$`,
 		minishift.executingMinishiftCommand)
 	s.Step(`^executing "minishift (.*)" (succeeds|fails)$`,

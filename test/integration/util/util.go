@@ -165,6 +165,16 @@ func (m *MinishiftRunner) CheckStatus(desired string) bool {
 	return strings.Contains(m.GetStatus(), desired)
 }
 
+func (m *MinishiftRunner) GetProfileStatus(profileName string) string {
+	cmdOut, _, _ := m.RunCommand("--profile " + profileName + " status")
+	return strings.Trim(cmdOut, " \n")
+}
+
+func (m *MinishiftRunner) GetProfileList() string {
+	cmdOut, _, _ := m.RunCommand("profile list")
+	return strings.Trim(cmdOut, " \n")
+}
+
 func NewOcRunner() *OcRunner {
 	jsonDataPath := filepath.Join(os.Getenv(constants.MiniShiftHomeEnv), "machines", constants.MachineName+".json")
 	instanceState.InstanceConfig, _ = instanceState.NewInstanceConfig(jsonDataPath)

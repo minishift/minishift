@@ -138,7 +138,7 @@ func TestProperlyHandlesNestedSingleQuotesWithinDoubleQuotes(t *testing.T) {
 	}
 
 	if args[2] != `%a %b %d '%T %Z %Y' -- \"foobar\"` {
-		t.Errorf("Expected the second arg to be '%a %%b %%d '%%T %%Z %%Y' -- \"foobar\"', but was '%s'", args[2])
+		t.Errorf("Expected the second arg to be '%%a %%b %%d '%%T %%Z %%Y' -- \"foobar\"', but was '%s'", args[2])
 	}
 
 	if args[3] != "01/01/1900" {

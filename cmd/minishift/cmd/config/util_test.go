@@ -57,10 +57,10 @@ func TestSetInt(t *testing.T) {
 	}
 	val, ok := minikubeConfig["cpus"].(int)
 	if !ok {
-		t.Fatalf("Type is not set to int")
+		t.Fatal("Type is not set to int")
 	}
 	if val != 22 {
-		t.Fatalf("SetInt set value is incorrect")
+		t.Fatal("SetInt set value is incorrect")
 	}
 }
 
@@ -71,10 +71,10 @@ func TestSetBool(t *testing.T) {
 	}
 	val, ok := minikubeConfig["show-libmachine-logs"].(bool)
 	if !ok {
-		t.Fatalf("Type is not set to bool")
+		t.Fatal("Type is not set to bool")
 	}
 	if !val {
-		t.Fatalf("SetBool set value is incorrect")
+		t.Fatal("SetBool set value is incorrect")
 	}
 }
 
@@ -82,11 +82,11 @@ func TestSetSlice(t *testing.T) {
 	expectedSlice := []string{"172.0.0.1/16", "mycustom.registry.com/3030"}
 	err := SetSlice(minikubeConfig, "insecure-registry", strings.Join(expectedSlice, ","))
 	if err != nil {
-		t.Fatal("Cannot set Slice value in config: %s", err)
+		t.Fatalf("Cannot set Slice value in config: %s", err)
 	}
 	val, ok := minikubeConfig["insecure-registry"].([]string)
 	if !ok {
-		t.Fatalf("Type is not set to slice")
+		t.Fatal("Type is not set to slice")
 	}
 	if !reflect.DeepEqual(expectedSlice, val) {
 		t.Fatalf("Expected: %+v, Got: %+v", expectedSlice, val)

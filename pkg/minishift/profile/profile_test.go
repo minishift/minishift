@@ -65,13 +65,13 @@ func TestSetingGetProfileList(t *testing.T) {
 			dirPath := filepath.Join(miniPath, "profiles", profile)
 			err := os.MkdirAll(dirPath, os.ModePerm)
 			if err != nil {
-				fmt.Println(fmt.Sprintf("%", err.Error()))
+				fmt.Println(fmt.Sprintf("%s", err.Error()))
 			}
 		}
 	}
 	actualProfileList := GetProfileList()
 	if !reflect.DeepEqual(profileList, actualProfileList) {
-		t.Errorf("Expected profile name does not match actual profile name")
+		t.Error("Expected profile name does not match actual profile name")
 	}
 }
 

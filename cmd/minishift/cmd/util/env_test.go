@@ -32,6 +32,6 @@ func TestReplaceEnv(t *testing.T) {
 	}
 
 	if len(env) != len(replaced) {
-		t.Fatalf("Environment variables do not match length: '%s', '%s'", len(env), len(replaced))
+		t.Fatalf("Environment variables do not match length: '%d', '%d'", len(env), len(replaced))
 	}
 }

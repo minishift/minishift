@@ -27,10 +27,8 @@ import (
 type ImageMissStrategy int
 
 const (
-	SKIP ImageMissStrategy = iota
-	PULL
-	// TODO Implement a retry strategy as well (HF)
-	//RETRY
+	Skip ImageMissStrategy = iota
+	Pull
 )
 
 type ImageCacheConfig struct {
@@ -49,13 +47,15 @@ func GetOpenShiftImageNames(version string) []string {
 	}
 }
 
-func CreateExportCommand(version string) (*exec.Cmd, error) {
+func CreateExportCommand(version string, profile string) (*exec.Cmd, error) {
 	cmd, err := os.CurrentExecutable()
 	if err != nil {
 		return nil, err
 	}
 
 	exportArgs := []string{
+		"--profile",
+		profile,
 		"image",
 		"export"}
 	exportArgs = append(exportArgs, GetOpenShiftImageNames(version)...)

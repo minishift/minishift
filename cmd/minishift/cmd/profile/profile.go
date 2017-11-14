@@ -17,13 +17,15 @@ limitations under the License.
 package profile
 
 import (
+	"strings"
+
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
 
 const (
-	emptyProfileMessage  = "You must provide the profile name. Run `minishift profile list` to view profiles"
-	extraArgumentMessage = "You have provided more arguments than required. You must provide a single profile name"
+	emptyProfileMessage  = "A profile name must be provided. Run `minishift profile list` for a list of existing profiles."
+	extraArgumentMessage = "You have provided more arguments than required. You must provide a single profile name."
 )
 
 var ProfileCmd = &cobra.Command{
@@ -41,5 +43,7 @@ func validateArgs(args []string) {
 		atexit.ExitWithMessage(1, emptyProfileMessage)
 	} else if len(args) > 1 {
 		atexit.ExitWithMessage(1, extraArgumentMessage)
+	} else if strings.TrimSpace(args[0]) == "" {
+		atexit.ExitWithMessage(1, emptyProfileMessage)
 	}
 }

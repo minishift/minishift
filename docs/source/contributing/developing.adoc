@@ -221,11 +221,16 @@ $ make integration
 
 NOTE: By default `make integration` only runs tests which are tagged as `@basic`.
 
-To run all the test, use the following command:
+To run all tests, use the following command:
 
 ----
 $ make integration_all
 ----
+
+[NOTE]
+====
+There is also a `make integration_pr` target which is being run as part of pull request testing.
+====
 
 ===== Additional Parameters
 
@@ -281,6 +286,12 @@ Set `no-colors` to true to disable ansi colors of Godog's output.
 
 Definitions::
 Set `definitions` to true to print all available step definitions.
+
+[NOTE]
+====
+Passing any value via `GODOG_OPTS` overrides the default tag definition on each integration target.
+Thus in this case `--tags` must be specified manually, otherwise all features will be run.
+====
 
 For example, to run integration tests on two specific feature files using only `@basic` and `@openshift` tags and without ansi colors, the following command can be used:
 

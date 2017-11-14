@@ -196,14 +196,25 @@ test: vendor $(ADDON_ASSET_FILE)
 	@go test -ldflags="$(VERSION_VARIABLES)" -v $(shell $(PACKAGES))
 
 .PHONY: integration
+integration: GODOG_OPTS = --tags=basic
 integration: $(MINISHIFT_BINARY)
 	mkdir -p $(INTEGRATION_TEST_DIR)
-	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) --run-before-feature="$(RUN_BEFORE_FEATURE)" --tags basic $(GODOG_OPTS)
+	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) \
+	--run-before-feature="$(RUN_BEFORE_FEATURE)" $(GODOG_OPTS)
 
 .PHONY: integration_all
+integration_all: GODOG_OPTS = --tags=~coolstore
 integration_all: $(MINISHIFT_BINARY)
 	mkdir -p $(INTEGRATION_TEST_DIR)
-	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) --run-before-feature="$(RUN_BEFORE_FEATURE)" $(GODOG_OPTS) --tags ~coolstore
+	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) \
+	--run-before-feature="$(RUN_BEFORE_FEATURE)" $(GODOG_OPTS)
+
+.PHONY: integration_pr
+integration_pr: GODOG_OPTS = --tags=~coolstore\&\&~addon-xpaas
+integration_pr: $(MINISHIFT_BINARY)
+	mkdir -p $(INTEGRATION_TEST_DIR)
+	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) \
+	--run-before-feature="$(RUN_BEFORE_FEATURE)" $(GODOG_OPTS)
 
 .PHONY: fmt
 fmt:

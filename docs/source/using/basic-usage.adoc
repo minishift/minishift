@@ -31,6 +31,8 @@ xref:../openshift/openshift-client-binary.adoc#openshift-client-binary-overview[
 For more details about using {project} to manage your local OpenShift cluster, see the xref:../openshift/index.adoc#[Interacting with OpenShift] section.
 
 [[diagram-minishift-architecture]]
+
+//DOC_TAR_MARKER_TITLE_Minishift architecture_IMG_NAME_minishift-architecture_ENDS
 .: Minishift architecture
 [ditaa, "minishift-architecture"]
 ----
@@ -67,6 +69,7 @@ For more details about using {project} to manage your local OpenShift cluster, s
  +-------+-----------------------------------------------------------------------------+
 
 ----
+//DOC_TAR_MARKER_ENDS
 
 [[minishift-life-cycle]]
 == {project} Life-cycle

@@ -77,7 +77,7 @@ task :serve, [:server_args] => [:init, :markdown_to_asciidoc, :adoc_variables] d
 end
 
 desc 'Create adoc tar bundle'
-task :adoc_tar => [:init, :adoc_variables, :markdown_to_asciidoc] do
+task :adoc_tar => [:init, :adoc_variables, :markdown_to_asciidoc, :gen] do
   file_list = FileList.new('source/**/*.adoc', 'source/**/images/*', TOPIC_MAP, ADOC_VARIABLES)
   file_list.exclude("source/images/**")
   File.open("#{BUILD_DIR}/minishift-adoc.tar", "wb") do |file|
@@ -86,7 +86,13 @@ task :adoc_tar => [:init, :adoc_variables, :markdown_to_asciidoc] do
         tar.add_file(f, 0444) { |io|
           if File.extname(f) == ".adoc" then
             adoc_content = File.read(f)
-            adoc_content = adoc_content.gsub(/include::.*variables\.adoc\[\]/, "include::minishift/variables.adoc[]")
+            adoc_content.gsub!(/include::.*variables\.adoc\[\]/, "include::minishift/variables.adoc[]")
+            # skip writing-docs.adoc file since it contains match regex pattern
+            if File.basename(f) != "writing-docs.adoc" then
+              adoc_content.gsub!(/\/\/DOC_TAR_MARKER_TITLE_(.*)_IMG_NAME_(.*)_ENDS(.*)\/\/DOC_TAR_MARKER_ENDS/m) do |match|
+               ".: #{$1}\nimage::#{$2}.png[#{$1}]\nendif::[]"
+              end
+            end
             io.write(adoc_content)
           else
             io.write(File.read(f))

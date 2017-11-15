@@ -45,6 +45,23 @@ See the link:https://github.com/openshift/openshift-docs/blob/master/contributin
 
 - To make documentation reviews easier on GitHub, we use one line per sentence wherever possible. This practice is in addition to the OpenShift documentation guidlines.
 
+[[adding-diagram]]
+== Adding Diagram
+
+link:http://asciidoctor.org/docs/asciidoctor-diagram[Asciidoctor Diagram] is a set of Asciidoctor extensions that enable you to add diagrams, which you describe using plain text, to your AsciiDoc document. You can refer link:http://asciidoctor.org/docs/asciidoctor-diagram/#creating-a-diagram[here] in more details on how to create a diagram.
+
+To integrate this diagram properly with xref:integration-with-docs-openshift-org[docs.openshift.org], you need to wrap the _anatomy of your diagram_ as following:
+
+```
+//DOC_TAR_MARKER_TITLE_<title>_IMG_NAME_<image-name>_ENDS
+.: <title>
+[ditaa, "<image-name>"]
+<Anatomy of diagram>
+//DOC_TAR_MARKER_ENDS
+```
+
+One such example can be found in xref:../using/basic-usage.adoc#basic-usage-overview[Basic Usage] page.
+
 [[adding-new-topic]]
 === Adding a New Topic
 

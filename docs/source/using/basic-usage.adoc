@@ -32,6 +32,7 @@ For more details about using {project} to manage your local OpenShift cluster, s
 
 [[diagram-minishift-architecture]]
 .: Minishift architecture
+
 [ditaa, "minishift-architecture"]
 ----
 

@@ -89,3 +89,17 @@ Scenario: User should be able to switch between non existing profiles
       oc cli context could not changed for 'minishift'. Make sure the profile is in running state or restart if the problem persists.
       Profile 'minishift' set as active profile
       """
+Scenario: User should not be able to create profile with blank profile name
+    When executing "minishift profile set"
+     Then exitcode should equal "1"
+     Then stderr should contain
+     """
+     A profile name must be provided. Run `minishift profile list` for a list of existing profiles.
+     """
+    When executing "minishift profile set '  '"
+     Then exitcode should equal "1"
+     Then stderr should contain
+     """
+     A profile name must be provided. Run `minishift profile list` for a list of existing profiles.
+     """
+

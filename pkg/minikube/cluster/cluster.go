@@ -129,6 +129,7 @@ func DeleteHost(api libmachine.API) error {
 	m := util.MultiError{}
 	m.Collect(host.Driver.Remove())
 	m.Collect(api.Remove(constants.MachineName))
+
 	return m.ToError()
 }
 

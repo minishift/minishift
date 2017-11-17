@@ -21,6 +21,7 @@ import (
 	"os"
 
 	"github.com/docker/machine/libmachine"
+	"github.com/golang/glog"
 	registrationUtil "github.com/minishift/minishift/cmd/minishift/cmd/registration"
 	cmdUtil "github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
@@ -71,14 +72,16 @@ func runProfileDelete(cmd *cobra.Command, args []string) {
 	api := libmachine.NewClient(profileBaseDir, constants.MakeMiniPath("certs"))
 	defer api.Close()
 
-	exists := cmdUtil.VMExists(api, constants.MachineName)
-	if !exists {
-		fmt.Println(fmt.Sprintf("VM for profile '%s' does not exist", profileName))
-	} else {
+	if cmdUtil.VMExists(api, constants.MachineName) {
 		registrationUtil.UnregisterHost(api, false, forceProfileDeletion)
 		err := cluster.DeleteHost(api)
 		if err != nil {
 			fmt.Println(fmt.Sprintf("Error deleting '%s': %v", constants.MakeMiniPath("machines"), err.Error()))
+			return
+		}
+
+		if glog.V(2) {
+			fmt.Println(fmt.Sprintf("Deleted: Minishift VM '%s'", constants.MachineName))
 		}
 	}
 
@@ -86,8 +89,12 @@ func runProfileDelete(cmd *cobra.Command, args []string) {
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting '%s': %v", profileBaseDir, err.Error()))
 	}
-	fmt.Println("Deleted: ", profileBaseDir)
-	fmt.Println(fmt.Sprintf("Profile '%s' deleted successfully", profileName))
+
+	if glog.V(2) {
+		fmt.Println(fmt.Sprintf("Deleted: %s", profileBaseDir))
+	}
+
+	fmt.Println(fmt.Sprintf("Profile '%s' deleted successfully.", profileName))
 
 	// When active profile is deleted, reset the active profile to default profile
 	if profileActions.GetActiveProfile() == profileName {

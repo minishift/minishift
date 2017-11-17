@@ -71,10 +71,7 @@ func runProfileDelete(cmd *cobra.Command, args []string) {
 	api := libmachine.NewClient(profileBaseDir, constants.MakeMiniPath("certs"))
 	defer api.Close()
 
-	exists := cmdUtil.VMExists(api, constants.MachineName)
-	if !exists {
-		fmt.Println(fmt.Sprintf("VM for profile '%s' does not exist", profileName))
-	} else {
+	if cmdUtil.VMExists(api, constants.MachineName) {
 		registrationUtil.UnregisterHost(api, false, forceProfileDeletion)
 		err := cluster.DeleteHost(api)
 		if err != nil {
@@ -86,8 +83,8 @@ func runProfileDelete(cmd *cobra.Command, args []string) {
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting '%s': %v", profileBaseDir, err.Error()))
 	}
-	fmt.Println("Deleted: ", profileBaseDir)
-	fmt.Println(fmt.Sprintf("Profile '%s' deleted successfully", profileName))
+
+	fmt.Println(fmt.Sprintf("Profile '%s' (%s) deleted successfully.", profileName, profileBaseDir))
 
 	// When active profile is deleted, reset the active profile to default profile
 	if profileActions.GetActiveProfile() == profileName {

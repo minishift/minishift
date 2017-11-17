@@ -347,7 +347,7 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 
 	cacheMinishiftISO(machineConfig)
 
-	fmt.Print("-- Starting Minishift VM ...")
+	fmt.Printf("-- Starting Minishift VM profile '%s'...", minishiftConfig.AllInstancesConfig.ActiveProfile)
 	progressDots.Start()
 	start := func() (err error) {
 		hostVm, err = cluster.StartHost(libMachineClient, *machineConfig)

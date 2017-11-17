@@ -121,21 +121,20 @@ function setup_repo() {
   cp -r /home/minishift_ci/payload $GOPATH/src/github.com/minishift/minishift
 }
 
-function setup_glide() {
-  # Setup Glide ("curl https://glide.sh/get | sh" not working due to https://github.com/Masterminds/glide/issues/708)
-  GLIDE_OS_ARCH=`go env GOHOSTOS`-`go env GOHOSTARCH`
-  GLIDE_TAG=v0.12.3
-  GLIDE_LATEST_RELEASE_URL="https://github.com/Masterminds/glide/releases/download/${GLIDE_TAG}/glide-${GLIDE_TAG}-${GLIDE_OS_ARCH}.tar.gz"
-  curl -LO ${GLIDE_LATEST_RELEASE_URL}
-  mkdir /tmp/glide
-  tar --directory=/tmp/glide -xvf glide-${GLIDE_TAG}-${GLIDE_OS_ARCH}.tar.gz
-  export PATH=$PATH:/tmp/glide/${GLIDE_OS_ARCH}
+function setup_godep() {
+  GODEP_OS_ARCH=`go env GOHOSTOS`-`go env GOHOSTARCH`
+  GODEP_TAG=v0.3.2
+  GODEP_LATEST_RELEASE_URL="https://github.com/golang/dep/releases/download/${GODEP_TAG}/dep-${GODEP_OS_ARCH}"
+  mkdir /tmp/godep
+  curl -L ${GODEP_LATEST_RELEASE_URL} -o /tmp/godep/dep
+  chmod +x /tmp/godep/dep
+  export PATH=$PATH:/tmp/godep/
 }
 
 function prepare_repo() {
   setup_golang;
   setup_repo;
-  setup_glide;
+  setup_godep;
   echo "CICO: Preparation complete"
 }
 

@@ -3,9 +3,11 @@ build:
   tags:
     - docker
   script:
-    - dnf install -y golang glide make git python
+    - dnf install -y golang make git python
     - export CURRENT_BUILD_PATH=$PWD
-    - mkdir -p $HOME/gopath
+    - mkdir -p $HOME/gopath/bin
+    - curl -L https://github.com/golang/dep/releases/download/v0.3.2/dep-linux-amd64 -o $HOME/gopath/bin/dep
+    - chmod +x $HOME/gopath/bin/dep
     - export GOPATH=$HOME/gopath
     - export PATH=$PATH:$GOPATH/bin
     - mkdir -p $HOME/gopath/src/github.com/minishift

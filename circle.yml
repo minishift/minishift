@@ -22,17 +22,15 @@ dependencies:
         - go version
         - go env
         - mkdir $HOME/bin
-        # Install Glide
-        - curl -sL ${GLIDE_LATEST_RELEASE_URL} -o /tmp/glide.tar.gz:
+        # Install Dep
+        - mkdir /tmp/godep
+        - curl -sL ${GODEP_LATEST_RELEASE_URL} -o /tmp/godep/dep:
             environment:
-                GLIDE_OS_ARCH: $(go env GOHOSTOS)-$(go env GOHOSTARCH)
-                GLIDE_TAG: v0.12.3
-                GLIDE_LATEST_RELEASE_URL: "https://github.com/Masterminds/glide/releases/download/${GLIDE_TAG}/glide-${GLIDE_TAG}-${GLIDE_OS_ARCH}.tar.gz"
-        - mkdir /tmp/glide
-        - tar --directory=/tmp/glide -xvf /tmp/glide.tar.gz
-        - mv /tmp/glide/${GLIDE_OS_ARCH}/glide $GOPATH/bin/:
-            environment:
-                GLIDE_OS_ARCH: $(go env GOHOSTOS)-$(go env GOHOSTARCH)
+                GODEP_OS_ARCH: $(go env GOHOSTOS)-$(go env GOHOSTARCH)
+                GODEP_TAG: v0.3.2
+                GODEP_LATEST_RELEASE_URL: "https://github.com/golang/dep/releases/download/${GODEP_TAG}/dep-${GODEP_OS_ARCH}"
+        - chmod +x /tmp/godep/dep
+        - mv /tmp/godep/dep $GOPATH/bin/
 
 ## Customize test commands
 test:

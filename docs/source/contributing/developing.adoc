@@ -89,19 +89,19 @@ For instructions on setting up IDEA, see link:http://hadihariri.com/2015/09/30/s
 [[manage-dependencies]]
 == Dependency Management
 
-{project} uses link:https://github.com/Masterminds/glide[Glide] for dependency management.
+{project} uses link:https://github.com/golang/dep[Dep] for dependency management.
 
-[[install-glide]]
-=== Installing Glide
+[[install-dep]]
+=== Installing Dep
 
-Before you can use Glide you need to download and install it from GitHub:
+Before you can use Dep you need to download and install it from GitHub:
 
 ----
-$ go get github.com/Masterminds/glide
+$ go get github.com/golang/dep/cmd/dep
 ----
 
-This will install the `glide` binary into *_$GOPATH/bin_*.
-Make sure to use Glide version 0.12.3 or later.
+This will install the `dep` binary into *_$GOPATH/bin_*.
+Make sure to use Dep version 0.3.2 or later.
 
 [[bootstrap-dependencies]]
 === Bootstrapping Dependencies
@@ -114,31 +114,31 @@ To install the dependencies, you can run the following command:
 $ make vendor
 ----
 
-This command calls and runs Glide.
-Alternatively, you can run the Glide command directly.
+This command calls and runs Dep.
+Alternatively, you can run the Dep command directly.
 
 ----
-$ glide install -v
+$ dep ensure -v
 ----
 
 [[update-dependencies]]
 === Updating Dependencies
 
-If your work requires a change to the dependencies, you need to update the Glide configuration.
+If your work requires a change to the dependencies, you need to update the Dep configuration.
 
-. Edit *_glide.yaml_* to change the dependencies as needed.
+. Edit *_Gopkg.toml_* to change the dependencies as needed.
 
-. Delete *_glide.lock_* and re-create the vendor directory by running `make vendor`.
-Glide will recognize that there is no lock file and recalculate the required dependencies.
+. Delete *_Gopkg.lock_* and re-create the vendor directory by running `make vendor`.
+Dep will recognize that there is no lock file and recalculate the required dependencies.
 
-. Check-in the updated *_glide.yaml_* and *_glide.lock_* files.
+. Check-in the updated *_Gopkg.toml_* and *_Gopkg.lock_* files.
 
 . Test that everything still compiles with the new lock file in place by running `make clean && make`.
 
 [TIP]
 ====
-The Glide cache located under *_~/.glide/cache_* can get corrupted in some cases.
-If you see Glide errors during `make vendor`, you can clear the Glide cache via `glide cc`.
+The Dep cache located under *_$GOPATH/pkg/dep_*.
+If you see any Dep errors during `make vendor`, you can remove local cached directory and try again.
 ====
 
 [[build-minishift]]

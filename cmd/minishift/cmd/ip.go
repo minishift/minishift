@@ -22,6 +22,7 @@ import (
 	"github.com/docker/machine/libmachine"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 
+	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
@@ -32,7 +33,7 @@ var ipCmd = &cobra.Command{
 	Short: "Gets the IP address of the running cluster.",
 	Long:  `Gets the IP address of the running cluster and prints it to standard output.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+		api := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
 		defer api.Close()
 		host, err := api.Load(constants.MachineName)
 		if err != nil {

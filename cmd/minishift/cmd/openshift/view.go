@@ -24,8 +24,8 @@ import (
 	"fmt"
 
 	"github.com/docker/machine/libmachine/provision"
+	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
-	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/docker"
 	"github.com/minishift/minishift/pkg/minishift/openshift"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
@@ -58,7 +58,7 @@ func runViewConfig(cmd *cobra.Command, args []string) {
 		atexit.ExitWithMessage(1, unknownConfigTargetError)
 	}
 
-	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+	api := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
 	defer api.Close()
 
 	host, err := cluster.CheckIfApiExistsAndLoad(api)

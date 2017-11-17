@@ -24,11 +24,12 @@ import (
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
-	"github.com/minishift/minishift/pkg/minikube/constants"
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 
+	cmdState "github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/out/bindata"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
 var (
@@ -67,10 +68,11 @@ func ExitIfNotRunning(driver drivers.Driver, machineName string) {
 
 func GetVMStatus(profileName string) string {
 	var status string
-	profileActions.UpdateProfileConstants(profileName)
-	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+	profileDirs := cmdState.NewMinishiftDirs(constants.GetProfileHomeDir(profileName))
+
+	api := libmachine.NewClient(profileDirs.Home, profileDirs.Certs)
 	defer api.Close()
-	status, err := cluster.GetHostStatus(api)
+	status, err := cluster.GetHostStatus(api, profileName)
 	if err != nil {
 		status = fmt.Sprintf("Error getting the VM status: %s", err.Error())
 	}

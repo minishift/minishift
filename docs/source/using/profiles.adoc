@@ -14,7 +14,7 @@ toc::[]
 A profile is an instance of the Minishift VM along with all of its configuration and state.
 The profile feature allows you to create and manage these isolated instances of Minishift.
 
-Each {project} profile is created with its own configuration (memory, CPU, disk size, add-ons, and so on) and completely independent of other profiles.
+Each {project} profile is created with its own configuration (memory, CPU, disk size, add-ons, and so on) and is independent of other profiles.
 Refer to the use of xref:../using/basic-usage.adoc#environment-variables[environment variables] if you want to make sure that certain configuration settings, for example `cpus` or `memory`, get applied to all profiles.
 
 The _active_ profile is the profile against which all commands are executed, unless the global `--profile` flag is used.
@@ -24,10 +24,17 @@ You can execute single commands against a non-active profile by using the `--pro
 On top of the `--profile` flag, there are xref:../command-ref/minishift_profile.adoc#[commands] for xref:../command-ref/minishift_profile_list.adoc#[listing], xref:../command-ref/minishift_profile_delete.adoc#[deleting] and xref:../command-ref/minishift_profile_set.adoc#[setting] the active profile.
 These commands are described in the following sections.
 
+[TIP]
+====
+Even though profiles are independent of each other, they share the same cache for ISOs, `oc` binaries and container images.
+`minishift delete --clear-cache` will for this reason affect all profiles.
+We recommend using `--clear-cache` with caution.
+====
+
 [[creating-profiles]]
 == Creating Profiles
 
-There are two ways to create a new profile. 
+There are two ways to create a new profile.
 
 [NOTE]
 ====

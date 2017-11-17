@@ -17,6 +17,7 @@ limitations under the License.
 package config
 
 import (
+	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"io/ioutil"
 	"os"
@@ -36,6 +37,8 @@ func TestModifyData(t *testing.T) {
 	if err != nil {
 		t.Error()
 	}
+	state.InstanceDirs = state.NewMinishiftDirs(testDir)
+
 	constants.ConfigFile = filepath.Join(testDir, "config.json")
 	defer os.RemoveAll(testDir)
 

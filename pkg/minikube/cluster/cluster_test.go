@@ -24,14 +24,23 @@ import (
 	"github.com/docker/machine/libmachine/host"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minikube/tests"
+	"io/ioutil"
+	"os"
 )
 
 func TestRemoteBoot2DockerURL(t *testing.T) {
+	testDir, err := ioutil.TempDir("", "minishift-tmp-test-dir-")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(testDir)
+
 	var machineConfig = MachineConfig{
 		MinikubeISO: "http://github.com/fake/boot2docker.iso",
+		ISOCacheDir: filepath.Join(testDir, "iso"),
 	}
 
-	isoPath := filepath.Join(constants.Minipath, "cache", "iso", "unnamed", filepath.Base(machineConfig.MinikubeISO))
+	isoPath := filepath.Join(testDir, "iso", "unnamed", filepath.Base(machineConfig.MinikubeISO))
 	expectedURL := "file://" + filepath.ToSlash(isoPath)
 	url := machineConfig.GetISOFileURI()
 

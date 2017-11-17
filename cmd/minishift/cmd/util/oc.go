@@ -27,6 +27,7 @@ import (
 
 	"github.com/docker/machine/libmachine"
 	"github.com/golang/glog"
+	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/cache"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
@@ -40,7 +41,7 @@ import (
 func CacheOc(openShiftVersion string) string {
 	ocBinary := cache.Oc{
 		OpenShiftVersion:  openShiftVersion,
-		MinishiftCacheDir: filepath.Join(constants.Minipath, "cache"),
+		MinishiftCacheDir: state.InstanceDirs.Cache,
 	}
 	if err := ocBinary.EnsureIsCached(); err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error starting the cluster: %v", err))
@@ -121,7 +122,7 @@ func RemoveCurrentContext() error {
 }
 
 func GetOcPathForProfile(profileName string) (error, string) {
-	instanceConfigFile := filepath.Join(constants.GetProfileHomeDir(), "machines", profileName+".json")
+	instanceConfigFile := filepath.Join(constants.GetProfileHomeDir(constants.ProfileName), "machines", profileName+".json")
 	//Check if the file exists
 	_, err := os.Stat(instanceConfigFile)
 	if os.IsNotExist(err) {

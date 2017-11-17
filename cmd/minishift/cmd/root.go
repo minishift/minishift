@@ -46,6 +46,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+
+	"github.com/minishift/minishift/cmd/minishift/state"
 )
 
 const (
@@ -72,18 +74,19 @@ var RootCmd = &cobra.Command{
 		)
 
 		constants.MachineName = constants.ProfileName
+		constants.Minipath = constants.GetProfileHomeDir(constants.ProfileName)
 
 		// Initialize the instance directory structure
-		minishiftConfig.InstanceDirs = minishiftConfig.NewMinishiftDirs()
+		state.InstanceDirs = state.NewMinishiftDirs(constants.Minipath)
 
-		constants.KubeConfigPath = filepath.Join(constants.Minipath, "machines", constants.MachineName+"_kubeconfig")
+		constants.KubeConfigPath = filepath.Join(state.InstanceDirs.Machines, constants.MachineName+"_kubeconfig")
 
-		if !filehelper.Exists(minishiftConfig.InstanceDirs.Addons) {
+		if !filehelper.Exists(state.InstanceDirs.Addons) {
 			isAddonInstallRequired = true
 		}
 
 		// creating all directories for minishift run
-		createMinishiftDirs(minishiftConfig.InstanceDirs)
+		createMinishiftDirs(state.InstanceDirs)
 
 		// If AllInstanceConfig is not defined we should define it now.
 		if minishiftConfig.AllInstancesConfig == nil {
@@ -104,7 +107,7 @@ var RootCmd = &cobra.Command{
 		}
 
 		if isAddonInstallRequired {
-			if err := cmdUtil.UnpackAddons(minishiftConfig.InstanceDirs.Addons); err != nil {
+			if err := cmdUtil.UnpackAddons(state.InstanceDirs.Addons); err != nil {
 				atexit.ExitWithMessage(1, fmt.Sprintf("Error installing default add-ons : %s", err))
 			}
 		}
@@ -278,7 +281,7 @@ func performPostUpdateExecution(markerPath string) error {
 	if markerData.InstallAddon {
 		fmt.Println(fmt.Sprintf("Minishift was upgraded from v%s to v%s. Running post update actions.", markerData.PreviousVersion, version.GetMinishiftVersion()))
 		fmt.Print("--- Updating default add-ons ... ")
-		cmdUtil.UnpackAddons(minishiftConfig.InstanceDirs.Addons)
+		cmdUtil.UnpackAddons(state.InstanceDirs.Addons)
 		fmt.Println("OK")
 		fmt.Println(fmt.Sprintf("Default add-ons %s installed", strings.Join(cmdUtil.DefaultAssets, ", ")))
 	}
@@ -298,7 +301,7 @@ func ensureAllInstanceConfigPath(configPath string) {
 	}
 }
 
-func createMinishiftDirs(dirs *minishiftConfig.MinishiftDirs) {
+func createMinishiftDirs(dirs *state.MinishiftDirs) {
 	dirPaths := reflect.ValueOf(*dirs)
 
 	for i := 0; i < dirPaths.NumField(); i++ {

@@ -21,8 +21,8 @@ import (
 	"os"
 
 	"github.com/docker/machine/libmachine"
+	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
-	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
@@ -37,7 +37,7 @@ var logsCmd = &cobra.Command{
 	Short: "Gets the logs of the running OpenShift cluster.",
 	Long:  `Gets the logs of the running OpenShift cluster. The logs do not contain information about your application code.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+		api := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
 		defer api.Close()
 		s, err := cluster.GetHostLogs(api, follow)
 		if err != nil {

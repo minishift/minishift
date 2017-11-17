@@ -20,8 +20,8 @@ import (
 	"fmt"
 
 	"github.com/docker/machine/libmachine"
+	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
-	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
@@ -36,7 +36,7 @@ var sshCmd = &cobra.Command{
 	Short: "Log in to or run a command on a Minishift VM with SSH.",
 	Long:  "Log in to or run a command on a Minishift VM with SSH. This command is similar to 'docker-machine ssh'.",
 	Run: func(cmd *cobra.Command, args []string) {
-		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+		api := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
 		defer api.Close()
 
 		err := cluster.CreateSSHShell(api, args)

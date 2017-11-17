@@ -23,7 +23,6 @@ import (
 	"testing"
 
 	"fmt"
-	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/viper"
 )
@@ -36,7 +35,7 @@ func SetupTmpMinishiftHome(t *testing.T) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	constants.Minipath = testDir
+	os.Setenv("MINISHIFT_HOME", testDir)
 
 	return testDir
 }
@@ -89,7 +88,10 @@ func PreventExitWithNonZeroExitCode(t *testing.T) func(int) bool {
 }
 
 func TearDown(testDir string, tee *Tee) {
-	tee.Close()
+	os.Unsetenv("MINISHIFT_HOME")
+	if tee != nil {
+		tee.Close()
+	}
 	os.RemoveAll(testDir)
 	viper.Reset()
 	atexit.ClearExitHandler()

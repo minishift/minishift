@@ -60,14 +60,14 @@ func MakeMiniPath(fileName ...string) string {
 	return filepath.Join(args...)
 }
 
-// GetProfileHomeDir determines the Minishift home directory for the profile.
-func GetProfileHomeDir() string {
-	if ProfileName != DefaultProfileName {
+// GetProfileHomeDir determines the base directory for the specified profile name
+func GetProfileHomeDir(profile string) string {
+	if profile != DefaultProfileName {
 		homeEnv, ok := os.LookupEnv(MiniShiftHomeEnv)
 		if ok {
-			return filepath.Join(homeEnv, "profiles", ProfileName)
+			return filepath.Join(homeEnv, "profiles", profile)
 		}
-		return filepath.Join(util.HomeDir(), ".minishift", "profiles", ProfileName)
+		return filepath.Join(util.HomeDir(), ".minishift", "profiles", profile)
 	}
 	return GetMinishiftHomeDir()
 }

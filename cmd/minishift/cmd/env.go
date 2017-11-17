@@ -30,6 +30,7 @@ import (
 
 	"github.com/docker/machine/libmachine"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
+	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/minishift/minishift/pkg/util/shell"
@@ -142,7 +143,7 @@ var dockerEnvCmd = &cobra.Command{
 	Long:  `Sets Docker environment variables, similar to '$(docker-machine env)'.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+		api := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
 		defer api.Close()
 
 		util.ExitIfUndefined(api, constants.MachineName)

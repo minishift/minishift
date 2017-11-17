@@ -22,6 +22,7 @@ import (
 	"github.com/docker/machine/libmachine"
 	"github.com/minishift/minishift/cmd/minishift/cmd/config"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
+	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/docker/image"
@@ -33,7 +34,7 @@ import (
 )
 
 func getCachedImages(cacheDir string) []string {
-	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+	api := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
 	defer api.Close()
 
 	handler, err := image.NewLocalOnlyOciImageHandler()

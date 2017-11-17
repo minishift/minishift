@@ -22,6 +22,7 @@ import (
 	"github.com/docker/machine/libmachine"
 	registrationUtil "github.com/minishift/minishift/cmd/minishift/cmd/registration"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
+	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
@@ -38,7 +39,7 @@ VM but does not delete any associated files. To start the cluster again, use the
 }
 
 func runStop(cmd *cobra.Command, args []string) {
-	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+	api := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
 	defer api.Close()
 
 	// if VM does not exist, exit with error

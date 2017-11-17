@@ -19,6 +19,7 @@ package image
 import (
 	"fmt"
 	"github.com/docker/machine/libmachine"
+	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/spf13/cobra"
 )
@@ -35,7 +36,7 @@ var (
 )
 
 func listImages(cmd *cobra.Command, args []string) {
-	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+	api := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
 	defer api.Close()
 
 	if dockerDaemonImages {
@@ -46,7 +47,7 @@ func listImages(cmd *cobra.Command, args []string) {
 }
 
 func listCachedImages() {
-	cacheDir := constants.MakeMiniPath(CacheDir...)
+	cacheDir := state.InstanceDirs.ImageCache
 	cachedImages := getCachedImages(cacheDir)
 	if len(cachedImages) > 0 {
 		printImageList(cachedImages)
@@ -59,7 +60,6 @@ func listDockerDaemonImages(api *libmachine.Client) {
 		fmt.Println(fmt.Sprintf("There are no images available in the Docker daemon of Minishift instance '%s'", constants.ProfileName))
 	} else {
 		printImageList(images)
-
 	}
 }
 

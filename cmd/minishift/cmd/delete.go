@@ -23,6 +23,7 @@ import (
 	"github.com/docker/machine/libmachine"
 	registrationUtil "github.com/minishift/minishift/cmd/minishift/cmd/registration"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
+	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
@@ -46,7 +47,7 @@ var (
 )
 
 func runDelete(cmd *cobra.Command, args []string) {
-	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+	api := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
 	defer api.Close()
 
 	util.ExitIfUndefined(api, constants.MachineName)
@@ -59,7 +60,7 @@ func runDelete(cmd *cobra.Command, args []string) {
 	}
 
 	if clearCache {
-		cachePath := constants.MakeMiniPath("cache")
+		cachePath := state.InstanceDirs.Cache
 		err := os.RemoveAll(cachePath)
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting Minishift cache: %v", err))

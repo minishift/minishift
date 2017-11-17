@@ -76,7 +76,7 @@ func runProfileDelete(cmd *cobra.Command, args []string) {
 		registrationUtil.UnregisterHost(api, false, forceProfileDeletion)
 		err := cluster.DeleteHost(api)
 		if err != nil {
-			fmt.Println(fmt.Sprintf("Error deleting '%s': %v", constants.MakeMiniPath("machines"), err.Error()))
+			fmt.Println(fmt.Sprintf("Error deleting '%s': %v", constants.MakeMiniPath("certs"), err.Error()))
 			return
 		}
 

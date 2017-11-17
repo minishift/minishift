@@ -24,6 +24,7 @@ import (
 
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/state"
+	cmdState "github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	openshiftVersion "github.com/minishift/minishift/pkg/minishift/openshift/version"
@@ -53,12 +54,12 @@ var statusCmd = &cobra.Command{
 }
 
 func runStatus(cmd *cobra.Command, args []string) {
-	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+	api := libmachine.NewClient(cmdState.InstanceDirs.Home, cmdState.InstanceDirs.Certs)
 	defer api.Close()
 
 	host, err := api.Load(constants.MachineName)
 	if err != nil {
-		s, err := cluster.GetHostStatus(api)
+		s, err := cluster.GetHostStatus(api, constants.MachineName)
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error getting cluster status: %s", err.Error()))
 		}
@@ -69,7 +70,7 @@ func runStatus(cmd *cobra.Command, args []string) {
 	diskUsage := "Unknown"
 	profileName := constants.ProfileName
 
-	vmStatus, err := cluster.GetHostStatus(api)
+	vmStatus, err := cluster.GetHostStatus(api, constants.MachineName)
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error getting cluster status: %s", err.Error()))
 	}

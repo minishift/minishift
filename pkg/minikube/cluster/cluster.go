@@ -132,10 +132,10 @@ func DeleteHost(api libmachine.API) error {
 	return m.ToError()
 }
 
-// GetHostStatus gets the status of the host VM.
-func GetHostStatus(api libmachine.API) (string, error) {
+// GetHostStatus gets the status of the host VM with the specified name.
+func GetHostStatus(api libmachine.API, machine string) (string, error) {
 	dne := "Does Not Exist"
-	exists, err := api.Exists(constants.MachineName)
+	exists, err := api.Exists(machine)
 	if err != nil {
 		return "", err
 	}
@@ -143,7 +143,7 @@ func GetHostStatus(api libmachine.API) (string, error) {
 		return dne, nil
 	}
 
-	host, err := api.Load(constants.MachineName)
+	host, err := api.Load(machine)
 	if err != nil {
 		return "", err
 	}
@@ -162,6 +162,7 @@ type sshAble interface {
 // MachineConfig contains the parameters used to start a cluster.
 type MachineConfig struct {
 	MinikubeISO      string
+	ISOCacheDir      string
 	Memory           int
 	CPUs             int
 	DiskSize         int
@@ -209,7 +210,7 @@ func (m *MachineConfig) CacheMinikubeISOFromURL() error {
 		return fmt.Errorf("Received %d response from %s while trying to download the ISO", response.StatusCode, m.MinikubeISO)
 	}
 
-	err = os.MkdirAll(filepath.Join(constants.Minipath, "cache", "iso", minishiftUtil.GetIsoPath(m.MinikubeISO)), os.ModePerm)
+	err = os.MkdirAll(filepath.Join(m.ISOCacheDir, minishiftUtil.GetIsoPath(m.MinikubeISO)), os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -307,7 +308,7 @@ func (m *MachineConfig) ShouldCacheMinikubeISO() bool {
 }
 
 func (m *MachineConfig) GetISOCacheFilepath() string {
-	return filepath.Join(constants.Minipath, "cache", "iso", minishiftUtil.GetIsoPath(m.MinikubeISO), filepath.Base(m.MinikubeISO))
+	return filepath.Join(m.ISOCacheDir, minishiftUtil.GetIsoPath(m.MinikubeISO), filepath.Base(m.MinikubeISO))
 }
 
 func (m *MachineConfig) GetISOFileURI() string {

@@ -21,6 +21,7 @@ import (
 	"os"
 
 	"github.com/docker/machine/libmachine"
+	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
@@ -44,7 +45,7 @@ var consoleCmd = &cobra.Command{
 	Short:   "Opens or displays the OpenShift Web Console URL.",
 	Long:    `Opens the OpenShift Web Console URL in the default browser or displays it to the console.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+		api := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
 		defer api.Close()
 
 		if consoleURLMode {

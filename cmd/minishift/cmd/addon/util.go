@@ -23,7 +23,7 @@ import (
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/cmd/minishift/cmd/config"
-	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minishift/addon"
 	"github.com/minishift/minishift/pkg/minishift/addon/manager"
 	"github.com/minishift/minishift/pkg/minishift/docker"
@@ -35,7 +35,7 @@ import (
 // GetAddOnManager returns the addon manager
 func GetAddOnManager() *manager.AddOnManager {
 	addOnConfigs := GetAddOnConfiguration()
-	m, err := manager.NewAddOnManager(constants.MakeMiniPath("addons"), addOnConfigs)
+	m, err := manager.NewAddOnManager(state.InstanceDirs.Addons, addOnConfigs)
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot initialize the add-on manager: %s", err.Error()))
 	}

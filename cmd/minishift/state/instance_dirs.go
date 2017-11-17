@@ -14,10 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package config
+package state
 
 import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	"path/filepath"
 )
 
 type MinishiftDirs struct {
@@ -37,20 +38,21 @@ type MinishiftDirs struct {
 var InstanceDirs *MinishiftDirs
 
 // Constructor for MinishiftDirs
-func NewMinishiftDirs() *MinishiftDirs {
-	constants.Minipath = constants.GetProfileHomeDir()
+func NewMinishiftDirs(baseDir string) *MinishiftDirs {
+	// We use a global cache, sharing the cache directory of the default 'minishift' instance
+	cacheDir := filepath.Join(constants.GetMinishiftHomeDir(), "cache")
 
 	return &MinishiftDirs{
-		Home:       constants.Minipath,
-		Certs:      constants.MakeMiniPath("certs"),
-		Machines:   constants.MakeMiniPath("machines"),
-		Cache:      constants.MakeMiniPath("cache"),
-		IsoCache:   constants.MakeMiniPath("cache", "iso"),
-		OcCache:    constants.MakeMiniPath("cache", "oc"),
-		ImageCache: constants.MakeMiniPath("cache", "images"),
-		Addons:     constants.MakeMiniPath("addons"),
-		Logs:       constants.MakeMiniPath("logs"),
-		Tmp:        constants.MakeMiniPath("tmp"),
-		Config:     constants.MakeMiniPath("config"),
+		Home:       baseDir,
+		Certs:      filepath.Join(baseDir, "certs"),
+		Machines:   filepath.Join(baseDir, "machines"),
+		Addons:     filepath.Join(baseDir, "addons"),
+		Logs:       filepath.Join(baseDir, "logs"),
+		Tmp:        filepath.Join(baseDir, "tmp"),
+		Config:     filepath.Join(baseDir, "config"),
+		Cache:      cacheDir,
+		IsoCache:   filepath.Join(cacheDir, "iso"),
+		OcCache:    filepath.Join(cacheDir, "oc"),
+		ImageCache: filepath.Join(cacheDir, "images"),
 	}
 }

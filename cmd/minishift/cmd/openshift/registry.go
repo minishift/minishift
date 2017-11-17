@@ -22,6 +22,7 @@ import (
 	"github.com/docker/machine/libmachine"
 	"github.com/minishift/minishift/cmd/minishift/cmd/addon"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
+	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/openshift"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
@@ -35,7 +36,7 @@ var registryCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		//Check if Minishift VM is running
-		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+		api := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
 		defer api.Close()
 
 		util.ExitIfUndefined(api, constants.MachineName)

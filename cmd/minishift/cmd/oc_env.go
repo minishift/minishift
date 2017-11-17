@@ -28,6 +28,7 @@ import (
 	"github.com/docker/machine/libmachine"
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
+	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minishift/cache"
 	"github.com/minishift/minishift/pkg/minishift/clusterup"
 	"github.com/minishift/minishift/pkg/minishift/config"
@@ -79,7 +80,7 @@ var ocEnvCmd = &cobra.Command{
 			atexit.ExitWithMessage(1, "Cannot find the OpenShift client binary.\nMake sure that OpenShift was provisioned successfully.")
 		}
 
-		api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+		api := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
 		defer api.Close()
 
 		util.ExitIfUndefined(api, constants.MachineName)
@@ -120,7 +121,7 @@ func getOcPath() string {
 	ocVersion := clusterup.DetermineOcVersion(requestedOpenShiftVersion)
 	ocBinary := cache.Oc{
 		OpenShiftVersion:  ocVersion,
-		MinishiftCacheDir: filepath.Join(constants.Minipath, "cache"),
+		MinishiftCacheDir: state.InstanceDirs.Cache,
 	}
 	return filepath.Join(ocBinary.GetCacheFilepath(), constants.OC_BINARY_NAME)
 }

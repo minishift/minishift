@@ -24,8 +24,8 @@ import (
 
 	"github.com/docker/machine/libmachine"
 
+	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
-	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
 // Runs all the validation or callback functions and collects errors
@@ -90,7 +90,7 @@ func SetSlice(m MinishiftConfig, name string, val string) error {
 }
 
 func RequiresRestartMsg(name string, value string) error {
-	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+	api := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
 	defer api.Close()
 
 	_, err := cluster.CheckIfApiExistsAndLoad(api)

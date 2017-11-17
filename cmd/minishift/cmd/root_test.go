@@ -27,6 +27,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
+	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/testing/cli"
@@ -98,7 +99,7 @@ func TestPreRunDirectories(t *testing.T) {
 	constants.Minipath = testDir
 	cli.RunCommand(RootCmd.PersistentPreRun)
 
-	dirPaths := reflect.ValueOf(*minishiftConfig.InstanceDirs)
+	dirPaths := reflect.ValueOf(*state.InstanceDirs)
 	for i := 0; i < dirPaths.NumField(); i++ {
 		dir := dirPaths.Field(i).Interface().(string)
 		_, err := os.Stat(dir)

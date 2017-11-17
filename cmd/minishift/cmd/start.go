@@ -30,9 +30,9 @@ import (
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/cmd/minishift/cmd/addon"
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
-	imageCmd "github.com/minishift/minishift/cmd/minishift/cmd/image"
 	registrationUtil "github.com/minishift/minishift/cmd/minishift/cmd/registration"
 	cmdUtil "github.com/minishift/minishift/cmd/minishift/cmd/util"
+	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftCluster "github.com/minishift/minishift/pkg/minishift/cluster"
@@ -150,7 +150,7 @@ For the latter see 'minishift config -h'.`,
 func runStart(cmd *cobra.Command, args []string) {
 	fmt.Println(fmt.Sprintf("-- Starting profile '%s'", constants.ProfileName))
 
-	libMachineClient := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+	libMachineClient := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
 	defer libMachineClient.Close()
 
 	ensureNotRunning(libMachineClient, constants.MachineName)
@@ -314,6 +314,7 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 	// Configuration used for creation/setup of the Virtual Machine
 	machineConfig := &cluster.MachineConfig{
 		MinikubeISO:      determineIsoUrl(viper.GetString(configCmd.ISOUrl.Name)),
+		ISOCacheDir:      state.InstanceDirs.IsoCache,
 		Memory:           calculateMemorySize(viper.GetString(configCmd.Memory.Name)),
 		CPUs:             viper.GetInt(configCmd.CPUs.Name),
 		DiskSize:         calculateDiskSize(viper.GetString(configCmd.DiskSize.Name)),
@@ -411,7 +412,7 @@ func importContainerImages(driver drivers.Driver, api libmachine.API, openShiftV
 
 	handler := getImageHandler(driver, envMap)
 	config := &image.ImageCacheConfig{
-		HostCacheDir: constants.MakeMiniPath(imageCmd.CacheDir...),
+		HostCacheDir: state.InstanceDirs.ImageCache,
 		CachedImages: images,
 		Out:          os.Stdout,
 	}
@@ -450,7 +451,7 @@ func exportContainerImages(driver drivers.Driver, api libmachine.API, version st
 
 	handler := getImageHandler(driver, envMap)
 	config := &image.ImageCacheConfig{
-		HostCacheDir: constants.MakeMiniPath(imageCmd.CacheDir...),
+		HostCacheDir: state.InstanceDirs.ImageCache,
 		CachedImages: images,
 	}
 

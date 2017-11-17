@@ -79,7 +79,7 @@ func GetActiveProfile() string {
 func UpdateProfileConstants(profileName string) {
 	constants.ProfileName = profileName
 	constants.MachineName = constants.ProfileName
-	constants.Minipath = constants.GetProfileHomeDir()
+	constants.Minipath = constants.GetProfileHomeDir(constants.ProfileName)
 }
 
 func SetDefaultProfileActive() error {

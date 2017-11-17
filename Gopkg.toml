@@ -1,0 +1,103 @@
+
+# Gopkg.toml example
+#
+# Refer to https://github.com/golang/dep/blob/master/docs/Gopkg.toml.md
+# for detailed Gopkg.toml documentation.
+#
+# required = ["github.com/user/thing/cmd/thing"]
+# ignored = ["github.com/user/project/pkgX", "bitbucket.org/user/project/pkgA/pkgY"]
+#
+# [[constraint]]
+#   name = "github.com/user/project"
+#   version = "1.0.0"
+#
+# [[constraint]]
+#   name = "github.com/user/project2"
+#   branch = "dev"
+#   source = "github.com/myfork/project2"
+#
+# [[override]]
+#  name = "github.com/x/y"
+#  version = "2.4.0"
+
+
+[[constraint]]
+  name = "github.com/DATA-DOG/godog"
+  version = "=0.7.4"
+
+[[constraint]]
+  name = "github.com/asaskevich/govalidator"
+  version = "=5"
+
+[[constraint]]
+  name = "github.com/blang/semver"
+  version = "=3.5.0"
+
+[[constraint]]
+  name = "github.com/docker/go-units"
+
+[[constraint]]
+  name = "github.com/docker/machine"
+  version = "=0.11.0"
+
+[[constraint]]
+  name = "github.com/elazarl/goproxy"
+
+[[constraint]]
+  name = "github.com/gbraad/go-hvkvp"
+  version = "=0.3.0"
+
+[[constraint]]
+  name = "github.com/golang/glog"
+  revision = "335da9dda11408a34b64344f82e9c03779b71673"
+  source = "https://github.com/openshift/glog.git"
+
+[[constraint]]
+  name = "github.com/google/go-github"
+  revision = "30a21ee1a3839fb4a408efe331f226b73faac379"
+
+[[constraint]]
+  name = "github.com/gorillalabs/go-powershell"
+  revision = "3bc7a60b1df80a5766820c4a53d59668f4553f75"
+
+[[constraint]]
+  name = "github.com/inconshreveable/go-update"
+
+[[constraint]]
+  name = "github.com/kardianos/osext"
+
+[[constraint]]
+  name = "github.com/olekukonko/tablewriter"
+
+[[constraint]]
+  name = "github.com/pborman/uuid"
+
+[[constraint]]
+  name = "github.com/pkg/browser"
+
+[[constraint]]
+  name = "github.com/pkg/errors"
+  version = "0.8.0"
+
+[[constraint]]
+  name = "github.com/spf13/cobra"
+
+[[constraint]]
+  name = "github.com/spf13/pflag"
+
+[[constraint]]
+  name = "github.com/spf13/viper"
+  revision = "382f87b929b84ce13e9c8a375a4b217f224e6c65"
+
+[[constraint]]
+  name = "golang.org/x/crypto"
+
+[[constraint]]
+  name = "golang.org/x/oauth2"
+
+[[constraint]]
+  name = "gopkg.in/cheggaaa/pb.v1"
+  version = "=1.0.13"
+
+[[constraint]]
+  name = "gopkg.in/yaml.v2"

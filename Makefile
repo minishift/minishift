@@ -80,7 +80,7 @@ __check_defined = \
 $(GOPATH)/bin/minishift$(IS_EXE): $(ADDON_ASSET_FILE) vendor
 	go install -pkgdir=$(ADDON_BINDATA_DIR) -ldflags="$(VERSION_VARIABLES)" ./cmd/minishift
 vendor:
-	glide install -v
+	dep ensure -v
 
 $(ADDON_ASSET_FILE): $(GOPATH)/bin/go-bindata
 	@mkdir -p $(ADDON_BINDATA_DIR)

@@ -20,7 +20,7 @@ This section contains solutions to common problems that you might encounter whil
 [[minishift-delete-fails-undefine-snapshots]]
 === Undefining virsh snapshots fail
 
-If you use `virsh` on KVM/libvirt to create snapshots in your development workflow, and then use `minishift delete` to delete the snapshots along with the VM, you might encounter the following error:
+If you use `virsh` on KVM/libvirt to create snapshots in your development workflow then use `minishift delete` to delete the snapshots along with the VM, you might encounter the following error:
 
 ----
 $ minishift delete
@@ -32,14 +32,14 @@ Cause: The snapshots are stored in *_~/.minishift/machines_*, but the definition
 
 Workaround: To delete the snapshots, you need to perform the following steps.
 
-.  Delete the definitions.
+.  Delete the definitions:
 +
 
 ----
 $ sudo virsh snapshot-delete --metadata minishift <snapshot-name>
 ----
 
-.  Undefine the {project} domain.
+.  Undefine the {project} domain:
 +
 
 ----
@@ -106,7 +106,7 @@ $ systemctl enable virtlogd
 If you try `minishift start` and the this error appears, ensure that you use `minishift delete` to delete the VMs that you created earlier.
 However, if this fails and you want to completely clean up {project} and start fresh, do the following:
 
-. Check if any existing {project} VM are running:
+. Check if any existing {project} VMs are running:
 +
 
 ----
@@ -160,7 +160,10 @@ Reset the {project}-specific IP database, ensure that you remove the `minishift`
 }
 ----
 
-NOTE: You can completely reset the IP database by removing the files manually but this is very risky.
+[NOTE]
+====
+You can completely reset the IP database by removing the files manually, but this is very risky.
+====
 
 [[troubleshooting-driver-virtualbox]]
 == VirtualBox

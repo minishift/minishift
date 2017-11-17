@@ -25,14 +25,20 @@ Depending on your host operating system, you have the choice of the following hy
 macOS::
 - link:https://github.com/mist64/xhyve[xhyve] (default)
 +
-NOTE: xhyve requires specific installation and configuration steps that are described in the xref:../getting-started/setting-up-driver-plugin.adoc#[Setting Up the Driver Plug-in] section.
+[NOTE]
+====
+xhyve requires specific installation and configuration steps that are described in the xref:../getting-started/setting-up-driver-plugin.adoc#[Setting Up the Driver Plug-in] section.
+====
 
 - link:https://www.virtualbox.org/wiki/Downloads[VirtualBox]
 
-GNU/Linux::
+Linux::
 - link:https://en.wikipedia.org/wiki/Kernel-based_Virtual_Machine[KVM] (default)
 +
-NOTE: KVM requires specific installation and configuration steps that are described in the xref:../getting-started/setting-up-driver-plugin.adoc#[Setting Up the Driver Plug-in] section.
+[NOTE]
+====
+KVM requires specific installation and configuration steps that are described in the xref:../getting-started/setting-up-driver-plugin.adoc#[Setting Up the Driver Plug-in] section.
+====
 
 - link:https://www.virtualbox.org/wiki/Downloads[VirtualBox]
 
@@ -66,7 +72,7 @@ If you encounter issues related to the hypervisor, see the xref:../troubleshooti
 
 [NOTE]
 ====
-- On the Windows operating system, due to issue link:https://github.com/minishift/minishift/issues/236[#236], you need to execute the {project} binary from your local *_C:\_* drive.
+On the Windows operating system, due to issue link:https://github.com/minishift/minishift/issues/236[#236], you need to execute the {project} binary from your local *_C:\_* drive.
 You cannot run {project} from a network drive.
 ====
 

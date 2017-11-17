@@ -12,7 +12,7 @@ toc::[]
 == Overview
 
 There are several ways you can expose your service after you deploy it on OpenShift.
-The following sections describes the various methods and when to use them.
+The following sections describe the various methods and when to use them.
 
 [[application-routes]]
 == Routes

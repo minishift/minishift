@@ -28,7 +28,10 @@ Since {project} is closely related to the OpenShift Origin project, we follow th
 
 The documentation source structure follows a modular format, where each file is called a _topic_ and each topic is stored under a sub-folder based on the relevant category, such as Getting Started, Using {project}, or Command Reference.
 
-TIP: You can check out the link:https://raw.githubusercontent.com/minishift/minishift/master/docs/source/contributing/writing-docs.adoc[raw file] of this topic or other existing {project} topics to see examples of how the information is structured and which tags to use.
+[TIP]
+====
+You can check out the link:https://raw.githubusercontent.com/minishift/minishift/master/docs/source/contributing/writing-docs.adoc[raw file] of this topic or other existing {project} topics to see examples of how the information is structured and which tags to use.
+====
 
 [[common-conventions]]
 === Commonly-Used Conventions
@@ -43,7 +46,8 @@ See the link:https://github.com/openshift/openshift-docs/blob/master/contributin
 The anchor ID text should match the title as much as possible.
 See the link:https://github.com/openshift/openshift-docs/blob/master/contributing_to_docs/doc_guidelines.adoc#unique-ids[unique IDs] section of the OpenShift documentation guidelines for more information and examples.
 
-- To make documentation reviews easier on GitHub, we use one line per sentence wherever possible. This practice is in addition to the OpenShift documentation guidlines.
+- To make documentation reviews easier on GitHub, we use one line per sentence wherever possible.
+This practice is in addition to the OpenShift documentation guidelines.
 
 [[adding-new-topic]]
 === Adding a New Topic
@@ -62,7 +66,7 @@ Make sure to add the new topic in the same order in all of the locations.
 == Building the Documentation Locally
 
 By default, the documentation is built in a Docker container.
-This way you do not need to install all the required dependencies on your development machine.
+This way you do not need to install all of the required dependencies on your development machine.
 All you need is a running Docker daemon.
 In case you don't have one, use {project} itself.
 For more information, see xref:../using/docker-daemon.adoc#[reusing the Docker daemon].
@@ -82,9 +86,8 @@ In case you need to make changes to the link:https://github.com/minishift/minish
 $ make build_docs_container
 ----
 
-If changes to the Dockerfile become part of a pull request, make sure to
-deploy a new version of the image to link:https://hub.docker.com/r/minishift/minishift-docs-builder/:[minishift/minishift-docs-builder].
-First increment the version of the image in the _DOCS_BUILDER_IMAGE_ variable of the Makefile. Then run:
+If changes to the Dockerfile become part of a pull request, make sure to deploy a new version of the image to link:https://hub.docker.com/r/minishift/minishift-docs-builder/:[minishift/minishift-docs-builder].
+First increment the version of the image in the `DOCS_BUILDER_IMAGE` variable of the Makefile. Then run:
 
 ----
 $ make push_docs_container
@@ -128,11 +131,11 @@ To view the {project} documentation integrated into the OpenShift documentation,
 
 [NOTE]
 ====
-- Before you start, you need to check out the link:https://github.com/openshift/openshift-docs.git[openshift-docs] GitHub repository.
-You need all the tooling to build openshift-docs.
-See the link:https://github.com/openshift/openshift-docs/blob/master/contributing_to_docs/tools_and_setup.adoc[Install and set up the tools and software] section, which is part of the _openshift-docs_ repository.
+Before you start, you need to check out the link:https://github.com/openshift/openshift-docs.git[*openshift-docs*] GitHub repository.
+You need all of the tooling required to build *openshift-docs*.
+See the link:https://github.com/openshift/openshift-docs/blob/master/contributing_to_docs/tools_and_setup.adoc[Install and set up the tools and software] section, which is part of the *openshift-docs* repository.
 
-- Make sure that the `rake build` commands succeeds before integrating the {project} documentation.
+Make sure that the `rake build` command succeeds before integrating the {project} documentation.
 ====
 
 . In the local {project} repository, build the {project} documentation tarball.
@@ -143,7 +146,7 @@ $ make gen_adoc_tar
 
 After the build completes there will be a *_minishift-adoc.tar_* file in the *_docs/build_* directory of the local {project} repository.
 
-. In the local openshift-docs repository, run the following commands:
+. In the local *openshift-docs* repository, run the following commands:
 
 ----
 $ mkdir minishift

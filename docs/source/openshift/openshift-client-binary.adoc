@@ -12,16 +12,16 @@ toc::[]
 == Overview
 
 The `minishift start` command creates an OpenShift cluster using the link:https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md[cluster up] approach.
-For this purpose it copies the *oc* binary onto your host.
+For this purpose it copies the `oc` binary onto your host.
 
-The *oc* binary is located in the  *_~/.minishift/cache/oc/{openshift-version}_* directory, assuming that you use {project}'s default version of OpenShift.
+The `oc` binary is located in the  *_~/.minishift/cache/oc/{openshift-version}_* directory, assuming that you use {project}'s default version of OpenShift.
 You can add this binary to your `PATH` using xref:../command-ref/minishift_oc-env.adoc#[`minishift oc-env`], which displays the command you need to type into your shell.
 
 The output of `minishift oc-env` differs depending on the operating system and the shell type.
 
 ----
 $ minishift oc-env
-export PATH="/Users/john/.minishift/cache/oc/v1.5.0:$PATH"
+export PATH="/home/john/.minishift/cache/oc/v1.5.0:$PATH"
 # Run this command to configure your shell:
 # eval $(minishift oc-env)
 ----
@@ -46,7 +46,8 @@ For an introduction to `oc` usage, see the link:https://docs.openshift.org/lates
 By default, `cluster up` uses link:https://docs.openshift.org/latest/install_config/configuring_authentication.html#AllowAllPasswordIdentityProvider[AllowAllPasswordIdentityProvider] to authenticate against the local cluster.
 This means any non-empty user name and password can be used to login to the local cluster.
 
-The recommended user name and password is `developer` and `developer`, respectively. This is because they are already assigned to the default project *myproject* and also can link:https://docs.openshift.org/latest/architecture/additional_concepts/authentication.html#authentication-impersonation[impersonate] the administrator.
+The recommended user name and password is `developer` and `developer`, respectively.
+This is because they are already assigned to the default project *myproject* and also can link:https://docs.openshift.org/latest/architecture/additional_concepts/authentication.html#authentication-impersonation[impersonate] the administrator.
 This allows you to run administrator commands using the `--as system:admin` parameter.
 
 To login as administrator, use the system account:
@@ -100,7 +101,7 @@ For more information refer also to xref:../openshift/exposing-services.adoc#[Exp
 [[view-openshift-logs]]
 == Viewing OpenShift Logs
 
-To access OpenShift logs, run the `logs` command after starting {project}:
+To access OpenShift logs, run the following command after starting {project}:
 
 ----
 $ minishift logs
@@ -121,7 +122,10 @@ To show the node configuration instead of the master configuration, specify the 
 
 For details about the `view` sub-command, see the xref:../command-ref/minishift_openshift_config_view.adoc#[minishift openshift config view] synopsis.
 
-NOTE: After you update the OpenShift configuration, OpenShift will transparently restart.
+[NOTE]
+====
+After you update the OpenShift configuration, OpenShift will transparently restart.
+====
 
 [[example-config-cors]]
 === Example: Configuring cross-origin resource sharing
@@ -139,7 +143,7 @@ $  minishift openshift config set --patch '{"corsAllowedOrigins": [".*"]}'
 
 [NOTE]
 ====
-If you get the error _The specified patch need to be a valid JSON._ when you run the above command, you need to modify the above command depending on your Operating System, your shell environment and its interpolation behavior.
+If you get the error _The specified patch need to be a valid JSON._ when you run the above command, you need to modify the above command depending on your operating system, your shell environment and its interpolation behavior.
 
 For example, if you use PowerShell on Windows 7 or 10, modify the above command to:
 
@@ -156,7 +160,7 @@ C:\> minishift.exe openshift config set --patch "{\"corsAllowedOrigins\": [\".*\
 ====
 
 [[example-change-openshift-routing-suffix]]
-=== Example: Changing the OpenShift routing suffix
+=== Example: Changing the OpenShift Routing Suffix
 
 In this example, you change the OpenShift routing suffix in the master configuration.
 

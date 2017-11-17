@@ -165,6 +165,7 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	proxyConfig := handleProxies()
 
+	fmt.Println(fmt.Sprintf("-- Starting profile '%s'", constants.ProfileName))
 	fmt.Printf("-- Starting local OpenShift cluster")
 	hostVm := startHost(libMachineClient)
 	registrationUtil.RegisterHost(libMachineClient)

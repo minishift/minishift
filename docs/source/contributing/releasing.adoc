@@ -20,8 +20,8 @@ The following sections describe how to release {project} either via automated jo
   - Move remaining open issues into the next milestone.
   - Review resolved/closed issues and make sure they are classified correctly.
   - Check and update the resolution of the issues.
-  For example, issues with a merged pull requests should be labeled as *resolution/done*.
-. Close milestone.
+  For example, issues with merged pull requests should be labeled as *resolution/done*.
+. Close the milestone.
 
 [[automated-release]]
 == Automated Release
@@ -35,14 +35,14 @@ $ make ci_release API_KEY=<api-key> RELEASE_VERSION=<version>
 where
 
   - `api-key` : {project} CentOS CI API key
-  - `version` : Expected release version. Eg : 1.0.0 (without 'v')
+  - `version` : The expected release version (without 'v'). For example, 1.0.0.
 
 Once triggered you can follow the release process link:https://ci.centos.org/job/minishift-release/[here].
 
 The automated release performs:
 
 - xref:../contributing/releasing.adoc#cut-release[Cutting the Release]
-- xref:../contributing/releasing.adoc#trigger-docs-build[Trigger the documentation build]
+- xref:../contributing/releasing.adoc#trigger-docs-build[Triggering the Documentation Build]
 - xref:../contributing/releasing.adoc#post-release-tasks[Perform Post-Release Tasks]
 
 [[manaul-release]]
@@ -51,8 +51,7 @@ The automated release performs:
 [[release-prereqs]]
 === Prerequisites
 
-- You must have a https://help.github.com/articles/creating-an-access-token-for-command-line-use[GitHub personal access token]
-defined in your environment as _GITHUB_ACCESS_TOKEN_.
+- You must have a https://help.github.com/articles/creating-an-access-token-for-command-line-use[GitHub personal access token] defined in your environment as `GITHUB_ACCESS_TOKEN`.
 
 [[cut-release]]
 === Cutting the Release
@@ -74,7 +73,9 @@ $ make release
 ----
 
 [[trigger-docs-build]]
-=== Trigger the documentation build
+=== Triggering the Documentation Build
+
+Use the following to trigger the documentation build:
 
 ----
 $ export API_KEY=<api-key>
@@ -91,7 +92,7 @@ As part of the release process we also send a release announcement and edit the 
 
 For the latter we usually add a categorized list of closed issues as well as some release highlights (most often taken from the release announcement).
 
-If you have link:https://stedolan.github.io/jq/[jq] installed on your machine, you can use the link:https://github.com/minishift/minishift/blob/master/scripts/release/issue-list.sh[issue-list.sh] script to generate the markdown needed for adding the issue list.
+If you have link:https://stedolan.github.io/jq/[`jq`] installed on your machine, you can use the link:https://github.com/minishift/minishift/blob/master/scripts/release/issue-list.sh[issue-list.sh] script to generate the Markdown needed for adding the issue list.
 For example:
 
 ----

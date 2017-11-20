@@ -19,6 +19,7 @@ package profile
 import (
 	"strings"
 
+	cmdUtil "github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
@@ -26,6 +27,7 @@ import (
 const (
 	emptyProfileMessage  = "A profile name must be provided. Run `minishift profile list` for a list of existing profiles."
 	extraArgumentMessage = "You have provided more arguments than required. You must provide a single profile name."
+	invalidNameMessage   = "Profile names must consist of alphanumeric characters only."
 )
 
 var ProfileCmd = &cobra.Command{
@@ -45,5 +47,8 @@ func validateArgs(args []string) {
 		atexit.ExitWithMessage(1, extraArgumentMessage)
 	} else if strings.TrimSpace(args[0]) == "" {
 		atexit.ExitWithMessage(1, emptyProfileMessage)
+	}
+	if !cmdUtil.IsValidProfileName(args[0]) {
+		atexit.ExitWithMessage(1, invalidNameMessage)
 	}
 }

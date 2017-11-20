@@ -18,6 +18,7 @@ package util
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/drivers"
@@ -96,4 +97,10 @@ func IsValidProfile(profileName string) bool {
 		}
 	}
 	return false
+}
+
+// IsValidProfileName return true if profile name follow ^\w+[\w+-]+$
+func IsValidProfileName(profileName string) bool {
+	rr := regexp.MustCompile(`^\w+[\w+-]+$`)
+	return rr.MatchString(profileName)
 }

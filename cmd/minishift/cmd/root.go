@@ -213,6 +213,9 @@ func initializeProfile() string {
 	for i, arg := range os.Args {
 		if arg == "--"+profileFlag {
 			profileName = os.Args[i+1]
+			if !cmdUtil.IsValidProfileName(profileName) {
+				atexit.ExitWithMessage(1, "Profile names must consist of alphanumeric characters only.")
+			}
 			break
 		}
 	}

@@ -27,7 +27,15 @@ These commands are described in the following sections.
 [[creating-profiles]]
 == Creating Profiles
 
-There are two ways to create a new profile.
+There are two ways to create a new profile. 
+
+[NOTE]
+====
+Profile names must consist of alphanumeric characters only, for example:
+
+- foo, bar123, demo-profile and 1stProfile are considered as valid profile names.
+- $foo, bar#@, profile@123 are invalid profile names.
+====
 
 === Using the `--profile` Flag
 

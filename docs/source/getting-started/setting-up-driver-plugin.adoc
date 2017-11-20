@@ -107,7 +107,7 @@ $ newgrp libvirt
 [[xhyve-driver-install]]
 == xhyve Driver
 
-{project} is currently tested against *docker-machine-driver-xhyve* version 0.3.1.
+{project} is currently tested against *docker-machine-driver-xhyve* version 0.3.3.
 
 [[homebrew-install-xhyve]]
 === Homebrew Install
@@ -116,11 +116,11 @@ You can verify the existing version of the xhyve driver on your system using:
 
 ----
 $ brew info --installed docker-machine-driver-xhyve
-docker-machine-driver-xhyve: stable 0.3.1 (bottled), HEAD
+docker-machine-driver-xhyve: stable 0.3.3 (bottled), HEAD
 Docker Machine driver for xhyve
 https://github.com/zchee/docker-machine-driver-xhyve
-/usr/local/Cellar/docker-machine-driver-xhyve/0.3.1 (3 files, 13.2M) *
-  Poured from bottle on 2016-12-20 at 17:44:35
+/usr/local/Cellar/docker-machine-driver-xhyve/0.3.3 (3 files, 10.3MB) *
+  Poured from bottle on 2017-08-18 at 14:46:20
 From: https://github.com/Homebrew/homebrew-core/blob/master/Formula/docker-machine-driver-xhyve.rb
 ----
 
@@ -147,7 +147,7 @@ The following steps explain the installation of the *docker-machine-driver-xhyve
 . Download the *docker-machine-driver-xhyve* binary using:
 +
 ----
-$ sudo curl -L  https://github.com/zchee/docker-machine-driver-xhyve/releases/download/v0.3.1/docker-machine-driver-xhyve -o /usr/local/bin/docker-machine-driver-xhyve
+$ sudo curl -L  https://github.com/zchee/docker-machine-driver-xhyve/releases/download/v0.3.3/docker-machine-driver-xhyve -o /usr/local/bin/docker-machine-driver-xhyve
 ----
 
 . Enable root access for the *docker-machine-driver-xhyve* binary and add it to the default *wheel* group:

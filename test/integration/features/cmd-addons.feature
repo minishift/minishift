@@ -108,7 +108,7 @@ Feature: Addons command and its subcommands
      When executing "minishift addons disable xpaas" succeeds
      Then stdout should contain
       """
-      Add-on 'xpaas' disabled
+      Add-on 'xpaas' is already disabled
       """
      When executing "minishift addons list" succeeds
      Then stdout should match "xpaas\s*: disabled"

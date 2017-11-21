@@ -24,8 +24,9 @@ import (
 )
 
 const (
-	emptyDisableError       = "You must specify an add-on name. Run `minishift addons list` to view installed add-ons."
-	noAddOnToDisableMessage = "No add-on with the name %s is installed."
+	emptyDisableError           = "You must specify an add-on name. Run `minishift addons list` to view installed add-ons."
+	noAddOnToDisableMessage     = "No add-on with the name %s is installed."
+	addOnAlreadyDisabledMessage = "Add-on '%s' is already disabled."
 )
 
 var addonsDisableCmd = &cobra.Command{
@@ -49,6 +50,10 @@ func runDisableAddon(cmd *cobra.Command, args []string) {
 
 	if !addOnManager.IsInstalled(addOnName) {
 		atexit.ExitWithMessage(0, fmt.Sprintf(noAddOnToDisableMessage, addOnName))
+	}
+
+	if !addOnManager.Get(addOnName).IsEnabled() {
+		atexit.ExitWithMessage(0, fmt.Sprintf(addOnAlreadyDisabledMessage, addOnName))
 	}
 
 	addOnConfig, err := addOnManager.Disable(addOnName)

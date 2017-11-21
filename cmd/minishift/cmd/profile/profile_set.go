@@ -21,13 +21,10 @@ import (
 
 	"github.com/golang/glog"
 	cmdUtil "github.com/minishift/minishift/cmd/minishift/cmd/util"
+	"github.com/minishift/minishift/pkg/minishift/config"
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
-)
-
-const (
-	unableToSetOcContextErrorMessage = "Make sure the profile is in running state or restart if the problem persists."
 )
 
 var profileSetCmd = &cobra.Command{
@@ -41,26 +38,38 @@ func runProfile(cmd *cobra.Command, args []string) {
 	validateArgs(args)
 	profileName := args[0]
 
-	if !cmdUtil.IsValidProfile(profileName) {
-		err := profileActions.SetActiveProfile(profileName)
-		if err != nil {
-			atexit.ExitWithMessage(1, err.Error())
-		}
-	} else {
-		err := cmdUtil.SetOcContext(profileName)
+	// Unset the OC CLI context if present for the active profile
+	if cmdUtil.DoesVMExist(config.AllInstancesConfig.ActiveProfile) {
+		err := cmdUtil.RemoveCurrentContext()
 		if err != nil {
 			if glog.V(2) {
 				fmt.Println(fmt.Sprintf("%s", err.Error()))
 			}
-			fmt.Println(fmt.Sprintf("oc cli context could not changed for '%s'. %s", profileName, unableToSetOcContextErrorMessage))
 		}
+	}
 
-		err = profileActions.SetActiveProfile(profileName)
+	if cmdUtil.IsValidProfile(profileName) {
+		err := profileActions.SetActiveProfile(profileName)
 		if err != nil {
 			atexit.ExitWithMessage(1, err.Error())
 		}
+		fmt.Printf("Profile '%s' set as active profile.\n", profileName)
+
+		err = cmdUtil.SetOcContext(profileName)
+		if err != nil {
+			if glog.V(2) {
+				fmt.Println(fmt.Sprintf("%s", err.Error()))
+				fmt.Println(fmt.Sprintf("oc cli context could not changed for '%s'.", profileName))
+			}
+		}
+	} else {
+		err := profileActions.SetActiveProfile(profileName)
+		if err != nil {
+			atexit.ExitWithMessage(1, err.Error())
+		}
+		fmt.Printf("Profile '%s' set as active profile.\n", profileName)
 	}
-	fmt.Printf("Profile '%s' set as active profile\n", profileName)
+
 }
 
 func init() {

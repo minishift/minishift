@@ -44,7 +44,7 @@ The use of underscore ( *_* ) and hyphen ( *-* ) are allowed as separator.
 
 === Using the `--profile` Flag
 
-When you run any {project} command with the `--profile` flag the profile gets created if it does not exist, for example:
+When you run {project} `start` command with the `--profile` flag the profile gets created if it does not exist, for example:
 
 ----
 $ minishift --profile profile-demo start

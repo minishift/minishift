@@ -11,8 +11,9 @@ Feature: Profile
 
   Examples: Empty profile name
     | profilename |
+    |             |
     | ''          |
-    | ' '         |
+
     
   Scenario Outline: As user, I cannot create profile with special character in profile name
      When executing "minishift profile set <profilename>" fails
@@ -23,6 +24,7 @@ Feature: Profile
 
   Examples: Wrong profile names
     | profilename |
+    | ' '         |
     | '.'         |
     | '-'         |
     | '#$'        |
@@ -160,3 +162,29 @@ Feature: Profile
      Then Minishift should have state "Does Not Exist"
      When executing "minishift ip"
      Then exitcode should equal "1"
+
+  Scenario: As user, I cannot create profile when used along with profile <subcommand> --profile name
+    Given Minishift has state "Does Not Exist"
+     When executing "minishift profile list --profile foo" succeeds
+     Then stdout should not contain
+       """
+       foo
+       """
+
+  Scenario Outline: Test all minishift commands along with --profile flag to make sure it doesn't create
+    Given Minishift has state "Does Not Exist"
+     When executing "minishift <commands> --profile foo"
+     Then exitcode should equal "1"
+      And stderr should contain
+       """
+       Profile: foo doesn't exist, Use `minishift profile set foo` or `minishift start --profile foo` to create
+       """
+  Examples: minishift commands
+    | commands  |
+    | ip        |
+    | status    |
+    | delete    |
+    | logs      |
+    | stop      |
+    | version   |
+    

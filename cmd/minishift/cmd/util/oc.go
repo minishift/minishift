@@ -17,21 +17,22 @@ limitations under the License.
 package util
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"github.com/docker/machine/libmachine"
-	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
+	"github.com/golang/glog"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/cache"
-	"github.com/minishift/minishift/pkg/minishift/clusterup"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/minishift/oc"
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
-	"github.com/spf13/viper"
 )
 
 // CacheOc ensures that the oc binary matching the requested OpenShift version is cached on the host
@@ -54,7 +55,6 @@ func CacheOc(openShiftVersion string) string {
 }
 
 func SetOcContext(profileName string) error {
-
 	profileActions.UpdateProfileConstants(profileName)
 
 	// Need to create the kube config path for the profile for ocrunner to use it.
@@ -78,8 +78,13 @@ func SetOcContext(profileName string) error {
 		return errors.New(fmt.Sprintf("Error getting the IP address: '%s'", err.Error()))
 	}
 
-	requestedOpenShiftVersion := viper.GetString(configCmd.OpenshiftVersion.Name)
-	ocPath := CacheOc(clusterup.DetermineOcVersion(requestedOpenShiftVersion))
+	err, ocPath := GetOcPathForProfile(profileName)
+	if err != nil {
+		if glog.V(2) {
+			fmt.Println(fmt.Sprintf("%s", err.Error()))
+		}
+		return errors.New(fmt.Sprintf("Error getting the oc path for profile '%s'", profileName))
+	}
 
 	ocRunner, err := oc.NewOcRunner(ocPath, kubeConfigPath)
 	if err != nil {
@@ -91,4 +96,45 @@ func SetOcContext(profileName string) error {
 	}
 
 	return nil
+}
+
+//RemoveCurrentContext removes the current context from `machinename_kubeconfig`
+func RemoveCurrentContext() error {
+	ocPath := minishiftConfig.InstanceConfig.OcPath
+	cmd := "config unset current-context"
+
+	ocRunner, err := oc.NewOcRunner(ocPath, filepath.Join(constants.Minipath, "machines", constants.MachineName+"_kubeconfig"))
+	if err != nil {
+		if glog.V(2) {
+			fmt.Println(fmt.Sprintf("%s", err.Error()))
+		}
+		return errors.New(fmt.Sprintf("Error unsetting current-context"))
+	}
+
+	exitCode := ocRunner.RunAsUser(cmd, nil, nil)
+	if exitCode != 0 {
+		return errors.New(fmt.Sprintf("Error during removing current context: %v", err.Error()))
+	}
+	return nil
+}
+
+func GetOcPathForProfile(profileName string) (error, string) {
+	instanceConfigFile := filepath.Join(constants.GetProfileHomeDir(), "machines", profileName+".json")
+	//Check if the file exists
+	_, err := os.Stat(instanceConfigFile)
+	if os.IsNotExist(err) {
+		return nil, ""
+	}
+	raw, err := ioutil.ReadFile(instanceConfigFile)
+	if err != nil {
+		return err, ""
+	}
+
+	var instanceCfg = minishiftConfig.InstanceConfigType{}
+	err = json.Unmarshal(raw, &instanceCfg)
+	if err != nil {
+		fmt.Println(err.Error())
+		return err, ""
+	}
+	return nil, instanceCfg.OcPath
 }

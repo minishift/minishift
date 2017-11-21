@@ -76,6 +76,12 @@ func GetVMStatus(profileName string) string {
 	return status
 }
 
+func DoesVMExist(profileName string) bool {
+	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+	defer api.Close()
+	return VMExists(api, profileName)
+}
+
 // UnpackAddons will unpack the default addons into addons default dir
 func UnpackAddons(addonsDir string) error {
 	for _, asset := range DefaultAssets {

@@ -231,6 +231,12 @@ func runStart(cmd *cobra.Command, args []string) {
 		postClusterUp(hostVm, clusterUpConfig)
 		exportContainerImages(hostVm, requestedOpenShiftVersion)
 	}
+	if isRestart {
+		err = cmdUtil.SetOcContext(minishiftConfig.AllInstancesConfig.ActiveProfile)
+		if err != nil {
+			fmt.Println(fmt.Sprintf("Could not set oc CLI context for: %s", profileActions.GetActiveProfile()))
+		}
+	}
 }
 
 // postClusterUp performs configuration action which only need to be run after an initial provision of OpenShift.

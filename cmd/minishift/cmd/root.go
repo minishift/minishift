@@ -52,8 +52,11 @@ import (
 
 const (
 	showLibmachineLogs    = "show-libmachine-logs"
+	profileCmd            = "profile"
 	profileFlag           = "profile"
+	profileSetCmd         = "set"
 	enableExperimentalEnv = "MINISHIFT_ENABLE_EXPERIMENTAL"
+	invalidProfileName    = "Profile names must consist of alphanumeric characters only."
 )
 
 var viperWhiteList = []string{
@@ -72,6 +75,8 @@ var RootCmd = &cobra.Command{
 			err                    error
 			isAddonInstallRequired bool
 		)
+
+		checkForValidProfileOrExit(cmd)
 
 		constants.MachineName = constants.ProfileName
 		constants.Minipath = constants.GetProfileHomeDir(constants.ProfileName)
@@ -206,18 +211,47 @@ func initConfig() {
 	setupViper()
 }
 
+// initializeProfile always return profile name based on below checks.
+// 1. If profile set <PROFILE_NAME> is used then return PROFILE_NAME
+// 2. If --profile <PROFILE_NAME> then return PROFILE_NAME
+// 3. If no profile command or flag then return active profile name.
 func initializeProfile() string {
 	var (
-		profileName   string
-		err           error
-		activeProfile string
+		profileName     string
+		err             error
+		activeProfile   string
+		profileCmdAlias = []string{
+			"profiles",
+			"instance",
+		}
 	)
 
+	// Check if profileCmd is part of os.Args so that it takes preference instead `--profile` argument
+	var isProfileCmdUsed bool
+	for _, arg := range os.Args {
+		if arg == profileCmd || arg == profileCmdAlias[0] || arg == profileCmdAlias[1] {
+			isProfileCmdUsed = true
+		}
+	}
+
 	for i, arg := range os.Args {
-		if arg == "--"+profileFlag {
-			profileName = os.Args[i+1]
-			if !cmdUtil.IsValidProfileName(profileName) {
-				atexit.ExitWithMessage(1, "Profile names must consist of alphanumeric characters only.")
+		if !isProfileCmdUsed {
+			// This will match if `--profile` flag is used
+			if arg == "--"+profileFlag {
+				profileName = os.Args[i+1]
+				break
+			}
+		}
+		// This will match if we used profile or it's alias commands
+		if arg == profileCmd || arg == profileCmdAlias[0] || arg == profileCmdAlias[1] {
+			// This make sure if user specify profile command without any subcommand then
+			// it should not panic with out of index error
+			if len(os.Args) <= i+2 {
+				break
+			}
+			// For use cases when minishift profile set PROFILE_NAME is used
+			if os.Args[i+1] == profileSetCmd {
+				profileName = os.Args[i+2]
 			}
 			break
 		}
@@ -330,6 +364,22 @@ func setDefaultActiveProfile() {
 		// Otherwise minishift will be the active profile irrespective of what user chooses
 		if constants.ProfileName == constants.DefaultProfileName {
 			cmdUtil.SetOcContext(constants.DefaultProfileName)
+		}
+	}
+}
+
+// checkForValidProfileOrExit checks if a profile exist or not when --profile flag used.
+// If profile not exist then it will error out with message.
+func checkForValidProfileOrExit(cmd *cobra.Command) {
+	if !cmdUtil.IsValidProfileName(constants.ProfileName) {
+		atexit.ExitWithMessage(1, invalidProfileName)
+	}
+	if cmd.Parent() != nil {
+		// This condition true for each command execpt `minishift profile <subcommand>` and `minishift start ...``
+		if cmd.Parent().Name() != profileCmd && cmd.Name() != startCmd.Name() {
+			if !cmdUtil.IsValidProfile(constants.ProfileName) {
+				atexit.ExitWithMessage(1, fmt.Sprintf("Profile: %s doesn't exist, Use `minishift profile set %s` or `minishift start --profile %s` to create", constants.ProfileName, constants.ProfileName, constants.ProfileName))
+			}
 		}
 	}
 }

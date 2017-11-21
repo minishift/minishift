@@ -134,3 +134,27 @@ func TestViperAndFlags(t *testing.T) {
 		cli.UnsetValues(testOption)
 	}
 }
+
+func TestInitializeProfile(t *testing.T) {
+	oldArgs := os.Args
+	defer func() { os.Args = oldArgs }()
+	Testdata := []struct {
+		Args   []string
+		Result string
+	}{
+		{[]string{"minishift", "profile", "set", "hello"}, "hello"},
+		{[]string{"minishift", "profiles", "set", "hello"}, "hello"},
+		{[]string{"minishift", "instance", "set", "hello"}, "hello"},
+		{[]string{"minishift", "start", "--profile", "hello"}, "hello"},
+		{[]string{"minishift", "ip", "--profile", "hello"}, "hello"},
+		{[]string{"minishift", "status", "--profile", "hello"}, "hello"},
+	}
+
+	for _, testInput := range Testdata {
+		os.Args = testInput.Args
+		got := initializeProfile()
+		if got != testInput.Result {
+			t.Errorf("Got %s, Expected %s as profile Name", got, testInput.Result)
+		}
+	}
+}

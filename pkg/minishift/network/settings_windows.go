@@ -25,7 +25,6 @@ import (
 	hvkvp "github.com/gbraad/go-hvkvp"
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/pkg/minishift/shell/powershell"
-	"github.com/spf13/viper"
 )
 
 const (
@@ -34,9 +33,9 @@ const (
 	networkingMessageName = "PROVISION_NETWORKING"
 )
 
-func ConfigureNetworking(machineName string, networkSettings NetworkSettings) {
+func ConfigureNetworking(machineName string, vmDriver string, networkSettings NetworkSettings) {
 	// Instruct the user that this does not work for other Hypervisors on Windows
-	if viper.GetString("vm-driver") != "hyperv" {
+	if vmDriver != "hyperv" {
 		fmt.Println(configureIPAddressMessage, configureIPAddressFailure)
 		return
 	}

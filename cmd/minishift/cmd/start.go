@@ -348,7 +348,7 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 
 		// Configure networking on startup only works on Hyper-V
 		if networkSettings.IPAddress != "" {
-			minishiftNetwork.ConfigureNetworking(constants.MachineName, networkSettings)
+			minishiftNetwork.ConfigureNetworking(constants.MachineName, machineConfig.VMDriver, networkSettings)
 		}
 	}
 

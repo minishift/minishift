@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHostfolderConfig(t *testing.T) {
@@ -40,19 +41,13 @@ func TestHostfolderConfig(t *testing.T) {
 	}
 
 	hostfolderExpectedMountpoint := fmt.Sprintf("%s/%s", HostfoldersDefaultPath, "Users")
-	assertFields(t, hostfolderExpectedMountpoint, hostfolderActual.Mountpoint())
+	assert.Equal(t, hostfolderExpectedMountpoint, hostfolderActual.Mountpoint())
 
 	viper.Set(HostfoldersMountPathKey, "/mnt/data")
 	hostfolderExpectedMountpoint = "/mnt/data/Users"
-	assertFields(t, hostfolderExpectedMountpoint, hostfolderActual.Mountpoint())
+	assert.Equal(t, hostfolderExpectedMountpoint, hostfolderActual.Mountpoint())
 
 	hostfolderActual.Options["mountpoint"] = "/c/Users"
 	hostfolderExpectedMountpoint = "/c/Users"
-	assertFields(t, hostfolderExpectedMountpoint, hostfolderActual.Mountpoint())
-}
-
-func assertFields(t *testing.T, expected string, actual string) {
-	if expected != actual {
-		t.Errorf("Hostfolder expected: '%s'. Actual '%s'", expected, actual)
-	}
+	assert.Equal(t, hostfolderExpectedMountpoint, hostfolderActual.Mountpoint())
 }

@@ -16,7 +16,12 @@ limitations under the License.
 
 package config
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 type validationTest struct {
 	value     string
@@ -26,11 +31,11 @@ type validationTest struct {
 func runValidations(t *testing.T, tests []validationTest, name string, f func(string, string) error) {
 	for _, tt := range tests {
 		err := f(name, tt.value)
-		if err != nil && !tt.shouldErr {
-			t.Errorf("%s: %v", tt.value, err)
+		if !tt.shouldErr {
+			assert.NoError(t, err, fmt.Sprintf("Error for testcase %v", tt))
 		}
-		if err == nil && tt.shouldErr {
-			t.Errorf("%s: %v", tt.value, err)
+		if tt.shouldErr {
+			assert.Error(t, err, fmt.Sprintf("Error for testcase %v", tt))
 		}
 	}
 }
@@ -49,7 +54,6 @@ func TestDriver(t *testing.T) {
 	}
 
 	runValidations(t, tests, "vm-driver", IsValidDriver)
-
 }
 
 func TestValidCIDR(t *testing.T) {

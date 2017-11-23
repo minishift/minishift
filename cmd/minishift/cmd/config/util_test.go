@@ -16,9 +16,12 @@ limitations under the License.
 
 package config
 
-import "testing"
-import "reflect"
-import "strings"
+import (
+	"strings"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 var minikubeConfig = MinishiftConfig{
 	"vm-driver":            "kvm",
@@ -27,68 +30,50 @@ var minikubeConfig = MinishiftConfig{
 }
 
 func TestFindSettingNotFound(t *testing.T) {
-	s, err := findSetting("nonexistant")
-	if err == nil {
-		t.Fatalf("Unexpected setting found. [%+v]", s)
-	}
+	_, err := findSetting("nonexistant")
+	assert.Error(t, err)
 }
 
 func TestFindSetting(t *testing.T) {
 	s, err := findSetting("vm-driver")
-	if err != nil {
-		t.Fatalf("Cannot find the setting of the vm-driver: %s", err)
-	}
-	if s.Name != "vm-driver" {
-		t.Fatalf("Incorrect setting, expected vm-driver, received %s", s.Name)
-	}
+	assert.NoError(t, err, "Cannot find the setting of the vm-driver")
+	assert.Equal(t, "vm-driver", s.Name, "Setting of the vm-driver not found")
 }
 
 func TestSetString(t *testing.T) {
 	err := SetString(minikubeConfig, "vm-driver", "virtualbox")
-	if err != nil {
-		t.Fatalf("Cannot set the string: %s", err)
-	}
+	assert.NoError(t, err, "Error setting config")
 }
 
 func TestSetInt(t *testing.T) {
 	err := SetInt(minikubeConfig, "cpus", "22")
-	if err != nil {
-		t.Fatalf("Cannot set integer value in config: %s", err)
-	}
+
+	assert.NoError(t, err, "Error setting int value")
+
 	val, ok := minikubeConfig["cpus"].(int)
-	if !ok {
-		t.Fatal("Type is not set to int")
-	}
-	if val != 22 {
-		t.Fatal("SetInt set value is incorrect")
-	}
+
+	assert.True(t, ok, "Type is not set to int")
+	assert.Equal(t, 22, val, "SetInt set value is incorrect")
+	assert.IsType(t, *new(int), minikubeConfig["cpus"])
 }
 
 func TestSetBool(t *testing.T) {
 	err := SetBool(minikubeConfig, "show-libmachine-logs", "true")
-	if err != nil {
-		t.Fatalf("Cannot set boolean value in config: %s", err)
-	}
+
+	assert.NoError(t, err, "Error setting boolean value in config")
+
 	val, ok := minikubeConfig["show-libmachine-logs"].(bool)
-	if !ok {
-		t.Fatal("Type is not set to bool")
-	}
-	if !val {
-		t.Fatal("SetBool set value is incorrect")
-	}
+
+	assert.True(t, ok, "Type is not set to bool")
+	assert.True(t, val, "SetBool set value is incorrect")
+	assert.IsType(t, *new(bool), minikubeConfig["show-libmachine-logs"])
 }
 
 func TestSetSlice(t *testing.T) {
 	expectedSlice := []string{"172.0.0.1/16", "mycustom.registry.com/3030"}
 	err := SetSlice(minikubeConfig, "insecure-registry", strings.Join(expectedSlice, ","))
-	if err != nil {
-		t.Fatalf("Cannot set Slice value in config: %s", err)
-	}
-	val, ok := minikubeConfig["insecure-registry"].([]string)
-	if !ok {
-		t.Fatal("Type is not set to slice")
-	}
-	if !reflect.DeepEqual(expectedSlice, val) {
-		t.Fatalf("Expected: %+v, Got: %+v", expectedSlice, val)
-	}
+	assert.NoError(t, err, "Error setting slice")
+	val, _ := minikubeConfig["insecure-registry"].([]string)
+	assert.IsType(t, *new([]string), minikubeConfig["insecure-registry"])
+	assert.Equal(t, expectedSlice, val)
 }

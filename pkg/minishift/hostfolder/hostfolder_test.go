@@ -21,6 +21,7 @@ import (
 
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/minishift/minishift/pkg/minikube/tests"
+	"github.com/stretchr/testify/assert"
 
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 )
@@ -61,13 +62,9 @@ func TestHostfolderIsMounted(t *testing.T) {
 	state := false
 	mockSsh.CommandToOutput["if grep -qs /mnt/sda1/Users /proc/mounts; then echo '1'; else echo '0'; fi"] = `0`
 	state, _ = isHostfolderMounted(mockDriver, hostfolder)
-	if state {
-		t.Errorf("Hostfolder error: should have returned 0")
-	}
+	assert.False(t, state)
 
 	mockSsh.CommandToOutput["if grep -qs /mnt/sda1/Users /proc/mounts; then echo '1'; else echo '0'; fi"] = `1`
 	state, _ = isHostfolderMounted(mockDriver, hostfolder)
-	if !state {
-		t.Errorf("Hostfolder error: should have returned 1")
-	}
+	assert.True(t, state)
 }

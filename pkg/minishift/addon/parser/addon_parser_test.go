@@ -21,13 +21,13 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"reflect"
 	"runtime"
 	"strings"
 	"testing"
 
 	"github.com/minishift/minishift/pkg/minishift/addon/command"
 	minishiftTesting "github.com/minishift/minishift/pkg/testing"
+	"github.com/stretchr/testify/assert"
 )
 
 var anyuid string = `# Name: anyuid
@@ -109,273 +109,171 @@ func Test_successful_parsing_of_addon_dir_without_remove_addon_file(t *testing.T
 	path := filepath.Join(basepath, "..", "..", "..", "..", "addons", "anyuid")
 	addOn, err := testParser.Parse(path)
 
-	if err != nil {
-		t.Fatal("Unexpected error parsing addon content: " + err.Error())
-	}
+	assert.NoError(t, err, "Error in parsing addon content")
 
 	expectedName := "anyuid"
-	if addOn.MetaData().Name() != expectedName {
-		t.Fatalf("Unexpected addon name: '%s'. Expected '%s'", addOn.MetaData().Name(), expectedName)
-	}
+	assert.Equal(t, expectedName, addOn.MetaData().Name())
 
 	expectedNumberOfCommands := 5
-	if len(addOn.Commands()) != expectedNumberOfCommands {
-		t.Errorf("Unexpected number of commands. Found %d, but expected %d", len(addOn.Commands()), expectedNumberOfCommands)
-	}
+	assert.Len(t, addOn.Commands(), expectedNumberOfCommands)
 
-	expectedNumberOfRemoveCommands := 0
-	if len(addOn.RemoveCommands()) != expectedNumberOfRemoveCommands {
-		t.Errorf("Unexpected number of commands. Found %d, but expected %d", len(addOn.RemoveCommands()), expectedNumberOfRemoveCommands)
-	}
+	assert.Empty(t, addOn.RemoveCommands())
 
 	_, ok := addOn.Commands()[0].(*command.OcCommand)
-	if !ok {
-		t.Fatalf("Expected an OcCommand. Got %s", reflect.TypeOf(addOn.Commands()[0]).Name())
-	}
+	assert.True(t, ok)
 }
 
 func Test_successful_parsing_of_addon_dir_with_remove_addon_file(t *testing.T) {
 	path := filepath.Join(basepath, "..", "..", "..", "..", "addons", "admin-user")
 	addOn, err := testParser.Parse(path)
 
-	if err != nil {
-		t.Fatal("Unexpected error parsing addon content: " + err.Error())
-	}
+	assert.NoError(t, err, "Error in parsing addon content")
 
 	expectedName := "admin-user"
-	if addOn.MetaData().Name() != expectedName {
-		t.Fatalf("Unexpected addon name: '%s'. Expected '%s'", addOn.MetaData().Name(), expectedName)
-	}
+	assert.Equal(t, expectedName, addOn.MetaData().Name())
 
 	expectedNumberOfCommands := 2
-	if len(addOn.Commands()) != expectedNumberOfCommands {
-		t.Errorf("Unexpected number of commands. Found %d, but expected %d", len(addOn.Commands()), expectedNumberOfCommands)
-	}
+	assert.Len(t, addOn.Commands(), expectedNumberOfCommands)
 
 	expectedNumberOfRemoveCommands := 2
-	if len(addOn.RemoveCommands()) != expectedNumberOfRemoveCommands {
-		t.Errorf("Unexpected number of commands. Found %d, but expected %d", len(addOn.RemoveCommands()), expectedNumberOfRemoveCommands)
-	}
+	assert.Len(t, addOn.RemoveCommands(), expectedNumberOfRemoveCommands)
 
 	_, ok := addOn.Commands()[0].(*command.OcCommand)
-	if !ok {
-		t.Fatalf("Expected an OcCommand. Got %s", reflect.TypeOf(addOn.Commands()[0]).Name())
-	}
+	assert.True(t, ok)
 }
 
 func Test_empty_lines_and_comments_in_content_are_ignored(t *testing.T) {
 	_, commands, err := testParser.parseAddOnContent(strings.NewReader(addOnWithEmptyLinesAndCommments))
-
-	if err != nil {
-		t.Fatal("Unexpected error parsing addon content: " + err.Error())
-	}
+	assert.NoError(t, err, "Error in parsing addon content")
 
 	expectedNumberOfCommands := 3
-	if len(commands) != expectedNumberOfCommands {
-		t.Errorf("Unexpected number of commands. Found %d, but expected %d", len(commands), expectedNumberOfCommands)
-	}
+	assert.Len(t, commands, expectedNumberOfCommands)
 }
 
 func Test_multiple_lines_in_description_with_tab_and_space(t *testing.T) {
 	meta, commands, err := testParser.parseAddOnContent(strings.NewReader(addOnWithMultilineDescriptionWithTabAndSpace))
-
-	if err != nil {
-		t.Fatal("Unexpected error parsing addon content: " + err.Error())
-	}
+	assert.NoError(t, err, "Error in parsing addon content")
 
 	expectedDescription := []string{"This is one line", "This is second line", "This is third line", "This is forth line"}
 	minishiftTesting.AssertEqualSlice(expectedDescription, meta.Description(), t)
 
 	expectedNumberOfCommands := 1
-	if len(commands) != expectedNumberOfCommands {
-		t.Errorf("Unexpected number of commands. Found %d, but expected %d", len(commands), expectedNumberOfCommands)
-	}
+	assert.Len(t, commands, expectedNumberOfCommands)
 }
 
 func Test_multiple_lines_in_description_with_comment(t *testing.T) {
 	meta, commands, err := testParser.parseAddOnContent(strings.NewReader(addOnWithMultilineDescriptionWithComment))
-
-	if err != nil {
-		t.Fatal("Unexpected error parsing addon content: " + err.Error())
-	}
+	assert.NoError(t, err, "Error in parsing addon content")
 
 	expectedName := "foo"
-	if meta.Name() != expectedName {
-		t.Errorf("Expected Name: %s, Got: %s", expectedName, meta.Name())
-	}
+	assert.Equal(t, expectedName, meta.Name())
 
 	expectedDescription := []string{"This is one line", "This is:second line", "This is third line"}
-	minishiftTesting.AssertEqualSlice(expectedDescription, meta.Description(), t)
-
+	assert.Equal(t, expectedDescription, meta.Description())
 	expectedNumberOfCommands := 1
-	if len(commands) != expectedNumberOfCommands {
-		t.Errorf("Unexpected number of commands. Found %d, but expected %d", len(commands), expectedNumberOfCommands)
-	}
+	assert.Len(t, commands, expectedNumberOfCommands)
 }
 
 func Test_addon_with_unknown_command_returns_error(t *testing.T) {
 	_, _, err := testParser.parseAddOnContent(strings.NewReader(addOnWithUnknownCommand))
-
-	if err == nil {
-		t.Fatal("Expected error, got none")
-	}
+	assert.Error(t, err, "Error in parsing addon content")
 
 	expectedError := "Unable to process command: 'snafu'"
-	if err.Error() != expectedError {
-		t.Fatalf("Expected '%s'. Got '%s'", expectedError, err.Error())
-	}
+	assert.EqualError(t, err, expectedError)
 }
 
 func Test_non_existend_addon_directory_creates_error(t *testing.T) {
 	_, err := testParser.Parse("foo")
-
-	if err == nil {
-		t.Fatal("The parsing should have returned an error")
-	}
+	assert.Error(t, err, "Error in parsing addon content")
 
 	_, ok := err.(ParseError)
-	if !ok {
-		t.Fatalf("Expected an ParseError. Got %s", reflect.TypeOf(err))
-	}
+	assert.True(t, ok)
 }
 
 func Test_successful_parsing_of_content(t *testing.T) {
 	meta, commands, err := testParser.parseAddOnContent(strings.NewReader(anyuid))
-
-	if err != nil {
-		t.Fatal("Unexpected error parsing addon content: " + err.Error())
-	}
+	assert.NoError(t, err, "Error in parsing addon content")
 
 	expectedName := "anyuid"
-	if meta.Name() != expectedName {
-		t.Fatal(fmt.Sprintf("Unexpected addon name: '%s'. Expected: '%s'", meta.Name(), expectedName))
-	}
+	assert.Equal(t, expectedName, meta.Name())
 
-	expectedDescription := "Allows authenticated users to run images to run with USER as per Dockerfile"
-	if meta.Name() != expectedName {
-		t.Fatal(fmt.Sprintf("Unexpected addon description: '%s'. Expected: '%s'", meta.Description(), expectedDescription))
-	}
+	var expectedDescription = []string{"Allows authenticated users to run images to run with USER as per Dockerfile"}
+	assert.Equal(t, expectedDescription, meta.Description())
 
-	if len(commands) != 1 {
-		t.Errorf("Unexpected number of commands. Found %d, but expected 1", len(commands))
-	}
+	assert.Len(t, commands, 1)
 
 	_, ok := commands[0].(*command.OcCommand)
-	if !ok {
-		t.Fatalf("Expected an OcCommand. Got %s", reflect.TypeOf(commands[0]))
-	}
+	assert.True(t, ok)
 }
 
 func Test_all_command_types_recognized(t *testing.T) {
 	_, commands, _ := testParser.parseAddOnContent(strings.NewReader(oneOfAll))
 
 	expectedNumberOfCommands := 4
-	if len(commands) != expectedNumberOfCommands {
-		t.Errorf("Unexpected number of commands. Found %d, but expected %d", len(commands), expectedNumberOfCommands)
-	}
+	assert.Len(t, commands, expectedNumberOfCommands)
 
 	_, ok := commands[0].(*command.OcCommand)
-	if !ok {
-		t.Fatalf("Expected an OcCommand. Got %s", reflect.TypeOf(commands[0]))
-	}
+	assert.True(t, ok)
 
 	_, ok = commands[1].(*command.OpenShiftCommand)
-	if !ok {
-		t.Fatalf("Expected an OpenShiftCommand. Got %s", reflect.TypeOf(commands[1]))
-	}
+	assert.True(t, ok)
 
 	_, ok = commands[2].(*command.SleepCommand)
-	if !ok {
-		t.Fatalf("Expected an SleepCommand. Got %s", reflect.TypeOf(commands[2]))
-	}
+	assert.True(t, ok)
 
 	_, ok = commands[3].(*command.DockerCommand)
-	if !ok {
-		t.Fatalf("Expected an DockerCommand. Got %s", reflect.TypeOf(commands[3]))
-	}
+	assert.True(t, ok)
 }
 
 func Test_metadata_creation_requires_name_attribute(t *testing.T) {
 	_, _, err := testParser.parseAddOnContent(strings.NewReader(noName))
-
-	if err == nil {
-		t.Fatal("The parsing should have returned an error")
-	}
+	assert.Error(t, err, "Error in parsing addon content")
 
 	tag := "Name"
-	if !strings.Contains(err.Error(), tag) {
-		t.Fatal(fmt.Sprintf("The error message should contain the tag '%s', but was '%s'", tag, err.Error()))
-	}
+	assert.Contains(t, err.Error(), tag)
 }
 
 func Test_metadata_creation_requires_description_attribute(t *testing.T) {
 	_, _, err := testParser.parseAddOnContent(strings.NewReader(noDescription))
-
-	if err == nil {
-		t.Fatal("The parsing should have returned an error")
-	}
+	assert.Error(t, err, "Error in parsing addon content")
 
 	tag := "Description"
-	if !strings.Contains(err.Error(), tag) {
-		t.Fatal(fmt.Sprintf("The error message should contain the tag '%s', but was '%s'", tag, err.Error()))
-	}
+	assert.Contains(t, err.Error(), tag)
 }
 
 func Test_at_least_one_addon_file_required(t *testing.T) {
 	testDir, err := ioutil.TempDir("", "minishift-test-addon-parser-")
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err, "Error in creating temp directory")
 	defer os.RemoveAll(testDir)
 
 	_, err = os.Create(filepath.Join(testDir, "test.json"))
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err, "Error in creating 'test.json'")
 
 	addon, err := testParser.Parse(testDir)
-
-	if err == nil {
-		t.Fatal("Expected a parse error for directory w/o addon file")
-	}
+	assert.Error(t, err)
 
 	expectedError := fmt.Sprintf(noAddOnDefinitionFoundError, testDir)
-	if err.Error() != expectedError {
-		t.Fatal(fmt.Sprintf("Unexpected error message. Got '%s'. Expected '%s'", err.Error(), expectedError))
-	}
+	assert.EqualError(t, err, expectedError)
 
-	if addon != nil {
-		t.Fatal("No addon should have been returned")
-	}
+	assert.Nil(t, addon, "No addon should have been returned")
 }
 
 func Test_multiple_addon_definitions_create_error(t *testing.T) {
 	testDir, err := ioutil.TempDir("", "minishift-test-addon-parser-")
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err, "Error creating temp directory")
 	defer os.RemoveAll(testDir)
 
 	addonFiles := []string{"first.addon", "second.addon"}
 	for _, f := range addonFiles {
 		_, err = os.Create(filepath.Join(testDir, f))
-		if err != nil {
-			t.Error(err)
-		}
+		assert.NoError(t, err, "Error in creating addon files in addons dir")
 	}
 
 	addon, err := testParser.Parse(testDir)
-
-	if err == nil {
-		t.Fatal("Expected a parse error for directory w/o addon file")
-	}
+	assert.Error(t, err)
 
 	expectedError := fmt.Sprintf(multipleAddOnDefinitionsError, strings.Join(addonFiles, ", "))
-	if err.Error() != expectedError {
-		t.Fatal(fmt.Sprintf("Unexpected error message. Got '%s'. Expected '%s'", err.Error(), expectedError))
-	}
+	assert.EqualError(t, err, expectedError)
 
-	if addon != nil {
-		t.Fatal("No addon should have been returned")
-	}
+	assert.Nil(t, addon, "No addon should have been returned")
 }

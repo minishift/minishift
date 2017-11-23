@@ -17,10 +17,11 @@ limitations under the License.
 package cmd
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/minishift/minishift/cmd/testing/cli"
-	"regexp"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_version_output_has_correct_format(t *testing.T) {
@@ -32,12 +33,5 @@ func Test_version_output_has_correct_format(t *testing.T) {
 	versionString := tee.StdoutBuffer.String()
 
 	versionRegExp := "minishift v[0-9]+\\.[0-9]+\\.[0-9]+\\+[a-z0-9]{7,8}\n"
-	match, err := regexp.Match(versionRegExp, []byte(versionString))
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-
-	if !match {
-		t.Fatalf("Expected version string to match '%s' but '%s' does not.", versionRegExp, versionString)
-	}
+	assert.Regexp(t, regexp.MustCompile(versionRegExp), versionString)
 }

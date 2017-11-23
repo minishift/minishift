@@ -22,12 +22,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"reflect"
-
-	"fmt"
-
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -42,9 +39,7 @@ func TestSetingActiveProfile(t *testing.T) {
 	profileName := "foo"
 	SetActiveProfile(profileName)
 	actualProfileName := GetActiveProfile()
-	if actualProfileName != profileName {
-		t.Errorf("Expected profile name: %s does not match actual profile name: %s", profileName, actualProfileName)
-	}
+	assert.Equal(t, profileName, actualProfileName, "Profile name doesn't match")
 }
 
 func TestSetingGetProfileList(t *testing.T) {
@@ -52,9 +47,7 @@ func TestSetingGetProfileList(t *testing.T) {
 	defer teardown()
 
 	miniPath, err := ioutil.TempDir("", "minishift-test-profile-")
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err)
 	os.Setenv("MINISHIFT_HOME", miniPath)
 	defer os.Unsetenv("MINISHIFT_HOME")
 
@@ -64,15 +57,11 @@ func TestSetingGetProfileList(t *testing.T) {
 		if profile != constants.DefaultProfileName {
 			dirPath := filepath.Join(miniPath, "profiles", profile)
 			err := os.MkdirAll(dirPath, os.ModePerm)
-			if err != nil {
-				fmt.Println(fmt.Sprintf("%s", err.Error()))
-			}
+			assert.NoError(t, err, "Error creating profiles directory")
 		}
 	}
 	actualProfileList := GetProfileList()
-	if !reflect.DeepEqual(profileList, actualProfileList) {
-		t.Error("Expected profile name does not match actual profile name")
-	}
+	assert.EqualValues(t, profileList, actualProfileList, "Profile lists do not match")
 }
 
 func setup(t *testing.T) {

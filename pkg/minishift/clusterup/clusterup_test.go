@@ -17,11 +17,11 @@ limitations under the License.
 package clusterup
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
 	utilStrings "github.com/minishift/minishift/pkg/util/strings"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_DetermineOcVersion(t *testing.T) {
@@ -35,22 +35,14 @@ func Test_DetermineOcVersion(t *testing.T) {
 	}
 	for _, version := range versionTests {
 		actualOcVersion := DetermineOcVersion(version.inputVersion)
-		if actualOcVersion != version.outVersion {
-			t.Fatalf("Expected '%s' Got '%s'", version.outVersion, actualOcVersion)
-		}
+		assert.Equal(t, version.outVersion, actualOcVersion)
 	}
 }
 
 func Test_invalid_addon_variable_leads_to_error_in_context_creation(t *testing.T) {
 	context, err := GetExecutionContext("127.0.0.1", "foo.bar", []string{"FOOBAR"}, nil, nil)
-
-	if err == nil {
-		t.Fatal("There should have been an error due to invalide addon env variable.")
-	}
-
-	if context != nil {
-		t.Fatal("There should be no InterpolationContext returned.")
-	}
+	assert.Error(t, err, "There should have been an error due to incorrect addon env variable.")
+	assert.Nil(t, context, "There should be no InterpolationContext returned.")
 }
 
 func Test_addon_variable_can_be_interpolated(t *testing.T) {
@@ -60,9 +52,7 @@ func Test_addon_variable_can_be_interpolated(t *testing.T) {
 func Test_nil_can_be_passed_to_create_context(t *testing.T) {
 	_, err := GetExecutionContext("127.0.0.1", "foo.bar", nil, nil, nil)
 
-	if err != nil {
-		t.Fatal(fmt.Sprintf("There should have been no error, but got '%s'.", err.Error()))
-	}
+	assert.NoError(t, err, "Error in getting execution context")
 }
 
 func Test_addon_variable_can_be_interpolated_from_environment(t *testing.T) {
@@ -81,14 +71,10 @@ func Test_addon_variable_can_be_interpolated_from_environment(t *testing.T) {
 
 func assertInterpolation(variables []string, testString string, expectedResult string, t *testing.T) {
 	context, err := GetExecutionContext("127.0.0.1", "foo.bar", variables, nil, nil)
-	if err != nil {
-		t.Fatal(fmt.Sprintf("There should have been no error, but got '%s'.", err.Error()))
-	}
+	assert.NoError(t, err)
 
 	result := context.Interpolate(testString)
-	if result != expectedResult {
-		t.Fatal(fmt.Sprintf("Unexpected interpolation result. Expected '%s', got '%s'.", expectedResult, result))
-	}
+	assert.Equal(t, expectedResult, result)
 }
 
 func resetEnv(env []string) {

@@ -23,6 +23,7 @@ import (
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/pkg/minikube/tests"
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -64,9 +65,7 @@ func TestRedHatRegistratorCompatibleWithDistribution(t *testing.T) {
 		ID:        "rhel",
 		VersionID: "7.3",
 	}
-	if !registrator.CompatibleWithDistribution(info) {
-		t.Fatal("Registration capability should be in the Distribution")
-	}
+	assert.True(t, registrator.CompatibleWithDistribution(info), "Registration capability should be in the Distribution")
 }
 
 func TestRedHatRegistratorNotCompatibleWithDistribution(t *testing.T) {
@@ -76,18 +75,14 @@ func TestRedHatRegistratorNotCompatibleWithDistribution(t *testing.T) {
 		ID:        "centos",
 		VersionID: "7.3",
 	}
-	if registrator.CompatibleWithDistribution(info) {
-		t.Fatal("Registration capability shouldn't be in the Distribution")
-	}
+	assert.False(t, registrator.CompatibleWithDistribution(info), "Registration capability shouldn't be in the Distribution")
 }
 
 func TestRedHatRegistratorRegister(t *testing.T) {
 	s, _ := tests.NewSSHServer()
 	s.CommandToOutput = make(map[string]string)
 	port, err := s.Start()
-	if err != nil {
-		t.Fatalf("Error starting ssh server: %s", err)
-	}
+	assert.NoError(t, err, "Error starting ssh server")
 	d := &tests.MockDriver{
 		Port: port,
 		BaseDriver: drivers.BaseDriver{
@@ -99,13 +94,10 @@ func TestRedHatRegistratorRegister(t *testing.T) {
 	registrator := NewRedHatRegistrator(commander)
 
 	s.CommandToOutput["sudo -E subscription-manager version"] = `server type: This system is currently not registered.`
-	if err := registrator.Register(param); err != nil {
-		t.Fatalf("Expected: Distribution should able to register, Got: %v", err)
-	} else {
-		if _, ok := s.Commands[expectedCMDRegistration]; !ok {
-			t.Fatalf("Expected command: %s", expectedCMDRegistration)
-		}
-	}
+	err = registrator.Register(param)
+	assert.NoError(t, err, "Distribution should be able to register")
+	_, ok := s.Commands[expectedCMDRegistration]
+	assert.True(t, ok, "Expected command :%s", expectedCMDRegistration)
 
 }
 
@@ -113,9 +105,7 @@ func TestRedHatRegistratorUnregister(t *testing.T) {
 	s, _ := tests.NewSSHServer()
 	s.CommandToOutput = make(map[string]string)
 	port, err := s.Start()
-	if err != nil {
-		t.Fatalf("Error starting ssh server: %s", err)
-	}
+	assert.NoError(t, err, "Error starting ssh server")
 	d := &tests.MockDriver{
 		Port: port,
 		BaseDriver: drivers.BaseDriver{
@@ -127,11 +117,8 @@ func TestRedHatRegistratorUnregister(t *testing.T) {
 	registrator := NewRedHatRegistrator(commander)
 
 	s.CommandToOutput["sudo -E subscription-manager version"] = `server type: RedHat Subscription Management`
-	if err := registrator.Unregister(param); err != nil {
-		t.Fatal("Distribution should be able to unregister")
-	} else {
-		if _, ok := s.Commands[expectedCMDUnregistration]; !ok {
-			t.Fatalf("Expected command: %s", expectedCMDUnregistration)
-		}
-	}
+	err = registrator.Unregister(param)
+	assert.NoError(t, err, "Distribution should be able to unregister")
+	_, ok := s.Commands[expectedCMDUnregistration]
+	assert.True(t, ok, "Expected command: %s", expectedCMDUnregistration)
 }

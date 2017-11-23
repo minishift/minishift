@@ -17,11 +17,13 @@ limitations under the License.
 package cluster
 
 import (
-	"github.com/docker/machine/libmachine/drivers"
-	"github.com/minishift/minishift/pkg/minikube/tests"
 	"os"
 	"strconv"
 	"testing"
+
+	"github.com/docker/machine/libmachine/drivers"
+	"github.com/minishift/minishift/pkg/minikube/tests"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_driver_options_from_config(t *testing.T) {
@@ -35,17 +37,12 @@ func Test_driver_options_from_config(t *testing.T) {
 	explicitConfig["test-boot2docker-url"] = expectedURL
 
 	driverOptions, err := prepareDriverOptions(supportedFlags, explicitConfig)
-	if err != nil {
-		t.Fatal("Unexpected error: " + err.Error())
-	}
+	assert.NoError(t, err, "Error preparing driver options ")
 
-	if err := d.SetConfigFromFlags(driverOptions); err != nil {
-		t.Fatal("Unexpected error:" + err.Error())
-	}
+	err = d.SetConfigFromFlags(driverOptions)
+	assert.NoError(t, err, "Error setting configs from flags")
 
-	if d.Boot2DockerURL != expectedURL {
-		t.Fatalf("Expected %s but got %s", expectedURL, d.Boot2DockerURL)
-	}
+	assert.Equal(t, expectedURL, d.Boot2DockerURL)
 }
 
 func Test_driver_options_from_environment(t *testing.T) {
@@ -59,17 +56,12 @@ func Test_driver_options_from_environment(t *testing.T) {
 	defer os.Unsetenv("TEST_BOOT2DOCKER_URL")
 
 	driverOptions, err := prepareDriverOptions(supportedFlags, make(map[string]interface{}))
-	if err != nil {
-		t.Fatal("Unexpected error: " + err.Error())
-	}
+	assert.NoError(t, err, "Error preparing driver options ")
 
-	if err := d.SetConfigFromFlags(driverOptions); err != nil {
-		t.Fatal("Unexpected error:" + err.Error())
-	}
+	err = d.SetConfigFromFlags(driverOptions)
+	assert.NoError(t, err, "Error setting configs from flags")
 
-	if d.Boot2DockerURL != expectedURL {
-		t.Fatalf("Expected %s but got %s", expectedURL, d.Boot2DockerURL)
-	}
+	assert.Equal(t, expectedURL, d.Boot2DockerURL)
 }
 
 func Test_driver_options_from_environment_int_type(t *testing.T) {
@@ -83,14 +75,10 @@ func Test_driver_options_from_environment_int_type(t *testing.T) {
 	defer os.Unsetenv("TEST_CPU_COUNT")
 
 	driverOptions, err := prepareDriverOptions(supportedFlags, make(map[string]interface{}))
-	if err != nil {
-		t.Fatal("Unexpected error: " + err.Error())
-	}
+	assert.NoError(t, err, "Error preparing driver options ")
 
 	actualCount := driverOptions.Int("test-cpu-count")
-	if actualCount != expectedCpuCount {
-		t.Fatalf("Expected %d but got %d", expectedCpuCount, actualCount)
-	}
+	assert.Equal(t, expectedCpuCount, actualCount)
 }
 
 func Test_driver_options_from_environment_win(t *testing.T) {
@@ -106,17 +94,12 @@ func Test_driver_options_from_environment_win(t *testing.T) {
 	explicitConfig["test-boot2docker-url"] = "/snafu/boot2docker.iso"
 
 	driverOptions, err := prepareDriverOptions(supportedFlags, explicitConfig)
-	if err != nil {
-		t.Fatal("Unexpected error: " + err.Error())
-	}
+	assert.NoError(t, err, "Error preparing dirver options")
 
-	if err := d.SetConfigFromFlags(driverOptions); err != nil {
-		t.Fatal("Unexpected error:" + err.Error())
-	}
+	err = d.SetConfigFromFlags(driverOptions)
+	assert.NoError(t, err, "Error setting configs from flags")
 
-	if d.Boot2DockerURL != expectedURL {
-		t.Fatalf("Expected %s but got %s", expectedURL, d.Boot2DockerURL)
-	}
+	assert.Equal(t, expectedURL, d.Boot2DockerURL)
 }
 
 func Test_wrong_driver_option_does_not_affect_driver_config(t *testing.T) {
@@ -130,17 +113,12 @@ func Test_wrong_driver_option_does_not_affect_driver_config(t *testing.T) {
 	defer os.Unsetenv("WRONG_BOOT2DOCKER_URL")
 
 	driverOptions, err := prepareDriverOptions(supportedFlags, make(map[string]interface{}))
-	if err != nil {
-		t.Fatal("Unexpected error: " + err.Error())
-	}
+	assert.NoError(t, err, "Error preparing driver options")
 
-	if err := d.SetConfigFromFlags(driverOptions); err != nil {
-		t.Fatalf("Unexpected error:" + err.Error())
-	}
+	err = d.SetConfigFromFlags(driverOptions)
+	assert.NoError(t, err, "Error setting configs from flags")
 
-	if d.Boot2DockerURL != "" {
-		t.Fatalf("Expected empty url, but got %s", d.Boot2DockerURL)
-	}
+	assert.Empty(t, d.Boot2DockerURL)
 }
 
 func Test_unused_explicit_driver_options_returns_error(t *testing.T) {
@@ -153,12 +131,8 @@ func Test_unused_explicit_driver_options_returns_error(t *testing.T) {
 	explicitConfig["foo"] = "bar"
 
 	_, err := prepareDriverOptions(supportedFlags, explicitConfig)
-	if err == nil {
-		t.Fatal("Expexted and error, but got none")
-	}
+	assert.Error(t, err, "preparingDriverOptions should return error")
 
 	expectedError := "Unused explicit driver options: map[foo:bar]"
-	if err.Error() != expectedError {
-		t.Fatalf("Expected error message '%s', got '%s'", expectedError, err.Error())
-	}
+	assert.EqualError(t, err, expectedError)
 }

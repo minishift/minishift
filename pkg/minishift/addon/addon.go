@@ -31,14 +31,14 @@ type AddOn interface {
 	// Commands returns a Command slice of the commands this addon consists of.
 	Commands() []command.Command
 
-	// RemoveCommands returns a Command slice of the commands which use for remove this addon.
+	// RemoveCommands returns a slice of the commands which are used to remove this addon.
 	RemoveCommands() []command.Command
 
 	// InstallPath returns the path under which the addon is installed.
 	InstallPath() string
 
 	// IsEnabled returns true, if this addon is currently enabled and getting applied as part of OpenShift
-	// provisioning. Returns false, is this addon is not enabled.
+	// provisioning. Returns false, if this addon is not enabled.
 	IsEnabled() bool
 
 	// SetEnabled sets this addon as en- or disabled.

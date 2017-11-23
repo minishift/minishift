@@ -17,10 +17,10 @@ limitations under the License.
 package command
 
 import (
-	"fmt"
 	"testing"
 
 	pkgTesting "github.com/minishift/minishift/pkg/testing"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_echo_command(t *testing.T) {
@@ -53,19 +53,14 @@ func Test_echo_command(t *testing.T) {
 	for _, test := range testCases {
 		tee, err := pkgTesting.NewTee(true)
 		defer tee.Close()
-
-		if err != nil {
-			t.Fatal("Unexpected error: " + err.Error())
-		}
+		assert.NoError(t, err, "Error getting instance of Tee")
 
 		echo := NewEchoCommand(test.echoCommand)
 		context := &FakeInterpolationContext{}
 		echo.Execute(&ExecutionContext{interpolationContext: context})
 		tee.Close()
 
-		if tee.StdoutBuffer.String() != test.expectedOutput {
-			t.Fatal(fmt.Sprintf("Unexpected output to stdout. Expected '%s', but got '%s'", test.expectedOutput, tee.StdoutBuffer.String()))
-		}
+		assert.Equal(t, tee.StdoutBuffer.String(), test.expectedOutput)
 	}
 }
 

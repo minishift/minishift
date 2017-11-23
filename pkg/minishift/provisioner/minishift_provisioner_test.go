@@ -31,24 +31,21 @@ import (
 	"github.com/docker/machine/libmachine/provision/provisiontest"
 	"github.com/docker/machine/libmachine/swarm"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMinishiftLogLevel(t *testing.T) {
 	p := NewMinishiftProvisioner("", &fakedriver.Driver{})
 	p.SSHCommander = provisiontest.NewFakeSSHCommander(provisiontest.FakeSSHCommanderOptions{})
 	p.Provision(swarm.Options{}, auth.Options{}, engine.Options{LogLevel: "5"})
-	if p.EngineOptions.LogLevel != "5" {
-		t.Fatal("LogLevel should be 5")
-	}
+	assert.Equal(t, "5", p.EngineOptions.LogLevel, "Log level should be 5")
 }
 
 func TestMinishiftDefaultStorageDriver(t *testing.T) {
 	p := NewMinishiftProvisioner("", &fakedriver.Driver{})
 	p.SSHCommander = provisiontest.NewFakeSSHCommander(provisiontest.FakeSSHCommanderOptions{})
 	p.Provision(swarm.Options{}, auth.Options{}, engine.Options{})
-	if p.EngineOptions.StorageDriver != "devicemapper" {
-		t.Fatal("Default storage driver should be devicemapper")
-	}
+	assert.Equal(t, "devicemapper", p.EngineOptions.StorageDriver, "Default storage driver should be devicemapper")
 }
 
 func TestRhelImage(t *testing.T) {
@@ -61,9 +58,7 @@ func TestRhelImage(t *testing.T) {
 		VersionID: "7.3",
 	}
 	p.SetOsReleaseInfo(info)
-	if !p.GetRedhatRelease() {
-		t.Fatal("Provisioner should detect RHEL")
-	}
+	assert.True(t, p.GetRedhatRelease(), "Provisioner should detect RHEL")
 }
 
 func TestCentOSImage(t *testing.T) {
@@ -74,9 +69,8 @@ func TestCentOSImage(t *testing.T) {
 		VersionID: "7.3",
 	}
 	p.SetOsReleaseInfo(info)
-	if p.GetRedhatRelease() {
-		t.Fatal("Provisioner should detect CentOS")
-	}
+	os, _ := p.GetOsReleaseInfo()
+	assert.Contains(t, os.Name, "CentOS Linux", "Provisioner should detect 'CentOS'")
 }
 
 func parseTemplate(t *testing.T, p *MinishiftProvisioner, engineConfigTemplate string) (*provision.DockerOptions, bytes.Buffer) {
@@ -84,14 +78,10 @@ func parseTemplate(t *testing.T, p *MinishiftProvisioner, engineConfigTemplate s
 		engineCfg bytes.Buffer
 	)
 	dockerOptions, err := p.GenerateDockerOptions(22)
-	if err != nil {
-		t.Fatal("Provisioner should Generate Docker Options")
-	}
+	assert.NoError(t, err, "Provisioner should Generate Docker Options")
 
 	parseTemplate, err := template.New("engineConfig").Parse(engineConfigTemplate)
-	if err != nil {
-		t.Fatal("Provisioner should Generate Docker Options")
-	}
+	assert.NoError(t, err, "Provisioner should Generate Docker Options")
 
 	engineConfigContext := provision.EngineConfigContext{
 		DockerPort:       22,
@@ -113,9 +103,7 @@ func TestMinishiftProvisionerGenerateDockerOptionsForRHEL(t *testing.T) {
 
 	dockerOptions, engineCfg := parseTemplate(t, p, engineConfigTemplateRHEL)
 
-	if dockerOptions.EngineOptions != engineCfg.String() {
-		t.Fatalf("Expected %s, Got %s", engineCfg.String(), dockerOptions.EngineOptions)
-	}
+	assert.Equal(t, engineCfg.String(), dockerOptions.EngineOptions)
 }
 
 func TestMinishiftProvisionerGenerateDockerOptionsForCentOS(t *testing.T) {
@@ -131,9 +119,7 @@ func TestMinishiftProvisionerGenerateDockerOptionsForCentOS(t *testing.T) {
 
 	dockerOptions, engineCfg := parseTemplate(t, p, engineConfigTemplateCentOS)
 
-	if dockerOptions.EngineOptions != engineCfg.String() {
-		t.Fatalf("Expected %s, Got %s", engineCfg.String(), dockerOptions.EngineOptions)
-	}
+	assert.Equal(t, engineCfg.String(), dockerOptions.EngineOptions)
 }
 
 func setup(t *testing.T) string {

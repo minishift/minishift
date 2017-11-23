@@ -25,14 +25,13 @@ import (
 
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
 	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestIsoUrl(t *testing.T) {
 	defer viper.Reset()
 	currentDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	assert.NoError(t, err, "Error getting working directory")
 	dummyIsoFile := filepath.Join(currentDir, "..", "..", "..", "test", "testdata", "dummy.iso")
 
 	var isoURLCheck = sharedIsoURLChecks
@@ -40,9 +39,7 @@ func TestIsoUrl(t *testing.T) {
 
 	for _, urlTest := range isoURLCheck {
 		viper.Set(configCmd.ISOUrl.Name, urlTest.in)
-		ret := checkIsoURL()
-		if ret != urlTest.out {
-			t.Errorf("Expected '%t' for given url '%s'. Got '%t'.", urlTest.out, urlTest.in, ret)
-		}
+		actual := checkIsoURL()
+		assert.Equal(t, urlTest.out, actual)
 	}
 }

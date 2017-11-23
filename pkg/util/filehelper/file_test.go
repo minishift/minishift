@@ -21,106 +21,82 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_non_existent_directory_returns_false(t *testing.T) {
 	path := filepath.Join("this", "path", "really", "should", "not", "exists", "unless", "you", "have", "a", "crazy", "setup")
-	if Exists(path) {
-		t.Fatalf("The path '%s' should not exist", path)
-	}
+	assert.False(t, Exists(path), "The path '%s' should not exist", path)
 }
 
 func Test_existent_directory_returns_true(t *testing.T) {
 	testDir, err := ioutil.TempDir("", "minishift-test-filetest-")
 	defer os.RemoveAll(testDir)
 
-	if err != nil {
-		t.Fatal("Unexpected error: " + err.Error())
-	}
+	assert.NoError(t, err)
 
-	if !Exists(testDir) {
-		t.Fatalf("The path '%s' should exist", testDir)
-	}
+	assert.True(t, Exists(testDir))
 }
 
 func Test_testDir_is_directory(t *testing.T) {
 	testDir, err := ioutil.TempDir("", "minishift-test-filetest-")
 	defer os.RemoveAll(testDir)
 
-	if err != nil {
-		t.Fatal("Unexpected error: " + err.Error())
-	}
+	assert.NoError(t, err)
 
-	if !IsDirectory(testDir) {
-		t.Fatalf("The path '%s' should be a directory", testDir)
-	}
+	assert.True(t, IsDirectory(testDir), "The path '%s' should be a directory", testDir)
 }
 
 func Test_non_existing_file_is_not_a_directory(t *testing.T) {
 	testDir, err := ioutil.TempDir("", "minishift-test-filetest-")
 	defer os.RemoveAll(testDir)
 
-	if err != nil {
-		t.Fatal("Unexpected error: " + err.Error())
-	}
+	assert.NoError(t, err)
 
-	if IsDirectory(filepath.Join(testDir, "foo")) {
-		t.Fatalf("The path '%s' should not be a directory", testDir)
-	}
+	path := IsDirectory(filepath.Join(testDir, "foo"))
+	assert.False(t, path, "The path '%s' should not be a directory", testDir)
 }
 
 func Test_file_is_not_a_directory(t *testing.T) {
 	testDir, err := ioutil.TempDir("", "minishift-test-filetest-")
 	defer os.RemoveAll(testDir)
 
-	if err != nil {
-		t.Fatal("Unexpected error: " + err.Error())
-	}
+	assert.NoError(t, err)
 
 	content := []byte("Hello world")
 	tmpfile, err := ioutil.TempFile(testDir, "example")
 	defer tmpfile.Close()
-	if err != nil {
-		t.Fatal("Unexpected error: " + err.Error())
-	}
+	assert.NoError(t, err)
 
-	if _, err := tmpfile.Write(content); err != nil {
-		t.Fatal("Unexpected error: " + err.Error())
-	}
+	_, err = tmpfile.Write(content)
+	assert.NoError(t, err)
 
-	if IsDirectory(tmpfile.Name()) {
-		t.Fatalf("The path '%s' should not be a directory", testDir)
-	}
+	assert.False(t, IsDirectory(tmpfile.Name()), "The path '%s' should not be a directory", testDir)
 }
 
 func Test_non_existing_directory(t *testing.T) {
 	testDir := "/foo/bar"
-	if empty := IsEmptyDir(testDir); empty {
-		t.Fatalf("Expected that the directory %s doesn't exist.", testDir)
-	}
+	empty := IsEmptyDir(testDir)
+	assert.False(t, empty, "Expected that the directory %s doesn't exists", testDir)
+
 }
 
 func Test_existing_empty_directory(t *testing.T) {
 	testDir, err := ioutil.TempDir("", "minishift-test-filetest-")
 	defer os.RemoveAll(testDir)
-	if err != nil {
-		t.Fatal("Unexpected error: " + err.Error())
-	}
+	assert.NoError(t, err)
 
-	if empty := IsEmptyDir(testDir); !empty {
-		t.Fatalf("Expected %s to be empty.", testDir)
-	}
+	empty := IsEmptyDir(testDir)
+	assert.True(t, empty, "Expected  %s to be empty", testDir)
 }
 
 func Test_existing_nonempty_directory(t *testing.T) {
 	testDir, _ := ioutil.TempDir("", "minishift-test-filetest-")
 	_, err := ioutil.TempFile(testDir, "foo")
 	defer os.RemoveAll(testDir)
-	if err != nil {
-		t.Fatal("Unexpected error: " + err.Error())
-	}
+	assert.NoError(t, err)
 
-	if empty := IsEmptyDir(testDir); empty {
-		t.Fatalf("Expected %s to be nonempty.", testDir)
-	}
+	empty := IsEmptyDir(testDir)
+	assert.False(t, empty, "Expected %s to be nonempty.", testDir)
 }

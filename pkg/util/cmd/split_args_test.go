@@ -16,160 +16,79 @@ limitations under the License.
 
 package cmd
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestReturnsAnArrayOfStrings(t *testing.T) {
 	args := SplitCmdString(`date 1423`)
 
-	if args[0] != "date" {
-		t.Errorf("Expected the first arg to be 'date', but was '%s'", args[0])
-	}
-
-	if args[1] != "1423" {
-		t.Errorf("Expected the second arg to be '1423', but was '%s'", args[1])
-	}
+	assert.Equal(t, args[0], "date", "Expected the first arg to be 'date', but was '%s'", args[0])
+	assert.Equal(t, args[1], "1423", "Expected the second arg to be '1423', but was '%s'", args[1])
 }
 
 func TestRemovesOuterSingleQuotes(t *testing.T) {
 	args := SplitCmdString(`date '1423'`)
 
-	if args[0] != "date" {
-		t.Errorf("Expected the first arg to be 'date', but was '%s'", args[0])
-	}
-
-	if args[1] != "1423" {
-		t.Errorf("Expected the second arg to be '1423', but was '%s'", args[1])
-	}
+	assert.Equal(t, args[0], "date", "Expected the first arg to be 'date', but was '%s'", args[0])
+	assert.Equal(t, args[1], "1423", "Expected the second arg to be '1423', but was '%s'", args[1])
 }
 
 func TestRemovesOuterDoubleQuotes(t *testing.T) {
 	args := SplitCmdString(`date "1423"`)
 
-	if args[0] != "date" {
-		t.Errorf("Expected the first arg to be 'date', but was '%s'", args[0])
-	}
-
-	if args[1] != "1423" {
-		t.Errorf("Expected the second arg to be '1423', but was '%s'", args[1])
-	}
+	assert.Equal(t, args[0], "date", "Expected the first arg to be 'date'")
+	assert.Equal(t, args[1], "1423", "Expected the second arg to be '1423'")
 }
 
 func TestProperlyHandlesWhitespaceWithinSingleQuotes(t *testing.T) {
 	args := SplitCmdString(`date -f '%a %b %d %T %Z %Y' "01/01/1900" '+%s'`)
 
-	if args[0] != "date" {
-		t.Errorf("Expected the first arg to be 'date', but was '%s'", args[0])
-	}
-
-	if args[1] != "-f" {
-		t.Errorf("Expected the second arg to be '-f', but was '%s'", args[1])
-	}
-
-	if args[2] != "%a %b %d %T %Z %Y" {
-		t.Errorf("Expected the second arg to be '%%a %%b %%d %%T %%Z %%Y', but was '%s'", args[2])
-	}
-
-	if args[3] != "01/01/1900" {
-		t.Errorf("Expected the second arg to be '01/01/1900', but was '%s'", args[2])
-	}
-
-	if args[4] != "+%s" {
-		t.Errorf("Expected the second arg to be '+%%s', but was '%s'", args[2])
-	}
+	assert.Equal(t, args[0], "date", "Expected the first arg to be 'date', but was '%s'", args[0])
+	assert.Equal(t, args[1], "-f", "Expected the second arg to be '-f', but was '%s'", args[1])
+	assert.Equal(t, args[2], "%a %b %d %T %Z %Y", "Expected the third arg to be '%%a %%b %%d %%T %%Z %%Y', but was '%s'", args[2])
+	assert.Equal(t, args[3], "01/01/1900", "Expected the fourth arg to be '01/01/1900', but was '%s'", args[3])
+	assert.Equal(t, args[4], "+%s", "Expected the fourth arg to be '+%%s', but was '%s'", args[4])
 }
 
 func TestProperlyHandlesWhitespaceWithinDoubleQuotes(t *testing.T) {
 	args := SplitCmdString(`date -f "%a %b %d %T %Z %Y" "01/01/1900" "+%s"`)
 
-	if args[0] != "date" {
-		t.Errorf("Expected the first arg to be 'date', but was '%s'", args[0])
-	}
-
-	if args[1] != "-f" {
-		t.Errorf("Expected the second arg to be '-f', but was '%s'", args[1])
-	}
-
-	if args[2] != "%a %b %d %T %Z %Y" {
-		t.Errorf("Expected the second arg to be '%%a %%b %%d %%T %%Z %%Y', but was '%s'", args[2])
-	}
-
-	if args[3] != "01/01/1900" {
-		t.Errorf("Expected the second arg to be '01/01/1900', but was '%s'", args[2])
-	}
-
-	if args[4] != "+%s" {
-		t.Errorf("Expected the second arg to be '+%%s', but was '%s'", args[2])
-	}
+	assert.Equal(t, args[0], "date", "Expected the first arg to be 'date', but was '%s'", args[0])
+	assert.Equal(t, args[1], "-f", "Expected the second arg to be '-f', but was '%s'", args[1])
+	assert.Equal(t, args[2], "%a %b %d %T %Z %Y", "Expected the third arg to be '%a %b %d %T %Z %Y', but was '%s'", args[2])
+	assert.Equal(t, args[3], "01/01/1900", "Expected the third arg to be '01/01/1900', but was '%s'", args[3])
+	assert.Equal(t, args[4], "+%s", "Expected the third arg to be '+%%s', but was '%s'", args[4])
 }
 
 func TestProperlyHandlesEscapedDoubleQuotesWithinDoubleQuotes(t *testing.T) {
 	args := SplitCmdString(`date -f "%a %b %d \"%T %Z %Y\"" "01/01/1900" "+%s"`)
 
-	if args[0] != "date" {
-		t.Errorf("Expected the first arg to be 'date', but was '%s'", args[0])
-	}
-
-	if args[1] != "-f" {
-		t.Errorf("Expected the second arg to be '-f', but was '%s'", args[1])
-	}
-
-	if args[2] != `%a %b %d \"%T %Z %Y\"` {
-		t.Errorf("Expected the second arg to be '%%a %%b %%d \\\"%%T %%Z %%Y\\\"', but was '%s'", args[2])
-	}
-
-	if args[3] != "01/01/1900" {
-		t.Errorf("Expected the second arg to be '01/01/1900', but was '%s'", args[2])
-	}
-
-	if args[4] != "+%s" {
-		t.Errorf("Expected the second arg to be '+%%s', but was '%s'", args[2])
-	}
+	assert.Equal(t, args[0], "date", "Expected the first arg to be 'date', but was '%s'", args[0])
+	assert.Equal(t, args[1], "-f", "Expected the second arg to be '-f', but was '%s'", args[1])
+	assert.Equal(t, args[2], `%a %b %d \"%T %Z %Y\"`, "Expected the third arg to be '%%a %%b %%d \\\"%%T %%Z %%Y\\\"', but was '%s'", args[2])
+	assert.Equal(t, args[3], "01/01/1900", "Expected the third arg to be '01/01/1900', but was '%s'", args[3])
+	assert.Equal(t, args[4], "+%s", "Expected the third arg to be '+%%s', but was '%s'", args[4])
 }
 
 func TestProperlyHandlesNestedSingleQuotesWithinDoubleQuotes(t *testing.T) {
 	args := SplitCmdString(`date -f "%a %b %d '%T %Z %Y' -- \"foobar\"" "01/01/1900" "+%s"`)
 
-	if args[0] != "date" {
-		t.Errorf("Expected the first arg to be 'date', but was '%s'", args[0])
-	}
-
-	if args[1] != "-f" {
-		t.Errorf("Expected the second arg to be '-f', but was '%s'", args[1])
-	}
-
-	if args[2] != `%a %b %d '%T %Z %Y' -- \"foobar\"` {
-		t.Errorf("Expected the second arg to be '%%a %%b %%d '%%T %%Z %%Y' -- \"foobar\"', but was '%s'", args[2])
-	}
-
-	if args[3] != "01/01/1900" {
-		t.Errorf("Expected the second arg to be '01/01/1900', but was '%s'", args[2])
-	}
-
-	if args[4] != "+%s" {
-		t.Errorf("Expected the second arg to be '+%%s', but was '%s'", args[2])
-	}
+	assert.Equal(t, args[0], "date", "Expected the first arg to be 'date', but was '%s'", args[0])
+	assert.Equal(t, args[1], "-f", "Expected the second arg to be '-f', but was '%s'", args[1])
+	assert.Equal(t, args[2], `%a %b %d '%T %Z %Y' -- \"foobar\"`, "Expected the third arg to be '%%a %%b %%d '%%T %%Z %%Y' -- \"foobar\"', but was '%s'", args[2])
+	assert.Equal(t, args[3], "01/01/1900", "Expected the third arg to be '01/01/1900', but was '%s'", args[3])
+	assert.Equal(t, args[4], "+%s", "Expected the third arg to be '+%%s', but was '%s'", args[4])
 }
 
 func TestProperlyHandlesNestedSingleQuotesInNestedDoubleQuotes(t *testing.T) {
 	args := SplitCmdString(`date -f "\"The title of the book was 'foobar'\" - %a %b %d %T %Z %Y" "01/01/1900" "+%s"`)
 
-	if args[0] != "date" {
-		t.Errorf("Expected the first arg to be 'date', but was '%s'", args[0])
-	}
-
-	if args[1] != "-f" {
-		t.Errorf("Expected the second arg to be '-f', but was '%s'", args[1])
-	}
-
-	if args[2] != `\"The title of the book was 'foobar'\" - %a %b %d %T %Z %Y` {
-		t.Errorf("Expected the second arg to be '\\\"The title of the book was 'foobar'\\\" - %%a %%b %%d %%T %%Z %%Y', but was '%s'", args[2])
-	}
-
-	if args[3] != "01/01/1900" {
-		t.Errorf("Expected the second arg to be '01/01/1900', but was '%s'", args[2])
-	}
-
-	if args[4] != "+%s" {
-		t.Errorf("Expected the second arg to be '+%%s', but was '%s'", args[2])
-	}
+	assert.Equal(t, args[0], "date", "Expected the first arg to be 'date', but was '%s'", args[0])
+	assert.Equal(t, args[1], "-f", "Expected the second arg to be '-f', but was '%s'", args[1])
+	assert.Equal(t, args[2], `\"The title of the book was 'foobar'\" - %a %b %d %T %Z %Y`, "Expected the third arg to be '\"The title of the book was 'foobar'\" - %a %b %d %T %Z %Y', but was '%s'", args[2])
+	assert.Equal(t, args[3], "01/01/1900", "Expected the third arg to be '01/01/1900', but was '%s'", args[3])
+	assert.Equal(t, args[4], "+%s", "Expected the third arg to be '+%%s', but was '%s'", args[4])
 }

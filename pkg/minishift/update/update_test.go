@@ -27,7 +27,7 @@ import (
 
 	minitesting "github.com/minishift/minishift/pkg/testing"
 	minishiftos "github.com/minishift/minishift/pkg/util/os"
-	"strings"
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -67,11 +67,9 @@ func TestDownloadAndVerifyArchive(t *testing.T) {
 		downloadLinkFormat := "https://github.com/" + githubOwner + "/" + githubRepo + "/releases/download/v%s/%s"
 		url := fmt.Sprintf(downloadLinkFormat, testAsset.version, testAsset.archiveName)
 		archivePath, err := downloadAndVerifyArchive(url, testDir)
-		checkErr(t, err)
 
-		if expectedArchivePath != archivePath {
-			t.Fatalf("Expected %s but got %s", expectedArchivePath, archivePath)
-		}
+		assert.NoError(t, err, "Error in downloading and verifying archive")
+		assert.Equal(t, expectedArchivePath, archivePath)
 	}
 }
 
@@ -97,10 +95,8 @@ func TestExtractBinaryforOlderVersionFormat(t *testing.T) {
 	// Copy test archive to tmpDir for testing purpose
 	copyArchive(t, testArchivePath, tmpArchivePath)
 	fileName, err := extractBinary(tmpArchivePath, testDir)
-	if !strings.HasSuffix(fileName, binaryName) {
-		t.Fatalf("Expected minishift binary path, Got : %s\n", fileName)
-	}
-	checkErr(t, err)
+	assert.NoError(t, err, "Error in extracting binary")
+	assert.Contains(t, fileName, binaryName)
 }
 
 func TestExtractBinaryforNewerVersionFormat(t *testing.T) {
@@ -125,10 +121,8 @@ func TestExtractBinaryforNewerVersionFormat(t *testing.T) {
 	// Copy test archive to tmpDir for testing purpose
 	copyArchive(t, testArchivePath, tmpArchivePath)
 	fileName, err := extractBinary(tmpArchivePath, testDir)
-	if !strings.HasSuffix(fileName, binaryName) {
-		t.Fatalf("Expected minishift binary path, Got : %s\n", fileName)
-	}
-	checkErr(t, err)
+	assert.NoError(t, err, "Error in extracting binary")
+	assert.Contains(t, fileName, binaryName)
 
 }
 
@@ -152,29 +146,21 @@ func TestExtractBinaryWithoutHavingMiniShift(t *testing.T) {
 	// Copy test archive to tmpDir for testing purpose
 	copyArchive(t, testArchivePath, tmpArchivePath)
 	fileName, err := extractBinary(tmpArchivePath, testDir)
-	if fileName != "" {
-		t.Fatalf("Expected empty string as filename, Got : %s\n", fileName)
-	}
-	checkErr(t, err)
+	assert.NoError(t, err, "Error in extracting binary")
+	assert.Empty(t, fileName)
 
 }
 
 func setUp(t *testing.T) {
 	testDir, err = ioutil.TempDir("", "minishift-test-")
-	checkErr(t, err)
+	assert.NoError(t, err)
 }
 
 func copyArchive(t *testing.T, src, dest string) {
 	data, err := ioutil.ReadFile(src)
-	checkErr(t, err)
+	assert.NoError(t, err)
 	err = ioutil.WriteFile(dest, data, 0644)
-	checkErr(t, err)
-}
-
-func checkErr(t *testing.T, err error) {
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err, "Error writing to file")
 }
 
 func addMockResponses(mockTransport *minitesting.MockRoundTripper) {

@@ -20,6 +20,8 @@ import (
 	"fmt"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_tee_captures_stdout_and_stderr(t *testing.T) {
@@ -33,11 +35,7 @@ func Test_tee_captures_stdout_and_stderr(t *testing.T) {
 
 	tee.Close()
 
-	if tee.StdoutBuffer.String() != "Hello" {
-		t.Fatalf("Wrong stdout capture: '%s'", tee.StdoutBuffer.String())
-	}
+	assert.Equal(t, "Hello", tee.StdoutBuffer.String())
 
-	if tee.StderrBuffer.String() != "world!" {
-		t.Fatalf("Wrong stderr capture: '%s'", tee.StderrBuffer.String())
-	}
+	assert.Equal(t, "world!", tee.StderrBuffer.String())
 }

@@ -18,6 +18,8 @@ package util
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestIsValidProfileName(t *testing.T) {
@@ -43,8 +45,6 @@ func TestIsValidProfileName(t *testing.T) {
 		{"foo-123", true}}
 	for _, v := range testData {
 		got := IsValidProfileName(v.profileName)
-		if got != v.expected {
-			t.Errorf("Expected *%s* profileName to be %t, Got %t", v.profileName, v.expected, got)
-		}
+		assert.Equal(t, v.expected, got)
 	}
 }

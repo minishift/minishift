@@ -22,6 +22,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var testDir string
@@ -32,14 +34,10 @@ func TestNewInstanceConfig(t *testing.T) {
 
 	expectedFilePath := filepath.Join(testDir, "fake-machine.json")
 	cfg, _ := NewInstanceConfig(expectedFilePath)
+	assert.Equal(t, expectedFilePath, cfg.FilePath)
 
-	if cfg.FilePath != expectedFilePath {
-		t.Errorf("Expected path '%s'. Received '%s'", expectedFilePath, cfg.FilePath)
-	}
-
-	if _, err := os.Stat(cfg.FilePath); os.IsNotExist(err) {
-		t.Errorf("File %s should exists", cfg.FilePath)
-	}
+	_, err := os.Stat(cfg.FilePath)
+	assert.NoError(t, err, "File %s should exists", cfg.FilePath)
 }
 
 func TestConfigOnFileExists(t *testing.T) {
@@ -58,9 +56,7 @@ func TestConfigOnFileExists(t *testing.T) {
 	ioutil.WriteFile(cfg.FilePath, jsonData, 0644)
 
 	newCfg, _ := NewInstanceConfig(filePath)
-	if newCfg.OcPath != expectedOcPath {
-		t.Errorf("Expected oc path '%s'. Received '%s'", expectedOcPath, cfg.OcPath)
-	}
+	assert.Equal(t, expectedOcPath, newCfg.OcPath)
 }
 
 func TestWrite(t *testing.T) {
@@ -77,14 +73,10 @@ func TestWrite(t *testing.T) {
 	// read config file and verify content
 	var testCfg *InstanceConfigType
 	raw, err := ioutil.ReadFile(path)
-	if err != nil {
-		t.Errorf("Error reading config file %s", path)
-	}
+	assert.NoError(t, err, "Error in reading config file %s", path)
 
 	json.Unmarshal(raw, &testCfg)
-	if testCfg.OcPath != cfg.OcPath {
-		t.Errorf("Expected oc path '%s'. Received '%s'", expectedOcPath, cfg.OcPath)
-	}
+	assert.Equal(t, testCfg.OcPath, cfg.OcPath)
 }
 
 func TestDelete(t *testing.T) {
@@ -96,18 +88,15 @@ func TestDelete(t *testing.T) {
 
 	cfg.Delete()
 
-	if _, err := os.Stat(cfg.FilePath); err == nil {
-		t.Errorf("Expected file '%s' to be deleted", path)
-	}
+	_, err := os.Stat(cfg.FilePath)
+	assert.Error(t, err)
 }
 
 func setup(t *testing.T) {
 	var err error
 	testDir, err = ioutil.TempDir("", "minishift-test-config-")
 
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err, "Error creating temp directory")
 }
 
 // teardown remove the temp directory

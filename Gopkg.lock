@@ -61,6 +61,12 @@
   version = "v1.0.7"
 
 [[projects]]
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  revision = "346938d642f2ec3594ed81d874461961cd0faa76"
+  version = "v1.1.0"
+
+[[projects]]
   name = "github.com/docker/distribution"
   packages = [".","digestset","reference","registry/api/errcode","registry/api/v2","registry/client","registry/client/auth/challenge","registry/client/transport","registry/storage/cache","registry/storage/cache/memory"]
   revision = "5f6282db7d65e6d72ad7c2cc66310724a57be716"
@@ -296,6 +302,12 @@
   version = "v0.8.0"
 
 [[projects]]
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/pquerna/ffjson"
   packages = ["fflib/v1","fflib/v1/internal"]
@@ -351,6 +363,12 @@
   name = "github.com/spf13/viper"
   packages = ["."]
   revision = "382f87b929b84ce13e9c8a375a4b217f224e6c65"
+
+[[projects]]
+  name = "github.com/stretchr/testify"
+  packages = ["assert"]
+  revision = "b91bfb9ebec76498946beb6af7c0230c7cc7ba6c"
+  version = "v1.2.0"
 
 [[projects]]
   name = "github.com/tchap/go-patricia"
@@ -417,6 +435,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0aef932b275def0df646c10b2df61d5070a5678ec76e6ae33f019283dab85361"
+  inputs-digest = "8f23b05e678847832ee58b983e8164ece758740889f248423fba5fae50d0f924"
   solver-name = "gps-cdcl"
   solver-version = 1

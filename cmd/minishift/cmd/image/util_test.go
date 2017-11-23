@@ -17,13 +17,15 @@ limitations under the License.
 package image
 
 import (
+	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type testData struct {
 	image           string
 	normalizedImage string
-	err             error
 }
 
 var tests = []testData{
@@ -34,11 +36,8 @@ var tests = []testData{
 func Test_normalize_image_names(t *testing.T) {
 	for _, test := range tests {
 		normalizedImage, err := normalizeImageName(test.image)
-		if err != test.err {
-			t.Errorf("Expected error '%v' , got '%v'", test.err, err)
-		}
-		if normalizedImage != test.normalizedImage {
-			t.Errorf("Normalinzing '%s' should have returned '%s', got '%s'", test.image, normalizedImage, test.normalizedImage)
-		}
+
+		assert.NoError(t, err)
+		assert.Equal(t, normalizedImage, test.normalizedImage, fmt.Sprintf("Normalizing '%s' should have returned '%s', got '%s'", test.image, normalizedImage, test.normalizedImage))
 	}
 }

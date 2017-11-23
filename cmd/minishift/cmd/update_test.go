@@ -21,15 +21,15 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateUpdateMarker(t *testing.T) {
 	testFile, err := ioutil.TempFile(os.TempDir(), "testFile")
 	testFileName := testFile.Name()
 	defer os.Remove(testFileName)
-	if err != nil {
-		t.Fatal("Unexpected error: " + err.Error())
-	}
+	assert.NoError(t, err, "Error creating temporary file")
 
 	expectedInstallAddon, expectedPreviousVersion := true, "1.0.0"
 	createUpdateMarker(testFileName, UpdateMarker{expectedInstallAddon, expectedPreviousVersion})
@@ -38,15 +38,8 @@ func TestCreateUpdateMarker(t *testing.T) {
 	var markerData UpdateMarker
 
 	file, err := ioutil.ReadFile(testFileName)
-	if err != nil {
-		t.Fatal("Unexpected error: " + err.Error())
-	}
-
+	assert.NoError(t, err, "Error reading temporary file")
 	json.Unmarshal(file, &markerData)
-	if markerData.InstallAddon != expectedInstallAddon {
-		t.Fatalf("Expected allow installation of addon to be %t but got %t.", expectedInstallAddon, markerData.InstallAddon)
-	}
-	if markerData.PreviousVersion != expectedPreviousVersion {
-		t.Fatalf("Expected previous version to be %s but got %s.", expectedPreviousVersion, markerData.PreviousVersion)
-	}
+	assert.Equal(t, expectedInstallAddon, markerData.InstallAddon)
+	assert.Equal(t, expectedPreviousVersion, markerData.PreviousVersion)
 }

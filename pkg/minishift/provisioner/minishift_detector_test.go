@@ -17,11 +17,12 @@ limitations under the License.
 package provisioner
 
 import (
+	"testing"
+
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/pkg/minikube/tests"
-	"reflect"
-	"testing"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMinishiftProvisionerSelected(t *testing.T) {
@@ -60,19 +61,12 @@ VARIANT_VERSION="1.0.0-alpha.1"
 
 	detector := MinishiftProvisionerDetector{Delegate: provision.StandardDetector{}}
 	provisioner, err := detector.DetectProvisioner(d)
-	if err != nil {
-		t.Fatalf("Error Getting detector: %s", err)
-	}
 
-	expectedProvisioner := "*provisioner.MinishiftProvisioner"
-	if reflect.TypeOf(provisioner).String() != expectedProvisioner {
-		t.Fatalf("Unexpected provisioner type. Expected '%s' but got '%s'", expectedProvisioner, reflect.TypeOf(provisioner).String())
-	}
+	assert.NoError(t, err, "Error Getting detector")
+	assert.IsType(t, new(MinishiftProvisioner), provisioner)
 
 	osRelease, _ := provisioner.GetOsReleaseInfo()
-	if osRelease.Variant != "minishift" {
-		t.Fatal("Release info must contain 'minishift' variant")
-	}
+	assert.Equal(t, "minishift", osRelease.Variant, "Release info must contain 'minishift' variant")
 
 }
 
@@ -96,9 +90,7 @@ REDHAT_SUPPORT_PRODUCT="centos"
 REDHAT_SUPPORT_PRODUCT_VERSION="7"
 `
 	port, err := s.Start()
-	if err != nil {
-		t.Fatalf("Error starting ssh server: %s", err)
-	}
+	assert.NoError(t, err, "Error starting ssh server")
 	d := &tests.MockDriver{
 		Port: port,
 		BaseDriver: drivers.BaseDriver{
@@ -109,17 +101,10 @@ REDHAT_SUPPORT_PRODUCT_VERSION="7"
 
 	detector := MinishiftProvisionerDetector{Delegate: provision.StandardDetector{}}
 	provisioner, err := detector.DetectProvisioner(d)
-	if err != nil {
-		t.Fatalf("Error Getting detector: %s", err)
-	}
+	assert.NoError(t, err, "Error Getting detector")
 
-	expectedProvisioner := "*provision.CentosProvisioner"
-	if reflect.TypeOf(provisioner).String() != expectedProvisioner {
-		t.Fatalf("Unexpected provisioner type. Expected '%s' but got '%s'", expectedProvisioner, reflect.TypeOf(provisioner).String())
-	}
+	assert.IsType(t, new(provision.CentosProvisioner), provisioner)
 
 	osRelease, _ := provisioner.GetOsReleaseInfo()
-	if osRelease.Variant == "minishift" {
-		t.Fatal("Release info should not contain 'minishift' variant")
-	}
+	assert.NotEqual(t, "minishift", osRelease.Variant, "Release info should not contain 'minishift' variant")
 }

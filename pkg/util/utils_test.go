@@ -17,6 +17,7 @@ limitations under the License.
 package util
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -24,6 +25,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
 )
 
 // Returns a function that will return n errors, then return successfully forever.
@@ -49,25 +51,21 @@ func TestErrorGenerator(t *testing.T) {
 	errors := 3
 	f := errorGenerator(errors, false)
 	for i := 0; i < errors-1; i++ {
-		if err := f(); err == nil {
-			t.Fatalf("Error should have been thrown at iteration %v", i)
-		}
+		err := f()
+		assert.Error(t, err, fmt.Sprintf("Error should have been thrown at iteration %v", i))
 	}
-	if err := f(); err == nil {
-		t.Fatalf("Error should not have been thrown this call!")
-	}
+	err := f()
+	assert.Error(t, err)
 }
 
 func TestRetry(t *testing.T) {
 	f := errorGenerator(4, true)
-	if err := Retry(5, f); err != nil {
-		t.Fatalf("Error should not have been raised by retry.")
-	}
+	err := Retry(5, f) //err != nil {
+	assert.NoError(t, err, "Error should not have been raised by retry")
 
 	f = errorGenerator(5, true)
-	if err := Retry(4, f); err == nil {
-		t.Fatalf("Error should have been raised by retry.")
-	}
+	err = Retry(4, f)
+	assert.Error(t, err, "Error should have been raised by retry")
 }
 
 func TestMultiError(t *testing.T) {
@@ -79,14 +77,12 @@ func TestMultiError(t *testing.T) {
 	err := m.ToError()
 	expected := `Error 1
 Error 2`
-	if err.Error() != expected {
-		t.Fatalf("%s != %s", err, expected)
-	}
+
+	assert.Equal(t, expected, err.Error())
 
 	m = MultiError{}
-	if err := m.ToError(); err != nil {
-		t.Fatalf("Unexpected error: %s", err)
-	}
+	err = m.ToError()
+	assert.NoError(t, err)
 }
 
 func TestVersionOrdinal(t *testing.T) {
@@ -106,9 +102,8 @@ func TestVersionOrdinal(t *testing.T) {
 	}
 
 	for _, versionTest := range versionTestData {
-		if (VersionOrdinal(versionTest.MinOpenshiftVersion) >= VersionOrdinal(versionTest.OpenshiftVersion)) != versionTest.expectedResult {
-			t.Errorf("Expected: %s >= %s", versionTest.MinOpenshiftVersion, versionTest.OpenshiftVersion)
-		}
+		actualResult := VersionOrdinal(versionTest.MinOpenshiftVersion) >= VersionOrdinal(versionTest.OpenshiftVersion)
+		assert.Equal(t, versionTest.expectedResult, actualResult, fmt.Sprintf("Expected: %s >= %s", versionTest.MinOpenshiftVersion, versionTest.OpenshiftVersion))
 	}
 }
 
@@ -134,17 +129,13 @@ func TestFriendlyDuration(t *testing.T) {
 	for _, tt := range durationTests {
 		got := FriendlyDuration(tt.in)
 		expected, _ := time.ParseDuration(tt.want)
-		if got != expected {
-			t.Errorf("Expected %v but got %v", got, expected)
-		}
+		assert.Equal(t, expected, got)
 	}
 }
 
 func Test_command_executes_successfully_with_absolute_path(t *testing.T) {
 	currentDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	assert.NoError(t, err, "Error getting working directory")
 
 	dummyBinaryPath := filepath.Join(currentDir, "..", "..", "test", "testdata")
 
@@ -168,17 +159,13 @@ func Test_command_executes_successfully_with_absolute_path(t *testing.T) {
 	}
 	for _, v := range testData {
 		got := CommandExecutesSuccessfully(v.command)
-		if got != v.exists {
-			t.Errorf("Expected %v for executing %s, got %v", v.exists, dummyBinaryPath, got)
-		}
+		assert.Equal(t, v.exists, got, "while executing %s", dummyBinaryPath)
 	}
 }
 
 func Test_command_executes_successfully_with_command_lookup(t *testing.T) {
 	currentDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
+	assert.NoError(t, err, "Error getting working directory")
 
 	dummyBinaryPath := filepath.Join(currentDir, "..", "..", "test", "testdata")
 	origPath := os.Getenv("PATH")
@@ -200,9 +187,7 @@ func Test_command_executes_successfully_with_command_lookup(t *testing.T) {
 	}
 
 	success := CommandExecutesSuccessfully(cmd)
-	if !success {
-		t.Errorf("Expected execution of %s to succeed", cmd)
-	}
+	assert.True(t, success)
 }
 
 func Test_command_executes_unsuccessfully_with_command_lookup(t *testing.T) {
@@ -219,7 +204,5 @@ func Test_command_executes_unsuccessfully_with_command_lookup(t *testing.T) {
 	}
 
 	success := CommandExecutesSuccessfully(cmd)
-	if success {
-		t.Errorf("Expected execution of %s to fail", cmd)
-	}
+	assert.False(t, success)
 }

@@ -17,10 +17,11 @@ limitations under the License.
 package strings
 
 import (
-	minishiftTesting "github.com/minishift/minishift/pkg/testing"
 	"reflect"
 	"runtime"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func getFunctionName(i interface{}) string {
@@ -40,9 +41,7 @@ func TestContains(t *testing.T) {
 
 	for _, testCase := range testCases {
 		actualResult := Contains(testCase.slice, testCase.element)
-		if actualResult != testCase.expectedResult {
-			t.Errorf("Unexpected result for Contains(%v, %s). Expected '%t', got '%t'", testCase.slice, testCase.element, testCase.expectedResult, actualResult)
-		}
+		assert.Equal(t, testCase.expectedResult, actualResult)
 	}
 }
 
@@ -60,7 +59,7 @@ func TestRemove(t *testing.T) {
 
 	for _, testCase := range testCases {
 		actual := Remove(testCase.slice, testCase.element)
-		minishiftTesting.AssertEqualSlice(testCase.expected, actual, t)
+		assert.EqualValues(t, testCase.expected, actual)
 	}
 }
 
@@ -90,9 +89,7 @@ func TestHasMatcher(t *testing.T) {
 
 	for _, testCase := range testCases {
 		actualResult := testCase.matcher(testCase.testString)
-		if actualResult != testCase.expectedResult {
-			t.Errorf("Unexpected result for '%s'. Expected '%s' to return '%t', but got '%t'", getFunctionName(testCase.matcher), testCase.testString, testCase.expectedResult, actualResult)
-		}
+		assert.Equal(t, testCase.expectedResult, actualResult)
 	}
 }
 
@@ -114,9 +111,7 @@ func TestGetMatcher(t *testing.T) {
 
 	for _, testCase := range testCases {
 		actualResult := testCase.matcher(testCase.testString)
-		if actualResult != testCase.expectedResult {
-			t.Errorf("Unexpected result for '%s'. Expected '%s' to return '%s', but got '%s'", getFunctionName(testCase.matcher), testCase.testString, testCase.expectedResult, actualResult)
-		}
+		assert.Equal(t, testCase.expectedResult, actualResult)
 	}
 }
 
@@ -127,9 +122,7 @@ func TestEscapeSingleQuote(t *testing.T) {
 		`foobar`:   `foobar`,
 	}
 	for pass, expected := range experimentstring {
-		if EscapeSingleQuote(pass) != expected {
-			t.Fatalf("Expected '%s' Got '%s'", expected, EscapeSingleQuote(pass))
-		}
+		assert.Equal(t, expected, EscapeSingleQuote(pass))
 	}
 }
 
@@ -148,6 +141,6 @@ func TestSplitAndTrim(t *testing.T) {
 	for _, testCase := range testCases {
 		tokens, _ := SplitAndTrim(testCase.testString, testCase.separator)
 		actualSlice := []string{tokens[0], tokens[1]}
-		minishiftTesting.AssertEqualSlice(actualSlice, testCase.expectedSlice, t)
+		assert.EqualValues(t, testCase.expectedSlice, actualSlice)
 	}
 }

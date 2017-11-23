@@ -19,13 +19,15 @@ package addon
 import (
 	"testing"
 
-	"fmt"
-	"github.com/minishift/minishift/cmd/testing/cli"
-	"github.com/minishift/minishift/pkg/minikube/constants"
-	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/minishift/minishift/cmd/testing/cli"
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var anyuid string = `# Name: anyuid
@@ -58,31 +60,23 @@ func Test_install_with_enable_flag_works(t *testing.T) {
 	defer cli.TearDown(tmpMinishiftHomeDir, tee)
 
 	addOnManager := GetAddOnManager()
-	if len(addOnManager.List()) != 0 {
-		t.Fatal(fmt.Sprintf("There should be no add-ons installed. Got got : %v", addOnManager.List()))
-	}
+
+	assert.Len(t, addOnManager.List(), 0, "There should be no add-ons installed. Got: %v", addOnManager.List())
 
 	// create a dummy addon
 	testAddOnDir := filepath.Join(tmpMinishiftHomeDir, "anyuid")
 	os.Mkdir(testAddOnDir, 0777)
 	err := ioutil.WriteFile(filepath.Join(testAddOnDir, "anyuid.addon"), []byte(anyuid), 0644)
-	if err != nil {
-		t.Fatal(fmt.Sprintf("Unexpected error writing to file: %v", err))
-	}
+	assert.NoError(t, err, "Unexpected error writing to file")
 
 	enable = true
 	runInstallAddon(nil, []string{testAddOnDir})
 
 	addOnManager = GetAddOnManager()
-	if len(addOnManager.List()) != 1 {
-		t.Fatal(fmt.Sprintf("There should be only one add-on. Got got : %v", addOnManager.List()))
-	}
 
-	if addOnManager.Get("anyuid").MetaData().Name() != "anyuid" {
-		t.Fatal("The anyuid addon should be installed.")
-	}
+	assert.Len(t, addOnManager.List(), 1, "anyuid add-on should be installed")
 
-	if addOnManager.Get("anyuid").IsEnabled() != true {
-		t.Fatal("The anyuid addon should be installed AND enabled")
-	}
+	assert.Equal(t, addOnManager.Get("anyuid").MetaData().Name(), "anyuid")
+
+	assert.True(t, addOnManager.Get("anyuid").IsEnabled())
 }

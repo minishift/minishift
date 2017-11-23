@@ -26,6 +26,7 @@ import (
 
 	"github.com/docker/machine/libmachine/drivers/plugin/localbinary"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/stretchr/testify/assert"
 )
 
 func makeTempDir() string {
@@ -41,9 +42,7 @@ func TestRunNotDriver(t *testing.T) {
 	tempDir := makeTempDir()
 	defer os.RemoveAll(tempDir)
 	StartDriver()
-	if !localbinary.CurrentBinaryIsDockerMachine {
-		t.Fatal("CurrentBinaryIsDockerMachine is not set. This will prevent driver initialization.")
-	}
+	assert.True(t, localbinary.CurrentBinaryIsDockerMachine, "CurrentBinaryIsDockerMachine Not set This will prevent driver initialization")
 }
 
 func TestRunDriver(t *testing.T) {
@@ -69,13 +68,10 @@ func TestRunDriver(t *testing.T) {
 	// The command will write out what port it's listening on over stdout.
 	reader := bufio.NewReader(r)
 	addr, _, err := reader.ReadLine()
-	if err != nil {
-		t.Fatal("Cannot read address in the standard output.")
-	}
+	assert.NoError(t, err, "Cannot read address in the standard output")
 	os.Stdout = old
 
 	// Now that we got the port, make sure we can connect.
-	if _, err := net.Dial("tcp", string(addr)); err != nil {
-		t.Fatal("Driver is not listening.")
-	}
+	_, err = net.Dial("tcp", string(addr))
+	assert.NoError(t, err, "Driver is not listening")
 }

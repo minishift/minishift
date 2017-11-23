@@ -27,15 +27,14 @@ import (
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/docker/machine/libmachine/provision/provisiontest"
 	"github.com/docker/machine/libmachine/swarm"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBuildRootLogLevel(t *testing.T) {
 	p := NewBuildrootProvisioner("", &fakedriver.Driver{})
 	p.SSHCommander = provisiontest.NewFakeSSHCommander(provisiontest.FakeSSHCommanderOptions{})
 	p.Provision(swarm.Options{}, auth.Options{}, engine.Options{LogLevel: "5"})
-	if p.EngineOptions.LogLevel != "5" {
-		t.Fatal("LogLevel should be 5")
-	}
+	assert.Equal(t, "5", p.EngineOptions.LogLevel)
 }
 
 func TestBuildRootProvisionerGenerateDockerOptions(t *testing.T) {
@@ -43,9 +42,7 @@ func TestBuildRootProvisionerGenerateDockerOptions(t *testing.T) {
 
 	dockerOptions, engineCfg := parseBuildRootTemplate(t, p, engineConfigTemplateBuildRoot)
 
-	if dockerOptions.EngineOptions != engineCfg.String() {
-		t.Fatalf("Expected %s, Got %s", engineCfg.String(), dockerOptions.EngineOptions)
-	}
+	assert.Equal(t, engineCfg.String(), dockerOptions.EngineOptions)
 }
 
 func parseBuildRootTemplate(t *testing.T, p *BuildrootProvisioner, engineConfigTemplate string) (*provision.DockerOptions, bytes.Buffer) {
@@ -53,14 +50,10 @@ func parseBuildRootTemplate(t *testing.T, p *BuildrootProvisioner, engineConfigT
 		engineCfg bytes.Buffer
 	)
 	dockerOptions, err := p.GenerateDockerOptions(22)
-	if err != nil {
-		t.Fatal("Provisioner should Generate Docker Options")
-	}
+	assert.NoError(t, err, "Provisioner should Generate Docker Options")
 
 	parseTemplate, err := template.New("engineConfig").Parse(engineConfigTemplate)
-	if err != nil {
-		t.Fatal("Provisioner should Generate Docker Options")
-	}
+	assert.NoError(t, err, "Provisioner should Generate Docker Options")
 
 	engineConfigContext := provision.EngineConfigContext{
 		DockerPort:       22,

@@ -19,6 +19,8 @@ package util
 import (
 	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetIsoPath(t *testing.T) {
@@ -37,9 +39,7 @@ func TestGetIsoPath(t *testing.T) {
 
 	for _, v := range testData {
 		got := GetIsoPath(v.provided)
-		if got != v.expected {
-			t.Errorf("Expected: %s, Got: %s", v.expected, got)
-		}
+		assert.Equal(t, v.expected, got)
 	}
 }
 
@@ -59,8 +59,6 @@ func Test_getMinikubeIsoVersion(t *testing.T) {
 
 	for _, v := range testData {
 		got := getIsoVersion(v.provided)
-		if got != v.expected {
-			t.Errorf("Expected: %s, Got: %s", v.expected, got)
-		}
+		assert.Equal(t, v.expected, got)
 	}
 }

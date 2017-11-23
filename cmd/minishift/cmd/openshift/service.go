@@ -75,9 +75,11 @@ var serviceCmd = &cobra.Command{
 
 		if url {
 			stdOutURL(serviceSpecs, ip)
-		} else if inbrowser {
+		}
+		if inbrowser {
 			openInBrowser(serviceSpecs, ip)
-		} else {
+		}
+		if !url && !inbrowser {
 			printToStdOut(serviceSpecs, ip)
 		}
 	},

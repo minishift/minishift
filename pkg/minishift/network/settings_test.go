@@ -17,8 +17,9 @@ limitations under the License.
 package network
 
 import (
-	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFillNetworkSettingsScript(t *testing.T) {
@@ -41,7 +42,5 @@ DNS1=8.8.8.8
 DNS2=8.8.4.4
 `
 
-	if actual != expected {
-		t.Fatal(fmt.Sprintf("Actual: %s does not match expected: %s", actual, expected))
-	}
+	assert.Equal(t, expected, actual)
 }

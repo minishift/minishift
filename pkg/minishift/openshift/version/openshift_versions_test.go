@@ -20,81 +20,56 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/version"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPrintUpStreamVersions(t *testing.T) {
 	testDir, err := ioutil.TempDir("", "minishift-config-")
-	if err != nil {
-		t.Error()
-	}
+	assert.NoError(t, err)
 	defer os.RemoveAll(testDir)
 
 	f, err := os.Create(testDir + "out.txt")
-	if err != nil {
-		t.Fatal("Error creating test file", err)
-	}
+	assert.NoError(t, err)
 	defer f.Close()
 
 	os.Stdout = f
 	defaultVersion := version.GetOpenShiftVersion()
 	err = PrintUpStreamVersions(f, constants.MinimumSupportedOpenShiftVersion, defaultVersion)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err)
 
-	if _, err := f.Seek(0, 0); err != nil {
-		t.Fatal("Error setting offset back", err)
-	}
-
+	_, err = f.Seek(0, 0)
+	assert.NoError(t, err, "Error setting offset back")
 	data, err := ioutil.ReadAll(f)
-	if err != nil {
-		t.Fatal("Error reading file", err)
-	}
+	assert.NoError(t, err)
 	actualStdout := string(data)
-	if !strings.Contains(actualStdout, constants.MinimumSupportedOpenShiftVersion) {
-		t.Fatalf("Should Contain constants.MinimumSupportedOpenShiftVersion in\n %s", actualStdout)
-	}
-	if !strings.Contains(actualStdout, defaultVersion) {
-		t.Fatalf("Should Contain defaultVersion in\n %s", actualStdout)
-	}
+	assert.Contains(t, actualStdout, constants.MinimumSupportedOpenShiftVersion)
+	assert.Contains(t, actualStdout, defaultVersion)
 }
 
 func TestPrintDownStreamVersions(t *testing.T) {
 	testDir, err := ioutil.TempDir("", "minishift-config-")
-	if err != nil {
-		t.Error()
-	}
+	assert.NoError(t, err)
 	defer os.RemoveAll(testDir)
 
 	f, err := os.Create(testDir + "out.txt")
-	if err != nil {
-		t.Fatal("Error creating test file", err)
-	}
+	assert.NoError(t, err)
 	defer f.Close()
 
 	os.Stdout = f
 	err = PrintDownStreamVersions(f, "v3.4.1.10")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if _, err := f.Seek(0, 0); err != nil {
-		t.Fatal("Error setting offset back", err)
-	}
+	assert.NoError(t, err)
+	_, err = f.Seek(0, 0)
+	assert.NoError(t, err, "Error setting offset back")
 
 	data, err := ioutil.ReadAll(f)
-	if err != nil {
-		t.Fatal("Error reading file", err)
-	}
+	assert.NoError(t, err, "Error reading file")
 
 	actualStdout := string(data)
-	if !strings.Contains(actualStdout, "v3.4.1.10") {
-		t.Fatalf("Should Contain v3.4.1.10 in\n %s", actualStdout)
-	}
+	assert.Contains(t, actualStdout, "v3.4.1.10")
 }
 
 func TestIsGreaterOrEqualToBaseVersion(t *testing.T) {
@@ -118,13 +93,11 @@ func TestIsGreaterOrEqualToBaseVersion(t *testing.T) {
 
 	for _, versionTest := range versionTestData {
 		actualResult, actualErr := IsGreaterOrEqualToBaseVersion(versionTest.openshiftVersion, versionTest.baseOpenshiftVersion)
-		if actualResult != versionTest.expectedResult {
-			t.Errorf("IsGreaterOrEqualToBaseVersion(%s, %s) is expected to return '%v' but returned '%v'",
-				versionTest.openshiftVersion, versionTest.baseOpenshiftVersion, versionTest.expectedResult, actualResult)
-		}
-		if actualErr != nil && actualErr.Error() != versionTest.expectedErr.Error() {
-			t.Errorf("IsGreaterOrEqualToBaseVersion(%s, %s) is expected to return '%v' but returned '%v'",
-				versionTest.openshiftVersion, versionTest.baseOpenshiftVersion, versionTest.expectedErr, actualErr)
+
+		assert.Equal(t, versionTest.expectedResult, actualResult)
+
+		if actualErr != nil {
+			assert.EqualError(t, actualErr, versionTest.expectedErr.Error())
 		}
 	}
 }

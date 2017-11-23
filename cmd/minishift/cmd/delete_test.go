@@ -22,6 +22,7 @@ import (
 
 	"github.com/minishift/minishift/cmd/testing/cli"
 	pgkTesting "github.com/minishift/minishift/pkg/testing"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/util/filehelper"
@@ -67,9 +68,7 @@ func Test_clear_cache_forced(t *testing.T) {
 	forceFlag = true
 	clearCache()
 
-	if filehelper.Exists(state.InstanceDirs.Cache) {
-		t.Fatalf("Expected cache dir '%s' to be deleted", state.InstanceDirs.Cache)
-	}
+	assert.False(t, filehelper.Exists(state.InstanceDirs.Cache), "Expected cache dir '%s' to be deleted", state.InstanceDirs.Cache)
 }
 
 func Test_delete_succeeds_for_non_existing_vm(t *testing.T) {

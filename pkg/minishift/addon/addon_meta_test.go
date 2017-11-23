@@ -17,10 +17,9 @@ limitations under the License.
 package addon
 
 import (
-	"fmt"
 	"testing"
 
-	minishiftTesting "github.com/minishift/minishift/pkg/testing"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_Metadata_creation_succeeds(t *testing.T) {
@@ -33,11 +32,8 @@ func Test_Metadata_creation_succeeds(t *testing.T) {
 
 	addOnMeta := getAddOnMeta(testMap, t)
 
-	if addOnMeta.Name() != testName {
-		t.Fatal(fmt.Sprintf("Expected addon name '%s', but got '%s'", testName, addOnMeta.Name()))
-	}
-
-	minishiftTesting.AssertEqualSlice(addOnMeta.Description(), testDescription, t)
+	assert.Equal(t, testName, addOnMeta.Name())
+	assert.Equal(t, testDescription, addOnMeta.Description())
 }
 
 func Test_missing_name_returns_error(t *testing.T) {
@@ -48,14 +44,9 @@ func Test_missing_name_returns_error(t *testing.T) {
 
 	_, err := NewAddOnMeta(testMap)
 
-	if err == nil {
-		t.Fatal("Expected an error, got none")
-	}
-
+	assert.Error(t, err)
 	expectedError := "Metadata does not contain a mandatory entry for 'Name'"
-	if err.Error() != expectedError {
-		t.Fatal(fmt.Sprintf("Expected error '%s', but got '%s'", expectedError, err.Error()))
-	}
+	assert.EqualError(t, err, expectedError)
 }
 
 func Test_missing_description_returns_error(t *testing.T) {
@@ -66,14 +57,11 @@ func Test_missing_description_returns_error(t *testing.T) {
 
 	_, err := NewAddOnMeta(testMap)
 
-	if err == nil {
-		t.Fatal("Expected an error, got none")
-	}
+	assert.Error(t, err)
 
 	expectedError := "Metadata does not contain a mandatory entry for 'Description'"
-	if err.Error() != expectedError {
-		t.Fatal(fmt.Sprintf("Expected error '%s', but got '%s'", expectedError, err.Error()))
-	}
+
+	assert.EqualError(t, err, expectedError)
 }
 
 func Test_optional_metadata_is_retained(t *testing.T) {
@@ -88,9 +76,7 @@ func Test_optional_metadata_is_retained(t *testing.T) {
 
 	addOnMeta := getAddOnMeta(testMap, t)
 
-	if addOnMeta.GetValue("Url") != testUrl {
-		t.Fatal(fmt.Sprintf("Expected addon value '%s', but got '%s'", testName, addOnMeta.GetValue("Url")))
-	}
+	assert.Equal(t, testUrl, addOnMeta.GetValue("Url"))
 }
 
 func Test_required_vars_meta_is_extracted(t *testing.T) {
@@ -101,7 +87,7 @@ func Test_required_vars_meta_is_extracted(t *testing.T) {
 
 	addOnMeta := getAddOnMeta(testMap, t)
 	requiredVars, _ := addOnMeta.RequiredVars()
-	minishiftTesting.AssertEqualSlice(requiredVars, []string{"USER", "access_token"}, t)
+	assert.Equal(t, []string{"USER", "access_token"}, requiredVars)
 }
 
 func Test_required_vars_empty_if_not_specified(t *testing.T) {
@@ -111,7 +97,8 @@ func Test_required_vars_empty_if_not_specified(t *testing.T) {
 
 	addOnMeta := getAddOnMeta(testMap, t)
 	requiredVars, _ := addOnMeta.RequiredVars()
-	minishiftTesting.AssertEqualSlice(requiredVars, []string{}, t)
+
+	assert.Equal(t, []string{}, requiredVars)
 }
 
 func Test_var_defaults_empty_if_not_specified(t *testing.T) {
@@ -121,9 +108,8 @@ func Test_var_defaults_empty_if_not_specified(t *testing.T) {
 
 	addOnMeta := getAddOnMeta(testMap, t)
 	varDefaults, _ := addOnMeta.VarDefaults()
-	if len(varDefaults) != 0 {
-		t.Fatal(fmt.Sprintf("Expected empty var default, but got: '%d'", len(varDefaults)))
-	}
+
+	assert.Len(t, varDefaults, 0)
 }
 
 func Test_var_defaults_meta_is_extracted(t *testing.T) {
@@ -135,9 +121,8 @@ func Test_var_defaults_meta_is_extracted(t *testing.T) {
 
 	addOnMeta := getAddOnMeta(testMap, t)
 	varDefaults, _ := addOnMeta.VarDefaults()
-	if len(varDefaults) != 1 {
-		t.Fatal(fmt.Sprintf("Expected one var default, but got: '%d'", len(varDefaults)))
-	}
+
+	assert.Len(t, varDefaults, 1)
 }
 
 type varDefaultTestCase struct {
@@ -172,22 +157,16 @@ func Test_invalid_var_defaults_meta(t *testing.T) {
 	for _, testCase := range testCases {
 		testMap["Var-Defaults"] = testCase.expectedVarDefault
 		_, err := NewAddOnMeta(testMap)
-		if err == nil {
-			t.Fatalf("Expected an error, got none for var default \"%s\"", testCase.expectedVarDefault)
-		}
 
-		if err.Error() != testCase.expectedError {
-			t.Fatalf("Expected error \"%s\", but got \"%s\"", testCase.expectedError, err.Error())
-		}
+		assert.Error(t, err)
+
+		assert.Equal(t, testCase.expectedError, err.Error())
 	}
 }
 
 func getAddOnMeta(testMap map[string]interface{}, t *testing.T) AddOnMeta {
 	addOnMeta, err := NewAddOnMeta(testMap)
-
-	if err != nil {
-		t.Fatal(fmt.Sprintf("No error expected, but got: \"%s\"", err.Error()))
-	}
+	assert.NoError(t, err, "Error getting new addon meta")
 
 	return addOnMeta
 }
@@ -213,8 +192,6 @@ func Test_check_openshift_version_sematic(t *testing.T) {
 	}
 
 	for _, versionTest := range versionTestData {
-		if checkVersionSemantic(versionTest.OpenshiftVersion) != versionTest.expectedResult {
-			t.Errorf("Expected: '%t', Got 'true' for version: %s", versionTest.expectedResult, versionTest.OpenshiftVersion)
-		}
+		assert.Equal(t, versionTest.expectedResult, checkVersionSemantic(versionTest.OpenshiftVersion))
 	}
 }

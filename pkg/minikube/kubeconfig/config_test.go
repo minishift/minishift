@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 )
 
@@ -47,14 +47,14 @@ func TestCacheSystemAdminEntries(t *testing.T) {
 	yaml.Unmarshal([]byte(data), &testSystemConfig)
 
 	// verify entries
-	strings.Contains(kubeData, testSystemConfig.Users[0].Name)
-	strings.Contains(kubeData, testSystemConfig.Users[0].User["client-certificate-data"])
-	strings.Contains(kubeData, testSystemConfig.Clusters[0].Name)
-	strings.Contains(kubeData, testSystemConfig.Clusters[0].Cluster["certificate-authority-data"])
-	strings.Contains(kubeData, testSystemConfig.Clusters[0].Cluster["server"])
-	strings.Contains(kubeData, testSystemConfig.Contexts[0].Name)
-	strings.Contains(kubeData, testSystemConfig.Contexts[0].Context["cluster"])
-	strings.Contains(kubeData, testSystemConfig.Contexts[0].Context["user"])
+	assert.Contains(t, kubeData, testSystemConfig.Users[0].Name)
+	assert.Contains(t, kubeData, testSystemConfig.Users[0].User["client-certificate-data"])
+	assert.Contains(t, kubeData, testSystemConfig.Clusters[0].Name)
+	assert.Contains(t, kubeData, testSystemConfig.Clusters[0].Cluster["certificate-authority-data"])
+	assert.Contains(t, kubeData, testSystemConfig.Clusters[0].Cluster["server"])
+	assert.Contains(t, kubeData, testSystemConfig.Contexts[0].Name)
+	assert.Contains(t, kubeData, testSystemConfig.Contexts[0].Context["cluster"])
+	assert.Contains(t, kubeData, testSystemConfig.Contexts[0].Context["user"])
 }
 
 func setUp() {

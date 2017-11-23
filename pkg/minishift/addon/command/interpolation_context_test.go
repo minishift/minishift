@@ -17,8 +17,9 @@ limitations under the License.
 package command
 
 import (
-	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_interpolate_cmd(t *testing.T) {
@@ -30,9 +31,7 @@ func Test_interpolate_cmd(t *testing.T) {
 	expectedCmd := "ssh sudo mkdir -p /etc/docker/certs.d/docker-registry-default.10.0.0.42.xip.io && sudo ls /etc/docker/certs.d"
 	actualCmd := context.Interpolate(cmd)
 
-	if expectedCmd != actualCmd {
-		t.Fatal(fmt.Sprintf("Expected command: %s. Got: %s.", expectedCmd, actualCmd))
-	}
+	assert.Equal(t, expectedCmd, actualCmd)
 }
 
 func Test_adding_multiple_interpolation_variables(t *testing.T) {
@@ -45,9 +44,7 @@ func Test_adding_multiple_interpolation_variables(t *testing.T) {
 	expectedCmd := "bar foobar"
 	actualCmd := context.Interpolate(cmd)
 
-	if expectedCmd != actualCmd {
-		t.Fatal(fmt.Sprintf("Expected command: %s. Got: %s.", expectedCmd, actualCmd))
-	}
+	assert.Equal(t, expectedCmd, actualCmd)
 }
 
 func Test_dollar_sign_in_replacement_value_prints_literally(t *testing.T) {
@@ -59,9 +56,7 @@ func Test_dollar_sign_in_replacement_value_prints_literally(t *testing.T) {
 	expectedCmd := "$bar"
 	actualCmd := context.Interpolate(cmd)
 
-	if expectedCmd != actualCmd {
-		t.Fatal(fmt.Sprintf("Expected command: %s. Got: %s.", expectedCmd, actualCmd))
-	}
+	assert.Equal(t, expectedCmd, actualCmd)
 }
 
 func Test_adding_and_removing_context_variables(t *testing.T) {
@@ -72,15 +67,11 @@ func Test_adding_and_removing_context_variables(t *testing.T) {
 	expected := "bar"
 	actual := context.Interpolate("#{foo}")
 
-	if expected != actual {
-		t.Fatal(fmt.Sprintf("Expected: %s. Got: %s.", expected, actual))
-	}
+	assert.Equal(t, expected, actual)
 
 	context.RemoveFromContext("foo")
 
 	expected = "#{foo}"
 	actual = context.Interpolate("#{foo}")
-	if expected != actual {
-		t.Fatal(fmt.Sprintf("Expected: %s. Got: %s.", expected, actual))
-	}
+	assert.Equal(t, expected, actual)
 }

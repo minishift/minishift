@@ -22,15 +22,14 @@ import (
 	"testing"
 
 	"github.com/minishift/minishift/pkg/util"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDefaultMinishiftHome(t *testing.T) {
 	os.Unsetenv("MINISHIFT_HOME")
 	expectedMiniPath := filepath.Join(util.HomeDir(), ".minishift")
 	actualMiniPath := GetMinishiftHomeDir()
-	if actualMiniPath != expectedMiniPath {
-		t.Fatalf("Expected Minishift home directory : '%s' Got: '%s'", expectedMiniPath, actualMiniPath)
-	}
+	assert.Equal(t, expectedMiniPath, actualMiniPath)
 }
 
 func TestMinishiftHomeViaEnvironment(t *testing.T) {
@@ -39,7 +38,5 @@ func TestMinishiftHomeViaEnvironment(t *testing.T) {
 	defer os.Unsetenv("MINISHIFT_HOME")
 
 	actualMiniPath := GetMinishiftHomeDir()
-	if actualMiniPath != expectedMiniPath {
-		t.Fatalf("Expected Minishift home directory : '%s' Got: '%s'", expectedMiniPath, actualMiniPath)
-	}
+	assert.Equal(t, expectedMiniPath, actualMiniPath)
 }

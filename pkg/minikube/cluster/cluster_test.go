@@ -20,19 +20,19 @@ import (
 	"path/filepath"
 	"testing"
 
+	"io/ioutil"
+	"os"
+
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/host"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minikube/tests"
-	"io/ioutil"
-	"os"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRemoteBoot2DockerURL(t *testing.T) {
 	testDir, err := ioutil.TempDir("", "minishift-tmp-test-dir-")
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err, "Error creating temp directory")
 	defer os.RemoveAll(testDir)
 
 	var machineConfig = MachineConfig{
@@ -44,9 +44,7 @@ func TestRemoteBoot2DockerURL(t *testing.T) {
 	expectedURL := "file://" + filepath.ToSlash(isoPath)
 	url := machineConfig.GetISOFileURI()
 
-	if url != expectedURL {
-		t.Fatalf("Expected URL : %s, Got : %s", expectedURL, url)
-	}
+	assert.Equal(t, expectedURL, url)
 }
 
 func TestLocalBoot2DockerURL(t *testing.T) {
@@ -59,9 +57,7 @@ func TestLocalBoot2DockerURL(t *testing.T) {
 
 	url := machineConfig.GetISOFileURI()
 
-	if url != localISOUrl {
-		t.Fatalf("Expected URL : %s", localISOUrl)
-	}
+	assert.Equal(t, localISOUrl, url)
 }
 
 func TestFollowLogsFlag(t *testing.T) {
@@ -69,9 +65,7 @@ func TestFollowLogsFlag(t *testing.T) {
 
 	s, _ := tests.NewSSHServer()
 	port, err := s.Start()
-	if err != nil {
-		t.Fatalf("Error starting ssh server: %s", err)
-	}
+	assert.NoError(t, err, "Error starting ssh server")
 
 	d := &tests.MockDriver{
 		Port: port,
@@ -98,12 +92,10 @@ func TestFollowLogsFlag(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(test.expectedCommand, func(t *testing.T) {
-			if _, err = GetHostLogs(api, test.follow); err != nil {
-				t.Errorf("Error getting logs of the running OpenShift cluster: %s", err)
-			}
-			if _, ok := s.Commands[test.expectedCommand]; !ok {
-				t.Errorf("Expected command %s to run but did not.", test.expectedCommand)
-			}
+			_, err := GetHostLogs(api, test.follow)
+			assert.NoError(t, err, "Error gettinglogsof the running OpenShift cluster")
+			_, ok := s.Commands[test.expectedCommand]
+			assert.True(t, ok, "Expected command to run but did not")
 		})
 	}
 }

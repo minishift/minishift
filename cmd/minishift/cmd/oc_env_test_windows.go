@@ -18,15 +18,13 @@ package cmd
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_windows_oc_path(t *testing.T) {
 	shellConfig, err := getOcShellConfig("C:\\Users\\john\\.minishift\\cache\\oc\\v1.5.0\\oc.exe", "")
-	if err != nil {
-		t.Fatalf("Unexepcted error: %s", err)
-	}
-
-	if shellConfig.OcDirPath != "C:\\Users\\john\\.minishift\\cache\\oc\\v1.5.0" {
-		t.Fatalf("Unexepcted oc path: %s", shellConfig.OcDirPath)
-	}
+	assert.NoError(t, err)
+	expectedOcDirPath := "C:\\Users\\john\\.minishift\\cache\\oc\\v1.5.0"
+	assert.Equal(t, shellConfig.OcDirPath, expectedOcDirPath)
 }

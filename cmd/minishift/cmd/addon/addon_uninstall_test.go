@@ -19,13 +19,15 @@ package addon
 import (
 	"testing"
 
-	"fmt"
-	"github.com/minishift/minishift/cmd/testing/cli"
-	"github.com/minishift/minishift/pkg/minikube/constants"
-	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/minishift/minishift/cmd/testing/cli"
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var adminUser string = `# Name: admin-user
@@ -57,25 +59,22 @@ func Test_uninstall_with_enable_flag_works(t *testing.T) {
 	defer cli.TearDown(tmpMinishiftHomeDir, tee)
 
 	addOnManager := GetAddOnManager()
-	if len(addOnManager.List()) != 0 {
-		t.Fatal(fmt.Sprintf("There should be no add-ons installed. Got : %v", addOnManager.List()))
-	}
+
+	assert.Empty(t, addOnManager.List())
 
 	// create a dummy addon named as admin-user
 	testAddOnDir := filepath.Join(tmpMinishiftHomeDir, "admin-user")
 	os.Mkdir(testAddOnDir, 0777)
 	err := ioutil.WriteFile(filepath.Join(testAddOnDir, "admin-user.addon"), []byte(adminUser), 0644)
-	if err != nil {
-		t.Fatal(fmt.Sprintf("Unexpected error writing to file: %v", err))
-	}
+
+	assert.NoError(t, err, "Unexpected error writing to file")
 
 	enable = true
 	runInstallAddon(nil, []string{testAddOnDir})
 
 	runUnInstallAddon(nil, []string{"admin-user"})
 	addOnManager = GetAddOnManager()
-	if len(addOnManager.List()) != 0 {
-		t.Fatal(fmt.Sprintf("There shouldn't be any add-on installed. Got : %v", addOnManager.List()))
-	}
+
+	assert.Empty(t, addOnManager.List())
 
 }

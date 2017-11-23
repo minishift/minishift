@@ -25,6 +25,7 @@ import (
 	"path/filepath"
 
 	"github.com/docker/machine/libmachine/provision"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/minishift/minishift/cmd/minishift/cmd/config"
 
@@ -149,9 +150,7 @@ func TestStartClusterUpNoFlags(t *testing.T) {
 	clusterUpParams := determineClusterUpParameters(testConfig)
 	clusterup.ClusterUp(testConfig, clusterUpParams, testRunner)
 
-	if testRunner.Cmd != testConfig.OcPath {
-		t.Errorf("Expected command '%s'. Received '%s'", testConfig.OcPath, testRunner.Cmd)
-	}
+	assert.Equal(t, testConfig.OcPath, testRunner.Cmd)
 
 	expectedArguments := []string{
 		"cluster",
@@ -336,9 +335,7 @@ func TestNoExplicitRouteSuffixDefaultsToNip(t *testing.T) {
 	expectedRoutingSuffix := testConfig.Ip + ".nip.io"
 	actualRoutingSuffix := getDefaultRoutingPrefix(testConfig.Ip)
 
-	if actualRoutingSuffix != expectedRoutingSuffix {
-		t.Fatalf("Expected argument '%s'. Received '%s'", expectedRoutingSuffix, viper.Get(config.RoutingSuffix.Name))
-	}
+	assert.Equal(t, expectedRoutingSuffix, actualRoutingSuffix)
 }
 
 func TestExplicitRouteSuffixGetApplied(t *testing.T) {
@@ -352,9 +349,7 @@ func TestExplicitRouteSuffixGetApplied(t *testing.T) {
 
 	actualRoutingSuffix := getDefaultRoutingPrefix(testConfig.Ip)
 
-	if actualRoutingSuffix != explicitRoutingSuffix {
-		t.Fatalf("Expected argument '%s'. Received '%s'", explicitRoutingSuffix, viper.Get(config.RoutingSuffix.Name))
-	}
+	assert.Equal(t, explicitRoutingSuffix, actualRoutingSuffix)
 }
 
 func TestCheckMemorySize(t *testing.T) {
@@ -370,9 +365,8 @@ func TestCheckMemorySize(t *testing.T) {
 
 	for _, sizeTest := range sizeTests {
 		size := calculateMemorySize(sizeTest.in)
-		if size != sizeTest.out {
-			t.Errorf("Expected '%d' for memory size given input '%s'. Got '%d'.", sizeTest.out, sizeTest.in, size)
-		}
+
+		assert.Equal(t, sizeTest.out, size)
 	}
 }
 
@@ -389,9 +383,8 @@ func TestCheckDiskSize(t *testing.T) {
 
 	for _, sizeTest := range sizeTests {
 		size := calculateDiskSize(sizeTest.in)
-		if size != sizeTest.out {
-			t.Errorf("Expected '%d' for disk size given input '%s'. Got '%d'.", sizeTest.out, sizeTest.in, size)
-		}
+
+		assert.Equal(t, sizeTest.out, size)
 	}
 }
 
@@ -414,9 +407,7 @@ func TestDetermineIsoUrl(t *testing.T) {
 
 	for _, isoTest := range isoTests {
 		isoUrl := determineIsoUrl(isoTest.in)
-		if isoUrl != isoTest.out {
-			t.Errorf("Expected '%s' as ISO URL for input '%s'. Got '%s'.", isoTest.out, isoTest.in, isoUrl)
-		}
+		assert.Equal(t, isoTest.out, isoUrl)
 	}
 }
 
@@ -443,14 +434,10 @@ func Test_getslice_withConfig(t *testing.T) {
 	viper.ReadConfig(bytes.NewBuffer(confFile))
 
 	expectedSlice := []string{"hello", "world"}
-	if len(expectedSlice) != len(getSlice("bar")) {
-		t.Errorf("expected %+v, Got %+v", len(expectedSlice), len(getSlice("bar")))
-	}
+	assert.Len(t, expectedSlice, len(getSlice("bar")))
 
 	for i, v := range getSlice("bar") {
-		if expectedSlice[i] != v {
-			t.Errorf("expected %+v. Got %+v", expectedSlice[i], v)
-		}
+		assert.Equal(t, expectedSlice[i], v)
 	}
 }
 
@@ -459,50 +446,34 @@ func Test_getslice_withCommandLine(t *testing.T) {
 	defer viper.Reset()
 
 	expectedSlice := []string{"hello", "world"}
-	if len(expectedSlice) != len(getSlice("foo")) {
-		t.Errorf("expected %+v, Got %+v", len(expectedSlice), len(getSlice("foo")))
-	}
+	assert.Len(t, expectedSlice, len(getSlice("foo")))
 
 	for i, v := range getSlice("foo") {
-		if expectedSlice[i] != v {
-			t.Errorf("expected %+v. Got %+v", expectedSlice[i], v)
-		}
+		assert.Equal(t, expectedSlice[i], v)
 	}
 }
 
 func assertCommandLineArguments(expectedArguments []string, t *testing.T) {
-	if len(expectedArguments) > len(testRunner.Args) {
-		t.Errorf("Expected more arguments than received. Expected: '%s'. Got: '%s'", expectedArguments, testRunner.Args)
-	}
-
-	if len(expectedArguments) < len(testRunner.Args) {
-		t.Errorf("Received more arguments than expected. Expected: '%s'. Got '%s'", expectedArguments, testRunner.Args)
-	}
+	assert.Len(t, expectedArguments, len(testRunner.Args))
 
 	sort.Strings(testRunner.Args)
 	sort.Strings(expectedArguments)
 
 	for i, v := range testRunner.Args {
-		if v != expectedArguments[i] {
-			t.Errorf("Expected argument '%s'. Received '%s'", expectedArguments[i], v)
-		}
+		assert.Equal(t, expectedArguments[i], v)
 	}
 }
 
 func setUp(t *testing.T) {
 	var err error
 	testDir, err = ioutil.TempDir("", "minishift-test-start-cmd-")
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err, "Error creating temporary directory")
 
 	machinesDirPath := filepath.Join(testDir, "machines")
 	os.Mkdir(machinesDirPath, 0755)
 	instanceState.InstanceConfig, err = instanceState.NewInstanceConfig(filepath.Join(machinesDirPath, "fake-machines.json"))
-	if err != nil {
-		t.Error(err)
-	}
 
+	assert.NoError(t, err, "Error getting new instance config")
 	constants.Minipath = testDir
 
 	testRunner = &RecordingRunner{}

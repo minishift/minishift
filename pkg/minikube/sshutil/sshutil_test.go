@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/docker/machine/libmachine/drivers"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/minishift/minishift/pkg/minikube/tests"
 )
@@ -28,9 +29,7 @@ import (
 func TestNewSSHClient(t *testing.T) {
 	s, _ := tests.NewSSHServer()
 	port, err := s.Start()
-	if err != nil {
-		t.Fatalf("Error starting the ssh server: %s", err)
-	}
+	assert.NoError(t, err, "Error starting the ssh server")
 	d := &tests.MockDriver{
 		Port: port,
 		BaseDriver: drivers.BaseDriver{
@@ -39,19 +38,15 @@ func TestNewSSHClient(t *testing.T) {
 		},
 	}
 	c, err := NewSSHClient(d)
-	if err != nil {
-		t.Fatalf("Unexpected error: %s", err)
-	}
+	assert.NoError(t, err, "Error starting ssh client")
 
 	cmd := "foo"
 	RunCommand(c, cmd)
-	if !s.Connected {
-		t.Fatalf("Error!")
-	}
+	assert.True(t, s.Connected, "Error connecting to ssh")
 
-	if _, ok := s.Commands[cmd]; !ok {
-		t.Fatalf("Expected command: %s", cmd)
-	}
+	_, ok := s.Commands[cmd]
+	assert.True(t, ok, "Expected command: %s", cmd)
+
 }
 
 func TestNewSSHHost(t *testing.T) {
@@ -67,36 +62,24 @@ func TestNewSSHHost(t *testing.T) {
 	}
 
 	h, err := newSSHHost(&d)
-	if err != nil {
-		t.Fatalf("Unexpected error creating host: %s", err)
-	}
+	assert.NoError(t, err, "Error creating host")
 
-	if h.SSHKeyPath != sshKeyPath {
-		t.Fatalf("%s != %s", h.SSHKeyPath, sshKeyPath)
-	}
-	if h.Username != user {
-		t.Fatalf("%s != %s", h.Username, user)
-	}
-	if h.IP != ip {
-		t.Fatalf("%s != %s", h.IP, ip)
-	}
+	assert.Equal(t, sshKeyPath, h.SSHKeyPath)
+	assert.Equal(t, user, h.Username)
+	assert.Equal(t, ip, h.IP)
 }
 
 func TestNewSSHHostError(t *testing.T) {
 	d := tests.MockDriver{HostError: true}
 
 	_, err := newSSHHost(&d)
-	if err == nil {
-		t.Fatal("Expected error creating host, received nil.")
-	}
+	assert.Error(t, err, "Expected error creating host")
 }
 
 func TestTransfer(t *testing.T) {
 	s, _ := tests.NewSSHServer()
 	port, err := s.Start()
-	if err != nil {
-		t.Fatalf("Error starting ssh server: %s", err)
-	}
+	assert.NoError(t, err, "Error starting ssh server")
 	d := &tests.MockDriver{
 		Port: port,
 		BaseDriver: drivers.BaseDriver{
@@ -105,13 +88,10 @@ func TestTransfer(t *testing.T) {
 		},
 	}
 	c, err := NewSSHClient(d)
-	if err != nil {
-		t.Fatalf("Unexpected error: %s", err)
-	}
+	assert.NoError(t, err, "Error starting ssh client")
 
 	dest := "bar"
 	contents := []byte("testcontents")
-	if err := Transfer(bytes.NewReader(contents), int64(len(contents)), "/tmp", dest, "0777", c); err != nil {
-		t.Fatalf("Unexpected error: %s", err)
-	}
+	err = Transfer(bytes.NewReader(contents), int64(len(contents)), "/tmp", dest, "0777", c)
+	assert.NoError(t, err, "Error transferring bytes")
 }

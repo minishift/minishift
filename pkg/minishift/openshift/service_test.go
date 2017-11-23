@@ -25,6 +25,7 @@ import (
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 	test "github.com/minishift/minishift/pkg/testing"
 	"github.com/minishift/minishift/pkg/testing/testdata"
+	"github.com/stretchr/testify/assert"
 )
 
 //
@@ -42,9 +43,7 @@ func Test_getServiceSpecs_with_multiple_nodeports_and_routes(t *testing.T) {
 
 	got, err := GetServiceSpecs(namespace)
 
-	if err != nil {
-		t.Fatalf("%+v", err)
-	}
+	assert.NoError(t, err, "Error getting service specs")
 
 	expected := []ServiceSpec{{Namespace: namespace, Name: "guestbook-v1-np", URL: []string(nil), NodePort: "32740", Weight: []string(nil)},
 		{Namespace: namespace, Name: "guestbook-v2-np", URL: []string(nil), NodePort: "30485", Weight: []string(nil)},
@@ -63,26 +62,16 @@ func comapareServiceSpec(t *testing.T, got, expected []ServiceSpec) {
 		sort.Strings(expected[i].URL)
 		sort.Strings(service.Weight)
 		sort.Strings(expected[i].Weight)
-		if service.Namespace != expected[i].Namespace {
-			t.Fatalf("Expected Namespace: %+v, Got Namespace: %+v", expected[i].Namespace, service.Namespace)
-		}
+		assert.Equal(t, expected[i].Namespace, service.Namespace)
 
 		for j := range service.URL {
-			if service.URL[j] != expected[i].URL[j] {
-				t.Fatalf("Expected Route URL: %+v, Got Route URL: %+v", expected[i].URL[j], service.URL[j])
-			}
+			assert.Equal(t, expected[i].URL[j], service.URL[j])
 		}
 
-		if service.Name != expected[i].Name {
-			t.Fatalf("Expected Service: %+v, Got Service: %+v", expected[i].Name, service.Name)
-		}
-		if service.NodePort != expected[i].NodePort {
-			t.Fatalf("Expected NodePort: %+v, Got NodePort: %+v", expected[i].NodePort, service.NodePort)
-		}
+		assert.Equal(t, expected[i].Name, service.Name)
+		assert.Equal(t, expected[i].NodePort, service.NodePort)
 		for j := range service.Weight {
-			if service.Weight[j] != expected[i].Weight[j] {
-				t.Fatalf("Expected Weight: %+v, Got Weight: %+v", expected[i].Weight[j], service.Weight[j])
-			}
+			assert.Equal(t, expected[i].Weight[j], service.Weight[j])
 		}
 	}
 

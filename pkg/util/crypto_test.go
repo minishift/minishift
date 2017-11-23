@@ -18,13 +18,13 @@ package util
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestEncryption(t *testing.T) {
 	expectedText := "Hello how are you"
 	encryptedText, _ := EncryptText("Hello how are you")
 	decryptedText, _ := DecryptText(encryptedText)
-	if decryptedText != expectedText {
-		t.Fatalf("Expected %s, Got %s", expectedText, decryptedText)
-	}
+	assert.Equal(t, expectedText, decryptedText)
 }

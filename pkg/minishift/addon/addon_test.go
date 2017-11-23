@@ -20,6 +20,8 @@ import (
 	"fmt"
 	"sort"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type DummyAddOn struct {
@@ -67,9 +69,8 @@ func Test_sorting_addons_by_priority(t *testing.T) {
 	sort.Sort(ByPriority(addOns))
 
 	expectedSortOrder := "[c d e b a]"
-	if fmt.Sprint(addOns) != expectedSortOrder {
-		t.Fatal(fmt.Sprintf("Expected sort order '%s', but got '%s'", expectedSortOrder, fmt.Sprint(addOns)))
-	}
+
+	assert.Equal(t, expectedSortOrder, fmt.Sprint(addOns))
 }
 
 func Test_sorting_addons_by_state_and_name(t *testing.T) {
@@ -77,9 +78,8 @@ func Test_sorting_addons_by_state_and_name(t *testing.T) {
 	sort.Sort(ByStatusThenName(addOns))
 
 	expectedSortOrder := "[b d e a c]"
-	if fmt.Sprint(addOns) != expectedSortOrder {
-		t.Fatal(fmt.Sprintf("Expected sort order '%s', but got '%s'", expectedSortOrder, fmt.Sprint(addOns)))
-	}
+
+	assert.Equal(t, expectedSortOrder, fmt.Sprint(addOns))
 }
 
 func Test_sorting_addons_by_state_priority_and_name(t *testing.T) {
@@ -87,7 +87,6 @@ func Test_sorting_addons_by_state_priority_and_name(t *testing.T) {
 	sort.Sort(ByStatusThenPriorityThenName(addOns))
 
 	expectedSortOrder := "[d e b c a]"
-	if fmt.Sprint(addOns) != expectedSortOrder {
-		t.Fatal(fmt.Sprintf("Expected sort order '%s', but got '%s'", expectedSortOrder, fmt.Sprint(addOns)))
-	}
+
+	assert.Equal(t, expectedSortOrder, fmt.Sprint(addOns))
 }

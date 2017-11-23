@@ -170,3 +170,7 @@ ignored = ["github.com/Sirupsen/logrus"]
 [[constraint]]
   name = "github.com/opencontainers/go-digest"
   revision = "aa2ec055abd10d26d539eb630a92241b781ce4bc"
+
+[[constraint]]
+  name = "github.com/stretchr/testify"
+  version = "=v1.2.0"

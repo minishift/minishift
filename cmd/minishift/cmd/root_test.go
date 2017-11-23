@@ -23,6 +23,7 @@ import (
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
 
 	"io/ioutil"
 	"path/filepath"
@@ -91,9 +92,7 @@ func TestPreRunDirectories(t *testing.T) {
 	allInstanceConfigPath := filepath.Join(testDir, "config", "allinstances.json")
 	minishiftConfig.AllInstancesConfig, err = minishiftConfig.NewAllInstancesConfig(allInstanceConfigPath)
 
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err)
 	defer os.RemoveAll(testDir)
 
 	constants.Minipath = testDir
@@ -103,18 +102,16 @@ func TestPreRunDirectories(t *testing.T) {
 	for i := 0; i < dirPaths.NumField(); i++ {
 		dir := dirPaths.Field(i).Interface().(string)
 		_, err := os.Stat(dir)
-		if os.IsNotExist(err) {
-			t.Fatalf("Directory %s does not exist.", dir)
-		}
+		assert.NoError(t, err, "Directory %s does not exist.", dir)
 	}
 }
 
 func TestViperConfig(t *testing.T) {
 	defer viper.Reset()
 	err := cli.InitTestConfig(`{ "v": "999" }`)
-	if viper.GetString("v") != "999" || err != nil {
-		t.Fatalf("Viper cannot read the test config file: %v", err)
-	}
+
+	assert.NoError(t, err, "Failed to initialize the test config file")
+	assert.Equal(t, viper.GetString("v"), "999", "Viper cannot read the test config file")
 }
 
 func TestViperAndFlags(t *testing.T) {
@@ -124,13 +121,9 @@ func TestViperAndFlags(t *testing.T) {
 		cli.SetOptionValue(t, testOption)
 		setupViper()
 		f := pflag.Lookup(testOption.Name)
-		if f == nil {
-			t.Fatalf("Cannot find the flag for %s", testOption.Name)
-		}
+		assert.NotNil(t, f)
 		actual := f.Value.String()
-		if actual != testOption.ExpectedValue {
-			t.Errorf("pflag.Value(%s) => %s, wanted %s [%+v]", testOption.Name, actual, testOption.ExpectedValue, testOption)
-		}
+		assert.Equal(t, testOption.ExpectedValue, actual)
 		cli.UnsetValues(testOption)
 	}
 }
@@ -153,8 +146,6 @@ func TestInitializeProfile(t *testing.T) {
 	for _, testInput := range Testdata {
 		os.Args = testInput.Args
 		got := initializeProfile()
-		if got != testInput.Result {
-			t.Errorf("Got %s, Expected %s as profile Name", got, testInput.Result)
-		}
+		assert.Equal(t, testInput.Result, got)
 	}
 }

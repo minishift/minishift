@@ -22,12 +22,11 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"testing"
 
 	"github.com/minishift/minishift/pkg/minishift/addon"
 	"github.com/minishift/minishift/pkg/minishift/addon/command"
-	minishiftTesting "github.com/minishift/minishift/pkg/testing"
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -45,32 +44,20 @@ func Test_creating_addon_manager_for_non_existing_directory_returns_an_error(t *
 	path := filepath.Join("this", "path", "really", "should", "not", "exists", "unless", "you", "have", "a", "crazy", "setup")
 
 	_, err := NewAddOnManager(path, make(map[string]*addon.AddOnConfig))
-
-	if err == nil {
-		t.Fatal(fmt.Sprintf("Creating the manager in directory '%s' should have failed", path))
-	}
-
-	if !strings.HasPrefix(err.Error(), "Unable to create addon manager") {
-		t.Fatal(fmt.Sprintf("Unexpected error message '%s", err.Error()))
-	}
+	assert.Error(t, err, fmt.Sprintf("Creating the manager in directory '%s' should have failed", path))
+	assert.Regexp(t, "^Unable to create addon manager", err.Error(), "Unexpected error message '%s'", err)
 }
 
 func Test_create_addon_manager(t *testing.T) {
 	path := filepath.Join(basepath, "..", "..", "..", "..", "addons")
 
 	manager, err := NewAddOnManager(path, make(map[string]*addon.AddOnConfig))
-
-	if err != nil {
-		t.Fatal(fmt.Sprintf("Unexpected error creating manager in directory '%s'. Creation should not have failed: '%s'", path, err.Error()))
-	}
+	assert.NoError(t, err, "Unexpected error creating manager in directory '%s'", path)
 
 	addOns := manager.List()
 
 	expectedNumberOfAddOns := 4
-	actualNumberOfAddOns := len(addOns)
-	if actualNumberOfAddOns != expectedNumberOfAddOns {
-		t.Fatal(fmt.Sprintf("Unexpected number of addons. Expected %d, got %d", expectedNumberOfAddOns, actualNumberOfAddOns))
-	}
+	assert.Len(t, addOns, expectedNumberOfAddOns)
 }
 
 func Test_installing_addon_for_non_existing_directory_returns_an_error(t *testing.T) {
@@ -80,58 +67,38 @@ func Test_installing_addon_for_non_existing_directory_returns_an_error(t *testin
 	manager, err := NewAddOnManager(testDir, make(map[string]*addon.AddOnConfig))
 	_, err = manager.Install("foo", false)
 
-	if err == nil {
-		t.Fatal(("Creating addon should have failed"))
-	}
-
-	if !strings.HasPrefix(err.Error(), "The source of a addon needs to be a directory") {
-		t.Fatal(fmt.Sprintf("Unexpected error message '%s", err.Error()))
-	}
+	assert.Error(t, err, "Creation of addon should have failed")
+	assert.Regexp(t, "^The source of a addon needs to be a directory", err.Error(), "Unexpected error message")
 }
 
 func Test_invalid_addons_get_skipped(t *testing.T) {
 	testDir, err := ioutil.TempDir("", "minishift-test-addon-manager-")
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err, "Error creating temp directory")
 	defer os.RemoveAll(testDir)
 
 	// create a valid addon
 	addOn1Path := filepath.Join(testDir, "addon1")
 	err = os.Mkdir(addOn1Path, 0777)
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err, "Error in creating directory for addon")
 
 	err = ioutil.WriteFile(filepath.Join(addOn1Path, "anyuid.addon"), []byte(anyuid), 0777)
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err, "Error in writing to addon file")
 
 	// create a invalid addon
 	addOn2Path := filepath.Join(testDir, "addon2")
 	err = os.Mkdir(addOn2Path, 0777)
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err, "Error in creating directory for addon")
 	_, err = os.Create(filepath.Join(addOn2Path, "foo.addon"))
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err, "Error in creating file for addon")
 
 	manager, err := NewAddOnManager(testDir, make(map[string]*addon.AddOnConfig))
 
-	if err != nil {
-		t.Fatal(fmt.Sprintf("Unexpected error creating manager in directory '%s'. Creation should not have failed: '%s'", testDir, err.Error()))
-	}
+	assert.NoError(t, err, "Error in getting new addon manager")
 
 	addOns := manager.List()
 
 	expectedNumberOfAddOns := 1
-	actualNumberOfAddOns := len(addOns)
-	if actualNumberOfAddOns != expectedNumberOfAddOns {
-		t.Fatal(fmt.Sprintf("Unexpected number of add-ons. Expected %d, got %d", expectedNumberOfAddOns, actualNumberOfAddOns))
-	}
+	assert.Len(t, addOns, expectedNumberOfAddOns)
 }
 
 func TestAddVarDefaultsToContext(t *testing.T) {
@@ -146,7 +113,7 @@ func TestAddVarDefaultsToContext(t *testing.T) {
 	addOn := addon.NewAddOn(addOnMeta, []command.Command{}, []command.Command{}, "")
 
 	addVarDefaultsToContext(addOn, context)
-	minishiftTesting.AssertEqualSlice(context.Vars(), []string{expectedVarName}, t)
+	assert.EqualValues(t, []string{expectedVarName}, context.Vars())
 }
 
 func TestVerifyValidRequiredVariablesInContext(t *testing.T) {
@@ -161,9 +128,8 @@ func TestVerifyValidRequiredVariablesInContext(t *testing.T) {
 
 	// Add variable name to context
 	context.AddToContext(expectedVarName, expectedVarValue)
-	if err := verifyRequiredVariablesInContext(context, addOn.MetaData()); err != nil {
-		t.Fatal(fmt.Sprintf("No error expected, but got \"%s\"", err.Error()))
-	}
+	err := verifyRequiredVariablesInContext(context, addOn.MetaData())
+	assert.NoError(t, err)
 }
 
 func TestVerifyMissingRequiredVariablesInContext(t *testing.T) {
@@ -177,9 +143,7 @@ func TestVerifyMissingRequiredVariablesInContext(t *testing.T) {
 	addOn := addon.NewAddOn(addOnMeta, []command.Command{}, []command.Command{}, "")
 
 	err := verifyRequiredVariablesInContext(context, addOn.MetaData())
-	if err.Error() != expectedErrMsg {
-		t.Fatal(fmt.Sprintf("Error \"%s\" expected, but got \"%s\"", expectedErrMsg, err.Error()))
-	}
+	assert.EqualError(t, err, expectedErrMsg)
 }
 
 func getTestAddonMap(name, description, requireVar, varDefault, openshiftVersion string) map[string]interface{} {

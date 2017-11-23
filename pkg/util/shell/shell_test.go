@@ -19,6 +19,8 @@ package shell
 import (
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type shellTestCase struct {
@@ -41,25 +43,17 @@ func TestUnknownShell(t *testing.T) {
 	os.Setenv("SHELL", "/bin/"+expectedShellName)
 
 	shell, err := GetShell("")
-	if err != nil {
-		t.Fatal("Unexpected err : ", err.Error())
-	}
+	assert.NoError(t, err, "Error in getting shell")
 
-	if shell != expectedShellName {
-		t.Fatalf("Expected shell to be %s but %s", expectedShellName, shell)
-	}
+	assert.Equal(t, expectedShellName, shell)
 }
 
 func TestKnownShell(t *testing.T) {
 	expectedShellName := "bash"
 	shell, err := GetShell("bash")
-	if err != nil {
-		t.Fatal("Unexpected err : ", err.Error())
-	}
+	assert.NoError(t, err, "Error in getting shell")
 
-	if shell != expectedShellName {
-		t.Fatalf("Expected shell to be %s but %s", expectedShellName, shell)
-	}
+	assert.Equal(t, expectedShellName, shell)
 }
 
 func TestNoProxyFromEnvWhenUsedLowerCase(t *testing.T) {
@@ -69,9 +63,7 @@ func TestNoProxyFromEnvWhenUsedLowerCase(t *testing.T) {
 	os.Setenv(expectedNoProxyVarName, expectedNoProxyVarValue)
 
 	_, noProxyValue := FindNoProxyFromEnv()
-	if noProxyValue != expectedNoProxyVarValue {
-		t.Fatalf("Expected no proxy var value as %s but got %s", expectedNoProxyVarValue, noProxyValue)
-	}
+	assert.Equal(t, expectedNoProxyVarValue, noProxyValue)
 }
 
 func TestNoProxyFromEnvWhenUsedUpperCase(t *testing.T) {
@@ -81,9 +73,7 @@ func TestNoProxyFromEnvWhenUsedUpperCase(t *testing.T) {
 	os.Setenv(expectedNoProxyVarName, expectedNoProxyVarValue)
 
 	_, noProxyValue := FindNoProxyFromEnv()
-	if noProxyValue != expectedNoProxyVarValue {
-		t.Fatalf("Expected no proxy var value as %s but got %s", expectedNoProxyVarValue, noProxyValue)
-	}
+	assert.Equal(t, expectedNoProxyVarValue, noProxyValue)
 }
 
 func TestGenerateUsageHint(t *testing.T) {
@@ -117,9 +107,7 @@ REM 	@FOR /f "tokens=*" %i IN ('foo') DO @call %i
 
 	for _, tt := range testData {
 		hint := GenerateUsageHint(tt.name, tt.cmdLine)
-		if tt.expectedHint != hint {
-			t.Fatalf("Expected hint to be \n%s but got \n%s", tt.expectedHint, hint)
-		}
+		assert.Equal(t, tt.expectedHint, hint)
 
 	}
 }

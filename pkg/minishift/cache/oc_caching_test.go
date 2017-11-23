@@ -26,6 +26,7 @@ import (
 
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minitesting "github.com/minishift/minishift/pkg/testing"
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -40,19 +41,14 @@ func TestIsCached(t *testing.T) {
 	ocDir := filepath.Join(testDir, "cache", "oc", "v1.3.1", runtime.GOOS)
 	os.MkdirAll(ocDir, os.ModePerm)
 
-	if testOc.isCached() != false {
-		t.Error("Expected oc to be uncached")
-	}
+	assert.False(t, testOc.isCached())
 
 	content := []byte("foo")
 
-	if err := ioutil.WriteFile(filepath.Join(ocDir, constants.OC_BINARY_NAME), content, os.ModePerm); err != nil {
-		t.Error()
-	}
+	err := ioutil.WriteFile(filepath.Join(ocDir, constants.OC_BINARY_NAME), content, os.ModePerm)
+	assert.NoError(t, err, "Error writing to file")
 
-	if testOc.isCached() != true {
-		t.Error("Expected oc to be cached")
-	}
+	assert.True(t, testOc.isCached())
 }
 
 func TestCacheOc(t *testing.T) {
@@ -71,9 +67,7 @@ func TestCacheOc(t *testing.T) {
 	os.MkdirAll(ocDir, os.ModePerm)
 
 	err := testOc.cacheOc()
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err, "Error caching oc")
 }
 
 func setUp(t *testing.T) {

@@ -19,15 +19,14 @@ package image
 import (
 	"os"
 	"path/filepath"
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_Are_Images_Cached(t *testing.T) {
 	currDir, err := os.Getwd()
-	if err != nil {
-		t.Fatal("Unable to determine working directory.")
-	}
+	assert.NoError(t, err, "Unable to determine working directory")
 
 	cacheConfig := &ImageCacheConfig{
 		HostCacheDir:      filepath.Join(currDir, "testdata"),
@@ -38,9 +37,7 @@ func Test_Are_Images_Cached(t *testing.T) {
 
 	handler := OciImageHandler{}
 	allCached := handler.AreImagesCached(cacheConfig)
-	if !allCached {
-		t.Fatal("According to the index all images should be cached")
-	}
+	assert.True(t, allCached, "According to the index all images should be cached")
 
 	cacheConfig = &ImageCacheConfig{
 		HostCacheDir:      filepath.Join(currDir, "testdata"),
@@ -51,9 +48,7 @@ func Test_Are_Images_Cached(t *testing.T) {
 
 	handler = OciImageHandler{}
 	allCached = handler.AreImagesCached(cacheConfig)
-	if allCached {
-		t.Fatal("According to the index the image should not be cached")
-	}
+	assert.False(t, allCached, "According to the index the image should not be cached")
 }
 
 func Test_Get_Docker_Settings(t *testing.T) {
@@ -73,16 +68,11 @@ func Test_Get_Docker_Settings(t *testing.T) {
 		clientConfig, err := getDockerSettings(envTest.envMap)
 		if err != nil {
 			if envTest.errorMessage != "" {
-				if err.Error() != envTest.errorMessage {
-					t.Errorf("Unexpected error message. Expected '%s'. Got '%s'", envTest.errorMessage, err.Error())
-				}
+				assert.EqualError(t, err, envTest.errorMessage)
 			} else {
-				t.Errorf("There was no error expected. Got '%v'", err)
+				assert.NoError(t, err)
 			}
 		}
-
-		if !reflect.DeepEqual(clientConfig, envTest.dockerSettings) {
-			t.Errorf("Expected and received settings don't match. Got '%v'. Expected '%v'", clientConfig, envTest.dockerSettings)
-		}
+		assert.EqualValues(t, envTest.dockerSettings, clientConfig)
 	}
 }

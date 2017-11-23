@@ -22,6 +22,8 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -88,36 +90,26 @@ Use "oc options" for a list of global command-line options (applies to all comma
 func Test_invalid_oc_path_returns_error(t *testing.T) {
 	invalidPath := "/snafu"
 	_, err := NewOcRunner(invalidPath, "")
-	if err == nil {
-		t.Fatal("An error should have been returned for creating on OcRunner against an invalid path")
-	}
+	assert.Error(t, err, "An error should have been returned for creating on OcRunner against an invalid path")
 
 	expectedError := fmt.Sprintf(invalidOcPathError, invalidPath)
-	if err.Error() != expectedError {
-		t.Fatal(fmt.Sprintf("Wrong error returns. Expected '%s'. Got '%s'", expectedError, err.Error()))
-	}
+	assert.EqualError(t, err, expectedError)
 }
 
 func Test_invalid_kube_path_returns_error(t *testing.T) {
 	// for now it is enough to just pass a file, there are no checks for name of the file or whether
 	// it is executable
 	tmpOc, err := ioutil.TempFile("", "oc")
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, err)
 
 	defer os.Remove(tmpOc.Name()) // clean up
 
 	invalidPath := "/snafu"
 	_, err = NewOcRunner(tmpOc.Name(), invalidPath)
-	if err == nil {
-		t.Fatal("An error should have been returned for creating on OcRunner against an invalid path")
-	}
+	assert.Error(t, err, "An error should have been returned for creating on OcRunner against an invalid path")
 
 	expectedError := fmt.Sprintf(invalidKubeConfigPathError, invalidPath)
-	if err.Error() != expectedError {
-		t.Fatal(fmt.Sprintf("Wrong error returns. Expected '%s'. Got '%s'", expectedError, err.Error()))
-	}
+	assert.EqualError(t, err, expectedError)
 }
 
 func Test_quotes_in_commands_get_properly_parsed(t *testing.T) {
@@ -131,52 +123,25 @@ func Test_quotes_in_commands_get_properly_parsed(t *testing.T) {
 
 	ocRunner.Run("adm new-project foo --description='Bar Baz'", nil, nil)
 
-	if fakeRunner.cmd != expectedCommand {
-		t.Fatal(fmt.Sprintf("Wrong command. Expected '%s'. Got '%s'", expectedCommand, fakeRunner.cmd))
-	}
+	assert.Equal(t, expectedCommand, fakeRunner.cmd)
 
 	expectedLength := 5
-	if len(fakeRunner.args) != expectedLength {
-		t.Fatal(fmt.Sprintf("Wrong args count. Expected '%d'. Got '%d'", expectedLength, len(fakeRunner.args)))
-	}
+	assert.Len(t, fakeRunner.args, expectedLength)
 
 	expectedArgs := []string{"--config=/kube/config", "adm", "new-project", "foo", "--description='Bar Baz'"}
 	for i, expectedArg := range expectedArgs {
-		if expectedArg != fakeRunner.args[i] {
-			t.Error(fmt.Sprintf("Wrong argument. Expected '%s'. Got '%s'", expectedArg, fakeRunner.args[i]))
-		}
+		assert.Equal(t, expectedArg, fakeRunner.args[i])
 	}
 }
 
 func TestParseOcHelpCommand(t *testing.T) {
 	recievedOptions := parseOcHelpCommand(ocClusterUpHelp)
-	assertCompareSlice(expectedOptions, recievedOptions, t)
+	assert.EqualValues(t, expectedOptions, recievedOptions)
 }
 
 func TestFlagExist(t *testing.T) {
-	if !flagExist(expectedOptions, "image") {
-		t.Fatal("image flag exist but returned false")
-	}
-
-	if flagExist(expectedOptions, "proxy") {
-		t.Fatal("proxy flag doesn't exist but returned true")
-	}
-}
-
-func assertCompareSlice(expectedArguments []string, recievedArguments []string, t *testing.T) {
-	if len(expectedArguments) > len(recievedArguments) {
-		t.Errorf("Expected more arguments than received. Expected: '%s'. Got: '%s'", expectedArguments, recievedArguments)
-	}
-
-	if len(expectedArguments) < len(recievedArguments) {
-		t.Errorf("Received more arguments than expected. Expected: '%s'. Got '%s'", expectedArguments, recievedArguments)
-	}
-
-	for i, v := range recievedArguments {
-		if v != expectedArguments[i] {
-			t.Errorf("Expected argument '%s'. Received '%s'", expectedArguments[i], v)
-		}
-	}
+	assert.True(t, flagExist(expectedOptions, "image"))
+	assert.False(t, flagExist(expectedOptions, "proxy"))
 }
 
 type FakeRunner struct {

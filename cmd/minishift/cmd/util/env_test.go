@@ -20,6 +20,8 @@ package util
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestReplaceEnv(t *testing.T) {
@@ -27,11 +29,8 @@ func TestReplaceEnv(t *testing.T) {
 		"LC_ALL=de_DE.UTF8", "MINISHIFTHOME=/home/user/.minishift"}
 	replaced := ReplaceEnv(env, "LC_ALL", "C")
 
-	if env[2] == "LC_ALL=de_DE.UTF8" && replaced[2] != "LC_ALL=C" {
-		t.Fatalf("Environment variable did not get replaced: '%s', '%s'", env[2], replaced[2])
-	}
+	assert.Equal(t, env[2], "LC_ALL=de_DE.UTF8")
+	assert.Equal(t, replaced[2], "LC_ALL=C")
 
-	if len(env) != len(replaced) {
-		t.Fatalf("Environment variables do not match length: '%d', '%d'", len(env), len(replaced))
-	}
+	assert.Len(t, env, len(replaced))
 }

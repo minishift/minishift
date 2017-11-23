@@ -20,6 +20,8 @@ import (
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_parsing_sleep_time_is_successful(t *testing.T) {
@@ -27,13 +29,9 @@ func Test_parsing_sleep_time_is_successful(t *testing.T) {
 
 	duration, err := sleep.getSleepTime()
 
-	if err != nil {
-		t.Fatal(fmt.Sprintf("Unexpected error '%s'", err.Error()))
-	}
+	assert.NoError(t, err, "Error getting sleep time")
 
-	if duration != time.Duration(100)*time.Second {
-		t.Fatal(fmt.Sprintf("Unexpected duration: %s", duration))
-	}
+	assert.Equal(t, time.Duration(100)*time.Second, duration)
 }
 
 func Test_parsing_sleep_time_ignores_text_after_durationb(t *testing.T) {
@@ -42,13 +40,9 @@ func Test_parsing_sleep_time_ignores_text_after_durationb(t *testing.T) {
 
 	duration, err := sleep.getSleepTime()
 
-	if err != nil {
-		t.Fatal(fmt.Sprintf("Unexpected error '%s'", err.Error()))
-	}
+	assert.NoError(t, err, "Error getting sleep time")
 
-	if duration != time.Duration(5)*time.Second {
-		t.Fatal(fmt.Sprintf("Unexpected duration: %s", duration))
-	}
+	assert.Equal(t, time.Duration(5)*time.Second, duration)
 }
 
 func Test_parsing_sleep_time_fails(t *testing.T) {
@@ -56,12 +50,8 @@ func Test_parsing_sleep_time_fails(t *testing.T) {
 	sleep := NewSleepCommand(cmd)
 
 	_, err := sleep.getSleepTime()
-	if err == nil {
-		t.Fatal("An error should have been returned")
-	}
+	assert.Error(t, err, "Error getting sleep time")
 
 	expectedError := fmt.Sprintf(invalidSleepTimeError, cmd)
-	if err.Error() != expectedError {
-		t.Fatal(fmt.Sprintf("Unexpected error message. Got '%s'. Expected '%s'", err.Error(), expectedError))
-	}
+	assert.EqualError(t, err, expectedError)
 }

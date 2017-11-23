@@ -17,9 +17,11 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/minishift/minishift/cmd/testing/cli"
-	"strings"
 	"testing"
+
+	"github.com/minishift/minishift/cmd/testing/cli"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDisplayConsoleInMachineReadable(t *testing.T) {
@@ -27,13 +29,12 @@ func TestDisplayConsoleInMachineReadable(t *testing.T) {
 
 	expectedStdout := `HOST=192.168.1.1
 PORT=8443
-CONSOLE_URL=https://192.168.99.103:8443`
+CONSOLE_URL=https://192.168.99.103:8443
+`
 
 	displayConsoleInMachineReadable("192.168.1.1", "https://192.168.99.103:8443")
 	tee.Close()
 
 	actualStdout := tee.StdoutBuffer.String()
-	if strings.TrimSpace(actualStdout) != expectedStdout {
-		t.Fatalf("Expected:\n '%s' \nGot\n '%s'", expectedStdout, actualStdout)
-	}
+	assert.Equal(t, expectedStdout, actualStdout)
 }

@@ -105,8 +105,8 @@ func IsValidProfile(profileName string) bool {
 	return false
 }
 
-// IsValidProfileName return true if profile name follow ^\w+[\w+-]+$
+// IsValidProfileName return true if profile name follow ^[a-zA-Z0-9]+[\w+-]*$
 func IsValidProfileName(profileName string) bool {
-	rr := regexp.MustCompile(`^\w+[\w+-]+$`)
+	rr := regexp.MustCompile(`^[a-zA-Z0-9]+[\w+-]*$`)
 	return rr.MatchString(profileName)
 }

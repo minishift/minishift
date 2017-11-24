@@ -31,10 +31,8 @@ There are two ways to create a new profile.
 
 [NOTE]
 ====
-Profile name can only consist of alphanumeric characters and *-* as a separator, for example:
-
-- foo, bar123, demo-profile and 1stProfile are considered as valid profile names.
-- $foo, bar#@, profile@123 are invalid profile names.
+Profile name can only consist of alphanumeric characters.
+The use of underscore ( *_* ) and hyphen ( *-* ) are allowed as separator.
 ====
 
 === Using the `--profile` Flag

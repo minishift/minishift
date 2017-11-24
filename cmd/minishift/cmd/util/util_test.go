@@ -32,6 +32,12 @@ func TestIsValidProfileName(t *testing.T) {
 		{"foo_123", true},
 		{"foo@123", false},
 		{"", false},
+		{"a", true},
+		{"a-", true},
+		{"a_", true},
+		{"1", true},
+		{"_", false},
+		{"-", false},
 		{"-foo", false},
 		{"--hell", false},
 		{"foo-123", true}}

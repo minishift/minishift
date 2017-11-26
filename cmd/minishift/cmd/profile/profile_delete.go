@@ -107,6 +107,6 @@ func runProfileDelete(cmd *cobra.Command, args []string) {
 }
 
 func init() {
-	profileDeleteCmd.Flags().BoolVar(&forceProfileDeletion, "force", false, "Forces the deletion of profile and related files in MINISHIFT_HOME.")
+	profileDeleteCmd.Flags().BoolVarP(&forceProfileDeletion, "force", "f", false, "Forces the deletion of profile and related files in MINISHIFT_HOME.")
 	ProfileCmd.AddCommand(profileDeleteCmd)
 }

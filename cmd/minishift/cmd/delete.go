@@ -107,7 +107,7 @@ func removeInstanceConfigs() {
 }
 
 func init() {
-	deleteCmd.Flags().BoolVar(&forceMachineDeletion, "force", false, "Forces the deletion of the VM specific files in MINISHIFT_HOME.")
+	deleteCmd.Flags().BoolVarP(&forceMachineDeletion, "force", "f", false, "Forces the deletion of the VM specific files in MINISHIFT_HOME.")
 	deleteCmd.Flags().BoolVar(&clearCache, "clear-cache", false, "Deletes all cached artifacts as part of the VM deletion.")
 	RootCmd.AddCommand(deleteCmd)
 }

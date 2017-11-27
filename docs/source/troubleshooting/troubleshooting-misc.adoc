@@ -60,3 +60,36 @@ For example:
 ----
 minishift start --iso-url centos
 ----
+
+[[invalid-x509-certificate]]
+== X.509 certificate is valid for 10.0.2.15, 127.0.0.1, 172.17.0.1, 172.30.0.1, 192.168.99.100, not 192.168.99.101
+
+Starting a stopped {project} VM can produce the following X.509 certificate error:
+
+----
+$ minishift start
+-- Checking if requested hypervisor 'kvm' is supported on this platform ... OK
+-- Checking the ISO URL ... OK
+-- Starting local OpenShift cluster using 'kvm' hypervisor ...
+-- Starting Minishift VM ......................... OK
+[...]
+FAIL
+   Error: cannot access master readiness URL https://192.168.99.101:8443/healthz/ready
+   Details:
+     No log available from "origin" container
+
+   Caused By:
+     Error: Get https://192.168.99.101:8443/healthz/ready: x509: certificate is valid for 10.0.2.15, 127.0.0.1, 172.17.0.1, 172.30.0.1, 192.168.99.100, not 192.168.99.101
+Error during 'cluster up' execution: Error starting the cluster.
+----
+
+The reason for the above error is that OpenShift cluster certificates contain the IP of the {project} VM.
+The certificates are generated only when {project} VM is freshly started.
+After restart, the {project} VM might be assigned a new IP address and if this happens the certificate become invalid.
+
+Workaround: Delete the existing {project} VM and start again.
+
+----
+$ minishift delete --force
+$ minishift start
+----

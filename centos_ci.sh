@@ -308,6 +308,14 @@ function prepare_for_proxy() {
   firewall-cmd --zone=public --add-port=$INTEGRATION_PROXY_CUSTOM_PORT/tcp;
 }
 
+function perform_nightly() {
+  setup_kvm_docker_machine_driver;
+  cd $GOPATH/src/github.com/minishift/minishift
+  make prerelease synopsis_docs link_check_docs
+  MINISHIFT_VM_DRIVER=kvm make integration_all GODOG_OPTS=""
+  echo "CICO: Tests ran successfully"
+}
+
 if [[ "$UID" = 0 ]]; then
   setup_build_environment;
 else
@@ -322,6 +330,8 @@ else
     docs_tar_upload $RSYNC_PASSWORD;
   elif [[ "$JOB_NAME" = "minishift-release" ]]; then
     perform_release $RSYNC_PASSWORD;
+  elif [[ "$JOB_NAME" = "minishift-nightly" ]]; then
+    perform_nightly;
   else
     build_and_test $RSYNC_PASSWORD;
   fi

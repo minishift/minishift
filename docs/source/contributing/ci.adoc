@@ -1,3 +1,5 @@
+include::variables.adoc[]
+
 = Minishift CI
 :data-uri:
 :imagesdir: images
@@ -39,9 +41,11 @@ The artifacts of a successful pull request build can be found at link:http://art
 
 On top of building the master branch and pull requests, CentOS CI is also used to build the tar bundle used for xref:../contributing/writing-docs.adoc#integration-with-docs-openshift-org[integration with docs.openshift.org], as well as to build xref:../contributing/releasing.adoc#automated-release[releases].
 
+The link:https://ci.centos.org/job/minishift-nightly[nightly job] runs daily at midnight.
+It executes all integration tests against the _master_ branch of the {project} GitHub repository.
 
 |link:https://ci.centos.org/job/minishift/[master], link:https://ci.centos.org/job/minishift-pr/[pull requests], link:https://ci.centos.org/job/minishift-docs/[docs],
-link:https://ci.centos.org/job/minishift-release/[release]
+link:https://ci.centos.org/job/minishift-release/[release], link:https://ci.centos.org/job/minishift-nightly[nightly]
 
 |link:https://github.com/minishift/minishift/blob/master/centos_ci.sh[centos_ci.sh]
 

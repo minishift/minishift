@@ -26,12 +26,15 @@ import (
 var InstanceConfig *InstanceConfigType
 
 type InstanceConfigType struct {
-	FilePath     string `json:"-"`
-	OcPath       string
-	IsRegistered bool
-	IsRHELBased  bool
+	FilePath                  string `json:"-"`
+	OcPath                    string // minishift state
+	IsRegistered              bool   // minishift state
+	IsRHELBased               bool   // minishift state
+	SupportsNetworkAssignment bool   // minishift state
 
 	HostFolders []config.HostFolderConfig
+
+	VMDriver string // general config
 }
 
 // Create new object with data if file exists or

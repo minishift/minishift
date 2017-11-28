@@ -24,6 +24,7 @@ import (
 
 	hvkvp "github.com/gbraad/go-hvkvp"
 	"github.com/golang/glog"
+	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/minishift/shell/powershell"
 )
 
@@ -33,9 +34,9 @@ const (
 	networkingMessageName = "PROVISION_NETWORKING"
 )
 
-func ConfigureNetworking(machineName string, vmDriver string, networkSettings NetworkSettings) {
+func ConfigureNetworking(machineName string, networkSettings NetworkSettings) {
 	// Instruct the user that this does not work for other Hypervisors on Windows
-	if vmDriver != "hyperv" {
+	if !minishiftConfig.IsHyperV() {
 		fmt.Println(configureIPAddressMessage, configureIPAddressFailure)
 		return
 	}
@@ -55,6 +56,7 @@ func ConfigureNetworking(machineName string, vmDriver string, networkSettings Ne
 
 func doConfigure(success chan bool, command string) {
 	posh := powershell.New()
+	defer posh.Close()
 	result, _ := posh.Execute(command)
 
 	if strings.Contains(result, resultSuccess) {

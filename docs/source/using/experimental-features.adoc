@@ -44,7 +44,7 @@ For Hyper-V a functionality is provided to assign an IP address on startup using
 
 [IMPORTANT]
 ====
-While the default image is B2D, this only works with the CentOS/RHEL based image in combination with Hyper-V.
+This only works with the CentOS/RHEL based image in combination with Hyper-V.
 The B2D image experiences a problem when the values are being sent to the {project} instance and consumed by the B2D iso.
 We are looking into the issue and hope to provide a solution in the future.
 ====
@@ -87,3 +87,29 @@ PS> minishift.exe start `
 Be sure to specify a valid gateway and nameserver.
 Failing to do so will result in connectivity issues.
 ====
+
+
+[[set-fixed-ip]]
+== Set Fixed IP Address
+
+[NOTE]
+====
+Currently not supported on KVM as the driver plugin relies on the DHCP offer to determine the IP address.
+====
+
+Most hypervisors do not support extending the lease time when the IP is assigned using DHCP.
+This might lead to a new IP getting assigned to the VM after a restart as it will conflict with the security certificates generated for the old IP. This will make Minishift completely unusable.
+
+For this purpose, {project} includes the functionality to set a static address to the VM. This will prevent it from changing between restarts. However, it will not work on all the driver plugins at the moment due to the way the IP address is resolved.
+
+The following command will set the IP address that was assigned as fixed:
+
+----
+$ minishift ip --set-static 
+----
+
+If you prefer to use dynamic assignment, you can use:
+
+----
+$ minishift ip --set-dhcp
+----

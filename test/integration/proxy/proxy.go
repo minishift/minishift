@@ -29,7 +29,7 @@ import (
 	"strings"
 
 	"github.com/elazarl/goproxy"
-	minishiftUtil "github.com/minishift/minishift/pkg/minishift/util"
+	minishiftNetwork "github.com/minishift/minishift/pkg/minishift/network"
 )
 
 var (
@@ -90,7 +90,7 @@ func getIP() (string, error) {
 		return value, nil
 	}
 
-	ips := minishiftUtil.HostIPs()
+	ips := minishiftNetwork.HostIPs()
 	if ips == nil {
 		return "", errors.New(`No IP found. This might be an error in automated detection of available network devices.
 							   You can use INTEGRATION_PROXY_CUSTOM_IP to set IP manually.`)

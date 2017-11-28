@@ -31,6 +31,14 @@ task :clean do
   rm_f Rake::FileList.new("#{GENERATED_ADOC_DIR}/*.adoc")
   rm_rf BUILD_DIR
   rm_f ADOC_VARIABLES
+  # find ditaa images based on the fact that they have a cache file
+  DITAA_IMAGES = Rake::FileList.new do |list|
+    Rake::FileList.new("source/**/images/*.png.cache").each do |f|
+      list.add(f)
+      list.add(f.gsub(/\.cache/, ''))
+    end
+  end
+  rm_f DITAA_IMAGES
 end
 
 file TOPIC_MAP => [:init, 'source/_topic_map.yml'] do

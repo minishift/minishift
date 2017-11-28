@@ -116,7 +116,7 @@ func init() {
 	RootCmd.AddCommand(updateCmd)
 	updateCmd.Flags().AddFlag(cmdutil.HttpProxyFlag)
 	updateCmd.Flags().AddFlag(cmdutil.HttpsProxyFlag)
-	updateCmd.Flags().BoolVar(&addonForce, addonForceFlag, false, "Force update the add-ons after the binary update. Otherwise, prompt the user to update add-ons.")
+	updateCmd.Flags().BoolVarP(&addonForce, addonForceFlag, "f", false, "Force update the add-ons after the binary update. Otherwise, prompt the user to update add-ons.")
 }
 
 func createUpdateMarker(markerPath string, data UpdateMarker) error {

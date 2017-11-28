@@ -266,7 +266,7 @@ function perform_release() {
   MINISHIFT_VM_DRIVER=kvm make integration_all
   exit_on_failure "$?" "Integration tests failed."
 
-  make link_check_docs IMAGE_UID=$(id -u) # Test docs builds and all links are valid
+  make link_check_docs # Test docs builds and all links are valid
   exit_on_failure "$?" "Documentation build failed."
 
   create_release_commit
@@ -279,7 +279,7 @@ function perform_release() {
   add_release_notes;
   exit_on_failure "$?" "Failed to update release notes of Minishift v$RELEASE_VERSION. Try to manually update the release notes here - https://github.com/${REPO_OWNER}/minishift/releases/tag/v$RELEASE_VERSION."
 
-  make gen_adoc_tar IMAGE_UID=$(id -u)
+  make gen_adoc_tar
   exit_on_failure "$?" "Documentation tarball build failed."
 
   docs_tar_upload $1
@@ -318,7 +318,7 @@ else
 
   if [[ "$JOB_NAME" = "minishift-docs" ]]; then
     cd gopath/src/github.com/minishift/minishift
-    make gen_adoc_tar IMAGE_UID=$(id -u)
+    make gen_adoc_tar
     docs_tar_upload $RSYNC_PASSWORD;
   elif [[ "$JOB_NAME" = "minishift-release" ]]; then
     perform_release $RSYNC_PASSWORD;

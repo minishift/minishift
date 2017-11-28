@@ -49,7 +49,7 @@ var addonsInstallCmd = &cobra.Command{
 }
 
 func init() {
-	addonsInstallCmd.Flags().BoolVar(&force, forceFlag, false, "Forces the installation of the add-on even if the add-on was previously installed.")
+	addonsInstallCmd.Flags().BoolVarP(&force, forceFlag, "f", false, "Forces the installation of the add-on even if the add-on was previously installed.")
 	addonsInstallCmd.Flags().BoolVar(&enable, enableFlag, false, "If true, installs and enables the specified add-on with the default priority.")
 	addonsInstallCmd.Flags().BoolVar(&defaults, defaultsFlag, false,
 		fmt.Sprintf("If true, installs all default add-ons. (%s)",

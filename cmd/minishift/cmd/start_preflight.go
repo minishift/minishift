@@ -30,13 +30,13 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	validations "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/minishift/shell/powershell"
-	minishiftUtil "github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/util/github"
 
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/viper"
 
 	cmdUtils "github.com/minishift/minishift/cmd/minishift/cmd/util"
+	minishiftNetwork "github.com/minishift/minishift/pkg/minishift/network"
 	openshiftVersion "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	stringUtils "github.com/minishift/minishift/pkg/util/strings"
 )
@@ -430,7 +430,7 @@ func checkIPConnectivity(driver drivers.Driver) bool {
 	ipToPing := viper.GetString(configCmd.CheckNetworkPingHost.Name)
 
 	fmt.Printf("\n   Pinging %s ... ", ipToPing)
-	return minishiftUtil.IsIPReachable(driver, ipToPing, false)
+	return minishiftNetwork.IsIPReachable(driver, ipToPing, false)
 }
 
 // checkHttpConnectivity allows to test outside connectivity and possible proxy support
@@ -438,7 +438,7 @@ func checkHttpConnectivity(driver drivers.Driver) bool {
 	urlToRetrieve := viper.GetString(configCmd.CheckNetworkHttpHost.Name)
 
 	fmt.Printf("\n   Retrieving %s ... ", urlToRetrieve)
-	return minishiftUtil.IsRetrievable(driver, urlToRetrieve, false)
+	return minishiftNetwork.IsRetrievable(driver, urlToRetrieve, false)
 }
 
 // checkStorageMounted checks if the persistent storage volume, storageDisk, is

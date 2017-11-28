@@ -23,8 +23,14 @@ import (
 	cmdUtil "github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	minishiftNetwork "github.com/minishift/minishift/pkg/minishift/network"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
+)
+
+var (
+	configureAsStatic  bool
+	configureAsDynamic bool
 )
 
 // ipCmd represents the ip command
@@ -35,19 +41,34 @@ var ipCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		api := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
 		defer api.Close()
+
+		if configureAsStatic && configureAsDynamic {
+			atexit.ExitWithMessage(1, "Invalid options specified")
+		}
+
 		host, err := api.Load(constants.MachineName)
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error getting IP: %s", err.Error()))
 		}
 		cmdUtil.ExitIfNotRunning(host.Driver, constants.MachineName)
-		ip, err := host.Driver.GetIP()
-		if err != nil {
-			atexit.ExitWithMessage(1, fmt.Sprintf("Error getting IP: %s", err.Error()))
+
+		if configureAsDynamic {
+			minishiftNetwork.ConfigureDynamicAssignment(host.Driver)
+		} else if configureAsStatic {
+			minishiftNetwork.ConfigureStaticAssignment(host.Driver)
+		} else {
+			ip, err := minishiftNetwork.GetIP(host.Driver)
+			if err != nil {
+				atexit.ExitWithMessage(1, fmt.Sprintf("Error getting IP: %s", err.Error()))
+			}
+			fmt.Println(ip)
 		}
-		fmt.Println(ip)
 	},
 }
 
 func init() {
+	ipCmd.Flags().BoolVar(&configureAsStatic, "set-static", false, "Sets the current assigned IP address as static address for the instance")
+	ipCmd.Flags().BoolVar(&configureAsDynamic, "set-dhcp", false, "Sets network configuration to use DHCP to assign IP address to the instance")
+
 	RootCmd.AddCommand(ipCmd)
 }

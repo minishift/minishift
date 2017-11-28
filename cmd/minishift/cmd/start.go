@@ -330,6 +330,8 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 		HostOnlyCIDR:     viper.GetString(configCmd.HostOnlyCIDR.Name),
 		ShellProxyEnv:    shellProxyEnv,
 	}
+	minishiftConfig.InstanceConfig.VMDriver = machineConfig.VMDriver
+	minishiftConfig.InstanceConfig.Write()
 
 	fmt.Printf(" using '%s' hypervisor ...\n", machineConfig.VMDriver)
 	var hostVm *host.Host
@@ -355,7 +357,7 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 
 		// Configure networking on startup only works on Hyper-V
 		if networkSettings.IPAddress != "" {
-			minishiftNetwork.ConfigureNetworking(constants.MachineName, machineConfig.VMDriver, networkSettings)
+			minishiftNetwork.ConfigureNetworking(constants.MachineName, networkSettings)
 		}
 	}
 

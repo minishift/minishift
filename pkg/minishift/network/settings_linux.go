@@ -20,6 +20,6 @@ import (
 	"fmt"
 )
 
-func ConfigureNetworking(machineName string, vmDriver string, networkSettings NetworkSettings) {
+func ConfigureNetworking(machineName string, networkSettings NetworkSettings) {
 	fmt.Println(configureIPAddressMessage, configureIPAddressFailure)
 }

@@ -96,8 +96,8 @@
 [[projects]]
   name = "github.com/docker/machine"
   packages = ["commands/mcndirs","drivers/errdriver","drivers/fakedriver","drivers/hyperv","drivers/none","drivers/virtualbox","drivers/vmwarefusion","libmachine","libmachine/auth","libmachine/cert","libmachine/check","libmachine/drivers","libmachine/drivers/plugin","libmachine/drivers/plugin/localbinary","libmachine/drivers/rpc","libmachine/engine","libmachine/host","libmachine/log","libmachine/mcndockerclient","libmachine/mcnerror","libmachine/mcnflag","libmachine/mcnutils","libmachine/persist","libmachine/provision","libmachine/provision/pkgaction","libmachine/provision/provisiontest","libmachine/provision/serviceaction","libmachine/shell","libmachine/ssh","libmachine/state","libmachine/swarm","libmachine/version","libmachine/versioncmp","version"]
-  revision = "5b274558ea6ca822c06dd407a4e774a0105c3f60"
-  version = "v0.11.0"
+  revision = "9ba6da9ebd1140b65eb73e1ce08086ca72764c60"
+  version = "v0.13.0"
 
 [[projects]]
   name = "github.com/elazarl/goproxy"
@@ -368,7 +368,7 @@
 [[projects]]
   name = "golang.org/x/crypto"
   packages = ["cast5","curve25519","ed25519","ed25519/internal/edwards25519","openpgp","openpgp/armor","openpgp/elgamal","openpgp/errors","openpgp/packet","openpgp/s2k","ssh","ssh/terminal"]
-  revision = "453249f01cfeb54c3d549ddb75ff152ca243f9d8"
+  revision = "b080dc9a8c480b08e698fb1219160d598526310f"
 
 [[projects]]
   branch = "master"
@@ -419,6 +419,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f7e2affeedbffeaf8971abb4fcf9adeea3b4f8471eaaf2523aa9f0ba82ec3cd8"
+  inputs-digest = "126ca98597875822b477375d68ee4318150c6ebd9faf1dd5ab368fbe1fe99e9d"
   solver-name = "gps-cdcl"
   solver-version = 1

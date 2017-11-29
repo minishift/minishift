@@ -41,7 +41,7 @@ ignored = ["github.com/Sirupsen/logrus"]
 
 [[constraint]]
   name = "github.com/docker/machine"
-  version = "=0.11.0"
+  version = "=0.13.0"
 
 [[constraint]]
   name = "github.com/elazarl/goproxy"
@@ -140,7 +140,7 @@ ignored = ["github.com/Sirupsen/logrus"]
 
 [[constraint]]
   name = "golang.org/x/crypto"
-  revision = "453249f01cfeb54c3d549ddb75ff152ca243f9d8"
+  revision = "b080dc9a8c480b08e698fb1219160d598526310f"
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"

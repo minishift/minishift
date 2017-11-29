@@ -29,7 +29,7 @@ LATEST="latest"
 function load_jenkins_vars() {
   if [ -e "jenkins-env" ]; then
     cat jenkins-env \
-      | grep -E "(JENKINS_URL|GIT_BRANCH|GIT_COMMIT|BUILD_NUMBER|ghprbSourceBranch|ghprbActualCommit|BUILD_URL|ghprbPullId|GH_TOKEN|CICO_API_KEY|API_TOKEN|JOB_NAME|RELEASE_VERSION|GITHUB_TOKEN)=" \
+      | grep -E "(JENKINS_URL|GIT_BRANCH|GIT_COMMIT|BUILD_NUMBER|ghprbSourceBranch|ghprbActualCommit|BUILD_URL|ghprbPullId|GH_TOKEN|CICO_API_KEY|API_TOKEN|JOB_NAME|RELEASE_VERSION|GITHUB_TOKEN|REPO|BRANCH)=" \
       | sed 's/^/export /g' \
       > ~/.jenkins-env
     source ~/.jenkins-env
@@ -141,7 +141,14 @@ function prepare_repo() {
 function install_docs_prerequisite_packages() {
   # https://devops.profitbricks.com/tutorials/install-ruby-214-with-rvm-on-centos/
   # Prerequisite packages
-  sudo yum install -y libyaml-devel readline-devel zlib-devel libffi-devel openssl-devel sqlite-devel
+  sudo yum install -y libyaml-devel \
+                     readline-devel \
+                     zlib-devel \
+                     libffi-devel \
+                     openssl-devel \
+                     sqlite-devel \
+                     java-1.7.0-openjdk-devel
+
   # Install RVM
   gpg2 --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3
   curl -L get.rvm.io | bash -s stable
@@ -207,13 +214,6 @@ function docs_tar_upload() {
 }
 
 function create_release_commit() {
-  # Set Terminal
-  export TERM=xterm-256color
-  # Add git a/c identity
-  git config user.email "29732253+minishift-bot@users.noreply.github.com"
-  git config user.name "Minishift Bot"
-  # Export GITHUB_ACCESS_TOKEN
-  export GITHUB_ACCESS_TOKEN=$GITHUB_TOKEN
   # Create master branch as git clone in CI doesn't create it
   git checkout -b master
   # Bump version and commit
@@ -292,6 +292,29 @@ function perform_release() {
   curl http://minibot.19cf262c.svc.dockerapp.io:9009/hubot/centosci -H "Content-Type: application/json" -d '{"payload":{"status":"success","message":'"\"$MESSAGE\""',"url":'"\"$URL\""'}}' || true
 }
 
+function perform_docs_publish() {
+  # REPO and BRANCH variables are populated via https://ci.centos.org/job/minishift-docs
+  REPO_OWNER=$(echo $REPO | cut -d"/" -f4)
+  cd gopath/src/github.com/minishift/minishift
+
+  git checkout master
+  git checkout -b docs-branch
+  git pull -f $REPO $BRANCH # Get changes from remote repo/branch
+  git log -n 1              # Display last commit in log as reference
+
+  install_docs_prerequisite_packages;
+  make gen_adoc_tar
+  build_openshift_origin_docs $(pwd)/docs/build/minishift-adoc.tar;
+
+  mkdir -p minishift/docs/ondemand/$REPO_OWNER-$BRANCH
+  cp -r openshift-docs/_preview/openshift-origin minishift/docs/ondemand/$REPO_OWNER-$BRANCH/ # Copy the openshift-origin
+  cp docs/build/minishift-adoc.tar minishift/docs/ondemand/$REPO_OWNER-$BRANCH/ # Copy doc tar
+  # http://stackoverflow.com/a/22908437/1120530; Using --relative as --rsync-path not working
+  RSYNC_PASSWORD=$RSYNC_PASSWORD rsync -av --delete --relative minishift/docs/ondemand/$REPO_OWNER-$BRANCH/ minishift@artifacts.ci.centos.org::minishift/
+  echo "Find docs tar here http://artifacts.ci.centos.org/minishift/minishift/docs/ondemand/$REPO_OWNER-$BRANCH/"
+  echo "Minishift documentation is hosted at http://artifacts.ci.centos.org/minishift/minishift/docs/ondemand/$REPO_OWNER-$BRANCH/openshift-origin/latest/minishift/index.html"
+}
+
 function build_and_test() {
   setup_kvm_docker_machine_driver;
   cd $GOPATH/src/github.com/minishift/minishift
@@ -299,7 +322,6 @@ function build_and_test() {
   # Run integration test with 'kvm' driver
   MINISHIFT_VM_DRIVER=kvm make integration_pr
   echo "CICO: Tests ran successfully"
-
   artifacts_upload_on_pr_and_master_trigger $1;
 }
 
@@ -322,12 +344,18 @@ else
   source ~/jenkins-env # Source environment variables for minishift_ci user
   RSYNC_PASSWORD=$(echo $CICO_API_KEY | cut -d'-' -f1-2)
 
+  # Set Terminal
+  export TERM=xterm-256color
+  # Add git a/c identity
+  git config --global user.email "29732253+minishift-bot@users.noreply.github.com"
+  git config --global user.name "Minishift Bot"
+  # Export GITHUB_ACCESS_TOKEN
+  export GITHUB_ACCESS_TOKEN=$GITHUB_TOKEN
+
   prepare_repo;
 
   if [[ "$JOB_NAME" = "minishift-docs" ]]; then
-    cd gopath/src/github.com/minishift/minishift
-    make gen_adoc_tar
-    docs_tar_upload $RSYNC_PASSWORD;
+    perform_docs_publish;
   elif [[ "$JOB_NAME" = "minishift-release" ]]; then
     perform_release $RSYNC_PASSWORD;
   elif [[ "$JOB_NAME" = "minishift-nightly" ]]; then

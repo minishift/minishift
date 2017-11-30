@@ -17,6 +17,7 @@ limitations under the License.
 package util
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -102,18 +103,19 @@ func SetOcContext(profileName string) error {
 func RemoveCurrentContext() error {
 	ocPath := minishiftConfig.InstanceConfig.OcPath
 	cmd := "config unset current-context"
+	errBuffer := new(bytes.Buffer)
 
 	ocRunner, err := oc.NewOcRunner(ocPath, filepath.Join(constants.Minipath, "machines", constants.MachineName+"_kubeconfig"))
 	if err != nil {
 		if glog.V(2) {
 			fmt.Println(fmt.Sprintf("%s", err.Error()))
 		}
-		return errors.New(fmt.Sprintf("Error unsetting current-context"))
+		return errors.New("Error unsetting current-context")
 	}
 
-	exitCode := ocRunner.RunAsUser(cmd, nil, nil)
+	exitCode := ocRunner.RunAsUser(cmd, nil, errBuffer)
 	if exitCode != 0 {
-		return errors.New(fmt.Sprintf("Error during removing current context: %v", err.Error()))
+		return fmt.Errorf("Error during removing current context: %v", errBuffer)
 	}
 	return nil
 }

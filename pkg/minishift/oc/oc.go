@@ -17,18 +17,18 @@ limitations under the License.
 package oc
 
 import (
-	"fmt"
-	"github.com/minishift/minishift/pkg/minikube/constants"
-	"github.com/minishift/minishift/pkg/util"
-
 	"bytes"
-	"github.com/minishift/minishift/pkg/util/cmd"
-	"github.com/minishift/minishift/pkg/util/filehelper"
-	"github.com/pkg/errors"
+	"fmt"
 	"io"
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/util"
+	"github.com/minishift/minishift/pkg/util/cmd"
+	"github.com/minishift/minishift/pkg/util/filehelper"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -74,9 +74,10 @@ func (oc *OcRunner) RunAsUser(command string, stdOut io.Writer, stdErr io.Writer
 // See also https://docs.openshift.org/latest/architecture/additional_concepts/authentication.html#authentication-impersonation
 func (oc *OcRunner) AddSudoerRoleForUser(user string) error {
 	cmd := fmt.Sprintf("adm policy add-cluster-role-to-user sudoer %s", user)
-	exitCode := oc.Run(cmd, nil, nil)
+	errorBuffer := new(bytes.Buffer)
+	exitCode := oc.Run(cmd, nil, errorBuffer)
 	if exitCode != 0 {
-		return errors.New("Unable to add sudoer role")
+		return fmt.Errorf("Unable to add sudoer role: %v", errorBuffer)
 	}
 
 	return nil
@@ -87,16 +88,17 @@ func (oc *OcRunner) AddSudoerRoleForUser(user string) error {
 func (oc *OcRunner) AddCliContext(context string, ip string, username string, namespace string) error {
 	ip = strings.Replace(ip, ".", "-", -1)
 	cmd := fmt.Sprintf("config set-context %s --cluster=%s:%d --user=%s/%s:%d --namespace=%s", context, ip, constants.APIServerPort, username, ip, constants.APIServerPort, namespace)
+	errorBuffer := new(bytes.Buffer)
 
-	exitCode := oc.RunAsUser(cmd, nil, nil)
+	exitCode := oc.RunAsUser(cmd, nil, errorBuffer)
 	if exitCode != 0 {
-		return errors.New("Unable to create CLI context")
+		return fmt.Errorf("Unable to create CLI context: %v", errorBuffer)
 	}
 
 	cmd = fmt.Sprintf("config use-context %s", context)
-	exitCode = oc.RunAsUser(cmd, nil, nil)
+	exitCode = oc.RunAsUser(cmd, nil, errorBuffer)
 	if exitCode != 0 {
-		return errors.New("Unable to switch CLI context")
+		return fmt.Errorf("Unable to switch CLI context: %v", errorBuffer)
 	}
 
 	return nil

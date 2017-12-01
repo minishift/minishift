@@ -32,6 +32,7 @@ import (
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	miniutil "github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/util"
+	minishiftStrings "github.com/minishift/minishift/pkg/util/strings"
 )
 
 const (
@@ -322,11 +323,11 @@ func mountCifsHostfolder(driver drivers.Driver, hostfolder *config.HostFolder) e
 	}
 
 	cmd := fmt.Sprintf(
-		"sudo mount -t cifs %s %s -o username=%s,password=%s",
+		"sudo mount -t cifs %s %s -o username=%s,password='%s'",
 		hostfolder.Options["uncpath"],
 		hostfolder.Mountpoint(),
 		hostfolder.Options["username"],
-		password)
+		minishiftStrings.EscapeSingleQuote(password))
 
 	if minishiftConfig.InstanceConfig.IsRHELBased {
 		cmd = fmt.Sprintf("%s,context=system_u:object_r:svirt_sandbox_file_t:s0", cmd)

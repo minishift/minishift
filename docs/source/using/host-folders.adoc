@@ -12,44 +12,14 @@ toc::[]
 == Overview
 
 Host folders are directories on the host which are shared between the host and the {project} VM.
-They allow for a two way file synchronization between host and VM.
-The following sections discuss the various types of host folders, driver-provided host folders, as well as the `minishift hostfolder` command.
-
-[[driver-host-folders]]
-== Driver-Provided Host Folders
-
-Some drivers mount a default host folder into the VM in order to share files between the VM and the host.
-These folders are currently not configurable and differ for each driver and OS.
-
-[[table-driver-host-folders]]
-.Driver-provided host folders
-
-|===
-|Driver |OS |Host Folder |VM
-
-|VirtualBox |Linux |/home |/hosthome
-
-|VirtualBox |macOS |/Users |/Users
-
-|VirtualBox |Windows |C:\Users |/c/Users
-
-|xhyve |macOS |/Users |/Users
-|===
-
-[NOTE]
-====
-Host folder sharing is not implemented in the KVM and Hyper-V drivers.
-If you use one of these drivers, you need to use the `minishift hostfolder` command to set up and configure host folders.
-
-The VirtualBox default host folders are available only with the default Boot2Docker ISO.
-It requires VirtualBox link:https://www.virtualbox.org/manual/ch04.html[Guest Additions], which is currently unavailable in the CentOS ISO.
-====
+This allows for two way file synchronization between the host and the VM.
+The following sections discuss usage of the `minishift hostfolder` command.
 
 [[minishift-hostfolder-command]]
 == The minishift hostfolder Command
 
 {project} provides the xref:../command-ref/minishift_hostfolder.adoc#[`minishift hostfolder`] command to list, add, mount, unmount and remove host folders.
-In contrast to the driver-provided host folders, you can use the `hostfolder` command to mount multiple shared folders onto custom specified mount points.
+You can use the `hostfolder` command to mount multiple shared folders onto custom specified mount points.
 
 [NOTE]
 ====
@@ -84,7 +54,7 @@ Name        Mountpoint            Remote path              Mounted
 myshare     /mnt/sda1/myshare     //192.168.1.82/MYSHARE   N
 ----
 
-In this example, there is a host folder with the name *_myshare_* which mounts *_//192.168.1.82/MYSHARE_* onto *_/mnt/sda1/myshare_* in the {project} VM.
+In this example, there is a host folder with the name **myshare** which mounts *_//192.168.1.82/MYSHARE_* onto *_/mnt/sda1/myshare_* in the {project} VM.
 The share is currently not mounted.
 
 [NOTE]
@@ -111,7 +81,7 @@ Password: [HIDDEN]                 // <5>
 Domain:                            // <6>
 Added: myshare
 ----
-<1> (Required) Actual `minishift hostfolder add` command that specifies a host folder with the name of *_myshare_*.
+<1> (Required) Actual `minishift hostfolder add` command that specifies a host folder with the name of **myshare**.
 <2> (Required) The UNC path for the share.
 <3> The mount point within the VM. The default is *_/mnt/sda1/<host folder name>_*.
 <4> (Required) The user name for the CIFS share.
@@ -121,7 +91,7 @@ Added: myshare
 [TIP]
 ====
 On Windows hosts, the `minishift hostfolder add` command also provides a `users-share` option.
-When this option is specified, no UNC path needs to be specified and the *_C:\Users_* is assumed.
+When this option is specified, no UNC path needs to be specified and *_C:\Users_* is assumed.
 ====
 
 [WARNING]
@@ -136,8 +106,8 @@ By default, host folder definitions are persistent, similar to other xref:../usi
 This means that these host folder definitions will survive the deletion and subsequent re-creation of a {project} VM.
 
 In some cases you might want to define a host folder just for a specific {project} instance.
-To do so, you can use the `instance-only` flag of the xref:../command-ref/minishift_hostfolder_add.adoc#[`minishift hostfolder add`] command.
-Host folder definitions that are created with the `instance-only` flag will be removed together with any other instance-specific state during xref:../command-ref/minishift_delete.adoc#[`minishift delete`].
+To do so, you can use the `--instance-only` flag of the xref:../command-ref/minishift_hostfolder_add.adoc#[`minishift hostfolder add`] command.
+Host folder definitions that are created with the `--instance-only` flag will be removed together with any other instance-specific state during xref:../command-ref/minishift_delete.adoc#[`minishift delete`].
 
 [[mounting-host-folders]]
 === Mounting Host Folders
@@ -167,7 +137,7 @@ $ minishift ssh "ls -al /mnt/sda1/myshare"
 ==== Auto-Mounting Host Folders
 
 Host folders can also be mounted automatically each time you run xref:../command-ref/minishift_start.adoc#[`minishift start`].
-To set auto-mounting, you need to set the `hostfolder-automount` option in the {project} configuration file.
+To set auto-mounting, you need to set the `hostfolders-automount` option in the {project} configuration file.
 
 ----
 $ minishift config set hostfolders-automount true

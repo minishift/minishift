@@ -32,7 +32,7 @@ To see a full example of creating an application and exposing it with a route, s
 
 In case the service you want to expose is not HTTP based, you can create a link:https://docs.openshift.org/latest/architecture/core_concepts/pods_and_services.html#service-nodeport[*NodePort*] service.
 In this case, each OpenShift node will proxy that port into your service.
-To access this port on your {project} VM, you need to configure an Ingress IP using `oc expose` with the parameter `type=LoadBalancer`.
+To access this port on your {project} VM, you need to configure an link:https://docs.openshift.org/latest/dev_guide/expose_service/expose_internal_ip_nodeport.html[Ingress IP] using `oc expose` with the parameter `type=LoadBalancer`.
 
 A common use-case for Ingress IP Self-Service is the ability to expose a database service.
 The following example shows the complete workflow to create and expose a link:https://mariadb.org[MariaDB] instance using {project}:
@@ -53,7 +53,7 @@ ports:
 After the service is exposed, you can access MariaDB with the `mysql` CLI using the {project} VM IP and the exposed NodePort service.
 
 ----
-$ mysql --user=root --password=foo --host=$(minishift ip) --port=30907
+$ mysql --user=root --password=admin --host=$(minishift ip) --port=30907
 ----
 
 [[port-forwarding]]

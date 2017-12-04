@@ -297,10 +297,10 @@ function perform_docs_publish() {
   REPO_OWNER=$(echo $REPO | cut -d"/" -f4)
   cd gopath/src/github.com/minishift/minishift
 
-  git checkout master
-  git checkout -b docs-branch
-  git pull -f $REPO $BRANCH # Get changes from remote repo/branch
-  git log -n 1              # Display last commit in log as reference
+  git remote add remote-repo $REPO
+  git fetch remote-repo
+  git checkout -b docs-branch --track remote-repo/$BRANCH
+  git log -n 1 # Display last commit in log as reference
 
   install_docs_prerequisite_packages;
   make gen_adoc_tar

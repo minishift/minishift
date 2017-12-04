@@ -232,4 +232,5 @@ fmtcheck:
 
 .PHONY: validate_commits
 validate_commits: $(GOPATH)/bin/git-validation
-	git-validation -q -run short-subject,message_regexp='(Issue #[0-9]+ .*|cut v[0-9]+.[0-9]+.[0-9]+)' -range $(START_COMMIT_MESSAGE_VALIDATION)...
+	@# Need to add $$ to avoid shell interpretation/evaluation
+	git-validation -q -run short-subject,message_regexp='^(Issue #[0-9]+ .*|cut v[0-9]+.[0-9]+.[0-9]+)$$' -range $(START_COMMIT_MESSAGE_VALIDATION)...

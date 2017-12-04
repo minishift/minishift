@@ -35,10 +35,10 @@ dependencies:
 ## Customize test commands
 test:
     override:
-        - make prerelease:
+        - make validate_commits:
                 pwd:
                     ../src/github.com/minishift/minishift
-        - make validate_commits:
+        - make prerelease:
                 pwd:
                     ../src/github.com/minishift/minishift
 

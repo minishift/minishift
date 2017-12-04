@@ -19,7 +19,7 @@ install:
 - export PATH=$PATH:/tmp/godep/
 
 script:
-- make prerelease
+- make validate_commits prerelease
 
 notifications:
   webhooks: http://minibot.19cf262c.svc.dockerapp.io:9009/hubot/travis-ci

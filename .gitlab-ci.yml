@@ -13,7 +13,7 @@ build:
     - mkdir -p $HOME/gopath/src/github.com/minishift
     - ln -s $CURRENT_BUILD_PATH $HOME/gopath/src/github.com/minishift/minishift
     - cd $HOME/gopath/src/github.com/minishift/minishift/
-    - make prerelease
+    - make validate_commits prerelease
     - rm -rf $HOME/gopath/src/github.com/minishift/minishift/out/bindata
     - mv $HOME/gopath/src/github.com/minishift/minishift/out/ $CURRENT_BUILD_PATH/public
   artifacts:

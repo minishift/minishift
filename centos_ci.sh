@@ -162,6 +162,12 @@ function install_docs_prerequisite_packages() {
   echo "CICO: Ascii Binder Installed"
 }
 
+########################################################
+# Exit with message on failure of last executed command
+# Arguments:
+#   $1 - Exit code of last executed command
+#   $2 - Error message
+########################################################
 function exit_on_failure() {
   if [[ "$1" != 0 ]]; then
     echo "$2"
@@ -182,7 +188,7 @@ function build_openshift_origin_docs() {
   cd ..
 }
 
-function artifacts_upload_on_pr_and_master_trigger() {
+function perform_artifacts_upload() {
   set +x
   # For PR build, GIT_BRANCH is set to branch name other than origin/master
   if [[ "$GIT_BRANCH" = "origin/master" ]]; then
@@ -255,10 +261,39 @@ function setup_build_environment() {
   runuser -l minishift_ci -c "/bin/bash centos_ci.sh"
 }
 
-function perform_release() {
-  setup_kvm_docker_machine_driver; # Required for integeration tests
-  cd gopath/src/github.com/minishift/minishift
+#######################################################################
+# Publish Minishift documentation after integrating it with
+# OpenShift documentation
+# Arguments:
+#   $1 - Repo Owner
+#   $2 - Branch name
+#   $3 - Location on the artifact server where documentation is hosted
+######################################################################
+function perform_docs_publish() {
+  REPO="https://github.com/$1/minishift"
 
+  git remote add remote-repo $REPO
+  git fetch remote-repo
+  git checkout -b docs-branch --track remote-repo/$2
+  git log -n 1 # Display last commit in log as reference
+
+  install_docs_prerequisite_packages;
+  make gen_adoc_tar
+  build_openshift_origin_docs $(pwd)/docs/build/minishift-adoc.tar;
+
+  mkdir -p $3
+  cp -r openshift-docs/_preview/openshift-origin $3/ # Copy the openshift-origin
+  # http://stackoverflow.com/a/22908437/1120530; Using --relative as --rsync-path not working
+  RSYNC_PASSWORD=$RSYNC_PASSWORD rsync -av --delete --relative $3/ minishift@artifacts.ci.centos.org::minishift/
+  echo "Minishift documentation is hosted at http://artifacts.ci.centos.org/minishift/$3/openshift-origin/latest/minishift/index.html"
+}
+
+function prepare_for_proxy() {
+  export INTEGRATION_PROXY_CUSTOM_PORT=8181 # needs to be an unused port
+  firewall-cmd --zone=public --add-port=$INTEGRATION_PROXY_CUSTOM_PORT/tcp;
+}
+
+function perform_release() {
   # Test everything before bumping the version
   make prerelease
   exit_on_failure "$?" "Pre-release tests failed."
@@ -292,50 +327,22 @@ function perform_release() {
   curl http://minibot.19cf262c.svc.dockerapp.io:9009/hubot/centosci -H "Content-Type: application/json" -d '{"payload":{"status":"success","message":'"\"$MESSAGE\""',"url":'"\"$URL\""'}}' || true
 }
 
-function perform_docs_publish() {
-  # REPO and BRANCH variables are populated via https://ci.centos.org/job/minishift-docs
-  REPO_OWNER=$(echo $REPO | cut -d"/" -f4)
-  cd gopath/src/github.com/minishift/minishift
-
-  git remote add remote-repo $REPO
-  git fetch remote-repo
-  git checkout -b docs-branch --track remote-repo/$BRANCH
-  git log -n 1 # Display last commit in log as reference
-
-  install_docs_prerequisite_packages;
-  make gen_adoc_tar
-  build_openshift_origin_docs $(pwd)/docs/build/minishift-adoc.tar;
-
-  mkdir -p minishift/docs/ondemand/$REPO_OWNER-$BRANCH
-  cp -r openshift-docs/_preview/openshift-origin minishift/docs/ondemand/$REPO_OWNER-$BRANCH/ # Copy the openshift-origin
-  cp docs/build/minishift-adoc.tar minishift/docs/ondemand/$REPO_OWNER-$BRANCH/ # Copy doc tar
-  # http://stackoverflow.com/a/22908437/1120530; Using --relative as --rsync-path not working
-  RSYNC_PASSWORD=$RSYNC_PASSWORD rsync -av --delete --relative minishift/docs/ondemand/$REPO_OWNER-$BRANCH/ minishift@artifacts.ci.centos.org::minishift/
-  echo "Find docs tar here http://artifacts.ci.centos.org/minishift/minishift/docs/ondemand/$REPO_OWNER-$BRANCH/"
-  echo "Minishift documentation is hosted at http://artifacts.ci.centos.org/minishift/minishift/docs/ondemand/$REPO_OWNER-$BRANCH/openshift-origin/latest/minishift/index.html"
-}
-
-function build_and_test() {
-  setup_kvm_docker_machine_driver;
-  cd $GOPATH/src/github.com/minishift/minishift
+function perform_pr() {
   make prerelease synopsis_docs link_check_docs
-  # Run integration test with 'kvm' driver
   MINISHIFT_VM_DRIVER=kvm make integration_pr
-  echo "CICO: Tests ran successfully"
-  artifacts_upload_on_pr_and_master_trigger $1;
+  perform_artifacts_upload $1;
 }
 
-function prepare_for_proxy() {
-  export INTEGRATION_PROXY_CUSTOM_PORT=8181 #needs to be an unused port
-  firewall-cmd --zone=public --add-port=$INTEGRATION_PROXY_CUSTOM_PORT/tcp;
+function perform_master() {
+  make prerelease synopsis_docs link_check_docs
+  MINISHIFT_VM_DRIVER=kvm make integration_all
+  perform_docs_publish "minishift" "master" "minishift/docs/master";
+  perform_artifacts_upload $1;
 }
 
 function perform_nightly() {
-  setup_kvm_docker_machine_driver;
-  cd $GOPATH/src/github.com/minishift/minishift
   make prerelease synopsis_docs link_check_docs
   MINISHIFT_VM_DRIVER=kvm make integration_all
-  echo "CICO: Tests ran successfully"
 }
 
 if [[ "$UID" = 0 ]]; then
@@ -353,14 +360,21 @@ else
   export GITHUB_ACCESS_TOKEN=$GITHUB_TOKEN
 
   prepare_repo;
+  setup_kvm_docker_machine_driver;
+  # Navigate to the repo
+  cd $GOPATH/src/github.com/minishift/minishift
 
   if [[ "$JOB_NAME" = "minishift-docs" ]]; then
-    perform_docs_publish;
+    # REPO and BRANCH variables are populated via https://ci.centos.org/job/minishift-docs
+    REPO_OWNER=$(echo $REPO | cut -d"/" -f4)
+    perform_docs_publish "$REPO_OWNER" "$BRANCH" "minishift/docs/ondemand/$REPO_OWNER-$BRANCH";
   elif [[ "$JOB_NAME" = "minishift-release" ]]; then
     perform_release $RSYNC_PASSWORD;
   elif [[ "$JOB_NAME" = "minishift-nightly" ]]; then
     perform_nightly;
-  else
-    build_and_test $RSYNC_PASSWORD;
+  elif [[ "$JOB_NAME" = "minishift" ]]; then # Master job
+    perform_master $RSYNC_PASSWORD;
+  else # PR job
+    perform_pr $RSYNC_PASSWORD;
   fi
 fi

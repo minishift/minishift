@@ -39,6 +39,8 @@ Thus it is used to run integration tests in addition to unit tests.
 The artifacts of a successful master build can be found at link:http://artifacts.ci.centos.org/minishift/minishift/master/[artifacts.ci.centos.org/minishift/minishift/master/<BUILD_ID>].
 The artifacts of a successful pull request build can be found at link:http://artifacts.ci.centos.org/minishift/minishift/pr/[artifacts.ci.centos.org/minishift/minishift/pr/<PR_ID>].
 
+As part of master build, {project} documentation which is compiled from the _master_ branch and integrated with OpenShift documentation is hosted at link:http://artifacts.ci.centos.org/minishift/minishift/docs/master/openshift-origin/latest/minishift/index.html[artifacts.ci.centos.org/minishift/minishift/docs/master/openshift-origin/latest/minishift/].
+
 On top of building the master branch and pull requests, CentOS CI is also used to build the tar bundle used for xref:../contributing/writing-docs.adoc#integration-with-docs-openshift-org[integration with docs.openshift.org], as well as to build xref:../contributing/releasing.adoc#automated-release[releases].
 
 The link:https://ci.centos.org/job/minishift-nightly[nightly job] runs daily at midnight.

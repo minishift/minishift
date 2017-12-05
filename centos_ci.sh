@@ -318,7 +318,7 @@ function perform_docs_publish() {
 function build_and_test() {
   setup_kvm_docker_machine_driver;
   cd $GOPATH/src/github.com/minishift/minishift
-  make prerelease synopsis_docs link_check_docs
+  make validate_commits prerelease synopsis_docs link_check_docs
   # Run integration test with 'kvm' driver
   MINISHIFT_VM_DRIVER=kvm make integration_pr
   echo "CICO: Tests ran successfully"

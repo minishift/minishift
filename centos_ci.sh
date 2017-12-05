@@ -334,7 +334,7 @@ function perform_nightly() {
   setup_kvm_docker_machine_driver;
   cd $GOPATH/src/github.com/minishift/minishift
   make prerelease synopsis_docs link_check_docs
-  MINISHIFT_VM_DRIVER=kvm make integration_all GODOG_OPTS=""
+  MINISHIFT_VM_DRIVER=kvm make integration_all
   echo "CICO: Tests ran successfully"
 }
 

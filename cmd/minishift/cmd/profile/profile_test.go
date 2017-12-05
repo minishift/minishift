@@ -19,7 +19,7 @@ package profile
 import (
 	"testing"
 
-	"github.com/minishift/minishift/pkg/testing/cli"
+	"github.com/minishift/minishift/cmd/testing/cli"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 )
 
@@ -29,13 +29,7 @@ func Test_validate_args_exit_when_profilename_empty(t *testing.T) {
 	expectedOut := emptyProfileMessage
 
 	atexit.RegisterExitHandler(cli.VerifyExitCodeAndMessage(t, tee, 1, expectedOut))
-
 	validateArgs([]string{" "})
-
-	actualOut := tee.StdoutBuffer.String()
-	if expectedOut != actualOut {
-		t.Fatalf("Expected output '%s'. Got '%s'.", expectedOut, actualOut)
-	}
 }
 
 func Test_validate_args_exit_when_no_profilename(t *testing.T) {
@@ -45,13 +39,7 @@ func Test_validate_args_exit_when_no_profilename(t *testing.T) {
 	expectedOut := emptyProfileMessage
 
 	atexit.RegisterExitHandler(cli.VerifyExitCodeAndMessage(t, tee, 1, expectedOut))
-
 	validateArgs([]string{})
-
-	actualOut := tee.StdoutBuffer.String()
-	if expectedOut != actualOut {
-		t.Fatalf("Expeceted output '%s'. Got '%s'.", expectedOut, actualOut)
-	}
 }
 
 func Test_validate_args_exit_when_more_then_one_args(t *testing.T) {
@@ -61,11 +49,5 @@ func Test_validate_args_exit_when_more_then_one_args(t *testing.T) {
 	expectedOut := extraArgumentMessage
 
 	atexit.RegisterExitHandler(cli.VerifyExitCodeAndMessage(t, tee, 1, expectedOut))
-
 	validateArgs([]string{"foo", "bar", "baz"})
-
-	actualOut := tee.StdoutBuffer.String()
-	if expectedOut != actualOut {
-		t.Fatalf("Expeceted output '%s'. Got '%s'.", expectedOut, actualOut)
-	}
 }

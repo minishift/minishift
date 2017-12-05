@@ -19,7 +19,7 @@ package config
 import (
 	"testing"
 
-	"github.com/minishift/minishift/pkg/testing/cli"
+	"github.com/minishift/minishift/cmd/testing/cli"
 )
 
 type templateExpectedOutputTest struct {

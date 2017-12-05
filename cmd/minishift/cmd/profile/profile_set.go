@@ -59,7 +59,7 @@ func runProfile(cmd *cobra.Command, args []string) {
 		if err != nil {
 			if glog.V(2) {
 				fmt.Println(fmt.Sprintf("%s", err.Error()))
-				fmt.Println(fmt.Sprintf("oc cli context could not changed for '%s'.", profileName))
+				fmt.Println(fmt.Sprintf("oc testing.cli context could not changed for '%s'.", profileName))
 			}
 		}
 	} else {

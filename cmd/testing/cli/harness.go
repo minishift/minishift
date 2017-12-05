@@ -23,6 +23,8 @@ import (
 	"testing"
 
 	"fmt"
+	"github.com/minishift/minishift/cmd/minishift/state"
+	pkgTesting "github.com/minishift/minishift/pkg/testing"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/viper"
 )
@@ -31,19 +33,20 @@ import (
 // It returns the path to this tmp directory
 func SetupTmpMinishiftHome(t *testing.T) string {
 	var err error
-	testDir, err := ioutil.TempDir("", "minishift-tmp-test-dir-")
+	tmpDir, err := ioutil.TempDir("", "minishift-tmp-test-dir-")
 	if err != nil {
 		t.Fatal(err)
 	}
-	os.Setenv("MINISHIFT_HOME", testDir)
+	os.Setenv("MINISHIFT_HOME", tmpDir)
+	state.InstanceDirs = state.NewMinishiftDirs(tmpDir)
 
-	return testDir
+	return tmpDir
 }
 
 // CreateTee splits the stdout and stderr in order to capture these streams into a buffer
 // during test execution. If silent is true, the original output streams are silenced.
-func CreateTee(t *testing.T, silent bool) *Tee {
-	tee, err := NewTee(silent)
+func CreateTee(t *testing.T, silent bool) *pkgTesting.Tee {
+	tee, err := pkgTesting.NewTee(silent)
 	if err != nil {
 		t.Fatalf("Unexpected error during setup: %s", err.Error())
 	}
@@ -52,7 +55,7 @@ func CreateTee(t *testing.T, silent bool) *Tee {
 
 // VerifyExitCodeAndMessage creates an exit handler which verifies that the program will try to exit execution with the specified
 // exit code and message.
-func VerifyExitCodeAndMessage(t *testing.T, tee *Tee, expectedExitCode int, expectedErrorMessage string) func(int) bool {
+func VerifyExitCodeAndMessage(t *testing.T, tee *pkgTesting.Tee, expectedExitCode int, expectedErrorMessage string) func(int) bool {
 	var exitHandler func(int) bool
 	exitHandler = func(code int) bool {
 		tee.Close()
@@ -87,7 +90,7 @@ func PreventExitWithNonZeroExitCode(t *testing.T) func(int) bool {
 	return exitHandler
 }
 
-func TearDown(testDir string, tee *Tee) {
+func TearDown(testDir string, tee *pkgTesting.Tee) {
 	os.Unsetenv("MINISHIFT_HOME")
 	if tee != nil {
 		tee.Close()
@@ -100,5 +103,37 @@ func TearDown(testDir string, tee *Tee) {
 		if reason != atexit.ExitHandlerPanicMessage {
 			fmt.Println("Recovered from panic:", r)
 		}
+	}
+}
+
+// PrepareStdinResponse creates a temproary file with a prepared content which then is used as os.Stdin to test user input.
+// The orignal os.Stdin file handle is returned as well as the path of the file containing the canned stdin responses.
+func PrepareStdinResponse(s string, t *testing.T) (*os.File, string) {
+	content := []byte(s)
+	tmpfile, err := ioutil.TempFile("", "minishift-test-input")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := tmpfile.Write(content); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := tmpfile.Seek(0, 0); err != nil {
+		t.Fatal(err)
+	}
+
+	origStdin := os.Stdin
+	os.Stdin = tmpfile
+
+	return origStdin, tmpfile.Name()
+
+}
+
+// ResetStdin resets os.Stdin to the specified original file handle. It also deletes a potenitally created tmp file containing dummy stdin data.
+func ResetStdin(origStdin *os.File, tmpFile string) {
+	os.Stdin = origStdin
+	if tmpFile != "" {
+		os.Remove(tmpFile)
 	}
 }

@@ -20,8 +20,8 @@ import (
 	"testing"
 
 	"fmt"
+	"github.com/minishift/minishift/cmd/testing/cli"
 	"github.com/minishift/minishift/pkg/minikube/constants"
-	"github.com/minishift/minishift/pkg/testing/cli"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"io/ioutil"
 	"os"

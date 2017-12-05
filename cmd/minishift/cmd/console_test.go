@@ -17,7 +17,7 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/minishift/minishift/pkg/testing/cli"
+	"github.com/minishift/minishift/cmd/testing/cli"
 	"strings"
 	"testing"
 )

@@ -367,6 +367,11 @@ Each commit message must meet two requirements:
 
 The Makefile contains a `validate_commits` target which can be used to verify these requirements:
 
+[NOTE]
+====
+Currently, only xref:../contributing/ci.adoc#ci-system-summary[Circle CI] validates the commit message as part of the CI build.
+====
+
 ----
 $ make validate_commits
 ----

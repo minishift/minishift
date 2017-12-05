@@ -28,9 +28,9 @@ import (
 	"path/filepath"
 
 	"github.com/minishift/minishift/cmd/minishift/state"
+	"github.com/minishift/minishift/cmd/testing/cli"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
-	"github.com/minishift/minishift/pkg/testing/cli"
 )
 
 var configTests = []cli.TestOption{

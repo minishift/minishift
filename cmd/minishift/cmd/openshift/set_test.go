@@ -21,7 +21,7 @@ import (
 
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 
-	"github.com/minishift/minishift/pkg/testing/cli"
+	"github.com/minishift/minishift/cmd/testing/cli"
 )
 
 func Test_unknown_patch_target_aborts_command(t *testing.T) {

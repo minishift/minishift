@@ -34,11 +34,12 @@ import (
 
 	"bytes"
 
+	"github.com/minishift/minishift/cmd/testing/cli"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minikube/tests"
 	"github.com/minishift/minishift/pkg/minishift/clusterup"
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
-	"github.com/minishift/minishift/pkg/testing/cli"
+	pkgTest "github.com/minishift/minishift/pkg/testing"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/viper"
 )
@@ -138,7 +139,7 @@ var (
 	}
 	testDir    string
 	testRunner *RecordingRunner
-	tee        *cli.Tee
+	tee        *pkgTest.Tee
 )
 
 func TestStartClusterUpNoFlags(t *testing.T) {

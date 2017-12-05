@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/minishift/minishift/pkg/testing/cli"
+	pkgTesting "github.com/minishift/minishift/pkg/testing"
 )
 
 func Test_echo_command(t *testing.T) {
@@ -51,7 +51,7 @@ func Test_echo_command(t *testing.T) {
 	}
 
 	for _, test := range testCases {
-		tee, err := cli.NewTee(true)
+		tee, err := pkgTesting.NewTee(true)
 		defer tee.Close()
 
 		if err != nil {

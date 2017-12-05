@@ -22,7 +22,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/minishift/minishift/pkg/testing/cli"
+	"github.com/minishift/minishift/cmd/testing/cli"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 )
 
@@ -48,9 +48,4 @@ func Test_unknown_name_for_disable_command_returns_error(t *testing.T) {
 	atexit.RegisterExitHandler(cli.VerifyExitCodeAndMessage(t, tee, 0, expectedOut))
 
 	runDisableAddon(nil, []string{testAddOnName})
-
-	actualOut := tee.StdoutBuffer.String()
-	if expectedOut != actualOut {
-		t.Fatalf("Expected output '%s'. Got '%s'.", expectedOut, actualOut)
-	}
 }

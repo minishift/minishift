@@ -19,7 +19,7 @@ package image
 import (
 	"testing"
 
-	"github.com/minishift/minishift/pkg/testing/cli"
+	"github.com/minishift/minishift/cmd/testing/cli"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 )
 
@@ -29,13 +29,7 @@ func Test_no_images_to_import(t *testing.T) {
 	expectedOut := noCachedImagesSpecified
 
 	atexit.RegisterExitHandler(cli.VerifyExitCodeAndMessage(t, tee, 0, expectedOut))
-
 	importImage(nil, nil)
-
-	actualOut := tee.StdoutBuffer.String()
-	if expectedOut != actualOut {
-		t.Fatalf("Expected output '%s'. Got '%s'.", expectedOut, actualOut)
-	}
 }
 
 func Test_no_images_cached(t *testing.T) {
@@ -47,11 +41,5 @@ func Test_no_images_cached(t *testing.T) {
 	expectedOut := noCachedImages
 
 	atexit.RegisterExitHandler(cli.VerifyExitCodeAndMessage(t, tee, 0, expectedOut))
-
 	importImage(nil, nil)
-
-	actualOut := tee.StdoutBuffer.String()
-	if expectedOut != actualOut {
-		t.Fatalf("Expected output '%s'. Got '%s'.", expectedOut, actualOut)
-	}
 }

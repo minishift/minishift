@@ -179,5 +179,3 @@ Feature: Basic
     Given Minishift has state "Stopped"
      When executing "minishift delete --force --clear-cache" succeeds
      Then Minishift should have state "Does Not Exist"
-     When executing "minishift ip"
-     Then exitcode should equal "1"

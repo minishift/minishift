@@ -42,57 +42,71 @@ var (
 		Run:   runDelete,
 	}
 
-	forceMachineDeletion bool
-	clearCache           bool
+	forceFlag      bool
+	clearCacheFlag bool
 )
 
 func runDelete(cmd *cobra.Command, args []string) {
+	if clearCacheFlag {
+		clearCache()
+	}
+
 	api := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
 	defer api.Close()
 
-	util.ExitIfUndefined(api, constants.MachineName)
-
-	if !forceMachineDeletion {
-		hasConfirmed := pkgUtil.AskForConfirmation(fmt.Sprintf("You are deleting the Minishift VM: '%s'.", constants.MachineName))
-		if !hasConfirmed {
-			atexit.Exit(1)
-		}
+	if !util.VMExists(api, constants.MachineName) {
+		atexit.Exit(0)
 	}
 
-	if clearCache {
-		cachePath := state.InstanceDirs.Cache
-		err := os.RemoveAll(cachePath)
-		if err != nil {
-			atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting Minishift cache: %v", err))
-		} else {
-			fmt.Printf("Removed the cache at: %s\n", cachePath)
+	util.ExitIfUndefined(api, constants.MachineName)
+
+	if !forceFlag {
+		hasConfirmed := pkgUtil.AskForConfirmation(fmt.Sprintf("You are deleting the Minishift VM: '%s'.", constants.MachineName))
+		if !hasConfirmed {
+			atexit.Exit(0)
 		}
 	}
 
 	// Unregistration, do not allow to be skipped
-	registrationUtil.UnregisterHost(api, false, forceMachineDeletion)
+	registrationUtil.UnregisterHost(api, false, forceFlag)
 	fmt.Println("Deleting the Minishift VM...")
 	if err := cluster.DeleteHost(api); err != nil {
 		handleFailedHostDeletion(err)
 	}
 
-	removeInstanceConfigs()
+	removeInstanceAndKubeConfig()
 
 	fmt.Println("Minishift VM deleted.")
 }
 
+func clearCache() {
+	if !forceFlag {
+		hasConfirmed := pkgUtil.AskForConfirmation("This will delete the cache content for all profiles.")
+		if !hasConfirmed {
+			return
+		}
+	}
+	cachePath := state.InstanceDirs.Cache
+	err := os.RemoveAll(cachePath)
+	if err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting Minishift cache: %v", err))
+	} else {
+		fmt.Printf("Removed cache content at: %s\n", cachePath)
+	}
+}
+
 func handleFailedHostDeletion(err error) {
-	if forceMachineDeletion {
-		err := os.RemoveAll(constants.MakeMiniPath("machines"))
+	if forceFlag {
+		err := os.RemoveAll(state.InstanceDirs.Machines)
 		if err != nil {
-			atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting '%s': %v", constants.MakeMiniPath("machines"), err))
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting '%s': %v", state.InstanceDirs.Machines, err))
 		}
 	} else {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting the Minishift VM: %v", err))
 	}
 }
 
-func removeInstanceConfigs() {
+func removeInstanceAndKubeConfig() {
 	exists := filehelper.Exists(minishiftConfig.InstanceConfig.FilePath)
 	if exists {
 		if err := minishiftConfig.InstanceConfig.Delete(); err != nil {
@@ -108,7 +122,7 @@ func removeInstanceConfigs() {
 }
 
 func init() {
-	deleteCmd.Flags().BoolVarP(&forceMachineDeletion, "force", "f", false, "Forces the deletion of the VM specific files in MINISHIFT_HOME.")
-	deleteCmd.Flags().BoolVar(&clearCache, "clear-cache", false, "Deletes all cached artifacts as part of the VM deletion.")
+	deleteCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Forces the deletion of the VM specific files in MINISHIFT_HOME.")
+	deleteCmd.Flags().BoolVar(&clearCacheFlag, "clear-cache", false, "Deletes all cached content. This affects all profiles.")
 	RootCmd.AddCommand(deleteCmd)
 }

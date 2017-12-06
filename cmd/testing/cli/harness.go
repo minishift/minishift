@@ -56,8 +56,7 @@ func CreateTee(t *testing.T, silent bool) *pkgTesting.Tee {
 // VerifyExitCodeAndMessage creates an exit handler which verifies that the program will try to exit execution with the specified
 // exit code and message.
 func VerifyExitCodeAndMessage(t *testing.T, tee *pkgTesting.Tee, expectedExitCode int, expectedErrorMessage string) func(int) bool {
-	var exitHandler func(int) bool
-	exitHandler = func(code int) bool {
+	exitHandler := func(code int) bool {
 		tee.Close()
 
 		var actualOutput string
@@ -83,9 +82,17 @@ func VerifyExitCodeAndMessage(t *testing.T, tee *pkgTesting.Tee, expectedExitCod
 // PreventExitWithNonZeroReturn creates an exit handler function which will cast a veto when the program tries to call os.Exit with a non
 // zero exit code. This is useful to prevent a test from exiting early due to failing validation check.
 func PreventExitWithNonZeroExitCode(t *testing.T) func(int) bool {
-	var exitHandler func(int) bool
-	exitHandler = func(code int) bool {
+	exitHandler := func(code int) bool {
 		return code != 0
+	}
+	return exitHandler
+}
+
+// PreventAtExit prevents an early/unexpected termination via atexit.
+func PreventAtExit(t *testing.T) func(int) bool {
+	exitHandler := func(code int) bool {
+		t.Fatal("The called method unexpectedly called atexit.")
+		return true
 	}
 	return exitHandler
 }

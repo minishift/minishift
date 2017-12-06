@@ -42,7 +42,6 @@ import (
 
 	"github.com/minishift/minishift/pkg/util"
 	minishiftStrings "github.com/minishift/minishift/pkg/util/strings"
-	"github.com/minishift/minishift/pkg/version"
 )
 
 const (
@@ -165,12 +164,13 @@ func EnsureHostDirectoriesExist(host *host.Host, dirs []string) error {
 }
 
 // DetermineOcVersion returns the oc version to use.
-// If the requested version is < the base line version we use baseline oc to provision the requested OpenShift version.
-// If the requested OpenShift version is >= the baseline, we align the oc version with the requested OpenShift version.
+// If the requested version is < v3.7.0 we will use oc binary v3.6.0 to provision the requested OpenShift version.
+// If the requested OpenShift version is >= v3.7.0, we align the oc version with the requested OpenShift version.
+// Check Minishift github issue #1417 for details.
 func DetermineOcVersion(requestedVersion string) string {
-	valid, _ := ValidateOpenshiftMinVersion(requestedVersion, version.GetOpenShiftVersion())
+	valid, _ := ValidateOpenshiftMinVersion(requestedVersion, constants.BackwardIncompatibleOcVersion)
 	if !valid {
-		requestedVersion = version.GetOpenShiftVersion()
+		requestedVersion = constants.MinimumOcBinaryVersion
 	}
 
 	return requestedVersion

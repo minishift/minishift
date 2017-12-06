@@ -18,10 +18,11 @@ package clusterup
 
 import (
 	"fmt"
-	utilStrings "github.com/minishift/minishift/pkg/util/strings"
-	"github.com/pkg/errors"
 	"os"
 	"testing"
+
+	utilStrings "github.com/minishift/minishift/pkg/util/strings"
+	"github.com/pkg/errors"
 )
 
 func Test_validate_openshift_min_versions(t *testing.T) {
@@ -57,6 +58,23 @@ func Test_validate_openshift_min_versions(t *testing.T) {
 
 		if valid != versionTest.valid {
 			t.Fatalf("Expected '%t' Got '%t' for %s", versionTest.valid, valid, versionTest.version)
+		}
+	}
+}
+
+func Test_DetermineOcVersion(t *testing.T) {
+	var versionTests = []struct {
+		inputVersion string
+		outVersion   string
+	}{
+		{"v1.5.0", "v3.6.0"},
+		{"v3.6.0", "v3.6.0"},
+		{"v3.7.0", "v3.7.0"},
+	}
+	for _, version := range versionTests {
+		actualOcVersion := DetermineOcVersion(version.inputVersion)
+		if actualOcVersion != version.outVersion {
+			t.Fatalf("Expected '%s' Got '%s'", version.outVersion, actualOcVersion)
 		}
 	}
 }

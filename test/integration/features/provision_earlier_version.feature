@@ -11,6 +11,12 @@ Feature: Provision an older major release
      """
      openshift v1.5.1
      """
+      And JSON config file "machines/minishift.json" contains key "OcPath" with value matching "v3.6.0"
+     When executing "minishift oc-env" succeeds
+     Then stdout should contain
+      """
+      v3.6.0
+      """
 
   Scenario: OpenShift is ready after startup
     After startup of Minishift OpenShift instance should respond correctly on its HTML endpoints

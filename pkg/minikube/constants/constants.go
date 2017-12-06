@@ -25,17 +25,19 @@ import (
 )
 
 const (
-	APIServerPort                = 8443             // Port that the API server should listen on
-	MiniShiftEnvPrefix           = "MINISHIFT"      // Prefix for the environmental variables
-	MiniShiftHomeEnv             = "MINISHIFT_HOME" // Environment variable used to change the Minishift home directory
-	VersionPrefix                = "v"
-	MinOpenshiftSupportedVersion = "v1.4.1"
-	DefaultMemory                = "2GB"
-	DefaultCPUS                  = 2
-	DefaultDiskSize              = "20GB"
-	UpdateMarkerFileName         = "updated"
-	DefaultMachineName           = "minishift"
-	DefaultProfileName           = "minishift"
+	APIServerPort                 = 8443             // Port that the API server should listen on
+	MiniShiftEnvPrefix            = "MINISHIFT"      // Prefix for the environmental variables
+	MiniShiftHomeEnv              = "MINISHIFT_HOME" // Environment variable used to change the Minishift home directory
+	VersionPrefix                 = "v"
+	MinOpenshiftSupportedVersion  = "v1.4.1"
+	MinimumOcBinaryVersion        = "v3.6.0" // For provisioning OpenShift versions < v3.7.0 , we need to use oc v3.6.0. Refer #1417
+	BackwardIncompatibleOcVersion = "v3.7.0" // From v3.7.0 oc binary will not provision older versions of OpenShift instance
+	DefaultMemory                 = "2GB"
+	DefaultCPUS                   = 2
+	DefaultDiskSize               = "20GB"
+	UpdateMarkerFileName          = "updated"
+	DefaultMachineName            = "minishift"
+	DefaultProfileName            = "minishift"
 )
 
 var (

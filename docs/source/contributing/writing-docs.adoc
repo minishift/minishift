@@ -170,7 +170,7 @@ To view {project} documentation integrated into the OpenShift documentation usin
 $ export API_KEY=<api-key>
 $ export REPO=<user-repo>
 $ export BRANCH=<docs-branch>
-$ curl -H "$(curl --user minishift:$API_KEY 'https://ci.centos.org//crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)')" -X POST https://ci.centos.org/job/minishift-docs/build --user "minishift:$API_KEY" --data-urlencode json='{"parameter": [{"name":"REPO", "value":"$REPO"}, {"name":"BRANCH", "value":"$BRANCH"}]}'
+$ curl -H "$(curl --user minishift:$API_KEY 'https://ci.centos.org//crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)')" -X POST https://ci.centos.org/job/minishift-docs/build --user "minishift:$API_KEY" --data-urlencode json='{"parameter": [{"name":"REPO", "value":"'$REPO'"}, {"name":"BRANCH", "value":"'$BRANCH'"}]}'
 ----
 
 where

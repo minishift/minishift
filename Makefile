@@ -36,6 +36,9 @@ TIMEOUT ?= 3600s
 PACKAGES := go list ./... | grep -v /vendor | grep -v /out
 SOURCE_DIRS = cmd pkg test
 
+# defines non-default shell name to be used in godog steps which use instance of shell
+TEST_WITH_SPECIFIED_SHELL ?=
+
 # Linker flags
 VERSION_VARIABLES := -X $(REPOPATH)/pkg/version.minishiftVersion=$(MINISHIFT_VERSION) \
 	-X $(REPOPATH)/pkg/version.b2dIsoVersion=$(B2D_ISO_VERSION) \
@@ -202,21 +205,21 @@ integration: GODOG_OPTS = --tags=basic
 integration: $(MINISHIFT_BINARY)
 	mkdir -p $(INTEGRATION_TEST_DIR)
 	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) \
-	--run-before-feature="$(RUN_BEFORE_FEATURE)" $(GODOG_OPTS)
+	--run-before-feature="$(RUN_BEFORE_FEATURE)" --test-with-specified-shell="$(TEST_WITH_SPECIFIED_SHELL)" $(GODOG_OPTS)
 
 .PHONY: integration_all
 integration_all: GODOG_OPTS = --tags=~coolstore
 integration_all: $(MINISHIFT_BINARY)
 	mkdir -p $(INTEGRATION_TEST_DIR)
 	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) \
-	--run-before-feature="$(RUN_BEFORE_FEATURE)" $(GODOG_OPTS)
+	--run-before-feature="$(RUN_BEFORE_FEATURE)" --test-with-specified-shell="$(TEST_WITH_SPECIFIED_SHELL)" $(GODOG_OPTS)
 
 .PHONY: integration_pr
 integration_pr: GODOG_OPTS = --tags=~coolstore\&\&~addon-xpaas
 integration_pr: $(MINISHIFT_BINARY)
 	mkdir -p $(INTEGRATION_TEST_DIR)
 	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) \
-	--run-before-feature="$(RUN_BEFORE_FEATURE)" $(GODOG_OPTS)
+	--run-before-feature="$(RUN_BEFORE_FEATURE)" --test-with-specified-shell="$(TEST_WITH_SPECIFIED_SHELL)" $(GODOG_OPTS)
 
 .PHONY: fmt
 fmt:

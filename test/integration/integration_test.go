@@ -55,6 +55,7 @@ var (
 	isoName       string
 
 	runBeforeFeature string
+	testWithShell    string
 
 	// Godog options
 	godogFormat              string
@@ -120,6 +121,7 @@ func parseFlags() {
 	flag.StringVar(&minishiftArgs, "minishift-args", "", "Arguments to pass to minishift")
 	flag.StringVar(&minishiftBinary, "binary", "", "Path to minishift binary")
 	flag.StringVar(&runBeforeFeature, "run-before-feature", "", "Set of minishift commands to be executed before every feature. Individual commands must be delimited by a semicolon.")
+	flag.StringVar(&testWithShell, "test-with-specified-shell", "", "Name of shell to be used for steps which executes commands directly in persistent shell instance.")
 	flag.StringVar(&testDir, "test-dir", "", "Path to the directory in which to execute the tests")
 
 	flag.StringVar(&godogFormat, "format", "pretty", "Sets which format godog will use")
@@ -184,6 +186,8 @@ func FeatureContext(s *godog.Suite) {
 	// steps for scenario variables
 	s.Step(`^setting scenario variable "(.*)" to the stdout from executing "oc (.*)"$`,
 		minishift.setVariableExecutingOcCommand)
+	s.Step(`^setting scenario variable "(.*)" to the stdout from executing "minishift (.*)"$`,
+		minishift.setVariableExecutingMinishiftCommand)
 	s.Step(`^scenario variable "(.*)" should not be empty$`,
 		variableShouldNotBeEmpty)
 
@@ -256,6 +260,34 @@ func FeatureContext(s *godog.Suite) {
 	// steps for download of minishift-addons repository
 	s.Step(`^file from "(.*)" is downloaded into location "(.*)"$`,
 		downloadFileIntoLocation)
+
+	// steps for executing commands in shell
+	s.Step(`^user starts shell instance on host machine$`,
+		startHostShellInstance)
+	s.Step(`^user closes shell instance on host machine$`,
+		util.CloseHostShellInstance)
+	s.Step(`^executing "minishift (.*)" in host shell$`,
+		util.ExecuteMinishiftInHostShell)
+	s.Step(`^executing "minishift (.*)" in host shell (succeeds|fails)$`,
+		util.ExecuteMinishiftInHostShellSucceedsOrFails)
+	s.Step(`^executing "(.*)" in host shell$`,
+		util.ExecuteInHostShell)
+	s.Step(`^executing "(.*)" in host shell (succeeds|fails)$`,
+		util.ExecuteInHostShellSucceedsOrFails)
+	s.Step(`^(stdout|stderr) of host shell (?:should contain|contains) "(.*)"$`,
+		util.HostShellCommandReturnShouldContain)
+	s.Step(`^(stdout|stderr) of host shell (?:should not contain|does not contain) "(.*)"$`,
+		util.HostShellCommandReturnShouldNotContain)
+	s.Step(`^(stdout|stderr) of host shell (?:should contain|contains)$`,
+		util.HostShellCommandReturnShouldContainContent)
+	s.Step(`^(stdout|stderr) of host shell (?:should not contain|does not contain)$`,
+		util.HostShellCommandReturnShouldNotContainContent)
+	s.Step(`^(stdout|stderr) of host shell (?:should equal|equals) "(.*)"$`,
+		util.HostShellCommandReturnShouldEqual)
+	s.Step(`^(stdout|stderr) of host shell (?:should equal|equals)$`,
+		util.HostShellCommandReturnShouldEqualContent)
+	s.Step(`^evaluating stdout of the previous command in host shell$`,
+		util.ExecuteInHostShellLineByLine)
 
 	s.BeforeSuite(func() {
 		testDir = setUp()
@@ -439,7 +471,7 @@ func configFileContainsKeyMatchingValue(format string, configPath string, condit
 		return err
 	}
 
-	matches, err := performRegexMatch(expectedValue, keyValue)
+	matches, err := util.PerformRegexMatch(expectedValue, keyValue)
 	if err != nil {
 		return err
 	} else if (condition == "contains") && !matches {
@@ -479,7 +511,7 @@ func stdoutContainsKeyMatchingValue(commandField string, format string, conditio
 		return err
 	}
 
-	matches, err := performRegexMatch(expectedValue, keyValue)
+	matches, err := util.PerformRegexMatch(expectedValue, keyValue)
 	if err != nil {
 		return err
 	} else if (condition == "contains") && !matches {
@@ -503,69 +535,6 @@ func stdoutContainsKey(commandField string, format string, condition string, key
 		return fmt.Errorf("%s does not contain any value for key %s", commandField, keyPath)
 	} else if (condition == "does not have") && (keyValue != "<nil>") {
 		return fmt.Errorf("%s contains key %s with assigned value: %s", commandField, keyPath, keyValue)
-	}
-
-	return nil
-}
-
-func compareExpectedWithActualContains(expected string, actual string) error {
-	if !strings.Contains(actual, expected) {
-		return fmt.Errorf("Output did not match. Expected: '%s', Actual: '%s'", expected, actual)
-	}
-
-	return nil
-}
-
-func compareExpectedWithActualNotContains(notexpected string, actual string) error {
-	if strings.Contains(actual, notexpected) {
-		return fmt.Errorf("Output did match. Not expected: '%s', Actual: '%s'", notexpected, actual)
-	}
-
-	return nil
-}
-
-func compareExpectedWithActualEquals(expected string, actual string) error {
-	if actual != expected {
-		return fmt.Errorf("Output did not match. Expected: '%s', Actual: '%s'", expected, actual)
-	}
-
-	return nil
-}
-
-func compareExpectedWithActualNotEquals(notexpected string, actual string) error {
-	if actual == notexpected {
-		return fmt.Errorf("Output did match. Not expected: '%s', Actual: '%s'", notexpected, actual)
-	}
-
-	return nil
-}
-
-func performRegexMatch(regex string, input string) (bool, error) {
-	compRegex, err := regexp.Compile(regex)
-	if err != nil {
-		return false, fmt.Errorf("Expected value must be a valid regular expression statement: ", err)
-	}
-
-	return compRegex.MatchString(input), nil
-}
-
-func compareExpectedWithActualMatchesRegex(expected string, actual string) error {
-	matches, err := performRegexMatch(expected, actual)
-	if err != nil {
-		return err
-	} else if !matches {
-		return fmt.Errorf("Output did not match. Expected: '%s', Actual: '%s'", expected, actual)
-	}
-
-	return nil
-}
-
-func compareExpectedWithActualNotMatchesRegex(notexpected string, actual string) error {
-	matches, err := performRegexMatch(notexpected, actual)
-	if err != nil {
-		return err
-	} else if matches {
-		return fmt.Errorf("Output did match. Not expected: '%s', Actual: '%s'", notexpected, actual)
 	}
 
 	return nil
@@ -654,71 +623,71 @@ func validateYAML(inputString string) (bool, error) {
 func commandReturnEquals(commandField string, command string, condition string, expected string) error {
 	minishift.executingMinishiftCommand(command)
 	if condition == "is equal" {
-		return compareExpectedWithActualEquals(expected+"\n", selectFieldFromLastOutput(commandField))
+		return util.CompareExpectedWithActualEquals(expected+"\n", selectFieldFromLastOutput(commandField))
 	} else {
-		return compareExpectedWithActualNotEquals(expected+"\n", selectFieldFromLastOutput(commandField))
+		return util.CompareExpectedWithActualNotEquals(expected+"\n", selectFieldFromLastOutput(commandField))
 	}
 }
 
 func commandReturnContains(commandField string, command string, condition string, expected string) error {
 	minishift.executingMinishiftCommand(command)
 	if condition == "contains" {
-		return compareExpectedWithActualContains(expected, selectFieldFromLastOutput(commandField))
+		return util.CompareExpectedWithActualContains(expected, selectFieldFromLastOutput(commandField))
 	} else {
-		return compareExpectedWithActualNotContains(expected, selectFieldFromLastOutput(commandField))
+		return util.CompareExpectedWithActualNotContains(expected, selectFieldFromLastOutput(commandField))
 	}
 }
 
 func commandReturnShouldContain(commandField string, expected string) error {
-	return compareExpectedWithActualContains(expected, selectFieldFromLastOutput(commandField))
+	return util.CompareExpectedWithActualContains(expected, selectFieldFromLastOutput(commandField))
 }
 
 func commandReturnShouldNotContain(commandField string, notexpected string) error {
-	return compareExpectedWithActualNotContains(notexpected, selectFieldFromLastOutput(commandField))
+	return util.CompareExpectedWithActualNotContains(notexpected, selectFieldFromLastOutput(commandField))
 }
 
 func commandReturnShouldContainContent(commandField string, expected *gherkin.DocString) error {
-	return compareExpectedWithActualContains(expected.Content, selectFieldFromLastOutput(commandField))
+	return util.CompareExpectedWithActualContains(expected.Content, selectFieldFromLastOutput(commandField))
 }
 
 func commandReturnShouldNotContainContent(commandField string, notexpected *gherkin.DocString) error {
-	return compareExpectedWithActualNotContains(notexpected.Content, selectFieldFromLastOutput(commandField))
+	return util.CompareExpectedWithActualNotContains(notexpected.Content, selectFieldFromLastOutput(commandField))
 }
 
 func commandReturnShouldEqual(commandField string, expected string) error {
-	return compareExpectedWithActualEquals(expected, selectFieldFromLastOutput(commandField))
+	return util.CompareExpectedWithActualEquals(expected, selectFieldFromLastOutput(commandField))
 }
 
 func commandReturnShouldEqualContent(commandField string, expected *gherkin.DocString) error {
-	return compareExpectedWithActualEquals(expected.Content, selectFieldFromLastOutput(commandField))
+	return util.CompareExpectedWithActualEquals(expected.Content, selectFieldFromLastOutput(commandField))
 }
 
 func commandReturnShouldBeEmpty(commandField string) error {
-	return compareExpectedWithActualEquals("", selectFieldFromLastOutput(commandField))
+	return util.CompareExpectedWithActualEquals("", selectFieldFromLastOutput(commandField))
 }
 
 func commandReturnShouldNotBeEmpty(commandField string) error {
-	return compareExpectedWithActualNotEquals("", selectFieldFromLastOutput(commandField))
+	return util.CompareExpectedWithActualNotEquals("", selectFieldFromLastOutput(commandField))
 }
 
 func variableShouldNotBeEmpty(variableName string) error {
-	return compareExpectedWithActualNotEquals("", minishift.GetVariableByName(variableName).Value)
+	return util.CompareExpectedWithActualNotEquals("", minishift.GetVariableByName(variableName).Value)
 }
 
 func commandReturnShouldMatchRegex(commandField string, expected string) error {
-	return compareExpectedWithActualMatchesRegex(expected, selectFieldFromLastOutput(commandField))
+	return util.CompareExpectedWithActualMatchesRegex(expected, selectFieldFromLastOutput(commandField))
 }
 
 func commandReturnShouldNotMatchRegex(commandField string, notexpected string) error {
-	return compareExpectedWithActualNotMatchesRegex(notexpected, selectFieldFromLastOutput(commandField))
+	return util.CompareExpectedWithActualNotMatchesRegex(notexpected, selectFieldFromLastOutput(commandField))
 }
 
 func commandReturnShouldMatchRegexContent(commandField string, expected *gherkin.DocString) error {
-	return compareExpectedWithActualMatchesRegex(expected.Content, selectFieldFromLastOutput(commandField))
+	return util.CompareExpectedWithActualMatchesRegex(expected.Content, selectFieldFromLastOutput(commandField))
 }
 
 func commandReturnShouldNotMatchRegexContent(commandField string, notexpected *gherkin.DocString) error {
-	return compareExpectedWithActualNotMatchesRegex(notexpected.Content, selectFieldFromLastOutput(commandField))
+	return util.CompareExpectedWithActualNotMatchesRegex(notexpected.Content, selectFieldFromLastOutput(commandField))
 }
 
 type commandRunner func(string) error
@@ -810,11 +779,11 @@ func getRoutingUrlAndVerifyHTTPResponse(partOfResponse string, urlRoot string, s
 }
 
 func proxyLogShouldContain(expected string) error {
-	return compareExpectedWithActualContains(expected, testProxy.GetLog())
+	return util.CompareExpectedWithActualContains(expected, testProxy.GetLog())
 }
 
 func proxyLogShouldContainContent(expected *gherkin.DocString) error {
-	return compareExpectedWithActualContains(expected.Content, testProxy.GetLog())
+	return util.CompareExpectedWithActualContains(expected.Content, testProxy.GetLog())
 }
 
 func catDockerConfigFile() error {
@@ -861,4 +830,8 @@ func downloadFileIntoLocation(downloadURL string, destinationFolder string) erro
 	}
 
 	return nil
+}
+
+func startHostShellInstance() error {
+	return util.StartHostShellInstance(testWithShell, minishiftBinary)
 }

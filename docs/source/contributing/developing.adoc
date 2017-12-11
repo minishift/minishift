@@ -274,11 +274,28 @@ RUN_BEFORE_FEATURE::
 The `RUN_BEFORE_FEATURE` parameter specifies {project} commands to be run before each feature.
 This provides the ability to run integration tests against a {project} instance which is not in its default state.
 When multiple commands are specified, they must be delimited by a semicolon.
-For example, tests can be run against a stopped {project} instance with the image caching option turned on by running the following:
+For example, tests can be run against a stopped {project} instance with the image caching option turned on by running the following: 
 
 ----
 $ make integration_all RUN_BEFORE_FEATURE="start; stop; config set image-caching true"
 ----
+
+TEST_WITH_SHELL::
+
+About:::
+The majority of {project} integration tests pass command line arguments directly to the `minishift` or `oc` binaries via Go's `os/exec` package.
+However, some integration tests first start persistent instance of the shell to pass commands into later, for example: `When user starts shell instance on host machine`.
+Due to persistency of the shell instance all changes done in it will be present until its closure, for example, changed environmental variables.
+This allows testing of commands which are dependent on the shell they are being executed in.
+The steps using this approach have the `shell` keyword in their definition, for example: `When executing "minishift oc-env" in host shell succeeds`.
+
+Usage:::
+`TEST_WITH_SPECIFIED_SHELL` is an optional parameter.
+If nothing is passed with `TEST_WITH_SPECIFIED_SHELL`, then the shell type is automatically determined.
+By default, the shell will be PowerShell on Windows, Bash on macOS and Linux.
+The `TEST_WITH_SPECIFIED_SHELL` parameter can be used to run the tests with different shells.
+To run the tests using the Windows Command Prompt, for example, run `make integration_all TEST_WITH_SPECIFIED_SHELL=cmd`.
+The `TEST_WITH_SPECIFIED_SHELL` parameter supports the `powershell`, `cmd`, `bash`, `tcsh` and `zsh` options.
 
 [[godog-options]]
 ==== Using the GODOG_OPTS Parameter

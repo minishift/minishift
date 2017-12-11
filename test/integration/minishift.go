@@ -93,6 +93,10 @@ func (m *Minishift) setVariableExecutingOcCommand(name string, command string) e
 	return m.setVariableFromExecution(name, minishift.executingOcCommand, command)
 }
 
+func (m *Minishift) setVariableExecutingMinishiftCommand(name string, command string) error {
+	return m.setVariableFromExecution(name, minishift.executingMinishiftCommand, command)
+}
+
 func (m *Minishift) SetVariable(name string, value string) {
 	commandVariables = append(commandVariables,
 		CommandVariable{

@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/blang/semver"
 	"github.com/docker/machine/libmachine/host"
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/golang/glog"
@@ -37,6 +36,7 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/addon/manager"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/minishift/oc"
+	openshiftVersion "github.com/minishift/minishift/pkg/minishift/openshift/version"
 
 	"regexp"
 
@@ -168,7 +168,7 @@ func EnsureHostDirectoriesExist(host *host.Host, dirs []string) error {
 // If the requested OpenShift version is >= v3.7.0, we align the oc version with the requested OpenShift version.
 // Check Minishift github issue #1417 for details.
 func DetermineOcVersion(requestedVersion string) string {
-	valid, _ := ValidateOpenshiftMinVersion(requestedVersion, constants.BackwardIncompatibleOcVersion)
+	valid, _ := openshiftVersion.IsGreaterOrEqualToBaseVersion(requestedVersion, constants.BackwardIncompatibleOcVersion)
 	if !valid {
 		requestedVersion = constants.MinimumOcBinaryVersion
 	}
@@ -289,23 +289,4 @@ func getConfigClusterName(hostname string, ip string, port int) string {
 		return "local-cluster"
 	}
 	return fmt.Sprintf("%s:%d", strings.Replace(ip, ".", "-", -1), port)
-}
-
-func ValidateOpenshiftMinVersion(version string, minVersion string) (bool, error) {
-	v, err := semver.Parse(strings.TrimPrefix(version, constants.VersionPrefix))
-	if err != nil {
-		return false, errors.New(fmt.Sprintf("Invalid version format '%s': %s", version, err.Error()))
-	}
-
-	minSupportedVersion := strings.TrimPrefix(minVersion, constants.VersionPrefix)
-	versionRange, err := semver.ParseRange(fmt.Sprintf(">=%s", minSupportedVersion))
-	if err != nil {
-		fmt.Println("Not able to parse version info", err)
-		return false, err
-	}
-
-	if versionRange(v) {
-		return true, nil
-	}
-	return false, nil
 }

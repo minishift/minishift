@@ -37,7 +37,7 @@ var getVersionsCmd = &cobra.Command{
 }
 
 func runVersionList(cmd *cobra.Command, args []string) {
-	err := openshiftVersions.PrintUpStreamVersions(os.Stdout, constants.MinOpenshiftSupportedVersion, version.GetOpenShiftVersion())
+	err := openshiftVersions.PrintUpStreamVersions(os.Stdout, constants.MinimumSupportedOpenShiftVersion, version.GetOpenShiftVersion())
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error while trying to get list of available Origin versions: %s", err.Error()))
 	}

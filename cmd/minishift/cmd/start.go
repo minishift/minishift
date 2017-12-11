@@ -21,6 +21,8 @@ import (
 	"runtime"
 	"strings"
 
+	"os"
+
 	"github.com/asaskevich/govalidator"
 	units "github.com/docker/go-units"
 	"github.com/docker/machine/libmachine"
@@ -44,6 +46,7 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/hostfolder"
 	minishiftNetwork "github.com/minishift/minishift/pkg/minishift/network"
 	"github.com/minishift/minishift/pkg/minishift/openshift"
+	openshiftVersion "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
 	"github.com/minishift/minishift/pkg/util"
@@ -54,7 +57,6 @@ import (
 	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"os"
 )
 
 const (
@@ -645,7 +647,7 @@ func ensureNotRunning(client *libmachine.Client, machineName string) {
 func validateOpenshiftVersion() {
 	requestedVersion := viper.GetString(configCmd.OpenshiftVersion.Name)
 
-	valid, err := clusterup.ValidateOpenshiftMinVersion(requestedVersion, constants.MinOpenshiftSupportedVersion)
+	valid, err := openshiftVersion.IsGreaterOrEqualToBaseVersion(requestedVersion, constants.MinimumSupportedOpenShiftVersion)
 	if err != nil {
 		atexit.ExitWithMessage(1, err.Error())
 	}
@@ -653,7 +655,7 @@ func validateOpenshiftVersion() {
 	if !valid {
 		fmt.Printf("Minishift does not support OpenShift version %s. "+
 			"You need to use a version >= %s\n", viper.GetString(configCmd.OpenshiftVersion.Name),
-			constants.MinOpenshiftSupportedVersion)
+			constants.MinimumSupportedOpenShiftVersion)
 		atexit.Exit(1)
 	}
 

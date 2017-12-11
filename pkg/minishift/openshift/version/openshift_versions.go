@@ -26,10 +26,11 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/blang/semver"
 	"github.com/docker/machine/libmachine/host"
 	"github.com/docker/machine/libmachine/provision"
-	"github.com/minishift/minishift/pkg/minishift/clusterup"
-	"github.com/minishift/minishift/pkg/minishift/constants"
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/minishift/docker"
 	"github.com/minishift/minishift/pkg/util"
 )
@@ -51,7 +52,7 @@ type ImageInfo struct {
 func GetOpenshiftVersion(host *host.Host) (string, error) {
 	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
 	dockerCommander := docker.NewVmDockerCommander(sshCommander)
-	return dockerCommander.Exec(" ", constants.OpenshiftContainerName, "openshift", "version")
+	return dockerCommander.Exec(" ", minishiftConstants.OpenshiftContainerName, "openshift", "version")
 }
 
 func PrintDownStreamVersions(output io.Writer, minSupportedVersion string) error {
@@ -105,8 +106,8 @@ func PrintUpStreamVersions(output io.Writer, minSupportedVersion string, default
 		if strings.Contains(imageTag.Name, "latest") {
 			continue
 		}
-		if valid, _ := clusterup.ValidateOpenshiftMinVersion(imageTag.Name, minSupportedVersion); valid {
-			if valid, _ := clusterup.ValidateOpenshiftMinVersion(imageTag.Name, defaultVersion); valid {
+		if valid, _ := IsGreaterOrEqualToBaseVersion(imageTag.Name, minSupportedVersion); valid {
+			if valid, _ := IsGreaterOrEqualToBaseVersion(imageTag.Name, defaultVersion); valid {
 				tagsList = append(tagsList, imageTag.Name)
 			} else {
 				if !isPrerelease(imageTag.Name) {
@@ -135,4 +136,24 @@ func isPrerelease(tag string) bool {
 		return true
 	}
 	return false
+}
+
+// IsGreaterOrEqualToBaseVersion returns true if the version is greater or equal to the base version
+func IsGreaterOrEqualToBaseVersion(version string, baseVersion string) (bool, error) {
+	v, err := semver.Parse(strings.TrimPrefix(version, constants.VersionPrefix))
+	if err != nil {
+		return false, errors.New(fmt.Sprintf("Invalid version format '%s': %s", version, err.Error()))
+	}
+
+	baseVersionToCompare := strings.TrimPrefix(baseVersion, constants.VersionPrefix)
+	versionRange, err := semver.ParseRange(fmt.Sprintf(">=%s", baseVersionToCompare))
+	if err != nil {
+		fmt.Println("Not able to parse version info", err)
+		return false, err
+	}
+
+	if versionRange(v) {
+		return true, nil
+	}
+	return false, nil
 }

@@ -32,7 +32,7 @@ ifeq ($(GOOS),windows)
 	IS_EXE := .exe
 endif
 MINISHIFT_BINARY ?= $(GOPATH)/bin/minishift$(IS_EXE)
-TIMEOUT ?= 3600s
+TIMEOUT ?= 7200s
 PACKAGES := go list ./... | grep -v /vendor | grep -v /out
 SOURCE_DIRS = cmd pkg test
 

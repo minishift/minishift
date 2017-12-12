@@ -17,7 +17,6 @@ limitations under the License.
 package image
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -25,6 +24,7 @@ import (
 
 	"bytes"
 	"encoding/json"
+	"errors"
 	"github.com/containers/image/copy"
 	"github.com/containers/image/oci/layout"
 	"github.com/containers/image/signature"
@@ -84,17 +84,18 @@ func NewLocalOnlyOciImageHandler() (*OciImageHandler, error) {
 }
 
 // ImportImages imports cached images from the host into the Docker daemon of the VM.
-func (handler *OciImageHandler) ImportImages(config *ImageCacheConfig) error {
+func (handler *OciImageHandler) ImportImages(config *ImageCacheConfig) ([]string, error) {
 	out := handler.getOutputWriter(config)
+	importedImages := []string{}
 
 	policyContext, err := handler.getPolicyContext()
 	if err != nil {
-		return fmt.Errorf("Error creating security context: %s", err.Error())
+		return importedImages, fmt.Errorf("Error creating security context: %s", err.Error())
 	}
 
 	availableImages, err := handler.GetDockerImages()
 	if err != nil {
-		return err
+		return importedImages, err
 	}
 
 	multiError := util.MultiError{}
@@ -104,32 +105,35 @@ func (handler *OciImageHandler) ImportImages(config *ImageCacheConfig) error {
 		progressDots.SetWriter(out)
 		progressDots.Start()
 		if _, found := availableImages[imageName]; found {
-			handler.endProgress(progressDots, out, nil)
+			handler.endProgress(progressDots, out, OK)
+			importedImages = append(importedImages, imageName)
 			continue
 
 		}
 
 		if !handler.IsImageCached(config, imageName) {
-			err = errors.New(fmt.Sprintf("Unable to import image '%s' because it is not available in the local cache.", imageName))
-			multiError.Collect(err)
-			handler.endProgress(progressDots, out, err)
+			handler.endProgress(progressDots, out, CACHE_MISS)
 			continue
 		}
 
 		err := handler.importImage(imageName, config, policyContext, out)
-		handler.endProgress(progressDots, out, err)
+		handler.endProgress(progressDots, out, handler.progressStatusForError(err))
 		multiError.Collect(err)
+		if err == nil {
+			importedImages = append(importedImages, imageName)
+		}
 	}
-	return multiError.ToError()
+	return importedImages, multiError.ToError()
 }
 
 // ExportImages exports the images specified as part of the ImageCacheConfig from the VM to the host.
-func (handler *OciImageHandler) ExportImages(config *ImageCacheConfig) error {
+func (handler *OciImageHandler) ExportImages(config *ImageCacheConfig) ([]string, error) {
 	out := handler.getOutputWriter(config)
+	exportedImages := []string{}
 
 	policyContext, err := handler.getPolicyContext()
 	if err != nil {
-		return fmt.Errorf("Error creating security context: %s", err.Error())
+		return exportedImages, fmt.Errorf("Error creating security context: %s", err.Error())
 	}
 
 	multiError := util.MultiError{}
@@ -143,11 +147,14 @@ func (handler *OciImageHandler) ExportImages(config *ImageCacheConfig) error {
 		if !handler.IsImageCached(config, imageName) {
 			err = handler.exportImage(imageName, config, policyContext, out)
 		}
-		handler.endProgress(progressDots, out, err)
+		handler.endProgress(progressDots, out, handler.progressStatusForError(err))
 		multiError.Collect(err)
+		if err != nil {
+			exportedImages = append(exportedImages, imageName)
+		}
 	}
 
-	return multiError.ToError()
+	return exportedImages, multiError.ToError()
 }
 
 // IsImageCached returns true if the specified image is cached, false otherwise.
@@ -355,14 +362,9 @@ func (handler *OciImageHandler) getPolicyContext() (*signature.PolicyContext, er
 	return policyContext, nil
 }
 
-func (handler *OciImageHandler) endProgress(progressDots *progressdots.ProgressDots, out io.Writer, err error) {
+func (handler *OciImageHandler) endProgress(progressDots *progressdots.ProgressDots, out io.Writer, status ProgressStatus) {
 	progressDots.Stop()
-	if err == nil {
-		fmt.Fprint(out, " OK")
-	} else {
-		fmt.Fprint(out, " FAIL")
-	}
-	fmt.Fprint(out, "\n")
+	fmt.Fprintf(out, " %s\n", status.String())
 }
 
 func getDockerSettings(dockerEnv map[string]string) (*dockerClientConfig, error) {
@@ -391,4 +393,11 @@ func getDockerSettings(dockerEnv map[string]string) (*dockerClientConfig, error)
 	}
 
 	return settings, nil
+}
+
+func (handler *OciImageHandler) progressStatusForError(err error) ProgressStatus {
+	if err != nil {
+		return FAIL
+	}
+	return OK
 }

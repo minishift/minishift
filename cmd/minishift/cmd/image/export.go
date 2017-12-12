@@ -97,7 +97,7 @@ func exportImage(cmd *cobra.Command, args []string) {
 		ImageMissStrategy: image.Pull,
 	}
 
-	err = handler.ExportImages(imageCacheConfig)
+	_, err = handler.ExportImages(imageCacheConfig)
 	if err != nil {
 		msg := fmt.Sprintf("Container image export failed:\n%v", err)
 		if logToFile {

@@ -74,7 +74,7 @@ Feature: Basic image caching test
 
      When executing "minishift image import foo:latest alpine:latest"
      Then exitcode should equal "1"
-      And stdout should match "Importing foo:latest.*FAIL"
+      And stdout should match "Importing foo:latest.*CACHE MISS"
       And stdout should match "Importing alpine:latest.*OK"
 
      When executing "minishift image import foo:latest:"
@@ -83,7 +83,7 @@ Feature: Basic image caching test
 
      When executing "minishift image import foo:latest"
      Then exitcode should equal "1"
-      And stderr should contain "Unable to import image 'foo:latest' because it is not available in the local cache."
+      And stderr should contain "At least one image could not be imported."
 
      When executing "minishift image export foo:latest alpine:latest"
      Then exitcode should equal "1"

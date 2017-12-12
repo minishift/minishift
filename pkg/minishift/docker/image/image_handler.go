@@ -16,13 +16,36 @@ limitations under the License.
 
 package image
 
+// ProgressStatus defines a status code for import/export operations.
+type ProgressStatus int
+
+const (
+	OK ProgressStatus = iota
+	FAIL
+	CACHE_MISS
+)
+
+func (ps ProgressStatus) String() string {
+	switch ps {
+	case OK:
+		return "OK"
+	case FAIL:
+		return "FAIL"
+	case CACHE_MISS:
+		return "CACHE MISS"
+	}
+	return ""
+}
+
 // ImageHandler is responsible for the import and export of images into the Docker daemon of the VM
 type ImageHandler interface {
 	// ImportImages imports cached images from the host into the Docker daemon of the VM.
-	ImportImages(config *ImageCacheConfig) error
+	// The method returns the list of successfully imported images and an error if one occurred.
+	ImportImages(config *ImageCacheConfig) ([]string, error)
 
 	// ExportImages exports the images specified as part of the ImageCacheConfig from the VM to the host.
-	ExportImages(config *ImageCacheConfig) error
+	// The method returns the list of successfully exported images and an error if one occurred.
+	ExportImages(config *ImageCacheConfig) ([]string, error)
 
 	// IsImageCached returns true if the specified image is cached, false otherwise.
 	IsImageCached(config *ImageCacheConfig, image string) bool

@@ -418,9 +418,9 @@ func importContainerImages(driver drivers.Driver, api libmachine.API, openShiftV
 		CachedImages: images,
 		Out:          os.Stdout,
 	}
-	err = handler.ImportImages(config)
+	_, err = handler.ImportImages(config)
 	if err != nil {
-		fmt.Println(fmt.Sprintf("  WARN: Import of cached images failed. Continuing without importing images. Error: %s ", err.Error()))
+		fmt.Println(fmt.Sprintf("  WARN: At least one image could not be imported. Error: %s ", err.Error()))
 	}
 }
 

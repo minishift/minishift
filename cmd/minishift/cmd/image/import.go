@@ -100,9 +100,13 @@ func importImage(cmd *cobra.Command, args []string) {
 		ImageMissStrategy: image.Skip,
 	}
 
-	err = handler.ImportImages(imageCacheConfig)
+	importedImages, err := handler.ImportImages(imageCacheConfig)
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Container image import failed:\n%v", err))
+	}
+
+	if len(importedImages) < len(normalizedImageNames) {
+		atexit.ExitWithMessage(1, "At least one image could not be imported.")
 	}
 }
 

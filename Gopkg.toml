@@ -70,6 +70,7 @@ ignored = ["github.com/Sirupsen/logrus"]
 
 [[constraint]]
   name = "github.com/kardianos/osext"
+  revision = "ae77be60afb1dcacde03767a8c37337fad28ac14"
 
 [[constraint]]
   name = "github.com/olekukonko/tablewriter"

@@ -19,7 +19,6 @@ package util
 import (
 	"io"
 	"os/exec"
-	"path/filepath"
 	"syscall"
 )
 
@@ -45,9 +44,8 @@ func (r RealRunner) Output(command string, args ...string) ([]byte, error) {
 	return cmdOut, nil
 }
 
-func (r RealRunner) Run(stdOut io.Writer, stdErr io.Writer, commandPath string, args ...string) int {
-	path, _ := filepath.Abs(commandPath)
-	cmd := exec.Command(path, args...)
+func (r RealRunner) Run(stdOut io.Writer, stdErr io.Writer, command string, args ...string) int {
+	cmd := exec.Command(command, args...)
 
 	cmd.Stdout = stdOut
 	cmd.Stderr = stdErr

@@ -17,6 +17,9 @@ limitations under the License.
 package util
 
 import (
+	"os"
+	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 
@@ -134,5 +137,89 @@ func TestFriendlyDuration(t *testing.T) {
 		if got != expected {
 			t.Errorf("Expected %v but got %v", got, expected)
 		}
+	}
+}
+
+func Test_command_executes_successfully_with_absolute_path(t *testing.T) {
+	currentDir, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	dummyBinaryPath := filepath.Join(currentDir, "..", "..", "test", "testdata")
+
+	switch os := runtime.GOOS; os {
+	case "darwin":
+		dummyBinaryPath = filepath.Join(dummyBinaryPath, "dummybinary_darwin")
+	case "linux":
+		dummyBinaryPath = filepath.Join(dummyBinaryPath, "dummybinary_linux")
+	case "windows":
+		dummyBinaryPath = filepath.Join(dummyBinaryPath, "dummybinary_windows.exe")
+	default:
+		t.Fatal("Unpexpected OS")
+	}
+
+	testData := []struct {
+		command string
+		exists  bool
+	}{
+		{filepath.Join(currentDir, "..", "..", "test", "testdata", "blahh"), false},
+		{dummyBinaryPath, true},
+	}
+	for _, v := range testData {
+		got := CommandExecutesSuccessfully(v.command)
+		if got != v.exists {
+			t.Errorf("Expected %v for executing %s, got %v", v.exists, dummyBinaryPath, got)
+		}
+	}
+}
+
+func Test_command_executes_successfully_with_command_lookup(t *testing.T) {
+	currentDir, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	dummyBinaryPath := filepath.Join(currentDir, "..", "..", "test", "testdata")
+	origPath := os.Getenv("PATH")
+	os.Setenv("PATH", dummyBinaryPath+string(os.PathListSeparator)+origPath)
+	defer func() {
+		os.Setenv("PATH", origPath)
+	}()
+
+	var cmd string
+	switch os := runtime.GOOS; os {
+	case "darwin":
+		cmd = "dummybinary_darwin"
+	case "linux":
+		cmd = "dummybinary_linux"
+	case "windows":
+		cmd = "dummybinary_windows.exe"
+	default:
+		t.Fatal("Unpexpected OS")
+	}
+
+	success := CommandExecutesSuccessfully(cmd)
+	if !success {
+		t.Errorf("Expected execution of %s to succeed", cmd)
+	}
+}
+
+func Test_command_executes_unsuccessfully_with_command_lookup(t *testing.T) {
+	var cmd string
+	switch os := runtime.GOOS; os {
+	case "darwin":
+		cmd = "dummybinary_darwin"
+	case "linux":
+		cmd = "dummybinary_linux"
+	case "windows":
+		cmd = "dummybinary_windows.exe"
+	default:
+		t.Fatal("Unpexpected OS")
+	}
+
+	success := CommandExecutesSuccessfully(cmd)
+	if success {
+		t.Errorf("Expected execution of %s to fail", cmd)
 	}
 }

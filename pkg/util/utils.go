@@ -166,3 +166,15 @@ func FriendlyDuration(d time.Duration) time.Duration {
 	d2 := (d / time.Nanosecond) * (time.Nanosecond)
 	return d2
 }
+
+// CommandExecutesSuccessfully returns true if the command executed based on the exit code
+func CommandExecutesSuccessfully(cmd string, args ...string) bool {
+	var runner Runner = &RealRunner{}
+	var stdOut, stdErr io.Writer
+
+	exitCode := runner.Run(stdOut, stdErr, cmd, args...)
+	if exitCode == 0 {
+		return true
+	}
+	return false
+}

@@ -49,6 +49,7 @@ const (
 // preflightChecksAfterStartingHost is executed before the startHost function.
 func preflightChecksBeforeStartingHost() {
 	driverErrorMessage := "See the 'Setting Up the Driver Plug-in' topic (https://docs.openshift.org/latest/minishift/getting-started/setting-up-driver-plugin.html) for more information"
+	prerequisiteErrorMessage := "See the 'Installing Prerequisites for Minishift' topic (https://docs.openshift.org/latest/minishift/getting-started/installing.html#install-prerequisites) for more information"
 
 	preflightCheckSucceedsOrFails(
 		configCmd.SkipCheckVMDriver.Name,
@@ -109,6 +110,14 @@ func preflightChecksBeforeStartingHost() {
 			"Checking if user is a member of the Hyper-V Administrators group",
 			false, configCmd.WarnCheckHyperVDriver.Name,
 			driverErrorMessage)
+	case "virtualbox":
+		preflightCheckSucceedsOrFails(
+			configCmd.SkipCheckVBoxInstalled.Name,
+			checkVBoxInstalled,
+			"Checking if VirtualBox is installed",
+			false, configCmd.WarnCheckVBoxInstalled.Name,
+			prerequisiteErrorMessage)
+
 	}
 
 	preflightCheckSucceedsOrFails(

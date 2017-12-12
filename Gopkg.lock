@@ -52,7 +52,7 @@
   branch = "master"
   name = "github.com/containers/storage"
   packages = [".","drivers","drivers/aufs","drivers/btrfs","drivers/devmapper","drivers/overlay","drivers/overlayutils","drivers/quota","drivers/register","drivers/vfs","drivers/windows","drivers/zfs","pkg/archive","pkg/chrootarchive","pkg/devicemapper","pkg/directory","pkg/dmesg","pkg/fileutils","pkg/fsutils","pkg/homedir","pkg/idtools","pkg/ioutils","pkg/locker","pkg/longpath","pkg/loopback","pkg/mount","pkg/parsers","pkg/parsers/kernel","pkg/pools","pkg/promise","pkg/reexec","pkg/stringid","pkg/system","pkg/truncindex"]
-  revision = "138cddaf9d6b3910b18de44a017417f60bff4e66"
+  revision = "46ef35348492d492e4671938a1993a315e4ad30f"
 
 [[projects]]
   name = "github.com/cpuguy83/go-md2man"
@@ -198,7 +198,6 @@
   revision = "c7d06af17c68cd34c835053720b21f6549d9b0ee"
 
 [[projects]]
-  branch = "master"
   name = "github.com/kardianos/osext"
   packages = ["."]
   revision = "ae77be60afb1dcacde03767a8c37337fad28ac14"
@@ -317,8 +316,8 @@
 [[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  revision = "f006c2ac4710855cf0f916dd6b77acf6b048dc6e"
-  version = "v1.0.3"
+  revision = "d682213848ed68c0a260ca37d6dd5ace8423f5ba"
+  version = "v1.0.4"
 
 [[projects]]
   name = "github.com/spf13/afero"
@@ -374,7 +373,7 @@
   branch = "master"
   name = "golang.org/x/net"
   packages = ["context","context/ctxhttp","http2","http2/hpack","idna","lex/httplex","proxy"]
-  revision = "894f8ed5849b15b810ae41e9590a0d05395bba27"
+  revision = "d866cfc389cec985d6fda2859936a575a55a3ab6"
 
 [[projects]]
   name = "golang.org/x/oauth2"
@@ -385,13 +384,13 @@
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix","windows","windows/registry"]
-  revision = "1006bb3484c92b19a5b6612452e038b554fadb9c"
+  revision = "53aa286056ef226755cd898109dbcdaba8ac0b81"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/text"
   packages = ["collate","collate/build","internal/colltab","internal/gen","internal/tag","internal/triegen","internal/ucd","language","secure/bidirule","transform","unicode/bidi","unicode/cldr","unicode/norm","unicode/rangetable"]
-  revision = "572a2b141f625f4360cf42a41a43622067e0510b"
+  revision = "3b24cac7bc3a458991ab409aa2a339ac9e0d60d6"
 
 [[projects]]
   name = "google.golang.org/appengine"
@@ -419,6 +418,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "126ca98597875822b477375d68ee4318150c6ebd9faf1dd5ab368fbe1fe99e9d"
+  inputs-digest = "6d90e09d82cfe1cea527bbbc9753c1e9ad8ca2b7e2f567e1e2809767fb017df2"
   solver-name = "gps-cdcl"
   solver-version = 1

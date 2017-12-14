@@ -29,8 +29,8 @@ func Test_DetermineOcVersion(t *testing.T) {
 		inputVersion string
 		outVersion   string
 	}{
-		{"v1.5.0", "v3.6.0"},
-		{"v3.6.0", "v3.6.0"},
+		{"v1.5.0", "v3.6.1"},
+		{"v3.6.0", "v3.6.1"},
 		{"v3.7.0", "v3.7.0"},
 	}
 	for _, version := range versionTests {

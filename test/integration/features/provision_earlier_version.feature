@@ -11,11 +11,11 @@ Feature: Provision an older major release
      """
      openshift v1.5.1
      """
-      And JSON config file "machines/minishift.json" contains key "OcPath" with value matching "v3.6.0"
+      And JSON config file "machines/minishift.json" contains key "OcPath" with value matching "v3.6.1"
      When executing "minishift oc-env" succeeds
      Then stdout should contain
       """
-      v3.6.0
+      v3.6.1
       """
 
   Scenario: OpenShift is ready after startup

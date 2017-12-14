@@ -30,8 +30,8 @@ const (
 	MiniShiftHomeEnv                 = "MINISHIFT_HOME" // Environment variable used to change the Minishift home directory
 	VersionPrefix                    = "v"
 	MinimumSupportedOpenShiftVersion = "v1.4.1"
-	MinimumOcBinaryVersion           = "v3.6.0" // For provisioning OpenShift versions < v3.7.0 , we need to use oc v3.6.0. Refer #1417
-	BackwardIncompatibleOcVersion    = "v3.7.0" // From v3.7.0 oc binary will not provision older versions of OpenShift instance
+	MinimumOcBinaryVersion           = "v3.6.1" // For provisioning OpenShift versions < v3.7.0 , we need to use oc v3.6.1. Refer openshift/origin#17821
+	BackwardIncompatibleOcVersion    = "v3.7.0" // From v3.7.0 oc binary will not provision older versions of OpenShift instance. Refer #1417
 	DefaultMemory                    = "2GB"
 	DefaultCPUS                      = 2
 	DefaultDiskSize                  = "20GB"

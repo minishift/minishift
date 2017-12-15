@@ -68,7 +68,7 @@ func getConfigSet(api libmachine.API, forceShell string, noProxy bool) (*DockerS
 		return nil, err
 	}
 
-	cmdLine := "minishift docker-env"
+	cmdLine := "minishift docker-env --no-proxy"
 	shellCfg := &DockerShellConfig{
 		DockerCertPath:  envMap["DOCKER_CERT_PATH"],
 		DockerHost:      envMap["DOCKER_HOST"],
@@ -114,7 +114,7 @@ func getConfigUnset(forceShell string, noProxy bool) (*DockerShellConfig, error)
 		return nil, err
 	}
 
-	cmdLine := "minishift docker-env"
+	cmdLine := "minishift docker-env --unset"
 	shellCfg := &DockerShellConfig{
 		UsageHint: shell.GenerateUsageHint(userShell, cmdLine),
 	}

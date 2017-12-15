@@ -84,7 +84,8 @@ __check_defined = \
 .PHONY: $(GOPATH)/bin/minishift$(IS_EXE)
 $(GOPATH)/bin/minishift$(IS_EXE): $(ADDON_ASSET_FILE) vendor
 	go install -tags "$(BUILD_TAGS)" -pkgdir=$(ADDON_BINDATA_DIR) -ldflags="$(VERSION_VARIABLES)" ./cmd/minishift
-vendor:
+vendor: $(GOPATH)/bin/dep
+	echo $(shell dep version)
 	dep ensure -v
 
 $(ADDON_ASSET_FILE): $(GOPATH)/bin/go-bindata
@@ -111,6 +112,9 @@ $(GOPATH)/bin/go-bindata:
 
 $(GOPATH)/bin/git-validation:
 	go get -u github.com/vbatts/git-validation/...
+
+$(GOPATH)/bin/dep:
+	go get -u github.com/golang/dep/cmd/dep/...
 
 .PHONY: build_docs_container
 build_docs_container:

@@ -342,7 +342,7 @@ function perform_master() {
 
 function perform_nightly() {
   make prerelease synopsis_docs link_check_docs
-  MINISHIFT_VM_DRIVER=kvm make integration_all
+  MINISHIFT_ISO_URL=$1 MINISHIFT_VM_DRIVER=kvm make integration_all
 }
 
 if [[ "$UID" = 0 ]]; then
@@ -370,8 +370,12 @@ else
     perform_docs_publish "$REPO_OWNER" "$BRANCH" "minishift/docs/ondemand/$REPO_OWNER-$BRANCH";
   elif [[ "$JOB_NAME" = "minishift-release" ]]; then
     perform_release $RSYNC_PASSWORD;
-  elif [[ "$JOB_NAME" = "minishift-nightly" ]]; then
-    perform_nightly;
+  elif [[ "$JOB_NAME" = "minishift-nightly-b2d" ]]; then
+    perform_nightly "b2d";
+  elif [[ "$JOB_NAME" = "minishift-nightly-minikube" ]]; then
+    perform_nightly "minikube";
+  elif [[ "$JOB_NAME" = "minishift-nightly-centos" ]]; then
+    perform_nightly "centos";
   elif [[ "$JOB_NAME" = "minishift" ]]; then # Master job
     perform_master $RSYNC_PASSWORD;
   else # PR job

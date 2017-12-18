@@ -100,7 +100,7 @@ func TestRedHatRegistratorRegister(t *testing.T) {
 
 	s.CommandToOutput["sudo -E subscription-manager version"] = `server type: This system is currently not registered.`
 	if err := registrator.Register(param); err != nil {
-		t.Fatal("Distribution should able to register")
+		t.Fatalf("Expected: Distribution should able to register, Got: %v", err)
 	} else {
 		if _, ok := s.Commands[expectedCMDRegistration]; !ok {
 			t.Fatalf("Expected command: %s", expectedCMDRegistration)

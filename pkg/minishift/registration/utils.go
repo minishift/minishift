@@ -27,6 +27,7 @@ import (
 type RegistrationParameters struct {
 	Username               string
 	Password               string
+	IsTtySupported         bool
 	GetUsernameInteractive func(message string) string
 	GetPasswordInteractive func(message string) string
 }

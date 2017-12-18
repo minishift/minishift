@@ -66,6 +66,10 @@ func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) er
 			progressDots := progressdots.New()
 			// request username (disallow empty value)
 			if param.Username == "" {
+				// Check if Terminal tty supported or not
+				if !param.IsTtySupported {
+					return fmt.Errorf(("Not a tty supported terminal, Retries are disabled"))
+				}
 				for param.Username == "" {
 					param.Username = param.GetUsernameInteractive(RHSMName + " username")
 				}

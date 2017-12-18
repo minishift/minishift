@@ -673,6 +673,7 @@ func validateOpenshiftVersion() {
 func setSubscriptionManagerParameters() {
 	minishiftCluster.RegistrationParameters.Username = viper.GetString(configCmd.Username.Name)
 	minishiftCluster.RegistrationParameters.Password = viper.GetString(configCmd.Password.Name)
+	minishiftCluster.RegistrationParameters.IsTtySupported = util.IsTtySupported()
 	minishiftCluster.RegistrationParameters.GetUsernameInteractive = getUsernameInteractive
 	minishiftCluster.RegistrationParameters.GetPasswordInteractive = getPasswordInteractive
 }

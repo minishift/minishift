@@ -18,10 +18,10 @@ package util
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"golang.org/x/crypto/ssh/terminal"
+	"syscall"
 )
 
 func ReadInputFromStdin(fieldlabel string) string {
@@ -31,10 +31,15 @@ func ReadInputFromStdin(fieldlabel string) string {
 	return value
 }
 
+func IsTtySupported() bool {
+	// https://github.com/golang/go/issues/12978
+	return terminal.IsTerminal(int(syscall.Stdin))
+}
+
 func ReadPasswordFromStdin(fieldlabel string) string {
 	var value string
 	fmt.Printf("%s: ", fieldlabel)
-	pwinput, err := terminal.ReadPassword(int(os.Stdin.Fd()))
+	pwinput, err := terminal.ReadPassword(int(syscall.Stdin))
 	if err == nil {
 		fmt.Println("[HIDDEN]")
 		value = string(pwinput)

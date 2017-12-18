@@ -101,7 +101,40 @@ REDHAT_SUPPORT_PRODUCT_VERSION="7"
 	provisioner, err := detector.DetectProvisioner(d)
 	assert.NoError(t, err, "Error Getting detector")
 
-	assert.IsType(t, new(provision.CentosProvisioner), provisioner)
+	assert.IsType(t, new(MinishiftProvisioner), provisioner)
+
+	osRelease, _ := provisioner.GetOsReleaseInfo()
+	assert.NotEqual(t, "minishift", osRelease.Variant, "Release info should not contain 'minishift' variant")
+}
+
+func TestDefaultUbuntuProvisionerSelected(t *testing.T) {
+	s, _ := tests.NewSSHServer()
+	s.CommandToOutput = make(map[string]string)
+	s.CommandToOutput["cat /etc/os-release"] = `NAME="Ubuntu"
+VERSION="13.10, Saucy Salamander"
+ID=ubuntu
+ID_LIKE=debian
+PRETTY_NAME="Ubuntu 13.10"
+VERSION_ID="13.10"
+HOME_URL="http://www.ubuntu.com/"
+SUPPORT_URL="http://help.ubuntu.com/"
+BUG_REPORT_URL="http://bugs.launchpad.net/ubuntu/"
+`
+	port, err := s.Start()
+	assert.NoError(t, err, "Error starting ssh server")
+	d := &tests.MockDriver{
+		Port: port,
+		BaseDriver: drivers.BaseDriver{
+			IPAddress:  "127.0.0.1",
+			SSHKeyPath: "",
+		},
+	}
+
+	detector := MinishiftProvisionerDetector{Delegate: provision.StandardDetector{}}
+	provisioner, err := detector.DetectProvisioner(d)
+	assert.NoError(t, err, "Error Getting detector")
+
+	assert.IsType(t, new(provision.UbuntuProvisioner), provisioner)
 
 	osRelease, _ := provisioner.GetOsReleaseInfo()
 	assert.NotEqual(t, "minishift", osRelease.Variant, "Release info should not contain 'minishift' variant")

@@ -61,6 +61,7 @@ import (
 const (
 	commandName             = "start"
 	defaultInsecureRegistry = "172.30.0.0/16"
+	genericDriver           = "generic"
 )
 
 var (
@@ -166,7 +167,9 @@ func runStart(cmd *cobra.Command, args []string) {
 	proxyConfig := handleProxies()
 
 	// preflight check (before start)
-	preflightChecksBeforeStartingHost()
+	if viper.GetString(configCmd.VmDriver.Name) != genericDriver {
+		preflightChecksBeforeStartingHost()
+	}
 
 	// Cache OC binary before starting the VM and perform oc command option check
 	requestedOpenShiftVersion := viper.GetString(configCmd.OpenshiftVersion.Name)
@@ -184,7 +187,9 @@ func runStart(cmd *cobra.Command, args []string) {
 	minishiftNetwork.AddNameserversToInstance(hostVm.Driver, getSlice(configCmd.NameServers.Name))
 
 	// preflight checks (after start)
-	preflightChecksAfterStartingHost(hostVm.Driver)
+	if viper.GetString(configCmd.VmDriver.Name) != genericDriver {
+		preflightChecksAfterStartingHost(hostVm.Driver)
+	}
 
 	// Adding active profile information to all instance config
 	addActiveProfileInformation()
@@ -350,19 +355,22 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 
 	// Configuration used for creation/setup of the Virtual Machine
 	machineConfig := &cluster.MachineConfig{
-		MinikubeISO:         determineIsoUrl(viper.GetString(configCmd.ISOUrl.Name)),
-		ISOCacheDir:         state.InstanceDirs.IsoCache,
-		Memory:              calculateMemorySize(viper.GetString(configCmd.Memory.Name)),
-		CPUs:                viper.GetInt(configCmd.CPUs.Name),
-		DiskSize:            calculateDiskSize(viper.GetString(configCmd.DiskSize.Name)),
-		VMDriver:            viper.GetString(configCmd.VmDriver.Name),
-		DockerEnv:           append(dockerEnv, getSlice(configCmd.DockerEnv.Name)...),
-		DockerEngineOpt:     getSlice(configCmd.DockerEngineOpt.Name),
-		InsecureRegistry:    determineInsecureRegistry(configCmd.InsecureRegistry.Name),
-		RegistryMirror:      getSlice(configCmd.RegistryMirror.Name),
-		HostOnlyCIDR:        viper.GetString(configCmd.HostOnlyCIDR.Name),
-		HypervVirtualSwitch: viper.GetString(configCmd.HypervVirtualSwitch.Name),
-		ShellProxyEnv:       shellProxyEnv,
+		MinikubeISO:           determineIsoUrl(viper.GetString(configCmd.ISOUrl.Name)),
+		ISOCacheDir:           state.InstanceDirs.IsoCache,
+		Memory:                calculateMemorySize(viper.GetString(configCmd.Memory.Name)),
+		CPUs:                  viper.GetInt(configCmd.CPUs.Name),
+		DiskSize:              calculateDiskSize(viper.GetString(configCmd.DiskSize.Name)),
+		VMDriver:              viper.GetString(configCmd.VmDriver.Name),
+		DockerEnv:             append(dockerEnv, getSlice(configCmd.DockerEnv.Name)...),
+		DockerEngineOpt:       getSlice(configCmd.DockerEngineOpt.Name),
+		InsecureRegistry:      determineInsecureRegistry(configCmd.InsecureRegistry.Name),
+		RegistryMirror:        getSlice(configCmd.RegistryMirror.Name),
+		HostOnlyCIDR:          viper.GetString(configCmd.HostOnlyCIDR.Name),
+		HypervVirtualSwitch:   viper.GetString(configCmd.HypervVirtualSwitch.Name),
+		ShellProxyEnv:         shellProxyEnv,
+		RemoteIPAddress:       viper.GetString(configCmd.RemoteIPAddress.Name),
+		RemoteSSHUser:         viper.GetString(configCmd.RemoteSSHUser.Name),
+		SSHKeyToConnectRemote: viper.GetString(configCmd.SSHKeyToConnectRemote.Name),
 	}
 	minishiftConfig.InstanceConfig.VMDriver = machineConfig.VMDriver
 	minishiftConfig.InstanceConfig.Write()
@@ -370,20 +378,22 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 	fmt.Printf(" using '%s' hypervisor ...\n", machineConfig.VMDriver)
 	var hostVm *host.Host
 
-	// configuration with these settings only happen on create
-	isRestart := cmdUtil.VMExists(libMachineClient, constants.MachineName)
-	if !isRestart {
-		fmt.Println("-- Minishift VM will be configured with ...")
-		fmt.Println("   Memory:   ", units.HumanSize(float64((machineConfig.Memory/units.KiB)*units.GB)))
-		fmt.Println("   vCPUs :   ", machineConfig.CPUs)
-		fmt.Println("   Disk size:", units.HumanSize(float64(machineConfig.DiskSize*units.MB)))
+	if machineConfig.VMDriver != genericDriver {
+		// configuration with these settings only happen on create
+		isRestart := cmdUtil.VMExists(libMachineClient, constants.MachineName)
+		if !isRestart {
+			fmt.Println("-- Minishift VM will be configured with ...")
+			fmt.Println("   Memory:   ", units.HumanSize(float64((machineConfig.Memory/units.KiB)*units.GB)))
+			fmt.Println("   vCPUs :   ", machineConfig.CPUs)
+			fmt.Println("   Disk size:", units.HumanSize(float64(machineConfig.DiskSize*units.MB)))
+		}
+
+		configureNetworkSettings()
+
+		cacheMinishiftISO(machineConfig)
+
+		fmt.Print("-- Starting Minishift VM ...")
 	}
-
-	configureNetworkSettings()
-
-	cacheMinishiftISO(machineConfig)
-
-	fmt.Print("-- Starting Minishift VM ...")
 	progressDots.Start()
 	start := func() (err error) {
 		hostVm, err = cluster.StartHost(libMachineClient, *machineConfig)
@@ -593,6 +603,7 @@ func initStartFlags() *flag.FlagSet {
 	startFlagSet.String(configCmd.DiskSize.Name, constants.DefaultDiskSize, "Disk size to allocate to the Minishift VM. Use the format <size><unit>, where unit = MB or GB.")
 	startFlagSet.String(configCmd.HostOnlyCIDR.Name, "192.168.99.1/24", "The CIDR to be used for the minishift VM. (Only supported with VirtualBox driver.)")
 	startFlagSet.Bool(configCmd.SkipPreflightChecks.Name, false, "Skip the startup checks.")
+
 	startFlagSet.AddFlag(dockerEnvFlag)
 	startFlagSet.AddFlag(dockerEngineOptFlag)
 	startFlagSet.AddFlag(insecureRegistryFlag)
@@ -612,6 +623,9 @@ func initStartFlags() *flag.FlagSet {
 	if minishiftConfig.EnableExperimental {
 		startFlagSet.Bool(configCmd.NoProvision.Name, false, "Do not provision the VM with OpenShift (experimental)")
 		startFlagSet.String(configCmd.ISOUrl.Name, minishiftConstants.CentOsIsoAlias, "Location of the minishift ISO. Can be a URL, file URI or one of the following short names: [b2d centos minikube].")
+		startFlagSet.String(configCmd.RemoteIPAddress.Name, "", "IP address of the remote machine to provision OpenShift on")
+		startFlagSet.String(configCmd.RemoteSSHUser.Name, "", "The username of the remote machine to provision OpenShift on")
+		startFlagSet.String(configCmd.SSHKeyToConnectRemote.Name, "", "SSH private key location on the host to connect remote machine")
 	} else {
 		startFlagSet.String(configCmd.ISOUrl.Name, minishiftConstants.CentOsIsoAlias, "Location of the minishift ISO. Can be a URL, file URI or one of the following short names: [b2d centos].")
 	}

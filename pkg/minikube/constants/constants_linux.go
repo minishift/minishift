@@ -21,6 +21,7 @@ package constants
 var SupportedVMDrivers = [...]string{
 	"virtualbox",
 	"kvm",
+	"generic",
 }
 
 const DefaultVMDriver = "kvm"

@@ -135,7 +135,7 @@ func PostClusterUp(clusterUpConfig *ClusterUpConfig, sshCommander provision.SSHC
 
 // EnsureHostDirectoriesExist ensures that the specified directories exist on the VM and creates them if not.
 func EnsureHostDirectoriesExist(host *host.Host, dirs []string) error {
-	cmd := fmt.Sprintf("sudo install -d -o docker -g docker -m 755 %s", strings.Join(dirs, " "))
+	cmd := fmt.Sprintf("sudo install -d -o %s -g %s -m 755 %s", host.Driver.GetSSHUsername(), host.Driver.GetSSHUsername(), strings.Join(dirs, " "))
 	_, err := host.RunSSHCommand(cmd)
 	if err != nil {
 		return err

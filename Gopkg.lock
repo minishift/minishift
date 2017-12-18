@@ -225,6 +225,7 @@
     "commands/mcndirs",
     "drivers/errdriver",
     "drivers/fakedriver",
+    "drivers/generic",
     "drivers/hyperv",
     "drivers/none",
     "drivers/virtualbox",
@@ -701,6 +702,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e8be8e80644c208558011b357d8d51528ed4fc7f1fbc5c4c0f16542e312ad14d"
+  inputs-digest = "f899fbdd9a5e7232dc5570aec2da884bfbdd5ebb4247bf0906670ae1fbaaa0c2"
   solver-name = "gps-cdcl"
   solver-version = 1

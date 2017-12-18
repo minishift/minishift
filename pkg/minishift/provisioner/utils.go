@@ -60,6 +60,24 @@ ExecStart=/usr/bin/dockerd-current -H tcp://0.0.0.0:{{.DockerPort}} -H unix:///v
            {{ range .EngineOptions.Labels }}--label {{.}} {{ end }}{{ range .EngineOptions.InsecureRegistry }}--insecure-registry {{.}} {{ end }}{{ range .EngineOptions.RegistryMirror }}--registry-mirror {{.}} {{ end }}{{ range .EngineOptions.ArbitraryFlags }}--{{.}} {{ end }}
 Environment={{range .EngineOptions.Env}}{{ printf "%q" . }} {{end}}
 `
+
+	engineConfigTemplateFedora = `[Service]
+ExecStart=
+ExecStart=/usr/bin/dockerd-current -H tcp://0.0.0.0:{{.DockerPort}} -H unix:///var/run/docker.sock \
+		  --add-runtime oci=/usr/libexec/docker/docker-runc-current \
+          --default-runtime=oci \
+          --authorization-plugin=rhel-push-plugin \
+          --containerd /run/containerd.sock \
+          --exec-opt native.cgroupdriver=systemd \
+          --userland-proxy-path=/usr/libexec/docker/docker-proxy-current \
+          --init-path=/usr/libexec/docker/docker-init-current \
+          --seccomp-profile=/etc/docker/seccomp.json \
+		  --storage-driver {{.EngineOptions.StorageDriver}} --tlsverify --tlscacert {{.AuthOptions.CaCertRemotePath}} \
+		  --tlscert {{.AuthOptions.ServerCertRemotePath}} --tlskey {{.AuthOptions.ServerKeyRemotePath}} \
+           {{ range .EngineOptions.Labels }}--label {{.}} {{ end }}{{ range .EngineOptions.InsecureRegistry }}--insecure-registry {{.}} {{ end }}{{ range .EngineOptions.RegistryMirror }}--registry-mirror {{.}} {{ end }}{{ range .EngineOptions.ArbitraryFlags }}--{{.}} {{ end }}
+Environment={{range .EngineOptions.Env}}{{ printf "%q" . }} {{end}}
+`
+
 	engineConfigTemplateBuildRoot = `[Unit]
 Description=Docker Application Container Engine
 Documentation=https://docs.docker.com

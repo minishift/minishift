@@ -56,6 +56,7 @@ func TestRhelImage(t *testing.T) {
 	info := &provision.OsRelease{
 		Name:      "Red Hat Enterprise Linux Server",
 		VersionID: "7.3",
+		ID:        "redhat",
 	}
 	p.SetOsReleaseInfo(info)
 	assert.True(t, p.GetRedhatRelease(), "Provisioner should detect RHEL")
@@ -67,6 +68,7 @@ func TestCentOSImage(t *testing.T) {
 	info := &provision.OsRelease{
 		Name:      "CentOS Linux",
 		VersionID: "7.3",
+		ID:        "centos",
 	}
 	p.SetOsReleaseInfo(info)
 	os, _ := p.GetOsReleaseInfo()
@@ -98,6 +100,7 @@ func TestMinishiftProvisionerGenerateDockerOptionsForRHEL(t *testing.T) {
 	info := &provision.OsRelease{
 		Name:      "Red Hat Enterprise Linux Server",
 		VersionID: "7.3",
+		ID:        "redhat",
 	}
 	p.SetOsReleaseInfo(info)
 
@@ -114,6 +117,7 @@ func TestMinishiftProvisionerGenerateDockerOptionsForCentOS(t *testing.T) {
 	info := &provision.OsRelease{
 		Name:      "CentOS Linux",
 		VersionID: "7.3",
+		ID:        "centos",
 	}
 	p.SetOsReleaseInfo(info)
 

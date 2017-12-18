@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"strings"
 	"text/template"
 
 	"github.com/docker/machine/libmachine/auth"
@@ -78,8 +77,7 @@ func (provisioner *MinishiftProvisioner) GetRedhatRelease() bool {
 	minishiftConfig.InstanceConfig.IsRHELBased = true
 	minishiftConfig.InstanceConfig.Write()
 
-	OsRelease, _ := provisioner.GetOsReleaseInfo()
-	if strings.Contains(OsRelease.Name, "Red Hat Enterprise") {
+	if provisioner.OsReleaseInfo.ID == "redhat" {
 		return true
 	}
 	return false
@@ -163,6 +161,8 @@ func (provisioner *MinishiftProvisioner) GenerateDockerOptions(dockerPort int) (
 	engineConfigTemplate := engineConfigTemplateCentOS
 	if provisioner.GetRedhatRelease() {
 		engineConfigTemplate = engineConfigTemplateRHEL
+	} else if provisioner.OsReleaseInfo.ID == "fedora" {
+		engineConfigTemplate = engineConfigTemplateFedora
 	}
 
 	t, err := template.New("engineConfig").Parse(engineConfigTemplate)

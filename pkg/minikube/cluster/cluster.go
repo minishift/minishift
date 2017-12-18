@@ -32,9 +32,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 
-	"github.com/docker/machine/drivers/virtualbox"
 	"github.com/docker/machine/libmachine"
-	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/engine"
 	"github.com/docker/machine/libmachine/host"
 	"github.com/docker/machine/libmachine/state"
@@ -159,19 +157,22 @@ type sshAble interface {
 
 // MachineConfig contains the parameters used to start a cluster.
 type MachineConfig struct {
-	MinikubeISO         string
-	ISOCacheDir         string
-	Memory              int
-	CPUs                int
-	DiskSize            int
-	VMDriver            string
-	DockerEnv           []string // Each entry is formatted as KEY=VALUE.
-	DockerEngineOpt     []string
-	InsecureRegistry    []string
-	RegistryMirror      []string
-	HostOnlyCIDR        string // Only used by the virtualbox driver
-	ShellProxyEnv       string // Only used for proxy purpose
-	HypervVirtualSwitch string
+	MinikubeISO           string
+	ISOCacheDir           string
+	Memory                int
+	CPUs                  int
+	DiskSize              int
+	VMDriver              string
+	DockerEnv             []string // Each entry is formatted as KEY=VALUE.
+	DockerEngineOpt       []string
+	InsecureRegistry      []string
+	RegistryMirror        []string
+	HostOnlyCIDR          string // Only used by the virtualbox driver
+	ShellProxyEnv         string // Only used for proxy purpose
+	HypervVirtualSwitch   string
+	RemoteIPAddress       string // Only used for generic driver purpose to connect remote machine
+	RemoteSSHUser         string // Only used for generic driver purpose to specify ssh user
+	SSHKeyToConnectRemote string // Only used for generic driver purpose to specify ssh key path
 }
 
 func engineOptions(config MachineConfig) *engine.Options {
@@ -320,12 +321,6 @@ func (m *MachineConfig) IsMinikubeISOCached() bool {
 }
 
 func createHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
-	if config.ShouldCacheMinikubeISO() {
-		if err := config.CacheMinikubeISOFromURL(); err != nil {
-			return nil, err
-		}
-	}
-
 	driverOptions := getDriverOptions(config)
 
 	rawDriver, err := json.Marshal(driverOptions)
@@ -380,6 +375,8 @@ func getDriverOptions(config MachineConfig) interface{} {
 		driver = createHypervHost(config)
 	case "hyperkit":
 		driver = createHyperkitHost(config)
+	case "generic":
+		driver = createGenericDriverConfig(config)
 	default:
 		atexit.ExitWithMessage(1, fmt.Sprintf("Unsupported driver: %s", config.VMDriver))
 	}
@@ -513,14 +510,4 @@ func GetHostIP(api libmachine.API) (string, error) {
 		return "", err
 	}
 	return ip, nil
-}
-
-func createVirtualboxHost(config MachineConfig) drivers.Driver {
-	d := virtualbox.NewDriver(constants.MachineName, constants.Minipath)
-	d.Boot2DockerURL = config.GetISOFileURI()
-	d.Memory = config.Memory
-	d.CPU = config.CPUs
-	d.DiskSize = int(config.DiskSize)
-	d.HostOnlyCIDR = config.HostOnlyCIDR
-	return d
 }

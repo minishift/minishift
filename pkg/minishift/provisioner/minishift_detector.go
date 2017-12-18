@@ -48,6 +48,11 @@ func (detector *MinishiftProvisionerDetector) DetectProvisioner(driver drivers.D
 		provisioner := NewMinishiftProvisioner("minishift", driver)
 		provisioner.SetOsReleaseInfo(osReleaseInfo)
 		return provisioner, nil
+	} else if detector.isRHELVariantIso(osReleaseInfo) {
+		provisioner := NewMinishiftProvisioner("minishift", driver)
+		provisioner.SetOsReleaseInfo(osReleaseInfo)
+		return provisioner, nil
+
 	} else if detector.isBuildrootIso(osReleaseInfo) {
 		provisioner := NewBuildrootProvisioner("buildroot", driver)
 		provisioner.SetOsReleaseInfo(osReleaseInfo)
@@ -59,6 +64,13 @@ func (detector *MinishiftProvisionerDetector) DetectProvisioner(driver drivers.D
 
 func (detector *MinishiftProvisionerDetector) isMinishiftIso(osReleaseInfo *provision.OsRelease) bool {
 	if osReleaseInfo.Variant == "minishift" {
+		return true
+	}
+	return false
+}
+
+func (detector *MinishiftProvisionerDetector) isRHELVariantIso(osReleaseInfo *provision.OsRelease) bool {
+	if osReleaseInfo.ID == "centos" || osReleaseInfo.ID == "fedora" || osReleaseInfo.ID == "redhat" {
 		return true
 	}
 	return false

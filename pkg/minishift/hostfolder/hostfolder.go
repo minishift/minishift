@@ -37,6 +37,7 @@ import (
 
 const (
 	HostfoldersAutoMountKey = "hostfolders-automount"
+	NonSupportedTtyError    = "Not a tty supported terminal"
 )
 
 func IsAutoMount() bool {
@@ -112,6 +113,9 @@ func SetupUsers(allInstances bool) error {
 
 	mountpoint := readInputForMountpoint(name)
 	username := util.ReadInputFromStdin("Username")
+	if !util.IsTtySupported() {
+		return fmt.Errorf(NonSupportedTtyError)
+	}
 	password := util.ReadPasswordFromStdin("Password")
 	domain := util.ReadInputFromStdin("Domain")
 	password, err := util.EncryptText(password)
@@ -141,6 +145,9 @@ func Add(name string, allInstances bool) error {
 	}
 	mountpoint := readInputForMountpoint(name)
 	username := util.ReadInputFromStdin("Username")
+	if !util.IsTtySupported() {
+		return fmt.Errorf(NonSupportedTtyError)
+	}
 	password := util.ReadPasswordFromStdin("Password")
 	domain := util.ReadInputFromStdin("Domain")
 	password, err := util.EncryptText(password)

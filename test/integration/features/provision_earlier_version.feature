@@ -22,12 +22,12 @@ Feature: Provision an older major release
     After startup of Minishift OpenShift instance should respond correctly on its HTML endpoints
     and OpenShift web console should be accessible.
     Given Minishift has state "Running"
-     Then status code of HTTP request to "OpenShift" at "/healthz" is equal to "200"
-      And body of HTTP request to "OpenShift" at "/healthz" contains "ok"
-      And status code of HTTP request to "OpenShift" at "/healthz/ready" is equal to "200"
-      And body of HTTP request to "OpenShift" at "/healthz/ready" contains "ok"
-      And status code of HTTP request to "OpenShift" at "/console" is equal to "200"
-      And body of HTTP request to "OpenShift" at "/console" contains "<title>OpenShift Web Console</title>"
+     Then "status code" of HTTP request to "/healthz" of OpenShift instance is equal to "200"
+      And "body" of HTTP request to "/healthz" of OpenShift instance contains "ok"
+      And "status code" of HTTP request to "/healthz/ready" of OpenShift instance is equal to "200"
+      And "body" of HTTP request to "/healthz/ready" of OpenShift instance contains "ok"
+      And "status code" of HTTP request to "/console" of OpenShift instance is equal to "200"
+      And "body" of HTTP request to "/console" of OpenShift instance contains "<title>OpenShift Web Console</title>"
 
   Scenario: User is able to do ssh into Minishift VM
     Given Minishift has state "Running"

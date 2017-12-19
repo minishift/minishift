@@ -19,9 +19,10 @@ which are then available in OpenShift to the user.
   Scenario Outline: User deploys, checks out and deletes several templates from XpaaS imagestream
    Given Minishift has state "Running"
     When executing "oc new-app <template-name>" succeeds
-     And services "<service-name>" rollout successfully
-    Then body of HTTP request to "<http-endpoint>" of service "<service-name>" in namespace "myproject" contains "<expected-hello>"
-     And status code of HTTP request to "<http-endpoint>" of service "<service-name>" in namespace "myproject" is equal to "200"
+     And executing "oc set probe dc/<service-name> --readiness --get-url=http://:8080<http-endpoint>" succeeds
+     And service "<service-name>" rollout successfully
+    Then with up to "10" retries with wait period of "500ms" the "body" of HTTP request to "<http-endpoint>" of service "<service-name>" in namespace "myproject" contains "<expected-hello>"
+     And with up to "10" retries with wait period of "500ms" the "status code" of HTTP request to "<http-endpoint>" of service "<service-name>" in namespace "myproject" is equal to "200"
      And executing "oc delete all --all" succeeds
 
   Examples: Required information to test the templates

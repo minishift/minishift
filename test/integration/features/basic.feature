@@ -35,12 +35,12 @@ Feature: Basic
     and OpenShift web console should be accessible.
 
     Given Minishift has state "Running"
-     When status code of HTTP request to "OpenShift" at "/healthz" is equal to "200"
-     Then body of HTTP request to "OpenShift" at "/healthz" contains "ok"
-      And status code of HTTP request to "OpenShift" at "/healthz/ready" is equal to "200"
-      And body of HTTP request to "OpenShift" at "/healthz/ready" contains "ok"
-      And status code of HTTP request to "OpenShift" at "/console" is equal to "200"
-      And body of HTTP request to "OpenShift" at "/console" contains "<title>OpenShift Web Console</title>"
+     When "status code" of HTTP request to "/healthz" of OpenShift instance is equal to "200"
+     Then "body" of HTTP request to "/healthz" of OpenShift instance contains "ok"
+      And "status code" of HTTP request to "/healthz/ready" of OpenShift instance is equal to "200"
+      And "body" of HTTP request to "/healthz/ready" of OpenShift instance contains "ok"
+      And "status code" of HTTP request to "/console" of OpenShift instance is equal to "200"
+      And "body" of HTTP request to "/console" of OpenShift instance contains "<title>OpenShift Web Console</title>"
 
   Scenario Outline: User can set, get, view and unset values in configuration file
     User is able to setup persistent configuration of Minishift using "config" command
@@ -143,10 +143,12 @@ Feature: Basic
     When executing "oc login --username=developer --password=developer" succeeds
      And executing "oc new-project ruby" succeeds
      And executing "oc new-app centos/ruby-22-centos7~https://github.com/openshift/ruby-ex.git" succeeds
-     And services "ruby-ex" rollout successfully
      And executing "oc expose svc/ruby-ex" succeeds
-    Then status code of HTTP request to "/" of service "ruby-ex" in namespace "ruby" is equal to "200"
-     And body of HTTP request to "/" of service "ruby-ex" in namespace "ruby" contains "Welcome to your Ruby application on OpenShift"
+     And executing "oc set probe dc/ruby-ex --readiness --get-url=http://:8080" succeeds
+     And service "ruby-ex" rollout successfully
+
+    Then with up to "10" retries with wait period of "500ms" the "status code" of HTTP request to "/" of service "ruby-ex" in namespace "ruby" is equal to "200"
+     And with up to "10" retries with wait period of "500ms" the "body" of HTTP request to "/" of service "ruby-ex" in namespace "ruby" contains "Welcome to your Ruby application on OpenShift"
 
     When executing "oc delete project ruby" succeeds
     Then stdout should contain "project "ruby" deleted"

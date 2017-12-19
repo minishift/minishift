@@ -35,6 +35,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/godog"
 	"github.com/DATA-DOG/godog/gherkin"
@@ -192,7 +193,7 @@ func FeatureContext(s *godog.Suite) {
 		variableShouldNotBeEmpty)
 
 	// steps for rollout check
-	s.Step(`^services "([^"]*)" rollout successfully$`,
+	s.Step(`^services? "([^"]*)" rollout successfully$`,
 		minishift.rolloutServicesSuccessfully)
 
 	// steps for proxying
@@ -234,13 +235,19 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^(stdout|stderr|exitcode) should not match$`,
 		commandReturnShouldNotMatchRegexContent)
 
-	// step for HTTP requests for minishift web console
-	s.Step(`^(body|status code) of HTTP request to "([^"]*)" (?:|at "([^"]*)" )(contains|is equal to) "(.*)"$`,
-		verifyHTTPResponse)
-
-	// step for HTTP requests for accessing application
-	s.Step(`^(body|status code) of HTTP request to "([^"]*)" of service "([^"]*)" in namespace "([^"]*)" (contains|is equal to) "(.*)"$`,
-		getRoutingUrlAndVerifyHTTPResponse)
+	// step for HTTP requests to OpenShift instance
+	s.Step(`^"(body|status code)" of HTTP request to "([^"]*)" (contains|is equal to) "(.*)"$`,
+		verifyRequestToURL)
+	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)ms" the "(body|status code)" of HTTP request to "([^"]*)" (contains|is equal to) "(.*)"$`,
+		verifyRequestToURLWithRetry)
+	s.Step(`^"(body|status code)" of HTTP request to "([^"]*)" of OpenShift instance (contains|is equal to) "(.*)"$`,
+		verifyRequestToOpenShift)
+	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)ms" the "(body|status code)" of HTTP request to "([^"]*)" of OpenShift instance (contains|is equal to) "(.*)"$`,
+		verifyRequestToOpenShiftWithRetry)
+	s.Step(`^"(body|status code)" of HTTP request to "([^"]*)" of service "([^"]*)" in namespace "([^"]*)" (contains|is equal to) "(.*)"$`,
+		verifyRequestToService)
+	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)ms" the "(body|status code)" of HTTP request to "([^"]*)" of service "([^"]*)" in namespace "([^"]*)" (contains|is equal to) "(.*)"$`,
+		verifyRequestToServiceWithRetry)
 
 	// steps for verifying config file content
 	s.Step(`^(JSON|YAML) config file "(.*)" (contains|does not contain) key "(.*)" with value matching "(.*)"$`,
@@ -288,6 +295,10 @@ func FeatureContext(s *godog.Suite) {
 		util.HostShellCommandReturnShouldEqualContent)
 	s.Step(`^evaluating stdout of the previous command in host shell$`,
 		util.ExecuteInHostShellLineByLine)
+
+	// steps for prototyping or debugging purposes, please do not use in production
+	s.Step(`^user (?:waits|waited) "(\d+)" seconds?$`,
+		util.WaitForNSeconds)
 
 	s.BeforeSuite(func() {
 		testDir = setUp()
@@ -725,11 +736,55 @@ func succeedsOrFails(execute commandRunner, command string, expectedResult strin
 	return nil
 }
 
-func verifyHTTPResponse(partOfResponse string, url string, urlSuffix string, assertion string, expected string) error {
-	switch url {
-	case "OpenShift":
-		url = minishift.getOpenShiftUrl() + urlSuffix
+func verifyRequestToURL(partOfResponse string, url string, assertion string, expected string) error {
+	return verifyHTTPResponse(partOfResponse, url, assertion, expected)
+}
+
+func verifyRequestToURLWithRetry(retryCount int, retryWaitPeriod int, partOfResponse string, url string, assertion string, expected string) error {
+	return verifyHTTPResponseWithRetry(partOfResponse, url, assertion, expected, retryCount, retryWaitPeriod)
+}
+
+func verifyRequestToService(partOfResponse string, urlSuffix string, serviceName string, nameSpace string, assertion string, expected string) error {
+	url := minishift.getRoute(serviceName, nameSpace) + urlSuffix
+	return verifyHTTPResponse(partOfResponse, url, assertion, expected)
+}
+
+func verifyRequestToServiceWithRetry(retryCount int, retryWaitPeriod int, partOfResponse string, urlSuffix string, serviceName string, nameSpace string, assertion string, expected string) error {
+	url := minishift.getRoute(serviceName, nameSpace) + urlSuffix
+	return verifyHTTPResponseWithRetry(partOfResponse, url, assertion, expected, retryCount, retryWaitPeriod)
+}
+
+func verifyRequestToOpenShift(partOfResponse string, urlSuffix string, assertion string, expected string) error {
+	url := minishift.getOpenShiftUrl() + urlSuffix
+	return verifyHTTPResponse(partOfResponse, url, assertion, expected)
+}
+
+func verifyRequestToOpenShiftWithRetry(retryCount int, retryWaitPeriod int, partOfResponse string, urlSuffix string, assertion string, expected string) error {
+	url := minishift.getOpenShiftUrl() + urlSuffix
+	return verifyHTTPResponseWithRetry(partOfResponse, url, assertion, expected, retryCount, retryWaitPeriod)
+}
+
+func verifyHTTPResponseWithRetry(partOfResponse string, url string, assertion string, expected string, retryCount int, retryWaitPeriod int) error {
+	var err error
+
+	for i := 0; i <= retryCount; i++ {
+		err = verifyHTTPResponse(partOfResponse, url, assertion, expected)
+		if err == nil {
+			break
+		}
+		if i == retryCount {
+			fmt.Printf("HTTP check (%v) has failed. Error: %v\n", i+1, err)
+			break
+		}
+
+		fmt.Printf("HTTP check (%v) has failed, trying again in %v ms. Error: %v\n", i+1, retryWaitPeriod, err)
+		time.Sleep(time.Millisecond * time.Duration(retryWaitPeriod))
 	}
+
+	return err
+}
+
+func verifyHTTPResponse(partOfResponse string, url string, assertion string, expected string) error {
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
@@ -761,19 +816,6 @@ func verifyHTTPResponse(partOfResponse string, url string, urlSuffix string, ass
 		}
 	default:
 		return fmt.Errorf("Assertion type: %s is not implemented", assertion)
-	}
-	return nil
-}
-
-func getRoutingUrlAndVerifyHTTPResponse(partOfResponse string, urlRoot string, serviceName string, nameSpace string, assertion string, expected string) error {
-	url := minishift.getRoute(serviceName, nameSpace)
-	if urlRoot == "/" {
-		return verifyHTTPResponse(partOfResponse, url, "", assertion, expected)
-	} else if strings.HasPrefix(urlRoot, "/") {
-		url := url + urlRoot
-		return verifyHTTPResponse(partOfResponse, url, "", assertion, expected)
-	} else {
-		return fmt.Errorf("Wrong input format : %s. Input must start with /", urlRoot)
 	}
 	return nil
 }

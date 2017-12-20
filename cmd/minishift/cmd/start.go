@@ -376,6 +376,7 @@ func configureNetworkSettings() {
 		Netmask:   viper.GetString(configCmd.Netmask.Name),
 		Gateway:   viper.GetString(configCmd.Gateway.Name),
 	}
+
 	nameservers := getSlice(configCmd.NameServers.Name)
 	if len(nameservers) > 0 {
 		networkSettings.DNS1 = nameservers[0]

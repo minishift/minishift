@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"net"
 	"strconv"
 	"strings"
 	"text/template"
@@ -178,6 +179,14 @@ func fillNetworkSettingsScript(networkSettings NetworkSettings) string {
 	}
 
 	return result.String()
+}
+
+func determineDefaultGateway(ipaddress string) string {
+	ip := net.ParseIP(ipaddress)
+	ip = ip.To4()
+	//ip = ip.Mask(ip.DefaultMask())
+	ip[3] = 1
+	return ip.String()
 }
 
 func executeCommandOrExit(driver drivers.Driver, command string, errorMessage string) string {

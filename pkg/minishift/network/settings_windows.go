@@ -41,6 +41,10 @@ func ConfigureNetworking(machineName string, networkSettings NetworkSettings) {
 		return
 	}
 
+	if networkSettings.Gateway == "" {
+		networkSettings.Gateway = determineDefaultGateway(networkSettings.IPAddress)
+	}
+
 	printNetworkSettings(networkSettings)
 
 	networkScript := fillNetworkSettingsScript(networkSettings)

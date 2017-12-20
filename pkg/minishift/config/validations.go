@@ -155,6 +155,19 @@ func IsValidISOUrl(_ string, isoURL string) error {
 	return nil
 }
 
+func IsValidIPv4AddressSlice(name string, addressSlice string) error {
+	addresses := strings.Split(addressSlice, ",")
+
+	for _, address := range addresses {
+		err := IsValidIPv4Address(name, address)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func IsValidIPv4Address(name string, address string) error {
 	ip := net.ParseIP(address).To4()
 	if ip == nil {

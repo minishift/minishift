@@ -345,21 +345,7 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 		fmt.Println("   Disk size:", units.HumanSize(float64(machineConfig.DiskSize*units.MB)))
 	}
 
-	// Experimental features
-	if minishiftConfig.EnableExperimental {
-		networkSettings := minishiftNetwork.NetworkSettings{
-			Device:    viper.GetString(configCmd.NetworkDevice.Name),
-			IPAddress: viper.GetString(configCmd.IPAddress.Name),
-			Netmask:   viper.GetString(configCmd.Netmask.Name),
-			Gateway:   viper.GetString(configCmd.Gateway.Name),
-			DNS1:      viper.GetString(configCmd.NameServer.Name),
-		}
-
-		// Configure networking on startup only works on Hyper-V
-		if networkSettings.IPAddress != "" {
-			minishiftNetwork.ConfigureNetworking(constants.MachineName, networkSettings)
-		}
-	}
+	configureNetworkSettings()
 
 	cacheMinishiftISO(machineConfig)
 
@@ -381,6 +367,27 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 
 	fmt.Println(" OK")
 	return hostVm
+}
+
+func configureNetworkSettings() {
+	networkSettings := minishiftNetwork.NetworkSettings{
+		Device:    viper.GetString(configCmd.NetworkDevice.Name),
+		IPAddress: viper.GetString(configCmd.IPAddress.Name),
+		Netmask:   viper.GetString(configCmd.Netmask.Name),
+		Gateway:   viper.GetString(configCmd.Gateway.Name),
+	}
+	nameservers := getSlice(configCmd.NameServers.Name)
+	if len(nameservers) > 0 {
+		networkSettings.DNS1 = nameservers[0]
+	}
+	if len(nameservers) > 1 {
+		networkSettings.DNS2 = nameservers[1]
+	}
+
+	// Configure networking on startup only works on Hyper-V
+	if networkSettings.IPAddress != "" {
+		minishiftNetwork.ConfigureNetworking(constants.MachineName, networkSettings)
+	}
 }
 
 func autoMountHostFolders(driver drivers.Driver) {
@@ -556,7 +563,7 @@ func initStartFlags() *flag.FlagSet {
 		startFlagSet.String(configCmd.IPAddress.Name, "", "Specify IP address to assign to the instance (experimental - Hyper-V only)")
 		startFlagSet.String(configCmd.Netmask.Name, "24", "Specify netmask to use for the IP address. Ignored if no IP address specified (experimental - Hyper-V only)")
 		startFlagSet.String(configCmd.Gateway.Name, "", "Specify gateway to use for the instance. Ignored if no IP address specified (experimental - Hyper-V only)")
-		startFlagSet.String(configCmd.NameServer.Name, "8.8.8.8", "Specify nameserver to use for the instance. Ignored if no IP address specified (experimental - Hyper-V only)")
+		startFlagSet.String(configCmd.NameServers.Name, "8.8.8.8", "Specify nameserver to use for the instance. Ignored if no IP address specified (experimental - Hyper-V only)")
 	}
 
 	if minishiftConfig.EnableExperimental {

@@ -19,6 +19,7 @@ package network
 import (
 	"encoding/base64"
 	"fmt"
+	"net"
 	"strings"
 	"time"
 
@@ -34,6 +35,24 @@ const (
 	networkingMessageName = "PROVISION_NETWORKING"
 )
 
+func determineNameservers() []string {
+	posh := powershell.New()
+	defer posh.Close()
+
+	command := `Get-DnsClientServerAddress | Where-Object { $_.InterfaceAlias -like 'vEthernet*' } | ForEach-Object { $_.ServerAddresses }`
+	result, _ := posh.Execute(command)
+
+	nameservers := strings.Split(result, "\r\n")
+	ipv4ns := []string{}
+	for _, ns := range nameservers {
+		if net.ParseIP(ns).To4() != nil {
+			ipv4ns = append(ipv4ns, ns)
+		}
+	}
+
+	return ipv4ns
+}
+
 func ConfigureNetworking(machineName string, networkSettings NetworkSettings) {
 	// Instruct the user that this does not work for other Hypervisors on Windows
 	if !minishiftConfig.IsHyperV() {
@@ -43,6 +62,17 @@ func ConfigureNetworking(machineName string, networkSettings NetworkSettings) {
 
 	if networkSettings.Gateway == "" {
 		networkSettings.Gateway = determineDefaultGateway(networkSettings.IPAddress)
+	}
+
+	if networkSettings.DNS1 == "" && networkSettings.DNS2 == "" {
+		nameservers := determineNameservers()
+
+		if len(nameservers) > 0 {
+			networkSettings.DNS1 = nameservers[0]
+		}
+		if len(nameservers) > 1 {
+			networkSettings.DNS2 = nameservers[1]
+		}
 	}
 
 	printNetworkSettings(networkSettings)

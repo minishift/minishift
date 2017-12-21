@@ -23,3 +23,7 @@ import (
 func ConfigureNetworking(machineName string, networkSettings NetworkSettings) {
 	fmt.Println(configureIPAddressMessage, configureIPAddressFailure)
 }
+
+func determineNameservers() string {
+	return "" // not implemented
+}

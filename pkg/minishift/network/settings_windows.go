@@ -60,19 +60,35 @@ func ConfigureNetworking(machineName string, networkSettings NetworkSettings) {
 		return
 	}
 
+	if networkSettings.Device == "" {
+		networkSettings.Device = "eth0"
+	}
+
 	if networkSettings.Gateway == "" {
+		fmt.Println("-- Determing default gateway ... ")
 		networkSettings.Gateway = determineDefaultGateway(networkSettings.IPAddress)
 	}
 
 	if networkSettings.DNS1 == "" && networkSettings.DNS2 == "" {
+		fmt.Printf("-- Determing nameservers to use ... ")
 		nameservers := determineNameservers()
 
+		if len(nameservers) == 0 {
+			fmt.Println("FAIL")
+			fmt.Println("   Consider to configure using '--network-nameserver'")
+		}
+
 		if len(nameservers) > 0 {
+			fmt.Println("OK")
 			networkSettings.DNS1 = nameservers[0]
 		}
 		if len(nameservers) > 1 {
 			networkSettings.DNS2 = nameservers[1]
 		}
+		if len(nameservers) > 2 {
+			fmt.Println("   WARN: found more than 2 nameservers")
+		}
+
 	}
 
 	printNetworkSettings(networkSettings)

@@ -559,12 +559,12 @@ func initStartFlags() *flag.FlagSet {
 	startFlagSet.AddFlag(registryMirrorFlag)
 	startFlagSet.AddFlag(cmdUtil.AddOnEnvFlag)
 
-	if minishiftConfig.EnableExperimental && runtime.GOOS == "windows" {
-		startFlagSet.String(configCmd.NetworkDevice.Name, "eth0", "Specify the network device to use for the IP address. Ignored if no IP address specified (experimental - Hyper-V only)")
-		startFlagSet.String(configCmd.IPAddress.Name, "", "Specify IP address to assign to the instance (experimental - Hyper-V only)")
-		startFlagSet.String(configCmd.Netmask.Name, "24", "Specify netmask to use for the IP address. Ignored if no IP address specified (experimental - Hyper-V only)")
-		startFlagSet.String(configCmd.Gateway.Name, "", "Specify gateway to use for the instance. Ignored if no IP address specified (experimental - Hyper-V only)")
-		startFlagSet.String(configCmd.NameServers.Name, "8.8.8.8", "Specify nameserver to use for the instance. Ignored if no IP address specified (experimental - Hyper-V only)")
+	if runtime.GOOS == "windows" {
+		startFlagSet.String(configCmd.NetworkDevice.Name, "eth0", "Specify the network device to use for the IP address. Ignored if no IP address specified (Hyper-V only)")
+		startFlagSet.String(configCmd.IPAddress.Name, "", "Specify IP address to assign to the instance (Hyper-V only)")
+		startFlagSet.String(configCmd.Netmask.Name, "24", "Specify netmask to use for the IP address. Ignored if no IP address specified (Hyper-V only)")
+		startFlagSet.String(configCmd.Gateway.Name, "", "Specify gateway to use for the instance. Ignored if no IP address specified (Hyper-V only)")
+		startFlagSet.String(configCmd.NameServers.Name, "", "Specify nameserver to use for the instance. Ignored if no IP address specified (Hyper-V only)")
 	}
 
 	if minishiftConfig.EnableExperimental {

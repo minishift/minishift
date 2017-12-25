@@ -73,7 +73,6 @@ func getConfigSet(api libmachine.API, forceShell string, noProxy bool) (*DockerS
 		DockerCertPath:  envMap["DOCKER_CERT_PATH"],
 		DockerHost:      envMap["DOCKER_HOST"],
 		DockerTLSVerify: envMap["DOCKER_TLS_VERIFY"],
-		UsageHint:       shell.GenerateUsageHint(userShell, cmdLine),
 	}
 
 	if noProxy {
@@ -88,7 +87,7 @@ func getConfigSet(api libmachine.API, forceShell string, noProxy bool) (*DockerS
 		}
 
 		noProxyVar, noProxyValue := shell.FindNoProxyFromEnv()
-
+		cmdLine = cmdLine + " --no-proxy"
 		// add the docker host to the no_proxy list idempotently
 		switch {
 		case noProxyValue == "":
@@ -103,6 +102,7 @@ func getConfigSet(api libmachine.API, forceShell string, noProxy bool) (*DockerS
 		shellCfg.NoProxyValue = noProxyValue
 	}
 
+	shellCfg.UsageHint = shell.GenerateUsageHint(userShell, cmdLine)
 	shellCfg.Prefix, shellCfg.Suffix, shellCfg.Delimiter = shell.GetPrefixSuffixDelimiterForSet(userShell, false)
 
 	return shellCfg, nil
@@ -114,19 +114,16 @@ func getConfigUnset(forceShell string, noProxy bool) (*DockerShellConfig, error)
 		return nil, err
 	}
 
-	cmdLine := "minishift docker-env"
-	shellCfg := &DockerShellConfig{
-		UsageHint: shell.GenerateUsageHint(userShell, cmdLine),
-	}
+	cmdLine := "minishift docker-env --unset"
+	shellCfg := &DockerShellConfig{}
 
 	if noProxy {
 		shellCfg.NoProxyVar, shellCfg.NoProxyValue = shell.FindNoProxyFromEnv()
+		cmdLine = cmdLine + " --no-proxy"
 	}
 
-	prefix, suffix, delimiter := shell.GetPrefixSuffixDelimiterForUnSet(userShell)
-	shellCfg.Prefix = prefix
-	shellCfg.Suffix = suffix
-	shellCfg.Delimiter = delimiter
+	shellCfg.UsageHint = shell.GenerateUsageHint(userShell, cmdLine)
+	shellCfg.Prefix, shellCfg.Suffix, shellCfg.Delimiter = shell.GetPrefixSuffixDelimiterForUnSet(userShell)
 
 	return shellCfg, nil
 }

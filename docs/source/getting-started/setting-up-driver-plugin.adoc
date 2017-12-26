@@ -204,7 +204,6 @@ Verify that you pair the virtual switch with a network card (wired or wireless) 
 ====
 
 . Set the environment variable `HYPERV_VIRTUAL_SWITCH` to the name of the external virtual switch you want to use for {project}.
-For more information, see xref:../using/basic-usage.adoc#driver-specific-environment-variables[driver-specific environment variables].
 +
 For example, on Command Prompt use:
 +

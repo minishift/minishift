@@ -100,6 +100,13 @@ var (
 		Value:     cmdUtil.NewStringSliceValue([]string{}, &[]string{}),
 	}
 
+	nameServersFlag = &flag.Flag{
+		Name:      configCmd.NameServers.Name,
+		Shorthand: "",
+		Usage:     "Specify nameserver to use for the instance.",
+		Value:     cmdUtil.NewStringSliceValue([]string{}, &[]string{}),
+	}
+
 	startCmd *cobra.Command
 
 	// Set default value for host data and config dir
@@ -177,6 +184,9 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	hostVm := startHost(libMachineClient)
 	registrationUtil.RegisterHost(libMachineClient)
+
+	// Forcibly set nameservers when configured
+	minishiftNetwork.AddNameserversToInstance(hostVm.Driver, getSlice(configCmd.NameServers.Name))
 
 	// preflight checks (after start)
 	preflightChecksAfterStartingHost(hostVm.Driver)
@@ -564,8 +574,8 @@ func initStartFlags() *flag.FlagSet {
 		startFlagSet.String(configCmd.IPAddress.Name, "", "Specify IP address to assign to the instance (Hyper-V only)")
 		startFlagSet.String(configCmd.Netmask.Name, "24", "Specify netmask to use for the IP address. Ignored if no IP address specified (Hyper-V only)")
 		startFlagSet.String(configCmd.Gateway.Name, "", "Specify gateway to use for the instance. Ignored if no IP address specified (Hyper-V only)")
-		startFlagSet.String(configCmd.NameServers.Name, "", "Specify nameserver to use for the instance. Ignored if no IP address specified (Hyper-V only)")
 	}
+	startFlagSet.AddFlag(nameServersFlag)
 
 	if minishiftConfig.EnableExperimental {
 		startFlagSet.String(configCmd.ISOUrl.Name, minishiftConstants.B2dIsoAlias, "Location of the minishift ISO. Can be an URL, file URI or one of the following short names: [b2d centos minikube].")

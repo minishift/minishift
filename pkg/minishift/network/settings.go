@@ -191,6 +191,7 @@ func determineDefaultGateway(ipaddress string) string {
 
 func executeCommandOrExit(driver drivers.Driver, command string, errorMessage string) string {
 	result, err := drivers.RunSSHCommandFromDriver(driver, command)
+
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("%s: %s", errorMessage, err.Error()))
 	}

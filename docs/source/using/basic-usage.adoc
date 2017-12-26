@@ -269,30 +269,6 @@ For example:
 $ minishift config unset memory
 ----
 
-[[driver-specific-environment-variables]]
-=== Driver-Specific Environment Variables
-
-You can also set driver-specific environment variables.
-Each Docker Machine driver supports its own set of options and variables.
-A good starting point is the official Docker Machine link:https://docs.docker.com/machine/drivers/[driver documentation].
-
-xhyve and KVM documentation is available under their respective GitHub repository link:https://github.com/zchee/docker-machine-driver-xhyve[docker-machine-driver-xhyve] and https://github.com/dhiltgen/docker-machine-kvm[docker-machine-kvm].
-
-To use driver-specific options, make sure to export the variable as defined in its driver documentation before running xref:../command-ref/minishift_start.adoc#[`minishift start`].
-For example, the xhyve experimental NFS sharing can be enabled by executing:
-
-----
-$ export XHYVE_EXPERIMENTAL_NFS_SHARE=true
-$ minishift start --vm-driver xhyve
-----
-
-[CAUTION]
-====
-Driver-specific options might overlap with values specified using {project}-specific flags and environment variables.
-Examples are boot2docker URL, memory size, cpu count, and so on.
-In this case, driver-specific environment variables will override {project}-specific settings.
-====
-
 [[persistent-volumes]]
 == Persistent Volumes
 

@@ -73,6 +73,7 @@ var (
 	OpenshiftEnv      = createConfigSetting("openshift-env", nil, nil, nil, false)
 	Metrics           = createConfigSetting("metrics", SetBool, nil, nil, true)
 	Logging           = createConfigSetting("logging", SetBool, nil, nil, true)
+
 	// future enabled flags
 	ServiceCatalog      = createConfigSetting("service-catalog", SetBool, nil, nil, true)
 	ExtraClusterUpFlags = createConfigSetting("extra-clusterup-flags", SetString, nil, nil, true)

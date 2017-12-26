@@ -154,6 +154,12 @@ func preflightChecksAfterStartingHost(driver drivers.Driver) {
 		configCmd.WarnInstanceIP.Name,
 		"Error determining IP address")
 	preflightCheckSucceedsOrFailsWithDriver(
+		configCmd.SkipCheckNameservers.Name,
+		checkNameservers, driver,
+		"Checking for nameservers",
+		configCmd.WarnCheckNameservers.Name,
+		"VM does not have any nameserver setup")
+	preflightCheckSucceedsOrFailsWithDriver(
 		configCmd.SkipCheckNetworkPing.Name,
 		checkIPConnectivity, driver,
 		"Checking if external host is reachable from the Minishift VM",
@@ -423,6 +429,11 @@ func checkInstanceIP(driver drivers.Driver) bool {
 		return true
 	}
 	return false
+}
+
+// checkNameservers will return true if the instance has nameservers
+func checkNameservers(driver drivers.Driver) bool {
+	return minishiftNetwork.HasNameserversConfigured(driver)
 }
 
 // checkIPConnectivity checks if the VM has connectivity to the outside network

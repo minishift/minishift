@@ -33,9 +33,9 @@ import (
 const (
 	commentChar = "#"
 
-	noAddOnDefinitionFoundError         = "There needs to be an addon file per addon directory. Found none in %s"
-	multipleAddOnDefinitionsError       = "There can only be one addon file per addon directory. Found %s"
-	multipleAddOnRemoveDefinitionsError = "There can only be one addon.remove file per addon directory. Found %s"
+	noAddOnDefinitionFoundError         = "There needs to be an addon file per addon directory. Found none in '%s'"
+	multipleAddOnDefinitionsError       = "There can only be one addon file per addon directory. Found '%s'"
+	multipleAddOnRemoveDefinitionsError = "There can only be one addon.remove file per addon directory. Found '%s'"
 	regexToGetMetaTagInfo               = `^# ?([a-zA-Z-]*):(.*)`
 )
 

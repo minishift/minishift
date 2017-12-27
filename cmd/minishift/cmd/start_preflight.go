@@ -416,14 +416,14 @@ func checkHttpConnectivity(driver drivers.Driver) bool {
 	return minishiftUtil.IsRetrievable(driver, urlToRetrieve, false)
 }
 
-// checkStorageMounted checks if the peristent storage volume, storageDisk, is
+// checkStorageMounted checks if the persistent storage volume, storageDisk, is
 // mounted to the VM instance
 func checkStorageMounted(driver drivers.Driver) bool {
 	mounted, _ := isMounted(driver, StorageDisk)
 	return mounted
 }
 
-// checkStorageUsage checks if the peristent storage volume has enough storage
+// checkStorageUsage checks if the persistent storage volume has enough storage
 // space available.
 func checkStorageUsage(driver drivers.Driver) bool {
 	_, usedPercentage := getDiskUsage(driver, StorageDisk)

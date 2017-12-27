@@ -78,7 +78,7 @@ func RestartOpenShift(commander docker.DockerCommander) (bool, error) {
 }
 
 func Patch(target OpenShiftPatchTarget, patch string, commander docker.DockerCommander) (bool, error) {
-	fmt.Println(fmt.Sprintf("Patching OpenShift configuration %s with %s", target.containerConfigFile, patch))
+	fmt.Println(fmt.Sprintf("Patching OpenShift configuration '%s' with '%s'", target.containerConfigFile, patch))
 
 	patchId, err := backUpConfig(target, commander)
 	if err != nil {

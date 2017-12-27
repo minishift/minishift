@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	emptyProfileMessage  = "A profile name must be provided. Run `minishift profile list` for a list of existing profiles."
+	emptyProfileMessage  = "A profile name must be provided. Run 'minishift profile list' for a list of existing profiles."
 	extraArgumentMessage = "You have provided more arguments than required. You must provide a single profile name."
 	invalidNameMessage   = "Profile names must consist of alphanumeric characters only."
 )

@@ -67,7 +67,7 @@ func SetOcContext(profileName string) error {
 
 	host, err := api.Load(profileName)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Error getting information for the VM: %s", profileName))
+		return errors.New(fmt.Sprintf("Error getting information for the VM: '%s'", profileName))
 	}
 
 	running := IsHostRunning(host.Driver)

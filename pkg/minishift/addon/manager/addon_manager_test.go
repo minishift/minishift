@@ -139,7 +139,7 @@ func TestVerifyValidRequiredVariablesInContext(t *testing.T) {
 func TestVerifyMissingRequiredVariablesInContext(t *testing.T) {
 	context, _ := command.NewExecutionContext(nil, nil)
 	expectedVarName := "FOO"
-	expectedErrMsg := "The variable(s) FOO are required by the add-on, but are not defined in the context"
+	expectedErrMsg := "The variable(s) 'FOO' are required by the add-on, but are not defined in the context"
 
 	testAddonMap := getTestAddonMap("test", "test description", expectedVarName, "", "")
 
@@ -197,7 +197,7 @@ func TestRemoveAddon(t *testing.T) {
 	assert.Equal(t, expectedRemoveAddonOutput, tee.StdoutBuffer.String())
 }
 
-var expectedInvalidAddonOperationError = errors.New("The variable(s) TEST are required by the add-on, but are not defined in the context")
+var expectedInvalidAddonOperationError = errors.New("The variable(s) 'TEST' are required by the add-on, but are not defined in the context")
 
 func TestApplyInvalidAddon(t *testing.T) {
 	path := filepath.Join(basepath, "..", "..", "..", "..", "test", "testdata", "testaddons")

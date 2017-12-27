@@ -84,7 +84,7 @@ func GetServiceSpecs(serviceNamespace string) ([]ServiceSpec, error) {
 	var serviceSpecs []ServiceSpec
 
 	if serviceNamespace != "" && !isProjectExists(serviceNamespace) {
-		return serviceSpecs, errors.New(fmt.Sprintf("Namespace %s doesn't exist", serviceNamespace))
+		return serviceSpecs, errors.New(fmt.Sprintf("Namespace '%s' doesn't exist", serviceNamespace))
 	}
 
 	namespaces, err := getValidNamespaces(serviceNamespace)

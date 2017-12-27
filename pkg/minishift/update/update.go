@@ -149,7 +149,7 @@ func downloadAndVerifyArchive(url, tmpDir string) (string, error) {
 
 	httpResp, err := http.Get(url)
 	if err != nil {
-		return "", errors.New(fmt.Sprintf("Cannot download archive from %s: %s", url, err))
+		return "", errors.New(fmt.Sprintf("Cannot download archive from '%s': %s", url, err))
 	}
 	defer func() { _ = httpResp.Body.Close() }()
 

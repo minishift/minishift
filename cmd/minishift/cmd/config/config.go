@@ -155,7 +155,7 @@ var ConfigCmd = &cobra.Command{
 	Use:   "config SUBCOMMAND [flags]",
 	Short: "Modifies Minishift configuration properties.",
 	Long: `Modifies Minishift configuration properties. Some of the configuration properties are equivalent
-to the options that you set when you run the minishift start command.
+to the options that you set when you run the 'minishift start' command.
 
 Configurable properties (enter as SUBCOMMAND): ` + "\n\n" + configurableFields(),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -178,12 +178,12 @@ func ReadConfig() (MinishiftConfig, error) {
 		if os.IsNotExist(err) {
 			return make(map[string]interface{}), nil
 		}
-		return nil, fmt.Errorf("Cannot open file %s: %s", constants.ConfigFile, err)
+		return nil, fmt.Errorf("Cannot open file '%s': %s", constants.ConfigFile, err)
 	}
 	var m MinishiftConfig
 	m, err = decode(f)
 	if err != nil {
-		return nil, fmt.Errorf("Cannot decode config %s: %s", constants.ConfigFile, err)
+		return nil, fmt.Errorf("Cannot decode config '%s': %s", constants.ConfigFile, err)
 	}
 
 	return m, nil
@@ -193,12 +193,12 @@ func ReadConfig() (MinishiftConfig, error) {
 func WriteConfig(m MinishiftConfig) error {
 	f, err := os.Create(constants.ConfigFile)
 	if err != nil {
-		return fmt.Errorf("Cannot create file %s: %s", constants.ConfigFile, err)
+		return fmt.Errorf("Cannot create file '%s': %s", constants.ConfigFile, err)
 	}
 	defer f.Close()
 	err = encode(f, m)
 	if err != nil {
-		return fmt.Errorf("Cannot encode config %s: %s", constants.ConfigFile, err)
+		return fmt.Errorf("Cannot encode config '%s': %s", constants.ConfigFile, err)
 	}
 	return nil
 }

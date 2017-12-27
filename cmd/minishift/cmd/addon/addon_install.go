@@ -61,7 +61,7 @@ func runInstallAddon(cmd *cobra.Command, args []string) {
 	addOnManager := GetAddOnManager()
 	if defaults {
 		util.UnpackAddons(addOnManager.BaseDir())
-		fmt.Println(fmt.Sprintf("Default add-ons %s installed", strings.Join(util.DefaultAssets, ", ")))
+		fmt.Println(fmt.Sprintf("Default add-ons '%s' installed", strings.Join(util.DefaultAssets, ", ")))
 		return
 	}
 

@@ -37,7 +37,7 @@ func IsValidDriver(string, driver string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("Driver %s is not supported", driver)
+	return fmt.Errorf("Driver '%s' is not supported", driver)
 }
 
 func isValidHumanSize(size string) (bool, error) {
@@ -106,7 +106,7 @@ func IsValidPath(name string, path string) error {
 
 func IsValidProxy(name string, uri string) error {
 	if err := util.ValidateProxyURL(uri); err != nil {
-		return fmt.Errorf("%s path is not valid: %v", name, err)
+		return fmt.Errorf("'%s' path is not valid: %v", name, err)
 	}
 	return nil
 }
@@ -117,7 +117,7 @@ func IsValidUrl(_ string, isoURL string) error {
 	}
 	_, err := url.ParseRequestURI(isoURL)
 	if err != nil {
-		return fmt.Errorf("%s url is not valid: %v", isoURL, err)
+		return fmt.Errorf("'%s' url is not valid: %v", isoURL, err)
 	}
 	return nil
 }
@@ -125,14 +125,14 @@ func IsValidUrl(_ string, isoURL string) error {
 func IsValidIPv4Address(name string, address string) error {
 	ip := net.ParseIP(address).To4()
 	if ip == nil {
-		return fmt.Errorf("%s IPv4 address is not valid: %s", name, address)
+		return fmt.Errorf("%s IPv4 address is not valid: '%s'", name, address)
 	}
 
 	return nil
 }
 
 func IsValidNetmask(name string, mask string) error {
-	err := fmt.Errorf("%s netmask is not valid: %s", name, mask)
+	err := fmt.Errorf("%s netmask is not valid: '%s'", name, mask)
 
 	if stringUtils.HasOnlyNumbers(mask) {
 		prefixSize, _ := strconv.Atoi(mask)

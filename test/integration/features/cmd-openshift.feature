@@ -72,7 +72,7 @@ cluster in VM provided by Minishift.
 
   Scenario: Getting service from non-existing namespace
       When executing "minishift openshift service nodejs-ex --namespace does-not-exist" fails
-      Then stderr should contain "Namespace does-not-exist doesn't exist"
+      Then stderr should contain "Namespace 'does-not-exist' doesn't exist"
 
   Scenario: Forgotten service name
       When executing "minishift openshift service --namespace myapp" fails

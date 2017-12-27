@@ -24,7 +24,7 @@ import (
 	"time"
 )
 
-const invalidSleepTimeError = "Unable to extract sleep time from cmd: %s"
+const invalidSleepTimeError = "Unable to extract sleep time from cmd: '%s'"
 
 var sleepRegexp = regexp.MustCompile(`sleep (\d+)`)
 

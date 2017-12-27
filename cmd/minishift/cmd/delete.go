@@ -91,7 +91,7 @@ func clearCache() {
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting Minishift cache: %v", err))
 	} else {
-		fmt.Printf("Removed cache content at: %s\n", cachePath)
+		fmt.Printf("Removed cache content at: '%s'\n", cachePath)
 	}
 }
 
@@ -110,7 +110,7 @@ func removeInstanceAndKubeConfig() {
 	exists := filehelper.Exists(minishiftConfig.InstanceConfig.FilePath)
 	if exists {
 		if err := minishiftConfig.InstanceConfig.Delete(); err != nil {
-			atexit.ExitWithMessage(1, fmt.Sprintln(fmt.Sprintf("Error deleting %s: ", minishiftConfig.InstanceConfig.FilePath), err))
+			atexit.ExitWithMessage(1, fmt.Sprintln(fmt.Sprintf("Error deleting '%s': ", minishiftConfig.InstanceConfig.FilePath), err))
 		}
 	}
 	exists = filehelper.Exists(constants.KubeConfigPath)

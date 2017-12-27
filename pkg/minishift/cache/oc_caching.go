@@ -60,7 +60,7 @@ func (oc *Oc) isCached() bool {
 func (oc *Oc) cacheOc() error {
 	if !oc.isCached() {
 		if err := github.DownloadOpenShiftReleaseBinary(github.OC, minishiftos.CurrentOS(), oc.OpenShiftVersion, oc.GetCacheFilepath()); err != nil {
-			return errors.Wrapf(err, "Error attempting to download and cache %s", github.OC.String())
+			return errors.Wrapf(err, "Error attempting to download and cache '%s'", github.OC.String())
 		}
 	}
 	return nil

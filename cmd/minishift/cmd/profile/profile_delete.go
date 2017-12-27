@@ -91,7 +91,7 @@ func runProfileDelete(cmd *cobra.Command, args []string) {
 	}
 
 	if glog.V(2) {
-		fmt.Println(fmt.Sprintf("Deleted: %s", profileBaseDir))
+		fmt.Println(fmt.Sprintf("Deleted: '%s'", profileBaseDir))
 	}
 
 	fmt.Println(fmt.Sprintf("Profile '%s' deleted successfully.", profileName))

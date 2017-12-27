@@ -44,7 +44,7 @@ func (c *OcCommand) doExecute(ec *ExecutionContext) error {
 	commander := ec.GetOcCommander()
 	exitStatus := commander.Run(ec.Interpolate(cmd), ioutil.Discard, os.Stdin)
 	if exitStatus != 0 {
-		return errors.New(fmt.Sprintf("Error executing command %s.", c.String()))
+		return errors.New(fmt.Sprintf("Error executing command '%s'.", c.String()))
 	}
 
 	return nil

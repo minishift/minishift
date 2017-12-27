@@ -69,7 +69,7 @@ type ClusterUpConfig struct {
 func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string, runner util.Runner) error {
 	cmdArgs := []string{"cluster", "up", "--use-existing-config"}
 
-	fmt.Println("-- Checking `oc` support for startup flags ... ")
+	fmt.Println("-- Checking 'oc' support for startup flags ... ")
 
 	// Deal with extra flags (remove from cluster up params)
 	var extraFlags string
@@ -83,7 +83,7 @@ func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string, runne
 		fmt.Printf("   %s ... ", key)
 		if !oc.SupportFlag(key, config.OcPath, runner) {
 			fmt.Println("FAIL")
-			return errors.New(fmt.Sprintf("Flag %s is not supported for oc version %s. Use 'openshift-version' flag to select a different version of OpenShift.", key, config.OpenShiftVersion))
+			return errors.New(fmt.Sprintf("Flag '%s' is not supported for oc version %s. Use 'openshift-version' flag to select a different version of OpenShift.", key, config.OpenShiftVersion))
 		}
 		fmt.Println("OK")
 
@@ -94,7 +94,7 @@ func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string, runne
 	if minishiftConfig.EnableExperimental {
 		// Deal with extra flags (add to command arguments)
 		if len(extraFlags) > 0 {
-			fmt.Println("-- Extra `oc` cluster up flags (experimental) ... ")
+			fmt.Println("-- Extra 'oc' cluster up flags (experimental) ... ")
 			fmt.Printf("   '%s'\n", extraFlags)
 			extraFlagFields := strings.Fields(extraFlags)
 			for _, extraFlag := range extraFlagFields {
@@ -104,7 +104,7 @@ func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string, runne
 	}
 
 	if glog.V(2) {
-		fmt.Printf("-- Running `oc` with: '%s'\n", strings.Join(cmdArgs, " "))
+		fmt.Printf("-- Running 'oc' with: '%s'\n", strings.Join(cmdArgs, " "))
 	}
 	exitCode := runner.Run(os.Stdout, os.Stderr, config.OcPath, cmdArgs...)
 	if exitCode != 0 {

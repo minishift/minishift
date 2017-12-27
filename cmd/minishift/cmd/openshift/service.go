@@ -109,11 +109,11 @@ func getServiceURL(serviceSpecs []openshift.ServiceSpec, ip string) string {
 	serviceURL := ""
 	namespaceList := isServiceInMultipleNamespace(serviceSpecs, service)
 	if len(namespaceList) == 0 {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Service %s does not exist", service))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Service '%s' does not exist", service))
 	}
 	if len(namespaceList) > 1 {
 		namespaces := strings.TrimSpace(strings.Join(namespaceList, ", "))
-		atexit.ExitWithMessage(1, fmt.Sprintf("Service %s exists in multiple namespaces (%s), you need to chose a specific namespace using -n <namespace>.", service, namespaces))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Service '%s' exists in multiple namespaces (%s), you need to chose a specific namespace using -n <namespace>.", service, namespaces))
 	}
 
 	for _, serviceSpec := range serviceSpecs {

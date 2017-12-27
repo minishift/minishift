@@ -76,7 +76,10 @@ var RootCmd = &cobra.Command{
 			isAddonInstallRequired bool
 		)
 
-		checkForValidProfileOrExit(cmd)
+		// If profile name is 'minishift' then ignore the vaild profile check.
+		if constants.ProfileName != constants.DefaultProfileName {
+			checkForValidProfileOrExit(cmd)
+		}
 
 		constants.MachineName = constants.ProfileName
 		constants.Minipath = constants.GetProfileHomeDir(constants.ProfileName)

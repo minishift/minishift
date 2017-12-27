@@ -108,7 +108,7 @@ func readInputForMountpoint(name string) string {
 func SetupUsers(allInstances bool) error {
 	name := "Users"
 	if isHostfolderDefinedByName(name) {
-		return fmt.Errorf("Already have a host folder defined for: %s", name)
+		return fmt.Errorf("Already have a host folder defined for: '%s'", name)
 	}
 
 	mountpoint := readInputForMountpoint(name)
@@ -136,7 +136,7 @@ func SetupUsers(allInstances bool) error {
 
 func Add(name string, allInstances bool) error {
 	if isHostfolderDefinedByName(name) {
-		return fmt.Errorf("Already have a host folder defined for: %s", name)
+		return fmt.Errorf("Already have a host folder defined for: '%s'", name)
 	}
 
 	uncpath := util.ReadInputFromStdin("UNC path")
@@ -193,7 +193,7 @@ func addToConfig(hostfolder config.HostFolder, allInstances bool) {
 
 func Remove(name string) error {
 	if !isHostfolderDefinedByName(name) {
-		return fmt.Errorf("No host folder defined as: %s", name)
+		return fmt.Errorf("No host folder defined as: '%s'", name)
 	}
 
 	config.InstanceConfig.HostFolders = removeFromHostFoldersByName(name, config.InstanceConfig.HostFolders)
@@ -218,7 +218,7 @@ func Mount(driver drivers.Driver, name string) error {
 
 	hostfolder := getHostfolderByName(name)
 	if hostfolder == nil {
-		return fmt.Errorf("No host folder defined as: %s", name)
+		return fmt.Errorf("No host folder defined as: '%s'", name)
 	} else {
 		ensureMountPointExists(driver, hostfolder)
 		mountHostfolder(driver, hostfolder)
@@ -258,7 +258,7 @@ func Umount(driver drivers.Driver, name string) error {
 
 	hostfolder := getHostfolderByName(name)
 	if hostfolder == nil {
-		return fmt.Errorf("No host folder defined as: %s", name)
+		return fmt.Errorf("No host folder defined as: '%s'", name)
 	} else {
 		umountHostfolder(driver, hostfolder)
 	}

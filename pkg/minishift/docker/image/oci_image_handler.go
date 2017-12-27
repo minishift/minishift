@@ -100,7 +100,7 @@ func (handler *OciImageHandler) ImportImages(config *ImageCacheConfig) ([]string
 
 	multiError := util.MultiError{}
 	for _, imageName := range config.CachedImages {
-		fmt.Fprint(out, fmt.Sprintf("   Importing %s ", imageName))
+		fmt.Fprint(out, fmt.Sprintf("   Importing '%s' ", imageName))
 		progressDots := progressdots.New()
 		progressDots.SetWriter(out)
 		progressDots.Start()
@@ -138,7 +138,7 @@ func (handler *OciImageHandler) ExportImages(config *ImageCacheConfig) ([]string
 
 	multiError := util.MultiError{}
 	for _, imageName := range config.CachedImages {
-		fmt.Fprint(out, fmt.Sprintf("Exporting %s", imageName))
+		fmt.Fprint(out, fmt.Sprintf("Exporting '%s'", imageName))
 		err = nil
 		progressDots := progressdots.New()
 		progressDots.SetWriter(out)

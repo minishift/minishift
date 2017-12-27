@@ -28,8 +28,8 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-// checkVBoxInstalled checks for the locations of VBoxManage from environmet variables,
-// in the defaiult install location and in windows registry respectivley, returns true
+// checkVBoxInstalled checks for the locations of VBoxManage from environment variables,
+// in the default install location and in windows registry respectively, returns true
 // if found in any one of the location, https://github.com/docker/machine/blob/master/drivers/virtualbox/virtualbox_windows.go
 func checkVBoxInstalled() bool {
 	vboxCmd := "VBoxManage.exe"

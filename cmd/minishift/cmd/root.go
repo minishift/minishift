@@ -213,7 +213,7 @@ func initConfig() {
 	viper.SetConfigType("json")
 	err := viper.ReadInConfig()
 	if err != nil {
-		glog.Warningf("Error reading config file at %s: %s", configPath, err)
+		glog.Warningf("Error reading config file at '%s': %s", configPath, err)
 	}
 	setupViper()
 }
@@ -297,12 +297,12 @@ func ensureConfigFileExists(configPath string) {
 		jsonRoot := []byte("{}")
 		f, err := os.Create(configPath)
 		if err != nil {
-			glog.Exitf("Cannot create file %s: %s", configPath, err)
+			glog.Exitf("Cannot create file '%s': %s", configPath, err)
 		}
 		defer f.Close()
 		_, err = f.Write(jsonRoot)
 		if err != nil {
-			glog.Exitf("Cannot encode config %s: %s", configPath, err)
+			glog.Exitf("Cannot encode config '%s': %s", configPath, err)
 		}
 	}
 }
@@ -324,7 +324,7 @@ func performPostUpdateExecution(markerPath string) error {
 		fmt.Print("--- Updating default add-ons ... ")
 		cmdUtil.UnpackAddons(state.InstanceDirs.Addons)
 		fmt.Println("OK")
-		fmt.Println(fmt.Sprintf("Default add-ons %s installed", strings.Join(cmdUtil.DefaultAssets, ", ")))
+		fmt.Println(fmt.Sprintf("Default add-ons '%s' installed", strings.Join(cmdUtil.DefaultAssets, ", ")))
 	}
 
 	// Delete the marker file once post update execution is done
@@ -385,7 +385,7 @@ func checkForValidProfileOrExit(cmd *cobra.Command) {
 		// This condition true for each command execpt `minishift profile <subcommand>` and `minishift start ...``
 		if cmd.Parent().Name() != profileCmd && cmd.Name() != startCmd.Name() {
 			if !cmdUtil.IsValidProfile(constants.ProfileName) {
-				atexit.ExitWithMessage(1, fmt.Sprintf("Profile: %s doesn't exist, Use `minishift profile set %s` or `minishift start --profile %s` to create", constants.ProfileName, constants.ProfileName, constants.ProfileName))
+				atexit.ExitWithMessage(1, fmt.Sprintf("Profile '%s' doesn't exist, Use 'minishift profile set %s' or 'minishift start --profile %s' to create", constants.ProfileName, constants.ProfileName, constants.ProfileName))
 			}
 		}
 	}

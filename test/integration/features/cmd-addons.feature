@@ -37,14 +37,14 @@ Feature: Addons command and its subcommands
      When executing "minishift addons remove anyuid" succeeds
      Then stdout should contain
       """
-      No anyuid.addon.remove file found for anyuid add-on.
+      No anyuid.addon.remove file found for 'anyuid' add-on.
       """
 
   Scenario: Installing default add-ons manually
      When executing "minishift addons install --defaults" succeeds
      Then stdout should contain
       """
-      Default add-ons anyuid, admin-user, xpaas, registry-route installed
+      Default add-ons 'anyuid, admin-user, xpaas, registry-route' installed
       """
      When executing "minishift addons list" succeeds
      Then stdout should contain "admin-user"
@@ -64,7 +64,7 @@ Feature: Addons command and its subcommands
      When executing "minishift addons enable absent-addon"
      Then stdout should contain
       """
-      No add-on with the name absent-addon is installed.
+      No add-on with the name 'absent-addon' is installed.
       """
 
   Scenario: Enabling installed add-on
@@ -117,7 +117,7 @@ Feature: Addons command and its subcommands
      When executing "minishift addons disable absent-addon"
      Then stdout should contain
       """
-      No add-on with the name absent-addon is installed.
+      No add-on with the name 'absent-addon' is installed.
       """
 
   Scenario: Applying enabled add-on which was not applied during the startup

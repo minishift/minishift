@@ -95,10 +95,10 @@ func RequiresRestartMsg(name string, value string) error {
 
 	_, err := cluster.CheckIfApiExistsAndLoad(api)
 	if err != nil {
-		fmt.Fprintln(os.Stdout, fmt.Sprintf("No Minishift instance exists. New %s setting will be applied on next 'minishift start'", name))
+		fmt.Fprintln(os.Stdout, fmt.Sprintf("No Minishift instance exists. New '%s' setting will be applied on next 'minishift start'", name))
 	} else {
 		fmt.Fprintln(os.Stdout, fmt.Sprintf("You currently have an existing Minishift instance. "+
-			"Changes to the %s setting are only applied when a new Minishift instance is created.\n"+
+			"Changes to the '%s' setting are only applied when a new Minishift instance is created.\n"+
 			"To let the configuration changes take effect, "+
 			"you must delete the current instance with 'minishift delete' "+
 			"and then start a new one with 'minishift start'.", name))

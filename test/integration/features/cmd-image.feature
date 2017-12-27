@@ -74,8 +74,8 @@ Feature: Basic image caching test
 
      When executing "minishift image import foo:latest alpine:latest"
      Then exitcode should equal "1"
-      And stdout should match "Importing foo:latest.*CACHE MISS"
-      And stdout should match "Importing alpine:latest.*OK"
+      And stdout should match "Importing 'foo:latest'.*CACHE MISS"
+      And stdout should match "Importing 'alpine:latest'.*OK"
 
      When executing "minishift image import foo:latest:"
      Then exitcode should equal "1"
@@ -87,8 +87,8 @@ Feature: Basic image caching test
 
      When executing "minishift image export foo:latest alpine:latest"
      Then exitcode should equal "1"
-      And stdout should match "Exporting foo:latest.*FAIL"
-      And stdout should match "Exporting alpine:latest.*OK"
+      And stdout should match "Exporting 'foo:latest'.*FAIL"
+      And stdout should match "Exporting 'alpine:latest'.*OK"
 
      When executing "minishift delete --force --clear-cache" succeeds
      Then Minishift should have state "Does Not Exist"

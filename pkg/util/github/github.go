@@ -161,17 +161,17 @@ func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minis
 	out, err := os.Create(assetTmpFile)
 	defer out.Close()
 	if err != nil {
-		return errors.Wrapf(err, "Cannot create file %s", assetTmpFile)
+		return errors.Wrapf(err, "Cannot create file '%s'", assetTmpFile)
 	}
 
 	// Copy the asset and verify its hash
 	_, err = io.Copy(out, asset)
 	if err != nil {
-		return errors.Wrapf(err, "Unexpected error occured while copying %s to %s", assetTmpFile, tmpDir)
+		return errors.Wrapf(err, "Unexpected error occurred while copying '%s' to '%s'", assetTmpFile, tmpDir)
 	}
 	err = out.Sync()
 	if err != nil {
-		return errors.Wrapf(err, "Unexpected error occured while copying %s to %s", assetTmpFile, tmpDir)
+		return errors.Wrapf(err, "Unexpected error occurred while copying '%s' to '%s'", assetTmpFile, tmpDir)
 	}
 
 	// Hash verification for download oc binary
@@ -196,18 +196,18 @@ func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minis
 		tarFile := assetTmpFile[:len(assetTmpFile)-3]
 		err = archive.Ungzip(assetTmpFile, tarFile)
 		if err != nil {
-			return errors.Wrapf(err, "Cannot ungzip %s", assetTmpFile)
+			return errors.Wrapf(err, "Cannot ungzip '%s'", assetTmpFile)
 		}
 
 		// untar
 		err = archive.Untar(tarFile, tmpDir)
 		if err != nil {
-			return errors.Wrapf(err, "Cannot untar %s", tarFile)
+			return errors.Wrapf(err, "Cannot untar '%s'", tarFile)
 		}
 
 		content, err := listDirExcluding(tmpDir, ".*.tar.*")
 		if err != nil {
-			return errors.Wrapf(err, "Cannot list content of %s", tmpDir)
+			return errors.Wrapf(err, "Cannot list content of '%s'", tmpDir)
 		}
 		if len(content) > 1 {
 			return errors.New(fmt.Sprintf("Unexpected number of files in tmp directory: %s", content))
@@ -218,7 +218,7 @@ func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minis
 		contentDir := assetTmpFile[:len(assetTmpFile)-4]
 		err = archive.Unzip(assetTmpFile, contentDir)
 		if err != nil {
-			return errors.Wrapf(err, "Cannot unzip %s", assetTmpFile)
+			return errors.Wrapf(err, "Cannot unzip '%s'", assetTmpFile)
 		}
 		binaryPath = contentDir
 	}
@@ -243,7 +243,7 @@ func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minis
 
 	err = os.Chmod(finalBinaryPath, 0777)
 	if err != nil {
-		return errors.Wrapf(err, "Cannot make %s executable", finalBinaryPath)
+		return errors.Wrapf(err, "Cannot make '%s' executable", finalBinaryPath)
 	}
 
 	return nil
@@ -343,27 +343,27 @@ func getOpenShiftChecksumAssetID(release *github.RepositoryRelease) int {
 }
 
 func copy(src, dest string) error {
-	glog.V(2).Infof("Copying %s to %s\n", src, dest)
+	glog.V(2).Infof("Copying '%s' to '%s'\n", src, dest)
 	srcFile, err := os.Open(src)
 	defer srcFile.Close()
 	if err != nil {
-		return errors.Wrapf(err, "Cannot open src file %s", src)
+		return errors.Wrapf(err, "Cannot open src file '%s'", src)
 	}
 
 	destFile, err := os.Create(dest)
 	defer destFile.Close()
 	if err != nil {
-		return errors.Wrapf(err, "Cannot create dst file %s", dest)
+		return errors.Wrapf(err, "Cannot create dst file '%s'", dest)
 	}
 
 	_, err = io.Copy(destFile, srcFile)
 	if err != nil {
-		return errors.Wrapf(err, "Cannot copy %s to %s", src, dest)
+		return errors.Wrapf(err, "Cannot copy '%s' to '%s'", src, dest)
 	}
 
 	err = destFile.Sync()
 	if err != nil {
-		return errors.Wrapf(err, "Cannot copy %s to %s", src, dest)
+		return errors.Wrapf(err, "Cannot copy '%s' to '%s'", src, dest)
 	}
 
 	return nil

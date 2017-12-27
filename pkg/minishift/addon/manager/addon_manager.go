@@ -48,12 +48,12 @@ type AddOnManager struct {
 // NewAddOnManager creates a new addon manager for the specified addon directory.
 func NewAddOnManager(baseDir string, configMap map[string]*addon.AddOnConfig) (*AddOnManager, error) {
 	if !filehelper.IsDirectory(baseDir) {
-		return nil, errors.New(fmt.Sprintf("Unable to create addon manager for non existing directory %s", baseDir))
+		return nil, errors.New(fmt.Sprintf("Unable to create addon manager for non existing directory '%s'", baseDir))
 	}
 
 	files, err := ioutil.ReadDir(baseDir)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Unable to create addon manager for non existing directory %s. ", baseDir)
+		return nil, errors.Wrapf(err, "Unable to create addon manager for non existing directory '%s'. ", baseDir)
 	}
 
 	detectedAddOns := make(map[string]addon.AddOn)
@@ -72,7 +72,7 @@ func NewAddOnManager(baseDir string, configMap map[string]*addon.AddOnConfig) (*
 				fmt.Println(fmt.Sprintf("Skipping addon '%s' in '%s' due to parse error: %s", f.Name(), fullPath, err.Error()))
 				continue
 			} else {
-				return nil, errors.Wrapf(err, "Unable to create addon manager for %s. ", baseDir)
+				return nil, errors.Wrapf(err, "Unable to create addon manager for '%s'. ", baseDir)
 			}
 		}
 		setStateAndPriority(addOn, configMap)
@@ -129,7 +129,7 @@ func (m *AddOnManager) Get(name string) addon.AddOn {
 func (m *AddOnManager) Enable(addonName string, priority int) (*addon.AddOnConfig, error) {
 	addOn := m.addOns[addonName]
 	if addOn == nil {
-		return nil, errors.New(fmt.Sprintf("Unable to find addon %s in addon directory %s", addonName, m.baseDir))
+		return nil, errors.New(fmt.Sprintf("Unable to find addon '%s' in addon directory '%s'", addonName, m.baseDir))
 	}
 
 	addOn.SetEnabled(true)
@@ -142,7 +142,7 @@ func (m *AddOnManager) Enable(addonName string, priority int) (*addon.AddOnConfi
 func (m *AddOnManager) UnInstall(addonName string) error {
 	addOn := m.addOns[addonName]
 	if addOn == nil {
-		return errors.New(fmt.Sprintf("Unable to find addon %s in addon directory %s", addonName, m.baseDir))
+		return errors.New(fmt.Sprintf("Unable to find addon '%s' in addon directory '%s'", addonName, m.baseDir))
 	}
 
 	targetPath := filepath.Join(m.baseDir, addonName)
@@ -152,14 +152,14 @@ func (m *AddOnManager) UnInstall(addonName string) error {
 		}
 		return nil
 	}
-	return errors.New(fmt.Sprintf("Unable to find addon directory %s", targetPath))
+	return errors.New(fmt.Sprintf("Unable to find addon directory '%s'", targetPath))
 }
 
 // Disable disables the addon with the specified name.
 func (m *AddOnManager) Disable(addonName string) (*addon.AddOnConfig, error) {
 	addOn := m.addOns[addonName]
 	if addOn == nil {
-		return nil, errors.New(fmt.Sprintf("Unable to find addon %s in addon directory %s", addonName, m.baseDir))
+		return nil, errors.New(fmt.Sprintf("Unable to find addon '%s' in addon directory '%s'", addonName, m.baseDir))
 	}
 
 	addOn.SetEnabled(false)
@@ -285,7 +285,7 @@ func verifyRequiredVariablesInContext(context *command.ExecutionContext, meta ad
 
 	if len(missingVars) > 0 {
 		missing := strings.TrimSpace(strings.Join(missingVars, ", "))
-		return fmt.Errorf("The variable(s) %s are required by the add-on, but are not defined in the context", missing)
+		return fmt.Errorf("The variable(s) '%s' are required by the add-on, but are not defined in the context", missing)
 	}
 
 	return nil

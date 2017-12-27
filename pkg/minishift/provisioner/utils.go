@@ -143,7 +143,7 @@ func decideStorageDriver(p provision.Provisioner, defaultDriver, suppliedDriver 
 
 	defer func() {
 		if bestSuitedDriver != "" {
-			log.Debugf("No storage driver specified, instead using %s\n", bestSuitedDriver)
+			log.Debugf("No storage driver specified, instead using '%s'\n", bestSuitedDriver)
 		}
 	}()
 
@@ -196,10 +196,10 @@ func configureAuth(p *BuildrootProvisioner) error {
 	for src, dst := range hostCerts {
 		f, err := assets.NewFileAsset(src, filepath.Dir(dst), filepath.Base(dst), "0777")
 		if err != nil {
-			return errors.Wrapf(err, "open cert file: %s", src)
+			return errors.Wrapf(err, "open cert file: '%s'", src)
 		}
 		if err := assets.CopyFileLocal(f); err != nil {
-			return errors.Wrapf(err, "transferring file: %+v", f)
+			return errors.Wrapf(err, "transferring file: '%+v'", f)
 		}
 	}
 
@@ -241,10 +241,10 @@ func configureAuth(p *BuildrootProvisioner) error {
 	for src, dst := range remoteCerts {
 		f, err := assets.NewFileAsset(src, filepath.Dir(dst), filepath.Base(dst), "0640")
 		if err != nil {
-			return errors.Wrapf(err, "error copying %s to %s", src, dst)
+			return errors.Wrapf(err, "error copying '%s' to '%s'", src, dst)
 		}
 		if err := sshutil.TransferFile(f, sshClient); err != nil {
-			return errors.Wrapf(err, "transfering file to machine %v", f)
+			return errors.Wrapf(err, "transferring file to machine '%v'", f)
 		}
 	}
 

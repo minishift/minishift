@@ -6,7 +6,7 @@ Feature: Profile
      When executing "minishift profile set <profilename>" fails
      Then stderr should contain
       """
-      A profile name must be provided. Run `minishift profile list` for a list of existing profiles.
+      A profile name must be provided. Run 'minishift profile list' for a list of existing profiles.
       """
 
   Examples: Empty profile name
@@ -177,7 +177,7 @@ Feature: Profile
      Then exitcode should equal "1"
       And stderr should contain
        """
-       Profile: foo doesn't exist, Use `minishift profile set foo` or `minishift start --profile foo` to create
+       Profile 'foo' doesn't exist, Use 'minishift profile set foo' or 'minishift start --profile foo' to create
        """
   Examples: minishift commands
     | commands  |
@@ -187,4 +187,4 @@ Feature: Profile
     | logs      |
     | stop      |
     | version   |
-    
+

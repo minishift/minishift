@@ -193,7 +193,6 @@ clean:
 	rm -rf $(BUILD_DIR)
 	rm -rf release
 	rm -rf vendor
-	rm -rf $(DOCS_BUILD_DIR)
 	rm -f  $(DOCS_SYNOPISIS_DIR)/*.md
 
 .PHONY: test

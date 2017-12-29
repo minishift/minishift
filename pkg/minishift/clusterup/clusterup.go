@@ -227,29 +227,49 @@ func configurePersistentVolumes(hostPvDir string, addOnManager *manager.AddOnMan
 	var out, err *bytes.Buffer
 
 	// poll the status of the persistent-volume-setup job to determine when the persitent volume creates is completed
+	timeout := time.NewTimer(2 * time.Minute)
+outerPollActive:
 	for {
-		out = new(bytes.Buffer)
-		err = new(bytes.Buffer)
-		exitStatus := ocRunner.Run("get job persistent-volume-setup -n default -o 'jsonpath={ .status.active }'", out, err)
+		select {
+		case <-timeout.C:
+			return errors.New("Timed out to poll active state of persistent-volume-setup job")
+		default:
+			out = new(bytes.Buffer)
+			err = new(bytes.Buffer)
+			exitStatus := ocRunner.Run("get job persistent-volume-setup -n default -o 'jsonpath={ .status.active }'", out, err)
+			if exitStatus != 0 || len(err.String()) > 0 {
+				return errors.New("Unable to monitor persistent volume creation")
+			}
 
-		if exitStatus != 0 || len(err.String()) > 0 {
-			return errors.New("Unable to monitor persistent volume creation")
+			if out.String() != "1" {
+				break outerPollActive
+			}
+
+			time.Sleep(1 * time.Second)
 		}
-
-		if out.String() != "1" {
-			break
-		}
-
-		time.Sleep(1 * time.Second)
 	}
 
-	// verify the job succeeded
-	out = new(bytes.Buffer)
-	err = new(bytes.Buffer)
-	exitStatus := ocRunner.Run("get job persistent-volume-setup -n default -o 'jsonpath={ .status.succeeded }'", out, err)
+	// poll the success status of persistent-volume-setup job.
+outerPollSuccess:
+	for {
+		select {
+		case <-timeout.C:
+			return errors.New("Timed out to poll success state of persistent-volume-setup job")
+		default:
+			out = new(bytes.Buffer)
+			err = new(bytes.Buffer)
+			exitStatus := ocRunner.Run("get job persistent-volume-setup -n default -o 'jsonpath={ .status.succeeded }'", out, err)
 
-	if exitStatus != 0 || len(err.String()) > 0 || out.String() != "1" {
-		return errors.New("Persistent volume creation failed")
+			if exitStatus != 0 || len(err.String()) > 0 {
+				return errors.New("Persistent volume creation failed")
+			}
+
+			if out.String() == "1" {
+				break outerPollSuccess
+			}
+
+			time.Sleep(1 * time.Second)
+		}
 	}
 
 	cmd := fmt.Sprintf("sudo chmod -R 777 %s/pv*", hostPvDir)

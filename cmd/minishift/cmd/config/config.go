@@ -97,7 +97,7 @@ var (
 
 	// Image caching
 	ImageCaching = createConfigSetting("image-caching", SetBool, nil, nil, true)
-	CacheImages  = createConfigSetting("cache-images", SetSlice, nil, nil, true)
+	CacheImages  = createConfigSetting("cache-images", SetSlice, nil, nil, false)
 
 	// Pre-flight checks (before start)
 	SkipCheckKVMDriver     = createConfigSetting("skip-check-kvm-driver", SetBool, nil, nil, true)

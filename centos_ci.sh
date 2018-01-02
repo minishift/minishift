@@ -379,6 +379,6 @@ else
   elif [[ "$JOB_NAME" = "minishift" ]]; then # Master job
     perform_master $RSYNC_PASSWORD;
   else # PR job
-    perform_pr $RSYNC_PASSWORD;
+    perform_master $RSYNC_PASSWORD;
   fi
 fi

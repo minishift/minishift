@@ -1,4 +1,4 @@
-@cmd-openshift @command @openshift 
+@cmd-openshift @command @openshift
 Feature: Openshift commands
 Commands "minishift openshift [sub-command]" are used for interaction with Openshift
 cluster in VM provided by Minishift.
@@ -33,7 +33,7 @@ cluster in VM provided by Minishift.
        And stdout of command "minishift ssh -- "docker inspect --format={{.State.FinishedAt}} origin"" is not equal to "0001-01-01T00:00:00Z"
 
   Scenario: User deploys nodejs example application from OpenShift repository
-      When executing "oc new-app https://github.com/openshift/nodejs-ex -l name=myapp" succeeds
+      When executing "oc new-app https://github.com/openshift/nodejs-ex -l name=myapp" retrying 20 times with wait period of 3 seconds
       Then stdout should contain
        """
        Run 'oc status' to view your app.

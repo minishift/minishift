@@ -1,4 +1,4 @@
-@cmd-openshift @command @openshift 
+@cmd-openshift @command @openshift
 Feature: Openshift commands
 Commands "minishift openshift [sub-command]" are used for interaction with Openshift
 cluster in VM provided by Minishift.
@@ -7,9 +7,9 @@ cluster in VM provided by Minishift.
      Given Minishift has state "Does Not Exist"
       When executing "minishift openshift service list" succeeds
       Then stdout should contain
-      """
-      Running this command requires an existing 'minishift' VM, but no VM is defined.
-      """
+       """
+       Running this command requires an existing 'minishift' VM, but no VM is defined.
+       """
 
   Scenario: Minishift start
   Minishift must be started in order to interact with OpenShift via "minishift openshift" command
@@ -33,11 +33,11 @@ cluster in VM provided by Minishift.
        And stdout of command "minishift ssh -- "docker inspect --format={{.State.FinishedAt}} origin"" is not equal to "0001-01-01T00:00:00Z"
 
   Scenario: User deploys nodejs example application from OpenShift repository
-      When executing "oc new-app https://github.com/openshift/nodejs-ex -l name=myapp" succeeds
+      When executing "oc new-app https://github.com/openshift/nodejs-ex -l name=myapp" retrying 20 times with wait period of 3 seconds
       Then stdout should contain
-      """
-      Run 'oc status' to view your app.
-      """
+       """
+       Run 'oc status' to view your app.
+       """
 
   @minishift-only
   Scenario: Getting information about OpenShift and kubernetes versions
@@ -45,11 +45,11 @@ cluster in VM provided by Minishift.
      Given Minishift has state "Running"
       When executing "minishift openshift version" succeeds
       Then stdout should match
-      """
-      ^openshift v[0-9]+\.[0-9]+\.[0-9]+\+[0-9a-z]{7}
-      kubernetes v[0-9]+\.[0-9]+\.[0-9]+\+[0-9a-z]{10}
-      etcd [0-9]+\.[0-9]+\.[0-9]+
-      """
+       """
+       ^openshift v[0-9]+\.[0-9]+\.[0-9]+\+[0-9a-z]{7}
+       kubernetes v[0-9]+\.[0-9]+\.[0-9]+\+[0-9a-z]{10}
+       etcd [0-9]+\.[0-9]+\.[0-9]+
+       """
 
   Scenario: Getting address of internal docker registry
   Prints the host name and port number of the OpenShift registry to the standard output.
@@ -81,9 +81,9 @@ cluster in VM provided by Minishift.
   Scenario: User creates route to the service
       When executing "oc expose svc/nodejs-ex" succeeds
       Then stdout should contain
-      """
-      route "nodejs-ex" exposed
-      """
+       """
+       route "nodejs-ex" exposed
+       """
 
   Scenario: Getting existing service with route
       When executing "minishift openshift service nodejs-ex" succeeds

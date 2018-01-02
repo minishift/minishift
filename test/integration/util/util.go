@@ -24,6 +24,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"bytes"
 	"syscall"
@@ -78,6 +79,11 @@ func runCommand(command string, commandPath string) (stdOut string, stdErr strin
 	}
 
 	return
+}
+
+func WaitForNSeconds(seconds int) error {
+	time.Sleep(time.Duration(seconds) * time.Second)
+	return nil
 }
 
 func (m *MinishiftRunner) RunCommand(command string) (stdOut string, stdErr string, exitCode int) {

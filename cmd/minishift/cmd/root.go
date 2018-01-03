@@ -21,10 +21,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
-
-	"path/filepath"
 
 	"encoding/json"
 
@@ -141,6 +140,11 @@ var RootCmd = &cobra.Command{
 		}
 
 		setDefaultActiveProfile()
+
+		// Adding minishift version information to debug logs
+		if glog.V(2) {
+			fmt.Println(fmt.Sprintf("-- minishift version: v%s+%s", version.GetMinishiftVersion(), version.GetCommitSha()))
+		}
 	},
 }
 

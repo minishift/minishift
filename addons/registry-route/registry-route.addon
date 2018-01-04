@@ -15,4 +15,5 @@ docker cp origin:/var/lib/origin/openshift.local.config/master/ca.crt /etc/docke
 
 echo Add-on '#{addon-name}' created docker-registry route. Please run following commands to login to the OpenShift docker registry:
 echo $ eval $(minishift docker-env)
+echo $ eval $(minishift oc-env)
 echo $ docker login -u developer -p `oc whoami -t` docker-registry-default.#{routing-suffix}:443

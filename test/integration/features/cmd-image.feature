@@ -70,7 +70,7 @@ Feature: Basic image caching test
 
      When executing "minishift image export foo:latest"
      Then exitcode should equal "1"
-      And stderr should contain "Error: image library/foo:latest not found"
+      And stderr should contain "Container image export failed"
 
      When executing "minishift image import foo:latest alpine:latest"
      Then exitcode should equal "1"

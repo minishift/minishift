@@ -227,7 +227,7 @@ func configurePersistentVolumes(hostPvDir string, addOnManager *manager.AddOnMan
 	var out, err *bytes.Buffer
 
 	// poll the status of the persistent-volume-setup job to determine when the persitent volume creates is completed
-	timeout := time.NewTimer(2 * time.Minute)
+	timeout := time.NewTimer(5 * time.Minute)
 outerPollActive:
 	for {
 		select {

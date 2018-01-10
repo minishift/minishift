@@ -134,12 +134,75 @@ func Test_invalid_addons_get_skipped(t *testing.T) {
 	}
 }
 
-func Test_add_var_defaults_to_context(t *testing.T) {
+func TestAddVarDefaultsToContext(t *testing.T) {
 	context, _ := command.NewExecutionContext(nil, nil)
-	expectedVarName := "foo"
-	varDefaults := []addon.RequiredVar{
-		{Key: expectedVarName, Value: "bar"},
-	}
-	addVarDefaultsToContext(context, varDefaults)
+	expectedVarName := "FOO"
+	expectedVarDefaultValue := "foo"
+	varDefault := fmt.Sprintf("%s=%s", expectedVarName, expectedVarDefaultValue)
+
+	testAddonMap := getTestAddonMap("test", "test description", expectedVarName, varDefault, "")
+
+	addOnMeta := getAddOnMetadata(testAddonMap, t)
+	addOn := addon.NewAddOn(addOnMeta, []command.Command{}, []command.Command{}, "")
+
+	addVarDefaultsToContext(addOn, context)
 	minishiftTesting.AssertEqualSlice(context.Vars(), []string{expectedVarName}, t)
+}
+
+func TestVerifyValidRequiredVariablesInContext(t *testing.T) {
+	context, _ := command.NewExecutionContext(nil, nil)
+	expectedVarName := "FOO"
+	expectedVarValue := "foo"
+
+	testAddonMap := getTestAddonMap("test", "test description", expectedVarName, "", "")
+
+	addOnMeta := getAddOnMetadata(testAddonMap, t)
+	addOn := addon.NewAddOn(addOnMeta, []command.Command{}, []command.Command{}, "")
+
+	// Add variable name to context
+	context.AddToContext(expectedVarName, expectedVarValue)
+	if err := verifyRequiredVariablesInContext(context, addOn.MetaData()); err != nil {
+		t.Fatal(fmt.Sprintf("No error expected, but got \"%s\"", err.Error()))
+	}
+}
+
+func TestVerifyMissingRequiredVariablesInContext(t *testing.T) {
+	context, _ := command.NewExecutionContext(nil, nil)
+	expectedVarName := "FOO"
+	expectedErrMsg := "The variable(s) FOO are required by the add-on, but are not defined in the context"
+
+	testAddonMap := getTestAddonMap("test", "test description", expectedVarName, "", "")
+
+	addOnMeta := getAddOnMetadata(testAddonMap, t)
+	addOn := addon.NewAddOn(addOnMeta, []command.Command{}, []command.Command{}, "")
+
+	err := verifyRequiredVariablesInContext(context, addOn.MetaData())
+	if err.Error() != expectedErrMsg {
+		t.Fatal(fmt.Sprintf("Error \"%s\" expected, but got \"%s\"", expectedErrMsg, err.Error()))
+	}
+}
+
+func getTestAddonMap(name, description, requireVar, varDefault, openshiftVersion string) map[string]interface{} {
+	testAddonMap := make(map[string]interface{})
+	testAddonMap["Name"] = name
+	testAddonMap["Description"] = []string{description}
+	if requireVar != "" {
+		testAddonMap["Required-Vars"] = fmt.Sprintf("%s", requireVar)
+	}
+	if varDefault != "" {
+		testAddonMap["Var-Defaults"] = fmt.Sprintf("%s", varDefault)
+	}
+	if openshiftVersion != "" {
+		testAddonMap["OpenShift-Version"] = openshiftVersion
+	}
+	return testAddonMap
+}
+
+func getAddOnMetadata(testMap map[string]interface{}, t *testing.T) addon.AddOnMeta {
+	addOnMeta, err := addon.NewAddOnMeta(testMap)
+	if err != nil {
+		t.Fatal(fmt.Sprintf("No error expected, but got: \"%s\"", err.Error()))
+	}
+
+	return addOnMeta
 }

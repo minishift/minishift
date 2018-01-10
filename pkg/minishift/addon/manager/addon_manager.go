@@ -197,20 +197,15 @@ func (m *AddOnManager) ApplyAddOn(addOn addon.AddOn, context *command.ExecutionC
 	context.AddToContext("addon-name", addOn.MetaData().Name())
 	defer context.RemoveFromContext("addon-name")
 
-	err := m.verifyRequiredOpenshiftVersion(context, addOn.MetaData())
-	if err != nil {
+	if err := addVarDefaultsToContext(addOn, context); err != nil {
 		return err
 	}
 
-	varDefaults, err := addOn.MetaData().VarDefaults()
-	if err != nil {
+	addonMetadata := addOn.MetaData()
+	if err := verifyRequiredOpenshiftVersion(context, addonMetadata); err != nil {
 		return err
 	}
-	if err := addVarDefaultsToContext(context, varDefaults); err != nil {
-		return err
-	}
-
-	if err := m.verifyRequiredVariablesInContext(context, addOn.MetaData()); err != nil {
+	if err := verifyRequiredVariablesInContext(context, addonMetadata); err != nil {
 		return err
 	}
 
@@ -236,13 +231,15 @@ func (m *AddOnManager) RemoveAddOn(addOn addon.AddOn, context *command.Execution
 	context.AddToContext("addon-name", addOn.MetaData().Name())
 	defer context.RemoveFromContext("addon-name")
 
-	err := m.verifyRequiredOpenshiftVersion(context, addOn.MetaData())
-	if err != nil {
+	if err := addVarDefaultsToContext(addOn, context); err != nil {
 		return err
 	}
 
-	err = m.verifyRequiredVariablesInContext(context, addOn.MetaData())
-	if err != nil {
+	addonMetadata := addOn.MetaData()
+	if err := verifyRequiredOpenshiftVersion(context, addonMetadata); err != nil {
+		return err
+	}
+	if err := verifyRequiredVariablesInContext(context, addonMetadata); err != nil {
 		return err
 	}
 
@@ -273,7 +270,7 @@ func (m *AddOnManager) mapToSlice() []addon.AddOn {
 	return addOnSlice
 }
 
-func (m *AddOnManager) verifyRequiredVariablesInContext(context *command.ExecutionContext, meta addon.AddOnMeta) error {
+func verifyRequiredVariablesInContext(context *command.ExecutionContext, meta addon.AddOnMeta) error {
 	missingVars := []string{}
 
 	check := make(map[string]bool)
@@ -299,7 +296,7 @@ func (m *AddOnManager) verifyRequiredVariablesInContext(context *command.Executi
 	return nil
 }
 
-func (m *AddOnManager) verifyRequiredOpenshiftVersion(context *command.ExecutionContext, meta addon.AddOnMeta) error {
+func verifyRequiredOpenshiftVersion(context *command.ExecutionContext, meta addon.AddOnMeta) error {
 	dockerCommander := context.GetDockerCommander()
 	versionInfo, err := dockerCommander.Exec(" ", constants.OpenshiftContainerName, "openshift", "version")
 	if err != nil {
@@ -322,7 +319,6 @@ func (m *AddOnManager) verifyRequiredOpenshiftVersion(context *command.Execution
 				return err
 			}
 		}
-
 	}
 	return nil
 }
@@ -374,7 +370,12 @@ func compareOpenshiftVersions(openShiftVersion, requiredOpenshiftVersion string)
 	return nil
 }
 
-func addVarDefaultsToContext(context *command.ExecutionContext, varDefaults []addon.RequiredVar) error {
+func addVarDefaultsToContext(addOn addon.AddOn, context *command.ExecutionContext) error {
+	varDefaults, err := addOn.MetaData().VarDefaults()
+	if err != nil {
+		return err
+	}
+
 	for _, varDefault := range varDefaults {
 		// Don't add context if env already present
 		if !utilStrings.Contains(context.Vars(), varDefault.Key) {

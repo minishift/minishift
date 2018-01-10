@@ -3,17 +3,18 @@
     "apiVersion": "v1",
     "metadata": {
         "annotations": {
-            "description": "Application template for JBoss A-MQ brokers. These can be deployed as standalone and use persistent storage for saving messages. This template doesn't feature SSL support.",
-            "iconClass": "icon-jboss",
-            "tags": "messaging,amq,jboss,xpaas",
-            "version": "1.4.0",
-            "openshift.io/display-name": "Red Hat JBoss A-MQ 6.2 (Persistent, no SSL)"
+            "description": "Application template for JBoss A-MQ brokers. These can be deployed as standalone and use persistent storage for saving messages, including message migration when the number of pods are reduced. This template doesn't feature SSL support.",
+            "iconClass": "icon-amq",
+            "tags": "messaging,amq,jboss,hidden",
+            "version": "1.4.7",
+            "openshift.io/display-name": "JBoss A-MQ 6.2 (no SSL)",
+            "openshift.io/provider-display-name": "Red Hat, Inc."
         },
         "name": "amq62-persistent"
     },
     "labels": {
         "template": "amq62-persistent",
-        "xpaas": "1.4.0"
+        "xpaas": "1.4.7"
     },
     "message": "A new persistent messaging service has been created in your project. It will handle the protocol(s) \"${MQ_PROTOCOL}\". The username/password for accessing the service is ${MQ_USERNAME}/${MQ_PASSWORD}.",
     "parameters": [
@@ -26,9 +27,9 @@
         },
         {
             "displayName": "Split Data?",
-            "description": "Split the data directory for each node in a mesh.",
+            "description": "Split the data directory for each node in a mesh, this is now the default behaviour.",
             "name": "AMQ_SPLIT",
-            "value": "false",
+            "value": "true",
             "required": false
         },
         {
@@ -94,6 +95,13 @@
             "description": "The A-MQ storage usage limit",
             "name": "AMQ_STORAGE_USAGE_LIMIT",
             "value": "100 gb",
+            "required": false
+        },
+        {
+            "displayName": "Queue Memory Limit",
+            "description": "The queue memory limit (default is 1mb)",
+            "name": "AMQ_QUEUE_MEMORY_LIMIT",
+            "value": "",
             "required": false
         },
         {
@@ -229,7 +237,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "jboss-amq-62:1.4"
+                                "name": "jboss-amq-62:1.6"
                             }
                         }
                     },
@@ -346,6 +354,118 @@
                                     {
                                         "name": "AMQ_STORAGE_USAGE_LIMIT",
                                         "value": "${AMQ_STORAGE_USAGE_LIMIT}"
+                                    },
+                                    {
+                                        "name": "AMQ_QUEUE_MEMORY_LIMIT",
+                                        "value": "${AMQ_QUEUE_MEMORY_LIMIT}"
+                                    }
+                                ]
+                            }
+                        ],
+                        "volumes": [
+                            {
+                                "name": "${APPLICATION_NAME}-amq-pvol",
+                                "persistentVolumeClaim": {
+                                    "claimName": "${APPLICATION_NAME}-amq-claim"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-drainer",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "strategy": {
+                    "type": "Recreate"
+                },
+                "triggers": [
+                    {
+                        "type": "ImageChange",
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "${APPLICATION_NAME}-drainer"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "namespace": "${IMAGE_STREAM_NAMESPACE}",
+                                "name": "jboss-amq-62:1.6"
+                            }
+                        }
+                    },
+                    {
+                        "type": "ConfigChange"
+                    }
+                ],
+                "replicas": 1,
+                "selector": {
+                    "deploymentConfig": "${APPLICATION_NAME}-drainer"
+                },
+                "template": {
+                    "metadata": {
+                        "name": "${APPLICATION_NAME}-drainer",
+                        "labels": {
+                            "deploymentConfig": "${APPLICATION_NAME}-drainer",
+                            "application": "${APPLICATION_NAME}"
+                        }
+                    },
+                    "spec": {
+                        "terminationGracePeriodSeconds": 60,
+                        "containers": [
+                            {
+                                "name": "${APPLICATION_NAME}-drainer",
+                                "image": "jboss-amq-62",
+                                "command": [
+                                    "/opt/amq/bin/drain.sh"
+                                ],
+                                "imagePullPolicy": "Always",
+                                "volumeMounts": [
+                                    {
+                                        "mountPath": "/opt/amq/data",
+                                        "name": "${APPLICATION_NAME}-amq-pvol"
+                                    }
+                                ],
+                                "ports": [
+                                    {
+                                        "name": "jolokia",
+                                        "containerPort": 8778,
+                                        "protocol": "TCP"
+                                    },
+                                    {
+                                        "name": "tcp",
+                                        "containerPort": 61616,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "env": [
+                                    {
+                                        "name": "AMQ_USER",
+                                        "value": "${MQ_USERNAME}"
+                                    },
+                                    {
+                                        "name": "AMQ_PASSWORD",
+                                        "value": "${MQ_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "AMQ_MESH_SERVICE_NAME",
+                                        "value": "${APPLICATION_NAME}-amq-tcp"
+                                    },
+                                    {
+                                        "name": "AMQ_MESH_SERVICE_NAMESPACE",
+                                        "valueFrom": {
+                                            "fieldRef": {
+                                                "fieldPath": "metadata.namespace"
+                                            }
+                                        }
                                     }
                                 ]
                             }

@@ -3,7 +3,7 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "description": "Camel route using ActiveMQ in Karaf container.",
+      "description": "Camel route using ActiveMQ in Karaf container. This quickstart shows how to use Camel in a Karaf Container using Blueprint to connect to the A-MQ xPaaS message broker on OpenShift that should already be installed, one simple way to run a A-MQ service is following the documentation of the A-MQ xPaaS image for OpenShift related to the amq62-basic template.",
       "tags": "quickstart,java,karaf,fis",
       "iconClass": "icon-jboss",
       "version": "2.0"
@@ -31,7 +31,7 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "karaf2-camel-amq-1.0.0.redhat-000010",
+      "value": "karaf2-camel-amq-1.0.0.redhat-000019",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
@@ -49,7 +49,7 @@
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.redhat-000010",
+      "value": "1.0.0.redhat-000019",
       "description": "The application version."
     },
     {

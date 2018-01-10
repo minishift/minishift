@@ -31,8 +31,14 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "spring-boot-cxf-jaxrs-1.0.0.redhat-000005",
+      "value": "spring-boot-cxf-jaxrs-1.0.0.redhat-000014",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
+    },
+    {
+      "name": "SERVICE_NAME",
+      "displayName": "Service Name",
+      "value": "cxf-jaxrs",
+      "description": "Exposed service name."
     },
     {
       "name": "BUILDER_VERSION",
@@ -43,7 +49,7 @@
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.redhat-000005",
+      "value": "1.0.0.redhat-000014",
       "description": "The application version."
     },
     {
@@ -92,6 +98,59 @@
     }
   ],
   "objects": [
+    {
+      "apiVersion": "v1",
+      "kind": "Route",
+      "metadata": {
+        "labels": {
+          "component": "${APP_NAME}",
+          "provider": "s2i",
+          "project": "${APP_NAME}",
+          "version": "${APP_VERSION}",
+          "group": "quickstarts"
+        },
+        "name": "${SERVICE_NAME}-route"
+      },
+      "spec": {
+        "to": {
+          "kind": "Service",
+          "name": "${SERVICE_NAME}"
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+        },
+        "labels": {
+          "component": "${APP_NAME}",
+          "provider": "s2i",
+          "project": "${APP_NAME}",
+          "version": "${APP_VERSION}",
+          "group": "quickstarts"
+        },
+        "name": "${SERVICE_NAME}"
+      },
+      "spec": {
+        "clusterIP": "None",
+        "deprecatedPublicIPs": [],
+        "ports": [
+          {
+            "port": 9413,
+            "protocol": "TCP",
+            "targetPort": 8080
+          }
+        ],
+        "selector": {
+          "project": "${APP_NAME}",
+          "component": "${APP_NAME}",
+          "provider": "s2i",
+          "group": "quickstarts"
+        }
+      }
+    },
     {
       "kind": "ImageStream",
       "apiVersion": "v1",

@@ -3,17 +3,21 @@
     "apiVersion": "v1",
     "metadata": {
         "annotations": {
-            "iconClass": "icon-jboss",
-            "description": "Application template for JBoss Data Virtualization 6.3 services built using S2I.  Includes support for installing extensions (e.g. third-party DB drivers) and the ability to configure certificates for serving secure content.",
-            "tags": "jdv,datavirt,jboss,xpaas",
-            "version": "1.4.0",
-            "openshift.io/display-name": "Red Hat JBoss Data Virtualization 6.3 (with SSL and Extensions)"
+            "iconClass": "icon-datavirt",
+            "tags": "jdv,datavirt,database,jboss",
+            "version": "1.4.7",
+            "openshift.io/display-name": "JBoss Data Virtualization 6.3 (with SSL and Extensions)",
+            "openshift.io/provider-display-name": "Red Hat, Inc.",
+            "description": "An example JBoss Data Virtualization application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
+            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat Data Virtualization based application, including a build configuration, application deployment configuration, support for installing extensions (e.g. third-party DB drivers) and the ability to configure certificates for serving secure content.",
+            "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-data-virtualization/",
+            "template.openshift.io/support-url": "https://access.redhat.com"
         },
         "name": "datavirt63-extensions-support-s2i"
     },
     "labels": {
         "template": "datavirt63-extensions-support-s2i",
-        "xpaas": "1.4.0"
+        "xpaas": "1.4.7"
     },
     "message": "A new data service has been created in your project.  The username/password for accessing the service is ${TEIID_USERNAME}/${TEIID_PASSWORD}.  Please be sure to create the \"${SERVICE_ACCOUNT_NAME}\" service account and the following secrets: \"${CONFIGURATION_NAME}\" containing the datasource configuration details required by the deployed VDB(s); \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications.",
     "parameters": [
@@ -288,6 +292,16 @@
                         "name": "jdbcs",
                         "port": 31443,
                         "targetPort": "jdbcs"
+                    },
+                    {
+                        "name": "odbc",
+                        "port": 35432,
+                        "targetPort": "odbc"
+                    },
+                    {
+                        "name": "odbcs",
+                        "port": 35443,
+                        "targetPort": "odbcs"
                     }
                 ],
                 "selector": {
@@ -470,7 +484,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "jboss-datagrid65-client-openshift:1.0"
+                                "name": "jboss-datagrid65-client-openshift:1.1"
                             },
                             "paths": [
                                 {
@@ -500,7 +514,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-datavirt63-openshift:1.2"
+                            "name": "jboss-datavirt63-openshift:1.3"
                         },
                         "env": [
                             {
@@ -559,7 +573,7 @@
                         "imageChange": {
                             "from": {
                                 "kind": "ImageStreamTag",
-                                "name": "jboss-datagrid65-client-openshift:1.0"
+                                "name": "jboss-datagrid65-client-openshift:1.1"
                             }
                         }
                     },
@@ -679,6 +693,16 @@
                                     {
                                         "name": "jdbcs",
                                         "containerPort": 31443,
+                                        "protocol": "TCP"
+                                    },
+                                    {
+                                        "name": "odbc",
+                                        "containerPort": 35432,
+                                        "protocol": "TCP"
+                                    },
+                                    {
+                                        "name": "odbcs",
+                                        "containerPort": 35443,
                                         "protocol": "TCP"
                                     },
                                     {

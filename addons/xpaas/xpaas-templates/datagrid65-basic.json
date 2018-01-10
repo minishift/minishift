@@ -3,17 +3,18 @@
     "apiVersion": "v1",
     "metadata": {
         "annotations": {
-            "iconClass": "icon-jboss",
+            "iconClass": "icon-datagrid",
             "description": "Application template for JDG 6.5 applications.",
-            "tags": "datagrid,jboss,xpaas",
-            "version": "1.4.0",
-            "openshift.io/display-name": "Red Hat JBoss Data Grid 6.5 (Ephemeral, no https)"
+            "tags": "datagrid,jboss,hidden",
+            "version": "1.4.7",
+            "openshift.io/display-name": "JBoss Data Grid 6.5 (Ephemeral, no https)",
+            "openshift.io/provider-display-name": "Red Hat, Inc."
         },
         "name": "datagrid65-basic"
     },
     "labels": {
         "template": "datagrid65-basic",
-        "xpaas": "1.4.0"
+        "xpaas": "1.4.7"
     },
     "message": "A new data grid service has been created in your project. It supports connector type(s) \"${INFINISPAN_CONNECTORS}\".",
     "parameters": [
@@ -227,7 +228,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "jboss-datagrid65-openshift:1.4"
+                                "name": "jboss-datagrid65-openshift:1.5"
                             }
                         }
                     },

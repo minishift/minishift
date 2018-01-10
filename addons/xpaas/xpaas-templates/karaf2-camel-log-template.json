@@ -3,7 +3,7 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "description": "A simple Camel route in Karaf container.",
+      "description": "A simple Camel route in Karaf container. This quickstart shows a simple Apache Camel application that logs a message to the server log every 5th second.",
       "tags": "quickstart,java,karaf,fis",
       "iconClass": "icon-jboss",
       "version": "2.0"
@@ -31,7 +31,7 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "karaf2-camel-log-1.0.0.redhat-000010",
+      "value": "karaf2-camel-log-1.0.0.redhat-000019",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
@@ -49,7 +49,7 @@
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.redhat-000010",
+      "value": "1.0.0.redhat-000019",
       "description": "The application version."
     },
     {

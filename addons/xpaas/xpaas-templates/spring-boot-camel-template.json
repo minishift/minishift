@@ -31,7 +31,7 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "spring-boot-camel-1.0.0.redhat-000055",
+      "value": "spring-boot-camel-1.0.0.redhat-000064",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
@@ -43,7 +43,7 @@
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.redhat-000055",
+      "value": "1.0.0.redhat-000064",
       "description": "The application version."
     },
     {

@@ -98,7 +98,8 @@ Currently not supported on KVM as the driver plugin relies on the DHCP offer to 
 ====
 
 Most hypervisors do not support extending the lease time when the IP is assigned using DHCP.
-This might lead to a new IP getting assigned to the VM after a restart as it will conflict with the security certificates generated for the old IP. This will make Minishift completely unusable.
+This might lead to a new IP getting assigned to the VM after a restart as it will conflict with the security certificates generated for the old IP.
+This will make {project} completely unusable.
 
 For this purpose, {project} includes the functionality to set a static address to the VM. This will prevent it from changing between restarts. However, it will not work on all the driver plugins at the moment due to the way the IP address is resolved.
 

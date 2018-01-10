@@ -20,6 +20,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net"
+	"os"
 	"strings"
 	"time"
 
@@ -35,7 +36,39 @@ const (
 	networkingMessageName = "PROVISION_NETWORKING"
 )
 
+var (
+	successCount = 0
+)
+
+func isUsingDefaultSwitch() bool {
+	switchEnvName := "HYPERV_VIRTUAL_SWITCH"
+	switchEnvValue := os.Getenv(switchEnvName)
+
+	return switchEnvValue == "Default Switch" || switchEnvValue == ""
+}
+
+func getAddressAssignedToDefaultSwitch() string {
+	posh := powershell.New()
+	defer posh.Close()
+
+	command := `Get-NetIPInterface -InterfaceAlias "vEthernet (Default Switch)" -AddressFamily IPv4 | Get-NetIPAddress | ForEach-Object { $_.IPAddress }`
+	result, _ := posh.Execute(command)
+
+	return strings.TrimSpace(result)
+}
+
+func determineNetmask() string {
+	if isUsingDefaultSwitch() {
+		return "255.255.255.240" // 28
+	}
+	return "255.255.255.0" // 24
+}
+
 func determineNameservers() []string {
+	if isUsingDefaultSwitch() {
+		return []string{getAddressAssignedToDefaultSwitch()}
+	}
+
 	posh := powershell.New()
 	defer posh.Close()
 
@@ -53,6 +86,18 @@ func determineNameservers() []string {
 	return ipv4ns
 }
 
+func determineDefaultGateway(ipaddress string) string {
+	if isUsingDefaultSwitch() {
+		return getAddressAssignedToDefaultSwitch()
+	}
+
+	ip := net.ParseIP(ipaddress)
+	ip = ip.To4()
+	ip = ip.Mask(ip.DefaultMask())
+	ip[3] = 1
+	return ip.String()
+}
+
 func ConfigureNetworking(machineName string, networkSettings NetworkSettings) {
 	// Instruct the user that this does not work for other Hypervisors on Windows
 	if !minishiftConfig.IsHyperV() {
@@ -62,6 +107,11 @@ func ConfigureNetworking(machineName string, networkSettings NetworkSettings) {
 
 	if networkSettings.Device == "" {
 		networkSettings.Device = "eth0"
+	}
+
+	if networkSettings.Netmask == "" {
+		fmt.Println("-- Determing netmask ... ")
+		networkSettings.Netmask = determineNetmask()
 	}
 
 	if networkSettings.Gateway == "" {
@@ -113,7 +163,10 @@ func doConfigure(success chan bool, command string) {
 		if glog.V(5) {
 			fmt.Printf("*")
 		}
-		success <- true
+		if successCount > 3 {
+			success <- true
+		}
+		successCount++
 	}
 }
 

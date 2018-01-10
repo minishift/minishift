@@ -370,12 +370,38 @@ func checkLibvirtDefaultNetworkActive() bool {
 
 // checkHypervDriverSwitch returns true if Virtual Switch has been selected
 func checkHypervDriverSwitch() bool {
-	switchEnv := os.Getenv("HYPERV_VIRTUAL_SWITCH")
-	if switchEnv == "" {
+	switchEnvName := "HYPERV_VIRTUAL_SWITCH"
+	posh := powershell.New()
+	defer posh.Close()
+
+	switchEnvValue := os.Getenv(switchEnvName)
+
+	if switchEnvValue == "" {
+		checkIfDefaultSwitchExists := `Get-VMSwitch -Id c08cb7b8-9b3c-408e-8e30-5e16a3aeb444 | ForEach-Object { $_.SwitchType }`
+		fmt.Printf("\n   'Default Switch' ... ")
+		stdOut, _ := posh.Execute(checkIfDefaultSwitchExists)
+		if strings.Contains(stdOut, "Internal") {
+
+			// force setting the environment variable
+			os.Setenv("HYPERV_VIRTUAL_SWITCH", "Default Switch")
+			return true
+		}
+
 		return false
 	}
 
-	return true
+	if switchEnvValue != "" {
+		checkIfVirtualSwitchExists := fmt.Sprintf("Get-VMSwitch %s| ForEach-Object { $_.SwitchType }", switchEnvValue)
+		fmt.Printf(fmt.Sprintf("\n   '%s' ... ", switchEnvValue))
+		stdOut, _ := posh.Execute(checkIfVirtualSwitchExists)
+		if strings.Contains(stdOut, "Get-VMSwitch") {
+			return false // error returned
+		}
+
+		return true
+	}
+
+	return false
 }
 
 // checkHypervDriverInstalled returns true if Hyper-V driver is installed
@@ -388,6 +414,7 @@ func checkHypervDriverInstalled() bool {
 
 	// check to see if a hypervisor is present. if hyper-v is installed and enabled,
 	posh := powershell.New()
+	defer posh.Close()
 
 	checkHypervisorPresent := `@(Get-Wmiobject Win32_ComputerSystem).HypervisorPresent`
 
@@ -402,6 +429,7 @@ func checkHypervDriverInstalled() bool {
 // checkHypervDriverUser returns true if user is member of Hyper-V admin
 func checkHypervDriverUser() bool {
 	posh := powershell.New()
+	defer posh.Close()
 
 	// Use RID to prevent issues with localized groups: https://github.com/minishift/minishift/issues/1541
 	// https://support.microsoft.com/en-us/help/243330/well-known-security-identifiers-in-windows-operating-systems

@@ -50,7 +50,7 @@ func findSetting(name string) (Setting, error) {
 			return s, nil
 		}
 	}
-	return Setting{}, fmt.Errorf("Cannot find property name %s", name)
+	return Setting{}, fmt.Errorf("Cannot find property name '%s'", name)
 }
 
 // Set Functions

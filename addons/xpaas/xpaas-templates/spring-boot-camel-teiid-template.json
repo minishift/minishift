@@ -3,7 +3,7 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "description": "Spring-Boot, Camel and JBoss Data Virtualization QuickStart. This example demonstrates how to connect Apache Camel to a remote JBoss Data Virtualization (or Teiid) Server using the JDBC protocol.",
+      "description": "Spring-Boot, Camel and JBoss Data Virtualization QuickStart. This example demonstrates how to connect Apache Camel to a remote JBoss Data Virtualization (or Teiid) Server using the JDBC protocol. This quickstart assumes that the JDV server is already running and configured on OpenShift, more information about to setup a JDV server can be found at https://github.com/fabric8-quickstarts/spring-boot-camel-teiid/blob/fis-2.0.x.redhat/README.redhat.md",
       "tags": "quickstart,java,springboot,fis",
       "iconClass": "icon-jboss",
       "version": "2.0"
@@ -31,7 +31,7 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "spring-boot-camel-teiid-1.0.0.redhat-000053",
+      "value": "spring-boot-camel-teiid-1.0.0.redhat-000062",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
@@ -68,7 +68,7 @@
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.redhat-000053",
+      "value": "1.0.0.redhat-000062",
       "description": "The application version."
     },
     {

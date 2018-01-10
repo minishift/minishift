@@ -20,12 +20,9 @@ oc create -f xpaas-templates/datavirt63-basic-s2i.json -n openshift
 oc create -f xpaas-templates/datavirt63-extensions-support-s2i.json -n openshift
 oc create -f xpaas-templates/datavirt63-secure-s2i.json -n openshift
 
-oc create -f xpaas-templates/decisionserver62-amq-s2i.json -n openshift
-oc create -f xpaas-templates/decisionserver62-basic-s2i.json -n openshift
-oc create -f xpaas-templates/decisionserver62-https-s2i.json -n openshift
-oc create -f xpaas-templates/decisionserver63-amq-s2i.json -n openshift
-oc create -f xpaas-templates/decisionserver63-basic-s2i.json -n openshift
-oc create -f xpaas-templates/decisionserver63-https-s2i.json -n openshift
+oc create -f xpaas-templates/decisionserver64-amq-s2i.json -n openshift
+oc create -f xpaas-templates/decisionserver64-basic-s2i.json -n openshift
+oc create -f xpaas-templates/decisionserver64-https-s2i.json -n openshift
 
 oc create -f xpaas-templates/eap64-amq-persistent-s2i.json -n openshift
 oc create -f xpaas-templates/eap64-amq-s2i.json -n openshift
@@ -50,22 +47,22 @@ oc create -f xpaas-templates/eap70-postgresql-persistent-s2i.json -n openshift
 oc create -f xpaas-templates/eap70-postgresql-s2i.json -n openshift
 oc create -f xpaas-templates/eap70-sso-s2i.json -n openshift
 
-oc create -f xpaas-templates/jws30-tomcat7-basic-s2i.json -n openshift
-oc create -f xpaas-templates/jws30-tomcat7-https-s2i.json -n openshift
-oc create -f xpaas-templates/jws30-tomcat7-mongodb-persistent-s2i.json -n openshift
-oc create -f xpaas-templates/jws30-tomcat7-mongodb-s2i.json -n openshift
-oc create -f xpaas-templates/jws30-tomcat7-mysql-persistent-s2i.json -n openshift
-oc create -f xpaas-templates/jws30-tomcat7-mysql-s2i.json -n openshift
-oc create -f xpaas-templates/jws30-tomcat7-postgresql-persistent-s2i.json -n openshift
-oc create -f xpaas-templates/jws30-tomcat7-postgresql-s2i.json -n openshift
-oc create -f xpaas-templates/jws30-tomcat8-basic-s2i.json -n openshift
-oc create -f xpaas-templates/jws30-tomcat8-https-s2i.json -n openshift
-oc create -f xpaas-templates/jws30-tomcat8-mongodb-persistent-s2i.json -n openshift
-oc create -f xpaas-templates/jws30-tomcat8-mongodb-s2i.json -n openshift
-oc create -f xpaas-templates/jws30-tomcat8-mysql-persistent-s2i.json -n openshift
-oc create -f xpaas-templates/jws30-tomcat8-mysql-s2i.json -n openshift
-oc create -f xpaas-templates/jws30-tomcat8-postgresql-persistent-s2i.json -n openshift
-oc create -f xpaas-templates/jws30-tomcat8-postgresql-s2i.json -n openshift
+oc create -f xpaas-templates/jws31-tomcat7-basic-s2i.json -n openshift
+oc create -f xpaas-templates/jws31-tomcat7-https-s2i.json -n openshift
+oc create -f xpaas-templates/jws31-tomcat7-mongodb-persistent-s2i.json -n openshift
+oc create -f xpaas-templates/jws31-tomcat7-mongodb-s2i.json -n openshift
+oc create -f xpaas-templates/jws31-tomcat7-mysql-persistent-s2i.json -n openshift
+oc create -f xpaas-templates/jws31-tomcat7-mysql-s2i.json -n openshift
+oc create -f xpaas-templates/jws31-tomcat7-postgresql-persistent-s2i.json -n openshift
+oc create -f xpaas-templates/jws31-tomcat7-postgresql-s2i.json -n openshift
+oc create -f xpaas-templates/jws31-tomcat8-basic-s2i.json -n openshift
+oc create -f xpaas-templates/jws31-tomcat8-https-s2i.json -n openshift
+oc create -f xpaas-templates/jws31-tomcat8-mongodb-persistent-s2i.json -n openshift
+oc create -f xpaas-templates/jws31-tomcat8-mongodb-s2i.json -n openshift
+oc create -f xpaas-templates/jws31-tomcat8-mysql-persistent-s2i.json -n openshift
+oc create -f xpaas-templates/jws31-tomcat8-mysql-s2i.json -n openshift
+oc create -f xpaas-templates/jws31-tomcat8-postgresql-persistent-s2i.json -n openshift
+oc create -f xpaas-templates/jws31-tomcat8-postgresql-s2i.json -n openshift
 
 oc create -f xpaas-templates/karaf2-camel-amq-template.json -n openshift
 oc create -f xpaas-templates/karaf2-camel-log-template.json -n openshift
@@ -74,15 +71,15 @@ oc create -f xpaas-templates/karaf2-cxf-rest-template.json -n openshift
 
 oc create -f xpaas-templates/openjdk18-web-basic-s2i.json -n openshift
 
-oc create -f xpaas-templates/processserver63-amq-mysql-persistent-s2i.json -n openshift
-oc create -f xpaas-templates/processserver63-amq-mysql-s2i.json -n openshift
-oc create -f xpaas-templates/processserver63-amq-postgresql-persistent-s2i.json -n openshift
-oc create -f xpaas-templates/processserver63-amq-postgresql-s2i.json -n openshift
-oc create -f xpaas-templates/processserver63-basic-s2i.json -n openshift
-oc create -f xpaas-templates/processserver63-mysql-persistent-s2i.json -n openshift
-oc create -f xpaas-templates/processserver63-mysql-s2i.json -n openshift
-oc create -f xpaas-templates/processserver63-postgresql-persistent-s2i.json -n openshift
-oc create -f xpaas-templates/processserver63-postgresql-s2i.json -n openshift
+oc create -f xpaas-templates/processserver64-amq-mysql-persistent-s2i.json -n openshift
+oc create -f xpaas-templates/processserver64-amq-mysql-s2i.json -n openshift
+oc create -f xpaas-templates/processserver64-amq-postgresql-persistent-s2i.json -n openshift
+oc create -f xpaas-templates/processserver64-amq-postgresql-s2i.json -n openshift
+oc create -f xpaas-templates/processserver64-basic-s2i.json -n openshift
+oc create -f xpaas-templates/processserver64-mysql-persistent-s2i.json -n openshift
+oc create -f xpaas-templates/processserver64-mysql-s2i.json -n openshift
+oc create -f xpaas-templates/processserver64-postgresql-persistent-s2i.json -n openshift
+oc create -f xpaas-templates/processserver64-postgresql-s2i.json -n openshift
 
 oc create -f xpaas-templates/spring-boot-camel-amq-template.json -n openshift
 oc create -f xpaas-templates/spring-boot-camel-config-template.json -n openshift
@@ -95,11 +92,11 @@ oc create -f xpaas-templates/spring-boot-camel-xml-template.json -n openshift
 oc create -f xpaas-templates/spring-boot-cxf-jaxrs-template.json -n openshift
 oc create -f xpaas-templates/spring-boot-cxf-jaxws-template.json -n openshift
 
-oc create -f xpaas-templates/sso70-https.json -n openshift
-oc create -f xpaas-templates/sso70-mysql-persistent.json -n openshift
-oc create -f xpaas-templates/sso70-mysql.json -n openshift
-oc create -f xpaas-templates/sso70-postgresql-persistent.json -n openshift
-oc create -f xpaas-templates/sso70-postgresql.json -n openshift
+oc create -f xpaas-templates/sso71-https.json -n openshift
+oc create -f xpaas-templates/sso71-mysql-persistent.json -n openshift
+oc create -f xpaas-templates/sso71-mysql.json -n openshift
+oc create -f xpaas-templates/sso71-postgresql-persistent.json -n openshift
+oc create -f xpaas-templates/sso71-postgresql.json -n openshift
 
 echo XPaaS OpenShift imagestream and templates installed
 echo See https://github.com/openshift/openshift-ansible/tree/master/roles/openshift_examples/files/examples/v3.7

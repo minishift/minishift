@@ -3,7 +3,7 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "description": "Spring Boot, Camel REST DSL and MySQL QuickStart. This quickstart demonstrates how to connect a Spring Boot application to a MySQL database and expose a REST API with Camel on OpenShift. In this example we will use two containers, one container to run as a MySQL server, and another as a client to the database, where the Camel routes are running. This quickstart requires the MySQL server to be deployed and started first.",
+      "description": "Spring Boot, Camel REST DSL and MySQL QuickStart. This quickstart demonstrates how to connect a Spring Boot application to a MySQL database and expose a REST API with Camel on OpenShift. In this example we will use two containers, one container to run as a MySQL server, and another as a client to the database, where the Camel routes are running. This quickstart requires the MySQL server to be deployed and started first, one simple way to run a MySQL service is following the documentation of the OpenShift MySQL container image related to the mysql-ephemeral template.",
       "tags": "quickstart,java,springboot,fis",
       "iconClass": "icon-jboss",
       "version": "2.0"
@@ -31,7 +31,7 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "spring-boot-camel-rest-sql-1.0.0.redhat-000055",
+      "value": "spring-boot-camel-rest-sql-1.0.0.redhat-000064",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
@@ -72,7 +72,7 @@
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.redhat-000055",
+      "value": "1.0.0.redhat-000064",
       "description": "The application version."
     },
     {

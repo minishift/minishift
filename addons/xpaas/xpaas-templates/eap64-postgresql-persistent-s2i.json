@@ -3,17 +3,21 @@
     "apiVersion": "v1",
     "metadata": {
         "annotations": {
-            "description": "Application template for EAP 6 PostgreSQL applications with persistent storage built using S2I.",
-            "iconClass": "icon-jboss",
-            "tags": "eap,javaee,java,jboss,xpaas",
-            "version": "1.4.0",
-            "openshift.io/display-name": "Red Hat JBoss EAP 6.4 + PostgreSQL (Persistent with https)"
+            "iconClass": "icon-eap",
+            "tags": "eap,javaee,java,jboss",
+            "version": "1.4.7",
+            "openshift.io/display-name": "Red Hat JBoss EAP 6.4 + PostgreSQL (Persistent with https)",
+            "openshift.io/provider-display-name": "Red Hat, Inc.",
+            "description": "An example EAP 6 application with a PostgreSQL database. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
+            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat Enterprise Application Server 6.4 based application, including a build configuration, application deployment configuration, database deployment configuration for PostgreSQL using persistence and secure communication using https.",
+            "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-enterprise-application-platform/",
+            "template.openshift.io/support-url": "https://access.redhat.com"
         },
         "name": "eap64-postgresql-persistent-s2i"
     },
     "labels": {
         "template": "eap64-postgresql-persistent-s2i",
-        "xpaas": "1.4.0"
+        "xpaas": "1.4.7"
     },
     "message": "A new EAP 6 and PostgreSQL persistent based application with SSL support has been created in your project. The username/password for accessing the PostgreSQL database \"${DB_DATABASE}\" is ${DB_USERNAME}/${DB_PASSWORD}. Please be sure to create the \"${SERVICE_ACCOUNT_NAME}\" service account and the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications.",
     "parameters": [
@@ -440,7 +444,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-eap64-openshift:1.5"
+                            "name": "jboss-eap64-openshift:1.6"
                         }
                     }
                 },

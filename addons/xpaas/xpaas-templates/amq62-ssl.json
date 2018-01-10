@@ -4,16 +4,17 @@
     "metadata": {
         "annotations": {
             "description": "Application template for JBoss A-MQ brokers. These can be deployed as standalone or in a mesh. This template supports SSL and requires usage of OpenShift secrets.",
-            "iconClass": "icon-jboss",
-            "tags": "messaging,amq,jboss,xpaas",
-            "version": "1.4.0",
-            "openshift.io/display-name": "Red Hat JBoss A-MQ 6.2 (Ephemeral with SSL)"
+            "iconClass": "icon-amq",
+            "tags": "messaging,amq,jboss,hidden",
+            "version": "1.4.7",
+            "openshift.io/display-name": "JBoss A-MQ 6.2 (Ephemeral with SSL)",
+            "openshift.io/provider-display-name": "Red Hat, Inc."
         },
         "name": "amq62-ssl"
     },
     "labels": {
         "template": "amq62-ssl",
-        "xpaas": "1.4.0"
+        "xpaas": "1.4.7"
     },
     "message": "A new messaging service with SSL support has been created in your project. It will handle the protocol(s) \"${MQ_PROTOCOL}\". The username/password for accessing the service is ${MQ_USERNAME}/${MQ_PASSWORD}. Please be sure to create the \"amq-service-account\" service account and a secret named \"${AMQ_SECRET}\" containing the trust store and key store files (\"${AMQ_TRUSTSTORE}\" and \"${AMQ_KEYSTORE}\") used for serving secure content.",
     "parameters": [
@@ -115,6 +116,13 @@
             "description": "The A-MQ storage usage limit",
             "name": "AMQ_STORAGE_USAGE_LIMIT",
             "value": "100 gb",
+            "required": false
+        },
+        {
+            "displayName": "Queue Memory Limit",
+            "description": "The queue memory limit (default is 1mb)",
+            "name": "AMQ_QUEUE_MEMORY_LIMIT",
+            "value": "",
             "required": false
         },
         {
@@ -346,7 +354,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "jboss-amq-62:1.4"
+                                "name": "jboss-amq-62:1.6"
                             }
                         }
                     },
@@ -501,6 +509,10 @@
                                     {
                                         "name": "AMQ_STORAGE_USAGE_LIMIT",
                                         "value": "${AMQ_STORAGE_USAGE_LIMIT}"
+                                    },
+                                    {
+                                        "name": "AMQ_QUEUE_MEMORY_LIMIT",
+                                        "value": "${AMQ_QUEUE_MEMORY_LIMIT}"
                                     }
                                 ]
                             }

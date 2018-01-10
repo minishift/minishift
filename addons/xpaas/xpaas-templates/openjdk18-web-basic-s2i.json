@@ -3,17 +3,21 @@
     "apiVersion": "v1",
     "metadata": {
         "annotations": {
-            "iconClass": "icon-jboss",
-            "description": "Application template for Java applications built using S2I.",
-            "tags": "java,xpaas",
-            "version": "1.1.0",
-            "openshift.io/display-name": "Red Hat OpenJDK 8"
+            "iconClass": "icon-rh-openjdk",
+            "tags": "java",
+            "version": "1.4.7",
+            "openshift.io/display-name": "OpenJDK 8",
+            "openshift.io/provider-display-name": "Red Hat, Inc.",
+            "description": "An example Java application using OpenJDK 8. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
+            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat OpenJDK Java 8 based application.",
+            "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/",
+            "template.openshift.io/support-url": "https://access.redhat.com"
         },
         "name": "openjdk18-web-basic-s2i"
     },
     "labels": {
         "template": "openjdk18-web-basic-s2i",
-        "xpaas": "1.4.0"
+        "xpaas": "1.4.7"
     },
     "message": "A new java application has been created in your project.",
     "parameters": [
@@ -156,7 +160,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "redhat-openjdk18-openshift:1.1"
+                            "name": "redhat-openjdk18-openshift:1.2"
                         }
                     }
                 },

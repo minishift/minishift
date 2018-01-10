@@ -3,17 +3,21 @@
     "apiVersion": "v1",
     "metadata": {
         "annotations": {
-            "iconClass": "icon-jboss",
-            "description": "Application template for JDG 6.5 and MySQL applications with persistent storage.",
-            "tags": "datagrid,jboss,xpaas",
-            "version": "1.4.0",
-            "openshift.io/display-name": "Red Hat JBoss Data Grid 6.5 + MySQL (Persistent with https)"
+            "iconClass": "icon-datagrid",
+            "tags": "datagrid,jboss",
+            "version": "1.4.7",
+            "openshift.io/display-name": "JBoss Data Grid 6.5 + MySQL (with https)",
+            "openshift.io/provider-display-name": "Red Hat, Inc.",
+            "description": "An example JBoss Data Grid application with a MySQL database. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
+            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat JBoss Data Grid 6.5 based application, including a deployment configuration, using MySQL databased using persistence and secure communication using https.",
+            "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-data-grid/",
+            "template.openshift.io/support-url": "https://access.redhat.com"
         },
         "name": "datagrid65-mysql-persistent"
     },
     "labels": {
         "template": "datagrid65-mysql-persistent",
-        "xpaas": "1.4.0"
+        "xpaas": "1.4.7"
     },
     "message": "A new data grid service (using MySQL with persistent storage) has been created in your project. It supports connector type(s) \"${INFINISPAN_CONNECTORS}\". The username/password for accessing the MySQL database \"${DB_DATABASE}\" is ${DB_USERNAME}/${DB_PASSWORD}. Please be sure to create the \"datagrid-service-account\" service account and the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications.",
     "parameters": [
@@ -457,7 +461,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "jboss-datagrid65-openshift:1.4"
+                                "name": "jboss-datagrid65-openshift:1.5"
                             }
                         }
                     },
@@ -664,6 +668,10 @@
                                     {
                                         "name": "HOTROD_SERVICE_NAME",
                                         "value": "${APPLICATION_NAME}-hotrod"
+                                    },
+                                    {
+                                        "name": "HOTROD_ENCRYPTION",
+                                        "value": "${HTTPS_NAME}"
                                     },
                                     {
                                         "name": "MEMCACHED_CACHE",

@@ -3,7 +3,7 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "description": "Spring Boot and Camel using ConfigMaps and Secrets. This quickstart demonstrates how to configure a Spring-Boot application using Openshift ConfigMaps and Secrets.",
+      "description": "Spring Boot and Camel using ConfigMaps and Secrets. This quickstart demonstrates how to configure a Spring-Boot application using OpenShift ConfigMaps and Secrets. This example requires that a ConfigMap named camel-config and a Secret named camel-config are present in the namespace before the application is deployed, instruction about how to manually create them can be found here: https://github.com/fabric8-quickstarts/spring-boot-camel-config/blob/fis-2.0.x.redhat/README.redhat.md ",
       "tags": "quickstart,java,springboot,fis",
       "iconClass": "icon-jboss",
       "version": "2.0"
@@ -31,7 +31,7 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "spring-boot-camel-config-1.0.0.redhat-000005",
+      "value": "spring-boot-camel-config-1.0.0.redhat-000014",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
@@ -64,7 +64,7 @@
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.redhat-000005",
+      "value": "1.0.0.redhat-000014",
       "description": "The application version."
     },
     {

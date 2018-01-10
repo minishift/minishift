@@ -3,7 +3,7 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "description": "Spring Boot, Camel and ActiveMQ QuickStart. This quickstart demonstrates how to connect a Spring-Boot application to an ActiveMQ broker and use JMS messaging between two Camel routes using OpenShift. In this example we will use two containers, one container to run as a ActiveMQ broker, and another as a client to the broker, where the Camel routes are running. This quickstart requires the ActiveMQ broker has been deployed and running first.",
+      "description": "Spring Boot, Camel and ActiveMQ QuickStart. This quickstart demonstrates how to connect a Spring-Boot application to an ActiveMQ broker and use JMS messaging between two Camel routes using OpenShift. In this example we will use two containers, one container to run as a ActiveMQ broker, and another as a client to the broker, where the Camel routes are running. This quickstart requires the ActiveMQ broker has been deployed and running first, one simple way to run a A-MQ service is following the documentation of the A-MQ xPaaS image for OpenShift related to the amq62-basic template",
       "tags": "quickstart,java,springboot,fis",
       "iconClass": "icon-jboss",
       "version": "2.0"
@@ -31,7 +31,7 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "spring-boot-camel-amq-1.0.0.redhat-000055",
+      "value": "spring-boot-camel-amq-1.0.0.redhat-000064",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
@@ -60,7 +60,7 @@
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.redhat-000055",
+      "value": "1.0.0.redhat-000064",
       "description": "The application version."
     },
     {

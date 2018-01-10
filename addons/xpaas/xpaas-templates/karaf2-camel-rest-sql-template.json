@@ -3,7 +3,7 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "description": "Camel example using Rest DSL with SQL Database in Karaf container.",
+      "description": "Camel example using Rest DSL with SQL Database in Karaf container.  This example demonstrates how to use SQL via JDBC along with Camel's REST DSL to expose a RESTful API. The OpenShift MySQL container image should already be installed and running on your OpenShift installation, one simple way to run a MySQL service is following the documentation of the Openshift MySQL container image related to the mysql-ephemeral template..",
       "tags": "quickstart,java,karaf,fis",
       "iconClass": "icon-jboss",
       "version": "2.0"
@@ -31,7 +31,7 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "karaf2-camel-rest-sql-1.0.0.redhat-000010",
+      "value": "karaf2-camel-rest-sql-1.0.0.redhat-000019",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
@@ -73,7 +73,7 @@
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.redhat-000010",
+      "value": "1.0.0.redhat-000019",
       "description": "The application version."
     },
     {

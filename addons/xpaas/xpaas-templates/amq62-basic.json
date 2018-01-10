@@ -4,16 +4,17 @@
     "metadata": {
         "annotations": {
             "description": "Application template for JBoss A-MQ brokers. These can be deployed as standalone or in a mesh. This template doesn't feature SSL support.",
-            "iconClass": "icon-jboss",
-            "tags": "messaging,amq,jboss,xpaas",
-            "version": "1.4.0",
-            "openshift.io/display-name": "Red Hat JBoss A-MQ 6.2 (Ephemeral, no SSL)"
+            "iconClass": "icon-amq",
+            "openshift.io/provider-display-name": "Red Hat, Inc.",
+            "tags": "messaging,amq,jboss,hidden",
+            "version": "1.4.7",
+            "openshift.io/display-name": "JBoss A-MQ 6.2 (Ephemeral, no SSL)"
         },
         "name": "amq62-basic"
     },
     "labels": {
         "template": "amq62-basic",
-        "xpaas": "1.4.0"
+        "xpaas": "1.4.7"
     },
     "message": "A new messaging service has been created in your project. It will handle the protocol(s) \"${MQ_PROTOCOL}\". The username/password for accessing the service is ${MQ_USERNAME}/${MQ_PASSWORD}.",
     "parameters": [
@@ -80,6 +81,13 @@
             "description": "The A-MQ storage usage limit",
             "name": "AMQ_STORAGE_USAGE_LIMIT",
             "value": "100 gb",
+            "required": false
+        },
+        {
+            "displayName": "Queue Memory Limit",
+            "description": "The queue memory limit (default is 1mb)",
+            "name": "AMQ_QUEUE_MEMORY_LIMIT",
+            "value": "",
             "required": false
         },
         {
@@ -215,7 +223,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "jboss-amq-62:1.4"
+                                "name": "jboss-amq-62:1.6"
                             }
                         }
                     },
@@ -322,6 +330,10 @@
                                     {
                                         "name": "AMQ_STORAGE_USAGE_LIMIT",
                                         "value": "${AMQ_STORAGE_USAGE_LIMIT}"
+                                    },
+                                    {
+                                        "name": "AMQ_QUEUE_MEMORY_LIMIT",
+                                        "value": "${AMQ_QUEUE_MEMORY_LIMIT}"
                                     }
                                 ]
                             }

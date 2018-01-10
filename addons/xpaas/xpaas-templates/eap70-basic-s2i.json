@@ -3,17 +3,21 @@
     "apiVersion": "v1",
     "metadata": {
         "annotations": {
-            "iconClass": "icon-jboss",
-            "description": "Application template for EAP 7 applications built using S2I.",
-            "tags": "eap,javaee,java,jboss,xpaas",
-            "version": "1.4.0",
-            "openshift.io/display-name": "Red Hat JBoss EAP 7.0 (no https)"
+            "iconClass": "icon-eap",
+            "tags": "eap,javaee,java,jboss",
+            "version": "1.4.7",
+            "openshift.io/display-name": "JBoss EAP 7.0 (no https)",
+            "openshift.io/provider-display-name": "Red Hat, Inc.",
+            "description": "An example EAP 7 application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
+            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat Enterprise Application Server 7.0 based application, including a build configuration, application deployment configuration and insecure communication using http.",
+            "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-enterprise-application-platform/",
+            "template.openshift.io/support-url": "https://access.redhat.com"
         },
         "name": "eap70-basic-s2i"
     },
     "labels": {
         "template": "eap70-basic-s2i",
-        "xpaas": "1.4.0"
+        "xpaas": "1.4.7"
     },
     "message": "A new EAP 7 based application has been created in your project.",
     "parameters": [
@@ -216,7 +220,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-eap70-openshift:1.5"
+                            "name": "jboss-eap70-openshift:1.6"
                         }
                     }
                 },
@@ -299,17 +303,6 @@
                                 "name": "${APPLICATION_NAME}",
                                 "image": "${APPLICATION_NAME}",
                                 "imagePullPolicy": "Always",
-                                "lifecycle": {
-                                    "preStop": {
-                                        "exec": {
-                                            "command": [
-                                                "/opt/eap/bin/jboss-cli.sh",
-                                                "-c",
-                                                ":shutdown(timeout=60)"
-                                            ]
-                                        }
-                                    }
-                                },
                                 "livenessProbe": {
                                     "exec": {
                                         "command": [

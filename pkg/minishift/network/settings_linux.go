@@ -24,6 +24,7 @@ func ConfigureNetworking(machineName string, networkSettings NetworkSettings) {
 	fmt.Println(configureIPAddressMessage, configureIPAddressFailure)
 }
 
+// Not implemented for this platform
 func determineNameservers() string {
-	return "" // not implemented
+	return ""
 }

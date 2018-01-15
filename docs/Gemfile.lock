@@ -101,10 +101,10 @@ GEM
     middleman-syntax (3.0.0)
       middleman-core (>= 3.2)
       rouge (~> 2.0)
-    mini_portile2 (2.2.0)
+    mini_portile2 (2.3.0)
     minitest (5.10.1)
-    nokogiri (1.8.0)
-      mini_portile2 (~> 2.2.0)
+    nokogiri (1.8.1)
+      mini_portile2 (~> 2.3.0)
     padrino-helpers (0.13.3.3)
       i18n (~> 0.6, >= 0.6.7)
       padrino-support (= 0.13.3.3)
@@ -149,10 +149,11 @@ DEPENDENCIES
   middleman-asciidoc
   middleman-livereload (~> 3.4)
   middleman-syntax
+  nokogiri (~> 1.8.1)
   redcarpet
   therubyracer
   tzinfo-data
   wdm (~> 0.1.0)
 
 BUNDLED WITH
-   1.14.6
+   1.16.0

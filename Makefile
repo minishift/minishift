@@ -56,7 +56,7 @@ ADDON_BINDATA_DIR = $(CURDIR)/$(BUILD_DIR)/bindata
 ADDON_ASSET_FILE = $(ADDON_BINDATA_DIR)/addon_assets.go
 
 # Setup for the docs tasks
-DOCS_BUILDER_IMAGE = minishift/minishift-docs-builder:1.0.0
+DOCS_BUILDER_IMAGE = minishift/minishift-docs-builder:1.0.1
 LOCAL_DOCS_DIR ?= $(CURDIR)/docs
 CONTAINER_DOCS_DIR = /minishift-docs
 DOCS_SYNOPISIS_DIR = docs/source/_tmp

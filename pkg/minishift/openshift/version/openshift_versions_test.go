@@ -97,39 +97,34 @@ func TestPrintDownStreamVersions(t *testing.T) {
 	}
 }
 
-func Test_validate_openshift_min_versions(t *testing.T) {
-	var versionTests = []struct {
-		version string // input
-		valid   bool   // expected result
-		err     error
+func TestIsGreaterOrEqualToBaseVersion(t *testing.T) {
+	var versionTestData = []struct {
+		openshiftVersion     string
+		baseOpenshiftVersion string
+		expectedResult       bool
+		expectedErr          error
 	}{
-		{"v1.1.0", false, nil},
-		{"v1.2.2", false, nil},
-		{"v1.2.3-beta", false, nil},
-		{"v1.3.1", false, nil},
-		{"v1.3.5-alpha", false, nil},
-		{"foo", false, errors.New("Invalid version format 'foo': No Major.Minor.Patch elements found")},
-		{"151", false, errors.New("Invalid version format '151': No Major.Minor.Patch elements found")},
-		{"v1.4.1", true, nil},
-		{"v1.5.0-alpha.0", true, nil},
-		{"v1.5.1-beta.0", true, nil},
-		{"v3.6.0", true, nil},
-		{"3.6.0", true, nil},
+		{"v3.6.0", "v3.7.0", false, nil},
+		{"v3.6.0-alpha.1", "v3.6.0-alpha.2", false, nil},
+		{"v3.7.1", "v3.7.1", true, nil},
+		{"v3.6.0-rc1", "v3.6.0-alpha.1", true, nil},
+		{"v3.6.0-alpha.1", "v3.6.0-beta.0", false, nil},
+		{"v1.4.1", "v1.4.1", true, nil},
+		{"v1.5.0-alpha.0", "v1.4.1", true, nil},
+		{"v1.5.1-beta.0", "v1.4.1", true, nil},
+		{"foo", "v1.4.1", false, errors.New("Invalid version format 'foo': No Major.Minor.Patch elements found")},
+		{"151", "v1.4.1", false, errors.New("Invalid version format '151': No Major.Minor.Patch elements found")},
 	}
 
-	minVer := "v1.4.1"
-	for _, versionTest := range versionTests {
-		valid, err := IsGreaterOrEqualToBaseVersion(versionTest.version, minVer)
-		if versionTest.err == nil && err != nil {
-			t.Fatalf("No error expected. Got '%v'", err)
+	for _, versionTest := range versionTestData {
+		actualResult, actualErr := IsGreaterOrEqualToBaseVersion(versionTest.openshiftVersion, versionTest.baseOpenshiftVersion)
+		if actualResult != versionTest.expectedResult {
+			t.Errorf("IsGreaterOrEqualToBaseVersion(%s, %s) is expected to return '%v' but returned '%v'",
+				versionTest.openshiftVersion, versionTest.baseOpenshiftVersion, versionTest.expectedResult, actualResult)
 		}
-
-		if err != nil && err.Error() != versionTest.err.Error() {
-			t.Fatalf("Unexpected error. Expected '%v', got '%v'", versionTest.err, err)
-		}
-
-		if valid != versionTest.valid {
-			t.Fatalf("Expected '%t' Got '%t' for %s", versionTest.valid, valid, versionTest.version)
+		if actualErr != nil && actualErr.Error() != versionTest.expectedErr.Error() {
+			t.Errorf("IsGreaterOrEqualToBaseVersion(%s, %s) is expected to return '%v' but returned '%v'",
+				versionTest.openshiftVersion, versionTest.baseOpenshiftVersion, versionTest.expectedErr, actualErr)
 		}
 	}
 }

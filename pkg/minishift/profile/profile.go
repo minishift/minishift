@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
+	"regexp"
 
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/config"
@@ -47,6 +48,11 @@ func GetProfileList() []string {
 	}
 
 	for _, f := range files {
+		// Skip non-directory and hidden stuffs
+		match, _ := regexp.MatchString("^\\.", f.Name())
+		if !filehelper.IsDirectory(filepath.Join(profileBaseDir, f.Name())) || match {
+			continue
+		}
 		profileList = append(profileList, f.Name())
 	}
 	return profileList

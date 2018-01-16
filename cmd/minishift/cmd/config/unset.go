@@ -44,10 +44,18 @@ func init() {
 }
 
 func unset(name string) error {
+	_, err := findSetting(name)
+	if err != nil {
+		return err
+	}
 	m, err := ReadConfig()
 	if err != nil {
 		return err
 	}
+	if m[name] == nil {
+		return fmt.Errorf("Property name '%s' is not set", name)
+	}
 	delete(m, name)
+	fmt.Printf("Property name '%s' successfuly unset\n", name)
 	return WriteConfig(m)
 }

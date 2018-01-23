@@ -15,7 +15,7 @@ single-node OpenShift cluster inside a VM. You can try out OpenShift or
 develop with it, day-to-day, on your local host.
 
 Minishift uses https://github.com/docker/machine/tree/master/libmachine[libmachine] for
-provisioning VMs, and https://github.com/openshift/origin[OpenShift Origin] for running the cluster.
+provisioning VMs, and https://github.com/openshift/origin[OpenShift Origin] for running the cluster. The code base is forked from the https://github.com/kubernetes/minikube[Minikube] project.
 
 https://travis-ci.org/minishift/minishift[image:https://secure.travis-ci.org/minishift/minishift.png[Build Status]]
 https://ci.appveyor.com/project/minishift-bot/minishift/branch/master[image:https://ci.appveyor.com/api/projects/status/o0mha7mpanp7dpyo/branch/master?svg=true[Build status]]
@@ -57,9 +57,6 @@ In addition, you can review the release notes and project roadmap here on GitHub
 
 [[community]]
 == Community
-
-Minishift is an open-source project dedicated to developing and supporting Minishift.
-The code base is forked from the https://github.com/kubernetes/minikube[Minikube] project.
 
 Contributions, questions, and comments are all welcomed and encouraged!
 

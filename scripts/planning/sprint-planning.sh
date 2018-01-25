@@ -99,7 +99,7 @@ if [ -z "${repository}" ] || [ -z "${milestone}" ]; then
 fi
 
 if [ -n "${print_header}" ]; then
-    echo "Amit;Andreas;Budh;Gerard;Hardy;Lala;Praveen;Title;Repository;Milestone;Type;Priority;Id;URL"
+    echo "Amit;Andreas;Anjan;Budh;Gerard;Lala;Praveen;Title;Repository;Milestone;Type;Priority;Id;URL"
 fi
 
 if [ "${repository}" == "cdk" ]; then

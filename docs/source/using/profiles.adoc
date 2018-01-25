@@ -24,7 +24,7 @@ You can execute single commands against a non-active profile by using the `--pro
 On top of the `--profile` flag, there are xref:../command-ref/minishift_profile.adoc#[commands] for xref:../command-ref/minishift_profile_list.adoc#[listing], xref:../command-ref/minishift_profile_delete.adoc#[deleting] and xref:../command-ref/minishift_profile_set.adoc#[setting] the active profile.
 These commands are described in the following sections.
 
-[TIP]
+[WARNING]
 ====
 Even though profiles are independent of each other, they share the same cache for ISOs, `oc` binaries and container images.
 `minishift delete --clear-cache` will for this reason affect all profiles.

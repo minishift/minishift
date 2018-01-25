@@ -1,0 +1,7 @@
+# Name: testaddon
+# Description: Test addon description
+# URL: http://testaddon.url
+# Required-Vars: TEST
+# Var-Defaults: TEST=foo
+
+echo Removing testaddon with variable TEST of #{TEST} value

@@ -24,8 +24,12 @@ import (
 	"runtime"
 	"testing"
 
+	"errors"
+	"github.com/docker/machine/libmachine/provision"
+	"github.com/minishift/minishift/cmd/testing/cli"
 	"github.com/minishift/minishift/pkg/minishift/addon"
 	"github.com/minishift/minishift/pkg/minishift/addon/command"
+	"github.com/minishift/minishift/pkg/minishift/docker"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -144,6 +148,81 @@ func TestVerifyMissingRequiredVariablesInContext(t *testing.T) {
 
 	err := verifyRequiredVariablesInContext(context, addOn.MetaData())
 	assert.EqualError(t, err, expectedErrMsg)
+}
+
+type FakeSSHDockerCommander struct {
+	docker.DockerCommander
+	provision.SSHCommander
+}
+
+func (f *FakeSSHDockerCommander) SSHCommand(args string) (string, error) {
+	return "openshift v3.6.1+008f2d5\nkubernetes v1.6.1+5115d708d7\netcd 3.2.1", nil
+}
+
+var expectedApplyAddonOutput = `-- Applying addon 'testaddon':
+This testaddon is having variable TEST with foo value
+`
+
+func TestApplyAddon(t *testing.T) {
+	path := filepath.Join(basepath, "..", "..", "..", "..", "test", "testdata", "testaddons")
+	manager, err := NewAddOnManager(path, make(map[string]*addon.AddOnConfig))
+	assert.NoError(t, err, "Unexpected error creating manager in directory '%s'", path)
+
+	testaddon := manager.Get("testaddon")
+	context, _ := command.NewExecutionContext(nil, &FakeSSHDockerCommander{})
+
+	tee := cli.CreateTee(t, false)
+	manager.ApplyAddOn(testaddon, context)
+	tee.Close()
+
+	assert.Equal(t, expectedApplyAddonOutput, tee.StdoutBuffer.String())
+}
+
+var expectedRemoveAddonOutput = `-- Removing addon 'testaddon':
+Removing testaddon with variable TEST of foo value
+`
+
+func TestRemoveAddon(t *testing.T) {
+	path := filepath.Join(basepath, "..", "..", "..", "..", "test", "testdata", "testaddons")
+	manager, err := NewAddOnManager(path, make(map[string]*addon.AddOnConfig))
+	assert.NoError(t, err, "Unexpected error creating manager in directory '%s'", path)
+
+	testaddon := manager.Get("testaddon")
+	context, _ := command.NewExecutionContext(nil, &FakeSSHDockerCommander{})
+
+	tee := cli.CreateTee(t, false)
+	manager.RemoveAddOn(testaddon, context)
+	tee.Close()
+
+	assert.Equal(t, expectedRemoveAddonOutput, tee.StdoutBuffer.String())
+}
+
+var expectedInvalidAddonOperationError = errors.New("The variable(s) TEST are required by the add-on, but are not defined in the context")
+
+func TestApplyInvalidAddon(t *testing.T) {
+	path := filepath.Join(basepath, "..", "..", "..", "..", "test", "testdata", "testaddons")
+	manager, err := NewAddOnManager(path, make(map[string]*addon.AddOnConfig))
+	assert.NoError(t, err, "Unexpected error creating manager in directory '%s'", path)
+
+	testaddon := manager.Get("invalidaddon")
+	context, err := command.NewExecutionContext(nil, &FakeSSHDockerCommander{})
+	assert.NoError(t, err, "Unexpected error creating new execution context")
+
+	err = manager.ApplyAddOn(testaddon, context)
+	assert.EqualError(t, expectedInvalidAddonOperationError, err.Error())
+}
+
+func TestRemoveInvalidAddon(t *testing.T) {
+	path := filepath.Join(basepath, "..", "..", "..", "..", "test", "testdata", "testaddons")
+	manager, err := NewAddOnManager(path, make(map[string]*addon.AddOnConfig))
+	assert.NoError(t, err, "Unexpected error creating manager in directory '%s'", path)
+
+	testaddon := manager.Get("invalidaddon")
+	context, err := command.NewExecutionContext(nil, &FakeSSHDockerCommander{})
+	assert.NoError(t, err, "Unexpected error creating new execution context")
+
+	err = manager.RemoveAddOn(testaddon, context)
+	assert.EqualError(t, expectedInvalidAddonOperationError, err.Error())
 }
 
 func getTestAddonMap(name, description, requireVar, varDefault, openshiftVersion string) map[string]interface{} {

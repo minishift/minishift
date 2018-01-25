@@ -1,0 +1,6 @@
+# Name: invalidaddon
+# Description: Test addon description
+# URL: http://testaddon.url
+# Required-Vars: TEST
+
+echo Removing testaddon with variable TEST of #{TEST} value

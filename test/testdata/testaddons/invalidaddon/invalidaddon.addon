@@ -1,0 +1,6 @@
+# Name: invalidaddon
+# Description: Test addon description
+# URL: http://testaddon.url
+# Required-Vars: TEST
+
+echo This testaddon is having variable TEST with #{TEST} value

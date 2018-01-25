@@ -216,13 +216,11 @@ func (m *AddOnManager) ApplyAddOn(addOn addon.AddOn, context *command.ExecutionC
 	defer os.Chdir(oldDir)
 
 	os.Chdir(addOn.InstallPath())
-	for _, c := range addOn.Commands() {
-		err := c.Execute(context)
-		if err != nil {
-			return err
-		}
+	if err := addonCmdExecution(addOn.Commands(), context); err != nil {
+		return err
 	}
-	fmt.Print("\n\n")
+
+	fmt.Print("\n")
 	return nil
 }
 
@@ -250,13 +248,10 @@ func (m *AddOnManager) RemoveAddOn(addOn addon.AddOn, context *command.Execution
 	defer os.Chdir(oldDir)
 
 	os.Chdir(addOn.InstallPath())
-	for _, c := range addOn.RemoveCommands() {
-		err := c.Execute(context)
-		if err != nil {
-			return err
-		}
+	if err := addonCmdExecution(addOn.RemoveCommands(), context); err != nil {
+		return err
 	}
-	fmt.Print("\n\n")
+	fmt.Print("\n")
 	return nil
 }
 
@@ -320,6 +315,7 @@ func verifyRequiredOpenshiftVersion(context *command.ExecutionContext, meta addo
 			}
 		}
 	}
+
 	return nil
 }
 
@@ -380,6 +376,16 @@ func addVarDefaultsToContext(addOn addon.AddOn, context *command.ExecutionContex
 		// Don't add context if env already present
 		if !utilStrings.Contains(context.Vars(), varDefault.Key) {
 			context.AddToContext(varDefault.Key, varDefault.Value)
+		}
+	}
+
+	return nil
+}
+
+func addonCmdExecution(commands []command.Command, context *command.ExecutionContext) error {
+	for _, c := range commands {
+		if err := c.Execute(context); err != nil {
+			return err
 		}
 	}
 

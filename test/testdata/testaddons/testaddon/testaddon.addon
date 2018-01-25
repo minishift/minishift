@@ -1,0 +1,7 @@
+# Name: testaddon
+# Description: Test addon description
+# URL: http://testaddon.url
+# Required-Vars: TEST
+# Var-Defaults: TEST=foo
+
+echo This testaddon is having variable TEST with #{TEST} value

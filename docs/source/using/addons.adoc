@@ -186,7 +186,7 @@ $ minishift config set addon-env PROJECT_USER=env.USER        // <1>
 $ minishift addons apply acme                                 // <2>
 ----
 <1> Using the _env_ prefix ensures that instead of literally replacing '#{PROJECT_USER}' with 'env.USER', the value of the environment variable `USER` is used.
-If the environment variable is not set not, interpolation does not occur.
+If the environment variable is not set, interpolation does not occur.
 <2> When the add-on is applied, each occurrence of `#{PROJECT_USER}` within an add-on command gets replaced with the value of the environment variable `USER`.
 
 As an add-on developer, you can enforce that a variable value is provided when the add-on gets applied by adding the variable name to the _Required-Vars_ metadata header.

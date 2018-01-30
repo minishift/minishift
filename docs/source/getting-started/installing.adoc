@@ -76,6 +76,12 @@ On the Windows operating system, due to issue link:https://github.com/minishift/
 You cannot run {project} from a network drive.
 ====
 
+[NOTE]
+====
+Minishift will use any SSH binary found on the `PATH` in preference to internal SSH code.
+Ensure that any SSH binary in the system `PATH` does not generate warning messages as this will cause installation problems such as issue  link:https://github.com/minishift/minishift/issues/1923[#1923].
+====
+
 [[homebrew-install-minishift]]
 === With Homebrew
 

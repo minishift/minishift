@@ -4,6 +4,7 @@ Feature: Provision an older major release
 
   Scenario: Starting Minishift with v1.5.1
     Given Minishift has state "Does Not Exist"
+      And image caching is disabled
      When executing "minishift start --openshift-version v1.5.1" succeeds
      Then Minishift should have state "Running"
      When executing "minishift openshift version" succeeds

@@ -190,6 +190,47 @@ func (m *Minishift) executingMinishiftCommand(command string) error {
 	return nil
 }
 
+func (m *Minishift) setImageCaching(operation string) error {
+	enabled := "true"
+	if operation == "disabled" {
+		enabled = "false"
+	}
+
+	return m.executingMinishiftCommand(fmt.Sprintf("config set image-caching %s", enabled))
+}
+
+func (m *Minishift) imageExportShouldComplete(noOfImages int) error {
+	// poll till the output of the `minishift image list` shows number of cached images
+	timeout := time.NewTimer(20 * time.Minute)
+
+outerPollActive:
+	for {
+		select {
+		case <-timeout.C:
+			return errors.New("Timed out in getting the number of default cached images")
+		default:
+			cmdOut, _, _ := m.runner.RunCommand("image list")
+			cmdOut = strings.TrimRight(cmdOut, "\n")
+			numOfLines := len(strings.Split(cmdOut, "\n"))
+			if numOfLines == noOfImages {
+				break outerPollActive
+			}
+			if numOfLines > noOfImages {
+				return errors.New(fmt.Sprintf("Number of expected cached images is greater than %s", noOfImages))
+			}
+
+			time.Sleep(5 * time.Second)
+		}
+	}
+
+	return nil
+}
+
+func (m *Minishift) imageShouldHaveCached(image string) error {
+	cmdOut, _, _ := m.runner.RunCommand("image list")
+	return util.CompareExpectedWithActualMatchesRegex(image, strings.TrimRight(cmdOut, "\n"))
+}
+
 func (m *Minishift) getOpenShiftUrl() string {
 	cmdOut, _, _ := m.runner.RunCommand("console --url")
 	return strings.TrimRight(cmdOut, "\n")

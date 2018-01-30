@@ -8,6 +8,7 @@ Feature: Cool Store
   
   Scenario: User enables the 'xpaas' add-on and creates a Minishift instance
     Given Minishift has state "Does Not Exist"
+      And image caching is disabled
      When executing "minishift addons enable xpaas"
      Then stdout should contain
       """

@@ -66,6 +66,7 @@ Feature: Profile
   Scenario: As user, I can start Minishift with default profile 'minishift'
     Given profile "minishift" has state "Does Not Exist"
       And profile "minishift" is the active profile
+      And image caching is disabled
      When executing "minishift start" succeeds
      Then profile "minishift" should have state "Running"
      When executing "minishift profile list" succeeds

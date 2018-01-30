@@ -13,6 +13,8 @@ cluster in VM provided by Minishift.
 
   Scenario: Minishift start
   Minishift must be started in order to interact with OpenShift via "minishift openshift" command
+
+     Given image caching is disabled
       When executing "minishift start" succeeds
 
   Scenario: Service list sub-command

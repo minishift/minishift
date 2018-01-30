@@ -9,6 +9,7 @@ which are then available in OpenShift to the user.
 
   Scenario: User starts Minishift
     Given Minishift has state "Does Not Exist"
+      And image caching is disabled
      When executing "minishift start --memory 4GB" succeeds
      Then Minishift should have state "Running"
       And stdout should contain

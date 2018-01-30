@@ -4,6 +4,7 @@ Feature: Provision all major OpenShift versions
 
   Scenario Outline: Provision all major OpenShift versions
     Given Minishift has state "Does Not Exist"
+      And image caching is disabled
      When executing "minishift start --openshift-version <serverVersion>" succeeds
      Then Minishift should have state "Running"
      When executing "minishift openshift version" succeeds

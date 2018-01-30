@@ -13,6 +13,7 @@ one from: bash, cmd, powershell, tcsh, zsh with TEST_WITH_SPECIFIED_SHELL parame
 
   Scenario: Starting minishift
     Given Minishift has state "Does Not Exist"
+      And image caching is disabled
      When executing "minishift start" succeeds
      Then Minishift has state "Running"
 

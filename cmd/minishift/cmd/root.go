@@ -283,12 +283,17 @@ func initializeProfile() string {
 	return ""
 }
 
+func setViperConfigDefaults() {
+	viper.SetDefault(configCmd.ImageCaching.Name, constants.DefaultImageCaching)
+}
+
 func setupViper() {
 	viper.SetEnvPrefix(constants.MiniShiftEnvPrefix)
 	// Replaces '-' in flags with '_' in env variables
 	// e.g. show-libmachine-logs => $ENVPREFIX_SHOW_LIBMACHINE_LOGS
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	viper.AutomaticEnv()
+	setViperConfigDefaults()
 	setFlagsUsingViper()
 }
 

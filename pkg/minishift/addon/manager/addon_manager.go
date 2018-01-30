@@ -233,7 +233,7 @@ func (m *AddOnManager) RemoveAddOn(addOn addon.AddOn, context *command.Execution
 		return err
 	}
 
-	addonMetadata := addOn.MetaData()
+	addonMetadata := addOn.MetaDataForAddonRemove()
 	if err := verifyRequiredOpenshiftVersion(context, addonMetadata); err != nil {
 		return err
 	}

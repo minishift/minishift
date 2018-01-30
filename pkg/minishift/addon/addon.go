@@ -25,8 +25,11 @@ import (
 // AddOn is the internal representation of an AddOn including the addon metadata and the actual commands
 // the Addon consists off.
 type AddOn interface {
-	// GetMetaData returns the meta data of this addon.
+	// MetaData returns the meta data of this addon.
 	MetaData() AddOnMeta
+
+	// MetaDataForAddonRemove returns the meta data for this addon when remove subcommand used.
+	MetaDataForAddonRemove() AddOnMeta
 
 	// Commands returns a Command slice of the commands this addon consists of.
 	Commands() []command.Command
@@ -56,20 +59,22 @@ type AddOn interface {
 type DefaultAddOn struct {
 	AddOn
 
-	metaData       AddOnMeta
-	commands       []command.Command
-	removeCommands []command.Command
-	enabled        bool
-	path           string
-	priority       int
+	metaData               AddOnMeta
+	metaDataForAddonRemove AddOnMeta
+	commands               []command.Command
+	removeCommands         []command.Command
+	enabled                bool
+	path                   string
+	priority               int
 }
 
-func NewAddOn(meta AddOnMeta, commands []command.Command, removeCommands []command.Command, path string) AddOn {
+func NewAddOn(meta AddOnMeta, metaDataForAddonRemove AddOnMeta, commands []command.Command, removeCommands []command.Command, path string) AddOn {
 	addOn := DefaultAddOn{
-		metaData:       meta,
-		commands:       commands,
-		removeCommands: removeCommands,
-		path:           path,
+		metaData:               meta,
+		metaDataForAddonRemove: metaDataForAddonRemove,
+		commands:               commands,
+		removeCommands:         removeCommands,
+		path:                   path,
 	}
 	return &addOn
 }
@@ -84,6 +89,10 @@ func (a *DefaultAddOn) RemoveCommands() []command.Command {
 
 func (a *DefaultAddOn) MetaData() AddOnMeta {
 	return a.metaData
+}
+
+func (a *DefaultAddOn) MetaDataForAddonRemove() AddOnMeta {
+	return a.metaDataForAddonRemove
 }
 
 func (a *DefaultAddOn) IsEnabled() bool {

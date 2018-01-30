@@ -372,7 +372,7 @@ else
     perform_release $RSYNC_PASSWORD;
   elif [[ "$JOB_NAME" = "minishift-nightly-b2d" ]]; then
     perform_nightly "b2d";
-  elif [[ "$JOB_NAME" = "minishift-nightly-minikube" ]]; then
+  elif [[ "$JOB_NAME" = "minishift-pr" ]]; then
     perform_nightly "minikube";
   elif [[ "$JOB_NAME" = "minishift-nightly-centos" ]]; then
     perform_nightly "centos";

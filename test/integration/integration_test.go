@@ -176,6 +176,9 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^([^"]*) of command "minishift (.*)" (contains|does not contain) "(.*)"$`,
 		commandReturnContains)
 
+	// setting image caching operation
+	s.Step(`^image caching is (disabled|enabled)$`, minishift.setImageCaching)
+
 	// steps to execute `oc` commands
 	s.Step(`^executing "oc (.*)" retrying (\d+) times with wait period of (\d+) seconds$`,
 		minishift.executingRetryingTimesWithWaitPeriodOfSeconds)

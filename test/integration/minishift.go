@@ -190,6 +190,15 @@ func (m *Minishift) executingMinishiftCommand(command string) error {
 	return nil
 }
 
+func (m *Minishift) setImageCaching(operation string) error {
+	enabled := "true"
+	if operation == "disabled" {
+		enabled = "false"
+	}
+
+	return m.executingMinishiftCommand(fmt.Sprintf("config set image-caching %s", enabled))
+}
+
 func (m *Minishift) getOpenShiftUrl() string {
 	cmdOut, _, _ := m.runner.RunCommand("console --url")
 	return strings.TrimRight(cmdOut, "\n")

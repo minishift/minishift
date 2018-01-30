@@ -396,7 +396,7 @@ func addActiveProfileInformation() {
 }
 
 func importContainerImages(driver drivers.Driver, api libmachine.API, openShiftVersion string) {
-	if !viper.GetBool(configCmd.ImageCaching.Name) {
+	if viper.GetBool(configCmd.ImageCaching.Name) {
 		return
 	}
 
@@ -435,7 +435,7 @@ func getImageHandler(driver drivers.Driver, envMap map[string]string) image.Imag
 
 // exportContainerImages exports the OpenShift images in a background process (by calling 'minishift image export')
 func exportContainerImages(driver drivers.Driver, api libmachine.API, version string) {
-	if !viper.GetBool(configCmd.ImageCaching.Name) {
+	if viper.GetBool(configCmd.ImageCaching.Name) {
 		return
 	}
 

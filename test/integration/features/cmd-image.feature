@@ -13,7 +13,7 @@ Feature: Basic image caching test
      """
      Running this command requires an existing 'minishift' VM, but no VM is defined.
      """
-
+    Given image caching is disabled
      When executing "minishift start" succeeds
       And executing "minishift image export alpine:latest" succeeds
      Then stdout of command "minishift image list" contains "alpine:latest"

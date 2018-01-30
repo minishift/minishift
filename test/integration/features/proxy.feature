@@ -12,6 +12,7 @@ Feature: Minishift can run behind proxy
 
   Scenario: Start behind the proxy
    Given user starts proxy server and sets MINISHIFT_HTTP_PROXY variable
+     And image caching is disabled
     When executing "minishift start" succeeds
     Then proxy log should contain "Accepting CONNECT to registry-1.docker.io:443"
      And proxy log should contain "Accepting CONNECT to auth.docker.io:443"

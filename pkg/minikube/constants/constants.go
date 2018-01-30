@@ -38,6 +38,7 @@ const (
 	UpdateMarkerFileName             = "updated"
 	DefaultMachineName               = "minishift"
 	DefaultProfileName               = "minishift"
+	DefaultImageCaching              = true
 )
 
 var (

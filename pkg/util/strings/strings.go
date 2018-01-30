@@ -38,7 +38,7 @@ func Contains(slice []string, s string) bool {
 	return false
 }
 
-// Remove takes a slice os strings and returns a slice with the first occurance of the string value removed.
+// Remove takes a slice of strings and returns a slice with the first occurrence of the string value removed.
 func Remove(slice []string, value string) []string {
 	for i, s := range slice {
 		if s == value {

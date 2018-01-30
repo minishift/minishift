@@ -125,19 +125,19 @@ We recommend using this feature with caution.
 [[implicit-image-caching]]
 == Implicit Image Caching
 
-Image caching can be configured to automatically occur during the creation of the {project} VM while executing `minishift start`.
-To enable this feature you need to enable the `image-caching` property in the persistent configuration using the xref:../command-ref/minishift_config_set#[`minishift config set`] command:
-
-----
-$ minishift config set image-caching true
-----
-
-Once enabled, caching occurs in a background process, the first time you use the xref:../command-ref/minishift_start#[`minishift start`] command.
+Image caching is enabled by default for {project}.
+It occurs in a background process after the xref:../command-ref/minishift_start#[`minishift start`] command is completed for the first time.
 Once the images are cached under *_$MINISHIFT_HOME/cache/images_*, successive {project} VM creations will use these cached images.
+
+To disable this feature you need to disable the `image-caching` property in the persistent configuration using the xref:../command-ref/minishift_config_set#[`minishift config set`] command:
+
+----
+$ minishift config set image-caching false
+----
 
 [NOTE]
 ====
-Enabling implicit image caching will transparently add the required OpenShift images to the list of cached images as specified per `cache-images` configuration option.
+Implicit image caching will transparently add the required OpenShift images to the list of cached images as specified per `cache-images` configuration option.
 See xref:../using/image-caching.adoc#persisting-image-names[Persisting Cached Image Names].
 ====
 
@@ -146,7 +146,7 @@ See xref:../using/image-caching.adoc#persisting-image-names[Persisting Cached Im
 Each time an image exporting background process runs, a log file is generated under *_$MINISHIFT_HOME/logs_* which can be used to verify the progress of the export.
 ====
 
-You can disable the caching of the OpenShift images by setting `image-caching` to `false` or removing the setting altogether using xref:../command-ref/minishift_config_unset#[`minishift config unset`]:
+You can re-enable the caching of the OpenShift images by setting `image-caching` to `true` or removing the setting altogether using xref:../command-ref/minishift_config_unset#[`minishift config unset`]:
 
 ----
 $ minishift config unset image-caching

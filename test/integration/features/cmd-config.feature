@@ -203,6 +203,8 @@ user defined options which changes default behaviour of Minishift.
   Scenario: Minishift informs about starting with correct setup of memory, disk and CPU
   Note: Minishift rounds the values for the report to make it more readable.
         However original non-rounded values are used for the startup.
+    Given Minishift has state "Does Not Exist"
+      And image caching is disabled
      When executing "minishift start" succeeds
      Then stdout should match "Memory\s*:\s*3 GB"
      Then stdout should match "Disk size\s*:\s*25 GB"

@@ -20,6 +20,7 @@ Feature: Flags
 
   Scenario: Starting Minishift
     Given Minishift has state "Does Not Exist"
+      And image caching is disabled
      When executing "minishift start --insecure-registry test-registry:5000 --docker-env=FOO=BAR" succeeds
      Then Minishift should have state "Running"
 

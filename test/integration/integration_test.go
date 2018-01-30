@@ -176,6 +176,11 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^([^"]*) of command "minishift (.*)" (contains|does not contain) "(.*)"$`,
 		commandReturnContains)
 
+	// setting image caching operation
+	s.Step(`^image caching is (disabled|enabled)$`, minishift.setImageCaching)
+	s.Step(`^image export completes with (\d+) images$`, minishift.imageExportShouldComplete)
+	s.Step(`^container image "(.*)" is cached$`, minishift.imageShouldHaveCached)
+
 	// steps to execute `oc` commands
 	s.Step(`^executing "oc (.*)" retrying (\d+) times with wait period of (\d+) seconds$`,
 		minishift.executingRetryingTimesWithWaitPeriodOfSeconds)
@@ -402,12 +407,7 @@ func ensureTestDirEmpty() {
 	}
 
 	for _, file := range files {
-		fullPath := filepath.Join(testDir, file.Name())
-		if filepath.Base(file.Name()) == "cache" {
-			fmt.Println(fmt.Sprintf("Keeping Minishift cache directory '%s' for test run.", fullPath))
-			continue
-		}
-		os.RemoveAll(fullPath)
+		os.RemoveAll(filepath.Join(testDir, file.Name()))
 	}
 }
 
@@ -415,6 +415,7 @@ func cleanTestDirConfiguration() {
 	var foldersToClean []string
 	foldersToClean = append(foldersToClean, filepath.Join(testDir, "addons"))
 	foldersToClean = append(foldersToClean, filepath.Join(testDir, "config"))
+	foldersToClean = append(foldersToClean, filepath.Join(testDir, "cache/images"))
 
 	for index := range foldersToClean {
 		err := os.RemoveAll(foldersToClean[index])

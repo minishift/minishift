@@ -13,8 +13,11 @@ Feature: Basic image caching test
      """
      Running this command requires an existing 'minishift' VM, but no VM is defined.
      """
-
      When executing "minishift start" succeeds
+      And image export completes with 3 images
+      And container image "openshift\/origin-haproxy-router:v[0-9]+\.[0-9]+\.[0-9]+" is cached
+      And container image "openshift\/origin-docker-registry:v[0-9]+\.[0-9]+\.[0-9]+" is cached
+      And container image "openshift\/origin:v[0-9]+\.[0-9]+\.[0-9]+" is cached
       And executing "minishift image export alpine:latest" succeeds
      Then stdout of command "minishift image list" contains "alpine:latest"
 
@@ -22,7 +25,8 @@ Feature: Basic image caching test
      When executing "minishift delete --force" succeeds
      Then stdout of command "minishift image list" contains "alpine:latest"
 
-  Scenario: As a user I can import a container image from the local cache into a running Minishift instance
+  Scenario: As a user I can reuse the cached images on next start and also import a container image from the local
+    cache into a running Minishift instance.
     Note: In this scenario we use alpine:latest which was cached in the previous scenario
 
     Given Minishift has state "Does Not Exist"
@@ -36,8 +40,12 @@ Feature: Basic image caching test
      """
 
      When executing "minishift start" succeeds
-      And executing "minishift image list --vm" succeeds
-      And stdout should not contain "alpine:latest"
+     Then stdout should match "Importing 'openshift\/origin:v[0-9]+\.[0-9]+\.[0-9]+' [\.]+ OK"
+      And stdout should match "Importing 'openshift\/origin-docker-registry:v[0-9]+\.[0-9]+\.[0-9]+' [\.]+ OK"
+      And stdout should match "Importing 'openshift\/origin-haproxy-router:v[0-9]+\.[0-9]+\.[0-9]+' [\.]+ OK"
+
+     When executing "minishift image list --vm" succeeds
+     Then stdout should not contain "alpine:latest"
       And executing "minishift image import alpine:latest" succeeds
       And executing "minishift image list --vm" succeeds
      Then stdout should contain "alpine:latest"

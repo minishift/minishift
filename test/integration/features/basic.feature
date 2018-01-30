@@ -27,8 +27,11 @@ Feature: Basic
 
   Scenario: Starting Minishift
     Given Minishift has state "Does Not Exist"
+      And image caching is disabled
      When executing "minishift start" succeeds
      Then Minishift should have state "Running"
+     When executing "minishift image list" succeeds
+     Then stdout should be empty
 
   Scenario: OpenShift is ready after startup
     After startup of Minishift OpenShift instance should respond correctly on its html endpoints

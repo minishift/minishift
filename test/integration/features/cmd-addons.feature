@@ -82,6 +82,7 @@ Feature: Addons command and its subcommands
   Scenario: Starting Minishift with anyuid and xpaas add-ons enabled
   The addons are being applied in correct order.
     Given Minishift has state "Does Not Exist"
+      And image caching is disabled
      When executing "minishift start" succeeds
      Then Minishift should have state "Running"
      Then stdout should match

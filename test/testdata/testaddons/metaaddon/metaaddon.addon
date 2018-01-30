@@ -1,0 +1,6 @@
+# Name: metaaddon
+# Description: Meta addon description
+# URL: http://foo.bar.com
+# Required-Vars: TEST
+
+echo This metaaddon is having variable TEST with #{TEST} value

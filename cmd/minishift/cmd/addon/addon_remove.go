@@ -57,7 +57,7 @@ func runRemoveAddon(cmd *cobra.Command, args []string) {
 		if addOnManager.Get(addonName) == nil {
 			atexit.ExitWithMessage(0, fmt.Sprintf(noAddOnMessage, addonName))
 		}
-		if addOnManager.Get(addonName).RemoveCommands() == nil {
+		if addOnManager.Get(addonName).MetaDataForAddonRemove() == nil {
 			atexit.ExitWithMessage(0, fmt.Sprintf(noRemoveAddOnMessage, addonName, addonName))
 		}
 	}

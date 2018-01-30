@@ -1,0 +1,5 @@
+# Name: metaaddon
+# Description: Meta addon description
+# URL: http://foo.bar.com
+
+echo Removing metaaddon without depending on addon default variables

@@ -19,14 +19,15 @@ limitations under the License.
 package util
 
 import (
+	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
-
-	"bytes"
 	"syscall"
+	"time"
 
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
@@ -43,16 +44,37 @@ type OcRunner struct {
 }
 
 func runCommand(command string, commandPath string) (stdOut string, stdErr string, exitCode int) {
+	return runCommandWithTimeout(command, commandPath, 0)
+}
+
+func runCommandWithTimeout(command string, commandPath string, timeout int) (stdOut string, stdErr string, exitCode int) {
+	var ctx context.Context
+	var cancel context.CancelFunc
+
 	commandArr := utilCmd.SplitCmdString(command)
 	path, _ := filepath.Abs(commandPath)
-	cmd := exec.Command(path, commandArr...)
+
+	if timeout > 0 {
+		ctx, cancel = context.WithTimeout(context.Background(), time.Second*time.Duration(timeout))
+	} else {
+		ctx, cancel = context.WithCancel(context.Background())
+	}
+	defer cancel()
 
 	var outbuf, errbuf bytes.Buffer
+	cmd := exec.CommandContext(ctx, path, commandArr...)
 	cmd.Stdout = &outbuf
 	cmd.Stderr = &errbuf
 
 	LogMessage("command", fmt.Sprintf("%s %s", commandPath, command))
 	err := cmd.Run()
+
+	if ctx.Err() == context.DeadlineExceeded {
+		errorMessage := fmt.Sprintf("Command exceeded the timeout of %v seconds.\n", timeout)
+		if err != nil {
+			err = fmt.Errorf(errorMessage)
+		}
+	}
 
 	stdOut = outbuf.String()
 	stdErr = errbuf.String()
@@ -182,7 +204,14 @@ func NewOcRunner() *OcRunner {
 	return &OcRunner{CommandPath: p}
 }
 
+// RunCommand executes oc command with default timeout of 3600s and returns standard output, error and exitcode.
 func (k *OcRunner) RunCommand(command string) (stdOut string, stdErr string, exitCode int) {
 	stdOut, stdErr, exitCode = runCommand(command, k.CommandPath)
+	return
+}
+
+// RunCommandWithTimeout executes oc command with timeout specified in seconds and returns standard output, error and exitcode.
+func (k *OcRunner) RunCommandWithTimeout(command string, timeout int) (stdOut string, stdErr string, exitCode int) {
+	stdOut, stdErr, exitCode = runCommandWithTimeout(command, k.CommandPath, timeout)
 	return
 }

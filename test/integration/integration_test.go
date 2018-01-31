@@ -198,6 +198,8 @@ func FeatureContext(s *godog.Suite) {
 	// steps for rollout check
 	s.Step(`^services? "([^"]*)" rollout successfully$`,
 		minishift.rolloutServicesSuccessfully)
+	s.Step(`^services? "([^"]*)" rollout successfully within "(\d+)" seconds$`,
+		minishift.rolloutServicesSuccessfullyBeforeTimeout)
 
 	// steps for proxying
 	s.Step(`^user starts proxy server and sets MINISHIFT_HTTP_PROXY variable$`,

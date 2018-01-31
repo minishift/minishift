@@ -34,7 +34,7 @@ Feature: Cool Store
      """
      Success
      """
-    When services "web-ui, inventory, catalog, cart, coolstore-gw" rollout successfully
+    When services "web-ui, inventory, catalog, cart, coolstore-gw" rollout successfully within "1200" seconds
     Then executing "oc status -v" succeeds
      And stdout should not contain
      """

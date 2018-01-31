@@ -21,10 +21,11 @@ package integration
 import (
 	"errors"
 	"fmt"
-	"github.com/minishift/minishift/test/integration/util"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/minishift/minishift/test/integration/util"
 )
 
 var commandOutputs []CommandOutput
@@ -45,6 +46,12 @@ type CommandVariable struct {
 type Minishift struct {
 	mutex  sync.Mutex
 	runner util.MinishiftRunner
+}
+
+type rolloutMessage struct {
+	passed bool
+	stdOut string
+	stdErr string
 }
 
 func (m *Minishift) shouldHaveState(expected string) error {
@@ -241,11 +248,11 @@ func (m *Minishift) getRoute(serviceName, nameSpace string) string {
 	return strings.TrimRight(cmdOut, "\n")
 }
 
-func (m *Minishift) checkServiceRolloutForSuccess(service string, done chan bool) {
+func (m *Minishift) checkServiceRolloutForSuccess(service string, timeout int, done chan rolloutMessage) {
 	command := fmt.Sprintf("rollout status deploymentconfig %s --watch", service)
 
 	ocRunner := m.runner.GetOcRunner()
-	cmdOut, cmdErr, cmdExit := ocRunner.RunCommand(command)
+	cmdOut, cmdErr, cmdExit := ocRunner.RunCommandWithTimeout(command, timeout)
 	m.mutex.Lock()
 	commandOutputs = append(commandOutputs,
 		CommandOutput{
@@ -259,30 +266,44 @@ func (m *Minishift) checkServiceRolloutForSuccess(service string, done chan bool
 	expected := "successfully rolled out"
 	// if - else construct needed, else false is returned on the second time called
 	if strings.Contains(cmdOut, expected) {
-		done <- true
+		done <- rolloutMessage{passed: true, stdErr: cmdErr, stdOut: cmdOut}
 	} else {
-		done <- false
+		done <- rolloutMessage{passed: false, stdErr: cmdErr, stdOut: cmdOut}
 	}
 }
 
 func (m *Minishift) rolloutServicesSuccessfully(servicesToCheck string) error {
+	return minishift.rolloutServicesSuccessfullyBeforeTimeout(servicesToCheck, 0)
+}
+
+func (m *Minishift) rolloutServicesSuccessfullyBeforeTimeout(servicesToCheck string, timeout int) error {
 	success := true
+	var stdErrs []string
+	var stdOuts []string
 	servicesStr := strings.Replace(servicesToCheck, ", ", " ", -1)
 	servicesStr = strings.Replace(servicesStr, ",", " ", -1)
 	services := strings.Split(servicesStr, " ")
 	total := len(services)
-	done := make(chan bool, total)
+	done := make(chan rolloutMessage, total)
 
 	for i := 0; i < total; i++ {
-		go m.checkServiceRolloutForSuccess(services[i], done)
+		go m.checkServiceRolloutForSuccess(services[i], timeout, done)
 	}
 
 	for i := 0; i < total; i++ {
-		success = success && <-done
+		m := <-done
+		stdErrs = append(stdErrs, m.stdErr)
+		stdOuts = append(stdOuts, m.stdOut)
+		success = success && m.passed
 	}
 
 	if !success {
-		return fmt.Errorf("Not all successfully rolled out")
+		errorMessage := "Not all successfully rolled out:\n"
+		for i := 0; i < total; i++ {
+			errorMessage += fmt.Sprintf("Service: '%v'\n-StdOut: %v-StdErr: %v\n", services[i], stdOuts[i], stdErrs[i])
+		}
+		return fmt.Errorf("Not all services successfully rolled out:\n%v", errorMessage)
 	}
+
 	return nil
 }

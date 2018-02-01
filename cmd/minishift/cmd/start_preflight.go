@@ -55,7 +55,7 @@ func preflightChecksBeforeStartingHost() {
 		configCmd.SkipCheckVMDriver.Name,
 		checkVMDriver,
 		fmt.Sprintf("Checking if requested hypervisor '%s' is supported on this platform", viper.GetString(configCmd.VmDriver.Name)),
-		false, configCmd.WarnCheckVMDriver.Name,
+		configCmd.WarnCheckVMDriver.Name,
 		driverErrorMessage)
 
 	switch viper.GetString(configCmd.VmDriver.Name) {
@@ -64,58 +64,58 @@ func preflightChecksBeforeStartingHost() {
 			configCmd.SkipCheckXHyveDriver.Name,
 			checkXhyveDriver,
 			"Checking if xhyve driver is installed",
-			false, configCmd.WarnCheckXHyveDriver.Name,
+			configCmd.WarnCheckXHyveDriver.Name,
 			driverErrorMessage)
 	case "kvm":
 		preflightCheckSucceedsOrFails(
 			configCmd.SkipCheckKVMDriver.Name,
 			checkKvmDriver,
 			"Checking if KVM driver is installed",
-			false, configCmd.WarnCheckKVMDriver.Name,
+			configCmd.WarnCheckKVMDriver.Name,
 			driverErrorMessage)
 		preflightCheckSucceedsOrFails(
 			configCmd.SkipCheckKVMDriver.Name,
 			checkLibvirtInstalled,
 			"Checking if Libvirt is installed",
-			false, configCmd.WarnCheckKVMDriver.Name,
+			configCmd.WarnCheckKVMDriver.Name,
 			driverErrorMessage)
 		preflightCheckSucceedsOrFails(
 			configCmd.SkipCheckKVMDriver.Name,
 			checkLibvirtDefaultNetworkExists,
 			"Checking if Libvirt default network is present",
-			false, configCmd.WarnCheckKVMDriver.Name,
+			configCmd.WarnCheckKVMDriver.Name,
 			driverErrorMessage)
 		preflightCheckSucceedsOrFails(
 			configCmd.SkipCheckKVMDriver.Name,
 			checkLibvirtDefaultNetworkActive,
 			"Checking if Libvirt default network is active",
-			true, configCmd.WarnCheckKVMDriver.Name,
+			configCmd.WarnCheckKVMDriver.Name,
 			driverErrorMessage)
 	case "hyperv":
 		preflightCheckSucceedsOrFails(
 			configCmd.SkipCheckHyperVDriver.Name,
 			checkHypervDriverInstalled,
 			"Checking if Hyper-V driver is installed",
-			false, configCmd.WarnCheckHyperVDriver.Name,
+			configCmd.WarnCheckHyperVDriver.Name,
 			driverErrorMessage)
 		preflightCheckSucceedsOrFails(
 			configCmd.SkipCheckHyperVDriver.Name,
 			checkHypervDriverSwitch,
 			"Checking if Hyper-V driver is configured to use a Virtual Switch",
-			false, configCmd.WarnCheckHyperVDriver.Name,
+			configCmd.WarnCheckHyperVDriver.Name,
 			driverErrorMessage)
 		preflightCheckSucceedsOrFails(
 			configCmd.SkipCheckHyperVDriver.Name,
 			checkHypervDriverUser,
 			"Checking if user is a member of the Hyper-V Administrators group",
-			false, configCmd.WarnCheckHyperVDriver.Name,
+			configCmd.WarnCheckHyperVDriver.Name,
 			driverErrorMessage)
 	case "virtualbox":
 		preflightCheckSucceedsOrFails(
 			configCmd.SkipCheckVBoxInstalled.Name,
 			checkVBoxInstalled,
 			"Checking if VirtualBox is installed",
-			false, configCmd.WarnCheckVBoxInstalled.Name,
+			configCmd.WarnCheckVBoxInstalled.Name,
 			prerequisiteErrorMessage)
 
 	}
@@ -124,7 +124,7 @@ func preflightChecksBeforeStartingHost() {
 		configCmd.SkipCheckIsoUrl.Name,
 		checkIsoURL,
 		"Checking the ISO URL",
-		false, configCmd.WarnCheckIsoUrl.Name,
+		configCmd.WarnCheckIsoUrl.Name,
 		"See the 'Basic Usage' topic (https://docs.openshift.org/latest/minishift/using/basic-usage.html) for more information")
 }
 
@@ -134,31 +134,31 @@ func preflightChecksAfterStartingHost(driver drivers.Driver) {
 		configCmd.SkipInstanceIP.Name,
 		checkInstanceIP, driver,
 		"Checking for IP address",
-		false, configCmd.WarnInstanceIP.Name,
+		configCmd.WarnInstanceIP.Name,
 		"Error determining IP address")
 	preflightCheckSucceedsOrFailsWithDriver(
 		configCmd.SkipCheckNetworkPing.Name,
 		checkIPConnectivity, driver,
 		"Checking if external host is reachable from the Minishift VM",
-		true, configCmd.WarnCheckNetworkPing.Name,
+		configCmd.WarnCheckNetworkPing.Name,
 		"VM is unable to ping external host")
 	preflightCheckSucceedsOrFailsWithDriver(
 		configCmd.SkipCheckNetworkHTTP.Name,
 		checkHttpConnectivity, driver,
 		"Checking HTTP connectivity from the VM",
-		true, configCmd.WarnCheckNetworkHTTP.Name,
+		configCmd.WarnCheckNetworkHTTP.Name,
 		"VM cannot connect to external URL with HTTP")
 	preflightCheckSucceedsOrFailsWithDriver(
 		configCmd.SkipCheckStorageMount.Name,
 		checkStorageMounted, driver,
 		"Checking if persistent storage volume is mounted",
-		false, configCmd.WarnCheckStorageMount.Name,
+		configCmd.WarnCheckStorageMount.Name,
 		"Persistent volume storage is not mounted")
 	preflightCheckSucceedsOrFailsWithDriver(
 		configCmd.SkipCheckStorageUsage.Name,
 		checkStorageUsage, driver,
 		"Checking available disk space",
-		false, configCmd.WarnCheckStorageUsage.Name,
+		configCmd.WarnCheckStorageUsage.Name,
 		"Insufficient disk space on the persistent storage volume")
 }
 
@@ -175,7 +175,7 @@ type preflightCheckWithDriverFunc func(driver drivers.Driver) bool
 // cause is. It takes configNameOverrideIfSkipped to allow skipping the test.
 // While treatAsWarning and configNameOverrideIfWarning can be used to make the
 // test to be treated as a warning instead.
-func preflightCheckSucceedsOrFails(configNameOverrideIfSkipped string, execute preflightCheckFunc, message string, treatAsWarning bool, configNameOverrideIfWarning string, errorMessage string) {
+func preflightCheckSucceedsOrFails(configNameOverrideIfSkipped string, execute preflightCheckFunc, message string, configNameOverrideIfWarning string, errorMessage string) {
 	fmt.Printf("-- %s ... ", message)
 
 	isConfiguredToSkip := viper.GetBool(configNameOverrideIfSkipped)
@@ -193,7 +193,7 @@ func preflightCheckSucceedsOrFails(configNameOverrideIfSkipped string, execute p
 
 	fmt.Println("FAIL")
 	errorMessage = fmt.Sprintf("   %s", errorMessage)
-	if isConfiguredToWarn || treatAsWarning {
+	if isConfiguredToWarn {
 		fmt.Println(errorMessage)
 	} else {
 		atexit.ExitWithMessage(1, errorMessage)
@@ -207,7 +207,7 @@ func preflightCheckSucceedsOrFails(configNameOverrideIfSkipped string, execute p
 // configNameOverrideIfSkipped to allow skipping the test. While treatAsWarning
 // and configNameOverrideIfWarning can be used to make the test to be treated as
 // a warning instead.
-func preflightCheckSucceedsOrFailsWithDriver(configNameOverrideIfSkipped string, execute preflightCheckWithDriverFunc, driver drivers.Driver, message string, treatAsWarning bool, configNameOverrideIfWarning string, errorMessage string) {
+func preflightCheckSucceedsOrFailsWithDriver(configNameOverrideIfSkipped string, execute preflightCheckWithDriverFunc, driver drivers.Driver, message string, configNameOverrideIfWarning string, errorMessage string) {
 	fmt.Printf("-- %s ... ", message)
 
 	isConfiguredToSkip := viper.GetBool(configNameOverrideIfSkipped)
@@ -225,7 +225,7 @@ func preflightCheckSucceedsOrFailsWithDriver(configNameOverrideIfSkipped string,
 
 	fmt.Println("FAIL")
 	errorMessage = fmt.Sprintf("   %s", errorMessage)
-	if isConfiguredToWarn || treatAsWarning {
+	if isConfiguredToWarn {
 		fmt.Println(errorMessage)
 	} else {
 		atexit.ExitWithMessage(1, errorMessage)
@@ -397,9 +397,6 @@ func checkInstanceIP(driver drivers.Driver) bool {
 // checkIPConnectivity checks if the VM has connectivity to the outside network
 func checkIPConnectivity(driver drivers.Driver) bool {
 	ipToPing := viper.GetString(configCmd.CheckNetworkPingHost.Name)
-	if ipToPing == "" {
-		ipToPing = "8.8.8.8"
-	}
 
 	fmt.Printf("\n   Pinging %s ... ", ipToPing)
 	return minishiftUtil.IsIPReachable(driver, ipToPing, false)
@@ -408,9 +405,6 @@ func checkIPConnectivity(driver drivers.Driver) bool {
 // checkHttpConnectivity allows to test outside connectivity and possible proxy support
 func checkHttpConnectivity(driver drivers.Driver) bool {
 	urlToRetrieve := viper.GetString(configCmd.CheckNetworkHttpHost.Name)
-	if urlToRetrieve == "" {
-		urlToRetrieve = "http://minishift.io/index.html"
-	}
 
 	fmt.Printf("\n   Retrieving %s ... ", urlToRetrieve)
 	return minishiftUtil.IsRetrievable(driver, urlToRetrieve, false)

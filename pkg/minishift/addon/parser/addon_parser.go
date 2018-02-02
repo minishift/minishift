@@ -70,42 +70,44 @@ func NewAddOnParser() *AddOnParser {
 	return &parser
 }
 
-// Parse takes as parameter a reader containing an addon definition and returns an AddOn instance.
-// If an error occurs, the error is returned.
-func (parser *AddOnParser) Parse(addOnDir string) (addon.AddOn, error) {
-	addonInstallReader, err := parser.getAddOnContentReader(addOnDir, ".addon")
-	if err != nil {
-		return nil, err
-	}
-	addonRemoveReader, err := parser.getAddOnContentReader(addOnDir, ".addon.remove")
-	if err != nil {
-		return nil, err
-	}
-	meta, commands, err := parser.parseAddOnContent(addonInstallReader)
-	if err != nil {
-		name := ""
-		if meta != nil {
-			name = meta.Name()
-		}
-		return nil, NewParseError(err.Error(), name, addOnDir)
-	}
+func (parser *AddOnParser) getAddOnContent(addOnDir, fileSuffix string) (addon.AddOnMeta, []command.Command, error) {
+	var (
+		meta     addon.AddOnMeta
+		commands []command.Command
+		err      error
+	)
 
-	var removeCommands []command.Command
-	var metaDataForAddonRemove addon.AddOnMeta
-	if addonRemoveReader != nil {
-		metaDataForAddonRemove, removeCommands, err = parser.parseAddOnContent(addonRemoveReader)
+	addonReader, err := parser.getAddOnContentReader(addOnDir, fileSuffix)
+	if err != nil {
+		return nil, nil, err
+	}
+	if addonReader != nil {
+		meta, commands, err = parser.parseAddOnContent(addonReader)
 		if err != nil {
 			name := ""
-			if metaDataForAddonRemove != nil {
-				name = metaDataForAddonRemove.Name()
+			if meta != nil {
+				name = meta.Name()
 			}
-			return nil, NewParseError(err.Error(), name, addOnDir)
+			return nil, nil, NewParseError(err.Error(), name, addOnDir)
 		}
 	}
 
-	addOn := addon.NewAddOn(meta, metaDataForAddonRemove, commands, removeCommands, addOnDir)
+	return meta, commands, nil
+}
 
-	return addOn, nil
+// Parse parses the addon files containing in a directory provided and returns an AddOn instance.
+// If an error occurs, the error is returned.
+func (parser *AddOnParser) Parse(addOnDir string) (addon.AddOn, error) {
+	meta, commands, err := parser.getAddOnContent(addOnDir, ".addon")
+	if err != nil {
+		return nil, err
+	}
+	removeMeta, removeCommands, err := parser.getAddOnContent(addOnDir, ".addon.remove")
+	if err != nil {
+		return nil, err
+	}
+
+	return addon.NewAddOn(meta, removeMeta, commands, removeCommands, addOnDir), nil
 }
 
 func (parser *AddOnParser) getAddOnContentReader(addOnDir string, fileSuffix string) (io.Reader, error) {

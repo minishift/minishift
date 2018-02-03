@@ -1,0 +1,5 @@
+# Name: addondirmismatch
+# Description: Demoaddon description
+# Url: https://someurl.html
+
+echo Should fail with error message

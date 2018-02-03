@@ -39,7 +39,7 @@ var (
 	basepath   = filepath.Dir(b)
 )
 
-var anyuid string = `# Name: anyuid
+var anyuid = `# Name: anyuid
 # Description: Allows authenticated users to run images to run with USER as per Dockerfile
 
 oc adm policy add-scc-to-group anyuid system:authenticated
@@ -83,7 +83,7 @@ func Test_invalid_addons_get_skipped(t *testing.T) {
 	defer os.RemoveAll(testDir)
 
 	// create a valid addon
-	addOn1Path := filepath.Join(testDir, "addon1")
+	addOn1Path := filepath.Join(testDir, "anyuid")
 	err = os.Mkdir(addOn1Path, 0777)
 	assert.NoError(t, err, "Error in creating directory for addon")
 

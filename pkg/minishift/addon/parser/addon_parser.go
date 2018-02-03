@@ -83,19 +83,22 @@ func (parser *AddOnParser) getAddOnContent(addOnDir, fileSuffix string) (addon.A
 	}
 	if addonReader != nil {
 		meta, commands, err = parser.parseAddOnContent(addonReader)
+		var name string
+		if meta != nil {
+			name = meta.Name()
+		}
 		if err != nil {
-			name := ""
-			if meta != nil {
-				name = meta.Name()
-			}
 			return nil, nil, NewParseError(err.Error(), name, addOnDir)
+		}
+		if filepath.Base(addOnDir) != name {
+			return nil, nil, NewParseError(fmt.Sprintf("Add-on directory name should match to addon name"), "", addOnDir)
 		}
 	}
 
 	return meta, commands, nil
 }
 
-// Parse parses the addon files containing in a directory provided and returns an AddOn instance.
+// Parse parses the addon files containing in a directory provided via addOnDir and returns an AddOn instance.
 // If an error occurs, the error is returned.
 func (parser *AddOnParser) Parse(addOnDir string) (addon.AddOn, error) {
 	meta, commands, err := parser.getAddOnContent(addOnDir, ".addon")

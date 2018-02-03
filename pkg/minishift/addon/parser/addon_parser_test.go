@@ -276,3 +276,10 @@ func Test_multiple_addon_definitions_create_error(t *testing.T) {
 
 	assert.Nil(t, addon, "No addon should have been returned")
 }
+
+func TestInvalidAddonDirAndName(t *testing.T) {
+	testAddonName := "addon-dir-mismatch"
+	testAddonDir := filepath.Join(basepath, "..", "..", "..", "..", "test", "testdata", "testaddons", testAddonName)
+	_, _, err := testParser.getAddOnContent(testAddonDir, ".addon")
+	assert.EqualError(t, err, "Add-on directory name should match to addon name")
+}

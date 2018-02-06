@@ -26,7 +26,6 @@ import (
 	"testing"
 
 	"github.com/minishift/minishift/pkg/minishift/addon/command"
-	minishiftTesting "github.com/minishift/minishift/pkg/testing"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -155,7 +154,7 @@ func Test_multiple_lines_in_description_with_tab_and_space(t *testing.T) {
 	assert.NoError(t, err, "Error in parsing addon content")
 
 	expectedDescription := []string{"This is one line", "This is second line", "This is third line", "This is forth line"}
-	minishiftTesting.AssertEqualSlice(expectedDescription, meta.Description(), t)
+	assert.Equal(t, expectedDescription, meta.Description())
 
 	expectedNumberOfCommands := 1
 	assert.Len(t, commands, expectedNumberOfCommands)

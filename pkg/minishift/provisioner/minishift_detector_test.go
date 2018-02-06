@@ -48,9 +48,7 @@ VARIANT="minishift"
 VARIANT_VERSION="1.0.0-alpha.1"
 `
 	port, err := s.Start()
-	if err != nil {
-		t.Fatalf("Error starting ssh server: %s", err)
-	}
+	assert.NoError(t, err, "Error starting ssh server")
 	d := &tests.MockDriver{
 		Port: port,
 		BaseDriver: drivers.BaseDriver{

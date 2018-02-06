@@ -112,7 +112,7 @@ func IsValidProxy(name string, uri string) error {
 }
 
 func IsValidUrl(_ string, isoURL string) error {
-	if isoURL == minishiftConstants.B2dIsoAlias || isoURL == minishiftConstants.CentOsIsoAlias {
+	if isoURL == minishiftConstants.B2dIsoAlias || isoURL == minishiftConstants.CentOsIsoAlias || isoURL == minishiftConstants.MinikubeIsoAlias {
 		return nil
 	}
 	_, err := url.ParseRequestURI(isoURL)

@@ -21,10 +21,11 @@ package integration
 import (
 	"errors"
 	"fmt"
-	"github.com/minishift/minishift/test/integration/util"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/minishift/minishift/test/integration/util"
 )
 
 var commandOutputs []CommandOutput
@@ -201,7 +202,7 @@ func (m *Minishift) setImageCaching(operation string) error {
 
 func (m *Minishift) imageExportShouldComplete(noOfImages int) error {
 	// poll till the output of the `minishift image list` shows number of cached images
-	timeout := time.NewTimer(20 * time.Minute)
+	timeout := time.NewTimer(30 * time.Minute)
 
 outerPollActive:
 	for {

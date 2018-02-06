@@ -25,6 +25,7 @@ import (
 	"testing"
 
 	"errors"
+
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/cmd/testing/cli"
 	"github.com/minishift/minishift/pkg/minishift/addon"
@@ -98,7 +99,7 @@ func Test_invalid_addons_get_skipped(t *testing.T) {
 
 	manager, err := NewAddOnManager(testDir, make(map[string]*addon.AddOnConfig))
 
-	assert.NoError(t, err, "Error in getting new addon manager")
+	assert.NoError(t, err, "Error in getting addon manager")
 
 	addOns := manager.List()
 
@@ -114,7 +115,8 @@ func TestAddVarDefaultsToContext(t *testing.T) {
 
 	testAddonMap := getTestAddonMap("test", "test description", expectedVarName, varDefault, "")
 
-	addOnMeta := getAddOnMetadata(testAddonMap, t)
+	addOnMeta, err := addon.NewAddOnMeta(testAddonMap)
+	assert.NoError(t, err, "Failed to create addon meta")
 	addOn := addon.NewAddOn(addOnMeta, addOnMeta, []command.Command{}, []command.Command{}, "")
 
 	addVarDefaultsToContext(addOn, context)
@@ -128,12 +130,13 @@ func TestVerifyValidRequiredVariablesInContext(t *testing.T) {
 
 	testAddonMap := getTestAddonMap("test", "test description", expectedVarName, "", "")
 
-	addOnMeta := getAddOnMetadata(testAddonMap, t)
+	addOnMeta, err := addon.NewAddOnMeta(testAddonMap)
+	assert.NoError(t, err, "Failed to create addon meta")
 	addOn := addon.NewAddOn(addOnMeta, addOnMeta, []command.Command{}, []command.Command{}, "")
 
 	// Add variable name to context
 	context.AddToContext(expectedVarName, expectedVarValue)
-	err := verifyRequiredVariablesInContext(context, addOn.MetaData())
+	err = verifyRequiredVariablesInContext(context, addOn.MetaData())
 	assert.NoError(t, err)
 }
 
@@ -144,10 +147,11 @@ func TestVerifyMissingRequiredVariablesInContext(t *testing.T) {
 
 	testAddonMap := getTestAddonMap("test", "test description", expectedVarName, "", "")
 
-	addOnMeta := getAddOnMetadata(testAddonMap, t)
+	addOnMeta, err := addon.NewAddOnMeta(testAddonMap)
+	assert.NoError(t, err, "Failed to create addon meta")
 	addOn := addon.NewAddOn(addOnMeta, addOnMeta, []command.Command{}, []command.Command{}, "")
 
-	err := verifyRequiredVariablesInContext(context, addOn.MetaData())
+	err = verifyRequiredVariablesInContext(context, addOn.MetaData())
 	assert.EqualError(t, err, expectedErrMsg)
 }
 
@@ -267,13 +271,4 @@ func getTestAddonMap(name, description, requireVar, varDefault, openshiftVersion
 		testAddonMap["OpenShift-Version"] = openshiftVersion
 	}
 	return testAddonMap
-}
-
-func getAddOnMetadata(testMap map[string]interface{}, t *testing.T) addon.AddOnMeta {
-	addOnMeta, err := addon.NewAddOnMeta(testMap)
-	if err != nil {
-		t.Fatal(fmt.Sprintf("No error expected, but got: \"%s\"", err.Error()))
-	}
-
-	return addOnMeta
 }

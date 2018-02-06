@@ -147,7 +147,7 @@ func Test_command_executes_successfully_with_absolute_path(t *testing.T) {
 	case "windows":
 		dummyBinaryPath = filepath.Join(dummyBinaryPath, "dummybinary_windows.exe")
 	default:
-		t.Fatal("Unpexpected OS")
+		assert.FailNow(t, "Unpexpected OS")
 	}
 
 	testData := []struct {
@@ -183,7 +183,7 @@ func Test_command_executes_successfully_with_command_lookup(t *testing.T) {
 	case "windows":
 		cmd = "dummybinary_windows.exe"
 	default:
-		t.Fatal("Unpexpected OS")
+		assert.FailNow(t, "Unpexpected OS")
 	}
 
 	success := CommandExecutesSuccessfully(cmd)
@@ -200,7 +200,7 @@ func Test_command_executes_unsuccessfully_with_command_lookup(t *testing.T) {
 	case "windows":
 		cmd = "dummybinary_windows.exe"
 	default:
-		t.Fatal("Unpexpected OS")
+		assert.FailNow(t, "Unpexpected OS")
 	}
 
 	success := CommandExecutesSuccessfully(cmd)

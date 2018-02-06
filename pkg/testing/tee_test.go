@@ -26,9 +26,7 @@ import (
 
 func Test_tee_captures_stdout_and_stderr(t *testing.T) {
 	tee, err := NewTee(true)
-	if err != nil {
-		t.Fatalf("Unexpected error: %s", err.Error())
-	}
+	assert.NoError(t, err)
 
 	fmt.Fprint(os.Stdout, "Hello")
 	fmt.Fprint(os.Stderr, "world!")

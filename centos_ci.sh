@@ -341,7 +341,7 @@ function perform_master() {
 }
 
 function perform_nightly() {
-  make prerelease synopsis_docs link_check_docs
+  # make prerelease synopsis_docs link_check_docs
   MINISHIFT_ISO_URL=$1 MINISHIFT_VM_DRIVER=kvm make integration_all
 }
 
@@ -374,7 +374,7 @@ else
     perform_nightly "b2d";
   elif [[ "$JOB_NAME" = "minishift-nightly-minikube" ]]; then
     perform_nightly "minikube";
-  elif [[ "$JOB_NAME" = "minishift-nightly-centos" ]]; then
+  elif [[ "$JOB_NAME" = "minishift-pr" ]]; then
     perform_nightly "centos";
   elif [[ "$JOB_NAME" = "minishift" ]]; then # Master job
     perform_master $RSYNC_PASSWORD;

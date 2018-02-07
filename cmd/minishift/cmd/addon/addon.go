@@ -25,7 +25,7 @@ const (
 
 	emptyAddOnError      = "You must specify an add-on name. Run 'minishift addons list' to view installed add-ons."
 	noAddOnMessage       = "No add-on with the name '%s' is installed."
-	noRemoveAddOnMessage = "No %s.addon.remove file found for '%s' add-on."
+	noRemoveAddOnMessage = "Unable to remove addon '%s'. No %s.addon.remove file is found."
 )
 
 var AddonsCmd = &cobra.Command{

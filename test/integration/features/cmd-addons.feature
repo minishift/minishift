@@ -37,7 +37,7 @@ Feature: Addons command and its subcommands
      When executing "minishift addons remove anyuid" succeeds
      Then stdout should contain
       """
-      No anyuid.addon.remove file found for 'anyuid' add-on.
+      Unable to remove addon 'anyuid'. No anyuid.addon.remove file is found.
       """
 
   Scenario: Installing default add-ons manually

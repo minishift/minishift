@@ -95,7 +95,7 @@ Feature: Profile
       And stdout should match "registry-route\s*: disabled\s*P\(0\)"
       And executing "minishift addons list" succeeds
       And stdout should match "registry-route\s*: enabled\s*P\(0\)"
-      And executing "minishift ssh -- less /proc/meminfo" succeeds
+      And executing "minishift ssh -- cat /proc/meminfo" succeeds
       And stdout should match "MemTotal:\s*5[0-1][0-9]{5}\s*kB"
 
   Scenario: As user, I can execute a command against a non active profile

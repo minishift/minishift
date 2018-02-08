@@ -268,12 +268,21 @@ func (m *Minishift) checkServiceRolloutForSuccess(service string, timeout int, d
 	if strings.Contains(cmdOut, expected) {
 		done <- rolloutMessage{passed: true, stdErr: cmdErr, stdOut: cmdOut}
 	} else {
+		// get application's build logs if rollout fails
+		command = fmt.Sprintf("logs bc/%s", service)
+		m.executingOcCommand(command)
+
+		lastCmdResult := getLastCommandOutput()
+
+		cmdOut += fmt.Sprintf("\n Service build output logs: %s\n", lastCmdResult.StdOut)
+		cmdErr += fmt.Sprintf("\n Service build error logs: %s\n", lastCmdResult.StdErr)
+
 		done <- rolloutMessage{passed: false, stdErr: cmdErr, stdOut: cmdOut}
 	}
 }
 
 func (m *Minishift) rolloutServicesSuccessfully(servicesToCheck string) error {
-	return minishift.rolloutServicesSuccessfullyBeforeTimeout(servicesToCheck, 0)
+	return m.rolloutServicesSuccessfullyBeforeTimeout(servicesToCheck, 0)
 }
 
 func (m *Minishift) rolloutServicesSuccessfullyBeforeTimeout(servicesToCheck string, timeout int) error {

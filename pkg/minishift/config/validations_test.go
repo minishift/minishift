@@ -115,15 +115,7 @@ func TestValidURL(t *testing.T) {
 			shouldErr: true,
 		},
 		{
-			value:     "/absolute/path/no/protocol/minishift.tar.gz",
-			shouldErr: false,
-		},
-		{
-			value:     "http://foo.com/minishift.tar.gz",
-			shouldErr: false,
-		},
-		{
-			value:     "file:///foo/download/minishift.tar.gz",
+			value:     "http://foo.com/boot2docker.iso",
 			shouldErr: false,
 		},
 		{
@@ -143,7 +135,7 @@ func TestValidURL(t *testing.T) {
 			shouldErr: true,
 		},
 	}
-	runValidations(t, tests, "iso-url", IsValidUrl)
+	runValidations(t, tests, "iso-url", IsValidISOUrl)
 }
 
 func TestValidProxyURL(t *testing.T) {

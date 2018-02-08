@@ -21,9 +21,13 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"regexp"
+	"runtime"
 	"strconv"
+	"strings"
 
 	units "github.com/docker/go-units"
+	"github.com/minishift/minishift/pkg/util/filehelper"
 
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
@@ -111,14 +115,43 @@ func IsValidProxy(name string, uri string) error {
 	return nil
 }
 
-func IsValidUrl(_ string, isoURL string) error {
-	if isoURL == minishiftConstants.B2dIsoAlias || isoURL == minishiftConstants.CentOsIsoAlias || isoURL == minishiftConstants.MinikubeIsoAlias {
+func IsValidISOUrl(_ string, isoURL string) error {
+	for _, isoAlias := range minishiftConstants.ValidIsoAliases {
+		if isoURL == isoAlias {
+			return nil
+		}
+	}
+	if !strings.HasSuffix(isoURL, ".iso") {
+		return fmt.Errorf("'%s' url is not valid", isoURL)
+	}
+
+	match, _ := regexp.MatchString(`^https?://`, isoURL)
+	if match {
+		_, err := url.ParseRequestURI(isoURL)
+		if err != nil {
+			return fmt.Errorf("'%s' url is not valid: %v", isoURL, err)
+		}
 		return nil
 	}
-	_, err := url.ParseRequestURI(isoURL)
-	if err != nil {
-		return fmt.Errorf("'%s' url is not valid: %v", isoURL, err)
+
+	if runtime.GOOS == "windows" {
+		match, _ := regexp.MatchString("^file://[a-zA-Z]:/.+", isoURL)
+		if !match {
+			return fmt.Errorf("'%s' url is not valid", isoURL)
+		}
+		if filehelper.Exists(strings.Replace(strings.TrimPrefix(isoURL, "file://"), "/", "\\", -1)) {
+			return nil
+		}
+	} else {
+		match, _ := regexp.MatchString("^file:///.+", isoURL)
+		if !match {
+			return fmt.Errorf("'%s' url is not valid", isoURL)
+		}
+		if filehelper.Exists(strings.TrimPrefix(isoURL, "file://")) {
+			return nil
+		}
 	}
+
 	return nil
 }
 

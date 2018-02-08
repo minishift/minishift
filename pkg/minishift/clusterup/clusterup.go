@@ -69,8 +69,6 @@ type ClusterUpConfig struct {
 func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string, runner util.Runner) error {
 	cmdArgs := []string{"cluster", "up", "--use-existing-config"}
 
-	fmt.Println("-- Checking 'oc' support for startup flags ... ")
-
 	// Deal with extra flags (remove from cluster up params)
 	var extraFlags string
 	if val, ok := clusterUpParams[configCmd.ExtraClusterUpFlags.Name]; ok {
@@ -78,15 +76,7 @@ func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string, runne
 		delete(clusterUpParams, configCmd.ExtraClusterUpFlags.Name)
 	}
 
-	// Check if clusterUp flags are supported
 	for key, value := range clusterUpParams {
-		fmt.Printf("   %s ... ", key)
-		if !oc.SupportFlag(key, config.OcPath, runner) {
-			fmt.Println("FAIL")
-			return errors.New(fmt.Sprintf("Flag '%s' is not supported for oc version %s. Use 'openshift-version' flag to select a different version of OpenShift.", key, config.OpenShiftVersion))
-		}
-		fmt.Println("OK")
-
 		cmdArgs = append(cmdArgs, "--"+key)
 		cmdArgs = append(cmdArgs, value)
 	}

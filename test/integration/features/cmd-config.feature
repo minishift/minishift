@@ -169,12 +169,12 @@ user defined options which changes default behaviour of Minishift.
       And JSON config file "config/config.json" does not have key "<property>"
 
   Examples: Correct values for iso-url keys
-    | property        | value                                                                                           | expected                                                                                        |
-    | iso-url         | https://github.com/minishift/minishift-b2d-iso/releases/download/v1.1.0/minishift-b2d.iso       | https://github.com/minishift/minishift-b2d-iso/releases/download/v1.1.0/minishift-b2d.iso       |
-    | iso-url         | http://github.com/minishift/minishift-centos-iso/releases/download/v1.1.0/minishift-centos7.iso | http://github.com/minishift/minishift-centos-iso/releases/download/v1.1.0/minishift-centos7.iso |
-    | iso-url         | file://home/me/Downloads/my_handmade_b2d.iso                                                    | file://home/me/Downloads/my_handmade_b2d.iso                                                    |
-    | iso-url         | b2d                                                                                             | b2d                                                                                             |
-    | iso-url         | centos                                                                                          | centos                                                                                          |
+    | property        | value                                                                                            | expected                                                                                        |
+    | iso-url         | https://github.com/minishift/minishift-b2d-iso/releases/download/v1.1.0/minishift-b2d.iso        | https://github.com/minishift/minishift-b2d-iso/releases/download/v1.1.0/minishift-b2d.iso       |
+    | iso-url         | http://github.com/minishift/minishift-centos-iso/releases/download/v1.1.0/minishift-centos7.iso  | http://github.com/minishift/minishift-centos-iso/releases/download/v1.1.0/minishift-centos7.iso |
+    | iso-url         | file:///home/me/Downloads/my_handmade_b2d.iso                                                    | file:///home/me/Downloads/my_handmade_b2d.iso                                                   |
+    | iso-url         | b2d                                                                                              | b2d                                                                                             |
+    | iso-url         | centos                                                                                           | centos                                                                                          |
 
   Scenario: Unsetting non-existing key
      When executing "minishift config unset i-do-not-exist" succeeds

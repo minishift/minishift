@@ -212,7 +212,7 @@ user defined options which changes default behaviour of Minishift.
       And Minishift should have state "Running"
 
   Scenario: Checking that memory value was applied
-     When executing "minishift ssh -- less /proc/meminfo" succeeds
+     When executing "minishift ssh -- cat /proc/meminfo" succeeds
      Then stdout should match "MemTotal:\s*3[4-5][0-9]{5} kB"
 
   Scenario: Checking that disk-size value was applied

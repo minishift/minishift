@@ -191,11 +191,12 @@ func preflightCheckSucceedsOrFails(configNameOverrideIfSkipped string, execute p
 		return
 	}
 
-	fmt.Println("FAIL")
 	errorMessage = fmt.Sprintf("   %s", errorMessage)
 	if isConfiguredToWarn {
+		fmt.Println("WARN")
 		fmt.Println(errorMessage)
 	} else {
+		fmt.Println("FAIL")
 		atexit.ExitWithMessage(1, errorMessage)
 	}
 }
@@ -223,11 +224,12 @@ func preflightCheckSucceedsOrFailsWithDriver(configNameOverrideIfSkipped string,
 		return
 	}
 
-	fmt.Println("FAIL")
 	errorMessage = fmt.Sprintf("   %s", errorMessage)
 	if isConfiguredToWarn {
+		fmt.Println("WARN")
 		fmt.Println(errorMessage)
 	} else {
+		fmt.Println("FAIL")
 		atexit.ExitWithMessage(1, errorMessage)
 	}
 }
@@ -371,11 +373,18 @@ func checkHypervDriverInstalled() bool {
 func checkHypervDriverUser() bool {
 	posh := powershell.New()
 
+	// Check if user is part of a windows domain: https://github.com/minishift/minishift/issues/1882#issuecomment-363755290
+	// If user is member of a domain cannot consistently determine if user is member of hyperv admins
+	checkIfInDomain := `@(Get-WMIObject Win32_ComputerSystem).PartOfDomain`
+	stdOut, _ := posh.Execute(checkIfInDomain)
+	if strings.Contains(stdOut, "True") {
+		return false
+	}
 	// Use RID to prevent issues with localized groups: https://github.com/minishift/minishift/issues/1541
 	// https://support.microsoft.com/en-us/help/243330/well-known-security-identifiers-in-windows-operating-systems
 	// BUILTIN\Hyper-V Administrators => S-1-5-32-578
 	checkIfMemberOfHyperVAdmins := `@([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole("S-1-5-32-578")`
-	stdOut, _ := posh.Execute(checkIfMemberOfHyperVAdmins)
+	stdOut, _ = posh.Execute(checkIfMemberOfHyperVAdmins)
 	if !strings.Contains(stdOut, "True") {
 		return false
 	}

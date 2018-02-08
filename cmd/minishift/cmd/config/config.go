@@ -106,7 +106,7 @@ var (
 	SkipCheckXHyveDriver   = createConfigSetting("skip-check-xhyve-driver", SetBool, nil, nil, true, nil)
 	WarnCheckXHyveDriver   = createConfigSetting("warn-check-xhyve-driver", SetBool, nil, nil, true, false)
 	SkipCheckHyperVDriver  = createConfigSetting("skip-check-hyperv-driver", SetBool, nil, nil, true, nil)
-	WarnCheckHyperVDriver  = createConfigSetting("warn-check-hyperv-driver", SetBool, nil, nil, true, false)
+	WarnCheckHyperVDriver  = createConfigSetting("warn-check-hyperv-driver", SetBool, nil, nil, true, true)
 	SkipCheckIsoUrl        = createConfigSetting("skip-check-iso-url", SetBool, nil, nil, true, nil)
 	WarnCheckIsoUrl        = createConfigSetting("warn-check-iso-url", SetBool, nil, nil, true, false)
 	SkipCheckVMDriver      = createConfigSetting("skip-check-vm-driver", SetBool, nil, nil, true, nil)

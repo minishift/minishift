@@ -112,15 +112,18 @@ task :adoc_variables => :init do
   centos_iso_version   = ENV['CENTOS_ISO_VERSION']   || 'unset'
   minikube_iso_version = ENV['MINIKUBE_ISO_VERSION'] || 'unset'
 
-  ADOC_VARIABLES.each do |f|
-    File.open(f, "w+") do |f|
-      f.write(":project: Minishift\n")
-      f.write(":minishift-version: #{minishift_version}\n")
-      f.write(":openshift-version: #{openshift_version}\n")
-      f.write(":centos-iso-version: #{centos_iso_version}\n")
-      f.write(":minikube-iso-version: #{minikube_iso_version}\n")
-    end
-  end
+  contents = <<EOF
+:project: Minishift
+:download-url: https://github.com/minishift/minishift/releases
+:download-text: {project} Releases
+
+:minishift-version: #{minishift_version}
+:openshift-version: #{openshift_version}
+:centos-iso-version: #{centos_iso_version}
+:minikube-iso-version: #{minikube_iso_version}
+EOF
+
+  ADOC_VARIABLES.each { |f| File.write(f, contents) }
 end
 
 desc 'Check links'

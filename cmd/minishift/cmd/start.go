@@ -46,7 +46,6 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/hostfolder"
 	minishiftNetwork "github.com/minishift/minishift/pkg/minishift/network"
 	"github.com/minishift/minishift/pkg/minishift/openshift"
-	openshiftVersion "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
 	"github.com/minishift/minishift/pkg/util"
@@ -70,9 +69,8 @@ var (
 	shellProxyEnv           string
 	unsupportedIsoUrlFormat = fmt.Sprintf("Unsupported value for iso-url. It can be a URL, file URI or one of the following aliases: [%s].",
 		strings.Join(minishiftConstants.ValidIsoAliases, ","))
-)
 
-var (
+	// custom flags variable
 	dockerEnvFlag = &flag.Flag{
 		Name:      configCmd.DockerEnv.Name,
 		Shorthand: "",
@@ -100,27 +98,27 @@ var (
 		Usage:     "Registry mirrors to pass to the Docker daemon.",
 		Value:     cmdUtil.NewStringSliceValue([]string{}, &[]string{}),
 	}
-)
 
-// startCmd represents the start command
-var startCmd *cobra.Command
+	startCmd *cobra.Command
 
-// Set default value for host data and config dir
-var (
+	// Set default value for host data and config dir
 	hostConfigDirectory  = "/var/lib/minishift/openshift.local.config"
 	hostDataDirectory    = "/var/lib/minishift/hostdata"
 	hostVolumesDirectory = "/var/lib/minishift/openshift.local.volumes"
 	hostPvDirectory      = "/var/lib/minishift/openshift.local.pv"
+
+	// clusterUpFlagSet contains the command line switches which needs to be passed on to 'cluster up'
+	clusterUpFlagSet *flag.FlagSet
+
+	// minishiftToClusterUp is a mapping between flag names used in minishift CLI and flag name as passed to 'cluster up'
+	minishiftToClusterUp = map[string]string{
+		"openshift-env":     "env",
+		"openshift-version": "version",
+	}
+
+	// ocPath
+	ocPath = ""
 )
-
-// clusterUpFlagSet contains the command line switches which needs to be passed on to 'cluster up'
-var clusterUpFlagSet *flag.FlagSet
-
-// minishiftToClusterUp is a mapping between flag names used in minishift CLI and flag name as passed to 'cluster up'
-var minishiftToClusterUp = map[string]string{
-	"openshift-env":     "env",
-	"openshift-version": "version",
-}
 
 // init configures the command line options of this command
 func init() {
@@ -156,7 +154,7 @@ func runStart(cmd *cobra.Command, args []string) {
 	defer libMachineClient.Close()
 
 	ensureNotRunning(libMachineClient, constants.MachineName)
-	validateOpenshiftVersion()
+	addVersionPrefixToOpenshiftVersion()
 
 	// to determine whether we need to run post cluster up actions,
 	// we need to determine whether this is a restart prior to potentially creating a new VM
@@ -164,6 +162,11 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	// preflight check (before start)
 	preflightChecksBeforeStartingHost()
+
+	// Cache OC binary before starting the VM and perform oc command option check
+	requestedOpenShiftVersion := viper.GetString(configCmd.OpenshiftVersion.Name)
+	ocPath = cmdUtil.CacheOc(clusterup.DetermineOcVersion(requestedOpenShiftVersion))
+	preflightChecksForArtifacts()
 
 	setSubscriptionManagerParameters()
 
@@ -197,12 +200,10 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	autoMountHostFolders(hostVm.Driver)
 
-	requestedOpenShiftVersion := viper.GetString(configCmd.OpenshiftVersion.Name)
 	if !isRestart {
 		importContainerImages(hostVm.Driver, libMachineClient, requestedOpenShiftVersion)
 	}
 
-	ocPath := cmdUtil.CacheOc(clusterup.DetermineOcVersion(requestedOpenShiftVersion))
 	clusterUpConfig := &clusterup.ClusterUpConfig{
 		OpenShiftVersion: requestedOpenShiftVersion,
 		MachineName:      constants.MachineName,
@@ -559,7 +560,6 @@ func initStartFlags() *flag.FlagSet {
 func initClusterUpFlags() *flag.FlagSet {
 	clusterUpFlagSet := flag.NewFlagSet(commandName, flag.ContinueOnError)
 
-	//clusterUpFlagSet.StringVar(&clusterUpConfig.Image, "image", "openshift/origin", "Specify the images to use for OpenShift")
 	clusterUpFlagSet.Bool(configCmd.SkipRegistryCheck.Name, false, "Skip the Docker daemon registry check.")
 	clusterUpFlagSet.String(configCmd.PublicHostname.Name, "", "Public hostname of the OpenShift cluster.")
 	clusterUpFlagSet.String(configCmd.RoutingSuffix.Name, "", "Default suffix for the server routes.")
@@ -644,22 +644,9 @@ func ensureNotRunning(client *libmachine.Client, machineName string) {
 	}
 }
 
-func validateOpenshiftVersion() {
+// Make sure the version actually has a 'v' prefix. See https://github.com/minishift/minishift/issues/410
+func addVersionPrefixToOpenshiftVersion() {
 	requestedVersion := viper.GetString(configCmd.OpenshiftVersion.Name)
-
-	valid, err := openshiftVersion.IsGreaterOrEqualToBaseVersion(requestedVersion, constants.MinimumSupportedOpenShiftVersion)
-	if err != nil {
-		atexit.ExitWithMessage(1, err.Error())
-	}
-
-	if !valid {
-		fmt.Printf("Minishift does not support OpenShift version %s. "+
-			"You need to use a version >= %s\n", viper.GetString(configCmd.OpenshiftVersion.Name),
-			constants.MinimumSupportedOpenShiftVersion)
-		atexit.Exit(1)
-	}
-
-	// Make sure the version actually has a 'v' prefix. See https://github.com/minishift/minishift/issues/410
 	if !strings.HasPrefix(requestedVersion, constants.VersionPrefix) {
 		requestedVersion = constants.VersionPrefix + requestedVersion
 		// this will make sure the right version is set in case the version comes from config file

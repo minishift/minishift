@@ -27,5 +27,5 @@ const (
 )
 
 var (
-	ValidIsoAliases = []string{"b2d", "centos", "minikube"}
+	ValidIsoAliases = []string{B2dIsoAlias, CentOsIsoAlias, MinikubeIsoAlias}
 )

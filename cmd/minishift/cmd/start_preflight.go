@@ -22,23 +22,22 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
-	"runtime"
 	"strconv"
 	"strings"
 
-	"github.com/minishift/minishift/pkg/util/filehelper"
-
 	"github.com/docker/machine/libmachine/drivers"
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 	validations "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/minishift/shell/powershell"
 	minishiftUtil "github.com/minishift/minishift/pkg/minishift/util"
+	"github.com/minishift/minishift/pkg/util/github"
 
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/viper"
 
 	cmdUtils "github.com/minishift/minishift/cmd/minishift/cmd/util"
-	"github.com/minishift/minishift/pkg/minishift/constants"
+	openshiftVersion "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	stringUtils "github.com/minishift/minishift/pkg/util/strings"
 )
 
@@ -46,10 +45,28 @@ const (
 	StorageDisk = "/mnt/sda1"
 )
 
-// preflightChecksAfterStartingHost is executed before the startHost function.
+// preflightChecksBeforeStartingHost is executed before the startHost function.
 func preflightChecksBeforeStartingHost() {
 	driverErrorMessage := "See the 'Setting Up the Driver Plug-in' topic (https://docs.openshift.org/latest/minishift/getting-started/setting-up-driver-plugin.html) for more information"
 	prerequisiteErrorMessage := "See the 'Installing Prerequisites for Minishift' topic (https://docs.openshift.org/latest/minishift/getting-started/installing.html#install-prerequisites) for more information"
+
+	preflightCheckSucceedsOrFails(
+		configCmd.SkipCheckOpenShiftGithubRelease.Name,
+		checkOcTagOnGithub,
+		fmt.Sprintf("Checking if requested OpenShift version '%s' is valid on GitHub", viper.GetString(configCmd.OpenshiftVersion.Name)),
+		configCmd.WarnCheckOpenShiftGithubRelease.Name,
+		fmt.Sprintf("%s is not a valid OpenShift version on GitHub", viper.GetString(configCmd.OpenshiftVersion.Name)),
+	)
+
+	preflightCheckSucceedsOrFails(
+		configCmd.SkipCheckOpenShiftVersion.Name,
+		validateOpenshiftVersion,
+		fmt.Sprintf("Checking if requested OpenShift version '%s' is supported", viper.GetString(configCmd.OpenshiftVersion.Name)),
+		configCmd.WarnCheckOpenShiftVersion.Name,
+		fmt.Sprintf("Minishift does not support OpenShift version %s. "+
+			"You need to use a version >= %s\n", viper.GetString(configCmd.OpenshiftVersion.Name),
+			constants.MinimumSupportedOpenShiftVersion),
+	)
 
 	preflightCheckSucceedsOrFails(
 		configCmd.SkipCheckVMDriver.Name,
@@ -474,43 +491,39 @@ func isMounted(driver drivers.Driver, mountpoint string) (bool, error) {
 // checkIsoUrl checks the Iso url and returns true if the iso file exists
 func checkIsoURL() bool {
 	isoUrl := viper.GetString(configCmd.ISOUrl.Name)
-	for _, isoAlias := range constants.ValidIsoAliases {
-		if isoUrl == isoAlias {
-			return true
-		}
-	}
-
-	if !strings.HasSuffix(isoUrl, ".iso") {
+	err := validations.IsValidISOUrl(configCmd.ISOUrl.Name, isoUrl)
+	if err != nil {
 		return false
 	}
-
-	match, _ := regexp.MatchString(`^https?://`, isoUrl)
-	if match {
-		return true
-	}
-
-	if runtime.GOOS == "windows" {
-		match, _ := regexp.MatchString("^file://[a-zA-Z]:/.+", isoUrl)
-		if !match {
-			return false
-		}
-		if filehelper.Exists(strings.Replace(strings.TrimPrefix(isoUrl, "file://"), "/", "\\", -1)) {
-			return true
-		}
-	} else {
-		match, _ := regexp.MatchString("^file:///.+", isoUrl)
-		if !match {
-			return false
-		}
-		if filehelper.Exists(strings.TrimPrefix(isoUrl, "file://")) {
-			return true
-		}
-	}
-	return false
+	return true
 }
 
 func checkVMDriver() bool {
 	err := validations.IsValidDriver(configCmd.VmDriver.Name, viper.GetString(configCmd.VmDriver.Name))
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func validateOpenshiftVersion() bool {
+	requestedVersion := viper.GetString(configCmd.OpenshiftVersion.Name)
+
+	valid, err := openshiftVersion.IsGreaterOrEqualToBaseVersion(requestedVersion, constants.MinimumSupportedOpenShiftVersion)
+	if err != nil {
+		return false
+	}
+
+	if !valid {
+		return false
+	}
+	return true
+}
+
+// checkOcTagOnGithub return true if specified version of OpenShift released.
+func checkOcTagOnGithub() bool {
+	client := github.Client()
+	_, _, err := client.Repositories.GetReleaseByTag("openshift", "origin", viper.GetString(configCmd.OpenshiftVersion.Name))
 	if err != nil {
 		return false
 	}

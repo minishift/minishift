@@ -59,7 +59,7 @@ The following sections describe the different startup checks.
 === Driver plug-in configuration
 
 One of the startup checks verifies that the relevant driver plug-in is configured correctly.
-If this startup check fails, review the xref:../getting-started/setting-up-driver-plugin.adoc#[setting up the driver plug-in] topic and configure the driver.
+If this startup check fails, review the xref:../getting-started/setting-up-virtualization-environment.adoc#[Setting Up the Virtualization Environment] topic and configure the appropriate driver.
 
 If you want to force {project} to start despite a failing driver plugin-in check, you can instruct {project} to treat these errors as warnings:
 

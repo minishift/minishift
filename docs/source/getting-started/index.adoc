@@ -3,10 +3,11 @@ include::variables.adoc[]
 = Getting Started with {project}
 :icons:
 
-This section contains information about installing {project}, quickstart steps, and sample application deployment.
+This section contains information about how to prepare your virtualization environment (hypervisor) for {project}, download {project} software, set up {project}, and start using it.
 
+- xref:../getting-started/preparing-to-install.adoc#[Preparing to Install {project}]
+- xref:../getting-started/setting-up-virtualization-environment.adoc#[Setting Up the Virtualization Environment]
 - xref:../getting-started/installing.adoc#[Installing {project}]
 - xref:../getting-started/quickstart.adoc#[{project} Quickstart]
-- xref:../getting-started/setting-up-driver-plugin.adoc#[Setting Up the Driver Plug-in]
 - xref:../getting-started/updating.adoc#[Updating {project}]
 - xref:../getting-started/uninstalling.adoc#[Uninstalling {project}]

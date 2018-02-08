@@ -10,12 +10,14 @@ Topics:
     Topics:
       - Name: Overview
         File: index
+      - Name: Preparing to Install Minishift
+        File: preparing-to-install
+      - Name: Setting Up the Virtualization Environment
+        File: setting-up-virtualization-environment
       - Name: Installing Minishift
         File: installing
       - Name: Minishift Quickstart
         File: quickstart
-      - Name: Setting up the Driver Plug-in
-        File: setting-up-driver-plugin
       - Name: Updating Minishift
         File: updating
       - Name: Uninstalling Minishift

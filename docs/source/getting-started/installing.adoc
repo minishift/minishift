@@ -9,98 +9,38 @@ include::variables.adoc[]
 
 toc::[]
 
-[[installing-overview]]
-== Overview
+[[installing-manually]]
+== Manually
 
-The following section describes how to install {project} and the required dependencies.
+. Download the archive for your operating system from the link:{download-url}[{download-text}] page and extract its contents.
 
-[[install-prerequisites]]
-== Prerequisites
+. Copy the contents of the directory to your preferred location.
 
-{project} requires a hypervisor to start the virtual machine on which the OpenShift cluster is provisioned.
-Verify that the hypervisor of your choice is installed and enabled on your system before you start {project}.
-
-Depending on your host operating system, you have the choice of the following hypervisors:
-
-macOS::
-- link:https://github.com/mist64/xhyve[xhyve] (default)
-+
-[NOTE]
-====
-xhyve requires specific installation and configuration steps that are described in the xref:../getting-started/setting-up-driver-plugin.adoc#[Setting Up the Driver Plug-in] section.
-====
-- link:https://github.com/moby/hyperkit[hyperkit]
-+
-[NOTE]
-====
-hyperkit requires specific installation and configuration steps that are described in the xref:../getting-started/setting-up-driver-plugin.adoc#[Setting Up the Driver Plug-in] section.
-====
-- link:https://www.virtualbox.org/wiki/Downloads[VirtualBox]
-
-Linux::
-- link:https://en.wikipedia.org/wiki/Kernel-based_Virtual_Machine[KVM] (default)
-+
-[NOTE]
-====
-KVM requires specific installation and configuration steps that are described in the xref:../getting-started/setting-up-driver-plugin.adoc#[Setting Up the Driver Plug-in] section.
-====
-
-- link:https://www.virtualbox.org/wiki/Downloads[VirtualBox]
-
-Windows::
-- link:https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v[Hyper-V] (default)
-+
-[NOTE]
-====
-To use {project} with Hyper-V ensure that, after you link:https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v[install Hyper-V], you also link:https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/connect-to-network[add a Virtual Switch] using the Hyper-V Manager and set the environment variable `HYPERV_VIRTUAL_SWITCH` to this virtual switch.
-For specific configuration steps see the xref:../getting-started/setting-up-driver-plugin.adoc#[Setting Up the Driver Plug-in] section.
-====
-
-- link:https://www.virtualbox.org/wiki/Downloads[VirtualBox]
-+
-[NOTE]
-====
-It is recommended to use VirtualBox 5.1.12 or later on Windows to avoid the issue xref:../troubleshooting/troubleshooting-driver-plugins.adoc#machine-doesnt-exist[Error: machine does not exist].
-If you encounter issues related to the hypervisor, see the xref:../troubleshooting/troubleshooting-driver-plugins.adoc#[Troubleshooting Driver Plug-ins] section.
-====
-
-[[installing-instructions]]
-== Installing {project}
-
-=== Manually
-
-.  Download the archive for your operating system from the link:https://github.com/minishift/minishift/releases[{project} releases page] and unpack it.
-
-.  Copy the contents of the directory to your preferred location.
-
-.  Add the *minishift* binary to your `PATH` environment variable.
+. Add the `minishift` binary to your `PATH` environment variable.
 
 [NOTE]
 ====
-On the Windows operating system, due to issue link:https://github.com/minishift/minishift/issues/236[#236], you need to execute the {project} binary from your local *_C:\_* drive.
+- On the Windows operating system, due to issue link:https://github.com/minishift/minishift/issues/236[#236], you need to execute the {project} binary from your local *_C:\_* drive.
 You cannot run {project} from a network drive.
-====
-
-[NOTE]
-====
-Minishift will use any SSH binary found on the `PATH` in preference to internal SSH code.
+- {project} will use any SSH binary found on the `PATH` in preference to internal SSH code.
 Ensure that any SSH binary in the system `PATH` does not generate warning messages as this will cause installation problems such as issue  link:https://github.com/minishift/minishift/issues/1923[#1923].
 ====
 
-[[homebrew-install-minishift]]
-=== With Homebrew
+[[installing-with-homebrew]]
+== With Homebrew
 
-[[homebrew-stable-install]]
-==== Stable
-
-On macOS you can also use link:https://caskroom.github.io[Homebrew Cask] to install the stable version of {project}:
+On macOS, you can also use link:https://caskroom.github.io[Homebrew Cask] to install the stable version of {project}:
 
 ----
-  $ brew cask install minishift
+$ brew cask install minishift
 ----
 
 To update the binary, run following command:
 
 ----
-  $ brew cask install --force minishift
+$ brew cask install --force minishift
 ----
+
+== Next Steps
+
+Proceed to the xref:../getting-started/quickstart.adoc#[{project} Quickstart] after installation.

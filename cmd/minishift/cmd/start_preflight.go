@@ -50,7 +50,7 @@ const (
 
 // preflightChecksBeforeStartingHost is executed before the startHost function.
 func preflightChecksBeforeStartingHost() {
-	driverErrorMessage := "See the 'Setting Up the Driver Plug-in' topic (https://docs.openshift.org/latest/minishift/getting-started/setting-up-driver-plugin.html) for more information"
+	driverErrorMessage := "See the 'Setting Up the Virtualization Environment' topic (https://docs.openshift.org/latest/minishift/getting-started/setting-up-virtualization-environment.html) for more information"
 	prerequisiteErrorMessage := "See the 'Installing Prerequisites for Minishift' topic (https://docs.openshift.org/latest/minishift/getting-started/installing.html#install-prerequisites) for more information"
 
 	if network.CheckInternetConnectivity(GithubAddress) {

@@ -334,6 +334,11 @@ func FeatureContext(s *godog.Suite) {
 		if err != nil {
 			fmt.Println("Error closing the log:", err)
 		}
+
+		// Print the logs
+		if err := util.PrintLog(filepath.Join(testDir, "..", "test-results")); err != nil {
+			fmt.Println("Error print the log file:", err)
+		}
 	})
 
 	s.BeforeFeature(func(this *gherkin.Feature) {

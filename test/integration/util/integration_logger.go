@@ -36,6 +36,7 @@ const (
 var (
 	IntegrationLog *log.Logger
 	logFile        *os.File
+	logFileName string
 )
 
 func init() {
@@ -45,7 +46,7 @@ func init() {
 
 func StartLog(logPath string) error {
 	t := time.Now()
-	logFileName := fmt.Sprintf("integration_%d-%d-%d_%02d-%02d-%02d.log", t.Year(), t.Month(),
+	logFileName = fmt.Sprintf("integration_%d-%d-%d_%02d-%02d-%02d.log", t.Year(), t.Month(),
 		t.Day(), t.Hour(), t.Minute(), t.Second())
 	logPath = path.Join(logPath, logFileName)
 	logFile, err := os.OpenFile(logPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
@@ -62,6 +63,20 @@ func StartLog(logPath string) error {
 
 func CloseLog() error {
 	return logFile.Close()
+}
+
+func PrintLog(logPath string) error {
+	//var data []byte
+
+	fmt.Println("========== Log file name ==========")
+	data, err := ioutil.ReadFile(path.Join(logPath, logFileName))
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(string(data))
+
+	return nil
 }
 
 func LogMessage(messageInfo, message string) error {

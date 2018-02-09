@@ -326,7 +326,7 @@ function perform_release() {
 
 function perform_pr() {
   make prerelease synopsis_docs link_check_docs
-  MINISHIFT_VM_DRIVER=kvm make integration_pr
+  MINISHIFT_VM_DRIVER=kvm make integration_pr || true
   perform_artifacts_upload $1;
 }
 

@@ -360,6 +360,15 @@ This information is often enough to find and debug the reason for a failure.
 However, for cases which require further investigation, the integration test also logs more detailed progress into a log file.
 This file is located at *_$GOPATH/github.com/minishift/minishift/out/test-results/integration_YYYY-MM-DD_HH:MM:SS.log_*.
 
+
+[[integration-tests-as-package]]
+==== Using Integration Tests as a Package
+
+Integration tests can be also used as a package outside of the {project} repository.
+You can import it as `github.com/minishift/minishift/test/integration/testsuite`.
+As a starting point for your project you can copy and use the link:https://github.com/minishift/minishift/blob/master/test/integration/integration_test.go[`test/integration/integration_test.go`] file.
+Its key parts are commented to help you to begin with the implementation.
+
 [[format-source-code]]
 === Formatting the Source Code
 

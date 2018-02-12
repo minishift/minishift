@@ -33,8 +33,9 @@ cluster in VM provided by Minishift.
      Given stdout of command "minishift ssh -- "docker inspect --format={{.State.FinishedAt}} origin"" is equal to "0001-01-01T00:00:00Z"
       When executing "minishift openshift restart" succeeds
       Then stdout should contain "Restarting OpenShift"
+       And stdoud of command "minishift ssh -- "docker inspect --format={{.State.Status}} origin"" is equal to "running"
        And stdout of command "minishift ssh -- "docker inspect --format={{.State.FinishedAt}} origin"" is not equal to "0001-01-01T00:00:00Z"
-
+ 
   Scenario: User deploys nodejs example application from OpenShift repository
       When executing "oc new-app https://github.com/openshift/nodejs-ex -l name=myapp" succeeds
       Then stdout should contain

@@ -14,7 +14,7 @@
 
 # Various versions - Minishift, default OpenShift, default B2D ISO
 MINISHIFT_VERSION = 1.12.0
-OPENSHIFT_VERSION = v3.6.1
+OPENSHIFT_VERSION = v3.7.1
 B2D_ISO_VERSION = v1.2.0
 CENTOS_ISO_VERSION = v1.5.0
 MINIKUBE_ISO_VERSION = v0.24.0
@@ -214,7 +214,7 @@ integration_all: $(MINISHIFT_BINARY)
 	--run-before-feature="$(RUN_BEFORE_FEATURE)" --test-with-specified-shell="$(TEST_WITH_SPECIFIED_SHELL)" --copy-oc-from="$(COPY_OC_FROM)" $(GODOG_OPTS)
 
 .PHONY: integration_pr
-integration_pr: GODOG_OPTS = --tags=~coolstore\&\&~addon-xpaas
+integration_pr: GODOG_OPTS = --tags=cmd-openshift
 integration_pr: $(MINISHIFT_BINARY)
 	mkdir -p $(INTEGRATION_TEST_DIR)
 	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) \

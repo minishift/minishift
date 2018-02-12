@@ -56,4 +56,6 @@ func runRestart(cmd *cobra.Command, args []string) {
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error restarting the OpenShift cluster: %s", err.Error()))
 	}
+
+	fmt.Println("OpenShift restarted successfully")
 }

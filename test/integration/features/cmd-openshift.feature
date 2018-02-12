@@ -35,13 +35,6 @@ cluster in VM provided by Minishift.
       Then stdout should contain "Restarting OpenShift"
        And stdout of command "minishift ssh -- "docker inspect --format={{.State.FinishedAt}} origin"" is not equal to "0001-01-01T00:00:00Z"
 
-  Scenario: User deploys nodejs example application from OpenShift repository
-      When executing "oc new-app https://github.com/openshift/nodejs-ex -l name=myapp" succeeds
-      Then stdout should contain
-       """
-       Run 'oc status' to view your app.
-       """
-
   @minishift-only
   Scenario: Getting information about OpenShift and kubernetes versions
   Prints the current running OpenShift version to the standard output.
@@ -53,22 +46,7 @@ cluster in VM provided by Minishift.
        kubernetes v[0-9]+\.[0-9]+\.[0-9]+\+[0-9a-z]{10}
        etcd [0-9]+\.[0-9]+\.[0-9]+
        """
-
-  Scenario: Getting address of internal docker registry
-  Prints the host name and port number of the OpenShift registry to the standard output.
-     Given Minishift has state "Running"
-      When executing "minishift openshift registry" succeeds
-      Then stdout should be valid IP with port number
-
-  Scenario: Getting existing service without route
-      When executing "minishift openshift service nodejs-ex" succeeds
-      Then stdout should contain "nodejs-ex"
-       And stdout should not match
-       """
-       ^http:\/\/nodejs-ex-myproject\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.nip\.io
-       """
-
-  Scenario: Getting non-existing service
+ Scenario: Getting non-existing service
   If service does not exist, user gets an empty table.
       When executing "minishift openshift service not-present" succeeds
       Then stdout should not contain "not-present"
@@ -80,6 +58,28 @@ cluster in VM provided by Minishift.
   Scenario: Forgotten service name
       When executing "minishift openshift service --namespace myapp" fails
       Then stderr should contain "You must specify the name of the service."
+
+  Scenario: Getting address of internal docker registry
+  Prints the host name and port number of the OpenShift registry to the standard output.
+     Given Minishift has state "Running"
+      When executing "minishift openshift registry" succeeds
+      Then stdout should be valid IP with port number
+
+  Scenario: User deploys nodejs example application from OpenShift repository
+     Given Minishift has state "Running"
+      When executing "oc new-app https://github.com/openshift/nodejs-ex -l name=myapp" succeeds
+      Then stdout should contain
+       """
+       Run 'oc status' to view your app.
+       """
+
+  Scenario: Getting existing service without route
+      When executing "minishift openshift service nodejs-ex" succeeds
+      Then stdout should contain "nodejs-ex"
+       And stdout should not match
+       """
+       ^http:\/\/nodejs-ex-myproject\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.nip\.io
+       """
 
   Scenario: User creates route to the service
       When executing "oc expose svc/nodejs-ex" succeeds

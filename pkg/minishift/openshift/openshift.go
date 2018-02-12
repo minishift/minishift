@@ -69,11 +69,11 @@ func (t *OpenShiftPatchTarget) localConfigFilePath() (string, error) {
 }
 
 func RestartOpenShift(commander docker.DockerCommander) (bool, error) {
-	fmt.Println("Restarting OpenShift")
 	ok, err := commander.Restart(constants.OpenshiftContainerName)
 	if err != nil {
 		return false, err
 	}
+	fmt.Println("OpenShift restarted successfully")
 	return ok, nil
 }
 

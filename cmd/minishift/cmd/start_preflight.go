@@ -374,13 +374,22 @@ func checkHypervDriverSwitch() bool {
 
 // checkHypervDriverInstalled returns true if Hyper-V driver is installed
 func checkHypervDriverInstalled() bool {
-	posh := powershell.New()
-
-	checkIfHyperVInstalled := `@(Get-Command Get-VM).ModuleName`
-	stdOut, _ := posh.Execute(checkIfHyperVInstalled)
-	if !strings.Contains(stdOut, "Hyper-V") {
+	// Check if Hyper-V's Virtual Machine Management Service is installed
+	_, err := exec.LookPath("vmms.exe")
+	if err != nil {
 		return false
 	}
+
+	// check to see if a hypervisor is present. if hyper-v is installed and enabled,
+	posh := powershell.New()
+
+	checkHypervisorPresent := `@(Get-Wmiobject Win32_ComputerSystem).HypervisorPresent`
+
+	stdOut, _ := posh.Execute(checkHypervisorPresent)
+	if !strings.Contains(stdOut, "True") {
+		return false
+	}
+
 	return true
 }
 

@@ -23,6 +23,7 @@ import (
 
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/filehelper"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
 
 	"github.com/golang/glog"
 	"golang.org/x/sys/windows/registry"
@@ -32,6 +33,12 @@ import (
 // in the default install location and in windows registry respectively, returns true
 // if found in any one of the location, https://github.com/docker/machine/blob/master/drivers/virtualbox/virtualbox_windows.go
 func checkVBoxInstalled() bool {
+	hypervActiveError := "\n   VirtualBox can not run when Hyper-V is installed. Please use Hyper-V or uninstall Hyper-V to use VirtualBox"
+	// check if Hyper-V is installed and active
+	if checkHypervDriverInstalled() {
+		atexit.ExitWithMessage(1, hypervActiveError)
+	}
+
 	vboxCmd := "VBoxManage.exe"
 	if p := os.Getenv("VBOX_INSTALL_PATH"); p != "" {
 		return filehelper.Exists(filepath.Join(p, vboxCmd))

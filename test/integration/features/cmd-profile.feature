@@ -1,5 +1,5 @@
-@profile @command
-Feature: Profile
+@cmd-profile @command
+Feature: Profile commands
   As a user I can perform basic operations of Minishift with profile feature
 
   Scenario Outline: As user, I cannot create profile with blank profile name

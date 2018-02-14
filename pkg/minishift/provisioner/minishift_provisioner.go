@@ -110,7 +110,7 @@ func (provisioner *MinishiftProvisioner) Provision(swarmOptions swarm.Options, a
 	swarmOptions.Env = engineOptions.Env
 
 	// set default storage driver for minishift
-	storageDriver, err := decideStorageDriver(provisioner, "overlay2", engineOptions.StorageDriver)
+	storageDriver, err := decideStorageDriver(provisioner, "devicemapper", engineOptions.StorageDriver)
 	if err != nil {
 		return err
 	}

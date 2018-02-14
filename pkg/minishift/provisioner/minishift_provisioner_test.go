@@ -45,7 +45,7 @@ func TestMinishiftDefaultStorageDriver(t *testing.T) {
 	p := NewMinishiftProvisioner("", &fakedriver.Driver{})
 	p.SSHCommander = provisiontest.NewFakeSSHCommander(provisiontest.FakeSSHCommanderOptions{})
 	p.Provision(swarm.Options{}, auth.Options{}, engine.Options{})
-	assert.Equal(t, "overlay2", p.EngineOptions.StorageDriver, "Default storage driver should be overlay2")
+	assert.Equal(t, "devicemapper", p.EngineOptions.StorageDriver, "Default storage driver should be devicemapper")
 }
 
 func TestRhelImage(t *testing.T) {

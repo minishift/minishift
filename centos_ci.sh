@@ -207,6 +207,22 @@ function perform_artifacts_upload() {
   fi
 }
 
+#######################################################################
+# Perform logs upload
+# Arguments:
+#   $1 - Rsync password
+#   $2 - location in artifact server
+######################################################################
+function perform_logs_upload() {
+  set +x
+
+  mkdir -p minishift/$2/$BUILD_NUMBER/
+  cp -r out/test-results/* minishift/$2/$BUILD_NUMBER/
+  # http://stackoverflow.com/a/22908437/1120530; Using --relative as --rsync-path not working
+  RSYNC_PASSWORD=$1 rsync -av --relative minishift/$2/$BUILD_NUMBER/ minishift@artifacts.ci.centos.org::minishift/
+  echo "Find Artifacts here http://artifacts.ci.centos.org/minishift/minishift/$2/$BUILD_NUMBER/ ."
+}
+
 function docs_tar_upload() {
   set +x
 
@@ -341,8 +357,10 @@ function perform_master() {
 }
 
 function perform_nightly() {
-  make prerelease synopsis_docs link_check_docs
-  MINISHIFT_ISO_URL=$1 MINISHIFT_VM_DRIVER=kvm make integration_all
+#  make prerelease synopsis_docs link_check_docs
+  MINISHIFT_ISO_URL=$1 MINISHIFT_VM_DRIVER=kvm make integration GODOG_OPTS="-tags cmd-version"
+  location=$(echo $JOB_NAME | sed "s/minishift-//")
+  perform_logs_upload $1 "$location";
 }
 
 if [[ "$UID" = 0 ]]; then
@@ -363,6 +381,9 @@ else
   setup_kvm_docker_machine_driver;
   # Navigate to the repo
   cd $GOPATH/src/github.com/minishift/minishift
+
+  # Mock nightly job
+  export JOB_NAME="minishift-nightly-minikube"
 
   if [[ "$JOB_NAME" = "minishift-docs" ]]; then
     # REPO and BRANCH variables are populated via https://ci.centos.org/job/minishift-docs

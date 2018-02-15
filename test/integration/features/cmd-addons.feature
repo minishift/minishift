@@ -44,7 +44,7 @@ Feature: Addons command and its subcommands
      When executing "minishift addons install --defaults" succeeds
      Then stdout should contain
       """
-      Default add-ons 'anyuid, admin-user, xpaas, registry-route' installed
+      Default add-ons 'anyuid, admin-user, xpaas, registry-route, max-pod' installed
       """
      When executing "minishift addons list" succeeds
      Then stdout should contain "admin-user"

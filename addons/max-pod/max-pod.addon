@@ -1,0 +1,11 @@
+# Name: max-pod
+# Description: Add-on to update the maximum pods value (defaults to 20)
+# Required-Vars: MAX_PODS
+# Var-Defaults: MAX_PODS=20
+
+ssh docker exec -t origin /usr/bin/openshift ex config patch /var/lib/origin/openshift.local.config/node-localhost/node-config.yaml '--patch={"kubeletArguments": { "max-pods": ["#{MAX_PODS}"] } }' > tmpconfig
+
+ssh cat tmpconfig | sed "s/'/\'/" | sed "s/.$//" | sudo tee /var/lib/minishift/openshift.local.config/node-localhost/node-config.yaml > /dev/null
+ssh rm tmpconfig
+
+docker restart origin

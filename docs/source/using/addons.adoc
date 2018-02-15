@@ -255,6 +255,8 @@ By default, this is not allowed in OpenShift.
 | Creates a user named 'admin' and assigns the *cluster-admin* role to it.  
 | registry-route
 | Creates an edge terminated route for the OpenShift registry.
+| max-pod
+| Modify the value of 'max-pods', set the desired value using `--addon-env MAX_PODS=`
 
 | xpaas
 | Imports xPaaS templates.

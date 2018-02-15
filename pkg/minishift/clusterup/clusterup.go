@@ -114,13 +114,8 @@ func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string, runne
 }
 
 // PostClusterUp runs the Minishift specific provisioning after 'cluster up' has run
-func PostClusterUp(clusterUpConfig *ClusterUpConfig, sshCommander provision.SSHCommander, addOnManager *manager.AddOnManager) error {
-	// With oc 3.6 client, clusterName entry to kubeconfig file become 127.0.0.1:<port> and
-	// we started to use oc baseline >= 3.6 which can provision now older release version.
-	// In case there is any change happen to newer version of oc client binary then this need modification.
-	userName := fmt.Sprintf("system:admin/127-0-0-1:%d", clusterUpConfig.Port)
-
-	err := kubeconfig.CacheSystemAdminEntries(clusterUpConfig.KubeConfigPath, getConfigClusterName(clusterUpConfig.PublicHostname, clusterUpConfig.Ip, clusterUpConfig.Port), userName)
+func PostClusterUp(clusterUpConfig *ClusterUpConfig, sshCommander provision.SSHCommander, addOnManager *manager.AddOnManager, runner util.Runner) error {
+	err := kubeconfig.CacheSystemAdminEntries(clusterUpConfig.KubeConfigPath, clusterUpConfig.OcPath, runner)
 	if err != nil {
 		return err
 	}
@@ -302,11 +297,4 @@ func applyAddOns(addOnManager *manager.AddOnManager, ip string, routingSuffix st
 	}
 
 	return nil
-}
-
-func getConfigClusterName(hostname string, ip string, port int) string {
-	if hostname != "" {
-		return "local-cluster"
-	}
-	return fmt.Sprintf("%s:%d", strings.Replace(ip, ".", "-", -1), port)
 }

@@ -17,12 +17,11 @@ limitations under the License.
 package kubeconfig
 
 import (
-	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 
+	"bytes"
 	"github.com/minishift/minishift/pkg/util"
 	"gopkg.in/yaml.v2"
 )
@@ -60,41 +59,20 @@ func GetConfigPath() string {
 }
 
 // Cache system admin entries to be used to run oc commands
-func CacheSystemAdminEntries(systemEntriesConfigPath, clusterName string, userName string) error {
-	config, err := Read(GetConfigPath())
-	if err != nil {
-		return errors.New(fmt.Sprintf("Error reading config file %s", systemEntriesConfigPath))
-	}
+func CacheSystemAdminEntries(systemEntriesConfigPath string, ocPath string, runner util.Runner) error {
+	// There is another easy way to get config for current context
+	// oc login -u system:admin
+	// oc config view --minify --raw=true
+	// We need to login as system:admin because then only config view will have client-certificate-data
+	// and client-key-data which is associated with admin and all the operation we do as oc runner.
+	var buffer bytes.Buffer
+	cmdArgs := []string{"login", "-u", "system:admin"}
+	runner.Run(nil, os.Stderr, ocPath, cmdArgs...)
+	cmdArgs = []string{"config", "view", "--minify", "--raw=true"}
+	runner.Run(&buffer, os.Stderr, ocPath, cmdArgs...)
 
-	targetConfig := SystemKubeConfig{ApiVersion: "v1"}
-	for k, v := range config.Clusters {
-		if v.Name == clusterName {
-			targetConfig.Clusters = append(targetConfig.Clusters, config.Clusters[k])
-			break
-		}
-	}
-
-	targetConfig.CurrentContext = fmt.Sprintf("default/%s/system:admin", clusterName)
-	for k, v := range config.Contexts {
-		if v.Name == targetConfig.CurrentContext {
-			targetConfig.Contexts = append(targetConfig.Contexts, config.Contexts[k])
-			break
-		}
-	}
-
-	for k, v := range config.Users {
-		if v.Name == userName {
-			targetConfig.Users = append(targetConfig.Users, config.Users[k])
-			break
-		}
-	}
-
-	yamlData, err := yaml.Marshal(&targetConfig)
-	if err != nil {
-		return errors.New("Error marshalling system kubeconfig entries")
-	}
 	// Write to machines/<MACHINE_NAME>_kubeconfig
-	if err = ioutil.WriteFile(systemEntriesConfigPath, yamlData, 0644); err != nil {
+	if err := ioutil.WriteFile(systemEntriesConfigPath, buffer.Bytes(), 0644); err != nil {
 		return err
 	}
 

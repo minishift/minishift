@@ -23,6 +23,7 @@ import (
 	"text/template"
 
 	"github.com/docker/machine/libmachine"
+	"github.com/docker/machine/libmachine/provision"
 	"github.com/docker/machine/libmachine/state"
 	cmdState "github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
@@ -65,6 +66,7 @@ func runStatus(cmd *cobra.Command, args []string) {
 		}
 		atexit.ExitWithMessage(0, s)
 	}
+	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
 
 	openshiftStatus := "Stopped"
 	diskUsage := "Unknown"
@@ -76,7 +78,7 @@ func runStatus(cmd *cobra.Command, args []string) {
 	}
 
 	if vmStatus == state.Running.String() {
-		openshiftVersion, err := openshiftVersion.GetOpenshiftVersion(host)
+		openshiftVersion, err := openshiftVersion.GetOpenshiftVersion(sshCommander)
 		if err == nil {
 			openshiftStatus = fmt.Sprintf("Running (%s)", strings.Split(openshiftVersion, "\n")[0])
 		}

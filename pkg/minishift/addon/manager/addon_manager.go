@@ -25,11 +25,10 @@ import (
 
 	"strings"
 
-	minikubeConstants "github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/addon"
 	"github.com/minishift/minishift/pkg/minishift/addon/command"
 	"github.com/minishift/minishift/pkg/minishift/addon/parser"
-	"github.com/minishift/minishift/pkg/minishift/constants"
+	openshiftVersions "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/filehelper"
 	utilStrings "github.com/minishift/minishift/pkg/util/strings"
@@ -292,21 +291,10 @@ func verifyRequiredVariablesInContext(context *command.ExecutionContext, meta ad
 }
 
 func verifyRequiredOpenshiftVersion(context *command.ExecutionContext, meta addon.AddOnMeta) error {
-	dockerCommander := context.GetDockerCommander()
-	versionInfo, err := dockerCommander.Exec(" ", constants.OpenshiftContainerName, "openshift", "version")
+	openShiftVersion, err := openshiftVersions.GetOpenshiftVersionWithoutK8sAndEtcd(context.GetSSHCommander())
 	if err != nil {
 		return err
 	}
-
-	// verionInfo variable have below string as value along with new line
-	// openshift v3.6.0+c4dd4cf
-	// kubernetes v1.6.1+5115d708d7
-	// etcd 3.2.1
-	// openShiftVersionAlongWithCommitSha is contain *v3.6.0+c4dd4cf* (first split on new line and second on space)
-	openShiftVersionAlongWithCommitSha := strings.Split(strings.Split(versionInfo, "\n")[0], " ")[1]
-	// openshiftVersion is contain *3.6.0* (split on *+* string and then trim the *v* as perfix)
-	// TrimSpace is there to make sure no whitespace around version string
-	openShiftVersion := strings.TrimSpace(strings.TrimPrefix(strings.Split(openShiftVersionAlongWithCommitSha, "+")[0], minikubeConstants.VersionPrefix))
 	requiredOpenshiftVersions := strings.TrimSpace(meta.OpenShiftVersion())
 	if requiredOpenshiftVersions != "" {
 		for _, requiredOpenshiftVersion := range strings.Split(requiredOpenshiftVersions, versionRangeSeparator) {

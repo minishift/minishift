@@ -23,13 +23,14 @@ import (
 
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
+	openshiftVersionCheck "github.com/minishift/minishift/pkg/minishift/openshift/version"
 )
 
-func GetDockerRegistryInfo(registryAddonEnabled bool) (string, error) {
+func GetDockerRegistryInfo(registryAddonEnabled bool, openshiftVersion string) (string, error) {
 	var registryInfo string
 	var err error
 	if isRegistryRouteEnabled(registryAddonEnabled) {
-		registryInfo, err = fetchRegistryRoute()
+		registryInfo, err = fetchRegistryRoute(openshiftVersion)
 	} else {
 		registryInfo, err = fetchRegistryService()
 	}
@@ -51,10 +52,18 @@ func isRegistryRouteEnabled(registryAddonEnabled bool) bool {
 	return true
 }
 
-func fetchRegistryRoute() (string, error) {
+func fetchRegistryRoute(openshiftVersion string) (string, error) {
 	namespace := "default"
 	route := "route/docker-registry"
 	cmdArgText := fmt.Sprintf("get -o jsonpath={.spec.host}:443 %s -n %s --config=%s", route, namespace, constants.KubeConfigPath)
+	// With Openshift >= 3.7.0 we don't need to provide 443 as port number during the image tag and image push for internal registry
+	valid, err := openshiftVersionCheck.IsGreaterOrEqualToBaseVersion(openshiftVersion, constants.BackwardIncompatibleOcVersion)
+	if err != nil {
+		return "", err
+	}
+	if valid {
+		cmdArgText = fmt.Sprintf("get -o jsonpath={.spec.host} %s -n %s --config=%s", route, namespace, constants.KubeConfigPath)
+	}
 	tokens := strings.Split(cmdArgText, " ")
 	cmdName := instanceState.InstanceConfig.OcPath
 	cmdOut, err := runner.Output(cmdName, tokens...)

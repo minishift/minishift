@@ -20,11 +20,13 @@ import (
 	"fmt"
 
 	"github.com/docker/machine/libmachine"
+	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/cmd/minishift/cmd/addon"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/openshift"
+	openshiftVersions "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
@@ -52,7 +54,12 @@ var registryCmd = &cobra.Command{
 		if registryRoute == nil || !registryRoute.IsEnabled() {
 			registryAddonEnabled = false
 		}
-		registryInfo, err := openshift.GetDockerRegistryInfo(registryAddonEnabled)
+		sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
+		openshiftVersion, err := openshiftVersions.GetOpenshiftVersionWithoutK8sAndEtcd(sshCommander)
+		if err != nil {
+			atexit.ExitWithMessage(1, err.Error())
+		}
+		registryInfo, err := openshift.GetDockerRegistryInfo(registryAddonEnabled, openshiftVersion)
 		if err != nil {
 			atexit.ExitWithMessage(1, err.Error())
 		}

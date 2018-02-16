@@ -21,6 +21,7 @@ import (
 	"os"
 
 	"github.com/docker/machine/libmachine"
+	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	openshiftVersions "github.com/minishift/minishift/pkg/minishift/openshift/version"
@@ -44,7 +45,9 @@ func runVersion(cmd *cobra.Command, args []string) {
 	if err != nil {
 		atexit.ExitWithMessage(1, nonExistentMachineError)
 	}
-	version, err := openshiftVersions.GetOpenshiftVersion(host)
+	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
+
+	version, err := openshiftVersions.GetOpenshiftVersion(sshCommander)
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error getting the OpenShift cluster version: %s", err.Error()))
 	}

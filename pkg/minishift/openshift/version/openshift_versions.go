@@ -27,9 +27,9 @@ import (
 	"strings"
 
 	"github.com/blang/semver"
-	"github.com/docker/machine/libmachine/host"
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	minikubeConstants "github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/minishift/docker"
 	"github.com/minishift/minishift/pkg/util"
@@ -49,10 +49,27 @@ type ImageInfo struct {
 	OsFeatures   interface{} `json:"os_features"`
 }
 
-func GetOpenshiftVersion(host *host.Host) (string, error) {
-	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
+func GetOpenshiftVersion(sshCommander provision.SSHCommander) (string, error) {
 	dockerCommander := docker.NewVmDockerCommander(sshCommander)
 	return dockerCommander.Exec(" ", minishiftConstants.OpenshiftContainerName, "openshift", "version")
+}
+
+func GetOpenshiftVersionWithoutK8sAndEtcd(sshCommander provision.SSHCommander) (string, error) {
+	versionInfo, err := GetOpenshiftVersion(sshCommander)
+	if err != nil {
+		return "", err
+	}
+
+	// versionInfo variable have below string as value along with new line
+	// openshift v3.6.1+c4dd4cf
+	// kubernetes v1.6.1+5115d708d7
+	// etcd 3.2.1
+	// openShiftVersionAlongWithCommitSha is contain *v3.6.1+c4dd4cf* (first split on new line and second on space)
+	openShiftVersionAlongWithCommitSha := strings.Split(strings.Split(versionInfo, "\n")[0], " ")[1]
+	// openshiftVersion is contain *3.6.1* (split on *+* string and then trim the *v* as perfix)
+	// TrimSpace is there to make sure no whitespace around version string
+	openShiftVersion := strings.TrimSpace(strings.TrimPrefix(strings.Split(openShiftVersionAlongWithCommitSha, "+")[0], minikubeConstants.VersionPrefix))
+	return openShiftVersion, nil
 }
 
 func PrintDownStreamVersions(output io.Writer, minSupportedVersion string) error {

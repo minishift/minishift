@@ -179,6 +179,16 @@ Feature: Basic
       """
       The 'minishift' VM is already stopped.
       """
+     When executing "minishift console" succeeds
+     Then stdout should contain
+      """
+      Running this command requires a running 'minishift' VM, but no VM is running.
+      """
+     When executing "minishift ip" succeeds
+     Then stdout should contain
+      """
+      Running this command requires a running 'minishift' VM, but no VM is running.
+      """
 
   Scenario: Deleting Minishift
     Given Minishift has state "Stopped"

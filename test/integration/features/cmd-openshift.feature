@@ -50,7 +50,7 @@ cluster in VM provided by Minishift.
       When executing "minishift openshift version" succeeds
       Then stdout should match
        """
-       ^openshift v[0-9]+\.[0-9]+\.[0-9]+\+[0-9a-z]{7}
+       ^openshift v[0-9]+\.[0-9]+\.[0-9]+\+[0-9a-z]{7}(-[0-9]+)*
        kubernetes v[0-9]+\.[0-9]+\.[0-9]+\+[0-9a-z]{10}
        etcd [0-9]+\.[0-9]+\.[0-9]+
        """

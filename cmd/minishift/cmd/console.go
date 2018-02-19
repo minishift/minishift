@@ -21,6 +21,7 @@ import (
 	"os"
 
 	"github.com/docker/machine/libmachine"
+	cmdUtil "github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
@@ -68,6 +69,12 @@ func displayConsoleInMachineReadable(hostIP string, url string) {
 }
 
 func getHostUrl(api *libmachine.Client) string {
+	host, err := api.Load(constants.MachineName)
+	if err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error getting Minishift status: %s", err.Error()))
+	}
+	cmdUtil.ExitIfNotRunning(host.Driver, constants.MachineName)
+
 	url, err := cluster.GetConsoleURL(api)
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot access the OpenShift console. Verify that Minishift is running. Error: %s", err.Error()))

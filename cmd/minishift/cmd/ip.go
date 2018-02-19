@@ -20,9 +20,9 @@ import (
 	"fmt"
 
 	"github.com/docker/machine/libmachine"
-	"github.com/minishift/minishift/pkg/minikube/constants"
-
+	cmdUtil "github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/cmd/minishift/state"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
@@ -39,6 +39,7 @@ var ipCmd = &cobra.Command{
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error getting IP: %s", err.Error()))
 		}
+		cmdUtil.ExitIfNotRunning(host.Driver, constants.MachineName)
 		ip, err := host.Driver.GetIP()
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error getting IP: %s", err.Error()))

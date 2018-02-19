@@ -77,28 +77,26 @@ Feature: Profile commands
   Scenario: As user, I can apply independent settings in profile 'foo'
      When executing "minishift profile set foo" succeeds
      Then profile "foo" should be the active profile
-     When executing "minishift --profile minishift config get memory" succeeds
-     Then stdout should match "<nil>"
+      And executing "minishift --profile minishift config set cpus 4" succeeds
       And executing "minishift --profile minishift addons list" succeeds
       And stdout should match "registry-route\s*: disabled\s*P\(0\)"
       And executing "minishift addons enable registry-route" succeeds
       And executing "minishift config set memory 5120" succeeds
       And executing "minishift config get memory" succeeds
       And stdout should match "5120"
+      And image caching is disabled
      When executing "minishift start" succeeds
-     Then stdout should contain
-      """
-      Add-on 'registry-route' created docker-registry route.
-      """
+     Then stdout should match "vCPUs\s*:\s*2"
       And profile "foo" should have state "Running"
-     When executing "minishift --profile minishift config get memory" succeeds
-     Then stdout should match "<nil>"
+     When executing "minishift --profile minishift config get cpus" succeeds
+     Then stdout should match "4"
       And executing "minishift --profile minishift addons list" succeeds
       And stdout should match "registry-route\s*: disabled\s*P\(0\)"
       And executing "minishift addons list" succeeds
       And stdout should match "registry-route\s*: enabled\s*P\(0\)"
-      And executing "minishift ssh -- cat /proc/meminfo" succeeds
-      And stdout should match "MemTotal:\s*5[0-1][0-9]{5}\s*kB"
+      And executing "minishift ssh -- cat /proc/cpuinfo" succeeds
+      And stdout should match "processor\s*: [0-3]"
+      And stdout should not match "processor\s*: [4-9]"
 
   Scenario: As user, I can execute a command against a non active profile
     Given profile "foo" is the active profile
@@ -107,7 +105,6 @@ Feature: Profile commands
       And executing "minishift --profile minishift stop" succeeds
       And stdout should contain
        """
-       Stopping local OpenShift cluster...
        Cluster stopped.
        """
      When executing "minishift --profile minishift status" succeeds

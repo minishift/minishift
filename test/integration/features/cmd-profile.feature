@@ -39,6 +39,8 @@ Feature: Profile commands
     | '*te$st^'   |
     | 'foo 123'   |
     | 'foo    '   |
+    | 'foo_bar'   |
+    | '_'         |
 
   Scenario Outline: As user, I can create profile with alphanumeric character including '_' and '-' in profile name
      When executing "minishift profile set <profilename>" succeeds
@@ -48,13 +50,13 @@ Feature: Profile commands
   Examples: Correct profile names
     | profilename |
     | Test-123    |
-    | profile_    |
-    | P1_name-    |
-    | vm_45       |
+    | Profile     |
+    | P1-name-    |
     | 20          |
     | random001z  |
-    | 00_XYZ-     |
-    | test_Pro-01 |
+    | 00-XYZ-     |
+    | test-Pro-01 |
+    | 123profile  |
     | foo         |
 
   Scenario: As user, I can switch between existing profiles
@@ -121,13 +123,13 @@ Feature: Profile commands
   Examples: Profile name
     | profilename |
     | Test-123    |
-    | profile_    |
-    | P1_name-    |
-    | vm_45       |
+    | Profile     |
+    | P1-name-    |
     | 20          |
     | random001z  |
-    | 00_XYZ-     |
-    | test_Pro-01 |
+    | 00-XYZ-     |
+    | test-Pro-01 |
+    | 123profile  |
     | foo         |
 
   Scenario: As user, I cannot run delete command on non existing profile

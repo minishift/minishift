@@ -376,7 +376,7 @@ func checkHypervDriverUser() bool {
 	// BUILTIN\Hyper-V Administrators => S-1-5-32-578
 
 	//Hyper-V Administrators group check fails: https://github.com/minishift/minishift/issues/2047
-	//Using SecurityIdentifier overload of IsInRole
+	//Using SecurityIdentifier overload of IsInRole()
 	checkIfMemberOfHyperVAdmins :=
 		`$sid = New-Object System.Security.Principal.SecurityIdentifier("S-1-5-32-578")
 	@([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole($sid)`

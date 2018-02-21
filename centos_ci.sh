@@ -364,7 +364,10 @@ else
   # Navigate to the repo
   cd $GOPATH/src/github.com/minishift/minishift
 
-  if [[ "$JOB_NAME" = "minishift-docs" ]]; then
+  # Fail fast to get build slave
+  exit 1
+
+ if [[ "$JOB_NAME" = "minishift-docs" ]]; then
     # REPO and BRANCH variables are populated via https://ci.centos.org/job/minishift-docs
     REPO_OWNER=$(echo $REPO | cut -d"/" -f4)
     perform_docs_publish "$REPO_OWNER" "$BRANCH" "minishift/docs/ondemand/$REPO_OWNER-$BRANCH";

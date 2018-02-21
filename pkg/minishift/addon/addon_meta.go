@@ -146,7 +146,7 @@ func requiredMetaTagsCheck(headers map[string]interface{}) error {
 func requiredOpenShiftVersionCheck(headers map[string]interface{}) error {
 	if headers[RequiredOpenShiftVersion] != nil {
 		if !checkVersionSemantic(headers[RequiredOpenShiftVersion].(string)) {
-			return errors.New("Add-on only support OpenShift version semantics eg. 3.6.0 or >3.6.0, <3.9.0 or >=3.5 etc.")
+			return errors.New("Add-on supports OpenShift version semantics (eg. 3.6.0, >3.6.0, <3.6.0 or >=3.6 etc.")
 		}
 	}
 

@@ -247,7 +247,7 @@ func runStart(cmd *cobra.Command, args []string) {
 // On subsequent VM restarts these actions can be skipped.
 func postClusterUp(hostVm *host.Host, clusterUpConfig *clusterup.ClusterUpConfig) {
 	sshCommander := provision.GenericSSHCommander{Driver: hostVm.Driver}
-	err := clusterup.PostClusterUp(clusterUpConfig, sshCommander, addon.GetAddOnManager())
+	err := clusterup.PostClusterUp(clusterUpConfig, sshCommander, addon.GetAddOnManager(), &util.RealRunner{})
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error during post cluster up configuration: %v", err))
 	}

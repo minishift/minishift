@@ -32,7 +32,7 @@ cluster in VM provided by Minishift.
         after next start of container.
      Given stdout of command "minishift ssh -- "docker inspect --format={{.State.FinishedAt}} origin"" is equal to "0001-01-01T00:00:00Z"
       When executing "minishift openshift restart" succeeds
-      Then stdout should contain "Restarting OpenShift"
+      Then stdout should contain "OpenShift restarted successfully"
        And stdout of command "minishift ssh -- "docker inspect --format={{.State.FinishedAt}} origin"" is not equal to "0001-01-01T00:00:00Z"
 
   Scenario: User deploys nodejs example application from OpenShift repository
@@ -50,7 +50,7 @@ cluster in VM provided by Minishift.
       When executing "minishift openshift version" succeeds
       Then stdout should match
        """
-       ^openshift v[0-9]+\.[0-9]+\.[0-9]+\+[0-9a-z]{7}
+       ^openshift v[0-9]+\.[0-9]+\.[0-9]+\+[0-9a-z]{7}(-[0-9]+)*
        kubernetes v[0-9]+\.[0-9]+\.[0-9]+\+[0-9a-z]{10}
        etcd [0-9]+\.[0-9]+\.[0-9]+
        """

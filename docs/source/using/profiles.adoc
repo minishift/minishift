@@ -39,7 +39,7 @@ There are two ways to create a new profile.
 [NOTE]
 ====
 Profile name can only consist of alphanumeric characters.
-The use of underscore ( *_* ) and hyphen ( *-* ) are allowed as separator.
+The use of hyphen ( *-* ) is allowed as separator.
 ====
 
 === Using the `--profile` Flag

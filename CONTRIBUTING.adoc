@@ -18,7 +18,8 @@ Thank you for your contributions! Please follow this process to submit a patch:
 . Fork the repository and create a topic branch.
 . Refer to the link:https://docs.openshift.org/latest/minishift/contributing/developing.html[developer documentation] for guidelines and tips on how to build and test Minishift.
 . Submit a pull request with the proposed changes.
-  To make reviewing and integration as smooth as possible, please run the `make` targets link:https://docs.openshift.org/latest/minishift/contributing/developing.html#unit-tests[`test`], https://docs.openshift.org/latest/minishift/contributing/developing.html#format-source-code[`fmtcheck`] and https://docs.openshift.org/latest/minishift/contributing/developing.html#commit-messages[`validate_commits`] prior to submitting the pull request.
+.. The required format for the git commit message is 'Issue #<issue_no> message'.
+.. To make reviewing and integration as smooth as possible, please run the `make` targets link:https://docs.openshift.org/latest/minishift/contributing/developing.html#unit-tests[`test`], https://docs.openshift.org/latest/minishift/contributing/developing.html#format-source-code[`fmtcheck`] and https://docs.openshift.org/latest/minishift/contributing/developing.html#commit-messages[`validate_commits`] prior to submitting the pull request.
 
 [[questions]]
 == Questions?

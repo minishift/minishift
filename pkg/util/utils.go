@@ -19,6 +19,8 @@ package util
 import (
 	"fmt"
 	"io"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -177,4 +179,18 @@ func CommandExecutesSuccessfully(cmd string, args ...string) bool {
 		return true
 	}
 	return false
+}
+
+// IsDirectoryWritable checks if the directory is writable or not
+// by trying creating a temporary file
+// Return true if directory is writable else false
+func IsDirectoryWritable(path string) bool {
+	tmpFilePath := filepath.Join(path, "tmp")
+	_, err := os.Create(tmpFilePath)
+	defer os.Remove(tmpFilePath)
+	if err != nil {
+		return false
+	}
+
+	return true
 }

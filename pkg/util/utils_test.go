@@ -26,6 +26,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
+	"io/ioutil"
 )
 
 // Returns a function that will return n errors, then return successfully forever.
@@ -205,4 +206,25 @@ func Test_command_executes_unsuccessfully_with_command_lookup(t *testing.T) {
 
 	success := CommandExecutesSuccessfully(cmd)
 	assert.False(t, success)
+}
+
+func TestWritableDirectory(t *testing.T) {
+	testDir, err := ioutil.TempDir("", "minishift-test-")
+	assert.NoError(t, err)
+	defer os.RemoveAll(testDir)
+
+	assert.True(t, IsDirectoryWritable(testDir))
+}
+
+func TestNonWritableDirectory(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping as Appveyor CI is running in administrator mode")
+	}
+
+	testDir, err := ioutil.TempDir("", "minishift-test-")
+	assert.NoError(t, err)
+	defer os.RemoveAll(testDir)
+
+	os.Chmod(testDir, 0400) // make dir read-only
+	assert.False(t, IsDirectoryWritable(testDir))
 }

@@ -1,4 +1,4 @@
-@provision-various-versions
+@provision-various-versions @openshift
 Feature: Provision all major OpenShift versions
   As a user I can provision major versions of OpenShift
 
@@ -18,6 +18,12 @@ Feature: Provision all major OpenShift versions
       """
       <ocVersion>
       """
+      And "status code" of HTTP request to "/healthz" of OpenShift instance is equal to "200"
+      And "body" of HTTP request to "/healthz" of OpenShift instance contains "ok"
+      And "status code" of HTTP request to "/healthz/ready" of OpenShift instance is equal to "200"
+      And "body" of HTTP request to "/healthz/ready" of OpenShift instance contains "ok"
+      And "status code" of HTTP request to "/console" of OpenShift instance is equal to "200"
+      And "body" of HTTP request to "/console" of OpenShift instance contains "<title>OpenShift Web Console</title>"
      When executing "minishift delete --force" succeeds
      Then Minishift should have state "Does Not Exist"
 
@@ -25,6 +31,5 @@ Feature: Provision all major OpenShift versions
     | serverVersion | ocVersion |
     | v1.4.1        | v3.6.1    |
     | v1.5.1        | v3.6.1    |
-    | v3.6.0        | v3.6.1    |
     | v3.6.1        | v3.6.1    |
     | v3.7.0        | v3.7.0    |

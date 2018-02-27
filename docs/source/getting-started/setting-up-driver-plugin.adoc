@@ -183,6 +183,52 @@ $ sudo chmod u+s /usr/local/bin/docker-machine-driver-xhyve
 For more information, see the link:https://github.com/zchee/docker-machine-driver-xhyve#install[xhyve driver] documentation on GitHub.
 ====
 
+[[hyperkit-driver-install]]
+== hyperkit Driver
+
+{project} is currently tested against *docker-machine-driver-hyperkit* version 1.0.0.
+
+
+To install the hyperkit driver, you need to download and install the *docker-machine-driver-hyperkit* binary and place it in a directory which is on your `PATH` environment variable.
+The directory *_/usr/local/bin_* is a good choice, since it is the default installation directory for Docker Machine binaries.
+
+The following steps explain the installation of the *docker-machine-driver-hyperkit* binary to the *_/usr/local/bin/_* directory:
+
+. Download the *docker-machine-driver-hyperkit* binary using:
++
+----
+$ sudo curl -L  https://github.com/machine-drivers/docker-machine-driver-hyperkit/releases/download/v1.0.0/docker-machine-driver-hyperkit -o /usr/local/bin/docker-machine-driver-hyperkit
+----
+
+. Enable root access for the *docker-machine-driver-hyperkit* binary and add it to the default *wheel* group:
++
+----
+$ sudo chown root:wheel /usr/local/bin/docker-machine-driver-hyperkit
+----
+
+. Set owner User ID (SUID) for the binary as follows:
++
+----
+$ sudo chmod u+s,+x /usr/local/bin/docker-machine-driver-hyperkit
+----
+
+[NOTE]
+====
+The downloaded *docker-machine-driver-hyperkit* binary is compiled against a specific version of macOS.
+It is possible that the driver will fail to work after a macOS version upgrade.
+In this case you can try to compile the driver from source:
+
+----
+$ go get -u -d github.com/machine-drivers/docker-machine-driver-hyperkit
+$ cd $GOPATH/src/github.com/machine-drivers/docker-machine-driver-hyperkit
+
+# Install docker-machine-driver-hyperkit binary into /usr/local/bin
+$ make build
+----
+
+For more information, see the link: https://github.com/machine-drivers/docker-machine-driver-hyperkit/blob/master/README.md[hyperkit driver] documentation on GitHub.
+====
+
 == Hyper-V Driver
 To use {project} with Hyper-V:
 

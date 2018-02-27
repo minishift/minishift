@@ -19,7 +19,9 @@ package cluster
 import (
 	"github.com/docker/machine/drivers/vmwarefusion"
 	"github.com/docker/machine/libmachine/drivers"
+	"github.com/machine-drivers/docker-machine-driver-hyperkit/pkg/hyperkit"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/pborman/uuid"
 )
 
 func createVMwareFusionHost(config MachineConfig) drivers.Driver {
@@ -66,5 +68,20 @@ func createXhyveHost(config MachineConfig) *xhyveDriver {
 		DiskSize:       int64(config.DiskSize),
 		QCow2:          false,
 		RawDisk:        true,
+	}
+}
+
+func createHyperkitHost(config MachineConfig) *hyperkit.Driver {
+	return &hyperkit.Driver{
+		BaseDriver: &drivers.BaseDriver{
+			MachineName: constants.MachineName,
+			StorePath:   constants.Minipath,
+			SSHUser:     "docker",
+		},
+		Boot2DockerURL: config.GetISOFileURI(),
+		DiskSize:       config.DiskSize,
+		Memory:         config.Memory,
+		CPU:            config.CPUs,
+		UUID:           uuid.NewUUID().String(),
 	}
 }

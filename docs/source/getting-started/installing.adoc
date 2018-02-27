@@ -29,7 +29,12 @@ macOS::
 ====
 xhyve requires specific installation and configuration steps that are described in the xref:../getting-started/setting-up-driver-plugin.adoc#[Setting Up the Driver Plug-in] section.
 ====
-
+- link:https://github.com/moby/hyperkit[hyperkit]
++
+[NOTE]
+====
+hyperkit requires specific installation and configuration steps that are described in the xref:../getting-started/setting-up-driver-plugin.adoc#[Setting Up the Driver Plug-in] section.
+====
 - link:https://www.virtualbox.org/wiki/Downloads[VirtualBox]
 
 Linux::

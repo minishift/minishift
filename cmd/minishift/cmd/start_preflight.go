@@ -51,11 +51,11 @@ func preflightChecksBeforeStartingHost() {
 	prerequisiteErrorMessage := "See the 'Installing Prerequisites for Minishift' topic (https://docs.openshift.org/latest/minishift/getting-started/installing.html#install-prerequisites) for more information"
 
 	preflightCheckSucceedsOrFails(
-		configCmd.SkipCheckOpenShiftGithubRelease.Name,
-		checkOcTagOnGithub,
-		fmt.Sprintf("Checking if requested OpenShift version '%s' is valid on GitHub", viper.GetString(configCmd.OpenshiftVersion.Name)),
-		configCmd.WarnCheckOpenShiftGithubRelease.Name,
-		fmt.Sprintf("%s is not a valid OpenShift version on GitHub", viper.GetString(configCmd.OpenshiftVersion.Name)),
+		configCmd.SkipCheckOpenShiftRelease.Name,
+		checkOriginRelease,
+		fmt.Sprintf("Checking if requested OpenShift version '%s' is valid", viper.GetString(configCmd.OpenshiftVersion.Name)),
+		configCmd.WarnCheckOpenShiftRelease.Name,
+		fmt.Sprintf("%s is not a valid OpenShift version", viper.GetString(configCmd.OpenshiftVersion.Name)),
 	)
 
 	preflightCheckSucceedsOrFails(
@@ -534,8 +534,8 @@ func validateOpenshiftVersion() bool {
 	return true
 }
 
-// checkOcTagOnGithub return true if specified version of OpenShift released.
-func checkOcTagOnGithub() bool {
+// checkOriginRelease return true if specified version of OpenShift is released
+func checkOriginRelease() bool {
 	client := github.Client()
 	_, _, err := client.Repositories.GetReleaseByTag("openshift", "origin", viper.GetString(configCmd.OpenshiftVersion.Name))
 	if err != nil {

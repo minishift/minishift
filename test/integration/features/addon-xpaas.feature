@@ -29,7 +29,6 @@ which are then available in OpenShift to the user.
   Examples: Required information to test the templates
     | template-name           | service-name   | http-endpoint | expected-hello                        |
     | datagrid65-basic        | datagrid-app   | /             | Welcome to the JBoss Data Grid Server |
-    | eap64-basic-s2i         | eap-app        | /index.jsf    | Welcome to JBoss!                     |
     | eap70-basic-s2i         | eap-app        | /index.jsf    | Welcome to JBoss!                     |
 
   Scenario: User deletes Minishift

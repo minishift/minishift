@@ -29,6 +29,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	DefaultRoutingSuffix = ".nip.io"
+)
+
 type configFile interface {
 	io.ReadWriter
 }

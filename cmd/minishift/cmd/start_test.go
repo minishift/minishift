@@ -27,8 +27,6 @@ import (
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/minishift/minishift/cmd/minishift/cmd/config"
-
 	"fmt"
 	"sort"
 	"strings"
@@ -326,30 +324,6 @@ func TestStartClusterUpWithOpenShiftEnv(t *testing.T) {
 		"--routing-suffix", testConfig.Ip + ".nip.io",
 	}
 	assertCommandLineArguments(expectedArguments, t)
-}
-
-func TestNoExplicitRouteSuffixDefaultsToNip(t *testing.T) {
-	setUp(t)
-	defer tearDown()
-
-	expectedRoutingSuffix := testConfig.Ip + ".nip.io"
-	actualRoutingSuffix := getDefaultRoutingPrefix(testConfig.Ip)
-
-	assert.Equal(t, expectedRoutingSuffix, actualRoutingSuffix)
-}
-
-func TestExplicitRouteSuffixGetApplied(t *testing.T) {
-	setUp(t)
-	defer tearDown()
-
-	explicitRoutingSuffix := "acme.com"
-
-	viper.Set(config.RoutingSuffix.Name, explicitRoutingSuffix)
-	defer viper.Reset()
-
-	actualRoutingSuffix := getDefaultRoutingPrefix(testConfig.Ip)
-
-	assert.Equal(t, explicitRoutingSuffix, actualRoutingSuffix)
 }
 
 func TestCheckMemorySize(t *testing.T) {

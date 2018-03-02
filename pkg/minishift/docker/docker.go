@@ -35,6 +35,10 @@ type DockerCommander interface {
 	// and exited. See also https://docs.docker.com/engine/api/v1.21/
 	Status(container string) (string, error)
 
+	// Runs the specified container. Returns true in case the run was successful, false otherwise.
+	// Any occurring error is also returned.
+	Run(options string, container string) (bool, error)
+
 	// Starts the specified container. Returns true in case the start was successful, false otherwise.
 	// Any occurring error is also returned.
 	Start(container string) (bool, error)
@@ -168,4 +172,14 @@ func (c VmDockerCommander) Status(container string) (string, error) {
 
 func (c VmDockerCommander) logCommand(cmd string) {
 	glog.V(2).Info(fmt.Sprintf("Executing docker command: '%s'", cmd))
+}
+
+func (c VmDockerCommander) Run(options string, container string) (bool, error) {
+	cmd := fmt.Sprintf("docker run %s %s", options, container)
+	c.logCommand(cmd)
+	_, err := c.commander.SSHCommand(cmd)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }

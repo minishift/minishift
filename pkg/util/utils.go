@@ -175,6 +175,7 @@ func CommandExecutesSuccessfully(cmd string, args ...string) bool {
 	var stdOut, stdErr io.Writer
 
 	exitCode := runner.Run(stdOut, stdErr, cmd, args...)
+
 	if exitCode == 0 {
 		return true
 	}

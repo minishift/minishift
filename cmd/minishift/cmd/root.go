@@ -31,6 +31,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/cmd/minishift/cmd/addon"
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
+	"github.com/minishift/minishift/cmd/minishift/cmd/dns"
 	hostfolderCmd "github.com/minishift/minishift/cmd/minishift/cmd/hostfolder"
 	"github.com/minishift/minishift/cmd/minishift/cmd/image"
 	cmdOpenshift "github.com/minishift/minishift/cmd/minishift/cmd/openshift"
@@ -192,6 +193,7 @@ func init() {
 	RootCmd.AddCommand(addon.AddonsCmd)
 	RootCmd.AddCommand(image.ImageCmd)
 	RootCmd.AddCommand(cmdProfile.ProfileCmd)
+	RootCmd.AddCommand(dns.DnsCmd)
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
 	logDir := pflag.Lookup("log_dir")
 	if !logDir.Changed {

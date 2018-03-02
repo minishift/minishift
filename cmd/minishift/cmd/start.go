@@ -653,15 +653,6 @@ func determineClusterUpParameters(config *clusterup.ClusterUpConfig) map[string]
 	return clusterUpParams
 }
 
-func getDefaultRoutingPrefix(ip string) string {
-	// prefer nip.io over xip.io. See GitHub issue #501
-	if viper.IsSet(configCmd.RoutingSuffix.Name) {
-		return viper.GetString(configCmd.RoutingSuffix.Name)
-	} else {
-		return ip + ".nip.io"
-	}
-}
-
 func ensureNotRunning(client *libmachine.Client, machineName string) {
 	if !cmdUtil.VMExists(client, machineName) {
 		return

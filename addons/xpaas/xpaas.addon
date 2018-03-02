@@ -24,17 +24,6 @@ oc create -f xpaas-templates/decisionserver64-amq-s2i.json -n openshift
 oc create -f xpaas-templates/decisionserver64-basic-s2i.json -n openshift
 oc create -f xpaas-templates/decisionserver64-https-s2i.json -n openshift
 
-oc create -f xpaas-templates/eap64-amq-persistent-s2i.json -n openshift
-oc create -f xpaas-templates/eap64-amq-s2i.json -n openshift
-oc create -f xpaas-templates/eap64-basic-s2i.json -n openshift
-oc create -f xpaas-templates/eap64-https-s2i.json -n openshift
-oc create -f xpaas-templates/eap64-mongodb-persistent-s2i.json -n openshift
-oc create -f xpaas-templates/eap64-mongodb-s2i.json -n openshift
-oc create -f xpaas-templates/eap64-mysql-persistent-s2i.json -n openshift
-oc create -f xpaas-templates/eap64-mysql-s2i.json -n openshift
-oc create -f xpaas-templates/eap64-postgresql-persistent-s2i.json -n openshift
-oc create -f xpaas-templates/eap64-postgresql-s2i.json -n openshift
-oc create -f xpaas-templates/eap64-sso-s2i.json -n openshift
 oc create -f xpaas-templates/eap70-amq-persistent-s2i.json -n openshift
 oc create -f xpaas-templates/eap70-amq-s2i.json -n openshift
 oc create -f xpaas-templates/eap70-basic-s2i.json -n openshift

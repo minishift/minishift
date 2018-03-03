@@ -1,4 +1,4 @@
-# AppVeyor CI configuration for Minishift
+# AppVeyor CI configuration for Minishift project
 ---
 version: "{build}"
 
@@ -10,6 +10,12 @@ environment:
 
 platform:
 - x64
+
+init:
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
+on_finish:
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 install:
 # Install the specific Go version.
@@ -25,7 +31,7 @@ install:
 - set PATH=%PATH%;%GOPATH%\bin
 - mkdir c:\tmp
 # Use Chocolatey to install make
-- choco install make
+- choco install make -y
 
 build_script:
 - make prerelease

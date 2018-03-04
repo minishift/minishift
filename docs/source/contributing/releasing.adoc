@@ -99,3 +99,21 @@ For example:
 $ cd scripts/release
 $ ./issue-list.sh -r minishift -m 9
 ----
+
+[[updating-brew-cask]]
+=== Updating the brew cask
+
+To update the {project} cask manually, we need to do the following tasks:
+
+. Fork the link:https://github.com/caskroom/homebrew-cask[homebrew-cask] repository and clone it locally if not already done.
+. Update the link:https://github.com/caskroom/homebrew-cask/blob/master/Casks/minishift.rb[minishift.rb] file with latest version, sha256sum and checkpoint.
+. Push the changes to the forked repository.
+. And finally open a pull request in the link:https://github.com/caskroom/homebrew-cask[homebrew-cask] repository.
+
+You can also use the link:https://github.com/minishift/minishift/blob/master/scripts/release/brew-cask.sh[brew-cask.sh] script to update link:https://github.com/caskroom/homebrew-cask/blob/master/Casks/minishift.rb[minishift.rb] with latest version information.
+For example:
+
+----
+$ cd scripts/release
+$ ./brew-cask.sh -r /path/to/homebrew-cask-repo -v 1.13.0
+----

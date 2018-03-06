@@ -31,15 +31,21 @@ const longDescription = `
 	Outputs minishift shell completion for the given shell (bash or zsh)
 
 	This depends on the bash-completion binary.  Example installation instructions:
-	OS X:
+
+	macOS:
+
 		$ brew install bash-completion
 		$ source $(brew --prefix)/etc/bash_completion
-		$ minishift completion bash > ~/.minishift-completion  # for bash users
-		$ minishift completion zsh > ~/.minishift-completion  # for zsh users
+		$ minishift completion bash > ~/.minishift-completion	# for bash users
+		$ minishift completion zsh > ~/.minishift-completion	# for zsh users
 		$ source ~/.minishift-completion
-	Fedora:
-		$ dnf install bash-completion
-		$ minishift completion bash > ~/.minishift-completion  # for bash users
+
+	RHEL/Fedora:
+
+		$ yum install bash-completion				# for RHEL
+		$ dnf install bash-completion   			# for Fedora
+		$ minishift completion bash > ~/.minishift-completion 	# for bash users
+		$ minishift completion zsh > ~/.minishift-completion	# for zsh users
 		$ source ~/.minishift-completion
 
 	Additionally, you may want to output the completion to a file and source in your .bashrc

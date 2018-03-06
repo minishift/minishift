@@ -316,6 +316,13 @@ The following options are available:
 
 Tags::
 Use `tags` to ensure that scenarios and features containing at least one of the selected tags are executed.
+To select particular feature, you can use its name as a tag.
+For example, the `cmd-config.feature` contains `@cmd-config` tag through which it can be selected and run with the following command: `make integration GODOG_OPTS=--tags=cmd-config`.
+There are also tags covering specific areas and usages of {project}:
+
+- The `@command` tag indicates that the feature file tests commands, for example `cmd-addons.feature`.
+- The `@openshift` tag indicates that the feature file has tests related to OpenShift.
+- The `@addon` tag indicates that the feature file tests particular add-on functionality.
 
 Paths::
 Use `paths` to define paths to different feature files or folders containing feature files.

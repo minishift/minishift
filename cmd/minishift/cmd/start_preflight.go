@@ -42,7 +42,7 @@ import (
 )
 
 const (
-	StorageDisk = "/mnt/sda1"
+	StorageDisk = "/mnt/?da1"
 )
 
 // preflightChecksBeforeStartingHost is executed before the startHost function.

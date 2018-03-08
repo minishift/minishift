@@ -65,5 +65,6 @@ func createXhyveHost(config MachineConfig) *xhyveDriver {
 		Boot2DockerURL: config.GetISOFileURI(),
 		DiskSize:       int64(config.DiskSize),
 		QCow2:          false,
+		RawDisk:        true,
 	}
 }

@@ -223,3 +223,12 @@ However, on PowerShell you need to use the quotes:
 ----
 PS> $env:HYPERV_VIRTUAL_SWITCH="External (Wireless)"
 ----
++
+Using `set` in Command Prompt or `$env` in PowerShell will only affect the currently running shell session.
+You may use the `setx` utility to persist this environment variable across shell instances and system restarts.
+Quotes must be used with `setx` for both Command Prompt and PowerShell.
+For example:
++
+----
+C:\> setx HYPERV_VIRTUAL_SWITCH "External (Wireless)"
+----

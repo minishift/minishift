@@ -6,8 +6,14 @@ Feature: Basic
     When executing "minishift addons install --defaults" succeeds
     Then stdout should contain
      """
-     Default add-ons 'anyuid, admin-user, xpaas, registry-route' installed
+     Default add-ons 'anyuid, admin-user, xpaas, registry-route, dotnet' installed
      """
+    When executing "minishift addons list" succeeds
+    Then stdout should contain "admin-user"
+    Then stdout should contain "anyuid"
+    Then stdout should contain "registry-route"
+    Then stdout should contain "xpaas"
+    Then stdout should contain "dotnet"
 
   Scenario: User can enable the anyuid add-on
     When executing "minishift addons enable anyuid" succeeds

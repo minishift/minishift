@@ -19,11 +19,7 @@ Feature: Basic
   @minishift-only
   Scenario: User can list enabled add-ons
     When executing "minishift addons list" succeeds
-    Then stdout should contain
-     """
-     - anyuid         : enabled    P(0)
-     - admin-user     : disabled   P(0)
-     """
+    Then stdout should match "anyuid\s*: enabled\s*P\(0\)"
 
   Scenario: Starting Minishift
     Given Minishift has state "Does Not Exist"

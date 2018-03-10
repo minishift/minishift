@@ -18,6 +18,7 @@ package addon
 
 import (
 	"os"
+	"text/tabwriter"
 	"text/template"
 
 	"fmt"
@@ -88,14 +89,15 @@ func runListCommand(cmd *cobra.Command, args []string) {
 func printAddOnList(manager *manager.AddOnManager, writer io.Writer, template *template.Template) {
 	addOns := manager.List()
 	sort.Sort(addon.ByStatusThenPriorityThenName(addOns))
+	display := new(tabwriter.Writer)
+	display.Init(os.Stdout, 0, 8, 0, '\t', 0)
+
 	for _, addon := range addOns {
 		description := strings.Join(addon.MetaData().Description(), fmt.Sprintf("\n%13s", " "))
-		addonTemplate := DisplayAddOn{addon.MetaData().Name(), description, stringFromStatus(addon.IsEnabled()), addon.GetPriority()}
-		err := template.Execute(writer, addonTemplate)
-		if err != nil {
-			atexit.ExitWithMessage(1, fmt.Sprintf("Error executing the template: %s", err.Error()))
-		}
+		addonInfo := DisplayAddOn{addon.MetaData().Name(), description, stringFromStatus(addon.IsEnabled()), addon.GetPriority()}
+		fmt.Fprintln(display, fmt.Sprintf("- %s\t : %s\tP(%v)", addonInfo.Name, addonInfo.Status, addonInfo.Priority))
 	}
+	display.Flush()
 }
 
 func stringFromStatus(addonStatus bool) string {

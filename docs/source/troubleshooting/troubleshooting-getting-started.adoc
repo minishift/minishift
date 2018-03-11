@@ -138,3 +138,18 @@ Downloading https://github.com/minishift/minishift/releases/download/v1.2.0/mini
  65 B / 65 B [===================================================================================================================================================] 100.00% 0s
 Update failed: open /usr/bin/.minishift.new: permission denied
 ----
+
+[[openshift-web-console-does-not-work-in-older-versions-of-safari]]
+== OpenShift web console does not work with older versions of Safari
+
+`minishift console` does not work on older versions of Safari web browser such as version 10.1.2 (12603.3.8).
+Attempting to access the web console results in the following error:
+
+----
+Error unable to load details about the server
+----
+
+Retry after updating it to the latest version or use Firefox or Chrome browser for this.
+Version 11.0.3 (13604.5.6) has been tested and works with OpenShift web console.
+You can use `minishift console --url` to get the web console URL.
+

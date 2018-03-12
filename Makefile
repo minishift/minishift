@@ -82,25 +82,25 @@ __check_defined = \
 # Start of the actual build targets
 
 .PHONY: $(GOPATH)/bin/minishift$(IS_EXE)
-$(GOPATH)/bin/minishift$(IS_EXE): $(ADDON_ASSET_FILE) vendor
+$(GOPATH)/bin/minishift$(IS_EXE): $(ADDON_ASSET_FILE) vendor ## Builds the binary into $GOPATH/bin
 	go install -tags "$(BUILD_TAGS)" -pkgdir=$(ADDON_BINDATA_DIR) -ldflags="$(VERSION_VARIABLES)" ./cmd/minishift
 vendor:
 	dep ensure -v
 
-$(ADDON_ASSET_FILE): $(GOPATH)/bin/go-bindata
+$(ADDON_ASSET_FILE): $(GOPATH)/bin/go-bindata ## Compiles the built-in add-on into the binary using go-bindata
 	@mkdir -p $(ADDON_BINDATA_DIR)
 	go-bindata $(GO_BINDATA_DEBUG) -prefix $(ADDON_ASSETS) -o $(ADDON_ASSET_FILE) -pkg bindata $(ADDON_ASSETS)/...
 
 $(BUILD_DIR)/$(GOOS)-$(GOARCH):
 	mkdir -p $(BUILD_DIR)/$(GOOS)-$(GOARCH)
 
-$(BUILD_DIR)/darwin-amd64/minishift: $(ADDON_ASSET_FILE) vendor $(BUILD_DIR)/$(GOOS)-$(GOARCH)
+$(BUILD_DIR)/darwin-amd64/minishift: $(ADDON_ASSET_FILE) vendor $(BUILD_DIR)/$(GOOS)-$(GOARCH) ## Cross compiles the darwin executable and places it in $(BUILD_DIR)/darwin-amd64/minishift
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build -tags "$(BUILD_TAGS)" -pkgdir=$(ADDON_BINDATA_DIR) --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/darwin-amd64/minishift ./cmd/minishift
 
-$(BUILD_DIR)/linux-amd64/minishift: $(ADDON_ASSET_FILE) vendor $(BUILD_DIR)/$(GOOS)-$(GOARCH)
+$(BUILD_DIR)/linux-amd64/minishift: $(ADDON_ASSET_FILE) vendor $(BUILD_DIR)/$(GOOS)-$(GOARCH) ## Cross compiles the linux executable and places it in $(BUILD_DIR)/linux-amd64/minishift
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -tags "$(BUILD_TAGS)" -pkgdir=$(ADDON_BINDATA_DIR) --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/linux-amd64/minishift ./cmd/minishift
 
-$(BUILD_DIR)/windows-amd64/minishift.exe: $(ADDON_ASSET_FILE) vendor $(BUILD_DIR)/$(GOOS)-$(GOARCH)
+$(BUILD_DIR)/windows-amd64/minishift.exe: $(ADDON_ASSET_FILE) vendor $(BUILD_DIR)/$(GOOS)-$(GOARCH) ## Cross compiles the windows executable and places it in $(BUILD_DIR)/windows-amd64/minishift
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build -tags "$(BUILD_TAGS)" -pkgdir=$(ADDON_BINDATA_DIR) --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/windows-amd64/minishift.exe ./cmd/minishift
 
 $(GOPATH)/bin/gh-release:
@@ -113,31 +113,31 @@ $(GOPATH)/bin/git-validation:
 	go get -u github.com/vbatts/git-validation/...
 
 .PHONY: build_docs_container
-build_docs_container:
+build_docs_container: ## Builds the image for the documentation build
 	cd docs && docker build -t $(DOCS_BUILDER_IMAGE) .
 
 .PHONY: push_docs_container
-push_docs_container: build_docs_container
+push_docs_container: build_docs_container ## Pushes the documentation build image to Docker Hub
 	cd docs && docker push $(DOCS_BUILDER_IMAGE)
 
 .PHONY: gen_adoc_tar
-gen_adoc_tar: clean_docs synopsis_docs
+gen_adoc_tar: clean_docs synopsis_docs ## Generates tarball of AsciiDoc sources for integration into docs.openshift.org
 	cd docs && docker run -u $(DOCS_UID) $(DOC_VARIABLES) -tiv $(LOCAL_DOCS_DIR):$(CONTAINER_DOCS_DIR):Z $(DOCS_BUILDER_IMAGE) adoc_tar
 
 .PHONY: gen_docs
-gen_docs: synopsis_docs
+gen_docs: synopsis_docs ## Generates the documentation
 	cd docs && docker run -u $(DOCS_UID) $(DOC_VARIABLES) -tiv $(LOCAL_DOCS_DIR):$(CONTAINER_DOCS_DIR):Z $(DOCS_BUILDER_IMAGE) gen
 
 .PHONY: clean_docs
-clean_docs:
+clean_docs:  ## Clean the documentation
 	cd docs && docker run -u $(DOCS_UID) $(DOC_VARIABLES) -tiv $(LOCAL_DOCS_DIR):$(CONTAINER_DOCS_DIR):Z $(DOCS_BUILDER_IMAGE) clean
 
 .PHONY: serve_docs
-serve_docs: synopsis_docs
+serve_docs: synopsis_docs ## Builds and serves the documentation using Middleman on port 4567
 	cd docs && docker run -u $(DOCS_UID) $(DOC_VARIABLES) -p 35729:35729 -p 4567:4567 -tiv $(LOCAL_DOCS_DIR):$(CONTAINER_DOCS_DIR):Z $(DOCS_BUILDER_IMAGE) serve[--watcher-force-polling]
 
 .PHONY: link_check_docs
-link_check_docs: gen_docs
+link_check_docs: gen_docs ## Checks the documentation for broken links
 	cd docs && docker run -u $(DOCS_UID) $(DOC_VARIABLES) -tiv $(LOCAL_DOCS_DIR):$(CONTAINER_DOCS_DIR):Z $(DOCS_BUILDER_IMAGE) link_check
 
 $(DOCS_SYNOPISIS_DIR)/*.md: vendor $(ADDON_ASSET_FILE)
@@ -145,10 +145,10 @@ $(DOCS_SYNOPISIS_DIR)/*.md: vendor $(ADDON_ASSET_FILE)
 	DOCS_SYNOPISIS_DIR=$(DOCS_SYNOPISIS_DIR) CGO_ENABLED=0 go run -tags "$(BUILD_TAGS) gendocs" -ldflags="$(LDFLAGS)" gen_help_text.go
 
 .PHONY: synopsis_docs
-synopsis_docs: $(DOCS_SYNOPISIS_DIR)/*.md
+synopsis_docs: $(DOCS_SYNOPISIS_DIR)/*.md ## Builds the Markdown command synopsis
 
 .PHONY: prerelease
-prerelease: clean fmtcheck vet test cross
+prerelease: clean fmtcheck vet test cross ## Pre-release target to verify tests pass and style requirements are met
 	$(eval files = $(shell ./scripts/boilerplate/boilerplate.py --rootdir . --boilerplate-dir ./scripts/boilerplate | grep -v vendor))
 	@if test "$(files)" != ""; then \
 		echo "The following files don't pass the boilerplate checks:"; \
@@ -157,7 +157,7 @@ prerelease: clean fmtcheck vet test cross
 	fi
 
 .PHONY: release
-release: clean $(GOPATH)/bin/gh-release cross
+release: clean $(GOPATH)/bin/gh-release cross ## Create release and upload to GitHub
 	mkdir -p release
 
 	@mkdir -p $(BUILD_DIR)/minishift-$(MINISHIFT_VERSION)-darwin-amd64
@@ -176,7 +176,7 @@ release: clean $(GOPATH)/bin/gh-release cross
 	gh-release create minishift/minishift $(MINISHIFT_VERSION) master v$(MINISHIFT_VERSION)
 
 .PHONY: ci_release
-ci_release:
+ci_release: ## Trigger a release via CentOS CI. Needs API_KEY and RELEASE_VERSION
 	$(call check_defined, API_KEY, "To trigger the CentOS CI release build you need to specify the CentOS CI API key.")
 	$(call check_defined, RELEASE_VERSION, "You need to specify the version you want to release.")
 
@@ -184,10 +184,10 @@ ci_release:
 	-X POST https://ci.centos.org/job/minishift-release/build --user 'minishift:$(API_KEY)' \
 	--data-urlencode json='{"parameter": [{"name":"RELEASE_VERSION", "value":'"$(RELEASE_VERSION)"'}]}'
 
-.PHONY: cross
+.PHONY: cross ## Cross compiles all binaries
 cross: $(BUILD_DIR)/darwin-amd64/minishift $(BUILD_DIR)/linux-amd64/minishift $(BUILD_DIR)/windows-amd64/minishift.exe
 
-.PHONY: clean
+.PHONY: clean ## Remove all build artifacts
 clean:
 	rm -rf $(GOPATH)/pkg/$(GOOS)_$(GOARCH)/$(ORG)
 	rm -rf $(BUILD_DIR)
@@ -196,24 +196,24 @@ clean:
 	rm -f  $(DOCS_SYNOPISIS_DIR)/*.md
 
 .PHONY: test
-test: vendor $(ADDON_ASSET_FILE)
-	@go test -tags "$(BUILD_TAGS)" -ldflags="$(VERSION_VARIABLES)" -v $(shell $(PACKAGES))
+test: vendor $(ADDON_ASSET_FILE)  ## Run unit tests
+	@go test -tags "$(BUILD_TAGS)" -ldflags="$(VERSION_VARIABLES)" $(shell $(PACKAGES))
 
 .PHONY: integration
-integration: GODOG_OPTS = --tags=basic
+integration: GODOG_OPTS = --tags=basic ## Run integration tests
 integration: $(MINISHIFT_BINARY)
 	mkdir -p $(INTEGRATION_TEST_DIR)
 	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) \
 	--run-before-feature="$(RUN_BEFORE_FEATURE)" --test-with-specified-shell="$(TEST_WITH_SPECIFIED_SHELL)" --copy-oc-from="$(COPY_OC_FROM)" $(GODOG_OPTS)
 
-.PHONY: integration_all
+.PHONY: integration_all ## Run all integration tests
 integration_all: GODOG_OPTS = --tags=~coolstore
 integration_all: $(MINISHIFT_BINARY)
 	mkdir -p $(INTEGRATION_TEST_DIR)
 	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) \
 	--run-before-feature="$(RUN_BEFORE_FEATURE)" --test-with-specified-shell="$(TEST_WITH_SPECIFIED_SHELL)" --copy-oc-from="$(COPY_OC_FROM)" $(GODOG_OPTS)
 
-.PHONY: integration_pr
+.PHONY: integration_pr ## Run integration tests for pull request
 integration_pr: GODOG_OPTS = --tags=~coolstore\&\&~addon-xpaas
 integration_pr: $(MINISHIFT_BINARY)
 	mkdir -p $(INTEGRATION_TEST_DIR)
@@ -221,18 +221,23 @@ integration_pr: $(MINISHIFT_BINARY)
 	--run-before-feature="$(RUN_BEFORE_FEATURE)" --test-with-specified-shell="$(TEST_WITH_SPECIFIED_SHELL)" --copy-oc-from="$(COPY_OC_FROM)" $(GODOG_OPTS)
 
 .PHONY: fmt
-fmt:
+fmt: ## Format source using gofmt
 	@gofmt -l -s -w $(SOURCE_DIRS)
 
 .PHONY: vet
-vet:
+vet: ## Vet the source using 'go vet'
 	@go vet $(shell $(PACKAGES))
 
 .PHONY: fmtcheck
-fmtcheck:
+fmtcheck: ## Checks for style violation using gofmt
 	@gofmt -l -s $(SOURCE_DIRS) | grep ".*\.go"; if [ "$$?" = "0" ]; then exit 1; fi
 
 .PHONY: validate_commits
-validate_commits: $(GOPATH)/bin/git-validation
+validate_commits: $(GOPATH)/bin/git-validation ## Validates commit messages match pattern ^(Issue #[0-9]+ .*|cut v[0-9]+\.[0-9]+\.[0-9]+)
 	@# Need to add $$ to avoid shell interpretation/evaluation
 	git-validation -q -run short-subject,message_regexp='^(Issue #[0-9]+ .*|cut v[0-9]+\.[0-9]+\.[0-9]+)$$' -range $(START_COMMIT_MESSAGE_VALIDATION)...
+
+.PHONY: help
+help: ## Prints this help
+	@grep -E '^[^.]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-40s\033[0m %s\n", $$1, $$2}'
+

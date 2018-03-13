@@ -55,7 +55,7 @@ link:https://ci.centos.org/job/minishift-release/[release], link:https://ci.cent
 |This system is used for compilation and unit testing on macOS.
 It is the only CI system which validates the xref:../contributing/developing.adoc#commit-message-requirements[Commit Message Requirements] on each pull request.
 |link:https://circleci.com/gh/minishift/minishift/tree/master[master and pull requests]
-|link:https://github.com/minishift/minishift/blob/master/circle.yml[circle.yml]
+|link:https://github.com/minishift/minishift/blob/master/.circleci/config.yml[config.yml]
 
 |link:https://ci.appveyor.com[*AppVeyor*]
 |This server is used for compilation and unit testing on Windows.

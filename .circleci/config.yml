@@ -1,0 +1,63 @@
+## Circleci version
+version: 2
+
+## Machine specific variable
+jobs:
+  build:
+    macos:
+      xcode: "9.0"
+    environment:
+        GOVERSION: 1.8.3
+        XCODE_SCHEME: symbolicator
+        XCODE_WORKSPACE: symbolicator
+
+## Build minishift
+    steps:
+    - checkout
+    - run:
+        name: Configure GOPATH
+        command: echo 'export GOPATH=$HOME/go' >> $BASH_ENV
+    - run: 
+        name: Configure Path
+        command: echo 'export PATH=$GOPATH/bin:/usr/local/go/bin/:$PATH' >> $BASH_ENV
+    - run: 
+        name: Prepare minishift
+        command: mkdir -p $GOPATH/src/github.com/minishift/minishift && cp -r ~/project/ $GOPATH/src/github.com/minishift/minishift
+    - run:
+        name: Cleanup GOROOT
+        command: sudo rm -rf /usr/local/go
+    - run:
+        name: Install go
+        command: curl https://storage.googleapis.com/golang/go${GOVERSION}.darwin-amd64.tar.gz | sudo tar -C /usr/local -xz
+    - run:
+        name: List go version
+        command: go version
+    - run:
+        name: List go environment
+        command: go env
+    - run:
+        name: Create GOPATH bin directory
+        command: mkdir -p $GOPATH/bin
+    - run: 
+        name: Download dep
+        command: curl -sL "https://github.com/golang/dep/releases/download/${GODEP_TAG}/dep-$(go env GOHOSTOS)-$(go env GOHOSTARCH)" -o /tmp/dep
+        environment:
+            GODEP_TAG: v0.4.1
+    - run:
+        name: Configure dep
+        command: mv /tmp/dep $GOPATH/bin/dep && chmod +x $GOPATH/bin/dep
+    - run:
+        name: Make prerelease
+        command: cd $GOPATH/src/github.com/minishift/minishift && make prerelease
+    - run: 
+        name: Validate Commits
+        command: cd $GOPATH/src/github.com/minishift/minishift && make validate_commits
+# Currently unable to use environment variables in the store_artifacts path in V2
+    - store_artifacts:
+        path: "../go/src/github.com/minishift/minishift/out"
+        destination: ms
+
+## Notifications
+notify:
+    webhooks:
+        - url: http://minibot.19cf262c.svc.dockerapp.io:9009/hubot/circleci

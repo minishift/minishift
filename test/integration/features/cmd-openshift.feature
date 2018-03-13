@@ -42,6 +42,9 @@ cluster in VM provided by Minishift.
        """
        Run 'oc status' to view your app.
        """
+       And service "nodejs-ex" rollout successfully within "1200" seconds
+      Then with up to "10" retries with wait period of "500ms" the "status code" of HTTP request to "/" of service "nodejs-ex" in namespace "myproject" is equal to "200"
+       And with up to "10" retries with wait period of "500ms" the "body" of HTTP request to "/" of service "nodejs-ex" in namespace "myproject" contains "Welcome to your Node.js application on OpenShift"
 
   @minishift-only
   Scenario: Getting information about OpenShift and kubernetes versions

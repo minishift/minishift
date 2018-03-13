@@ -316,18 +316,21 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 
 	// Configuration used for creation/setup of the Virtual Machine
 	machineConfig := &cluster.MachineConfig{
-		MinikubeISO:      determineIsoUrl(viper.GetString(configCmd.ISOUrl.Name)),
-		ISOCacheDir:      state.InstanceDirs.IsoCache,
-		Memory:           calculateMemorySize(viper.GetString(configCmd.Memory.Name)),
-		CPUs:             viper.GetInt(configCmd.CPUs.Name),
-		DiskSize:         calculateDiskSize(viper.GetString(configCmd.DiskSize.Name)),
-		VMDriver:         viper.GetString(configCmd.VmDriver.Name),
-		DockerEnv:        append(dockerEnv, getSlice(configCmd.DockerEnv.Name)...),
-		DockerEngineOpt:  getSlice(configCmd.DockerEngineOpt.Name),
-		InsecureRegistry: determineInsecureRegistry(configCmd.InsecureRegistry.Name),
-		RegistryMirror:   getSlice(configCmd.RegistryMirror.Name),
-		HostOnlyCIDR:     viper.GetString(configCmd.HostOnlyCIDR.Name),
-		ShellProxyEnv:    shellProxyEnv,
+		MinikubeISO:           determineIsoUrl(viper.GetString(configCmd.ISOUrl.Name)),
+		ISOCacheDir:           state.InstanceDirs.IsoCache,
+		Memory:                calculateMemorySize(viper.GetString(configCmd.Memory.Name)),
+		CPUs:                  viper.GetInt(configCmd.CPUs.Name),
+		DiskSize:              calculateDiskSize(viper.GetString(configCmd.DiskSize.Name)),
+		VMDriver:              viper.GetString(configCmd.VmDriver.Name),
+		DockerEnv:             append(dockerEnv, getSlice(configCmd.DockerEnv.Name)...),
+		DockerEngineOpt:       getSlice(configCmd.DockerEngineOpt.Name),
+		InsecureRegistry:      determineInsecureRegistry(configCmd.InsecureRegistry.Name),
+		RegistryMirror:        getSlice(configCmd.RegistryMirror.Name),
+		HostOnlyCIDR:          viper.GetString(configCmd.HostOnlyCIDR.Name),
+		ShellProxyEnv:         shellProxyEnv,
+		RemoteIPAddress:       viper.GetString(configCmd.RemoteIPAddress.Name),
+		RemoteSSHUser:         viper.GetString(configCmd.RemoteSSHUser.Name),
+		SSHKeyToConnectRemote: viper.GetString(configCmd.SSHKeyToConnectRemote.Name),
 	}
 
 	fmt.Printf(" using '%s' hypervisor ...\n", machineConfig.VMDriver)
@@ -533,6 +536,9 @@ func initStartFlags() *flag.FlagSet {
 	startFlagSet.String(configCmd.Memory.Name, constants.DefaultMemory, "Amount of RAM to allocate to the Minishift VM. Use the format <size><unit>, where unit = MB or GB.")
 	startFlagSet.String(configCmd.DiskSize.Name, constants.DefaultDiskSize, "Disk size to allocate to the Minishift VM. Use the format <size><unit>, where unit = MB or GB.")
 	startFlagSet.String(configCmd.HostOnlyCIDR.Name, "192.168.99.1/24", "The CIDR to be used for the minishift VM. (Only supported with VirtualBox driver.)")
+	startFlagSet.String(configCmd.RemoteIPAddress.Name, "", "IP address of the remote machine to run Minishift")
+	startFlagSet.String(configCmd.RemoteSSHUser.Name, "", "Username of the remote machine to run Minishift")
+	startFlagSet.String(configCmd.SSHKeyToConnectRemote.Name, "", "SSH key location of remote machine to run Minishift")
 	startFlagSet.AddFlag(dockerEnvFlag)
 	startFlagSet.AddFlag(dockerEngineOptFlag)
 	startFlagSet.AddFlag(insecureRegistryFlag)

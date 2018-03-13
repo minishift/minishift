@@ -22,6 +22,7 @@ var SupportedVMDrivers = [...]string{
 	"virtualbox",
 	"vmwarefusion",
 	"xhyve",
+	"generic",
 }
 
 const DefaultVMDriver = "xhyve"

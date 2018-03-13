@@ -21,6 +21,7 @@ package constants
 var SupportedVMDrivers = [...]string{
 	"virtualbox",
 	"hyperv",
+	"generic",
 }
 
 const DefaultVMDriver = "hyperv"

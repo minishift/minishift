@@ -35,18 +35,8 @@ import (
 	"github.com/minishift/minishift/pkg/util"
 )
 
-type ImageTags struct {
+type releaseTags struct {
 	Name string `json:"name"`
-}
-
-type ImageInfo struct {
-	Size         int         `json:"size"`
-	Architecture string      `json:"architecture"`
-	Variant      interface{} `json:"variant"`
-	Features     interface{} `json:"features"`
-	Os           interface{} `json:"os"`
-	OsVersion    interface{} `json:"os_version"`
-	OsFeatures   interface{} `json:"os_features"`
 }
 
 func GetOpenshiftVersion(sshCommander provision.SSHCommander) (string, error) {
@@ -104,37 +94,32 @@ func PrintDownStreamVersions(output io.Writer, minSupportedVersion string) error
 	return nil
 }
 
+// PrintUpStreamVersions prints the origin versions which satisfies the following conditions:
+// 	1. Major versions greater than or equal to the minimum supported and default version
+//	2. Pre-release versions greater than default version
 func PrintUpStreamVersions(output io.Writer, minSupportedVersion string, defaultVersion string) error {
-	dockerRegistryUrl := "https://registry.hub.docker.com/v1/repositories/openshift/origin/tags"
-	resp, err := getResponseBody(dockerRegistryUrl)
+	var releaseList []string
+	data, err := getGithubReleases()
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
-	decoder := json.NewDecoder(resp.Body)
-	var data []ImageTags
-	err = decoder.Decode(&data)
-	if err != nil {
-		return errors.New(fmt.Sprintf("%T\n%s\n%#v\n", err, err, err))
-	}
-	fmt.Fprint(output, "The following OpenShift versions are available: \n")
-	var tagsList []string
-	for _, imageTag := range data {
-		if strings.Contains(imageTag.Name, "latest") {
+	for _, releaseTag := range data {
+		if strings.Contains(releaseTag.Name, "latest") {
 			continue
 		}
-		if valid, _ := IsGreaterOrEqualToBaseVersion(imageTag.Name, minSupportedVersion); valid {
-			if valid, _ := IsGreaterOrEqualToBaseVersion(imageTag.Name, defaultVersion); valid {
-				tagsList = append(tagsList, imageTag.Name)
+		if valid, _ := IsGreaterOrEqualToBaseVersion(releaseTag.Name, minSupportedVersion); valid {
+			if valid, _ := IsGreaterOrEqualToBaseVersion(releaseTag.Name, defaultVersion); valid {
+				releaseList = append(releaseList, releaseTag.Name)
 			} else {
-				if !isPrerelease(imageTag.Name) {
-					tagsList = append(tagsList, imageTag.Name)
+				if !isPrerelease(releaseTag.Name) {
+					releaseList = append(releaseList, releaseTag.Name)
 				}
 			}
 		}
 	}
-	sort.Strings(tagsList)
-	for _, tag := range tagsList {
+	sort.Strings(releaseList)
+	fmt.Fprint(output, "The following OpenShift versions are available: \n")
+	for _, tag := range releaseList {
 		fmt.Fprintf(output, "\t- %s\n", tag)
 	}
 	return nil
@@ -173,4 +158,20 @@ func IsGreaterOrEqualToBaseVersion(version string, baseVersion string) (bool, er
 		return true, nil
 	}
 	return false, nil
+}
+
+func getGithubReleases() ([]releaseTags, error) {
+	githubReleaseUrl := "https://api.github.com/repos/openshift/origin/releases"
+	resp, err := getResponseBody(githubReleaseUrl)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	decoder := json.NewDecoder(resp.Body)
+	var data []releaseTags
+	err = decoder.Decode(&data)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("%T\n%s\n%#v\n", err, err, err))
+	}
+	return data, nil
 }

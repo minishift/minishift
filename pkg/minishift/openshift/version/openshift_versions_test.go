@@ -101,3 +101,21 @@ func TestIsGreaterOrEqualToBaseVersion(t *testing.T) {
 		}
 	}
 }
+
+func TestIsPrerelease(t *testing.T) {
+	var versionTestData = []struct {
+		openshiftVersion string
+		expectedResult   bool
+	}{
+		{"v3.6.0", false},
+		{"v3.6.0-alpha.1", true},
+		{"v3.9.0-alpha.3", true},
+		{"v3.8.0-rc.1", true},
+		{"v3.6.0-beta", true},
+	}
+
+	for _, versionTest := range versionTestData {
+		actualResult := isPrerelease(versionTest.openshiftVersion)
+		assert.Equal(t, versionTest.expectedResult, actualResult)
+	}
+}

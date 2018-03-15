@@ -45,12 +45,12 @@ func (ec *ExecutionContext) GetSSHCommander() provision.SSHCommander {
 	return ec.sshCommander
 }
 
-// GetSSHCommander returns a ssh commander to execute ssh commands against the Minishift VM
+// GetOcCommander returns a commander to run oc commands against the Minishift VM
 func (ec *ExecutionContext) GetOcCommander() *oc.OcRunner {
 	return ec.ocRunner
 }
 
-// GetDockerCommander returns a commander to run docker commands against the docker daemon used by Minishift
+// GetDockerCommander returns a commander to run docker commands against the docker daemon used by Minishift VM
 func (ec *ExecutionContext) GetDockerCommander() docker.DockerCommander {
 	return ec.dockerCommander
 }

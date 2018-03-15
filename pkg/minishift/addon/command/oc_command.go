@@ -28,20 +28,24 @@ type OcCommand struct {
 	*defaultCommand
 }
 
-func NewOcCommand(command string) *OcCommand {
-	defaultCommand := &defaultCommand{rawCommand: command}
+func NewOcCommand(command string, ignoreError bool) *OcCommand {
+	defaultCommand := &defaultCommand{rawCommand: command, ignoreError: ignoreError}
 	ocCommand := &OcCommand{defaultCommand}
 	defaultCommand.fn = ocCommand.doExecute
 	return ocCommand
 }
 
-func (c *OcCommand) doExecute(ec *ExecutionContext) error {
+func (c *OcCommand) doExecute(ec *ExecutionContext, ignoreError bool) error {
 	// split off the actual 'oc' command. We are using our cached oc version to run oc commands
 	cmd := strings.Replace(c.rawCommand, "oc ", "", 1)
 	cmd = ec.Interpolate(cmd)
 	fmt.Print(".")
 
 	commander := ec.GetOcCommander()
+	if ignoreError {
+		commander.Run(ec.Interpolate(cmd), ioutil.Discard, ioutil.Discard)
+		return nil
+	}
 	exitStatus := commander.Run(ec.Interpolate(cmd), ioutil.Discard, os.Stdin)
 	if exitStatus != 0 {
 		return errors.New(fmt.Sprintf("Error executing command '%s'.", c.String()))

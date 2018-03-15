@@ -32,14 +32,14 @@ type SleepCommand struct {
 	*defaultCommand
 }
 
-func NewSleepCommand(command string) *SleepCommand {
-	defaultCommand := &defaultCommand{rawCommand: command}
+func NewSleepCommand(command string, ignoreError bool) *SleepCommand {
+	defaultCommand := &defaultCommand{rawCommand: command, ignoreError: ignoreError}
 	sleepCommand := &SleepCommand{defaultCommand}
 	defaultCommand.fn = sleepCommand.doExecute
 	return sleepCommand
 }
 
-func (c *SleepCommand) doExecute(ec *ExecutionContext) error {
+func (c *SleepCommand) doExecute(ec *ExecutionContext, ignoreError bool) error {
 	duration, err := c.getSleepTime()
 	if err != nil {
 		return err

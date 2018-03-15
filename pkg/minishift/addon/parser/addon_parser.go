@@ -31,7 +31,8 @@ import (
 )
 
 const (
-	commentChar = "#"
+	commentChar     = "#"
+	ignoreErrorChar = "!"
 
 	noAddOnDefinitionFoundError         = "There needs to be an addon file per addon directory. Found none in '%s'"
 	multipleAddOnDefinitionsError       = "There can only be one addon file per addon directory. Found '%s'"
@@ -191,6 +192,7 @@ func (parser *AddOnParser) parseHeader(scanner *bufio.Scanner) (addon.AddOnMeta,
 func (parser *AddOnParser) parseCommands(scanner *bufio.Scanner) ([]command.Command, error) {
 	var commands []command.Command
 	for scanner.Scan() {
+		ignoreError := false
 		line := scanner.Text()
 
 		// skip blank and comment lines
@@ -198,8 +200,11 @@ func (parser *AddOnParser) parseCommands(scanner *bufio.Scanner) ([]command.Comm
 		if len(line) == 0 || strings.HasPrefix(line, commentChar) {
 			continue
 		}
-
-		newCommand, err := parser.handler.Handle(parser.handler, line)
+		if strings.HasPrefix(line, ignoreErrorChar) {
+			ignoreError = true
+			line = strings.TrimPrefix(line, ignoreErrorChar)
+		}
+		newCommand, err := parser.handler.Handle(parser.handler, line, ignoreError)
 		if err != nil {
 			return nil, err
 		}

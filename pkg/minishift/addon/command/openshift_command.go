@@ -28,14 +28,14 @@ type OpenShiftCommand struct {
 	*defaultCommand
 }
 
-func NewOpenShiftCommand(command string) *OpenShiftCommand {
-	defaultCommand := &defaultCommand{rawCommand: command}
+func NewOpenShiftCommand(command string, ignoreError bool) *OpenShiftCommand {
+	defaultCommand := &defaultCommand{rawCommand: command, ignoreError: ignoreError}
 	openShiftCommand := &OpenShiftCommand{defaultCommand}
 	defaultCommand.fn = openShiftCommand.doExecute
 	return openShiftCommand
 }
 
-func (c *OpenShiftCommand) doExecute(ec *ExecutionContext) error {
+func (c *OpenShiftCommand) doExecute(ec *ExecutionContext, ignoreError bool) error {
 	// split off the actual 'oc' command. We are using our cached oc version to run oc commands
 	cmd := strings.Replace(c.rawCommand, "openshift ", "", 1)
 	cmd = ec.Interpolate(cmd)

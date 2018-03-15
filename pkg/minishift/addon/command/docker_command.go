@@ -25,14 +25,14 @@ type DockerCommand struct {
 	*defaultCommand
 }
 
-func NewDockerCommand(command string) *DockerCommand {
-	defaultCommand := &defaultCommand{rawCommand: command}
+func NewDockerCommand(command string, ignoreError bool) *DockerCommand {
+	defaultCommand := &defaultCommand{rawCommand: command, ignoreError: ignoreError}
 	dockerCommand := &DockerCommand{defaultCommand}
 	defaultCommand.fn = dockerCommand.doExecute
 	return dockerCommand
 }
 
-func (c *DockerCommand) doExecute(ec *ExecutionContext) error {
+func (c *DockerCommand) doExecute(ec *ExecutionContext, ignoreError bool) error {
 	commander := ec.GetDockerCommander()
 	cmd := ec.Interpolate(c.rawCommand)
 	fmt.Print(".")

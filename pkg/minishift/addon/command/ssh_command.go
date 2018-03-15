@@ -26,14 +26,14 @@ type SSHCommand struct {
 	*defaultCommand
 }
 
-func NewSshCommand(command string) *SSHCommand {
-	defaultCommand := &defaultCommand{rawCommand: command}
+func NewSshCommand(command string, ignoreError bool) *SSHCommand {
+	defaultCommand := &defaultCommand{rawCommand: command, ignoreError: ignoreError}
 	sshCommand := &SSHCommand{defaultCommand}
 	defaultCommand.fn = sshCommand.doExecute
 	return sshCommand
 }
 
-func (c *SSHCommand) doExecute(ec *ExecutionContext) error {
+func (c *SSHCommand) doExecute(ec *ExecutionContext, ignoreError bool) error {
 	cmd := strings.Replace(c.rawCommand, "ssh ", "", 1)
 	cmd = ec.Interpolate(cmd)
 	fmt.Print(".")

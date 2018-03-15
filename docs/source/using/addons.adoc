@@ -38,7 +38,9 @@ oc adm policy add-scc-to-group anyuid system:authenticated                      
 
 [NOTE]
 ====
-Comment lines, starting with the '#' character, can be inserted anywhere in the file.
+- Comment lines, starting with the '#' character, can be inserted anywhere in the file.
+- Command starting with `!` character ignores the execution failure.
+With the help of this, add-on will be idempotent i.e. a command can be executed multiple times without changing the final behavior of the add-on.
 ====
 
 Enabled add-ons are applied during xref:../command-ref/minishift_start.adoc#[`minishift start`], immediately after the initial cluster provisioning is successfully completed.

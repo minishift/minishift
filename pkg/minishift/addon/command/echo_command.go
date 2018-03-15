@@ -26,14 +26,14 @@ type EchoCommand struct {
 	*defaultCommand
 }
 
-func NewEchoCommand(command string) *EchoCommand {
-	defaultCommand := &defaultCommand{rawCommand: command}
+func NewEchoCommand(command string, ignoreError bool) *EchoCommand {
+	defaultCommand := &defaultCommand{rawCommand: command, ignoreError: ignoreError}
 	echoCommand := &EchoCommand{defaultCommand}
 	defaultCommand.fn = echoCommand.doExecute
 	return echoCommand
 }
 
-func (c *EchoCommand) doExecute(ec *ExecutionContext) error {
+func (c *EchoCommand) doExecute(ec *ExecutionContext, ignoreError bool) error {
 	var err error
 
 	// split off the actual 'echo' command. As we need to print rest of the string

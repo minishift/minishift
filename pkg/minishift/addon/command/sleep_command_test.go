@@ -25,7 +25,7 @@ import (
 )
 
 func Test_parsing_sleep_time_is_successful(t *testing.T) {
-	sleep := NewSleepCommand("sleep 100")
+	sleep := NewSleepCommand("sleep 100", false)
 
 	duration, err := sleep.getSleepTime()
 
@@ -36,7 +36,7 @@ func Test_parsing_sleep_time_is_successful(t *testing.T) {
 
 func Test_parsing_sleep_time_ignores_text_after_durationb(t *testing.T) {
 	cmd := "sleep 5 foobar"
-	sleep := NewSleepCommand(cmd)
+	sleep := NewSleepCommand(cmd, false)
 
 	duration, err := sleep.getSleepTime()
 
@@ -47,7 +47,7 @@ func Test_parsing_sleep_time_ignores_text_after_durationb(t *testing.T) {
 
 func Test_parsing_sleep_time_fails(t *testing.T) {
 	cmd := "sleep abc"
-	sleep := NewSleepCommand(cmd)
+	sleep := NewSleepCommand(cmd, false)
 
 	_, err := sleep.getSleepTime()
 	assert.Error(t, err, "Error getting sleep time")

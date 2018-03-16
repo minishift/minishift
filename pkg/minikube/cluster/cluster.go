@@ -377,6 +377,8 @@ func getDriverOptions(config MachineConfig) interface{} {
 		driver = createXhyveHost(config)
 	case "hyperv":
 		driver = createHypervHost(config)
+	case "hyperkit":
+		driver = createHyperkitHost(config)
 	default:
 		atexit.ExitWithMessage(1, fmt.Sprintf("Unsupported driver: %s", config.VMDriver))
 	}

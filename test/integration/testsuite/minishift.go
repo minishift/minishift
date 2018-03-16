@@ -85,6 +85,26 @@ func (m *Minishift) isTheActiveProfile(profileName string) error {
 	return nil
 }
 
+func (m *Minishift) containerStatus(retryCount int, retryWaitPeriod int, imageName string, expected string) error {
+	var containerState string
+	for i := 0; i < retryCount; i++ {
+		runningContainers := m.runner.GetOpenshiftContainers()
+		individualContainerRows := strings.Split(runningContainers, "\n")
+		for _, individualContainer := range individualContainerRows {
+			if strings.Contains(individualContainer, imageName) {
+				containerId := strings.Split(individualContainer, " ")[0]
+				containerState = m.runner.GetContainerStatusUsingImageId(containerId)
+				if !strings.Contains(containerState, expected) {
+					return fmt.Errorf("Container state did not match. Expected: %s, Actual: %s", expected, containerState)
+				}
+				return nil
+			}
+		}
+		time.Sleep(time.Second * time.Duration(retryWaitPeriod))
+	}
+	return fmt.Errorf("Container state did not match expected state within time limit of %d seconds. Expected: %s, Actual: %s", retryCount*retryWaitPeriod, expected, containerState)
+}
+
 func (m *Minishift) executingRetryingTimesWithWaitPeriodOfSeconds(command string, retry, sleep int) error {
 	for i := 0; i < retry; i++ {
 		err := m.executingOcCommand(command)

@@ -197,6 +197,16 @@ func (m *MinishiftRunner) GetProfileList() string {
 	return strings.Trim(cmdOut, " \n")
 }
 
+func (m *MinishiftRunner) GetOpenshiftContainers() string {
+	cmdOut, _, _ := m.RunCommand("ssh -- docker ps")
+	return strings.Trim(cmdOut, " \n")
+}
+
+func (m *MinishiftRunner) GetContainerStatusUsingImageId(imageId string) string {
+	cmdOut, _, _ := m.RunCommand("ssh -- docker inspect -f '{{.State.Status}}'" + " " + imageId)
+	return strings.Trim(cmdOut, " \n")
+}
+
 func NewOcRunner() *OcRunner {
 	jsonDataPath := filepath.Join(os.Getenv(constants.MiniShiftHomeEnv), "machines", constants.MachineName+".json")
 	instanceState.InstanceConfig, _ = instanceState.NewInstanceConfig(jsonDataPath)

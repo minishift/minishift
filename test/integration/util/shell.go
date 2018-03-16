@@ -26,6 +26,7 @@ import (
 	"io"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/DATA-DOG/godog/gherkin"
 	"github.com/minishift/minishift/pkg/util/os"
@@ -250,6 +251,20 @@ func ExecuteInHostShellSucceedsOrFails(command string, expectedResult string) er
 	return err
 }
 
+func CommandOutputInHostShellWithRetry(retryCount int, retryWaitPeriod int, command string, expected string) error {
+	var exitCode, stdout string
+	for i := 0; i < retryCount; i++ {
+		err := ExecuteInHostShell(command)
+		exitCode, stdout := shell.excbuf.String(), shell.outbuf.String()
+		if err == nil && exitCode == "0" && strings.Contains(stdout, expected) {
+			return nil
+		}
+		time.Sleep(time.Second * time.Duration(retryWaitPeriod))
+	}
+
+	return fmt.Errorf("Command '%s', Expected: exitCode 0, stdout %s, Actual: exitCode %s, stdout %s", command, expected, exitCode, stdout)
+}
+
 func ExecuteInHostShellLineByLine() error {
 	var err error
 	stdout := shell.getLastShellOutput("stdout")
@@ -271,6 +286,10 @@ func ExecuteMinishiftInHostShell(commandField string) error {
 func ExecuteMinishiftInHostShellSucceedsOrFails(commandField string, expected string) error {
 	command := shell.minishiftPath + " " + commandField
 	return ExecuteInHostShellSucceedsOrFails(command, expected)
+}
+
+func ExecuteCommandInHostShellWithRetry(retryCount int, retryWaitPeriod int, command string, expected string) error {
+	return CommandOutputInHostShellWithRetry(retryCount, retryWaitPeriod, command, expected)
 }
 
 func HostShellCommandReturnShouldContain(commandField string, expected string) error {

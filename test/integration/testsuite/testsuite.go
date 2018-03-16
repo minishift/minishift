@@ -199,6 +199,8 @@ func FeatureContext(s *godog.Suite) {
 		util.ExecuteInHostShell)
 	s.Step(`^executing "(.*)" in host shell (succeeds|fails)$`,
 		util.ExecuteInHostShellSucceedsOrFails)
+	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)" (?:second|seconds) command "(.*)" output (?:should contain|contains) "(.*)"$`,
+		util.ExecuteCommandInHostShellWithRetry)
 	s.Step(`^(stdout|stderr) of host shell (?:should contain|contains) "(.*)"$`,
 		util.HostShellCommandReturnShouldContain)
 	s.Step(`^(stdout|stderr) of host shell (?:should not contain|does not contain) "(.*)"$`,
@@ -213,6 +215,10 @@ func FeatureContext(s *godog.Suite) {
 		util.HostShellCommandReturnShouldEqualContent)
 	s.Step(`^evaluating stdout of the previous command in host shell$`,
 		util.ExecuteInHostShellLineByLine)
+
+	// steps for container status
+	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)" (?:second|seconds) container image "(.*)" should be "(running|exited)"$`,
+		minishift.containerStatus)
 
 	// steps for prototyping or debugging purposes, please do not use in production
 	s.Step(`^user (?:waits|waited) "(\d+)" seconds?$`,

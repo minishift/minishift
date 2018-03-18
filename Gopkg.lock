@@ -133,7 +133,7 @@
     "pkg/system",
     "pkg/truncindex"
   ]
-  revision = "f5dc7fe58d10b581aee6cbf400ab69d2f6b86ab6"
+  revision = "aaa10cba3c246a9186e2160f4e12b21d8cf77c94"
 
 [[projects]]
   name = "github.com/cpuguy83/go-md2man"
@@ -234,7 +234,6 @@
     "drivers/hyperv",
     "drivers/none",
     "drivers/virtualbox",
-    "drivers/vmwarefusion",
     "libmachine",
     "libmachine/auth",
     "libmachine/cert",
@@ -528,8 +527,8 @@
 [[projects]]
   name = "github.com/pkg/sftp"
   packages = ["."]
-  revision = "0159c83e42a88e5c35180f73b84298a6bdde1ec1"
-  version = "1.4.0"
+  revision = "49488377fa2f14143ba3067cf7555f60f6c7b550"
+  version = "1.5.0"
 
 [[projects]]
   name = "github.com/pmezard/go-difflib"
@@ -661,7 +660,7 @@
     "lex/httplex",
     "proxy"
   ]
-  revision = "e0c57d8f86c17f0724497efcb3bc617e82834821"
+  revision = "24dd3780ca4f75fed9f321890729414a4b5d3f13"
 
 [[projects]]
   name = "golang.org/x/oauth2"
@@ -735,6 +734,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "334a1635bce7c80047923c6d66f544a330eb0d371956ef56f0fd81b971c44732"
+  inputs-digest = "72798011620276f7af8c3e0add3c2e135bd75caf54fc90c7946eb3fa26d4f931"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -368,9 +368,6 @@ func getDriverOptions(config MachineConfig) interface{} {
 	switch config.VMDriver {
 	case "virtualbox":
 		driver = createVirtualboxHost(config)
-	case "vmwarefusion":
-		fmt.Println("VMWare Fusion driver will be deprecated soon. Please consider using other drivers.")
-		driver = createVMwareFusionHost(config)
 	case "kvm":
 		driver = createKVMHost(config)
 	case "xhyve":

@@ -17,25 +17,11 @@ limitations under the License.
 package cluster
 
 import (
-	"github.com/docker/machine/drivers/vmwarefusion"
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/machine-drivers/docker-machine-driver-hyperkit/pkg/hyperkit"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/pborman/uuid"
 )
-
-func createVMwareFusionHost(config MachineConfig) drivers.Driver {
-	d := vmwarefusion.NewDriver(constants.MachineName, constants.Minipath).(*vmwarefusion.Driver)
-	d.Boot2DockerURL = config.GetISOFileURI()
-	d.Memory = config.Memory
-	d.CPU = config.CPUs
-	d.DiskSize = config.DiskSize
-
-	// TODO(philips): push these defaults upstream to fixup this driver
-	d.SSHPort = 22
-	d.ISO = d.ResolveStorePath("boot2docker.iso")
-	return d
-}
 
 type xhyveDriver struct {
 	*drivers.BaseDriver

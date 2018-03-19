@@ -26,9 +26,11 @@ import (
 	"strings"
 
 	"github.com/docker/machine/libmachine/drivers"
+	"github.com/golang/glog"
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	validations "github.com/minishift/minishift/pkg/minishift/config"
+	"github.com/minishift/minishift/pkg/minishift/network"
 	"github.com/minishift/minishift/pkg/minishift/shell/powershell"
 	"github.com/minishift/minishift/pkg/util/github"
 
@@ -42,7 +44,8 @@ import (
 )
 
 const (
-	StorageDisk = "/mnt/?da1"
+	StorageDisk   = "/mnt/?da1"
+	GithubAddress = "github.com:http"
 )
 
 // preflightChecksBeforeStartingHost is executed before the startHost function.
@@ -50,13 +53,20 @@ func preflightChecksBeforeStartingHost() {
 	driverErrorMessage := "See the 'Setting Up the Driver Plug-in' topic (https://docs.openshift.org/latest/minishift/getting-started/setting-up-driver-plugin.html) for more information"
 	prerequisiteErrorMessage := "See the 'Installing Prerequisites for Minishift' topic (https://docs.openshift.org/latest/minishift/getting-started/installing.html#install-prerequisites) for more information"
 
-	preflightCheckSucceedsOrFails(
-		configCmd.SkipCheckOpenShiftRelease.Name,
-		checkOriginRelease,
-		fmt.Sprintf("Checking if requested OpenShift version '%s' is valid", viper.GetString(configCmd.OpenshiftVersion.Name)),
-		configCmd.WarnCheckOpenShiftRelease.Name,
-		fmt.Sprintf("%s is not a valid OpenShift version", viper.GetString(configCmd.OpenshiftVersion.Name)),
-	)
+	if network.CheckInternetConnectivity(GithubAddress) {
+		preflightCheckSucceedsOrFails(
+			configCmd.SkipCheckOpenShiftRelease.Name,
+			checkOriginRelease,
+			fmt.Sprintf("Checking if requested OpenShift version '%s' is valid", viper.GetString(configCmd.OpenshiftVersion.Name)),
+			configCmd.WarnCheckOpenShiftRelease.Name,
+			fmt.Sprintf("%s is not a valid OpenShift version", viper.GetString(configCmd.OpenshiftVersion.Name)),
+		)
+	} else {
+		fmt.Printf("-- Checking if requested OpenShift version '%s' is valid ... SKIP\n", viper.GetString(configCmd.OpenshiftVersion.Name))
+		if glog.V(2) {
+			fmt.Println("github.com is not accessible over internet or host is not connected to internet")
+		}
+	}
 
 	preflightCheckSucceedsOrFails(
 		configCmd.SkipCheckOpenShiftVersion.Name,

@@ -1,4 +1,4 @@
-@cmd-openshift @command @openshift 
+@cmd-openshift @command @openshift
 Feature: Openshift commands
 Commands "minishift openshift [sub-command]" are used for interaction with Openshift
 cluster in VM provided by Minishift.
@@ -37,11 +37,12 @@ cluster in VM provided by Minishift.
 
   Scenario: User deploys nodejs example application from OpenShift repository
      Given Minishift has state "Running"
-      When executing "oc new-app https://github.com/openshift/nodejs-ex -l name=myapp" retrying 10 times with wait period of 2 seconds
+      When executing "oc new-app https://github.com/openshift/nodejs-ex -l name=myapp" retrying 10 times with wait period of 3 seconds
       Then stdout should contain
        """
        Run 'oc status' to view your app.
        """
+       And service "nodejs-ex" rollout successfully within "1200" seconds
 
   @minishift-only
   Scenario: Getting information about OpenShift and kubernetes versions

@@ -187,3 +187,31 @@ func IsValidNetmask(name string, mask string) error {
 
 	return nil
 }
+
+func IsValidPort(name string, p string) error {
+	port, err := strconv.Atoi(p)
+	if err != nil {
+		return fmt.Errorf("%s:%v", name, err)
+	}
+	if numInRange(port, 1024, 65536) && isPortAccessible(port) {
+		return nil
+	}
+	return fmt.Errorf("Port %d is inaccessible please use a port in the range (1024-65536)", port)
+}
+
+func numInRange(num int, start int, end int) bool {
+	if num >= start && num <= end {
+		return true
+	}
+	return false
+}
+
+func isPortAccessible(port int) bool {
+	hostWithPort := fmt.Sprintf(":%d", port)
+	listener, err := net.Listen("tcp", hostWithPort)
+	if err != nil {
+		return false
+	}
+	listener.Close()
+	return true
+}

@@ -266,3 +266,30 @@ func TestValidNetmask(t *testing.T) {
 	}
 	runValidations(t, tests, "netmask", IsValidNetmask)
 }
+
+func TestValidPort(t *testing.T) {
+
+	var tests = []validationTest{
+		{
+			value:     "",
+			shouldErr: true,
+		},
+		{
+			value:     "0",
+			shouldErr: true,
+		},
+		{
+			value:     "1023",
+			shouldErr: true,
+		},
+		{
+			value:     "1500",
+			shouldErr: false,
+		},
+		{
+			value:     "86000",
+			shouldErr: true,
+		},
+	}
+	runValidations(t, tests, "hostfolders-sftp-port", IsValidPort)
+}

@@ -23,8 +23,8 @@
     "colors",
     "gherkin"
   ]
-  revision = "4dc98b0e2b130c3c9d06868a050320e5b310d3e7"
-  version = "v0.7.4"
+  revision = "0371765570d36374bef4ab9f62ed0491f0862a3c"
+  version = "v0.7.6"
 
 [[projects]]
   name = "github.com/Microsoft/go-winio"
@@ -735,6 +735,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "334a1635bce7c80047923c6d66f544a330eb0d371956ef56f0fd81b971c44732"
+  inputs-digest = "a8b3132400a2b7599e27f66940235f05a28ea77c00039884e03943a10597d38f"
   solver-name = "gps-cdcl"
   solver-version = 1

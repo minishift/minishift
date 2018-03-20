@@ -364,6 +364,9 @@ else
   # Navigate to the repo
   cd $GOPATH/src/github.com/minishift/minishift
 
+  # fail fast to get node for debugging
+  exit 1
+
   if [[ "$JOB_NAME" = "minishift-docs" ]]; then
     # REPO and BRANCH variables are populated via https://ci.centos.org/job/minishift-docs
     REPO_OWNER=$(echo $REPO | cut -d"/" -f4)

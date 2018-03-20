@@ -20,7 +20,6 @@ package constants
 
 var SupportedVMDrivers = [...]string{
 	"virtualbox",
-	"vmwarefusion",
 	"kvm",
 	"xhyve",
 	"hyperv",

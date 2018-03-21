@@ -22,6 +22,7 @@ const (
 	MinikubeIsoAlias       = "minikube"
 	OpenshiftContainerName = "origin"
 	OpenshiftExec          = "/usr/bin/openshift"
+	OpenshiftOcExec        = "/usr/bin/oc"
 	DefaultProject         = "myproject"
 	DefaultUser            = "developer"
 )

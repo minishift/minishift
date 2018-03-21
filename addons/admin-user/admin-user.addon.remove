@@ -2,4 +2,5 @@
 # Description: Remove admin user addon
 
 oc delete user admin
+!oc delete identity anypassword:admin
 echo admin user deleted

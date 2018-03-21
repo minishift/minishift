@@ -134,7 +134,7 @@ func Test_successful_parsing_of_addon_dir_with_remove_addon_file(t *testing.T) {
 	expectedNumberOfCommands := 2
 	assert.Len(t, addOn.Commands(), expectedNumberOfCommands)
 
-	expectedNumberOfRemoveCommands := 2
+	expectedNumberOfRemoveCommands := 3
 	assert.Len(t, addOn.RemoveCommands(), expectedNumberOfRemoveCommands)
 
 	_, ok := addOn.Commands()[0].(*command.OcCommand)

@@ -1,8 +1,8 @@
 # Name: registry-route
 # Description: Create an edge terminated route for the OpenShift registry
 
-openshift admin ca create-server-cert --signer-cert=/var/lib/origin/openshift.local.config/master/ca.crt --signer-key=/var/lib/origin/openshift.local.config/master/ca.key --signer-serial=/var/lib/origin/openshift.local.config/master/ca.serial.txt --hostnames='docker-registry-default.#{routing-suffix},docker-registry-default.#{routing-suffix}:443,docker-registry.default.svc.cluster.local,172.30.1.1' --cert=/etc/secrets/registry.crt --key=/etc/secrets/registry.key
-openshift cli create route edge docker-registry --service=docker-registry --ca-cert=/var/lib/origin/openshift.local.config/master/ca.crt --cert=/etc/secrets/registry.crt --key=/etc/secrets/registry.key --hostname='docker-registry-default.#{routing-suffix}'
+openshift adm ca create-server-cert --signer-cert=/var/lib/origin/openshift.local.config/master/ca.crt --signer-key=/var/lib/origin/openshift.local.config/master/ca.key --signer-serial=/var/lib/origin/openshift.local.config/master/ca.serial.txt --hostnames='docker-registry-default.#{routing-suffix},docker-registry-default.#{routing-suffix}:443,docker-registry.default.svc.cluster.local,172.30.1.1' --cert=/etc/secrets/registry.crt --key=/etc/secrets/registry.key
+openshift create route edge docker-registry --service=docker-registry --ca-cert=/var/lib/origin/openshift.local.config/master/ca.crt --cert=/etc/secrets/registry.crt --key=/etc/secrets/registry.key --hostname='docker-registry-default.#{routing-suffix}'
 
 ssh sudo mkdir -p /etc/docker/certs.d/docker-registry-default.#{routing-suffix}:443
 ssh sudo chown docker /etc/docker/certs.d/docker-registry-default.#{routing-suffix}:443

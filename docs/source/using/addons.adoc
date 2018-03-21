@@ -92,7 +92,7 @@ The `oc` command is executed as *system:admin*.
 ====
 
 openshift::
-If the add-on command starts with `openshift`, you can run the *openshift* binary within the container that runs OpenShift.
+If the add-on command starts with `openshift`, you can run the *oc* binary within the container that runs OpenShift.
 This means that any file parameters or other system-specific parameters must match the environment of the container instead of your host.
 
 docker::

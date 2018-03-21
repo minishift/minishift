@@ -36,13 +36,13 @@ func NewOpenShiftCommand(command string, ignoreError bool) *OpenShiftCommand {
 }
 
 func (c *OpenShiftCommand) doExecute(ec *ExecutionContext, ignoreError bool) error {
-	// split off the actual 'oc' command. We are using our cached oc version to run oc commands
+	// split off the actual 'openshift' command. We are using origin container to run those commands
 	cmd := strings.Replace(c.rawCommand, "openshift ", "", 1)
 	cmd = ec.Interpolate(cmd)
 	fmt.Print(".")
 
 	commander := ec.GetDockerCommander()
-	_, err := commander.Exec("-t", constants.OpenshiftContainerName, constants.OpenshiftExec, ec.Interpolate(cmd))
+	_, err := commander.Exec("-t", constants.OpenshiftContainerName, constants.OpenshiftOcExec, ec.Interpolate(cmd))
 	if err != nil {
 		return errors.New(fmt.Sprintf("Error executing command '%s':", err.Error()))
 	}

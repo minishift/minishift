@@ -39,9 +39,6 @@ function load_jenkins_vars() {
 }
 
 function install_core_deps() {
-  # We need to disable selinux for now, XXX
-  /usr/sbin/setenforce 0
-
   # Install EPEL repo
   yum -y install epel-release
   # Get all the deps in

@@ -49,6 +49,19 @@ oc create -f xpaas-templates/eap70-postgresql-s2i.json -n openshift
 oc create -f xpaas-templates/eap70-sso-s2i.json -n openshift
 oc create -f xpaas-templates/eap70-third-party-db-s2i.json -n openshift
 oc create -f xpaas-templates/eap70-tx-recovery-s2i.json -n openshift
+oc create -f xpaas-templates/eap71-amq-persistent-s2i.json -n openshift
+oc create -f xpaas-templates/eap71-amq-s2i.json -n openshift
+oc create -f xpaas-templates/eap71-basic-s2i.json -n openshift
+oc create -f xpaas-templates/eap71-https-s2i.json -n openshift
+oc create -f xpaas-templates/eap71-mongodb-persistent-s2i.json -n openshift
+oc create -f xpaas-templates/eap71-mongodb-s2i.json -n openshift
+oc create -f xpaas-templates/eap71-mysql-persistent-s2i.json -n openshift
+oc create -f xpaas-templates/eap71-mysql-s2i.json -n openshift
+oc create -f xpaas-templates/eap71-postgresql-persistent-s2i.json -n openshift
+oc create -f xpaas-templates/eap71-postgresql-s2i.json -n openshift
+oc create -f xpaas-templates/eap71-sso-s2i.json -n openshift
+oc create -f xpaas-templates/eap71-third-party-db-s2i.json -n openshift
+oc create -f xpaas-templates/eap71-tx-recovery-s2i.json -n openshift
 
 oc create -f xpaas-templates/jws31-tomcat7-basic-s2i.json -n openshift
 oc create -f xpaas-templates/jws31-tomcat7-https-s2i.json -n openshift

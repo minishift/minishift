@@ -5,7 +5,7 @@
         "annotations": {
             "iconClass": "icon-decisionserver",
             "tags": "decisionserver,jboss",
-            "version": "1.4.7",
+            "version": "1.4.8",
             "openshift.io/display-name": "JBoss BRMS 6.4 decision server + A-MQ (with https)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example BRMS decision server A-MQ application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
@@ -17,9 +17,9 @@
     },
     "labels": {
         "template": "decisionserver64-amq-s2i",
-        "xpaas": "1.4.7"
+        "xpaas": "1.4.8"
     },
-    "message": "A new BRMS/A-MQ application with SSL support has been created in your project. The username/password for accessing the KIE Server REST or JMS interface is ${KIE_SERVER_USER}/${KIE_SERVER_PASSWORD}. For accessing the A-MQ service use the credentials ${MQ_USERNAME}/${MQ_PASSWORD}. Please be sure to create the \"decisionserver-service-account\" service account and the secret named \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content.",
+    "message": "A new BRMS/A-MQ application with SSL support has been created in your project. The username/password for accessing the KIE Server REST or JMS interface is ${KIE_SERVER_USER}/${KIE_SERVER_PASSWORD}. For accessing the A-MQ service use the credentials ${MQ_USERNAME}/${MQ_PASSWORD}. Please be sure to create the secret named \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content.",
     "parameters": [
         {
             "displayName": "KIE Container Deployment",
@@ -182,7 +182,7 @@
             "displayName": "A-MQ Mesh Discovery Type",
             "description": "The discovery agent type to use for discovering mesh endpoints.  'dns' will use OpenShift's DNS service to resolve endpoints.  'kube' will use Kubernetes REST API to resolve service endpoints.  If using 'kube' the service account for the pod must have the 'view' role, which can be added via 'oc policy add-role-to-user view system:serviceaccount:<namespace>:default' where <namespace> is the project namespace.",
             "name": "AMQ_MESH_DISCOVERY_TYPE",
-            "value": "kube",
+            "value": "dns",
             "required": false
         },
         {
@@ -226,6 +226,12 @@
             "description": "List of directories from which archives will be copied into the deployment folder. If unspecified, all archives in /target will be copied.",
             "name": "ARTIFACT_DIR",
             "value": "",
+            "required": false
+        },
+        {
+            "description": "Container memory limit",
+            "name": "MEMORY_LIMIT",
+            "value": "1Gi",
             "required": false
         }
     ],
@@ -301,6 +307,32 @@
                 },
                 "annotations": {
                     "description": "The broker's OpenWire port."
+                }
+            }
+        },
+        {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "spec": {
+                "clusterIP": "None",
+                "ports": [
+                    {
+                        "name": "mesh",
+                        "port": 61616
+                    }
+                ],
+                "selector": {
+                    "deploymentConfig": "${APPLICATION_NAME}-amq"
+                }
+            },
+            "metadata": {
+                "name": "${APPLICATION_NAME}-amq-mesh",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "annotations": {
+                    "service.alpha.kubernetes.io/tolerate-unready-endpoints": "true",
+                    "description": "Supports node discovery for mesh formation."
                 }
             }
         },
@@ -396,7 +428,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-decisionserver64-openshift:1.1"
+                            "name": "jboss-decisionserver64-openshift:1.2"
                         }
                     }
                 },
@@ -473,13 +505,17 @@
                         }
                     },
                     "spec": {
-                        "serviceAccountName": "decisionserver-service-account",
                         "terminationGracePeriodSeconds": 60,
                         "containers": [
                             {
                                 "name": "${APPLICATION_NAME}",
                                 "image": "${APPLICATION_NAME}",
                                 "imagePullPolicy": "Always",
+                                "resources": {
+                                    "limits": {
+                                        "memory": "${MEMORY_LIMIT}"
+                                    }
+                                },
                                 "volumeMounts": [
                                     {
                                         "name": "decisionserver-keystore-volume",
@@ -494,7 +530,8 @@
                                             "-c",
                                             "/opt/eap/bin/livenessProbe.sh"
                                         ]
-                                    }
+                                    },
+                                    "initialDelaySeconds": 60
                                 },
                                 "readinessProbe": {
                                     "exec": {
@@ -630,7 +667,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "jboss-amq-63:1.2"
+                                "name": "jboss-amq-63:1.3"
                             }
                         }
                     },
@@ -727,7 +764,7 @@
                                     },
                                     {
                                         "name": "AMQ_MESH_SERVICE_NAME",
-                                        "value": "${APPLICATION_NAME}-amq-tcp"
+                                        "value": "${APPLICATION_NAME}-amq-mesh"
                                     },
                                     {
                                         "name": "AMQ_MESH_SERVICE_NAMESPACE",

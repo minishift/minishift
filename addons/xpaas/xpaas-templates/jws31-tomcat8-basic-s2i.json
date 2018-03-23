@@ -6,7 +6,7 @@
             "iconClass": "icon-rh-tomcat",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "tags": "tomcat,tomcat8,java,jboss",
-            "version": "1.4.7",
+            "version": "1.4.8",
             "openshift.io/display-name": "JBoss Web Server 3.1 Apache Tomcat 8 (no https)",
             "description": "An example JBoss Web Server application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
             "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat JBoss Web Server 3.1 Apache Tomcat 8 based application, including a build configuration, and an application deployment configuration.",
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "jws31-tomcat8-basic-s2i",
-        "xpaas": "1.4.7"
+        "xpaas": "1.4.8"
     },
     "message": "A new JWS application for Apache Tomcat 8 has been created in your project. The username/password for administering your JWS is ${JWS_ADMIN_USERNAME}/${JWS_ADMIN_PASSWORD}.",
     "parameters": [

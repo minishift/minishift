@@ -5,7 +5,7 @@
         "annotations": {
             "iconClass": "icon-processserver",
             "tags": "processserver,jboss,hidden",
-            "version": "1.4.7",
+            "version": "1.4.8",
             "openshift.io/display-name": "JBoss BPM Suite 6.4 intelligent process server + PostgreSQL (Ephemeral with https)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example BPM Suite application with a PostgreSQL database. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
@@ -17,9 +17,9 @@
     },
     "labels": {
         "template": "processserver64-postgresql-s2i",
-        "xpaas": "1.4.7"
+        "xpaas": "1.4.8"
     },
-    "message": "A new BPMS application (using PostgreSQL) has been created in your project. The username/password for accessing the KIE Server REST or JMS interface is ${KIE_SERVER_USER}/${KIE_SERVER_PASSWORD}. For accessing the MySQL database \"${DB_DATABASE}\" use the credentials ${DB_USERNAME}/${DB_PASSWORD}. Please be sure to create the \"processserver-service-account\" service account and the secret named \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content.",
+    "message": "A new BPMS application (using PostgreSQL) has been created in your project. The username/password for accessing the KIE Server REST or JMS interface is ${KIE_SERVER_USER}/${KIE_SERVER_PASSWORD}. For accessing the MySQL database \"${DB_DATABASE}\" use the credentials ${DB_USERNAME}/${DB_PASSWORD}. Please be sure to create the secret named \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content.",
     "parameters": [
         {
             "displayName": "KIE Container Deployment",
@@ -265,6 +265,12 @@
             "name": "POSTGRESQL_IMAGE_STREAM_TAG",
             "value": "9.5",
             "required": true
+        },
+        {
+            "description": "Container memory limit",
+            "name": "MEMORY_LIMIT",
+            "value": "1Gi",
+            "required": false
         }
     ],
     "objects": [
@@ -434,7 +440,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-processserver64-openshift:1.1"
+                            "name": "jboss-processserver64-openshift:1.2"
                         }
                     }
                 },
@@ -511,13 +517,17 @@
                         }
                     },
                     "spec": {
-                        "serviceAccountName": "processserver-service-account",
                         "terminationGracePeriodSeconds": 60,
                         "containers": [
                             {
                                 "name": "${APPLICATION_NAME}",
                                 "image": "${APPLICATION_NAME}",
                                 "imagePullPolicy": "Always",
+                                "resources": {
+                                    "limits": {
+                                        "memory": "${MEMORY_LIMIT}"
+                                    }
+                                },
                                 "volumeMounts": [
                                     {
                                         "name": "processserver-keystore-volume",
@@ -532,7 +542,8 @@
                                             "-c",
                                             "/opt/eap/bin/livenessProbe.sh"
                                         ]
-                                    }
+                                    },
+                                    "initialDelaySeconds": 60
                                 },
                                 "readinessProbe": {
                                     "exec": {
@@ -746,7 +757,21 @@
                                         "name": "POSTGRESQL_SHARED_BUFFERS",
                                         "value": "${POSTGRESQL_SHARED_BUFFERS}"
                                     }
+                                ],
+                                "volumeMounts": [
+                                    {
+                                        "mountPath": "/var/lib/pgsql/data",
+                                        "name": "${APPLICATION_NAME}-data"
+                                    }
                                 ]
+                            }
+                        ],
+                        "volumes": [
+                            {
+                                "emptyDir": {
+                                    "medium": ""
+                                },
+                                "name": "${APPLICATION_NAME}-data"
                             }
                         ]
                     }

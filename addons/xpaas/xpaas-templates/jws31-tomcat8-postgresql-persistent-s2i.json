@@ -7,16 +7,16 @@
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "Application template for JWS PostgreSQL applications with persistent storage built using S2I.",
             "tags": "tomcat,tomcat8,java,jboss",
-            "version": "1.4.7",
+            "version": "1.4.8",
             "openshift.io/display-name": "JBoss Web Server 3.1 Apache Tomcat 8 + PostgreSQL (with https)"
         },
         "name": "jws31-tomcat8-postgresql-persistent-s2i"
     },
     "labels": {
         "template": "jws31-tomcat8-postgresql-persistent-s2i",
-        "xpaas": "1.4.7"
+        "xpaas": "1.4.8"
     },
-    "message": "A new persistent JWS application for Apache Tomcat 8 (using PostgreSQL) has been created in your project. The username/password for administering your JWS is ${JWS_ADMIN_USERNAME}/${JWS_ADMIN_PASSWORD}. For accessing the PostgreSQL database \"${DB_DATABASE}\" use the credentials ${DB_USERNAME}/${DB_PASSWORD}. Please be sure to create the \"jws-service-account\" service account and the secret named \"${JWS_HTTPS_SECRET}\" containing the ${JWS_HTTPS_CERTIFICATE} file used for serving secure content.",
+    "message": "A new persistent JWS application for Apache Tomcat 8 (using PostgreSQL) has been created in your project. The username/password for administering your JWS is ${JWS_ADMIN_USERNAME}/${JWS_ADMIN_PASSWORD}. For accessing the PostgreSQL database \"${DB_DATABASE}\" use the credentials ${DB_USERNAME}/${DB_PASSWORD}. Please be sure to create the secret named \"${JWS_HTTPS_SECRET}\" containing the ${JWS_HTTPS_CERTIFICATE} file used for serving secure content.",
     "parameters": [
         {
             "displayName": "Application Name",
@@ -78,7 +78,7 @@
             "displayName": "Database Volume Capacity",
             "description": "Size of persistent storage for database volume.",
             "name": "VOLUME_CAPACITY",
-            "value": "512Mi",
+            "value": "1Gi",
             "required": true
         },
         {
@@ -455,7 +455,6 @@
                         }
                     },
                     "spec": {
-                        "serviceAccountName": "jws-service-account",
                         "terminationGracePeriodSeconds": 60,
                         "containers": [
                             {

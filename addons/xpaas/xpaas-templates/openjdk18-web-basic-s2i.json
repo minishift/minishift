@@ -5,7 +5,7 @@
         "annotations": {
             "iconClass": "icon-rh-openjdk",
             "tags": "java",
-            "version": "1.4.7",
+            "version": "1.4.8",
             "openshift.io/display-name": "OpenJDK 8",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example Java application using OpenJDK 8. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "openjdk18-web-basic-s2i",
-        "xpaas": "1.4.7"
+        "xpaas": "1.4.8"
     },
     "message": "A new java application has been created in your project.",
     "parameters": [

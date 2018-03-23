@@ -7,16 +7,16 @@
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "Application template for JWS MongoDB applications built using S2I.",
             "tags": "tomcat,tomcat7,java,jboss,hidden",
-            "version": "1.4.7",
+            "version": "1.4.8",
             "openshift.io/display-name": "JBoss Web Server 3.1 Apache Tomcat 7 + MongoDB (Ephemeral with https)"
         },
         "name": "jws31-tomcat7-mongodb-s2i"
     },
     "labels": {
         "template": "jws31-tomcat7-mongodb-s2i",
-        "xpaas": "1.4.7"
+        "xpaas": "1.4.8"
     },
-    "message": "A new JWS application for Apache Tomcat 7 (using MongoDB) has been created in your project. The username/password for administering your JWS is ${JWS_ADMIN_USERNAME}/${JWS_ADMIN_PASSWORD}. For accessing the MongoDB database \"${DB_DATABASE}\" use the credentials ${DB_USERNAME}/${DB_PASSWORD} (Admin password is \"${DB_ADMIN_PASSWORD}\"). Please be sure to create the \"jws-service-account\" service account and the secret named \"${JWS_HTTPS_SECRET}\" containing the ${JWS_HTTPS_CERTIFICATE} file used for serving secure content.",
+    "message": "A new JWS application for Apache Tomcat 7 (using MongoDB) has been created in your project. The username/password for administering your JWS is ${JWS_ADMIN_USERNAME}/${JWS_ADMIN_PASSWORD}. For accessing the MongoDB database \"${DB_DATABASE}\" use the credentials ${DB_USERNAME}/${DB_PASSWORD} (Admin password is \"${DB_ADMIN_PASSWORD}\"). Please be sure to create the secret named \"${JWS_HTTPS_SECRET}\" containing the ${JWS_HTTPS_CERTIFICATE} file used for serving secure content.",
     "parameters": [
         {
             "displayName": "Application Name",
@@ -462,7 +462,6 @@
                         }
                     },
                     "spec": {
-                        "serviceAccountName": "jws-service-account",
                         "terminationGracePeriodSeconds": 60,
                         "containers": [
                             {
@@ -664,7 +663,21 @@
                                         "name": "MONGODB_QUIET",
                                         "value": "${MONGODB_QUIET}"
                                     }
+                                ],
+                                "volumeMounts": [
+                                    {
+                                        "mountPath": "/var/lib/mongodb/data",
+                                        "name": "${APPLICATION_NAME}-data"
+                                    }
                                 ]
+                            }
+                        ],
+                        "volumes": [
+                            {
+                                "emptyDir": {
+                                    "medium": ""
+                                },
+                                "name": "${APPLICATION_NAME}-data"
                             }
                         ]
                     }

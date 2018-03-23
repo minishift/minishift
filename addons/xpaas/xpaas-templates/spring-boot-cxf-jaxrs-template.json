@@ -4,7 +4,7 @@
   "metadata": {
     "annotations": {
       "description": "Spring-Boot and CXF JAXRS QuickStart. This example demonstrates how you can use Apache CXF JAXRS with Spring Boot on Openshift. The quickstart uses Spring Boot to configure a little application that includes a CXF JAXRS endpoint with Swagger enabled.",
-      "tags": "quickstart,java,springboot,fis",
+      "tags": "quickstart,java,springboot,fis,jboss-fuse",
       "iconClass": "icon-jboss",
       "version": "2.0"
     },
@@ -31,7 +31,7 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "spring-boot-cxf-jaxrs-1.0.0.redhat-000014",
+      "value": "spring-boot-cxf-jaxrs-1.0.0.redhat-000017",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
@@ -49,7 +49,7 @@
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.redhat-000014",
+      "value": "1.0.0.redhat-000017",
       "description": "The application version."
     },
     {

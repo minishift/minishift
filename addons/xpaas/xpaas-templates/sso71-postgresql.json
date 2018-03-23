@@ -5,7 +5,7 @@
         "annotations": {
             "iconClass" : "icon-sso",
             "tags" : "sso,keycloak,jboss,hidden",
-            "version": "1.4.7",
+            "version": "1.4.8",
             "openshift.io/display-name": "Single Sign-On 7.1 + PostgreSQL (Ephemeral)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example SSO 7 application with a PostgreSQL database. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
@@ -17,9 +17,9 @@
     },
     "labels": {
         "template": "sso71-postgresql",
-        "xpaas": "1.4.7"
+        "xpaas": "1.4.8"
     },
-    "message": "A new SSO service (using PostgreSQL) has been created in your project. The admin username/password for accessing the master realm via the SSO console is ${SSO_ADMIN_USERNAME}/${SSO_ADMIN_PASSWORD}. The username/password for accessing the PostgreSQL database \"${DB_DATABASE}\" is ${DB_USERNAME}/${DB_PASSWORD}. Please be sure to create the \"${SERVICE_ACCOUNT_NAME}\" service account and the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications; \"${SSO_TRUSTSTORE_SECRET}\" containing the ${SSO_TRUSTSTORE} file used for securing SSO requests.",
+    "message": "A new SSO service (using PostgreSQL) has been created in your project. The admin username/password for accessing the master realm via the SSO console is ${SSO_ADMIN_USERNAME}/${SSO_ADMIN_PASSWORD}. The username/password for accessing the PostgreSQL database \"${DB_DATABASE}\" is ${DB_USERNAME}/${DB_PASSWORD}. Please be sure to create the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications; \"${SSO_TRUSTSTORE_SECRET}\" containing the ${SSO_TRUSTSTORE} file used for securing SSO requests.",
     "parameters": [
         {
             "displayName": "Application Name",
@@ -54,13 +54,6 @@
             "description": "Database name",
             "name": "DB_DATABASE",
             "value": "root",
-            "required": true
-        },
-        {
-            "displayName": "Service Account Name",
-            "description": "The name of the service account to use for the deployment.  The service account should be configured to allow useage of the secret(s) specified by HTTPS_SECRET and JGROUPS_ENCRYPT_SECRET.",
-            "name": "SERVICE_ACCOUNT_NAME",
-            "value": "sso-service-account",
             "required": true
         },
         {
@@ -251,6 +244,12 @@
             "name": "POSTGRESQL_IMAGE_STREAM_TAG",
             "value": "9.5",
             "required": true
+        },
+        {
+            "description": "Container memory limit",
+            "name": "MEMORY_LIMIT",
+            "value": "1Gi",
+            "required": false
         }
     ],
     "objects": [
@@ -332,6 +331,32 @@
             }
         },
         {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "spec": {
+                "clusterIP": "None",
+                "ports": [
+                    {
+                        "name": "ping",
+                        "port": 8888
+                    }
+                ],
+                "selector": {
+                    "deploymentConfig": "${APPLICATION_NAME}"
+                }
+            },
+            "metadata": {
+                "name": "${APPLICATION_NAME}-ping",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "annotations": {
+                    "service.alpha.kubernetes.io/tolerate-unready-endpoints": "true",
+                    "description": "The JGroups ping port for clustering."
+                }
+            }
+        },
+        {
             "kind": "Route",
             "apiVersion": "v1",
             "id": "${APPLICATION_NAME}-http",
@@ -401,7 +426,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "redhat-sso71-openshift:1.2"
+                                "name": "redhat-sso71-openshift:1.3"
                             }
                         }
                     },
@@ -423,13 +448,17 @@
                         }
                     },
                     "spec": {
-                        "serviceAccountName": "${SERVICE_ACCOUNT_NAME}",
                         "terminationGracePeriodSeconds": 75,
                         "containers": [
                             {
                                 "name": "${APPLICATION_NAME}",
                                 "image": "${APPLICATION_NAME}",
                                 "imagePullPolicy": "Always",
+                                "resources": {
+                                    "limits": {
+                                        "memory": "${MEMORY_LIMIT}"
+                                    }
+                                },
                                 "volumeMounts": [
                                     {
                                         "name": "eap-keystore-volume",
@@ -447,17 +476,6 @@
                                         "readOnly": true
                                     }
                                 ],
-                                "lifecycle": {
-                                    "preStop": {
-                                        "exec": {
-                                            "command": [
-                                                "/opt/eap/bin/jboss-cli.sh",
-                                                "-c",
-                                                ":shutdown(timeout=60)"
-                                            ]
-                                        }
-                                    }
-                                },
                                 "livenessProbe": {
                                     "exec": {
                                         "command": [
@@ -466,7 +484,7 @@
                                             "/opt/eap/bin/livenessProbe.sh"
                                         ]
                                     },
-                                    "initialDelaySeconds": 10
+                                    "initialDelaySeconds": 60
                                 },
                                 "readinessProbe": {
                                     "exec": {
@@ -537,16 +555,16 @@
                                         "value": "${DB_TX_ISOLATION}"
                                     },
                                     {
-                                        "name": "OPENSHIFT_KUBE_PING_LABELS",
-                                        "value": "application=${APPLICATION_NAME}"
+                                        "name": "JGROUPS_PING_PROTOCOL",
+                                        "value": "openshift.DNS_PING"
                                     },
                                     {
-                                        "name": "OPENSHIFT_KUBE_PING_NAMESPACE",
-                                        "valueFrom": {
-                                            "fieldRef": {
-                                                "fieldPath": "metadata.namespace"
-                                            }
-                                        }
+                                        "name": "OPENSHIFT_DNS_PING_SERVICE_NAME",
+                                        "value": "${APPLICATION_NAME}-ping"
+                                    },
+                                    {
+                                        "name": "OPENSHIFT_DNS_PING_SERVICE_PORT",
+                                        "value": "8888"
                                     },
                                     {
                                         "name": "HTTPS_KEYSTORE_DIR",
@@ -735,7 +753,21 @@
                                         "name": "POSTGRESQL_SHARED_BUFFERS",
                                         "value": "${POSTGRESQL_SHARED_BUFFERS}"
                                     }
+                                ],
+                                "volumeMounts": [
+                                    {
+                                        "mountPath": "/var/lib/pgsql/data",
+                                        "name": "${APPLICATION_NAME}-data"
+                                    }
                                 ]
+                            }
+                        ],
+                        "volumes": [
+                            {
+                                "emptyDir": {
+                                    "medium": ""
+                                },
+                                "name": "${APPLICATION_NAME}-data"
                             }
                         ]
                     }

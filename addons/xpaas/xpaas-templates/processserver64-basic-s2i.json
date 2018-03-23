@@ -5,7 +5,7 @@
         "annotations": {
             "iconClass": "icon-processserver",
             "tags": "processserver,jboss",
-            "version": "1.4.7",
+            "version": "1.4.8",
             "openshift.io/display-name": "JBoss BPM Suite 6.4 intelligent process server (no https)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example BPM Suite application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "processserver64-basic-s2i",
-        "xpaas": "1.4.7"
+        "xpaas": "1.4.8"
     },
     "message": "A new BPMS application has been created in your project. The username/password for accessing the KIE Server REST or JMS interface is ${KIE_SERVER_USER}/${KIE_SERVER_PASSWORD}.",
     "parameters": [
@@ -142,6 +142,12 @@
             "name": "ARTIFACT_DIR",
             "value": "",
             "required": false
+        },
+        {
+            "description": "Container memory limit",
+            "name": "MEMORY_LIMIT",
+            "value": "1Gi",
+            "required": false
         }
     ],
     "objects": [
@@ -238,7 +244,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-processserver64-openshift:1.1"
+                            "name": "jboss-processserver64-openshift:1.2"
                         }
                     }
                 },
@@ -321,6 +327,11 @@
                                 "name": "${APPLICATION_NAME}",
                                 "image": "${APPLICATION_NAME}",
                                 "imagePullPolicy": "Always",
+                                "resources": {
+                                    "limits": {
+                                        "memory": "${MEMORY_LIMIT}"
+                                    }
+                                },
                                 "livenessProbe": {
                                     "exec": {
                                         "command": [
@@ -328,7 +339,8 @@
                                             "-c",
                                             "/opt/eap/bin/livenessProbe.sh"
                                         ]
-                                    }
+                                    },
+                                    "initialDelaySeconds": 60
                                 },
                                 "readinessProbe": {
                                     "exec": {

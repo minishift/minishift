@@ -5,7 +5,7 @@
         "annotations": {
             "iconClass": "icon-datagrid",
             "tags": "datagrid,jboss,hidden",
-            "version": "1.4.7",
+            "version": "1.4.8",
             "openshift.io/display-name": "JBoss Data Grid 7.1 (Ephemeral, no https)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example JBoss Data Grid application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "datagrid71-partition",
-        "xpaas": "1.4.0"
+        "xpaas": "1.4.8"
     },
     "message": "A new data grid service has been created in your project. It supports connector type(s) \"${INFINISPAN_CONNECTORS}\".",
     "parameters": [
@@ -145,7 +145,7 @@
             "displayName": "Datagrid Volume Size",
             "description": "Size of the volume used by Datagrid for persisting metadata.",
             "name": "VOLUME_CAPACITY",
-            "value": "512Mi",
+            "value": "1Gi",
             "required": true
         },
         {
@@ -153,6 +153,12 @@
             "description": "Split the data directory for each node in a mesh, this is now the default behaviour.",
             "name": "DATAGRID_SPLIT",
             "value": "true",
+            "required": false
+        },
+        {
+            "description": "Container memory limit",
+            "name": "MEMORY_LIMIT",
+            "value": "1Gi",
             "required": false
         }
     ],
@@ -254,6 +260,32 @@
             }
         },
         {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "spec": {
+                "clusterIP": "None",
+                "ports": [
+                    {
+                        "name": "ping",
+                        "port": 8888
+                    }
+                ],
+                "selector": {
+                    "deploymentConfig": "${APPLICATION_NAME}"
+                }
+            },
+            "metadata": {
+                "name": "${APPLICATION_NAME}-ping",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "annotations": {
+                    "service.alpha.kubernetes.io/tolerate-unready-endpoints": "true",
+                    "description": "The JGroups ping port for clustering."
+                }
+            }
+        },
+        {
             "kind": "Route",
             "apiVersion": "v1",
             "id": "${APPLICATION_NAME}-http",
@@ -297,7 +329,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "jboss-datagrid71-openshift:1.1"
+                                "name": "jboss-datagrid71-openshift:1.2"
                             }
                         }
                     },
@@ -324,6 +356,11 @@
                                 "name": "${APPLICATION_NAME}",
                                 "image": "jboss-datagrid71-openshift",
                                 "imagePullPolicy": "Always",
+                                "resources": {
+                                    "limits": {
+                                        "memory": "${MEMORY_LIMIT}"
+                                    }
+                                },
                                 "volumeMounts": [
                                     {
                                         "mountPath": "/opt/datagrid/standalone/partitioned_data",
@@ -337,7 +374,8 @@
                                             "-c",
                                             "/opt/datagrid/bin/livenessProbe.sh"
                                         ]
-                                    }
+                                    },
+                                    "initialDelaySeconds": 60
                                 },
                                 "readinessProbe": {
                                     "exec": {
@@ -395,16 +433,16 @@
                                         "value": "${PASSWORD}"
                                     },
                                     {
-                                        "name": "OPENSHIFT_KUBE_PING_LABELS",
-                                        "value": "application=${APPLICATION_NAME}"
+                                        "name": "JGROUPS_PING_PROTOCOL",
+                                        "value": "openshift.DNS_PING"
                                     },
                                     {
-                                        "name": "OPENSHIFT_KUBE_PING_NAMESPACE",
-                                        "valueFrom": {
-                                            "fieldRef": {
-                                                "fieldPath": "metadata.namespace"
-                                            }
-                                        }
+                                        "name": "OPENSHIFT_DNS_PING_SERVICE_NAME",
+                                        "value": "${APPLICATION_NAME}-ping"
+                                    },
+                                    {
+                                        "name": "OPENSHIFT_DNS_PING_SERVICE_PORT",
+                                        "value": "8888"
                                     },
                                     {
                                         "name": "INFINISPAN_CONNECTORS",

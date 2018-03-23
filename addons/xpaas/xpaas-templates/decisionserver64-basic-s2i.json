@@ -6,14 +6,14 @@
             "description": "Application template for Red Hat JBoss BRMS 6.4 decision server applications built using S2I.",
             "iconClass": "icon-decisionserver",
             "tags": "decisionserver,jboss,xpaas",
-            "version": "1.4.7",
+            "version": "1.4.8",
             "openshift.io/display-name": "Red Hat JBoss BRMS 6.4 decision server (no https)"
         },
         "name": "decisionserver64-basic-s2i"
     },
     "labels": {
         "template": "decisionserver64-basic-s2i",
-        "xpaas": "1.4.7"
+        "xpaas": "1.4.8"
     },
     "message": "A new BRMS application has been created in your project. The username/password for accessing the KIE Server REST or JMS interface is ${KIE_SERVER_USER}/${KIE_SERVER_PASSWORD}.",
     "parameters": [
@@ -131,6 +131,12 @@
             "name": "ARTIFACT_DIR",
             "value": "",
             "required": false
+        },
+        {
+            "description": "Container memory limit",
+            "name": "MEMORY_LIMIT",
+            "value": "1Gi",
+            "required": false
         }
     ],
     "objects": [
@@ -227,7 +233,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-decisionserver64-openshift:1.1"
+                            "name": "jboss-decisionserver64-openshift:1.2"
                         }
                     }
                 },
@@ -310,6 +316,11 @@
                                 "name": "${APPLICATION_NAME}",
                                 "image": "${APPLICATION_NAME}",
                                 "imagePullPolicy": "Always",
+                                "resources": {
+                                    "limits": {
+                                        "memory": "${MEMORY_LIMIT}"
+                                    }
+                                },
                                 "livenessProbe": {
                                     "exec": {
                                         "command": [
@@ -317,7 +328,8 @@
                                             "-c",
                                             "/opt/eap/bin/livenessProbe.sh"
                                         ]
-                                    }
+                                    },
+                                    "initialDelaySeconds": 60
                                 },
                                 "readinessProbe": {
                                     "exec": {

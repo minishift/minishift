@@ -7,14 +7,14 @@
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "Application template for JWS applications built using S2I.",
             "tags": "tomcat,tomcat7,java,jboss",
-            "version": "1.4.7",
+            "version": "1.4.8",
             "openshift.io/display-name": "JBoss Web Server 3.1 Apache Tomcat 7 (no https)"
         },
         "name": "jws31-tomcat7-basic-s2i"
     },
     "labels": {
         "template": "jws31-tomcat7-basic-s2i",
-        "xpaas": "1.4.7"
+        "xpaas": "1.4.8"
     },
     "message": "A new JWS application for Apache Tomcat 7 has been created in your project. The username/password for administering your JWS is ${JWS_ADMIN_USERNAME}/${JWS_ADMIN_PASSWORD}.",
     "parameters": [

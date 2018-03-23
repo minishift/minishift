@@ -4,7 +4,7 @@
   "metadata": {
     "annotations": {
       "description": "Spring-Boot and Camel Xml QuickStart. This example demonstrates how you can use Apache Camel with Spring Boot on Openshift. The quickstart uses Spring Boot to configure a little application that includes a Camel route (in Spring xml) that triggeres a message every 5th second, and routes the message to a log.",
-      "tags": "quickstart,java,springboot,fis",
+      "tags": "quickstart,java,springboot,fis,jboss-fuse",
       "iconClass": "icon-jboss",
       "version": "2.0"
     },
@@ -31,7 +31,7 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "spring-boot-camel-xml-1.0.0.redhat-000064",
+      "value": "spring-boot-camel-xml-1.0.0.redhat-000067",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
@@ -43,7 +43,7 @@
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.redhat-000064",
+      "value": "1.0.0.redhat-000067",
       "description": "The application version."
     },
     {

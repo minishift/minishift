@@ -6,7 +6,7 @@
             "iconClass": "icon-rh-tomcat",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "tags": "tomcat,tomcat7,java,jboss",
-            "version": "1.4.7",
+            "version": "1.4.8",
             "openshift.io/display-name": "Red Hat JBoss Web Server 3.1 Apache Tomcat 7 + MySQL (with https)",
             "description": "An example JBoss Web Server application with a MySQL database. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
             "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat JBoss Web Server 3.1 Apache Tomcat 7 based application, including a build configuration, application deployment configuration, database deployment configuration for MySQL using persistence and secure communication using https.",
@@ -18,9 +18,9 @@
     },
     "labels": {
         "template": "jws31-tomcat7-mysql-persistent-s2i",
-        "xpaas": "1.4.7"
+        "xpaas": "1.4.8"
     },
-    "message": "A new persistent JWS application for Apache Tomcat 7 (using MySQL) has been created in your project. The username/password for administering your JWS is ${JWS_ADMIN_USERNAME}/${JWS_ADMIN_PASSWORD}. For accessing the MySQL database \"${DB_DATABASE}\" use the credentials ${DB_USERNAME}/${DB_PASSWORD}. Please be sure to create the \"jws-service-account\" service account and the secret named \"${JWS_HTTPS_SECRET}\" containing the ${JWS_HTTPS_CERTIFICATE} file used for serving secure content.",
+    "message": "A new persistent JWS application for Apache Tomcat 7 (using MySQL) has been created in your project. The username/password for administering your JWS is ${JWS_ADMIN_USERNAME}/${JWS_ADMIN_PASSWORD}. For accessing the MySQL database \"${DB_DATABASE}\" use the credentials ${DB_USERNAME}/${DB_PASSWORD}. Please be sure to create the secret named \"${JWS_HTTPS_SECRET}\" containing the ${JWS_HTTPS_CERTIFICATE} file used for serving secure content.",
     "parameters": [
         {
             "displayName": "Application Name",
@@ -82,7 +82,7 @@
             "displayName": "Database Volume Capacity",
             "description": "Size of persistent storage for database volume.",
             "name": "VOLUME_CAPACITY",
-            "value": "512Mi",
+            "value": "1Gi",
             "required": true
         },
         {
@@ -477,7 +477,6 @@
                         }
                     },
                     "spec": {
-                        "serviceAccountName": "jws-service-account",
                         "terminationGracePeriodSeconds": 60,
                         "containers": [
                             {

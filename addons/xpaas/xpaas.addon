@@ -9,6 +9,10 @@ oc create -f xpaas-templates/amq62-basic.json -n openshift
 oc create -f xpaas-templates/amq62-persistent-ssl.json -n openshift
 oc create -f xpaas-templates/amq62-persistent.json -n openshift
 oc create -f xpaas-templates/amq62-ssl.json -n openshift
+oc create -f xpaas-templates/amq63-basic.json -n openshift
+oc create -f xpaas-templates/amq63-persistent-ssl.json -n openshift
+oc create -f xpaas-templates/amq63-persistent.json -n openshift
+oc create -f xpaas-templates/amq63-ssl.json -n openshift
 
 oc create -f xpaas-templates/datagrid65-basic.json -n openshift
 oc create -f xpaas-templates/datagrid65-https.json -n openshift
@@ -16,6 +20,14 @@ oc create -f xpaas-templates/datagrid65-mysql-persistent.json -n openshift
 oc create -f xpaas-templates/datagrid65-mysql.json -n openshift
 oc create -f xpaas-templates/datagrid65-postgresql-persistent.json -n openshift
 oc create -f xpaas-templates/datagrid65-postgresql.json -n openshift
+oc create -f xpaas-templates/datagrid71-basic.json -n openshift
+oc create -f xpaas-templates/datagrid71-https.json -n openshift
+oc create -f xpaas-templates/datagrid71-mysql-persistent.json -n openshift
+oc create -f xpaas-templates/datagrid71-mysql.json -n openshift
+oc create -f xpaas-templates/datagrid71-partition.json -n openshift
+oc create -f xpaas-templates/datagrid71-postgresql-persistent.json -n openshift
+oc create -f xpaas-templates/datagrid71-postgresql.json -n openshift
+
 oc create -f xpaas-templates/datavirt63-basic-s2i.json -n openshift
 oc create -f xpaas-templates/datavirt63-extensions-support-s2i.json -n openshift
 oc create -f xpaas-templates/datavirt63-secure-s2i.json -n openshift
@@ -35,6 +47,8 @@ oc create -f xpaas-templates/eap70-mysql-s2i.json -n openshift
 oc create -f xpaas-templates/eap70-postgresql-persistent-s2i.json -n openshift
 oc create -f xpaas-templates/eap70-postgresql-s2i.json -n openshift
 oc create -f xpaas-templates/eap70-sso-s2i.json -n openshift
+oc create -f xpaas-templates/eap70-third-party-db-s2i.json -n openshift
+oc create -f xpaas-templates/eap70-tx-recovery-s2i.json -n openshift
 
 oc create -f xpaas-templates/jws31-tomcat7-basic-s2i.json -n openshift
 oc create -f xpaas-templates/jws31-tomcat7-https-s2i.json -n openshift

@@ -4,7 +4,7 @@
     "metadata": {
         "annotations": {
             "tags": "tomcat,tomcat8,java,jboss",
-            "version": "1.4.7",
+            "version": "1.4.8",
             "iconClass": "icon-rh-tomcat",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "openshift.io/display-name": "JBoss Web Server 3.1 Apache Tomcat 8 + MongoDB (with https)",
@@ -16,10 +16,10 @@
         },
         "name": "jws31-tomcat8-mongodb-persistent-s2i"
     },
-    "message": "A new persistent JWS application for Apache Tomcat 8 (using MongoDB) has been created in your project. The username/password for administering your JWS is ${JWS_ADMIN_USERNAME}/${JWS_ADMIN_PASSWORD}. For accessing the MongoDB database \"${DB_DATABASE}\" use the credentials ${DB_USERNAME}/${DB_PASSWORD} (Admin password is \"${DB_ADMIN_PASSWORD}\"). Please be sure to create the \"jws-service-account\" service account and the secret named \"${JWS_HTTPS_SECRET}\" containing the ${JWS_HTTPS_CERTIFICATE} file used for serving secure content.",
+    "message": "A new persistent JWS application for Apache Tomcat 8 (using MongoDB) has been created in your project. The username/password for administering your JWS is ${JWS_ADMIN_USERNAME}/${JWS_ADMIN_PASSWORD}. For accessing the MongoDB database \"${DB_DATABASE}\" use the credentials ${DB_USERNAME}/${DB_PASSWORD} (Admin password is \"${DB_ADMIN_PASSWORD}\"). Please be sure to create the secret named \"${JWS_HTTPS_SECRET}\" containing the ${JWS_HTTPS_CERTIFICATE} file used for serving secure content.",
     "labels": {
         "template": "jws31-tomcat8-mongodb-persistent-s2i",
-        "xpaas": "1.4.7"
+        "xpaas": "1.4.8"
     },
     "parameters": [
         {
@@ -82,7 +82,7 @@
             "displayName": "Database Volume Capacity",
             "description": "Size of persistent storage for database volume.",
             "name": "VOLUME_CAPACITY",
-            "value": "512Mi",
+            "value": "1Gi",
             "required": true
         },
         {
@@ -473,7 +473,6 @@
                         }
                     },
                     "spec": {
-                        "serviceAccountName": "jws-service-account",
                         "terminationGracePeriodSeconds": 60,
                         "containers": [
                             {

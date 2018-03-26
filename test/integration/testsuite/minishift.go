@@ -21,6 +21,7 @@ package testsuite
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -379,5 +380,31 @@ func (m *Minishift) rolloutServicesSuccessfullyBeforeTimeout(servicesToCheck str
 		return fmt.Errorf("Not all services successfully rolled out:\n%v", errorMessage)
 	}
 
+	return nil
+}
+
+func (m *Minishift) hostFolderMountStatus(shareName string, partern string) error {
+	var mountString string
+	listOfHostFolders := m.runner.GetHostfolderList()
+	switch partern {
+	case "should":
+		mountString = shareName + "\\s*sshfs\\s*(.*?)\\s+(.*?)\\s+Y"
+	case "should not":
+		mountString = shareName + "\\s*sshfs\\s*(.*?)\\s+(.*?)\\s+N"
+	}
+	re := regexp.MustCompile(mountString)
+	if !re.MatchString(listOfHostFolders) {
+		return fmt.Errorf("Hostfolder status Actual: %s", listOfHostFolders)
+	}
+	return nil
+}
+
+func (m *Minishift) addHostFolder(shareType string, source string, target string, shareName string) error {
+	testDir, _ := setupTestDirectory()
+	sourcePath := filepath.Join(testDir, source)
+	_, cmdErr, _ := m.runner.RunCommand("hostfolder add -t " + shareType + " --source " + sourcePath + " --target " + target + " " + shareName)
+	if cmdErr != "" {
+		return errors.New(cmdErr)
+	}
 	return nil
 }

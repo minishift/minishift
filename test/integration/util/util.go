@@ -297,3 +297,8 @@ func (k *OcRunner) RunCommandWithTimeout(command string, timeout int) (stdOut st
 	stdOut, stdErr, exitCode = runCommandWithTimeout(command, k.CommandPath, timeout)
 	return
 }
+
+func (m *MinishiftRunner) GetHostfolderList() string {
+	cmdOut, _, _ := m.RunCommand("hostfolder list")
+	return strings.Trim(cmdOut, " \n")
+}

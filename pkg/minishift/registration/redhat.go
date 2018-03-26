@@ -130,6 +130,10 @@ func (registrator *RedHatRegistrator) Unregister(param *RegistrationParameters) 
 			"sudo -E subscription-manager unregister"); err != nil {
 			return err
 		}
+		if _, err := registrator.SSHCommand(
+			"sudo -E subscription-manager clean"); err != nil {
+			return err
+		}
 	} else {
 		return err
 	}

@@ -20,6 +20,11 @@ import (
 	"fmt"
 )
 
-func ConfigureNetworking(machineName string, vmDriver string, networkSettings NetworkSettings) {
+func ConfigureNetworking(machineName string, networkSettings NetworkSettings) {
 	fmt.Println(configureIPAddressMessage, configureIPAddressFailure)
+}
+
+// Not implemented for this platform
+func determineNameservers() string {
+	return ""
 }

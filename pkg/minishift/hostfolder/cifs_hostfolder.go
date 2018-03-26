@@ -23,9 +23,8 @@ import (
 
 	miniconfig "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/minishift/hostfolder/config"
-	miniutil "github.com/minishift/minishift/pkg/minishift/util"
+	"github.com/minishift/minishift/pkg/minishift/network"
 	"github.com/minishift/minishift/pkg/util"
-	"net"
 	"strings"
 )
 
@@ -44,7 +43,7 @@ func (h *CifsHostFolder) Config() config.HostFolderConfig {
 func (h *CifsHostFolder) Mount(driver drivers.Driver) error {
 	// If "Users" is used as name, determine the IP of host for UNC path on startup
 	if h.config.Name == "Users" {
-		hostIP, _ := h.determineHostIP(driver)
+		hostIP, _ := network.DetermineHostIP(driver)
 		h.config.Options[config.UncPath] = fmt.Sprintf("//%s/Users", hostIP)
 	}
 
@@ -122,27 +121,7 @@ func (h *CifsHostFolder) isCifsHostReachable(driver drivers.Driver) bool {
 		return false
 	}
 
-	return miniutil.IsIPReachable(driver, host, false)
-}
-
-func (h *CifsHostFolder) determineHostIP(driver drivers.Driver) (string, error) {
-	instanceIP, err := driver.GetIP()
-	if err != nil {
-		return "", err
-	}
-
-	for _, hostaddr := range miniutil.HostIPs() {
-
-		if miniutil.NetworkContains(hostaddr, instanceIP) {
-			hostip, _, _ := net.ParseCIDR(hostaddr)
-			if miniutil.IsIPReachable(driver, hostip.String(), false) {
-				return hostip.String(), nil
-			}
-			return "", errors.New("unreachable")
-		}
-	}
-
-	return "", errors.New("unknown error occurred")
+	return network.IsIPReachable(driver, host, false)
 }
 
 func (h *CifsHostFolder) ensureMountPointExists(driver drivers.Driver) error {

@@ -30,13 +30,13 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	validations "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/minishift/shell/powershell"
-	minishiftUtil "github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/util/github"
 
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/viper"
 
 	cmdUtils "github.com/minishift/minishift/cmd/minishift/cmd/util"
+	minishiftNetwork "github.com/minishift/minishift/pkg/minishift/network"
 	openshiftVersion "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	stringUtils "github.com/minishift/minishift/pkg/util/strings"
 )
@@ -153,6 +153,12 @@ func preflightChecksAfterStartingHost(driver drivers.Driver) {
 		"Checking for IP address",
 		configCmd.WarnInstanceIP.Name,
 		"Error determining IP address")
+	preflightCheckSucceedsOrFailsWithDriver(
+		configCmd.SkipCheckNameservers.Name,
+		checkNameservers, driver,
+		"Checking for nameservers",
+		configCmd.WarnCheckNameservers.Name,
+		"VM does not have any nameserver setup")
 	preflightCheckSucceedsOrFailsWithDriver(
 		configCmd.SkipCheckNetworkPing.Name,
 		checkIPConnectivity, driver,
@@ -364,12 +370,38 @@ func checkLibvirtDefaultNetworkActive() bool {
 
 // checkHypervDriverSwitch returns true if Virtual Switch has been selected
 func checkHypervDriverSwitch() bool {
-	switchEnv := os.Getenv("HYPERV_VIRTUAL_SWITCH")
-	if switchEnv == "" {
+	switchEnvName := "HYPERV_VIRTUAL_SWITCH"
+	posh := powershell.New()
+	defer posh.Close()
+
+	switchEnvValue := os.Getenv(switchEnvName)
+
+	if switchEnvValue == "" {
+		checkIfDefaultSwitchExists := `Get-VMSwitch -Id c08cb7b8-9b3c-408e-8e30-5e16a3aeb444 | ForEach-Object { $_.SwitchType }`
+		fmt.Printf("\n   'Default Switch' ... ")
+		stdOut, _ := posh.Execute(checkIfDefaultSwitchExists)
+		if strings.Contains(stdOut, "Internal") {
+
+			// force setting the environment variable
+			os.Setenv("HYPERV_VIRTUAL_SWITCH", "Default Switch")
+			return true
+		}
+
 		return false
 	}
 
-	return true
+	if switchEnvValue != "" {
+		checkIfVirtualSwitchExists := fmt.Sprintf("Get-VMSwitch %s| ForEach-Object { $_.SwitchType }", switchEnvValue)
+		fmt.Printf(fmt.Sprintf("\n   '%s' ... ", switchEnvValue))
+		stdOut, _ := posh.Execute(checkIfVirtualSwitchExists)
+		if strings.Contains(stdOut, "Get-VMSwitch") {
+			return false // error returned
+		}
+
+		return true
+	}
+
+	return false
 }
 
 // checkHypervDriverInstalled returns true if Hyper-V driver is installed
@@ -382,6 +414,7 @@ func checkHypervDriverInstalled() bool {
 
 	// check to see if a hypervisor is present. if hyper-v is installed and enabled,
 	posh := powershell.New()
+	defer posh.Close()
 
 	checkHypervisorPresent := `@(Get-Wmiobject Win32_ComputerSystem).HypervisorPresent`
 
@@ -396,6 +429,7 @@ func checkHypervDriverInstalled() bool {
 // checkHypervDriverUser returns true if user is member of Hyper-V admin
 func checkHypervDriverUser() bool {
 	posh := powershell.New()
+	defer posh.Close()
 
 	// Use RID to prevent issues with localized groups: https://github.com/minishift/minishift/issues/1541
 	// https://support.microsoft.com/en-us/help/243330/well-known-security-identifiers-in-windows-operating-systems
@@ -425,12 +459,17 @@ func checkInstanceIP(driver drivers.Driver) bool {
 	return false
 }
 
+// checkNameservers will return true if the instance has nameservers
+func checkNameservers(driver drivers.Driver) bool {
+	return minishiftNetwork.HasNameserversConfigured(driver)
+}
+
 // checkIPConnectivity checks if the VM has connectivity to the outside network
 func checkIPConnectivity(driver drivers.Driver) bool {
 	ipToPing := viper.GetString(configCmd.CheckNetworkPingHost.Name)
 
 	fmt.Printf("\n   Pinging %s ... ", ipToPing)
-	return minishiftUtil.IsIPReachable(driver, ipToPing, false)
+	return minishiftNetwork.IsIPReachable(driver, ipToPing, false)
 }
 
 // checkHttpConnectivity allows to test outside connectivity and possible proxy support
@@ -438,7 +477,7 @@ func checkHttpConnectivity(driver drivers.Driver) bool {
 	urlToRetrieve := viper.GetString(configCmd.CheckNetworkHttpHost.Name)
 
 	fmt.Printf("\n   Retrieving %s ... ", urlToRetrieve)
-	return minishiftUtil.IsRetrievable(driver, urlToRetrieve, false)
+	return minishiftNetwork.IsRetrievable(driver, urlToRetrieve, false)
 }
 
 // checkStorageMounted checks if the persistent storage volume, storageDisk, is

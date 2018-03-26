@@ -100,6 +100,13 @@ var (
 		Value:     cmdUtil.NewStringSliceValue([]string{}, &[]string{}),
 	}
 
+	nameServersFlag = &flag.Flag{
+		Name:      configCmd.NameServers.Name,
+		Shorthand: "",
+		Usage:     "Specify nameserver to use for the instance.",
+		Value:     cmdUtil.NewStringSliceValue([]string{}, &[]string{}),
+	}
+
 	startCmd *cobra.Command
 
 	// Set default value for host data and config dir
@@ -177,6 +184,9 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	hostVm := startHost(libMachineClient)
 	registrationUtil.RegisterHost(libMachineClient)
+
+	// Forcibly set nameservers when configured
+	minishiftNetwork.AddNameserversToInstance(hostVm.Driver, getSlice(configCmd.NameServers.Name))
 
 	// preflight checks (after start)
 	preflightChecksAfterStartingHost(hostVm.Driver)
@@ -330,6 +340,8 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 		HostOnlyCIDR:     viper.GetString(configCmd.HostOnlyCIDR.Name),
 		ShellProxyEnv:    shellProxyEnv,
 	}
+	minishiftConfig.InstanceConfig.VMDriver = machineConfig.VMDriver
+	minishiftConfig.InstanceConfig.Write()
 
 	fmt.Printf(" using '%s' hypervisor ...\n", machineConfig.VMDriver)
 	var hostVm *host.Host
@@ -343,21 +355,7 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 		fmt.Println("   Disk size:", units.HumanSize(float64(machineConfig.DiskSize*units.MB)))
 	}
 
-	// Experimental features
-	if minishiftConfig.EnableExperimental {
-		networkSettings := minishiftNetwork.NetworkSettings{
-			Device:    viper.GetString(configCmd.NetworkDevice.Name),
-			IPAddress: viper.GetString(configCmd.IPAddress.Name),
-			Netmask:   viper.GetString(configCmd.Netmask.Name),
-			Gateway:   viper.GetString(configCmd.Gateway.Name),
-			DNS1:      viper.GetString(configCmd.NameServer.Name),
-		}
-
-		// Configure networking on startup only works on Hyper-V
-		if networkSettings.IPAddress != "" {
-			minishiftNetwork.ConfigureNetworking(constants.MachineName, machineConfig.VMDriver, networkSettings)
-		}
-	}
+	configureNetworkSettings()
 
 	cacheMinishiftISO(machineConfig)
 
@@ -379,6 +377,28 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 
 	fmt.Println(" OK")
 	return hostVm
+}
+
+func configureNetworkSettings() {
+	networkSettings := minishiftNetwork.NetworkSettings{
+		Device:    viper.GetString(configCmd.NetworkDevice.Name),
+		IPAddress: viper.GetString(configCmd.IPAddress.Name),
+		Netmask:   viper.GetString(configCmd.Netmask.Name),
+		Gateway:   viper.GetString(configCmd.Gateway.Name),
+	}
+
+	nameservers := getSlice(configCmd.NameServers.Name)
+	if len(nameservers) > 0 {
+		networkSettings.DNS1 = nameservers[0]
+	}
+	if len(nameservers) > 1 {
+		networkSettings.DNS2 = nameservers[1]
+	}
+
+	// Configure networking on startup only works on Hyper-V
+	if networkSettings.IPAddress != "" {
+		minishiftNetwork.ConfigureNetworking(constants.MachineName, networkSettings)
+	}
 }
 
 func autoMountHostFolders(driver drivers.Driver) {
@@ -549,13 +569,13 @@ func initStartFlags() *flag.FlagSet {
 	startFlagSet.AddFlag(registryMirrorFlag)
 	startFlagSet.AddFlag(cmdUtil.AddOnEnvFlag)
 
-	if minishiftConfig.EnableExperimental && runtime.GOOS == "windows" {
-		startFlagSet.String(configCmd.NetworkDevice.Name, "eth0", "Specify the network device to use for the IP address. Ignored if no IP address specified (experimental - Hyper-V only)")
-		startFlagSet.String(configCmd.IPAddress.Name, "", "Specify IP address to assign to the instance (experimental - Hyper-V only)")
-		startFlagSet.String(configCmd.Netmask.Name, "24", "Specify netmask to use for the IP address. Ignored if no IP address specified (experimental - Hyper-V only)")
-		startFlagSet.String(configCmd.Gateway.Name, "", "Specify gateway to use for the instance. Ignored if no IP address specified (experimental - Hyper-V only)")
-		startFlagSet.String(configCmd.NameServer.Name, "8.8.8.8", "Specify nameserver to use for the instance. Ignored if no IP address specified (experimental - Hyper-V only)")
+	if runtime.GOOS == "windows" {
+		startFlagSet.String(configCmd.NetworkDevice.Name, "", "Specify the network device to use for the IP address. Ignored if no IP address specified (Hyper-V only)")
+		startFlagSet.String(configCmd.IPAddress.Name, "", "Specify IP address to assign to the instance (Hyper-V only)")
+		startFlagSet.String(configCmd.Netmask.Name, "", "Specify netmask to use for the IP address. Ignored if no IP address specified (Hyper-V only)")
+		startFlagSet.String(configCmd.Gateway.Name, "", "Specify gateway to use for the instance. Ignored if no IP address specified (Hyper-V only)")
 	}
+	startFlagSet.AddFlag(nameServersFlag)
 
 	if minishiftConfig.EnableExperimental {
 		startFlagSet.String(configCmd.ISOUrl.Name, minishiftConstants.B2dIsoAlias, "Location of the minishift ISO. Can be an URL, file URI or one of the following short names: [b2d centos minikube].")

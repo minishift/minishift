@@ -70,3 +70,4 @@ writing documentation, see the https://docs.openshift.org/latest/minishift/contr
 
 If you want to contribute, make sure to follow the link:CONTRIBUTING.adoc[contribution guidelines]
 when you open issues or submit pull requests.
+

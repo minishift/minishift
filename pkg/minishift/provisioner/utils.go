@@ -32,6 +32,7 @@ import (
 	"github.com/docker/machine/libmachine/provision/serviceaction"
 	"github.com/minishift/minishift/pkg/minikube/assets"
 	"github.com/minishift/minishift/pkg/minikube/sshutil"
+	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/pkg/errors"
 )
 
@@ -262,6 +263,22 @@ func configureAuth(p *BuildrootProvisioner) error {
 	if err := p.Service("docker", serviceaction.Restart); err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func doFeatureDetection(p provision.Provisioner) error {
+	if out, err := p.SSHCommand(fmt.Sprintf("test -f %s && echo '1' || echo '0' ", "/usr/local/bin/minishift-set-ipaddress")); err != nil {
+		return err
+	} else {
+		if strings.Trim(out, "\n") == "1" {
+			minishiftConfig.InstanceConfig.SupportsNetworkAssignment = true
+		} else {
+			minishiftConfig.InstanceConfig.SupportsNetworkAssignment = false
+		}
+	}
+
+	minishiftConfig.InstanceConfig.Write()
 
 	return nil
 }

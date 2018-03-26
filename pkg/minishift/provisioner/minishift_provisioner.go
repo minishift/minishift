@@ -138,6 +138,8 @@ func (provisioner *MinishiftProvisioner) Provision(swarmOptions swarm.Options, a
 		return err
 	}
 
+	doFeatureDetection(provisioner)
+
 	return nil
 }
 

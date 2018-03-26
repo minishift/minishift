@@ -132,6 +132,8 @@ var (
 	WarnCheckStorageMount = createConfigSetting("warn-check-storage-mount", SetBool, nil, nil, true, false)
 	SkipCheckStorageUsage = createConfigSetting("skip-check-storage-usage", SetBool, nil, nil, true, nil)
 	WarnCheckStorageUsage = createConfigSetting("warn-check-storage-usage", SetBool, nil, nil, true, false)
+	SkipCheckNameservers  = createConfigSetting("skip-check-nameservers", SetBool, nil, nil, true, nil)
+	WarnCheckNameservers  = createConfigSetting("warn-check-nameservers", SetBool, nil, nil, true, false)
 
 	// Pre-flight values
 	CheckNetworkHttpHost = createConfigSetting("check-network-http-host", SetString, nil, nil, true, "http://minishift.io/index.html")
@@ -142,7 +144,7 @@ var (
 	IPAddress     = createConfigSetting("network-ipaddress", SetString, []setFn{validations.IsValidIPv4Address}, nil, true, nil)
 	Netmask       = createConfigSetting("network-netmask", SetString, []setFn{validations.IsValidNetmask}, nil, true, nil)
 	Gateway       = createConfigSetting("network-gateway", SetString, []setFn{validations.IsValidIPv4Address}, nil, true, nil)
-	NameServer    = createConfigSetting("network-nameserver", SetString, []setFn{validations.IsValidIPv4Address}, nil, true, nil)
+	NameServers   = createConfigSetting("network-nameserver", SetSlice, []setFn{validations.IsValidIPv4AddressSlice}, nil, true, nil)
 )
 
 func createConfigSetting(name string, set func(MinishiftConfig, string, string) error, validations []setFn, callbacks []setFn, isApply bool, defaultVal interface{}) *Setting {

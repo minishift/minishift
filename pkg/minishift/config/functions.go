@@ -14,34 +14,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package powershell
+package config
 
-import (
-	ps "github.com/gorillalabs/go-powershell"
-	"github.com/gorillalabs/go-powershell/backend"
-)
-
-type PowerShell struct {
-	powerShell ps.Shell
-}
-
-func New() *PowerShell {
-	return &PowerShell{
-		powerShell: createPowerShell(),
+func checkDriver(driverName string) bool {
+	if InstanceConfig.VMDriver == driverName {
+		return true
 	}
+	return false
 }
 
-func (p *PowerShell) Close() {
-	p.powerShell.Exit()
+func IsVirtualBox() bool {
+	return checkDriver("virtualbox")
 }
 
-func (p *PowerShell) Execute(command string) (stdOut string, stdErr string) {
-	stdOut, stdErr, _ = p.powerShell.Execute(command)
-	return
+func IsHyperV() bool {
+	return checkDriver("hyperv")
 }
 
-func createPowerShell() ps.Shell {
-	back := &backend.Local{}
-	shell, _ := ps.New(back)
-	return shell
+func IsXhyve() bool {
+	return checkDriver("xhyve")
+}
+
+func IsKVM() bool {
+	return checkDriver("kvm")
 }

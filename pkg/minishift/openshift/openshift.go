@@ -23,6 +23,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/minishift/docker"
+	openshiftVersionCheck "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	"github.com/pborman/uuid"
 )
 
@@ -77,7 +78,7 @@ func RestartOpenShift(commander docker.DockerCommander) (bool, error) {
 	return ok, nil
 }
 
-func Patch(target OpenShiftPatchTarget, patch string, commander docker.DockerCommander) (bool, error) {
+func Patch(target OpenShiftPatchTarget, patch string, commander docker.DockerCommander, openshiftVersion string) (bool, error) {
 	fmt.Println(fmt.Sprintf("Patching OpenShift configuration '%s' with '%s'", target.containerConfigFile, patch))
 
 	patchId, err := backUpConfig(target, commander)
@@ -91,7 +92,17 @@ func Patch(target OpenShiftPatchTarget, patch string, commander docker.DockerCom
 	}
 
 	patchCommand := fmt.Sprintf("ex config patch %s --patch='%s'", containerConfigPath, patch)
-	result, err := commander.Exec("-t", constants.OpenshiftContainerName, constants.OpenshiftExec, patchCommand)
+	executer := constants.OpenshiftExec
+	// OpenShift >= 3.9 we need to run `ex config patch` using oc binary inside the origin container instead openshift server binary.
+	valid, err := openshiftVersionCheck.IsGreaterOrEqualToBaseVersion(openshiftVersion, "v3.9.0-alpha.3")
+	if err != nil {
+		return false, err
+	}
+	if valid {
+		executer = constants.OpenshiftOcExec
+	}
+
+	result, err := commander.Exec("-t", constants.OpenshiftContainerName, executer, patchCommand)
 	if err != nil {
 		glog.Error("Creating patched configuration failed. Not applying the changes.", err)
 		return false, nil

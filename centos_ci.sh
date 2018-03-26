@@ -303,7 +303,9 @@ function perform_docs_publish() {
 
 function prepare_for_proxy() {
   export INTEGRATION_PROXY_CUSTOM_PORT=8181 # needs to be an unused port
+  export INTEGRATION_DEFAULT_SSHFS_PORT=2022
   firewall-cmd --zone=public --add-port=$INTEGRATION_PROXY_CUSTOM_PORT/tcp;
+  firewall-cmd --zone=public --add-port=$INTEGRATION_DEFAULT_SSHFS_PORT/tcp;
 }
 
 function perform_release() {

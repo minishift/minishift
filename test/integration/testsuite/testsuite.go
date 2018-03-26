@@ -242,6 +242,10 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^printing Docker daemon configuration to stdout$`,
 		catDockerConfigFile)
 
+	s.Step(`^adding hostfolder of type "([^"]*)" of source directory "([^"]*)" to mount point "([^"]*)" of share name "([^"]*)" succeeds$`,
+		MinishiftInstance.addHostFolder)
+	s.Step(`^hostfolder share name "([^"]*)" (should|should not) be mounted$`, MinishiftInstance.hostFolderMountStatus)
+
 	// File download
 	// when external file is needed, for example, when downloading addon from minishift-addons
 	s.Step(`^file from "(.*)" is downloaded into location "(.*)"$`,
@@ -252,7 +256,14 @@ func FeatureContext(s *godog.Suite) {
 		deletingDirectorySucceeds)
 	s.Step(`^directory "([^"]*)" shouldn\'t exist$`,
 		directoryShouldntExist)
-
+	s.Step(`^creating directory "([^"]*)" succeeds$`,
+		creatingDirectoryInTestDirSucceeds)
+	s.Step(`^creating file "([^"]*)" in directory "([^"]*)" succeeds$`,
+		createFileInTestDirSucceeds)
+	s.Step(`^writing text "([^"]*)" to file "([^"]*)" in directory path "([^"]*)" succeeds$`,
+		writeToFileInTestDirSucceeds)
+	s.Step(`^file "([^"]*)" should match text "([^"]*)" succeeds$`,
+		readFileForTextMatchSucceeds)
 	// Prototyping and debugging
 	// please do not use in production
 	s.Step(`^user (?:waits|waited) "(\d+)" seconds?$`,
@@ -817,4 +828,48 @@ func setEnvironmentVariable(key string, value string) error {
 
 func unSetEnvironmentVariable(key string) error {
 	return os.Unsetenv(key)
+}
+
+func creatingDirectoryInTestDirSucceeds(dirName string) error {
+	return os.MkdirAll(testDir+"/"+dirName, 0777)
+}
+
+func createFileInTestDirSucceeds(fileName string, filePath string) error {
+	_, err := os.Stat(filePath + "/" + fileName)
+	if os.IsNotExist(err) {
+		file, err := os.Create(filePath + "/" + fileName)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+	}
+	return nil
+}
+
+func writeToFileInTestDirSucceeds(text string, fileName string, filePath string) error {
+	file, err := os.OpenFile(filePath+"/"+fileName, os.O_RDWR, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	_, err = file.WriteString(text)
+	if err != nil {
+		return err
+	}
+	err = file.Sync()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func readFileForTextMatchSucceeds(filePath string, textMatch string) error {
+	text, err := getFileContent(filePath)
+	if err != nil {
+		return err
+	}
+	if strings.Trim(string(text), " \n") != textMatch {
+		return fmt.Errorf("Expected: %s, Actual: %s", textMatch, text)
+	}
+	return nil
 }

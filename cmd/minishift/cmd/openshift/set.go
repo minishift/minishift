@@ -29,6 +29,7 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minishift/docker"
 	"github.com/minishift/minishift/pkg/minishift/openshift"
+	openshiftVersions "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 )
 
@@ -77,8 +78,12 @@ func runPatch(cmd *cobra.Command, args []string) {
 
 	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
 	dockerCommander := docker.NewVmDockerCommander(sshCommander)
+	openshiftVersion, err := openshiftVersions.GetOpenshiftVersionWithoutK8sAndEtcd(sshCommander)
+	if err != nil {
+		atexit.ExitWithMessage(1, err.Error())
+	}
 
-	_, err = openshift.Patch(patchTarget, patch, dockerCommander)
+	_, err = openshift.Patch(patchTarget, patch, dockerCommander, openshiftVersion)
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error patching the OpenShift configuration: %s", err.Error()))
 	}

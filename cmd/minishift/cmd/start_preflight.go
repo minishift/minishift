@@ -36,7 +36,7 @@ import (
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/viper"
 
-	cmdUtils "github.com/minishift/minishift/cmd/minishift/cmd/util"
+	"github.com/libvirt/libvirt-go"
 	openshiftVersion "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	stringUtils "github.com/minishift/minishift/pkg/util/strings"
 )
@@ -340,26 +340,17 @@ func checkLibvirtDefaultNetworkExists() bool {
 
 //checkLibvirtDefaultNetworkActive returns true if the "default" network is active
 func checkLibvirtDefaultNetworkActive() bool {
-	cmd := exec.Command("virsh", "--connect", "qemu:///system", "net-list")
-	cmd.Env = cmdUtils.ReplaceEnv(os.Environ(), "LC_ALL", "C")
-	stdOutStdError, err := cmd.CombinedOutput()
+	conn, err := libvirt.NewConnect("qemu:///system")
+	defer conn.Close()
 	if err != nil {
 		return false
 	}
-	stdOut := fmt.Sprintf("%s", stdOutStdError)
-	outputSlice := strings.Split(stdOut, "\n")
-
-	for _, stdOut = range outputSlice {
-		stdOut = strings.TrimSpace(stdOut)
-		match, err := regexp.MatchString("^default\\s", stdOut)
-		if err != nil {
-			return false
-		}
-		if match && strings.Contains(stdOut, "active") {
-			return true
-		}
+	defaultNet, err := conn.LookupNetworkByName("default")
+	if err != nil {
+		return false
 	}
-	return false
+	isActive, _ := defaultNet.IsActive()
+	return isActive
 }
 
 // checkHypervDriverSwitch returns true if Virtual Switch has been selected

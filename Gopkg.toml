@@ -184,3 +184,6 @@ ignored = ["github.com/Sirupsen/logrus"]
   name = "github.com/pkg/sftp"
   version = "1.0.0"
 
+[[constraint]]
+  name = "github.com/libvirt/libvirt-go"
+  version = "4.1.0"

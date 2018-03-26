@@ -400,6 +400,12 @@
   revision = "2788f0dbd16903de03cb8186e5c7d97b69ad387b"
 
 [[projects]]
+  name = "github.com/libvirt/libvirt-go"
+  packages = ["."]
+  revision = "b8570d1869813105e8fb57b728900a98291658f7"
+  version = "v4.1.0"
+
+[[projects]]
   name = "github.com/machine-drivers/docker-machine-driver-hyperkit"
   packages = [
     "pkg/drivers",
@@ -735,6 +741,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a8b3132400a2b7599e27f66940235f05a28ea77c00039884e03943a10597d38f"
+  inputs-digest = "7087fbe41bd09481d1ada52bd9413f2012326f4a24b34b269f4b1a9cd9070e5c"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -38,8 +38,8 @@ Workaround: When creating and entering passwords, wrap the string with single qu
 [[authentication-required-to-push-image]]
 == Authentication required to push image to OpenShift integrated Docker registry
 
-If you are using a Fedora, CentOS or RHEL host and you want to push to the OpenShift registry as described in xref:../openshift/openshift-docker-registry.adoc#[Accessing the OpenShift Docker Registry], you have to use the CentOS xref:../using/basic-usage.adoc#choosing-iso-image#[ISO].
-Using the Boot2Docker or Minikube xref:../using/basic-usage.adoc#choosing-iso-image#[ISO] will result in the following authorization error:
+If you are using a Fedora, CentOS or RHEL host and you want to push to the OpenShift registry as described in xref:../openshift/openshift-docker-registry.adoc#[Accessing the OpenShift Docker Registry], you have to use the CentOS xref:../using/basic-usage.adoc#choosing-iso-image[ISO].
+Using the Boot2Docker or Minikube xref:../using/basic-usage.adoc#choosing-iso-image[ISO] will result in the following authorization error:
 
 ----
 $ docker login -u developer -p `oc whoami -t` 172.30.1.1:5000
@@ -54,7 +54,7 @@ unauthorized: authentication required
 
 The reason is an incompatibility between the Docker client shipped with your host and the Docker daemon which is running inside the {project} VM.
 
-Workaround: Use the xref:../using/basic-usage.adoc#choosing-iso-image#[CentOS ISO] when using {project} on Fedora, CentOS or RHEL.
+Workaround: Use the xref:../using/basic-usage.adoc#choosing-iso-image[CentOS ISO] when using {project} on Fedora, CentOS or RHEL.
 For example:
 
 ----

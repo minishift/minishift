@@ -197,7 +197,7 @@ clean:
 
 .PHONY: test
 test: vendor $(ADDON_ASSET_FILE)  ## Run unit tests
-	@go test -tags "$(BUILD_TAGS)" -ldflags="$(VERSION_VARIABLES)" $(shell $(PACKAGES))
+	@go test -v -tags "$(BUILD_TAGS)" -ldflags="$(VERSION_VARIABLES)" $(shell $(PACKAGES))
 
 .PHONY: integration
 integration: GODOG_OPTS = --tags=basic ## Run integration tests

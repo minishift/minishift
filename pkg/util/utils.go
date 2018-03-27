@@ -187,10 +187,10 @@ func CommandExecutesSuccessfully(cmd string, args ...string) bool {
 func IsDirectoryWritable(path string) bool {
 	tmpFilePath := filepath.Join(path, "tmp")
 	_, err := os.Create(tmpFilePath)
-	defer os.Remove(tmpFilePath)
 	if err != nil {
 		return false
 	}
+	defer os.Remove(tmpFilePath)
 
 	return true
 }

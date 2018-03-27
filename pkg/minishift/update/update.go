@@ -81,8 +81,8 @@ func Update(latestVersion semver.Version) error {
 	var extName string
 
 	path, _ := osext.Executable()
-	if writable := util.IsDirectoryWritable(path); !writable {
-		return fmt.Errorf("Directory '%s' binary doesn't have write permission.\nPlease fix the permission issue and try running the command again.", filepath.Dir(path))
+	if writable := util.IsDirectoryWritable(filepath.Dir(path)); !writable {
+		return fmt.Errorf("Directory '%s' doesn't have write permission.\nPlease fix the permission issue and try running the command again.", filepath.Dir(path))
 	}
 
 	// Temporary directory to store archive contents

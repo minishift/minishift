@@ -55,12 +55,6 @@
   version = "v3.5.0"
 
 [[projects]]
-  name = "github.com/cloudflare/cfssl"
-  packages = ["log"]
-  revision = "4e2dcbde500472449917533851bf4bae9bdff562"
-  version = "1.3.1"
-
-[[projects]]
   name = "github.com/containers/image"
   packages = [
     "copy",
@@ -378,12 +372,6 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/johanneswuerbach/nfsexports"
-  packages = ["."]
-  revision = "a9068f3f0daa39616953aec11c3eb1209ebc4086"
-
-[[projects]]
-  branch = "master"
   name = "github.com/juju/errors"
   packages = ["."]
   revision = "c7d06af17c68cd34c835053720b21f6549d9b0ee"
@@ -398,15 +386,6 @@
   name = "github.com/kr/fs"
   packages = ["."]
   revision = "2788f0dbd16903de03cb8186e5c7d97b69ad387b"
-
-[[projects]]
-  name = "github.com/machine-drivers/docker-machine-driver-hyperkit"
-  packages = [
-    "pkg/drivers",
-    "pkg/hyperkit"
-  ]
-  revision = "88bae774eacefa283ef549f6ea6bc202d97ca07a"
-  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/magiconair/properties"
@@ -434,21 +413,9 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/mitchellh/go-ps"
-  packages = ["."]
-  revision = "4fdf99ab29366514c69ccccddab5dc58b8d84062"
-
-[[projects]]
-  branch = "master"
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
   revision = "00c29f56e2386353d58c599509e8dc3801b0d716"
-
-[[projects]]
-  name = "github.com/moby/hyperkit"
-  packages = ["go"]
-  revision = "858492e3d919f8b49a39e1944a49e1d7b4a51e6d"
-  version = "v0.20171204"
 
 [[projects]]
   branch = "master"
@@ -626,12 +593,6 @@
   version = "v0.10.2"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/zchee/go-vmnet"
-  packages = ["."]
-  revision = "97ebf91740978f1e665defc0a960fb997ebe282b"
-
-[[projects]]
   name = "golang.org/x/crypto"
   packages = [
     "cast5",
@@ -735,6 +696,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a8b3132400a2b7599e27f66940235f05a28ea77c00039884e03943a10597d38f"
+  inputs-digest = "43ecc8a0c8e0b7505ad016db24e92aba61aab35908254bc41345b550e5056303"
   solver-name = "gps-cdcl"
   solver-version = 1

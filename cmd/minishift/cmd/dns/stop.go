@@ -23,12 +23,10 @@ import (
 
 	"github.com/docker/machine/libmachine"
 
-	dnsActions "github.com/minishift/minishift/pkg/minishift/network/dns"
-
-	"github.com/docker/machine/libmachine/provision"
+	cmdUtil "github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/cmd/minishift/state"
-	"github.com/minishift/minishift/pkg/minikube/cluster"
-	"github.com/minishift/minishift/pkg/minishift/docker"
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minishift/network/dns"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 )
 
@@ -45,15 +43,13 @@ func stopDns(cmd *cobra.Command, args []string) {
 	api := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
 	defer api.Close()
 
-	host, err := cluster.CheckIfApiExistsAndLoad(api)
+	host, err := api.Load(constants.MachineName)
 	if err != nil {
 		atexit.ExitWithMessage(1, nonExistentMachineError)
 	}
+	cmdUtil.ExitIfNotRunning(host.Driver, constants.MachineName)
 
-	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
-	dockerCommander := docker.NewVmDockerCommander(sshCommander)
-
-	_, err = dnsActions.Stop(dockerCommander)
+	_, err = dns.Stop(host.Driver)
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error starting the DNS server: %s", err.Error()))
 	}

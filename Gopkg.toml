@@ -117,11 +117,6 @@ ignored = ["github.com/Sirupsen/logrus"]
   name = "github.com/docker/go-connections"
   revision = "3ede32e2033de7505e6500d6c868c2b9ed9f169d"
 
-# Get dependencies for hyperkit
-[[constraint]]
-  name = "github.com/machine-driver/docker-machine-driver-hyperkit"
-  version = "=v1.0.0"
-
 # Use override for docker/docker and docker/distribution to ensure we get the specfied version.
 # In particular we need a version which uses the altest logrus
 [[override]]

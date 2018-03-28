@@ -18,17 +18,19 @@ package dns
 
 import (
 	"fmt"
+	"github.com/minishift/minishift/pkg/minishift/network"
 )
 
 func handleHostDNSSettingsAfterStart(ipAddress string) (bool, error) {
-	fmt.Println("Add as first line in /etc/resolv.conf: nameserver", ipAddress)
+	fmt.Println(fmt.Sprintf("Add as first line in /etc/resolv.conf: nameserver %s", ipAddress))
 
 	return true, nil
 }
 
-func handleHostDNSSettingsAfterStop() (bool, error) {
-	fmt.Println("Please remove the entry from /etc/resolv.conf")
-
+func handleHostDNSSettingsAfterStop(ipAddress string) (bool, error) {
+	if has, _ := network.HasNameserverConfiguredLocally(ipAddress); has == true {
+		fmt.Println(fmt.Sprintf("Please remove the entry for %s from /etc/resolv.conf", ipAddress))
+	}
 	return true, nil
 }
 

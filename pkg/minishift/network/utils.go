@@ -18,7 +18,11 @@ package network
 
 import (
 	"errors"
+	"fmt"
+	"io/ioutil"
 	"net"
+	"strconv"
+	"strings"
 
 	"github.com/docker/machine/libmachine/drivers"
 )
@@ -50,4 +54,45 @@ func DetermineHostIP(driver drivers.Driver) (string, error) {
 	}
 
 	return "", errors.New("unknown error occurred")
+}
+
+// HasNameserversConfigured returns true if the instance uses nameservers
+// This is related to an issues when LCOW is used on Windows.
+func HasNameserversConfigured(driver drivers.Driver) bool {
+	cmd := "cat /etc/resolv.conf | grep -i '^nameserver' | wc -l | tr -d '\n'"
+	out, err := drivers.RunSSHCommandFromDriver(driver, cmd)
+
+	if err != nil {
+		return false
+	}
+
+	i, _ := strconv.Atoi(out)
+
+	return i != 0
+}
+
+// AddNameserversToInstance will add additional nameservers to the end of the
+// /etc/resolv.conf file inside the instance.
+func AddNameserversToInstance(driver drivers.Driver, nameservers []string) {
+	// TODO: verify values to be valid
+
+	for _, ns := range nameservers {
+		addNameserverToInstance(driver, ns)
+	}
+}
+
+// writes nameserver to the /etc/resolv.conf inside the instance
+func addNameserverToInstance(driver drivers.Driver, nameserver string) {
+	executeCommandOrExit(driver,
+		fmt.Sprintf("NS=%s; cat /etc/resolv.conf |grep -i \"^nameserver $NS\" || echo \"nameserver $NS\" | sudo tee -a /etc/resolv.conf", nameserver),
+		"Error adding nameserver")
+}
+
+func HasNameserverConfiguredLocally(nameserver string) (bool, error) {
+	file, err := ioutil.ReadFile("/etc/resolv.conf")
+	if err != nil {
+		return false, err
+	}
+
+	return strings.Contains(string(file), nameserver), nil
 }

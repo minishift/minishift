@@ -21,13 +21,13 @@ import (
 )
 
 func handleHostDNSSettingsAfterStart(ipAddress string) (bool, error) {
-	fmt.Println("Add a file /etc/resolver/.nip.io, containing: nameserver", ipAddress)
+	fmt.Println(fmt.Sprintf("Add a file /etc/resolver/nip.io, containing: nameserver %s\nsearch_order 1", ipAddress))
 
 	return true, nil
 }
 
-func handleHostDNSSettingsAfterStop() (bool, error) {
-	fmt.Println("Remove the file /etc/resolver/.nip.io")
+func handleHostDNSSettingsAfterStop(ipAddress string) (bool, error) {
+	fmt.Println("Remember to remove the file /etc/resolver/.nip.io")
 
 	return true, nil
 }

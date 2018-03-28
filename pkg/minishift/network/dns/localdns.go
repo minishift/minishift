@@ -22,7 +22,13 @@ import (
 	"fmt"
 	"text/template"
 
-	"github.com/minishift/minishift/pkg/minishift/docker"
+	// should not be here
+	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
+
+	"github.com/docker/machine/libmachine/drivers"
+	"github.com/docker/machine/libmachine/provision"
+	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
+
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 )
 
@@ -33,9 +39,14 @@ const (
 	additionalHostsPath   = "/var/lib/minishift/dnsmasq.hosts"
 	dnsmasqContainerImage = "registry.centos.org/minishift/dnsmasq"
 	dnsmasqContainerName  = "dnsmasq"
+	dnsmasqServiceName    = "dnsmasq"
 )
 
 var (
+	dnsmasqServicePrerequisites = `sudo rm -rf /etc/dnsmasq.* /etc/resolv.dnsmasq.conf; \
+sudo ln -s /var/lib/minishift/dnsmasq.hosts /etc/dnsmasq.hosts; \
+sudo ln -s /var/lib/minishift/dnsmasq.conf /etc/dnsmasq.conf; \
+sudo ln -s /var/lib/minishift/resolv.dnsmasq.conf /etc/resolv.dnsmasq.conf`
 	dnsmasqContainerRunOptions = `--name %s \
 	--privileged \
     -v /var/lib/minishift/dnsmasq.hosts:/etc/dnsmasq.hosts:Z \
@@ -83,93 +94,86 @@ func printDnsmasqConfiguration(dnsmasqConfiguration DnsmasqConfiguration) {
 	fmt.Println(fillDnsmasqConfiguration(dnsmasqConfiguration))
 }
 
-// IsRunning checks whether the dnsmasq container is in running state.
-func IsRunning(dockerCommander docker.DockerCommander) bool {
-	status, err := dockerCommander.Status(dnsmasqContainerName)
-	if err != nil || status != "running" {
-		return false
+func handleConfiguration(sshCommander provision.SSHCommander, ipAddress string, routingDomain string) (bool, error) {
+
+	dnsmasqConfiguration := DnsmasqConfiguration{
+		Port:                dnsmasqPort,
+		ResolveFilename:     resolveFilename,
+		AdditionalHostsPath: additionalHostsPath,
+		Domain:              "minishift",
+		RoutingDomain:       routingDomain,
+		LocalIP:             ipAddress,
+	}
+	dnsmasqConfigurationFile := fillDnsmasqConfiguration(dnsmasqConfiguration) // perhaps move this to the struct as a ToString()
+	encodedDnsmasqConfigurationFile := base64.StdEncoding.EncodeToString([]byte(dnsmasqConfigurationFile))
+	configCommand := fmt.Sprintf(
+		"echo %s | base64 --decode | sudo tee /var/lib/minishift/dnsmasq.conf > /dev/null",
+		encodedDnsmasqConfigurationFile)
+
+	execCommand := fmt.Sprintf("sudo mkdir %s && %s && sudo cp /etc/resolv.conf %s",
+		additionalHostsPath,
+		configCommand,
+		resolveFilename)
+	_, execError := sshCommander.SSHCommand(execCommand)
+	if execError != nil {
+		return false, execError
 	}
 
-	return true
-}
-
-func Restart(dockerCommander docker.DockerCommander) (bool, error) {
-	ok, err := dockerCommander.Restart(dnsmasqContainerName)
-	if err != nil {
-		return false, err
+	// matters if minikube, but let's always try
+	resolvedCommand := fmt.Sprintf("sudo systemctl stop systemd-resolved")
+	resolveOut, _ := sshCommander.SSHCommand(resolvedCommand)
+	if resolveOut == "" {
+		// when stopped, no nameservers are available
+		// remove the stale symlink and write the resolv back to pull image
+		sshCommander.SSHCommand(fmt.Sprintf("sudo rm -f /etc/resolv.conf; sudo cp %s /etc/resolv.conf", resolveFilename))
 	}
 
-	return ok, nil
+	return true, nil
 }
 
-func Start(dockerCommander docker.DockerCommander, ipAddress string, routingDomain string) (bool, error) {
-	_, err := dockerCommander.Status(dnsmasqContainerName)
-	if err != nil {
+func IsRunning(driver drivers.Driver) bool {
+	sshCommander := provision.GenericSSHCommander{Driver: driver}
 
-		dnsmasqConfiguration := DnsmasqConfiguration{
-			Port:                dnsmasqPort,
-			ResolveFilename:     resolveFilename,
-			AdditionalHostsPath: additionalHostsPath,
-			Domain:              "minishift",
-			RoutingDomain:       routingDomain,
-			LocalIP:             ipAddress,
-		}
-		dnsmasqConfigurationFile := fillDnsmasqConfiguration(dnsmasqConfiguration) // perhaps move this to the struct as a ToString()
-		encodedDnsmasqConfigurationFile := base64.StdEncoding.EncodeToString([]byte(dnsmasqConfigurationFile))
-		configCommand := fmt.Sprintf(
-			"echo %s | base64 --decode | sudo tee /var/lib/minishift/dnsmasq.conf > /dev/null",
-			encodedDnsmasqConfigurationFile)
-
-		execCommand := fmt.Sprintf("sudo mkdir %s && %s && sudo cp /etc/resolv.conf %s",
-			additionalHostsPath,
-			configCommand,
-			resolveFilename)
-		_, execError := dockerCommander.LocalExec(execCommand)
-		if execError != nil {
-			return false, execError
-		}
-
-		// matters if minikube, but let's always try
-		resolvedCommand := fmt.Sprintf("sudo systemctl stop systemd-resolved")
-		resolveOut, _ := dockerCommander.LocalExec(resolvedCommand)
-		if resolveOut == "" {
-			// when stopped, no nameservers are available
-			// remove the stale symlink and write the resolv back to pull image
-			dockerCommander.LocalExec(fmt.Sprintf("sudo rm -f /etc/resolv.conf; sudo cp %s /etc/resolv.conf", resolveFilename))
-		}
-
-		// container does not exist yet, we need to run first
-		dnsmasqContainerRunOptions := fmt.Sprintf(dnsmasqContainerRunOptions, dnsmasqContainerName)
-		_, runError := dockerCommander.Run(dnsmasqContainerRunOptions, dnsmasqContainerImage)
-		if runError != nil {
-			return false, runError
-		}
-
-		_, resolvError := dockerCommander.LocalExec("echo nameserver 127.0.0.1 | sudo tee /etc/resolv.conf > /dev/null")
-		if execError != nil {
-			return false, resolvError
-		}
-
+	if minishiftConfig.InstanceConfig.IsRHELBased {
+		return isServiceRunning(sshCommander)
 	} else {
-		// container exists and we can start
-		_, startError := dockerCommander.Start(dnsmasqContainerName)
-		if startError != nil {
-			return false, startError
-		}
+		return isContainerRunning(sshCommander)
+	}
+}
+
+func Start(driver drivers.Driver) (bool, error) {
+	sshCommander := provision.GenericSSHCommander{Driver: driver}
+
+	ipAddress, err := driver.GetIP()
+	if err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error getting IP: %s", err.Error()))
+	}
+
+	routingSuffix := configCmd.GetDefaultRoutingSuffix(ipAddress)
+	handleConfiguration(sshCommander, ipAddress, routingSuffix)
+
+	if minishiftConfig.InstanceConfig.IsRHELBased {
+		startService(sshCommander)
+	} else {
+		startContainer(sshCommander)
 	}
 
 	// perform host specific settings
 	return handleHostDNSSettingsAfterStart(ipAddress)
+
 }
 
-func Stop(dockerCommander docker.DockerCommander) (bool, error) {
-	_, err := dockerCommander.Stop(dnsmasqContainerName)
-	if err != nil {
-		return false, err
+func Stop(driver drivers.Driver) (bool, error) {
+	sshCommander := provision.GenericSSHCommander{Driver: driver}
+
+	if minishiftConfig.InstanceConfig.IsRHELBased {
+		stopService(sshCommander)
+	} else {
+		stopContainer(sshCommander)
 	}
 
 	execCommand := "sudo cp /var/lib/minishift/resolv.dnsmasq.conf /etc/resolv.conf"
-	_, execError := dockerCommander.LocalExec(execCommand)
+	_, execError := sshCommander.SSHCommand(execCommand)
 	if execError != nil {
 		return false, execError
 	}
@@ -177,11 +181,13 @@ func Stop(dockerCommander docker.DockerCommander) (bool, error) {
 	return handleHostDNSSettingsAfterStop()
 }
 
-func Reset(dockerCommander docker.DockerCommander) (bool, error) {
-	// remove container and configuration
-	dockerCommander.Stop(dnsmasqContainerName)
-	dockerCommander.LocalExec("sudo rm -rf /var/lib/minishift/dnsmasq.*; sudo rm -f /var/lib/minishift/resolv.dnsmasq.conf")
-	dockerCommander.LocalExec("docker rm dnsmasq -f")
+func Reset(driver drivers.Driver) (bool, error) {
+	sshCommander := provision.GenericSSHCommander{Driver: driver}
+
+	if !minishiftConfig.InstanceConfig.IsRHELBased {
+		resetContainer(sshCommander)
+	}
+	sshCommander.SSHCommand("sudo rm -rf /var/lib/minishift/dnsmasq.*; sudo rm -f /var/lib/minishift/resolv.dnsmasq.conf")
 
 	return handleHostDNSSettingsAfterReset()
 }

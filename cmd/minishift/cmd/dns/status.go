@@ -23,12 +23,9 @@ import (
 
 	"github.com/docker/machine/libmachine"
 
-	dnsActions "github.com/minishift/minishift/pkg/minishift/network/dns"
-
-	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
-	"github.com/minishift/minishift/pkg/minishift/docker"
+	"github.com/minishift/minishift/pkg/minishift/network/dns"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 )
 
@@ -50,11 +47,7 @@ func statusDns(cmd *cobra.Command, args []string) {
 		atexit.ExitWithMessage(1, nonExistentMachineError)
 	}
 
-	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
-	dockerCommander := docker.NewVmDockerCommander(sshCommander)
-
-	isRunning := dnsActions.IsRunning(dockerCommander)
-	if isRunning {
+	if dns.IsRunning(host.Driver) {
 		fmt.Println("DNS server is running")
 	} else {
 		fmt.Println("DNS server is stopped")

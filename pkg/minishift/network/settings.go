@@ -21,7 +21,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 	"text/template"
 
@@ -188,38 +187,6 @@ func executeCommandOrExit(driver drivers.Driver, command string, errorMessage st
 		atexit.ExitWithMessage(1, fmt.Sprintf("%s: %s", errorMessage, err.Error()))
 	}
 	return result
-}
-
-// HasNameserversConfigured returns true if the instance uses nameservers
-// This is related to an issues when LCOW is used on Windows.
-func HasNameserversConfigured(driver drivers.Driver) bool {
-	cmd := "cat /etc/resolv.conf | grep -i '^nameserver' | wc -l | tr -d '\n'"
-	out, err := drivers.RunSSHCommandFromDriver(driver, cmd)
-
-	if err != nil {
-		return false
-	}
-
-	i, _ := strconv.Atoi(out)
-
-	return i != 0
-}
-
-// AddNameserversToInstance will add additional nameservers to the end of the
-// /etc/resolv.conf file inside the instance.
-func AddNameserversToInstance(driver drivers.Driver, nameservers []string) {
-	// TODO: verify values to be valid
-
-	for _, ns := range nameservers {
-		addNameserverToInstance(driver, ns)
-	}
-}
-
-// writes nameserver to the /etc/resolv.conf inside the instance
-func addNameserverToInstance(driver drivers.Driver, nameserver string) {
-	executeCommandOrExit(driver,
-		fmt.Sprintf("NS=%s; cat /etc/resolv.conf |grep -i \"^nameserver $NS\" || echo \"nameserver $NS\" | sudo tee -a /etc/resolv.conf", nameserver),
-		"Error adding nameserver")
 }
 
 // retrieve the device used for the IP address from the instance

@@ -19,14 +19,48 @@ package dns
 import (
 	"fmt"
 	"github.com/docker/machine/libmachine/provision"
+
 	"github.com/minishift/minishift/pkg/minishift/docker"
 )
 
-// isComtainerRunning checks whether the dnsmasq container is in running state.
-func isContainerRunning(sshCommander provision.SSHCommander) bool {
-	dockerCommander := docker.NewVmDockerCommander(sshCommander)
+const (
+	dnsmasqContainerImage = "registry.centos.org/minishift/dnsmasq"
+	dnsmasqContainerName  = "dnsmasq"
+)
 
-	status, err := dockerCommander.Status(dnsmasqContainerName)
+var (
+	dnsmasqContainerRunOptions = `--name %s \
+	--privileged \
+    -v /var/lib/minishift/dnsmasq.hosts:/etc/dnsmasq.hosts:Z \
+    -v /var/lib/minishift/dnsmasq.conf:/etc/dnsmasq.conf \
+    -v /var/lib/minishift/resolv.dnsmasq.conf:/etc/resolv.dnsmasq.conf \
+    -p '0.0.0.0:53:53/udp' \
+    -d` // {{.ResolveFilename}}, {{.AdditionalHostsPath}} --restart always
+	dnsmasqConfigurationTemplate = `user=root
+port={{.Port}}
+bind-interfaces
+resolv-file=/etc/resolv.dnsmasq.conf
+addn-hosts=/etc/dnsmasq.hosts
+expand-hosts
+domain={{.Domain}}
+address=/.{{.RoutingDomain}}/{{.LocalIP}}
+address=/.{{.LocalIP}}.local/{{.LocalIP}}
+`
+)
+
+type DockerDnsService struct {
+	commander *docker.VmDockerCommander
+}
+
+func newDockerDnsService(sshCommander provision.SSHCommander) *DockerDnsService {
+	return &DockerDnsService{
+		commander: docker.NewVmDockerCommander(sshCommander),
+	}
+}
+
+// isComtainerRunning checks whether the dnsmasq container is in running state.
+func (s DockerDnsService) Status() bool {
+	status, err := s.commander.Status(dnsmasqContainerName)
 	if err != nil || status != "running" {
 		return false
 	}
@@ -34,10 +68,8 @@ func isContainerRunning(sshCommander provision.SSHCommander) bool {
 	return true
 }
 
-func restartContainer(sshCommander provision.SSHCommander) (bool, error) {
-	dockerCommander := docker.NewVmDockerCommander(sshCommander)
-
-	ok, err := dockerCommander.Restart(dnsmasqContainerName)
+func (s DockerDnsService) Restart() (bool, error) {
+	ok, err := s.commander.Restart(dnsmasqContainerName)
 	if err != nil {
 		return false, err
 	}
@@ -45,44 +77,32 @@ func restartContainer(sshCommander provision.SSHCommander) (bool, error) {
 	return ok, nil
 }
 
-func startContainer(sshCommander provision.SSHCommander) (bool, error) {
-	dockerCommander := docker.NewVmDockerCommander(sshCommander)
-
-	_, err := dockerCommander.Status(dnsmasqContainerName)
+func (s DockerDnsService) Start() (bool, error) {
+	_, err := s.commander.Status(dnsmasqContainerName)
 	if err != nil {
 		// container does not exist yet, we need to run first
 		dnsmasqContainerRunOptions := fmt.Sprintf(dnsmasqContainerRunOptions, dnsmasqContainerName)
-		_, runError := dockerCommander.Run(dnsmasqContainerRunOptions, dnsmasqContainerImage)
+		_, runError := s.commander.Run(dnsmasqContainerRunOptions, dnsmasqContainerImage)
 		if runError != nil {
 			return false, runError
 		}
-
-		// TODO: network code can add nameserver
-		_, resolvError := dockerCommander.LocalExec("echo nameserver 127.0.0.1 | sudo tee /etc/resolv.conf > /dev/null")
-		if resolvError != nil {
-			return false, resolvError
-		}
 	} else {
 		// container exists and we can start
-		_, startError := dockerCommander.Start(dnsmasqContainerName)
+		_, startError := s.commander.Start(dnsmasqContainerName)
 		if startError != nil {
 			return false, startError
 		}
 	}
 
-	return isContainerRunning(sshCommander), nil
+	return s.Status(), nil
 }
 
-func stopContainer(sshCommander provision.SSHCommander) (bool, error) {
-	dockerCommander := docker.NewVmDockerCommander(sshCommander)
-
-	return dockerCommander.Stop(dnsmasqContainerName)
+func (s DockerDnsService) Stop() (bool, error) {
+	return s.commander.Stop(dnsmasqContainerName)
 }
 
-func resetContainer(sshCommander provision.SSHCommander) {
-	dockerCommander := docker.NewVmDockerCommander(sshCommander)
-
+func (s DockerDnsService) Reset() {
 	// remove container and configuration
-	dockerCommander.Stop(dnsmasqContainerName)
-	dockerCommander.LocalExec("docker rm dnsmasq -f")
+	s.commander.Stop(dnsmasqContainerName)
+	s.commander.LocalExec("docker rm dnsmasq -f")
 }

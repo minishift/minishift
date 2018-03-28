@@ -220,7 +220,7 @@ func runStart(cmd *cobra.Command, args []string) {
 			MachineName:      constants.MachineName,
 			Ip:               ip,
 			Port:             constants.APIServerPort,
-			RoutingSuffix:    getDefaultRoutingPrefix(ip),
+			RoutingSuffix:    configCmd.GetDefaultRoutingSuffix(ip),
 			HostPvDir:        viper.GetString(configCmd.HostPvDir.Name),
 			User:             minishiftConstants.DefaultUser,
 			Project:          minishiftConstants.DefaultProject,

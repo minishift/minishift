@@ -18,16 +18,39 @@ package dns
 
 import (
 	"fmt"
-	"github.com/docker/machine/libmachine/provision"
-	"github.com/minishift/minishift/pkg/minishift/systemd"
 	"strings"
+
+	"github.com/docker/machine/libmachine/provision"
+
+	"github.com/minishift/minishift/pkg/minishift/systemd"
 )
 
-// isServiceRunning checks whether the dnsmasq service is running
-func isServiceRunning(sshCommander provision.SSHCommander) bool {
-	systemdCommander := systemd.NewVmSystemdCommander(sshCommander)
+const (
+	dnsmasqServiceName = "dnsmasq"
+)
 
-	status, err := systemdCommander.Status(dnsmasqServiceName)
+var (
+	dnsmasqServicePrerequisites = `sudo rm -rf /etc/dnsmasq.* /etc/resolv.dnsmasq.conf; \
+sudo ln -s /var/lib/minishift/dnsmasq.hosts /etc/dnsmasq.hosts; \
+sudo ln -s /var/lib/minishift/dnsmasq.conf /etc/dnsmasq.conf; \
+sudo ln -s /var/lib/minishift/resolv.dnsmasq.conf /etc/resolv.dnsmasq.conf; \
+sudo semanage permissive -a dnsmasq_t
+`
+)
+
+type SystemdDnsService struct {
+	commander *systemd.VmSystemdCommander
+}
+
+func newSystemdDnsService(sshCommander provision.SSHCommander) *SystemdDnsService {
+	return &SystemdDnsService{
+		commander: systemd.NewVmSystemdCommander(sshCommander),
+	}
+}
+
+// isServiceRunning checks whether the dnsmasq service is running
+func (s SystemdDnsService) Status() bool {
+	status, err := s.commander.Status(dnsmasqServiceName)
 	if err != nil || !strings.Contains(status, "active (running)") {
 		return false
 	}
@@ -35,20 +58,24 @@ func isServiceRunning(sshCommander provision.SSHCommander) bool {
 	return true
 }
 
-func startService(sshCommander provision.SSHCommander) (bool, error) {
-	systemdCommander := systemd.NewVmSystemdCommander(sshCommander)
-
+func (s SystemdDnsService) Start() (bool, error) {
 	cmd := fmt.Sprintf(dnsmasqServicePrerequisites)
-	_, err := systemdCommander.Exec(cmd)
+	_, err := s.commander.Exec(cmd)
 	if err != nil {
 		return false, err
 	}
 
-	return systemdCommander.Start(dnsmasqServiceName)
+	return s.commander.Start(dnsmasqServiceName)
 }
 
-func stopService(sshCommander provision.SSHCommander) (bool, error) {
-	systemdCommander := systemd.NewVmSystemdCommander(sshCommander)
+func (s SystemdDnsService) Stop() (bool, error) {
+	return s.commander.Stop(dnsmasqServiceName)
+}
 
-	return systemdCommander.Stop(dnsmasqServiceName)
+func (s SystemdDnsService) Restart() (bool, error) {
+	return s.commander.Restart(dnsmasqServiceName)
+}
+
+func (s SystemdDnsService) Reset() {
+
 }

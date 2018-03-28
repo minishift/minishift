@@ -26,7 +26,7 @@ func handleHostDNSSettingsAfterStart(ipAddress string) (bool, error) {
 	return true, nil
 }
 
-func handleHostDNSSettingsAfterStop() (bool, error) {
+func handleHostDNSSettingsAfterStop(ipAddress string) (bool, error) {
 
 	return true, nil
 }

@@ -47,7 +47,7 @@ func statusDns(cmd *cobra.Command, args []string) {
 		atexit.ExitWithMessage(1, nonExistentMachineError)
 	}
 
-	if dns.IsRunning(host.Driver) {
+	if dns.Status(host.Driver) {
 		fmt.Println("DNS server is running")
 	} else {
 		fmt.Println("DNS server is stopped")

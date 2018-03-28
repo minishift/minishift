@@ -32,6 +32,7 @@ import (
 
 const (
 	usage                = "Usage: minishift hostfolder add --type TYPE --source SOURCE --target TARGET HOST_FOLDER_NAME"
+	interactiveModeUsage = "Usage: minishift hostfolder add --interactive --type TYPE [sshfs|cifs (Default: cifs)] HOST_FOLDER_NAME"
 	noSource             = "you need to specify the source of the host folder"
 	noTarget             = "you need to specify the target of the host folder"
 	noUserName           = "you need to specify a username"
@@ -92,6 +93,9 @@ func addHostFolder(cmd *cobra.Command, args []string) {
 		// Windows-only (CIFS), all instances
 		name = "Users"
 	} else {
+		if interactive && len(args) < 1 {
+			atexit.ExitWithMessage(1, interactiveModeUsage)
+		}
 		if len(args) < 1 {
 			atexit.ExitWithMessage(1, usage)
 		}

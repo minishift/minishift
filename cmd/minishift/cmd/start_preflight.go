@@ -358,6 +358,7 @@ func checkLibvirtDefaultNetworkExists() bool {
 func checkLibvirtDefaultNetworkActive() bool {
 	cmd := exec.Command("virsh", "--connect", "qemu:///system", "net-list")
 	cmd.Env = cmdUtils.ReplaceEnv(os.Environ(), "LC_ALL", "C")
+	cmd.Env = cmdUtils.ReplaceEnv(cmd.Env, "LANG", "C")
 	stdOutStdError, err := cmd.CombinedOutput()
 	if err != nil {
 		return false

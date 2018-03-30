@@ -44,7 +44,7 @@ For Hyper-V a functionality is provided to assign an IP address on startup using
 
 [IMPORTANT]
 ====
-This only works with the CentOS/RHEL based image in combination with Hyper-V.
+This only works with the CentOS or RHEL ISO in combination with Hyper-V.
 The B2D image experiences a problem when the values are being sent to the {project} instance and consumed by the B2D iso.
 We are looking into the issue and hope to provide a solution in the future.
 ====
@@ -92,9 +92,9 @@ Failing to do so will result in connectivity issues.
 [[set-fixed-ip]]
 == Set Fixed IP Address
 
-[NOTE]
+[IMPORTANT]
 ====
-Currently not supported on KVM as the driver plugin relies on the DHCP offer to determine the IP address.
+This only works with the CentOS or RHEL ISO and is currently not supported on KVM as the driver plugin relies on the DHCP offer to determine the IP address.
 ====
 
 Most hypervisors do not support extending the lease time when the IP is assigned using DHCP.

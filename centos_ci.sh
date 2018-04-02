@@ -155,7 +155,7 @@ function install_docs_prerequisite_packages() {
   rvm install ruby-2.2.5
   echo "CICO: RVM and Ruby Installed"
 
-  gem install ascii_binder -v 0.1.9
+  gem install ascii_binder -v 0.1.13
   echo "CICO: Ascii Binder Installed"
 }
 

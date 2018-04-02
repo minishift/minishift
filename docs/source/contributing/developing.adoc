@@ -101,7 +101,7 @@ $ go get github.com/golang/dep/cmd/dep
 ----
 
 This will install the `dep` binary into *_$GOPATH/bin_*.
-Make sure to use Dep version 0.3.2 or later.
+Make sure to use Dep version 0.4.1 or later.
 
 [[bootstrap-dependencies]]
 === Bootstrapping Dependencies

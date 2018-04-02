@@ -61,7 +61,6 @@ import (
 const (
 	commandName             = "start"
 	defaultInsecureRegistry = "172.30.0.0/16"
-	hostfoldersAutoMountKey = "hostfolders-automount"
 )
 
 var (
@@ -211,46 +210,48 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	autoMountHostFolders(hostVm.Driver)
 
-	if !isRestart {
-		importContainerImages(hostVm.Driver, libMachineClient, requestedOpenShiftVersion)
-	}
+	if !isNoProvision() {
+		if !isRestart {
+			importContainerImages(hostVm.Driver, libMachineClient, requestedOpenShiftVersion)
+		}
 
-	clusterUpConfig := &clusterup.ClusterUpConfig{
-		OpenShiftVersion: requestedOpenShiftVersion,
-		MachineName:      constants.MachineName,
-		Ip:               ip,
-		Port:             constants.APIServerPort,
-		RoutingSuffix:    getDefaultRoutingPrefix(ip),
-		HostPvDir:        viper.GetString(configCmd.HostPvDir.Name),
-		User:             minishiftConstants.DefaultUser,
-		Project:          minishiftConstants.DefaultProject,
-		KubeConfigPath:   constants.KubeConfigPath,
-		OcPath:           ocPath,
-		AddonEnv:         viper.GetStringSlice(cmdUtil.AddOnEnv),
-		PublicHostname:   viper.GetString(configCmd.PublicHostname.Name),
-	}
+		clusterUpConfig := &clusterup.ClusterUpConfig{
+			OpenShiftVersion: requestedOpenShiftVersion,
+			MachineName:      constants.MachineName,
+			Ip:               ip,
+			Port:             constants.APIServerPort,
+			RoutingSuffix:    getDefaultRoutingPrefix(ip),
+			HostPvDir:        viper.GetString(configCmd.HostPvDir.Name),
+			User:             minishiftConstants.DefaultUser,
+			Project:          minishiftConstants.DefaultProject,
+			KubeConfigPath:   constants.KubeConfigPath,
+			OcPath:           ocPath,
+			AddonEnv:         viper.GetStringSlice(cmdUtil.AddOnEnv),
+			PublicHostname:   viper.GetString(configCmd.PublicHostname.Name),
+		}
 
-	clusterUpParams := determineClusterUpParameters(clusterUpConfig)
-	fmt.Println("-- OpenShift cluster will be configured with ...")
-	fmt.Println("   Version:", requestedOpenShiftVersion)
-	err = clusterup.ClusterUp(clusterUpConfig, clusterUpParams, &util.RealRunner{})
+		clusterUpParams := determineClusterUpParameters(clusterUpConfig)
+		fmt.Println("-- OpenShift cluster will be configured with ...")
+		fmt.Println("   Version:", requestedOpenShiftVersion)
+		err = clusterup.ClusterUp(clusterUpConfig, clusterUpParams, &util.RealRunner{})
 
-	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Error during 'cluster up' execution: %v", err))
-	}
-
-	if !IsOpenShiftRunning(hostVm.Driver) {
-		atexit.ExitWithMessage(1, "OpenShift provisioning failed. origin container failed to start.")
-	}
-
-	if !isRestart {
-		postClusterUp(hostVm, clusterUpConfig)
-		exportContainerImages(hostVm.Driver, libMachineClient, requestedOpenShiftVersion)
-	}
-	if isRestart {
-		err = cmdUtil.SetOcContext(minishiftConfig.AllInstancesConfig.ActiveProfile)
 		if err != nil {
-			fmt.Println(fmt.Sprintf("Could not set oc CLI context for: '%s'", profileActions.GetActiveProfile()))
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error during 'cluster up' execution: %v", err))
+		}
+
+		if !IsOpenShiftRunning(hostVm.Driver) {
+			atexit.ExitWithMessage(1, "OpenShift provisioning failed. origin container failed to start.")
+		}
+
+		if !isRestart {
+			postClusterUp(hostVm, clusterUpConfig)
+			exportContainerImages(hostVm.Driver, libMachineClient, requestedOpenShiftVersion)
+		}
+		if isRestart {
+			err = cmdUtil.SetOcContext(minishiftConfig.AllInstancesConfig.ActiveProfile)
+			if err != nil {
+				fmt.Println(fmt.Sprintf("Could not set oc CLI context for: '%s'", profileActions.GetActiveProfile()))
+			}
 		}
 	}
 }
@@ -412,8 +413,12 @@ func autoMountHostFolders(driver drivers.Driver) {
 	}
 }
 
+func isNoProvision() bool {
+	return viper.GetBool(configCmd.NoProvision.Name)
+}
+
 func isAutoMount() bool {
-	return viper.GetBool(hostfoldersAutoMountKey)
+	return viper.GetBool(configCmd.HostFoldersAutoMount.Name)
 }
 
 func addActiveProfileInformation() {
@@ -578,6 +583,7 @@ func initStartFlags() *flag.FlagSet {
 	startFlagSet.AddFlag(nameServersFlag)
 
 	if minishiftConfig.EnableExperimental {
+		startFlagSet.Bool(configCmd.NoProvision.Name, false, "Do not provision the VM with OpenShift (experimental)")
 		startFlagSet.String(configCmd.ISOUrl.Name, minishiftConstants.B2dIsoAlias, "Location of the minishift ISO. Can be an URL, file URI or one of the following short names: [b2d centos minikube].")
 	} else {
 		startFlagSet.String(configCmd.ISOUrl.Name, minishiftConstants.B2dIsoAlias, "Location of the minishift ISO. Can be an URL, file URI or one of the following short names: [b2d centos].")

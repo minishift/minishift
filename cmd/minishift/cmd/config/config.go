@@ -97,6 +97,9 @@ var (
 	HostFoldersAutoMount = createConfigSetting("hostfolders-automount", SetBool, nil, nil, true, nil)
 	HostFoldersSftpPort  = createConfigSetting("hostfolders-sftp-port", SetInt, []setFn{validations.IsValidPort}, nil, true, nil)
 
+	// No Provision
+	NoProvision = createConfigSetting("no-provision", SetBool, nil, nil, true, nil)
+
 	// Image caching
 	ImageCaching = createConfigSetting("image-caching", SetBool, nil, nil, true, true)
 	CacheImages  = createConfigSetting("cache-images", SetSlice, nil, nil, false, nil)

@@ -120,7 +120,7 @@ function setup_repo() {
 
 function setup_godep() {
   GODEP_OS_ARCH=`go env GOHOSTOS`-`go env GOHOSTARCH`
-  GODEP_TAG=v0.3.2
+  GODEP_TAG=v0.4.1
   GODEP_LATEST_RELEASE_URL="https://github.com/golang/dep/releases/download/${GODEP_TAG}/dep-${GODEP_OS_ARCH}"
   mkdir /tmp/godep
   curl -L ${GODEP_LATEST_RELEASE_URL} -o /tmp/godep/dep

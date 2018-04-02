@@ -19,10 +19,8 @@ package provisioner
 import (
 	"bytes"
 	"fmt"
+	"path"
 	"text/template"
-	"time"
-
-	"github.com/minishift/minishift/pkg/util"
 
 	"github.com/docker/machine/libmachine/auth"
 	"github.com/docker/machine/libmachine/drivers"
@@ -66,7 +64,9 @@ func (p *BuildrootProvisioner) GenerateDockerOptions(dockerPort int) (*provision
 		EngineOptions: p.EngineOptions,
 	}
 
-	t.Execute(&engineCfg, engineConfigContext)
+	if err := t.Execute(&engineCfg, engineConfigContext); err != nil {
+		return nil, err
+	}
 
 	return &provision.DockerOptions{
 		EngineOptions:     engineCfg.String(),
@@ -83,28 +83,40 @@ func (p *BuildrootProvisioner) Provision(swarmOptions swarm.Options, authOptions
 	p.AuthOptions = authOptions
 	p.EngineOptions = engineOptions
 
-	log.Debugf("setting hostname %q", p.Driver.GetMachineName())
+	log.Info("\n   Setting hostname ... ")
 	if err := p.SetHostname(p.Driver.GetMachineName()); err != nil {
+		log.Info("FAIL")
+		return err
+	} else {
+		log.Info("OK")
+	}
+
+	if err := makeDockerOptionsDir(p); err != nil {
 		return err
 	}
 
-	p.AuthOptions = setRemoteAuthOptions(p)
-	log.Debugf("set auth options %+v", p.AuthOptions)
-
-	log.Debugf("setting up certificates")
-
-	configureAuth := func() error {
-		if err := configureAuth(p); err != nil {
-			return &util.RetriableError{Err: err}
-		}
-		return nil
-	}
-
-	err := util.RetryAfter(5, configureAuth, time.Second*10)
+	dockerCfg, err := p.GenerateDockerOptions(engine.DefaultPort)
 	if err != nil {
-		log.Debugf("Error configuring auth during provisioning %v", err)
 		return err
 	}
+
+	log.Info("Setting Docker configuration on the remote daemon...")
+
+	if _, err = p.SSHCommand(fmt.Sprintf("sudo mkdir -p %s && printf %%s \"%s\" | sudo tee %s", path.Dir(dockerCfg.EngineOptionsPath), dockerCfg.EngineOptions, dockerCfg.EngineOptionsPath)); err != nil {
+		return err
+	}
+	// This is required because for minikube ISO there is no service file for docker and GenerateDockerOptions method creates it.
+	// To use the created service file in provision we need to reload daemon so that systemd able to list it.
+	if _, err = p.SSHCommand("sudo systemctl -f daemon-reload"); err != nil {
+		return err
+	}
+	p.AuthOptions = setRemoteAuthOptions(p)
+
+	if err := provision.ConfigureAuth(p); err != nil {
+		return err
+	}
+
+	doFeatureDetection(p)
 
 	return nil
 }

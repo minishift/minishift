@@ -260,6 +260,9 @@ By default, this is not allowed in OpenShift.
 
 | xpaas
 | Imports xPaaS templates.
+
+| dotnet
+| Imports templates and image streams required for .NET applications.
 |===
 
 [[addons-by-community]]

@@ -7,6 +7,7 @@ Feature: Addons command and its subcommands
      When executing "minishift addons list"
      Then stdout should match "admin-user\s*: disabled\s*P\(0\)"
       And stdout should match "anyuid\s*: disabled\s*P\(0\)"
+      And stdout should match "dotnet\s*: disabled\s*P\(0\)"
       And stdout should match "registry-route\s*: disabled\s*P\(0\)"
       And stdout should match "xpaas\s*: disabled\s*P\(0\)"
 
@@ -40,18 +41,6 @@ Feature: Addons command and its subcommands
       Unable to remove addon 'anyuid'. No anyuid.addon.remove file is found.
       """
 
-  Scenario: Installing default add-ons manually
-     When executing "minishift addons install --defaults" succeeds
-     Then stdout should contain
-      """
-      Default add-ons 'anyuid, admin-user, xpaas, registry-route' installed
-      """
-     When executing "minishift addons list" succeeds
-     Then stdout should contain "admin-user"
-     Then stdout should contain "anyuid"
-     Then stdout should contain "registry-route"
-     Then stdout should contain "xpaas"
-
   @minishift-only
   Scenario: Default add-ons are not enabled by default during installation
      When executing "minishift addons list"
@@ -59,6 +48,7 @@ Feature: Addons command and its subcommands
       And stdout should match "anyuid\s*: disabled\s*P\(0\)"
       And stdout should match "registry-route\s*: disabled\s*P\(0\)"
       And stdout should match "xpaas\s*: disabled\s*P\(0\)"
+      And stdout should match "dotnet\s*: disabled\s*P\(0\)"
 
   Scenario: Enabling not installed add-on
      When executing "minishift addons enable absent-addon"

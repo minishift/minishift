@@ -148,7 +148,11 @@ var (
 	IPAddress     = createConfigSetting("network-ipaddress", SetString, []setFn{validations.IsValidIPv4Address}, nil, true, nil)
 	Netmask       = createConfigSetting("network-netmask", SetString, []setFn{validations.IsValidNetmask}, nil, true, nil)
 	Gateway       = createConfigSetting("network-gateway", SetString, []setFn{validations.IsValidIPv4Address}, nil, true, nil)
-	NameServers   = createConfigSetting("network-nameserver", SetSlice, []setFn{validations.IsValidIPv4AddressSlice}, nil, true, nil)
+
+	// Network setting
+	NameServers           = createConfigSetting("network-nameserver", SetSlice, []setFn{validations.IsValidIPv4AddressSlice}, nil, true, nil)
+	DnsmasqContainerized  = createConfigSetting("network-dnsmasq-containerized", SetBool, nil, nil, true, false)
+	DnsmasqContainerImage = createConfigSetting("network-dnsmasq-container", SetString, nil, nil, true, nil)
 )
 
 func createConfigSetting(name string, set func(MinishiftConfig, string, string) error, validations []setFn, callbacks []setFn, isApply bool, defaultVal interface{}) *Setting {

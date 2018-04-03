@@ -138,7 +138,13 @@ func (provisioner *MinishiftProvisioner) Provision(swarmOptions swarm.Options, a
 		return err
 	}
 
-	doFeatureDetection(provisioner)
+	log.Info("\n   Feature detection ... ")
+	if err := doFeatureDetection(provisioner); err != nil {
+		log.Info("FAIL")
+		return err
+	} else {
+		log.Info("OK")
+	}
 
 	return nil
 }

@@ -193,7 +193,9 @@ func init() {
 	RootCmd.AddCommand(addon.AddonsCmd)
 	RootCmd.AddCommand(image.ImageCmd)
 	RootCmd.AddCommand(cmdProfile.ProfileCmd)
-	RootCmd.AddCommand(dns.DnsCmd)
+	if minishiftConfig.EnableExperimental {
+		RootCmd.AddCommand(dns.DnsCmd)
+	}
 	pflag.CommandLine.AddGoFlagSet(goflag.CommandLine)
 	logDir := pflag.Lookup("log_dir")
 	if !logDir.Changed {

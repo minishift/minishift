@@ -619,7 +619,7 @@ func initSubscriptionManagerFlags() *flag.FlagSet {
 	subscriptionManagerFlagSet := flag.NewFlagSet(commandName, flag.ContinueOnError)
 	subscriptionManagerFlagSet.String(configCmd.Username.Name, "", "Username for the virtual machine registration.")
 	subscriptionManagerFlagSet.String(configCmd.Password.Name, "", "Password for the virtual machine registration.")
-	subscriptionManagerFlagSet.BoolVar(&registrationUtil.SkipRegistration, configCmd.SkipRegistration.Name, false, "Skip the virtual machine registration.")
+	subscriptionManagerFlagSet.Bool(configCmd.SkipRegistration.Name, false, "Skip the virtual machine registration.")
 
 	return subscriptionManagerFlagSet
 }
@@ -688,6 +688,7 @@ func addVersionPrefixToOpenshiftVersion() {
 }
 
 func setSubscriptionManagerParameters() {
+	registrationUtil.SkipRegistration = viper.GetBool(configCmd.SkipRegistration.Name)
 	minishiftCluster.RegistrationParameters.Username = viper.GetString(configCmd.Username.Name)
 	minishiftCluster.RegistrationParameters.Password = viper.GetString(configCmd.Password.Name)
 	minishiftCluster.RegistrationParameters.IsTtySupported = util.IsTtySupported()

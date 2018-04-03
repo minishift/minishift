@@ -31,11 +31,22 @@ import (
 
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
+	"github.com/minishift/minishift/pkg/minishift/shell/powershell"
 	"github.com/minishift/minishift/pkg/util"
 	stringUtils "github.com/minishift/minishift/pkg/util/strings"
 )
 
 func IsValidDriver(string, driver string) error {
+	if runtime.GOOS == "windows" {
+		posh := powershell.New()
+		defer posh.Close()
+		checkWindowsName := `(Get-WmiObject -Class Win32_OperatingSystem).Caption`
+		stdOut, _ := posh.Execute(checkWindowsName)
+		if driver == "hyperv" && strings.Contains(stdOut, "Windows 7") {
+			return fmt.Errorf("Driver '%s' is not supported", driver)
+		}
+	}
+
 	for _, d := range constants.SupportedVMDrivers {
 		if driver == d {
 			return nil

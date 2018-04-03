@@ -110,6 +110,11 @@ func (p *BuildrootProvisioner) Provision(swarmOptions swarm.Options, authOptions
 	if _, err = p.SSHCommand("sudo systemctl -f daemon-reload"); err != nil {
 		return err
 	}
+	// This is required because minikube ISO doesn't symlink the resolve.conf and OpenShift v3.9 have a check for this.
+	// This is something we should do as part of ISO but atm not able to find a pointer [PK]
+	if _, err = p.SSHCommand("sudo ln -sfn /run/systemd/resolve/resolv.conf /etc/resolv.conf"); err != nil {
+		return err
+	}
 	p.AuthOptions = setRemoteAuthOptions(p)
 
 	if err := provision.ConfigureAuth(p); err != nil {

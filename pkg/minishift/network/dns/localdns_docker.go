@@ -20,12 +20,13 @@ import (
 	"fmt"
 	"github.com/docker/machine/libmachine/provision"
 
+	"github.com/minishift/minishift/cmd/minishift/cmd/config"
 	"github.com/minishift/minishift/pkg/minishift/docker"
 )
 
 const (
-	dnsmasqContainerImage = "registry.centos.org/minishift/dnsmasq"
-	dnsmasqContainerName  = "dnsmasq"
+	dnsmasqDefaultContainerImage = "registry.centos.org/minishift/dnsmasq"
+	dnsmasqContainerName         = "dnsmasq"
 )
 
 var (
@@ -35,7 +36,7 @@ var (
     -v /var/lib/minishift/dnsmasq.conf:/etc/dnsmasq.conf \
     -v /var/lib/minishift/resolv.dnsmasq.conf:/etc/resolv.dnsmasq.conf \
     -p '0.0.0.0:53:53/udp' \
-    -d` // {{.ResolveFilename}}, {{.AdditionalHostsPath}} --restart always
+    -d`
 	dnsmasqConfigurationTemplate = `user=root
 port={{.Port}}
 bind-interfaces
@@ -77,9 +78,28 @@ func (s DockerDnsService) Restart() (bool, error) {
 	return ok, nil
 }
 
+func (s DockerDnsService) getDnsmasqContainerImage() (string, error) {
+	minishiftConfig, err := config.ReadConfig()
+	if err != nil {
+		return "", err
+	}
+
+	dnsmasqContainerImage := minishiftConfig[config.DnsmasqContainerImage.Name]
+	if dnsmasqContainerImage != nil {
+		return fmt.Sprintf("%v", dnsmasqContainerImage), nil
+	}
+
+	return dnsmasqDefaultContainerImage, nil
+}
+
 func (s DockerDnsService) Start() (bool, error) {
 	_, err := s.commander.Status(dnsmasqContainerName)
 	if err != nil {
+		dnsmasqContainerImage, imgError := s.getDnsmasqContainerImage()
+		if imgError != nil {
+			return false, imgError
+		}
+
 		// container does not exist yet, we need to run first
 		dnsmasqContainerRunOptions := fmt.Sprintf(dnsmasqContainerRunOptions, dnsmasqContainerName)
 		_, runError := s.commander.Run(dnsmasqContainerRunOptions, dnsmasqContainerImage)

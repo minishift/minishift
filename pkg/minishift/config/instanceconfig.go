@@ -31,6 +31,7 @@ type InstanceConfigType struct {
 	IsRegistered              bool   // minishift state
 	IsRHELBased               bool   // minishift state
 	SupportsNetworkAssignment bool   // minishift state
+	SupportsDnsmasqServer     bool   // minishift state
 
 	HostFolders []config.HostFolderConfig
 

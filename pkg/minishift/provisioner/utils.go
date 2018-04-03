@@ -168,15 +168,23 @@ func getFilesystemType(p provision.Provisioner, directory string) (string, error
 	return fstype, nil
 }
 
+func checkDetectionValue(value string) bool {
+	return strings.Trim(value, "\n") == "1"
+}
+
 func doFeatureDetection(p provision.Provisioner) error {
-	if out, err := p.SSHCommand(fmt.Sprintf("test -f %s && echo '1' || echo '0' ", "/usr/local/bin/minishift-set-ipaddress")); err != nil {
-		return err
+	testFor := "test -f %s && echo '1' || echo '0'"
+
+	if networkAssignment, err := p.SSHCommand(fmt.Sprintf(testFor, "/usr/local/bin/minishift-set-ipaddress")); err == nil {
+		minishiftConfig.InstanceConfig.SupportsNetworkAssignment = checkDetectionValue(networkAssignment)
 	} else {
-		if strings.Trim(out, "\n") == "1" {
-			minishiftConfig.InstanceConfig.SupportsNetworkAssignment = true
-		} else {
-			minishiftConfig.InstanceConfig.SupportsNetworkAssignment = false
-		}
+		return err
+	}
+
+	if dnsmasqServer, err := p.SSHCommand(fmt.Sprintf(testFor, "/usr/sbin/dnsmasq")); err == nil {
+		minishiftConfig.InstanceConfig.SupportsDnsmasqServer = checkDetectionValue(dnsmasqServer)
+	} else {
+		return err
 	}
 
 	minishiftConfig.InstanceConfig.Write()

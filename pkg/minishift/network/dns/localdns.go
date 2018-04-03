@@ -19,12 +19,12 @@ package dns
 import (
 	"fmt"
 
-	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
-
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/provision"
-	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/minishift/network"
+
+	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
+	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 )
@@ -37,10 +37,33 @@ type serviceCommander interface {
 	Reset()
 }
 
+// checkSupportForAddressAssignment returns true when the instance can support
+// dnsmasq server from the image
+// Should be using Instance state. See #1796
+func checkSupportForDnsmasqServer() bool {
+	if minishiftConfig.InstanceConfig.IsRHELBased &&
+		minishiftConfig.InstanceConfig.SupportsDnsmasqServer {
+		return true
+	}
+	return false
+}
+
+// isContainerized allows to force containerized deployment
+// Should be using Instance config. See #1796
+func isContainerized() (bool, error) {
+	minishiftConfig, err := configCmd.ReadConfig()
+	if err != nil || minishiftConfig[configCmd.DnsmasqContainerized.Name] == nil {
+		return false, err
+	}
+
+	return minishiftConfig[configCmd.DnsmasqContainerized.Name].(bool), nil
+}
+
 func getServiceCommander(driver drivers.Driver) serviceCommander {
 	sshCommander := provision.GenericSSHCommander{Driver: driver}
+	isContainerized, _ := isContainerized()
 
-	if minishiftConfig.InstanceConfig.IsRHELBased {
+	if checkSupportForDnsmasqServer() && !isContainerized {
 		return newSystemdDnsService(sshCommander)
 	} else {
 		return newDockerDnsService(sshCommander)

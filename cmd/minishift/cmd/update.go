@@ -93,8 +93,11 @@ func runUpdate(cmd *cobra.Command, args []string) {
 			fmt.Printf("\nUpdated successfully to Minishift version %s.\n", latestVersion)
 
 			markerData := UpdateMarker{InstallAddon: false, PreviousVersion: version.GetMinishiftVersion()}
+			addonLocationForRelease := fmt.Sprintf("https://github.com/minishift/minishift/tree/v%s/addons", latestVersion)
 
-			fmt.Print("\nDo you want to update the default add-ons? [y/N]: ")
+			fmt.Printf("\nCurrent Installed add-ons are locally present at: %s\n", filepath.Join(constants.Minipath, "addons"))
+			fmt.Printf("The add-ons for %s available at: %s\n", latestVersion, addonLocationForRelease)
+			fmt.Printf("\nDo you want to update the default add-ons? [y/N]: ")
 			fmt.Scanln(&confirm)
 
 			if strings.ToLower(confirm) == "y" {

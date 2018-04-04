@@ -599,14 +599,14 @@ func initClusterUpFlags() *flag.FlagSet {
 	clusterUpFlagSet.String(configCmd.HostPvDir.Name, hostPvDirectory, "Directory on Docker host for OpenShift persistent volumes")
 	clusterUpFlagSet.Int(configCmd.ServerLogLevel.Name, 0, "Log level for the OpenShift server.")
 	clusterUpFlagSet.StringSliceVarP(&openShiftEnv, configCmd.OpenshiftEnv.Name, "e", []string{}, "Specify key-value pairs of environment variables to set on the OpenShift container.")
-	clusterUpFlagSet.Bool(configCmd.Metrics.Name, false, "Install metrics (experimental)")
-	clusterUpFlagSet.Bool(configCmd.Logging.Name, false, "Install logging (experimental)")
 	clusterUpFlagSet.String(configCmd.OpenshiftVersion.Name, version.GetOpenShiftVersion(), fmt.Sprintf("The OpenShift version to run, eg. %s", version.GetOpenShiftVersion()))
 	clusterUpFlagSet.String(configCmd.NoProxyList.Name, "", "List of hosts or subnets for which no proxy should be used.")
 	clusterUpFlagSet.AddFlag(cmdUtil.HttpProxyFlag)
 	clusterUpFlagSet.AddFlag(cmdUtil.HttpsProxyFlag)
 
 	if minishiftConfig.EnableExperimental {
+		clusterUpFlagSet.Bool(configCmd.Metrics.Name, false, "Install metrics (experimental)")
+		clusterUpFlagSet.Bool(configCmd.Logging.Name, false, "Install logging (experimental)")
 		clusterUpFlagSet.Bool(configCmd.ServiceCatalog.Name, false, "Install service catalog (experimental)")
 		clusterUpFlagSet.String(configCmd.ExtraClusterUpFlags.Name, "", "Specify optional flags for use with 'cluster up' (unsupported)")
 	}

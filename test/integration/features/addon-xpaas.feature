@@ -30,6 +30,7 @@ which are then available in OpenShift to the user.
     | template-name           | service-name   | http-endpoint | expected-hello                        |
     | datagrid65-basic        | datagrid-app   | /             | Welcome to the JBoss Data Grid Server |
     | eap70-basic-s2i         | eap-app        | /index.jsf    | Welcome to JBoss!                     |
+    | eap71-tx-recovery-s2i   | eap-app        | /index.jsf    | Welcome to JBoss!                     |
 
   Scenario: User deletes Minishift
      When executing "minishift delete --force" succeeds

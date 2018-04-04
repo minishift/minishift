@@ -71,11 +71,8 @@ var (
 	HostPvDir         = createConfigSetting("host-pv-dir", SetString, []setFn{validations.IsValidPath}, nil, true, nil)
 	ServerLogLevel    = createConfigSetting("server-loglevel", SetInt, []setFn{validations.IsPositive}, nil, true, nil)
 	OpenshiftEnv      = createConfigSetting("openshift-env", nil, nil, nil, false, nil)
-	Metrics           = createConfigSetting("metrics", SetBool, nil, nil, true, nil)
-	Logging           = createConfigSetting("logging", SetBool, nil, nil, true, nil)
 
 	// future enabled flags
-	ServiceCatalog      = createConfigSetting("service-catalog", SetBool, nil, nil, true, nil)
 	ExtraClusterUpFlags = createConfigSetting("extra-clusterup-flags", SetString, nil, nil, true, nil)
 
 	// Setting proxy

@@ -605,9 +605,6 @@ func initClusterUpFlags() *flag.FlagSet {
 	clusterUpFlagSet.AddFlag(cmdUtil.HttpsProxyFlag)
 
 	if minishiftConfig.EnableExperimental {
-		clusterUpFlagSet.Bool(configCmd.Metrics.Name, false, "Install metrics (experimental)")
-		clusterUpFlagSet.Bool(configCmd.Logging.Name, false, "Install logging (experimental)")
-		clusterUpFlagSet.Bool(configCmd.ServiceCatalog.Name, false, "Install service catalog (experimental)")
 		clusterUpFlagSet.String(configCmd.ExtraClusterUpFlags.Name, "", "Specify optional flags for use with 'cluster up' (unsupported)")
 	}
 

@@ -19,12 +19,13 @@ package hostfolder
 import (
 	"errors"
 	"fmt"
+	"regexp"
+
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/state"
 	"github.com/golang/glog"
 	miniConfig "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/minishift/hostfolder/config"
-	"strings"
 )
 
 type MountInfo struct {
@@ -100,12 +101,6 @@ func (m *Manager) List(driver drivers.Driver) ([]MountInfo, error) {
 		return nil, errors.New("no host folders defined")
 	}
 
-	procMounts := ""
-	if isRunning {
-		cmd := fmt.Sprint("cat /proc/mounts")
-		procMounts, _ = drivers.RunSSHCommandFromDriver(driver, cmd)
-	}
-
 	hostfolders := miniConfig.AllInstancesConfig.HostFolders
 	hostfolders = append(hostfolders, miniConfig.InstanceConfig.HostFolders...)
 	var mounts []MountInfo
@@ -120,8 +115,14 @@ func (m *Manager) List(driver drivers.Driver) ([]MountInfo, error) {
 		}
 
 		mounted := false
-		if isRunning && strings.Contains(procMounts, hostFolder.MountPoint()) {
-			mounted = true
+		if isRunning {
+			isMounted, err := m.isHostFolderMounted(driver, hostFolder)
+			if err != nil {
+				return nil, err
+			}
+			if isMounted {
+				mounted = true
+			}
 		}
 
 		mount := MountInfo{
@@ -282,14 +283,14 @@ func (m *Manager) removeFromHostFolders(name string, hostfolders []config.HostFo
 }
 
 func (m *Manager) isHostFolderMounted(driver drivers.Driver, hostFolderConfig config.HostFolderConfig) (bool, error) {
-	cmd := fmt.Sprintf(
-		"if grep -qs %s /proc/mounts; then echo '1'; else echo '0'; fi", hostFolderConfig.MountPoint())
-	out, err := drivers.RunSSHCommandFromDriver(driver, cmd)
+	cmd := "cat /proc/mounts"
+	procMounts, err := drivers.RunSSHCommandFromDriver(driver, cmd)
 	if err != nil {
 		return false, err
 	}
+	r := regexp.MustCompile(fmt.Sprintf("%s(\\s+)", hostFolderConfig.MountPoint()))
 
-	if strings.Trim(out, "\n") == "0" {
+	if !r.MatchString(procMounts) {
 		return false, nil
 	}
 

@@ -29,7 +29,7 @@ import (
 )
 
 //
-type ByName []ServiceSpec
+type ByName []Service
 
 func (a ByName) Len() int           { return len(a) }
 func (a ByName) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
@@ -41,22 +41,23 @@ func Test_getServiceSpecs_with_multiple_nodeports_and_routes(t *testing.T) {
 	setup(t, namespace)
 	defer teardown()
 
-	got, err := GetServiceSpecs(namespace)
+	got, err := GetServices(namespace)
 
 	assert.NoError(t, err, "Error getting service specs")
 
-	expected := []ServiceSpec{{Namespace: namespace, Name: "guestbook-v1-np", URL: []string(nil), NodePort: "32740", Weight: []string(nil)},
+	expected := []Service{{Namespace: namespace, Name: "guestbook-v1-np", URL: []string(nil), NodePort: "32740", Weight: []string(nil)},
 		{Namespace: namespace, Name: "guestbook-v2-np", URL: []string(nil), NodePort: "30485", Weight: []string(nil)},
 		{Namespace: namespace, Name: "guestbook-v1", URL: []string{"http://guestbook-v1-3002-myproject.192.168.64.2.nip.io", "http://guestbook-myproject.192.168.64.2.nip.io", "http://guestbook-v1-myproject.192.168.64.2.nip.io"}, NodePort: "", Weight: []string{"", "50%", ""}},
-		{Namespace: namespace, Name: "guestbook-v2", URL: []string{"http://guestbook-v2-myproject.192.168.64.2.nip.io", "http://guestbook-v2-3002-myproject.192.168.64.2.nip.io", "http://guestbook-myproject.192.168.64.2.nip.io"}, NodePort: "", Weight: []string{"", "", "50%"}}}
+		{Namespace: namespace, Name: "guestbook-v2", URL: []string{"http://guestbook-v2-myproject.192.168.64.2.nip.io", "http://guestbook-v2-3002-myproject.192.168.64.2.nip.io", "http://guestbook-myproject.192.168.64.2.nip.io"}, NodePort: "", Weight: []string{"", "", "50%"}},
+		{Namespace: namespace, Name: "ruby-ex", URL: []string{"https://ruby-ex-tls-myproject.192.168.42.14.nip.io"}, NodePort: "", Weight: []string{"", "", "50%"}}}
 
 	sort.Sort(ByName(got))
 	sort.Sort(ByName(expected))
 
-	comapareServiceSpec(t, got, expected)
+	comapareServices(t, got, expected)
 }
 
-func comapareServiceSpec(t *testing.T, got, expected []ServiceSpec) {
+func comapareServices(t *testing.T, got, expected []Service) {
 	for i, service := range got {
 		sort.Strings(service.URL)
 		sort.Strings(expected[i].URL)

@@ -33,11 +33,11 @@ import (
 )
 
 var (
-	namespace string
-	inbrowser bool
-	https     bool
-	url       bool
-	service   string
+	namespace   string
+	inbrowser   bool
+	https       bool
+	url         bool
+	serviceName string
 )
 
 // serviceCmd represents the service command
@@ -67,21 +67,21 @@ var serviceCmd = &cobra.Command{
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error getting IP: %s", err.Error()))
 		}
 
-		service = args[0]
+		serviceName = args[0]
 
-		serviceSpecs, err := openshift.GetServiceSpecs(namespace)
+		services, err := openshift.GetServices(namespace)
 		if err != nil {
 			atexit.ExitWithMessage(1, err.Error())
 		}
 
 		if url {
-			stdOutURL(serviceSpecs, ip)
+			stdOutURL(services, ip)
 		}
 		if inbrowser {
-			openInBrowser(serviceSpecs, ip)
+			openInBrowser(services, ip)
 		}
 		if !url && !inbrowser {
-			printToStdOut(serviceSpecs, ip)
+			printToStdOut(services, ip)
 		}
 	},
 }
@@ -94,36 +94,36 @@ func init() {
 	OpenShiftCmd.AddCommand(serviceCmd)
 }
 
-func openInBrowser(serviceSpecs []openshift.ServiceSpec, ip string) {
-	serviceURL := getServiceURL(serviceSpecs, ip)
+func openInBrowser(services []openshift.Service, ip string) {
+	serviceURL := getServiceURL(services, ip)
 	fmt.Fprintln(os.Stdout, "Opening the route/NodePort "+serviceURL+" in the default browser...")
 	browser.OpenURL(serviceURL)
 }
 
-func stdOutURL(serviceSpecs []openshift.ServiceSpec, ip string) {
-	serviceURL := getServiceURL(serviceSpecs, ip)
+func stdOutURL(services []openshift.Service, ip string) {
+	serviceURL := getServiceURL(services, ip)
 	fmt.Fprintln(os.Stdout, serviceURL)
 }
 
-func getServiceURL(serviceSpecs []openshift.ServiceSpec, ip string) string {
+func getServiceURL(services []openshift.Service, ip string) string {
 	serviceURL := ""
-	namespaceList := isServiceInMultipleNamespace(serviceSpecs, service)
+	namespaceList := isServiceInMultipleNamespace(services, serviceName)
 	if len(namespaceList) == 0 {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Service '%s' does not exist", service))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Service '%s' does not exist", serviceName))
 	}
 	if len(namespaceList) > 1 {
 		namespaces := strings.TrimSpace(strings.Join(namespaceList, ", "))
-		atexit.ExitWithMessage(1, fmt.Sprintf("Service '%s' exists in multiple namespaces (%s), you need to chose a specific namespace using -n <namespace>.", service, namespaces))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Service '%s' exists in multiple namespaces (%s), you need to chose a specific namespace using -n <namespace>.", serviceName, namespaces))
 	}
 
-	for _, serviceSpec := range serviceSpecs {
-		if serviceSpec.Name == service {
-			if serviceSpec.URL != nil {
-				serviceURL = serviceSpec.URL[0]
+	for _, service := range services {
+		if service.Name == serviceName {
+			if service.URL != nil {
+				serviceURL = service.URL[0]
 				return serviceURL
 
-			} else if serviceSpec.NodePort != "" {
-				nodePortURL := fmt.Sprintf("%s:%s", ip, serviceSpec.NodePort)
+			} else if service.NodePort != "" {
+				nodePortURL := fmt.Sprintf("%s:%s", ip, service.NodePort)
 				urlScheme := "http://"
 				if https {
 					urlScheme = "https://"
@@ -131,40 +131,40 @@ func getServiceURL(serviceSpecs []openshift.ServiceSpec, ip string) string {
 				serviceURL = urlScheme + nodePortURL
 				return serviceURL
 			} else {
-				atexit.ExitWithMessage(1, fmt.Sprintf("Service '%s' in namespace '%s' does not have route associated which can be opened in the browser.", serviceSpec.Name, serviceSpec.Namespace))
+				atexit.ExitWithMessage(1, fmt.Sprintf("Service '%s' in namespace '%s' does not have route associated which can be opened in the browser.", service.Name, service.Namespace))
 			}
 		}
 	}
 	return serviceURL
 }
 
-func isServiceInMultipleNamespace(serviceSpecs []openshift.ServiceSpec, service string) []string {
+func isServiceInMultipleNamespace(services []openshift.Service, serviceName string) []string {
 	namespceList := []string{}
-	for _, serviceSpec := range serviceSpecs {
-		if serviceSpec.Name == service {
-			namespceList = append(namespceList, serviceSpec.Namespace)
+	for _, service := range services {
+		if service.Name == serviceName {
+			namespceList = append(namespceList, service.Namespace)
 		}
 	}
 	return namespceList
 }
 
-func printToStdOut(serviceSpecs []openshift.ServiceSpec, ip string) {
+func printToStdOut(services []openshift.Service, ip string) {
 	var data [][]string
 	var urls, weights string
 
-	for _, serviceSpec := range serviceSpecs {
-		if serviceSpec.Name == service {
-			nodePortURL := serviceSpec.NodePort
+	for _, service := range services {
+		if service.Name == serviceName {
+			nodePortURL := service.NodePort
 			if nodePortURL != "" {
 				nodePortURL = fmt.Sprintf("%s:%s", ip, nodePortURL)
 			}
-			if serviceSpec.URL != nil {
-				urls = strings.Join(serviceSpec.URL, "\n")
+			if service.URL != nil {
+				urls = strings.Join(service.URL, "\n")
 			}
-			if serviceSpec.Weight != nil {
-				weights = strings.Join(serviceSpec.Weight, "\n")
+			if service.Weight != nil {
+				weights = strings.Join(service.Weight, "\n")
 			}
-			data = append(data, []string{serviceSpec.Namespace, serviceSpec.Name, nodePortURL, urls, weights})
+			data = append(data, []string{service.Namespace, service.Name, nodePortURL, urls, weights})
 		}
 	}
 	table := tablewriter.NewWriter(os.Stdout)

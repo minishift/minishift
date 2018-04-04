@@ -187,7 +187,54 @@ const (
             "status": {
                 "loadBalancer": {}
             }
-        }
+        },
+		{
+			"apiVersion": "v1",
+			"items": [
+				{
+					"apiVersion": "v1",
+					"kind": "Service",
+					"metadata": {
+						"annotations": {
+							"openshift.io/generated-by": "OpenShiftWebConsole"
+						},
+						"creationTimestamp": "2018-04-03T10:32:44Z",
+						"labels": {
+							"app": "ruby-ex"
+						},
+						"name": "ruby-ex",
+						"namespace": "myproject",
+						"resourceVersion": "1797",
+						"selfLink": "/api/v1/namespaces/myproject/services/ruby-ex",
+						"uid": "5899e30b-372a-11e8-892d-d6ed6f001924"
+					},
+					"spec": {
+						"clusterIP": "172.30.106.149",
+						"ports": [
+							{
+								"name": "8080-tcp",
+								"port": 8080,
+								"protocol": "TCP",
+								"targetPort": 8080
+							}
+						],
+						"selector": {
+							"deploymentconfig": "ruby-ex"
+						},
+						"sessionAffinity": "None",
+						"type": "ClusterIP"
+					},
+					"status": {
+						"loadBalancer": {}
+					}
+				}
+			],
+			"kind": "List",
+			"metadata": {
+				"resourceVersion": "",
+				"selfLink": ""
+			}
+		}
     ],
     "kind": "List",
     "metadata": {},
@@ -414,6 +461,55 @@ const (
                             }
                         ],
                         "host": "guestbook-v2-3002-myproject.192.168.64.2.nip.io",
+                        "routerName": "router",
+                        "wildcardPolicy": "None"
+                    }
+                ]
+            }
+        },
+		{
+            "apiVersion": "route.openshift.io/v1",
+            "kind": "Route",
+            "metadata": {
+                "annotations": {
+                    "openshift.io/host.generated": "true"
+                },
+                "creationTimestamp": "2018-04-03T10:52:09Z",
+                "labels": {
+                    "app": "ruby-ex"
+                },
+                "name": "ruby-ex-tls",
+                "namespace": "myproject",
+                "resourceVersion": "3217",
+                "selfLink": "/apis/route.openshift.io/v1/namespaces/myproject/routes/ruby-ex-tls",
+                "uid": "0eeabedc-372d-11e8-853f-567fb20565f6"
+            },
+            "spec": {
+                "host": "ruby-ex-tls-myproject.192.168.42.14.nip.io",
+                "port": {
+                    "targetPort": "8080-tcp"
+                },
+                "tls": {
+                    "termination": "edge"
+                },
+                "to": {
+                    "kind": "Service",
+                    "name": "ruby-ex",
+                    "weight": 100
+                },
+                "wildcardPolicy": "None"
+            },
+            "status": {
+                "ingress": [
+                    {
+                        "conditions": [
+                            {
+                                "lastTransitionTime": "2018-04-03T10:52:09Z",
+                                "status": "True",
+                                "type": "Admitted"
+                            }
+                        ],
+                        "host": "ruby-ex-tls-myproject.192.168.42.14.nip.io",
                         "routerName": "router",
                         "wildcardPolicy": "None"
                     }

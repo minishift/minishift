@@ -33,7 +33,12 @@ var (
 	runner util.Runner = &util.RealRunner{}
 )
 
-type Service struct {
+const (
+	http  = "http://%s"
+	https = "https://%s"
+)
+
+type ServiceSpec struct {
 	Items []struct {
 		Metadata struct {
 			Name string `json:"name"`
@@ -46,7 +51,7 @@ type Service struct {
 	} `json:"items"`
 }
 
-type Route struct {
+type RouteSpec struct {
 	Items []struct {
 		Spec struct {
 			AlternateBackends []struct {
@@ -54,7 +59,10 @@ type Route struct {
 				Weight int    `json:"weight"`
 			} `json:"alternateBackends"`
 			Host string `json:"host"`
-			To   struct {
+			Tls  struct {
+				Termination string `json:"termination"`
+			} `json:"tls"`
+			To struct {
 				Name   string `json:"name"`
 				Weight int    `json:"weight"`
 			} `json:"to"`
@@ -62,12 +70,13 @@ type Route struct {
 	} `json:"items"`
 }
 
-type ServiceWeight struct {
+type Route struct {
 	Name   string
 	Weight string
+	Tls    string
 }
 
-type ServiceSpec struct {
+type Service struct {
 	Namespace string
 	Name      string
 	URL       []string
@@ -75,42 +84,46 @@ type ServiceSpec struct {
 	Weight    []string
 }
 
+type Services struct {
+	Service map[string]*Service
+}
+
 const (
 	ProjectsCustomCol = "-o=custom-columns=NAME:.metadata.name"
 )
 
-// GetServiceSpecs takes Namespace string and return route/nodeport/name/weight in a ServiceSpec structure
-func GetServiceSpecs(serviceNamespace string) ([]ServiceSpec, error) {
-	var serviceSpecs []ServiceSpec
+// GetServices takes Namespace string and return route/nodeport/name/weight in a Service structure
+func GetServices(serviceNamespace string) ([]Service, error) {
+	var services []Service
 
 	if serviceNamespace != "" && !isProjectExists(serviceNamespace) {
-		return serviceSpecs, errors.New(fmt.Sprintf("Namespace '%s' doesn't exist", serviceNamespace))
+		return services, errors.New(fmt.Sprintf("Namespace '%s' doesn't exist", serviceNamespace))
 	}
 
 	namespaces, err := getValidNamespaces(serviceNamespace)
 	if err != nil {
-		return serviceSpecs, err
+		return services, err
 	}
 
 	// iterate over namespaces, get command output, format route and nodePort
 	for _, namespace := range namespaces {
-		serviceNodePort, err := getService(namespace)
+		serviceNodePort, err := getNodePorts(namespace)
 		if err != nil {
-			return serviceSpecs, err
+			return services, err
 		}
-		routeSpec, err := getRouteSpec(namespace)
+		route, err := getRoutes(namespace)
 		if err != nil {
-			return serviceSpecs, err
+			return services, err
 		}
 		if serviceNodePort != nil {
-			serviceSpecs = append(serviceSpecs, filterAndUpdateServiceSpecs(routeSpec, namespace, serviceNodePort)...)
+			services = append(services, filterAndUpdateServices(route, namespace, serviceNodePort)...)
 		}
 	}
-	if len(serviceSpecs) == 0 {
-		return serviceSpecs, errors.New(fmt.Sprintf("No services defined in namespace '%s'", serviceNamespace))
+	if len(services) == 0 {
+		return services, errors.New(fmt.Sprintf("No services defined in namespace '%s'", serviceNamespace))
 	}
 
-	return serviceSpecs, nil
+	return services, nil
 }
 
 // Check whether project exists or not
@@ -149,9 +162,9 @@ func getValidNamespaces(serviceListNamespace string) ([]string, error) {
 }
 
 // getRouteSpec take valid namespace and return map which have route as key and
-// value be ServiceWeight struct
-func getRouteSpec(namespace string) (map[string][]ServiceWeight, error) {
-	routeSpec := make(map[string][]ServiceWeight)
+// value be Route struct
+func getRoutes(namespace string) (map[string][]Route, error) {
+	routes := make(map[string][]Route)
 	cmdArgText := fmt.Sprintf("get route -o json --config=%s -n %s", constants.KubeConfigPath, namespace)
 	tokens := strings.Split(cmdArgText, " ")
 	cmdName := instanceState.InstanceConfig.OcPath
@@ -164,7 +177,7 @@ func getRouteSpec(namespace string) (map[string][]ServiceWeight, error) {
 		return nil, nil
 	}
 
-	var data Route
+	var data RouteSpec
 	err = json.Unmarshal(cmdOut, &data)
 	if err != nil {
 		return nil, err
@@ -175,13 +188,13 @@ func getRouteSpec(namespace string) (map[string][]ServiceWeight, error) {
 		for _, alternateBackend := range item.Spec.AlternateBackends {
 			totalWeight += alternateBackend.Weight
 		}
-		routeSpec[item.Spec.Host] = []ServiceWeight{{Name: item.Spec.To.Name, Weight: calculateWeight(float64(item.Spec.To.Weight), float64(totalWeight))}}
+		routes[item.Spec.Host] = []Route{{Name: item.Spec.To.Name, Weight: calculateWeight(float64(item.Spec.To.Weight), float64(totalWeight)), Tls: item.Spec.Tls.Termination}}
 		for _, alternateBackend := range item.Spec.AlternateBackends {
-			routeSpec[item.Spec.Host] = append(routeSpec[item.Spec.Host], ServiceWeight{Name: alternateBackend.Name,
-				Weight: calculateWeight(float64(alternateBackend.Weight), float64(totalWeight))})
+			routes[item.Spec.Host] = append(routes[item.Spec.Host], Route{Name: alternateBackend.Name,
+				Weight: calculateWeight(float64(alternateBackend.Weight), float64(totalWeight)), Tls: item.Spec.Tls.Termination})
 		}
 	}
-	return routeSpec, nil
+	return routes, nil
 }
 
 func calculateWeight(a float64, b float64) string {
@@ -192,50 +205,69 @@ func calculateWeight(a float64, b float64) string {
 	return ""
 }
 
-func filterAndUpdateServiceSpecs(routeSpec map[string][]ServiceWeight, namespace string, serviceNodePort map[string]string) []ServiceSpec {
-	var serviceSpecs []ServiceSpec
-	serviceSpecMap := make(map[string]*ServiceSpec)
+func hasNodePort(serviceNodePort map[string]string, name string) bool {
+	_, ok := serviceNodePort[name]
+	return ok
+}
 
-	for routeURL, v := range routeSpec {
+func createService(route Route, routeURL, namespace, nodePort string) *Service {
+	s := &Service{Name: route.Name,
+		Namespace: namespace,
+		Weight:    []string{route.Weight},
+		NodePort:  nodePort,
+	}
+
+	s.URL = append(s.URL, genUrl(route, routeURL))
+	return s
+}
+
+func genUrl(route Route, url string) string {
+	if route.Tls != "" {
+		return fmt.Sprintf(https, url)
+	}
+	return fmt.Sprintf(http, url)
+}
+
+func NewServices() *Services {
+	return &Services{Service: make(map[string]*Service)}
+}
+
+func (s *Services) Add(route Route, routeURL, namespace, nodePort string) {
+	if s.HasService(route.Name) {
+		s.Service[route.Name].URL = append(s.Service[route.Name].URL, genUrl(route, routeURL))
+		s.Service[route.Name].Weight = append(s.Service[route.Name].Weight, route.Weight)
+	} else {
+		s.Service[route.Name] = createService(route, routeURL, namespace, nodePort)
+	}
+}
+
+func (s *Services) HasService(name string) bool {
+	_, ok := s.Service[name]
+	return ok
+}
+
+func filterAndUpdateServices(routes map[string][]Route, namespace string, serviceNodePort map[string]string) []Service {
+	var serviceList []Service
+	services := NewServices()
+	for routeURL, v := range routes {
 		for _, service := range v {
-			// split content on colon to separate NAME, HOST and Weight
-			if _, ok := serviceNodePort[service.Name]; ok {
-				if _, ok := serviceSpecMap[service.Name]; !ok {
-					serviceSpecMap[service.Name] = &ServiceSpec{Namespace: namespace,
-						Name:     service.Name,
-						URL:      []string{fmt.Sprintf("http://%s", routeURL)},
-						NodePort: serviceNodePort[service.Name],
-						Weight:   []string{service.Weight},
-					}
-				} else {
-					serviceSpecMap[service.Name].URL = append(serviceSpecMap[service.Name].URL, fmt.Sprintf("http://%s", routeURL))
-					serviceSpecMap[service.Name].Weight = append(serviceSpecMap[service.Name].Weight, service.Weight)
-				}
+			if hasNodePort(serviceNodePort, service.Name) {
+				services.Add(service, routeURL, namespace, serviceNodePort[service.Name])
 				delete(serviceNodePort, service.Name)
 			} else {
-				if _, ok := serviceSpecMap[service.Name]; !ok {
-					serviceSpecMap[service.Name] = &ServiceSpec{Namespace: namespace,
-						Name:     service.Name,
-						URL:      []string{fmt.Sprintf("http://%s", routeURL)},
-						NodePort: "",
-						Weight:   []string{service.Weight},
-					}
-				} else {
-					serviceSpecMap[service.Name].URL = append(serviceSpecMap[service.Name].URL, fmt.Sprintf("http://%s", routeURL))
-					serviceSpecMap[service.Name].Weight = append(serviceSpecMap[service.Name].Weight, service.Weight)
-				}
+				services.Add(service, routeURL, namespace, "")
 			}
 		}
 	}
 
 	for k, v := range serviceNodePort {
-		serviceSpecs = append(serviceSpecs, ServiceSpec{Namespace: namespace, Name: k, URL: nil, NodePort: v, Weight: nil})
+		serviceList = append(serviceList, Service{Namespace: namespace, Name: k, URL: nil, NodePort: v, Weight: nil})
 	}
-	for _, v := range serviceSpecMap {
-		serviceSpecs = append(serviceSpecs, *v)
+	for _, v := range services.Service {
+		serviceList = append(serviceList, *v)
 	}
 
-	return serviceSpecs
+	return serviceList
 }
 
 // Discard empty elements
@@ -251,9 +283,9 @@ func emptyFilter(data []string) []string {
 	return res
 }
 
-// Get service provide service name and node-port as map data structure
-func getService(namespace string) (map[string]string, error) {
-	serviceNodePort := make(map[string]string)
+// getNodePorts  provide service name and node-port as map data structure
+func getNodePorts(namespace string) (map[string]string, error) {
+	serviceNodePorts := make(map[string]string)
 	cmdArgText := fmt.Sprintf("get svc -o json --config=%s -n %s", constants.KubeConfigPath, namespace)
 	tokens := strings.Split(cmdArgText, " ")
 	cmdName := instanceState.InstanceConfig.OcPath
@@ -266,7 +298,7 @@ func getService(namespace string) (map[string]string, error) {
 		return nil, nil
 	}
 
-	var data Service
+	var data ServiceSpec
 	err = json.Unmarshal(cmdOut, &data)
 	if err != nil {
 		return nil, err
@@ -278,10 +310,10 @@ func getService(namespace string) (map[string]string, error) {
 			if port.NodePort != 0 {
 				nodePort = fmt.Sprintf("%d", port.NodePort)
 			}
-			serviceNodePort[item.Metadata.Name] = nodePort
+			serviceNodePorts[item.Metadata.Name] = nodePort
 		}
 	}
-	return serviceNodePort, nil
+	return serviceNodePorts, nil
 }
 
 // Get all projects a user belongs to

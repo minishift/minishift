@@ -56,31 +56,31 @@ var serviceListCmd = &cobra.Command{
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error getting IP: %s", err.Error()))
 		}
 
-		serviceSpecs, err := openshift.GetServiceSpecs(serviceListNamespace)
+		services, err := openshift.GetServices(serviceListNamespace)
 		if err != nil {
 			atexit.ExitWithMessage(1, err.Error())
 		}
 
 		var data [][]string
 		namespace := make(map[string]bool)
-		for _, serviceSpec := range serviceSpecs {
-			if _, ok := namespace[serviceSpec.Namespace]; ok {
-				serviceSpec.Namespace = ""
+		for _, service := range services {
+			if _, ok := namespace[service.Namespace]; ok {
+				service.Namespace = ""
 			} else {
-				namespace[serviceSpec.Namespace] = true
+				namespace[service.Namespace] = true
 			}
 			var urls, weights string
-			nodePortURL := serviceSpec.NodePort
+			nodePortURL := service.NodePort
 			if nodePortURL != "" {
 				nodePortURL = fmt.Sprintf("%s:%s", ip, nodePortURL)
 			}
-			if serviceSpec.URL != nil {
-				urls = strings.Join(serviceSpec.URL, "\n")
+			if service.URL != nil {
+				urls = strings.Join(service.URL, "\n")
 			}
-			if serviceSpec.Weight != nil {
-				weights = strings.Join(serviceSpec.Weight, "\n")
+			if service.Weight != nil {
+				weights = strings.Join(service.Weight, "\n")
 			}
-			data = append(data, []string{serviceSpec.Namespace, serviceSpec.Name, nodePortURL, urls, weights})
+			data = append(data, []string{service.Namespace, service.Name, nodePortURL, urls, weights})
 		}
 
 		table := tablewriter.NewWriter(os.Stdout)

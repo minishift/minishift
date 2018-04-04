@@ -27,9 +27,9 @@ user defined options which changes default behaviour of Minishift.
 
   Examples: Wrong values for boolean keys
     | property            | value      |
-    | logging             | TRuE       |
-    | metrics             | positive   |
-    | metrics             | yes        |
+    | skip-registration   | TRuE       |
+    | skip-registry-check | positive   |
+    | skip-registration   | yes        |
     | skip-registry-check | fAlse      |
     | skip-registration   | -- -1      |
     | skip-registry-check | 11         |
@@ -102,19 +102,19 @@ user defined options which changes default behaviour of Minishift.
 
    Examples: Correct values for boolean keys
     | property            | value      | expected |
-    | logging             | true       | true     |
-    | logging             | True       | true     |
-    | logging             | TRUE       | true     |
-    | logging             | t          | true     |
-    | logging             | T          | true     |
-    | logging             | 1          | true     |
-    | metrics             | false      | false    |
-    | metrics             | False      | false    |
-    | metrics             | FALSE      | false    |
-    | metrics             | f          | false    |
-    | metrics             | F          | false    |
-    | metrics             | 0          | false    |
-    | metrics             | f          | false    |
+    | skip-registration   | true       | true     |
+    | skip-registry-check | True       | true     |
+    | skip-registration   | TRUE       | true     |
+    | skip-registry-check | t          | true     |
+    | skip-registration   | T          | true     |
+    | skip-registry-check | 1          | true     |
+    | skip-registration   | false      | false    |
+    | skip-registry-check | False      | false    |
+    | skip-registration   | FALSE      | false    |
+    | skip-registry-check | f          | false    |
+    | skip-registration   | F          | false    |
+    | skip-registry-check | 0          | false    |
+    | skip-registration   | f          | false    |
     | skip-registry-check | true       | true     |
     | skip-registration   | false      | false    |
     | skip-registry-check | True       | true     |

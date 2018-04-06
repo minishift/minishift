@@ -33,11 +33,8 @@ import (
 	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/minishift/docker"
 	"github.com/minishift/minishift/pkg/util"
+	"github.com/minishift/minishift/pkg/util/github"
 )
-
-type releaseTags struct {
-	Name string `json:"name"`
-}
 
 func GetOpenshiftVersion(sshCommander provision.SSHCommander) (string, error) {
 	dockerCommander := docker.NewVmDockerCommander(sshCommander)
@@ -104,15 +101,12 @@ func PrintUpStreamVersions(output io.Writer, minSupportedVersion string, default
 		return err
 	}
 	for _, releaseTag := range data {
-		if strings.Contains(releaseTag.Name, "latest") {
-			continue
-		}
-		if valid, _ := IsGreaterOrEqualToBaseVersion(releaseTag.Name, minSupportedVersion); valid {
-			if valid, _ := IsGreaterOrEqualToBaseVersion(releaseTag.Name, defaultVersion); valid {
-				releaseList = append(releaseList, releaseTag.Name)
+		if valid, _ := IsGreaterOrEqualToBaseVersion(releaseTag, minSupportedVersion); valid {
+			if valid, _ := IsGreaterOrEqualToBaseVersion(releaseTag, defaultVersion); valid {
+				releaseList = append(releaseList, releaseTag)
 			} else {
-				if !isPrerelease(releaseTag.Name) {
-					releaseList = append(releaseList, releaseTag.Name)
+				if !isPrerelease(releaseTag) {
+					releaseList = append(releaseList, releaseTag)
 				}
 			}
 		}
@@ -160,18 +154,19 @@ func IsGreaterOrEqualToBaseVersion(version string, baseVersion string) (bool, er
 	return false, nil
 }
 
-func getGithubReleases() ([]releaseTags, error) {
-	githubReleaseUrl := "https://api.github.com/repos/openshift/origin/releases"
-	resp, err := getResponseBody(githubReleaseUrl)
+func getGithubReleases() ([]string, error) {
+	var releaseTags []string
+	client := github.Client()
+	listOptions := github.ListOptions()
+	releases, _, err := client.Repositories.ListReleases("openshift", "origin", listOptions)
 	if err != nil {
+		if github.IsRateLimitError(err) {
+			return nil, fmt.Errorf("Hit github rate limit: %v", err)
+		}
 		return nil, err
 	}
-	defer resp.Body.Close()
-	decoder := json.NewDecoder(resp.Body)
-	var data []releaseTags
-	err = decoder.Decode(&data)
-	if err != nil {
-		return nil, errors.New(fmt.Sprintf("%T\n%s\n%#v\n", err, err, err))
+	for _, release := range releases {
+		releaseTags = append(releaseTags, *release.Name)
 	}
-	return data, nil
+	return releaseTags, nil
 }

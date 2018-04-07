@@ -129,6 +129,8 @@ func Test_http_proxy_from_env(t *testing.T) {
 	}{
 		{"HTTP_PROXY", "http://user:pass@myproxy.foo:1080", true},
 		{"HTTPS_PROXY", "http://user:pass@myproxy.foo:1080", true},
+		{"http_proxy", "http://user:pass@myproxy.foo:1080", true},
+		{"https_proxy", "http://user:pass@myproxy.foo:1080", true},
 		{"HTTP_PROXY", "", false},
 		{"HTTPS_PROXY", "", false},
 	}
@@ -143,4 +145,20 @@ func Test_http_proxy_from_env(t *testing.T) {
 
 		os.Clearenv()
 	}
+}
+
+func Test_http_proxy_from_env_lowercase_precedence(t *testing.T) {
+	os.Clearenv()
+	defer os.Clearenv()
+
+	os.Setenv("HTTP_PROXY", "http://user:pass@myproxy.foo:1080")
+	os.Setenv("http_proxy", "http://user:pass@someotherproxy.foo:1080")
+	os.Setenv("HTTPS_PROXY", "https://user:pass@myproxy.foo:1080")
+	os.Setenv("https_proxy", "https://user:pass@someotherproxy.foo:1080")
+
+	proxyConfig, err := NewProxyConfig("", "", "")
+	assert.NoError(t, err)
+
+	assert.Equal(t, "http://user:pass@someotherproxy.foo:1080", proxyConfig.httpProxy)
+	assert.Equal(t, "https://user:pass@someotherproxy.foo:1080", proxyConfig.httpsProxy)
 }

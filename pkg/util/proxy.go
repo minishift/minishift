@@ -39,7 +39,10 @@ type ProxyConfig struct {
 // the corresponding environment variable is checked.
 func NewProxyConfig(httpProxy string, httpsProxy string, noProxy string) (*ProxyConfig, error) {
 	if httpProxy == "" {
-		httpProxy = os.Getenv("HTTP_PROXY")
+		httpProxy = os.Getenv("http_proxy")
+		if httpProxy == "" {
+			httpProxy = os.Getenv("HTTP_PROXY")
+		}
 	}
 
 	err := ValidateProxyURL(httpProxy)
@@ -48,7 +51,10 @@ func NewProxyConfig(httpProxy string, httpsProxy string, noProxy string) (*Proxy
 	}
 
 	if httpsProxy == "" {
-		httpsProxy = os.Getenv("HTTPS_PROXY")
+		httpsProxy = os.Getenv("https_proxy")
+		if httpsProxy == "" {
+			httpsProxy = os.Getenv("HTTPS_PROXY")
+		}
 	}
 
 	err = ValidateProxyURL(httpsProxy)
@@ -60,7 +66,10 @@ func NewProxyConfig(httpProxy string, httpsProxy string, noProxy string) (*Proxy
 	np = append(np, defaultNoProxies...)
 
 	if noProxy == "" {
-		noProxy = os.Getenv("NO_PROXY")
+		noProxy = os.Getenv("no_proxy")
+		if noProxy == "" {
+			noProxy = os.Getenv("NO_PROXY")
+		}
 	}
 
 	if noProxy != "" {

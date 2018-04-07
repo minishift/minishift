@@ -37,7 +37,7 @@ import (
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/viper"
 
-	cmdUtils "github.com/minishift/minishift/cmd/minishift/cmd/util"
+	cmdUtil "github.com/minishift/minishift/cmd/minishift/cmd/util"
 	minishiftNetwork "github.com/minishift/minishift/pkg/minishift/network"
 	openshiftVersion "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	stringUtils "github.com/minishift/minishift/pkg/util/strings"
@@ -45,7 +45,7 @@ import (
 
 const (
 	StorageDisk   = "/mnt/?da1"
-	GithubAddress = "github.com:http"
+	GithubAddress = "https://github.com"
 )
 
 // preflightChecksBeforeStartingHost is executed before the startHost function.
@@ -53,7 +53,22 @@ func preflightChecksBeforeStartingHost() {
 	driverErrorMessage := "See the 'Setting Up the Driver Plug-in' topic (https://docs.openshift.org/latest/minishift/getting-started/setting-up-driver-plugin.html) for more information"
 	prerequisiteErrorMessage := "See the 'Installing Prerequisites for Minishift' topic (https://docs.openshift.org/latest/minishift/getting-started/installing.html#install-prerequisites) for more information"
 
+	proxy := os.Getenv("HTTPS_PROXY")
+
+	// In case we're not running with -v5, we want to obscure the proxy but
+	// still tell the user whether or not a proxy is being used. This is for
+	// security reasons as proxy URLs might contain credentials thay should not
+	// always be shown.
+	if !glog.V(5) {
+		if os.Getenv("HTTPS_PROXY") == "" {
+			proxy = "No"
+		} else {
+			proxy = "Yes"
+		}
+	}
+	fmt.Printf("-- Checking if %s is reachable (using proxy: %q) ... ", GithubAddress, proxy)
 	if network.CheckInternetConnectivity(GithubAddress) {
+		fmt.Printf("OK\n")
 		preflightCheckSucceedsOrFails(
 			configCmd.SkipCheckOpenShiftRelease.Name,
 			checkOriginRelease,
@@ -62,10 +77,8 @@ func preflightChecksBeforeStartingHost() {
 			fmt.Sprintf("%s is not a valid OpenShift version", viper.GetString(configCmd.OpenshiftVersion.Name)),
 		)
 	} else {
+		fmt.Printf("FAIL\n")
 		fmt.Printf("-- Checking if requested OpenShift version '%s' is valid ... SKIP\n", viper.GetString(configCmd.OpenshiftVersion.Name))
-		if glog.V(2) {
-			fmt.Println("github.com is not accessible over internet or host is not connected to internet")
-		}
 	}
 
 	preflightCheckSucceedsOrFails(
@@ -357,8 +370,8 @@ func checkLibvirtDefaultNetworkExists() bool {
 //checkLibvirtDefaultNetworkActive returns true if the "default" network is active
 func checkLibvirtDefaultNetworkActive() bool {
 	cmd := exec.Command("virsh", "--connect", "qemu:///system", "net-list")
-	cmd.Env = cmdUtils.ReplaceEnv(os.Environ(), "LC_ALL", "C")
-	cmd.Env = cmdUtils.ReplaceEnv(cmd.Env, "LANG", "C")
+	cmd.Env = cmdUtil.ReplaceEnv(os.Environ(), "LC_ALL", "C")
+	cmd.Env = cmdUtil.ReplaceEnv(cmd.Env, "LANG", "C")
 	stdOutStdError, err := cmd.CombinedOutput()
 	if err != nil {
 		return false

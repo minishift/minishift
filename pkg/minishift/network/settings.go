@@ -20,7 +20,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	"net"
+	"net/http"
 	"strconv"
 	"strings"
 	"text/template"
@@ -312,7 +312,7 @@ func WriteNetworkSettingsToInstance(driver drivers.Driver, networkSettings Netwo
 
 // CheckInternetConnectivity return false if user is not connected to internet
 func CheckInternetConnectivity(address string) bool {
-	_, err := net.Dial("tcp", address)
+	_, err := http.Get(address)
 	if err != nil {
 		return false
 	}

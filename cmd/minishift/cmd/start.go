@@ -168,6 +168,8 @@ func runStart(cmd *cobra.Command, args []string) {
 	// we need to determine whether this is a restart prior to potentially creating a new VM
 	isRestart := cmdUtil.VMExists(libMachineClient, constants.MachineName)
 
+	proxyConfig := handleProxies()
+
 	// preflight check (before start)
 	preflightChecksBeforeStartingHost()
 
@@ -177,8 +179,6 @@ func runStart(cmd *cobra.Command, args []string) {
 	preflightChecksForArtifacts()
 
 	setSubscriptionManagerParameters()
-
-	proxyConfig := handleProxies()
 
 	fmt.Print("-- Starting local OpenShift cluster")
 

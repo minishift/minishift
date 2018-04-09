@@ -16,6 +16,11 @@ limitations under the License.
 
 package constants
 
+import (
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	"path/filepath"
+)
+
 const (
 	B2dIsoAlias            = "b2d"
 	CentOsIsoAlias         = "centos"
@@ -30,3 +35,13 @@ const (
 var (
 	ValidIsoAliases = []string{B2dIsoAlias, CentOsIsoAlias, MinikubeIsoAlias}
 )
+
+// ProfileAuthorizedKeysPath returns the path of authorized_keys file in profile dir used for authentication purpose
+func ProfileAuthorizedKeysPath() string {
+	return filepath.Join(constants.Minipath, "certs", "authorized_keys")
+}
+
+// ProfilePrivateKeyPath returns the path of private key of VM present in profile dir which is used for authentication purpose
+func ProfilePrivateKeyPath() string {
+	return filepath.Join(constants.Minipath, "certs", "id_rsa")
+}

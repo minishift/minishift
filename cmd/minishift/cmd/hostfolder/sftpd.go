@@ -17,19 +17,18 @@ limitations under the License.
 package hostfolder
 
 import (
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/x509"
-	"encoding/pem"
 	"fmt"
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/cmd/minishift/cmd/config"
+	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
+	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/pkg/sftp"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/ssh"
 	"io"
+	"io/ioutil"
 	"net"
 	"os"
 	"sync/atomic"
@@ -50,16 +49,18 @@ var (
 		Run:    runSftp,
 		Hidden: true,
 	}
+
+	authorizedKeysMap map[string]bool
 )
 
 func init() {
+	authorizedKeysMap = make(map[string]bool)
 	hostFolderSSHDCmd.Flags().IntVarP(&serverPort, serverPortFlag, "p", 2022, "The server port.")
 	HostFolderCmd.AddCommand(hostFolderSSHDCmd)
 }
 
 func runSftp(cmd *cobra.Command, args []string) {
 	serverConfig := serverConfig()
-
 	port := viper.GetInt(config.HostFoldersSftpPort.Name)
 	if port == 0 {
 		port = serverPort
@@ -82,8 +83,9 @@ func serveConnections(listener net.Listener, serverConfig *ssh.ServerConfig) {
 			glog.Fatal("failed to accept incoming connection", err)
 		}
 
-		// Before use, a handshake must be performed on the incoming
-		// net.Conn.
+		// populate authorized keys for handshake
+		populateAuthorizedKeysMap()
+		// Before use, a handshake must be performed on the incoming net.Conn.
 		_, channels, requests, err := ssh.NewServerConn(nConn, serverConfig)
 		if err != nil {
 			glog.Fatal("failed to handshake", err)
@@ -159,47 +161,54 @@ func serveConnections(listener net.Listener, serverConfig *ssh.ServerConfig) {
 func serverConfig() *ssh.ServerConfig {
 	// An SSH server is represented by a ServerConfig, which holds certificate details and handles authentication
 	config := ssh.ServerConfig{
-		Config: ssh.Config{
-			MACs: []string{"hmac-sha1"},
-		},
 		PublicKeyCallback: keyAuth,
 	}
 
-	data, err := createPrivateKey()
-	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to create private key: %s", err))
+	if filehelper.Exists(minishiftConstants.ProfilePrivateKeyPath()) {
+		privateKeyBytes, err := ioutil.ReadFile(minishiftConstants.ProfilePrivateKeyPath())
+		if err != nil {
+			atexit.ExitWithMessage(1, fmt.Sprintf("Unable to read private key: %s", err))
+		}
+
+		privateKeySigner, err := ssh.ParsePrivateKey(privateKeyBytes)
+		if err != nil {
+			atexit.ExitWithMessage(1, fmt.Sprintf("Unable to parse private key: %s", err))
+		}
+		config.AddHostKey(privateKeySigner)
 	}
-	hostPrivateKeySigner, err := ssh.ParsePrivateKey(data)
-	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Unable to parse private key: %s", err))
-	}
-	config.AddHostKey(hostPrivateKeySigner)
+
 	return &config
 }
 
-func keyAuth(conn ssh.ConnMetadata, key ssh.PublicKey) (*ssh.Permissions, error) {
-	// TODO Do proper key based authentication
-	// See also https://github.com/golang/crypto/blob/master/ssh/example_test.go
-	// As part of the key generation w/i the VM we create a public key which we need to store in a authorized_keys file
-	// for all profiles
-	permissions := &ssh.Permissions{
-		CriticalOptions: map[string]string{},
-		Extensions:      map[string]string{},
+// populateAuthorizedKeysMap populates the authorizedKeysMap map after reading the key from the
+// authorized_keys file.
+// authorized_keys file is maintained separately for each profile.
+func populateAuthorizedKeysMap() {
+	authorizedKeysBytes, err := ioutil.ReadFile(minishiftConstants.ProfileAuthorizedKeysPath())
+	if err != nil {
+		glog.Fatalf("Failed to load authorized_keys, err: %v", err)
 	}
-	return permissions, nil
+
+	for len(authorizedKeysBytes) > 0 {
+		pubKey, _, _, rest, err := ssh.ParseAuthorizedKey(authorizedKeysBytes)
+		if err != nil {
+			glog.Fatal(err)
+		}
+
+		authorizedKeysMap[string(pubKey.Marshal())] = true
+		authorizedKeysBytes = rest
+	}
 }
 
-func createPrivateKey() ([]byte, error) {
-	key, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		return nil, err
+func keyAuth(conn ssh.ConnMetadata, key ssh.PublicKey) (*ssh.Permissions, error) {
+	// Reference link - https://github.com/golang/crypto/blob/master/ssh/example_test.go
+	if authorizedKeysMap[string(key.Marshal())] {
+		permissions := ssh.Permissions{
+			Extensions: map[string]string{
+				"pubkey-fp": ssh.FingerprintSHA256(key),
+			},
+		}
+		return &permissions, nil
 	}
-
-	pem := pem.EncodeToMemory(
-		&pem.Block{
-			Type:  "RSA PRIVATE KEY",
-			Bytes: x509.MarshalPKCS1PrivateKey(key),
-		},
-	)
-	return pem, nil
+	return nil, fmt.Errorf("unknown public key for %q", conn.User())
 }

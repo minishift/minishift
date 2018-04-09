@@ -166,3 +166,18 @@ func IsEmptyDir(path string) bool {
 
 	return err == io.EOF
 }
+
+func CreateOrOpenFileAndWrite(path, data string) error {
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0600)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	_, err = f.WriteString(data)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

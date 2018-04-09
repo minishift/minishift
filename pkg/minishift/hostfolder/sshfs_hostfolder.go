@@ -21,8 +21,10 @@ import (
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/golang/glog"
 	miniConfig "github.com/minishift/minishift/pkg/minishift/config"
+	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/minishift/hostfolder/config"
 	"github.com/minishift/minishift/pkg/util"
+	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/minishift/minishift/pkg/util/os"
 	"github.com/minishift/minishift/pkg/util/os/process"
 	goos "os"
@@ -54,13 +56,14 @@ func (h *SSHFSHostFolder) Config() config.HostFolderConfig {
 }
 
 func (h *SSHFSHostFolder) Mount(driver drivers.Driver) error {
-	err := h.ensureSFTPDDaemonRunning()
-	if err != nil {
+	if err := h.ensureRSAKeyExists(driver); err != nil {
+		return err
+	}
+	if err := h.cacheRSAKeys(driver); err != nil {
 		return err
 	}
 
-	err = h.ensureRSAKeyExists(driver)
-	if err != nil {
+	if err := h.ensureSFTPDDaemonRunning(); err != nil {
 		return err
 	}
 
@@ -92,7 +95,7 @@ func (h *SSHFSHostFolder) Mount(driver drivers.Driver) error {
 
 	err = util.Retry(3, mount)
 	if err != nil {
-		return fmt.Errorf("error occurred while mounting host folder")
+		return fmt.Errorf("error occurred while mounting host folder: %s", err)
 	}
 
 	return nil
@@ -145,9 +148,35 @@ func (h *SSHFSHostFolder) ensureSFTPDDaemonRunning() error {
 
 func (h *SSHFSHostFolder) ensureRSAKeyExists(driver drivers.Driver) error {
 	cmd := fmt.Sprintf("if [ ! -f %s ]; then ssh-keygen -t rsa -N \"\" -f %s; fi", keyFile, keyFile)
-
 	_, err := drivers.RunSSHCommandFromDriver(driver, cmd)
 	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// cacheRSAKeys will cache the private key and add the public key to authorized_keys file in profile home dir
+// which will be used for authentication later during mount.
+func (h *SSHFSHostFolder) cacheRSAKeys(driver drivers.Driver) error {
+	cmd := fmt.Sprintf("if [ -f %s ]; then cat %s; else exit 1; fi", keyFile, keyFile)
+	out, err := drivers.RunSSHCommandFromDriver(driver, cmd)
+	if err != nil {
+		return err
+	}
+
+	if err := filehelper.CreateOrOpenFileAndWrite(minishiftConstants.ProfilePrivateKeyPath(), out); err != nil {
+		return err
+	}
+
+	cmd = fmt.Sprintf("if [ -f %s ]; then cat %s.pub; else exit 1; fi", keyFile, keyFile)
+	out, err = drivers.RunSSHCommandFromDriver(driver, cmd)
+	if err != nil {
+		return err
+	}
+
+	// add public key to authorized keys
+	if err := filehelper.CreateOrOpenFileAndWrite(minishiftConstants.ProfileAuthorizedKeysPath(), out); err != nil {
 		return err
 	}
 

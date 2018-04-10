@@ -107,11 +107,11 @@ func (m *Minishift) containerStatus(retryCount int, retryWaitPeriod int, imageNa
 
 func (m *Minishift) executingRetryingTimesWithWaitPeriodOfSeconds(command string, retry, sleep int) error {
 	for i := 0; i < retry; i++ {
-		err := m.executingOcCommand(command)
+		err := m.ExecutingOcCommand(command)
 		if err != nil {
 			return err
 		}
-		lastCommandOutput := getLastCommandOutput()
+		lastCommandOutput := GetLastCommandOutput()
 		if lastCommandOutput.ExitCode == 0 {
 			break
 		}
@@ -139,11 +139,11 @@ func (m *Minishift) GetVariableByName(name string) *CommandVariable {
 }
 
 func (m *Minishift) setVariableExecutingOcCommand(name string, command string) error {
-	return m.setVariableFromExecution(name, minishift.executingOcCommand, command)
+	return m.setVariableFromExecution(name, MinishiftInstance.ExecutingOcCommand, command)
 }
 
 func (m *Minishift) setVariableExecutingMinishiftCommand(name string, command string) error {
-	return m.setVariableFromExecution(name, minishift.executingMinishiftCommand, command)
+	return m.setVariableFromExecution(name, MinishiftInstance.ExecutingMinishiftCommand, command)
 }
 
 func (m *Minishift) SetVariable(name string, value string) {
@@ -160,7 +160,7 @@ func (m *Minishift) setVariableFromExecution(name string, execute commandRunner,
 		return err
 	}
 
-	lastCommandOutput := getLastCommandOutput()
+	lastCommandOutput := GetLastCommandOutput()
 	commandFailed := (lastCommandOutput.ExitCode != 0 ||
 		len(lastCommandOutput.StdErr) != 0)
 
@@ -183,7 +183,7 @@ func (m *Minishift) processVariables(command string) string {
 	return command
 }
 
-func (m *Minishift) executingOcCommand(command string) error {
+func (m *Minishift) ExecutingOcCommand(command string) error {
 	ocRunner := m.runner.GetOcRunner()
 	if ocRunner == nil {
 		util.LogMessage("warning", "OC binary can't be detected, minishift is not Running")
@@ -203,7 +203,7 @@ func (m *Minishift) executingOcCommand(command string) error {
 	return nil
 }
 
-func (m *Minishift) executingMinishiftCommand(command string) error {
+func (m *Minishift) ExecutingMinishiftCommand(command string) error {
 	command = m.processVariables(command)
 	cmdOut, cmdErr, cmdExit := m.runner.RunCommand(command)
 	commandOutputs = append(commandOutputs,
@@ -223,7 +223,7 @@ func (m *Minishift) setImageCaching(operation string) error {
 		enabled = "false"
 	}
 
-	return m.executingMinishiftCommand(fmt.Sprintf("config set image-caching %s", enabled))
+	return m.ExecutingMinishiftCommand(fmt.Sprintf("config set image-caching %s", enabled))
 }
 
 func (m *Minishift) imageExportShouldComplete(noOfImages int) error {
@@ -290,9 +290,9 @@ func (m *Minishift) checkServiceRolloutForSuccess(service string, timeout int, d
 	} else {
 		// get application's build logs if rollout fails
 		command = fmt.Sprintf("logs bc/%s", service)
-		m.executingOcCommand(command)
+		m.ExecutingOcCommand(command)
 
-		lastCmdResult := getLastCommandOutput()
+		lastCmdResult := GetLastCommandOutput()
 
 		cmdOut += fmt.Sprintf("\n Service build output logs: %s\n", lastCmdResult.StdOut)
 		cmdErr += fmt.Sprintf("\n Service build error logs: %s\n", lastCmdResult.StdErr)

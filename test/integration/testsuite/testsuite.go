@@ -43,9 +43,9 @@ import (
 )
 
 var (
-	minishift       *Minishift
-	minishiftArgs   string
-	minishiftBinary string
+	MinishiftInstance *Minishift
+	minishiftArgs     string
+	minishiftBinary   string
 
 	testDir       string
 	testResultDir string
@@ -69,50 +69,50 @@ func FeatureContext(s *godog.Suite) {
 		CommandArgs: minishiftArgs,
 		CommandPath: minishiftBinary}
 
-	minishift = &Minishift{runner: runner}
+	MinishiftInstance = &Minishift{runner: runner}
 
 	// steps to execute `minishift` commands
 	s.Step(`^Minishift (?:has|should have) state "(Does Not Exist|Running|Stopped)"$`,
-		minishift.shouldHaveState)
+		MinishiftInstance.shouldHaveState)
 	s.Step(`^profile (.*) (?:has|should have) state "(Does Not Exist|Running|Stopped)"$`,
-		minishift.profileShouldHaveState)
+		MinishiftInstance.profileShouldHaveState)
 	s.Step(`profile (.*) (?:is the|should be the) active profile$`,
-		minishift.isTheActiveProfile)
+		MinishiftInstance.isTheActiveProfile)
 	s.Step(`^executing "minishift (.*)"$`,
-		minishift.executingMinishiftCommand)
+		MinishiftInstance.ExecutingMinishiftCommand)
 	s.Step(`^executing "minishift (.*)" (succeeds|fails)$`,
-		executingMinishiftCommandSucceedsOrFails)
+		ExecutingMinishiftCommandSucceedsOrFails)
 	s.Step(`^([^"]*) of command "minishift (.*)" (is equal|is not equal) to "(.*)"$`,
 		commandReturnEquals)
 	s.Step(`^([^"]*) of command "minishift (.*)" (contains|does not contain) "(.*)"$`,
 		commandReturnContains)
 
 	// setting image caching operation
-	s.Step(`^image caching is (disabled|enabled)$`, minishift.setImageCaching)
-	s.Step(`^image export completes with (\d+) images$`, minishift.imageExportShouldComplete)
-	s.Step(`^container image "(.*)" is cached$`, minishift.imageShouldHaveCached)
+	s.Step(`^image caching is (disabled|enabled)$`, MinishiftInstance.setImageCaching)
+	s.Step(`^image export completes with (\d+) images$`, MinishiftInstance.imageExportShouldComplete)
+	s.Step(`^container image "(.*)" is cached$`, MinishiftInstance.imageShouldHaveCached)
 
 	// steps to execute `oc` commands
 	s.Step(`^executing "oc (.*)" retrying (\d+) times with wait period of (\d+) seconds$`,
-		minishift.executingRetryingTimesWithWaitPeriodOfSeconds)
+		MinishiftInstance.executingRetryingTimesWithWaitPeriodOfSeconds)
 	s.Step(`^executing "oc (.*)"$`,
-		minishift.executingOcCommand)
+		MinishiftInstance.ExecutingOcCommand)
 	s.Step(`^executing "oc (.*)" (succeeds|fails)$`,
-		executingOcCommandSucceedsOrFails)
+		ExecutingOcCommandSucceedsOrFails)
 
 	// steps for scenario variables
 	s.Step(`^setting scenario variable "(.*)" to the stdout from executing "oc (.*)"$`,
-		minishift.setVariableExecutingOcCommand)
+		MinishiftInstance.setVariableExecutingOcCommand)
 	s.Step(`^setting scenario variable "(.*)" to the stdout from executing "minishift (.*)"$`,
-		minishift.setVariableExecutingMinishiftCommand)
+		MinishiftInstance.setVariableExecutingMinishiftCommand)
 	s.Step(`^scenario variable "(.*)" should not be empty$`,
 		variableShouldNotBeEmpty)
 
 	// steps for rollout check
 	s.Step(`^services? "([^"]*)" rollout successfully$`,
-		minishift.rolloutServicesSuccessfully)
+		MinishiftInstance.rolloutServicesSuccessfully)
 	s.Step(`^services? "([^"]*)" rollout successfully within "(\d+)" seconds$`,
-		minishift.rolloutServicesSuccessfullyBeforeTimeout)
+		MinishiftInstance.rolloutServicesSuccessfullyBeforeTimeout)
 
 	// steps for proxying
 	s.Step(`^user starts proxy server and sets MINISHIFT_HTTP_PROXY variable$`,
@@ -218,7 +218,7 @@ func FeatureContext(s *godog.Suite) {
 
 	// steps for container status
 	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)" (?:second|seconds) container image "(.*)" should be "(running|exited)"$`,
-		minishift.containerStatus)
+		MinishiftInstance.containerStatus)
 
 	// steps for prototyping or debugging purposes, please do not use in production
 	s.Step(`^user (?:waits|waited) "(\d+)" seconds?$`,
@@ -248,7 +248,7 @@ func FeatureContext(s *godog.Suite) {
 
 	s.AfterSuite(func() {
 		util.LogMessage("info", "----- Cleaning Up -----")
-		minishift.runner.EnsureDeleted()
+		MinishiftInstance.runner.EnsureDeleted()
 		err := util.CloseLog()
 		if err != nil {
 			fmt.Println("Error closing the log:", err)
@@ -434,12 +434,12 @@ func stdoutContainsKey(commandField string, format string, condition string, key
 	return nil
 }
 
-func getLastCommandOutput() CommandOutput {
+func GetLastCommandOutput() CommandOutput {
 	return commandOutputs[len(commandOutputs)-1]
 }
 
 func selectFieldFromLastOutput(commandField string) string {
-	lastCommandOutput := getLastCommandOutput()
+	lastCommandOutput := GetLastCommandOutput()
 	outputField := ""
 	switch commandField {
 	case "stdout":
@@ -515,7 +515,7 @@ func validateYAML(inputString string) (bool, error) {
 }
 
 func commandReturnEquals(commandField string, command string, condition string, expected string) error {
-	minishift.executingMinishiftCommand(command)
+	MinishiftInstance.ExecutingMinishiftCommand(command)
 	if condition == "is equal" {
 		return util.CompareExpectedWithActualEquals(expected+"\n", selectFieldFromLastOutput(commandField))
 	} else {
@@ -524,7 +524,7 @@ func commandReturnEquals(commandField string, command string, condition string, 
 }
 
 func commandReturnContains(commandField string, command string, condition string, expected string) error {
-	minishift.executingMinishiftCommand(command)
+	MinishiftInstance.ExecutingMinishiftCommand(command)
 	if condition == "contains" {
 		return util.CompareExpectedWithActualContains(expected, selectFieldFromLastOutput(commandField))
 	} else {
@@ -565,7 +565,7 @@ func commandReturnShouldNotBeEmpty(commandField string) error {
 }
 
 func variableShouldNotBeEmpty(variableName string) error {
-	return util.CompareExpectedWithActualNotEquals("", minishift.GetVariableByName(variableName).Value)
+	return util.CompareExpectedWithActualNotEquals("", MinishiftInstance.GetVariableByName(variableName).Value)
 }
 
 func commandReturnShouldMatchRegex(commandField string, expected string) error {
@@ -586,12 +586,12 @@ func commandReturnShouldNotMatchRegexContent(commandField string, notexpected *g
 
 type commandRunner func(string) error
 
-func executingOcCommandSucceedsOrFails(command string, expectedResult string) error {
-	return succeedsOrFails(minishift.executingOcCommand, command, expectedResult)
+func ExecutingOcCommandSucceedsOrFails(command string, expectedResult string) error {
+	return succeedsOrFails(MinishiftInstance.ExecutingOcCommand, command, expectedResult)
 }
 
-func executingMinishiftCommandSucceedsOrFails(command string, expectedResult string) error {
-	return succeedsOrFails(minishift.executingMinishiftCommand, command, expectedResult)
+func ExecutingMinishiftCommandSucceedsOrFails(command string, expectedResult string) error {
+	return succeedsOrFails(MinishiftInstance.ExecutingMinishiftCommand, command, expectedResult)
 }
 
 func succeedsOrFails(execute commandRunner, command string, expectedResult string) error {
@@ -600,7 +600,7 @@ func succeedsOrFails(execute commandRunner, command string, expectedResult strin
 		return err
 	}
 
-	lastCommandOutput := getLastCommandOutput()
+	lastCommandOutput := GetLastCommandOutput()
 	commandFailed := (lastCommandOutput.ExitCode != 0 ||
 		len(lastCommandOutput.StdErr) != 0)
 
@@ -628,22 +628,22 @@ func verifyRequestToURLWithRetry(retryCount int, retryWaitPeriod int, partOfResp
 }
 
 func verifyRequestToService(partOfResponse string, urlSuffix string, serviceName string, nameSpace string, assertion string, expected string) error {
-	url := minishift.getRoute(serviceName, nameSpace) + urlSuffix
+	url := MinishiftInstance.getRoute(serviceName, nameSpace) + urlSuffix
 	return verifyHTTPResponse(partOfResponse, url, assertion, expected)
 }
 
 func verifyRequestToServiceWithRetry(retryCount int, retryWaitPeriod int, partOfResponse string, urlSuffix string, serviceName string, nameSpace string, assertion string, expected string) error {
-	url := minishift.getRoute(serviceName, nameSpace) + urlSuffix
+	url := MinishiftInstance.getRoute(serviceName, nameSpace) + urlSuffix
 	return verifyHTTPResponseWithRetry(partOfResponse, url, assertion, expected, retryCount, retryWaitPeriod)
 }
 
 func verifyRequestToOpenShift(partOfResponse string, urlSuffix string, assertion string, expected string) error {
-	url := minishift.getOpenShiftUrl() + urlSuffix
+	url := MinishiftInstance.getOpenShiftUrl() + urlSuffix
 	return verifyHTTPResponse(partOfResponse, url, assertion, expected)
 }
 
 func verifyRequestToOpenShiftWithRetry(retryCount int, retryWaitPeriod int, partOfResponse string, urlSuffix string, assertion string, expected string) error {
-	url := minishift.getOpenShiftUrl() + urlSuffix
+	url := MinishiftInstance.getOpenShiftUrl() + urlSuffix
 	return verifyHTTPResponseWithRetry(partOfResponse, url, assertion, expected, retryCount, retryWaitPeriod)
 }
 
@@ -715,11 +715,11 @@ func catDockerConfigFile() error {
 	var err error
 	switch isoName {
 	case "b2d":
-		err = executingMinishiftCommandSucceedsOrFails("ssh -- cat /var/lib/boot2docker/profile", "succeeds")
+		err = ExecutingMinishiftCommandSucceedsOrFails("ssh -- cat /var/lib/boot2docker/profile", "succeeds")
 	case "minikube":
-		err = executingMinishiftCommandSucceedsOrFails("ssh -- cat /usr/lib/systemd/system/docker.service", "succeeds")
+		err = ExecutingMinishiftCommandSucceedsOrFails("ssh -- cat /usr/lib/systemd/system/docker.service", "succeeds")
 	case "centos", "rhel":
-		err = executingMinishiftCommandSucceedsOrFails("ssh -- cat /etc/systemd/system/docker.service.d/10-machine.conf", "succeeds")
+		err = ExecutingMinishiftCommandSucceedsOrFails("ssh -- cat /etc/systemd/system/docker.service.d/10-machine.conf", "succeeds")
 	default:
 		err = errors.New("ISO name not supported.")
 	}

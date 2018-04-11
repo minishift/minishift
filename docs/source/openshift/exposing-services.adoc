@@ -59,8 +59,23 @@ $ mysql --user=root --password=admin --host=$(minishift ip) --port=30907
 [[port-forwarding]]
 == Port Forwarding
 
+=== Using `oc port-forward`
 If you want to quickly access a port of a specific pod of your cluster, you can also use the `oc port-forward` command of the xref:../openshift/openshift-client-binary.adoc#[OpenShift CLI].
 
 ----
 $ oc port-forward POD [LOCAL_PORT:]REMOTE_PORT
 ----
+
+=== Using VirtualBox tools
+In case you're using the VirtualBox driver plugin there is another method you can use for port forwarding.
+This method will allow for permanent port forwarding as well as for forwarding multiple ports at the same time.
+This method requires you to set up a `nodePort` as outlined above.
+
+If we go by the example above, we can do the following:
+
+----
+$ VBoxManage controlvm minishift natpf1 "mariadb,tcp,,3306,,30907"
+----
+
+This will allow us to communicate with the mariadb service on `localhost:3306` which might be convenient if you don't want to change default ports.
+Additionally, an important advantage of this way of forwarding ports is that we can talk to a service as opposed to just a single pod.

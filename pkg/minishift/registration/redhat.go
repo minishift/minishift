@@ -17,7 +17,9 @@ limitations under the License.
 package registration
 
 import (
+	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -109,7 +111,7 @@ func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) er
 			if strings.Contains(err.Error(), "Invalid username or password") {
 				fmt.Println("   Invalid username or password. Retry:", i)
 			} else {
-				return err
+				return errors.New(redactPassword(err.Error()))
 			}
 
 			// always reset credentials
@@ -117,7 +119,7 @@ func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) er
 			param.Password = ""
 		}
 		if err != nil {
-			return err
+			return errors.New(redactPassword(err.Error()))
 		}
 	}
 	return nil
@@ -150,4 +152,10 @@ func (registrator *RedHatRegistrator) isRegistered() (bool, error) {
 		}
 		return false, nil
 	}
+}
+
+func redactPassword(msg string) string {
+	pattern := regexp.MustCompile(`--password .*`)
+	msgWithRedactedPass := pattern.ReplaceAllString(msg, "--password ********")
+	return msgWithRedactedPass
 }

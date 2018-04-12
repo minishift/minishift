@@ -90,6 +90,17 @@ func GetGitHubApiToken() string {
 	return ""
 }
 
+func ListOptions() *github.ListOptions {
+	return &github.ListOptions{}
+}
+
+func IsRateLimitError(err error) bool {
+	if _, ok := err.(*github.RateLimitError); ok {
+		return true
+	}
+	return false
+}
+
 func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minishiftos.OS, version, outputPath string) error {
 	client := Client()
 	var (

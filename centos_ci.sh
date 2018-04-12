@@ -361,7 +361,13 @@ else
   # Navigate to the repo
   cd $GOPATH/src/github.com/minishift/minishift
 
-  if [[ "$JOB_NAME" = "minishift-docs" ]]; then
+  # Both of these are populated via minishift-docs job.
+  # For testing purpose, I am exporting these variables.
+  export REPO="https://github.com/minishift/minishift"
+  export BRANCH="master"
+
+  # For testing purpose, I am running minishift-docs job condition by doing this
+  if [[ "$JOB_NAME" = "minishift-pr" ]]; then
     # REPO and BRANCH variables are populated via https://ci.centos.org/job/minishift-docs
     REPO_OWNER=$(echo $REPO | cut -d"/" -f4)
     perform_docs_publish "$REPO_OWNER" "$BRANCH" "minishift/docs/ondemand/$REPO_OWNER-$BRANCH";

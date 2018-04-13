@@ -7,7 +7,6 @@ one from: bash, cmd, powershell, tcsh, zsh with TEST_WITH_SPECIFIED_SHELL parame
   Scenario: User starts shell instance without oc in PATH
   INFO: This scenario starts interactive shell instance, which will be closed in the end of this feature.
     Given user starts shell instance on host machine
-     When executing "unset PATH" in host shell
      Then executing "oc status" in host shell fails
 
   Scenario: Starting minishift

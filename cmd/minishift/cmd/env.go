@@ -26,8 +26,6 @@ import (
 
 	"github.com/minishift/minishift/pkg/minikube/constants"
 
-	"strings"
-
 	"github.com/docker/machine/libmachine"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/cmd/minishift/state"
@@ -76,34 +74,17 @@ func getConfigSet(api libmachine.API, forceShell string, noProxy bool) (*DockerS
 	}
 
 	if noProxy {
-		host, err := api.Load(constants.MachineName)
-		if err != nil {
-			return nil, fmt.Errorf("Error getting IP: %s", err)
-		}
-
-		ip, err := host.Driver.GetIP()
-		if err != nil {
-			return nil, fmt.Errorf("Error getting host IP: %s", err)
-		}
-
-		noProxyVar, noProxyValue := shell.FindNoProxyFromEnv()
 		cmdLine = cmdLine + " --no-proxy"
-		// add the docker host to the no_proxy list idempotently
-		switch {
-		case noProxyValue == "":
-			noProxyValue = ip
-		case strings.Contains(noProxyValue, ip):
-		//ip already in no_proxy list, nothing to do
-		default:
-			noProxyValue = fmt.Sprintf("%s,%s", noProxyValue, ip)
+		noProxyVar, noProxyValue, err := util.GetNoProxyConfig(api)
+		if err != nil {
+			return nil, err
 		}
-
 		shellCfg.NoProxyVar = noProxyVar
 		shellCfg.NoProxyValue = noProxyValue
 	}
 
 	shellCfg.UsageHint = shell.GenerateUsageHint(userShell, cmdLine)
-	shellCfg.Prefix, shellCfg.Suffix, shellCfg.Delimiter = shell.GetPrefixSuffixDelimiterForSet(userShell, false)
+	shellCfg.Prefix, shellCfg.Delimiter, shellCfg.Suffix, _ = shell.GetPrefixSuffixDelimiterForSet(userShell)
 
 	return shellCfg, nil
 }

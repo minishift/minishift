@@ -40,16 +40,18 @@ import (
 )
 
 const (
-	ocEnvTmpl = `{{ .Prefix }}PATH{{ .Delimiter }}{{ .OcDirPath }}{{ .Suffix }}{{ .UsageHint }}`
+	ocEnvTmpl = `{{ .Prefix }}PATH{{ .Delimiter }}{{ .OcDirPath }}{{ .PathSuffix }}{{ if .NoProxyVar }}{{ .Prefix }}{{ .NoProxyVar }}{{ .Delimiter }}{{ .NoProxyValue }}{{ .Suffix }}{{end}}{{ .UsageHint }}`
 )
 
 type OcShellConfig struct {
 	shell.ShellConfig
-	OcDirPath string
-	UsageHint string
+	OcDirPath    string
+	UsageHint    string
+	NoProxyVar   string
+	NoProxyValue string
 }
 
-func getOcShellConfig(ocPath, forcedShell string) (*OcShellConfig, error) {
+func getOcShellConfig(api libmachine.API, ocPath string, forcedShell string, noProxy bool) (*OcShellConfig, error) {
 	userShell, err := shell.GetShell(forcedShell)
 	if err != nil {
 		return nil, err
@@ -58,10 +60,20 @@ func getOcShellConfig(ocPath, forcedShell string) (*OcShellConfig, error) {
 	cmdLine := "minishift oc-env"
 	shellCfg := &OcShellConfig{
 		OcDirPath: filepath.Dir(ocPath),
-		UsageHint: shell.GenerateUsageHint(userShell, cmdLine),
 	}
 
-	shellCfg.Prefix, shellCfg.Suffix, shellCfg.Delimiter = shell.GetPrefixSuffixDelimiterForSet(userShell, true)
+	if noProxy {
+		cmdLine = cmdLine + " --no-proxy"
+		noProxyVar, noProxyValue, err := util.GetNoProxyConfig(api)
+		if err != nil {
+			return nil, err
+		}
+		shellCfg.NoProxyVar = noProxyVar
+		shellCfg.NoProxyValue = noProxyValue
+	}
+
+	shellCfg.UsageHint = shell.GenerateUsageHint(userShell, cmdLine)
+	shellCfg.Prefix, shellCfg.Delimiter, shellCfg.Suffix, shellCfg.PathSuffix = shell.GetPrefixSuffixDelimiterForSet(userShell)
 
 	return shellCfg, nil
 }
@@ -84,13 +96,15 @@ var ocEnvCmd = &cobra.Command{
 		defer api.Close()
 
 		util.ExitIfUndefined(api, constants.MachineName)
-		_, err := api.Load(constants.MachineName)
+
+		host, err := api.Load(constants.MachineName)
 		if err != nil {
 			atexit.ExitWithMessage(1, err.Error())
 		}
 
-		var shellCfg *OcShellConfig
+		util.ExitIfNotRunning(host.Driver, constants.MachineName)
 
+		var shellCfg *OcShellConfig
 		var ocPath string
 		if constants.ProfileName != profileActions.GetActiveProfile() {
 			// When PROFILE_NAME is not an active profile i.e. oc-env --profile PROFILE_NAME
@@ -99,7 +113,7 @@ var ocEnvCmd = &cobra.Command{
 		} else {
 			ocPath = config.InstanceConfig.OcPath
 		}
-		shellCfg, err = getOcShellConfig(ocPath, forceShell)
+		shellCfg, err = getOcShellConfig(api, ocPath, forceShell, noProxy)
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error running the oc-env command: %s", err.Error()))
 		}
@@ -110,6 +124,7 @@ var ocEnvCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(ocEnvCmd)
+	ocEnvCmd.Flags().BoolVar(&noProxy, "no-proxy", false, "Add the virtual machine IP to the NO_PROXY environment variable.")
 	ocEnvCmd.Flags().StringVar(&forceShell, "shell", "", "Force setting the environment for a specified shell: [fish, cmd, powershell, tcsh, bash, zsh]. Default is auto-detect.")
 }
 

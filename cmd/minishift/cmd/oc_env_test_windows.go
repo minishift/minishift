@@ -19,11 +19,15 @@ package cmd
 import (
 	"testing"
 
+	"github.com/docker/machine/libmachine"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_windows_oc_path(t *testing.T) {
-	shellConfig, err := getOcShellConfig("C:\\Users\\john\\.minishift\\cache\\oc\\v1.5.0\\oc.exe", "")
+	api := libmachine.NewClient("foo", "foo")
+	defer api.Close()
+	shellConfig, err := getOcShellConfig(api, "C:\\Users\\john\\.minishift\\cache\\oc\\v1.5.0\\oc.exe", "", false)
+
 	assert.NoError(t, err)
 	expectedOcDirPath := "C:\\Users\\john\\.minishift\\cache\\oc\\v1.5.0"
 	assert.Equal(t, shellConfig.OcDirPath, expectedOcDirPath)

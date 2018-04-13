@@ -18,23 +18,25 @@ package constants
 
 import (
 	"fmt"
-	"github.com/minishift/minishift/pkg/minikube/constants"
 	"path/filepath"
+
+	"github.com/minishift/minishift/pkg/minikube/constants"
 )
 
 const (
-	B2dIsoAlias            = "b2d"
-	CentOsIsoAlias         = "centos"
-	MinikubeIsoAlias       = "minikube"
-	OpenshiftContainerName = "origin"
-	OpenshiftExec          = "/usr/bin/openshift"
-	OpenshiftOcExec        = "/usr/bin/oc"
-	DefaultProject         = "myproject"
-	DefaultUser            = "developer"
-	DefaultUserPassword    = "developer"
-	SkipVerifyInsecureTLS  = "insecure-skip-tls-verify=true"
-	BinaryName             = "minishift"
-	OcPathInsideVM         = "/var/lib/minishift/bin"
+	B2dIsoAlias               = "b2d"
+	CentOsIsoAlias            = "centos"
+	MinikubeIsoAlias          = "minikube"
+	OpenshiftContainerName    = "origin"
+	OpenshiftApiContainerName = "k8s_apiserver_openshift-apiserver"
+	OpenshiftExec             = "/usr/bin/openshift"
+	OpenshiftOcExec           = "/usr/bin/oc"
+	DefaultProject            = "myproject"
+	DefaultUser               = "developer"
+	DefaultUserPassword       = "developer"
+	SkipVerifyInsecureTLS     = "insecure-skip-tls-verify=true"
+	BinaryName                = "minishift"
+	OcPathInsideVM            = "/var/lib/minishift/bin"
 )
 
 var (
@@ -53,4 +55,9 @@ func ProfilePrivateKeyPath() string {
 
 func GetOpenshiftImageName(openshiftVersion string) string {
 	return fmt.Sprintf("openshift/origin:%s", openshiftVersion)
+}
+
+// GetInstanceConfigPath return the path of instance config json file
+func GetInstanceConfigPath() string {
+	return filepath.Join(constants.Minipath, "machines", constants.MachineName+".json")
 }

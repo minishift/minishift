@@ -25,7 +25,9 @@ import (
 	"strings"
 
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
+	openshiftVersionCheck "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/cmd"
 	"github.com/minishift/minishift/pkg/util/filehelper"
@@ -129,7 +131,15 @@ func SupportFlag(flag string, ocPath string, runner util.Runner) bool {
 
 func parseOcHelpCommand(cmdOut []byte) []string {
 	ocOptions := []string{}
+	var openshiftVersion string
 	ocOptionRegex := regexp.MustCompile(`(?s)Options(.*)OpenShift images`)
+	if instanceState.InstanceConfig != nil {
+		openshiftVersion = instanceState.InstanceConfig.OpenshiftVersion
+	}
+	valid, _ := openshiftVersionCheck.IsGreaterOrEqualToBaseVersion(openshiftVersion, constants.RefactoredOcVersion)
+	if valid {
+		ocOptionRegex = regexp.MustCompile(`(?s)Options(.*)host config dir`)
+	}
 	matches := ocOptionRegex.FindSubmatch(cmdOut)
 	if matches != nil {
 		tmpOptionsList := string(matches[0])

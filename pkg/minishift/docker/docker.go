@@ -67,6 +67,10 @@ type DockerCommander interface {
 	// An error indicates that the remove failed.
 	Rm(container string) error
 
+	// GetID return the ID of the container for a given name which is present
+	// Any occurring error is also returned.
+	GetID(container string) (string, error)
+
 	// Exec runs 'docker exec' with the specified options, against the specified container, using the specified
 	// command and arguments. The output of the command is returned as well as any occurring error.
 	Exec(options string, container string, command string, args string) (string, error)
@@ -221,4 +225,12 @@ func (c VmDockerCommander) Rm(container string) error {
 		return err
 	}
 	return nil
+}
+
+func (c VmDockerCommander) GetID(container string) (string, error) {
+	cmd := fmt.Sprintf(`docker ps -qf "name="%s""`, container)
+	c.logCommand(cmd)
+	out, err := c.commander.SSHCommand(cmd)
+	out = strings.TrimSpace(out)
+	return out, err
 }

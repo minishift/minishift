@@ -21,7 +21,9 @@ import (
 	"strings"
 
 	"github.com/golang/glog"
-	"github.com/minishift/minishift/pkg/minishift/constants"
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	instanceState "github.com/minishift/minishift/pkg/minishift/config"
+	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/minishift/docker"
 	openshiftVersionCheck "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	"github.com/pborman/uuid"
@@ -36,14 +38,14 @@ type OpenShiftPatchTarget struct {
 var (
 	MASTER = OpenShiftPatchTarget{
 		"master",
-		"/var/lib/origin/openshift.local.config/master/master-config.yaml",
-		"/var/lib/minishift/openshift.local.config/master/master-config.yaml",
+		getContainerConfigFile("master"),
+		getLocalConfigFile("master"),
 	}
 
 	NODE = OpenShiftPatchTarget{
 		"node",
-		"/var/lib/origin/openshift.local.config/node-localhost/node-config.yaml",
-		"/var/lib/minishift/openshift.local.config/node-localhost/node-config.yaml",
+		getContainerConfigFile("node"),
+		getLocalConfigFile("node"),
 	}
 
 	UNKNOWN = OpenShiftPatchTarget{
@@ -70,12 +72,28 @@ func (t *OpenShiftPatchTarget) localConfigFilePath() (string, error) {
 }
 
 func RestartOpenShift(commander docker.DockerCommander) (bool, error) {
-	ok, err := commander.Restart(constants.OpenshiftContainerName)
+	var (
+		ok  bool
+		err error
+	)
+	openshiftVersion := getOpenshiftVersion()
+	valid, _ := openshiftVersionCheck.IsGreaterOrEqualToBaseVersion(openshiftVersion, constants.RefactoredOcVersion)
+	if valid {
+		containerID, err := commander.GetID(minishiftConstants.OpenshiftApiContainerName)
+		if err != nil {
+			return false, err
+		}
+		ok, err = commander.Stop(containerID)
+		if err != nil {
+			return false, err
+		}
+	}
+	ok, err = commander.Restart(minishiftConstants.OpenshiftContainerName)
 	if err != nil {
 		return false, err
 	}
 
-	return ok, nil
+	return ok, err
 }
 
 func Patch(target OpenShiftPatchTarget, patch string, commander docker.DockerCommander, openshiftVersion string) (bool, error) {
@@ -86,23 +104,15 @@ func Patch(target OpenShiftPatchTarget, patch string, commander docker.DockerCom
 		return false, err
 	}
 
-	containerConfigPath, err := target.containerConfigFilePath()
+	localConfigPath, err := target.localConfigFilePath()
 	if err != nil {
 		return false, err
 	}
 
-	patchCommand := fmt.Sprintf("ex config patch %s --patch='%s'", containerConfigPath, patch)
-	executer := constants.OpenshiftExec
-	// OpenShift >= 3.9 we need to run `ex config patch` using oc binary inside the origin container instead openshift server binary.
-	valid, err := openshiftVersionCheck.IsGreaterOrEqualToBaseVersion(openshiftVersion, "v3.9.0-alpha.3")
-	if err != nil {
-		return false, err
-	}
-	if valid {
-		executer = constants.OpenshiftOcExec
-	}
+	patchCommand := fmt.Sprintf("ex config patch %s --patch='%s'", localConfigPath, patch)
+	cmd := fmt.Sprintf("%s/oc %s", minishiftConstants.OcPathInsideVM, patchCommand)
 
-	result, err := commander.Exec("-t", constants.OpenshiftContainerName, executer, patchCommand)
+	result, err := commander.LocalExec(cmd)
 	if err != nil {
 		glog.Error("Creating patched configuration failed. Not applying the changes.", err)
 		return false, nil
@@ -131,7 +141,7 @@ func Patch(target OpenShiftPatchTarget, patch string, commander docker.DockerCom
 // IsRunning checks whether the origin container is in running state.
 // This method returns true if the origin container is running, false otherwise
 func IsRunning(commander docker.DockerCommander) bool {
-	status, err := commander.Status(constants.OpenshiftContainerName)
+	status, err := commander.Status(minishiftConstants.OpenshiftContainerName)
 	if err != nil || status != "running" {
 		return false
 	}
@@ -140,22 +150,39 @@ func IsRunning(commander docker.DockerCommander) bool {
 }
 
 func ViewConfig(target OpenShiftPatchTarget, commander docker.DockerCommander) (string, error) {
+	var (
+		result string
+		err    error
+	)
 	path, err := target.containerConfigFilePath()
 	if err != nil {
 		return "", err
 	}
-
-	result, err := commander.Exec("-t", constants.OpenshiftContainerName, "cat", path)
-	if err != nil {
-		return "", err
+	openshiftVersion := getOpenshiftVersion()
+	valid, _ := openshiftVersionCheck.IsGreaterOrEqualToBaseVersion(openshiftVersion, constants.RefactoredOcVersion)
+	if !valid || target.target == "node" {
+		result, err = commander.Exec("-t", minishiftConstants.OpenshiftContainerName, "cat", path)
+		if err != nil {
+			return "", err
+		}
+	} else {
+		containerID, err := commander.GetID(minishiftConstants.OpenshiftApiContainerName)
+		if err != nil {
+			return "", err
+		}
+		result, err = commander.Exec("-t", containerID, "cat", path)
+		if err != nil {
+			return "", err
+		}
 	}
+
 	return result, nil
 }
 
 func rollback(target OpenShiftPatchTarget, commander docker.DockerCommander, patchId string) {
 	fmt.Println("Unable to restart OpenShift after patchting it. Rolling back.")
 	restoreConfig(target, patchId, commander)
-	commander.Restart(constants.OpenshiftContainerName)
+	commander.Restart(minishiftConstants.OpenshiftContainerName)
 	deleteBackup(target, patchId, commander)
 }
 
@@ -198,8 +225,7 @@ func writeConfig(target OpenShiftPatchTarget, config string, commander docker.Do
 		return err
 	}
 
-	// TODO Figure out where the (meta) charcater 'M' comes from at the end of the line (HF)
-	writeCommand := fmt.Sprintf("sudo echo '%s' | sed 's/.$//' | sudo tee %s > /dev/null", config, path)
+	writeCommand := fmt.Sprintf("sudo echo '%s' | sudo tee %s > /dev/null", config, path)
 
 	_, err = commander.LocalExec(writeCommand)
 	if err != nil {
@@ -216,7 +242,7 @@ func deleteBackup(target OpenShiftPatchTarget, id string, commander docker.Docke
 		return err
 	}
 
-	backupDeleteCommand := fmt.Sprintf("sudo rm %s-%s", path, id)
+	backupDeleteCommand := fmt.Sprintf("sudo rm -f %s-%s", path, id)
 
 	_, err = commander.LocalExec(backupDeleteCommand)
 	if err != nil {
@@ -224,4 +250,51 @@ func deleteBackup(target OpenShiftPatchTarget, id string, commander docker.Docke
 	}
 
 	return nil
+}
+
+func getLocalConfigFile(target string) string {
+	openshiftVersion := getOpenshiftVersion()
+	valid, _ := openshiftVersionCheck.IsGreaterOrEqualToBaseVersion(openshiftVersion, constants.RefactoredOcVersion)
+	switch target {
+	case "master":
+		if !valid {
+			return "/var/lib/minishift/openshift.local.config/master/master-config.yaml"
+		}
+		return "/var/lib/minishift/base/openshift-apiserver/master-config.yaml"
+	case "node":
+		if !valid {
+			return "/var/lib/minishift/openshift.local.config/node-localhost/node-config.yaml"
+		}
+		return "/var/lib/minishift/base/node/node-config.yaml"
+	}
+	return ""
+}
+
+func getContainerConfigFile(target string) string {
+	openshiftVersion := getOpenshiftVersion()
+	valid, _ := openshiftVersionCheck.IsGreaterOrEqualToBaseVersion(openshiftVersion, constants.RefactoredOcVersion)
+	switch target {
+	case "master":
+		if !valid {
+			return "/var/lib/origin/openshift.local.config/master/master-config.yaml"
+		}
+		return "/etc/origin/master/master-config.yaml"
+	case "node":
+		if !valid {
+			return "/var/lib/origin/openshift.local.config/node-localhost/node-config.yaml"
+		}
+		return "/var/lib/origin/openshift.local.config/node/node-config.yaml"
+	}
+	return ""
+}
+
+func getOpenshiftVersion() string {
+	var openshiftVersion string
+
+	instanceState.InstanceConfig, _ = instanceState.NewInstanceConfig(minishiftConstants.GetInstanceConfigPath())
+
+	if instanceState.InstanceConfig != nil {
+		openshiftVersion = instanceState.InstanceConfig.OpenshiftVersion
+	}
+	return openshiftVersion
 }

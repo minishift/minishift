@@ -46,6 +46,7 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/hostfolder"
 	minishiftNetwork "github.com/minishift/minishift/pkg/minishift/network"
 	"github.com/minishift/minishift/pkg/minishift/openshift"
+	openshiftVersion "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
 	"github.com/minishift/minishift/pkg/util"
@@ -116,6 +117,9 @@ var (
 		"host-volumes-dir": "/var/lib/minishift/openshift.local.volumes",
 		"host-pv-dir":      "/var/lib/minishift/openshift.local.pv",
 	}
+
+	// Set the base dir for v3.10.0
+	baseDirectory = "/var/lib/minishift/base"
 
 	// clusterUpFlagSet contains the command line switches which needs to be passed on to 'cluster up'
 	clusterUpFlagSet *flag.FlagSet
@@ -292,6 +296,7 @@ func getRequiredHostDirectories() []string {
 	for _, value := range dataDirectory {
 		requiredDirectories = append(requiredDirectories, value)
 	}
+	requiredDirectories = append(requiredDirectories, baseDirectory)
 	requiredDirectories = append(requiredDirectories, minishiftConstants.OcPathInsideVM)
 	return requiredDirectories
 }
@@ -603,13 +608,13 @@ func initStartFlags() *flag.FlagSet {
 	startFlagSet.String(configCmd.DiskSize.Name, constants.DefaultDiskSize, "Disk size to allocate to the Minishift VM. Use the format <size><unit>, where unit = MB or GB.")
 	startFlagSet.String(configCmd.HostOnlyCIDR.Name, "192.168.99.1/24", "The CIDR to be used for the minishift VM. (Only supported with VirtualBox driver.)")
 	startFlagSet.Bool(configCmd.SkipPreflightChecks.Name, false, "Skip the startup checks.")
+	startFlagSet.String(configCmd.OpenshiftVersion.Name, version.GetOpenShiftVersion(), fmt.Sprintf("The OpenShift version to run, eg. %s", version.GetOpenShiftVersion()))
 
 	startFlagSet.AddFlag(dockerEnvFlag)
 	startFlagSet.AddFlag(dockerEngineOptFlag)
 	startFlagSet.AddFlag(insecureRegistryFlag)
 	startFlagSet.AddFlag(registryMirrorFlag)
 	startFlagSet.AddFlag(cmdUtil.AddOnEnvFlag)
-	startFlagSet.String(configCmd.OpenshiftVersion.Name, version.GetOpenShiftVersion(), fmt.Sprintf("The OpenShift version to run, eg. %s", version.GetOpenShiftVersion()))
 
 	if runtime.GOOS == "windows" {
 		startFlagSet.String(configCmd.NetworkDevice.Name, "", "Specify the network device to use for the IP address. Ignored if no IP address specified (Hyper-V only)")
@@ -665,11 +670,19 @@ func initSubscriptionManagerFlags() *flag.FlagSet {
 // determineClusterUpParameters returns a map of flag names and values for the cluster up call.
 func determineClusterUpParameters(config *clusterup.ClusterUpConfig) map[string]string {
 	clusterUpParams := make(map[string]string)
+	valid, _ := openshiftVersion.IsGreaterOrEqualToBaseVersion(config.OpenShiftVersion, constants.RefactoredOcVersion)
+	if valid {
+		// Set default value for base config for 3.10
+		clusterUpParams["base-dir"] = baseDirectory
+	} else {
+		// This will only required to work with openshift < 3.10
+		for key, value := range dataDirectory {
+			clusterUpParams[key] = value
+		}
+	}
 
-	// Set default value for host config, data and volumes
 	viper.Set(configCmd.RoutingSuffix.Name, config.RoutingSuffix)
 	viper.Set(configCmd.PublicHostname.Name, config.PublicHostname)
-
 	clusterUpFlagSet.VisitAll(func(flag *flag.Flag) {
 		if viper.IsSet(flag.Name) {
 			value := viper.GetString(flag.Name)
@@ -677,11 +690,6 @@ func determineClusterUpParameters(config *clusterup.ClusterUpConfig) map[string]
 			clusterUpParams[key] = value
 		}
 	})
-
-	// This will only required to work with openshift < 3.10
-	for key, value := range dataDirectory {
-		clusterUpParams[key] = value
-	}
 
 	return clusterUpParams
 }

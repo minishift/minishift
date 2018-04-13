@@ -21,11 +21,15 @@ package cmd
 import (
 	"testing"
 
+	"github.com/docker/machine/libmachine"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_unix_oc_path(t *testing.T) {
-	shellConfig, err := getOcShellConfig("/Users/john/.minishift/cache/oc/v1.5.0/oc", "bash")
+	api := libmachine.NewClient("foo", "foo")
+	defer api.Close()
+	shellConfig, err := getOcShellConfig(api, "/Users/john/.minishift/cache/oc/v1.5.0/oc", "bash", false)
+
 	assert.NoError(t, err)
 	expectedOcDirPath := "/Users/john/.minishift/cache/oc/v1.5.0"
 	assert.Equal(t, shellConfig.OcDirPath, expectedOcDirPath)

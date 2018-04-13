@@ -29,9 +29,10 @@ var (
 )
 
 type ShellConfig struct {
-	Prefix    string
-	Delimiter string
-	Suffix    string
+	Prefix     string
+	Delimiter  string
+	Suffix     string
+	PathSuffix string
 }
 
 func GetShell(userShell string) (string, error) {
@@ -88,40 +89,32 @@ func GenerateUsageHint(userShell, cmdLine string) string {
 	return fmt.Sprintf("%s Run this command to configure your shell:\n%s %s\n", comment, comment, cmd)
 }
 
-func GetPrefixSuffixDelimiterForSet(userShell string, pathVar bool) (prefix, suffix, delimiter string) {
+func GetPrefixSuffixDelimiterForSet(userShell string) (prefix, delimiter, suffix, pathSuffix string) {
 	switch userShell {
 	case "fish":
 		prefix = "set -gx "
-		suffix = "\";\n"
 		delimiter = " \""
-		if pathVar {
-			suffix = "\" $PATH;\n"
-		}
+		suffix = "\";\n"
+		pathSuffix = "\" $PATH;\n"
 	case "powershell":
 		prefix = "$Env:"
-		suffix = "\"\n"
-		if pathVar {
-			suffix = ";" + prefix + "PATH" + suffix
-		}
 		delimiter = " = \""
+		suffix = "\"\n"
+		pathSuffix = ";" + prefix + "PATH" + suffix
 	case "cmd":
 		prefix = "SET "
-		suffix = "\n"
-		if pathVar {
-			suffix = ";%PATH%" + suffix
-		}
 		delimiter = "="
+		suffix = "\n"
+		pathSuffix = ";%PATH%" + suffix
 	case "emacs":
 		prefix = "(setenv \""
-		suffix = "\")\n"
 		delimiter = "\" \""
+		suffix = "\")\n"
 	default:
 		prefix = "export "
-		suffix = "\"\n"
-		if pathVar {
-			suffix = ":$PATH" + suffix
-		}
 		delimiter = "=\""
+		suffix = "\"\n"
+		pathSuffix = ":$PATH" + suffix
 	}
 
 	return

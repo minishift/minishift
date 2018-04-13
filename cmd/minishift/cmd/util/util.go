@@ -19,6 +19,7 @@ package util
 import (
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/drivers"
@@ -30,6 +31,7 @@ import (
 	cmdState "github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/out/bindata"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/util/shell"
 )
 
 var (
@@ -111,4 +113,29 @@ func IsValidProfile(profileName string) bool {
 func IsValidProfileName(profileName string) bool {
 	rr := regexp.MustCompile(`^[a-zA-Z0-9]+[a-zA-Z0-9-]*$`)
 	return rr.MatchString(profileName)
+}
+
+func GetNoProxyConfig(api libmachine.API) (string, string, error) {
+	host, err := api.Load(constants.MachineName)
+	if err != nil {
+		return "", "", fmt.Errorf("Error getting IP: %s", err)
+	}
+
+	ip, err := host.Driver.GetIP()
+	if err != nil {
+		return "", "", fmt.Errorf("Error getting host IP: %s", err)
+	}
+
+	noProxyVar, noProxyValue := shell.FindNoProxyFromEnv()
+
+	// Add the minishift VM to the no_proxy list idempotently.
+	switch {
+	case noProxyValue == "":
+		noProxyValue = ip
+	case strings.Contains(noProxyValue, ip):
+	// IP already in no_proxy list, nothing to do.
+	default:
+		noProxyValue = fmt.Sprintf("%s,%s", noProxyValue, ip)
+	}
+	return noProxyVar, noProxyValue, nil
 }

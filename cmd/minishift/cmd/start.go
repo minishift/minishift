@@ -284,6 +284,7 @@ func handleProxies() *util.ProxyConfig {
 	}
 
 	if proxyConfig.IsEnabled() {
+		fmt.Println("-- Using proxy for the setup")
 		proxyConfig.ApplyToEnvironment()
 		dockerEnv = append(dockerEnv, proxyConfig.ProxyConfig()...)
 		shellProxyEnv += strings.Join(proxyConfig.ProxyConfig(), " ")
@@ -292,10 +293,16 @@ func handleProxies() *util.ProxyConfig {
 		// proxy settings are properly passed to cluster up we need to explicitly set the values.
 		if proxyConfig.HttpProxy() != "" {
 			viper.Set(cmdUtil.HttpProxy, proxyConfig.HttpProxy())
+			if glog.V(5) {
+				fmt.Println(fmt.Sprintf("\tUsing http proxy: %s", proxyConfig.HttpProxy()))
+			}
 		}
 
 		if proxyConfig.HttpsProxy() != "" {
 			viper.Set(cmdUtil.HttpsProxy, proxyConfig.HttpsProxy())
+			if glog.V(5) {
+				fmt.Println(fmt.Sprintf("\tUsing https proxy: %s", proxyConfig.HttpsProxy()))
+			}
 		}
 		viper.Set(configCmd.NoProxyList.Name, proxyConfig.NoProxy())
 	}

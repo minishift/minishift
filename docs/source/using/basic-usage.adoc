@@ -302,6 +302,8 @@ Using the proxy options will transparently configure the Docker daemon as well a
 [NOTE]
 ====
 - `minishift start` honors the environment variables `HTTP_PROXY`, `HTTPS_PROXY` and `NO_PROXY`.
+The environment variables can be specified in lower case or upper case.
+The lower case variables take higher precedence over upper case variables.
 If these variables are set, they are implicitly used during `minishift start` unless explicitly overridden by the corresponding command line flags.
 
 - Using the proxy options requires that you run OpenShift version 1.5.0 or later.

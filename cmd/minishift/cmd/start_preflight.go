@@ -26,7 +26,6 @@ import (
 	"strings"
 
 	"github.com/docker/machine/libmachine/drivers"
-	"github.com/golang/glog"
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	validations "github.com/minishift/minishift/pkg/minishift/config"
@@ -53,20 +52,7 @@ func preflightChecksBeforeStartingHost() {
 	driverErrorMessage := "See the 'Setting Up the Virtualization Environment' topic (https://docs.openshift.org/latest/minishift/getting-started/setting-up-virtualization-environment.html) for more information"
 	prerequisiteErrorMessage := "See the 'Installing Prerequisites for Minishift' topic (https://docs.openshift.org/latest/minishift/getting-started/installing.html#install-prerequisites) for more information"
 
-	proxy := os.Getenv("HTTPS_PROXY")
-
-	// In case we're not running with -v5, we want to obscure the proxy but
-	// still tell the user whether or not a proxy is being used. This is for
-	// security reasons as proxy URLs might contain credentials thay should not
-	// always be shown.
-	if !glog.V(5) {
-		if os.Getenv("HTTPS_PROXY") == "" {
-			proxy = "No"
-		} else {
-			proxy = "Yes"
-		}
-	}
-	fmt.Printf("-- Checking if %s is reachable (using proxy: %q) ... ", GithubAddress, proxy)
+	fmt.Printf("-- Checking if %s is reachable ... ", GithubAddress)
 	if network.CheckInternetConnectivity(GithubAddress) {
 		fmt.Printf("OK\n")
 		preflightCheckSucceedsOrFails(

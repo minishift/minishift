@@ -43,8 +43,9 @@ import (
 )
 
 const (
-	StorageDisk   = "/mnt/?da1"
-	GithubAddress = "https://github.com"
+	StorageDisk                  = "/mnt/?da1"
+	GithubAddress                = "https://github.com"
+	hypervDefaultVirtualSwitchId = "c08cb7b8-9b3c-408e-8e30-5e16a3aeb444"
 )
 
 // preflightChecksBeforeStartingHost is executed before the startHost function.
@@ -55,6 +56,14 @@ func preflightChecksBeforeStartingHost() {
 	driverErrorMessage := "See the 'Setting Up the Virtualization Environment' topic (https://docs.openshift.org/latest/minishift/getting-started/setting-up-virtualization-environment.html) for more information"
 	prerequisiteErrorMessage := "See the 'Installing Prerequisites for Minishift' topic (https://docs.openshift.org/latest/minishift/getting-started/installing.html#install-prerequisites) for more information"
 
+	preflightCheckSucceedsOrFails(
+		configCmd.SkipDeprecationCheck.Name,
+		checkDeprecation,
+		"Check if depereccated options are used",
+		configCmd.WarnDeprecationCheck.Name,
+		"")
+
+	// Conectivity logic
 	fmt.Printf("-- Checking if %s is reachable ... ", GithubAddress)
 	if network.CheckInternetConnectivity(GithubAddress) {
 		fmt.Printf("OK\n")
@@ -69,6 +78,7 @@ func preflightChecksBeforeStartingHost() {
 		fmt.Printf("FAIL\n")
 		fmt.Printf("-- Checking if requested OpenShift version '%s' is valid ... SKIP\n", viper.GetString(configCmd.OpenshiftVersion.Name))
 	}
+	// end of connectivity logic
 
 	preflightCheckSucceedsOrFails(
 		configCmd.SkipCheckOpenShiftVersion.Name,
@@ -270,6 +280,16 @@ func preflightCheckSucceedsOrFailsWithDriver(configNameOverrideIfSkipped string,
 	}
 }
 
+func checkDeprecation() bool {
+	// Check for deprecated options
+	switchValue := os.Getenv("HYPERV_VIRTUAL_SWITCH")
+	if switchValue != "" {
+		fmt.Println("\n   Use of HYPERV_VIRTUAL_SWITCH has been deprecated\n   Please use: minishift config set hyper-virtual-switch", switchValue)
+		return false
+	}
+	return true
+}
+
 // checkXhyveDriver returns true if xhyve driver is available on path and has
 // the setuid-bit set
 func checkXhyveDriver() bool {
@@ -386,38 +406,26 @@ func checkLibvirtDefaultNetworkActive() bool {
 
 // checkHypervDriverSwitch returns true if Virtual Switch has been selected
 func checkHypervDriverSwitch() bool {
-	switchEnvName := "HYPERV_VIRTUAL_SWITCH"
 	posh := powershell.New()
 	defer posh.Close()
 
-	switchEnvValue := os.Getenv(switchEnvName)
+	switchName := viper.GetString(configCmd.HypervVirtualSwitch.Name)
 
-	if switchEnvValue == "" {
-		checkIfDefaultSwitchExists := `Get-VMSwitch -Id c08cb7b8-9b3c-408e-8e30-5e16a3aeb444 | ForEach-Object { $_.SwitchType }`
-		fmt.Printf("\n   'Default Switch' ... ")
-		stdOut, _ := posh.Execute(checkIfDefaultSwitchExists)
-		if strings.Contains(stdOut, "Internal") {
+	// check for default switch
+	if switchName == "" {
+		checkIfDefaultSwitchExists := fmt.Sprintf("Get-VMSwitch -Id %s | ForEach-Object { $_.Name }", hypervDefaultVirtualSwitchId)
+		stdOut, stdErr := posh.Execute(checkIfDefaultSwitchExists)
 
-			// force setting the environment variable
-			os.Setenv("HYPERV_VIRTUAL_SWITCH", "Default Switch")
-			return true
+		if !strings.Contains(stdErr, "Get-VMSwitch") {
+			// force setting the config variable
+			switchName = stringUtils.ParseLines(stdOut)[0]
+			viper.Set(configCmd.HypervVirtualSwitch.Name, switchName)
 		}
-
-		return false
 	}
 
-	if switchEnvValue != "" {
-		checkIfVirtualSwitchExists := fmt.Sprintf("Get-VMSwitch %s| ForEach-Object { $_.SwitchType }", switchEnvValue)
-		fmt.Printf(fmt.Sprintf("\n   '%s' ... ", switchEnvValue))
-		stdOut, _ := posh.Execute(checkIfVirtualSwitchExists)
-		if strings.Contains(stdOut, "Get-VMSwitch") {
-			return false // error returned
-		}
-
-		return true
-	}
-
-	return false
+	fmt.Printf("\n   '%s' ... ", switchName)
+	err := validations.IsValidHypervVirtualSwitch("hyperv-virtual-switch", switchName)
+	return err == nil
 }
 
 // checkHypervDriverInstalled returns true if Hyper-V driver is installed

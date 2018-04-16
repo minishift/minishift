@@ -159,18 +159,19 @@ type sshAble interface {
 
 // MachineConfig contains the parameters used to start a cluster.
 type MachineConfig struct {
-	MinikubeISO      string
-	ISOCacheDir      string
-	Memory           int
-	CPUs             int
-	DiskSize         int
-	VMDriver         string
-	DockerEnv        []string // Each entry is formatted as KEY=VALUE.
-	DockerEngineOpt  []string
-	InsecureRegistry []string
-	RegistryMirror   []string
-	HostOnlyCIDR     string // Only used by the virtualbox driver
-	ShellProxyEnv    string // Only used for proxy purpose
+	MinikubeISO         string
+	ISOCacheDir         string
+	Memory              int
+	CPUs                int
+	DiskSize            int
+	VMDriver            string
+	DockerEnv           []string // Each entry is formatted as KEY=VALUE.
+	DockerEngineOpt     []string
+	InsecureRegistry    []string
+	RegistryMirror      []string
+	HostOnlyCIDR        string // Only used by the virtualbox driver
+	ShellProxyEnv       string // Only used for proxy purpose
+	HypervVirtualSwitch string
 }
 
 func engineOptions(config MachineConfig) *engine.Options {

@@ -114,3 +114,39 @@ If you prefer to use dynamic assignment, you can use:
 ----
 $ minishift ip --set-dhcp
 ----
+
+
+[[local-dns-server]]
+== Local DNS Server
+
+{project} provides a DNS server for offline usage or possible overriding DNS records while testing. This will allow you to access the OpenShift routes without Internet.
+
+[NOTE]
+====
+The DNS server is specific to a profile.
+====
+
+Starting the DNS server can be done as follows:
+
+----
+$ minishift dns start
+----
+
+After starting the DNS server you need to configure your device settings to use this nameserver. The start command will show you a temporary option that can be used when you entered offline usage.
+
+[NOTE]
+====
+In the current implementation you need to start the server and do required changes in the host settings manually. The DNS configuration is not permanent and might reset when the network state of the device changes
+====
+
+Stopping the DNS server can be done as follows:
+
+----
+$ minishift dns stop
+----
+
+To get the status of the DNS server:
+
+----
+$ minishift dns status
+----

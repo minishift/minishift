@@ -39,6 +39,59 @@ For example, the following command will pass the `--service-catalog` flag to `oc
 $ MINISHIFT_ENABLE_EXPERIMENTAL=y minishift start --extra-clusterup-flags "--service-catalog"
 ----
 
+[[hyperv-static-ip]]
+== Assign IP Address to Hyper-V
+
+Since the Internal Virtual Switch for Hyper-V does not provide a DHCP offer option, an IP address needs to be provided in a different way.
+For Hyper-V a functionality is provided to assign an IP address on startup using the Data Exchange Service.
+
+[IMPORTANT]
+====
+This only works with the CentOS or RHEL ISO in combination with Hyper-V.
+The B2D image experiences a problem when the values are being sent to the {project} instance and consumed by the B2D iso.
+We are looking into the issue and hope to provide a solution in the future.
+====
+
+To make this work you need to create a link:https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/user-guide/setup-nat-network[Virtual Switch using NAT].
+
+[NOTE]
+====
+WinNAT is limited to one NAT network per host.
+For more details about capabilities, and limitations, please see the link:https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/user-guide/setup-nat-network[WinNAT capabilities and limitations blog].
+====
+
+The following command will attempt to assign an IP address for use on the Internal Virtual Switch 'MyInternal':
+
+----
+PS> $env:MINISHIFT_ENABLE_EXPERIMENTAL="y"
+PS> minishift config set hyperv-virtual-switch "MyInternal"
+PS> minishift.exe start `
+  --iso-url centos `
+  --network-ipaddress 192.168.1.10 `
+  --network-gateway 192.168.1.1 `
+  --network-nameserver 8.8.8.8
+----
+
+If you want to use the 'DockerNAT' network, the following commands are needed to setup the correct NAT networking and assign an IP in the range expected:
+
+----
+PS> New-NetNat -Name SharedNAT -InternalIPInterfaceAddressPrefix 10.0.75.1/24
+PS> $env:MINISHIFT_ENABLE_EXPERIMENTAL="y"
+PS> minishift config set hyperv-virtual-switch "DockerNAT"
+PS> minishift.exe start `
+  --iso-url centos `
+  --network-ipaddress 10.0.75.128 `
+  --network-gateway 10.0.75.1 `
+  --network-nameserver 8.8.8.8
+----
+
+[NOTE]
+====
+Be sure to specify a valid gateway and nameserver.
+Failing to do so will result in connectivity issues.
+====
+
+
 [[set-fixed-ip]]
 == Set Fixed IP Address
 

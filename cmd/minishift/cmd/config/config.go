@@ -101,6 +101,8 @@ var (
 	CacheImages  = createConfigSetting("cache-images", SetSlice, nil, nil, false, nil)
 
 	// Pre-flight checks (before start)
+	SkipDeprecationCheck      = createConfigSetting("skip-check-deprecation", SetBool, nil, nil, true, nil)
+	WarnDeprecationCheck      = createConfigSetting("warn-check-deprecation", SetBool, nil, nil, true, true)
 	SkipCheckKVMDriver        = createConfigSetting("skip-check-kvm-driver", SetBool, nil, nil, true, nil)
 	WarnCheckKVMDriver        = createConfigSetting("warn-check-kvm-driver", SetBool, nil, nil, true, false)
 	SkipCheckXHyveDriver      = createConfigSetting("skip-check-xhyve-driver", SetBool, nil, nil, true, nil)
@@ -153,6 +155,9 @@ var (
 	NameServers           = createConfigSetting("network-nameserver", SetSlice, []setFn{validations.IsValidIPv4AddressSlice}, nil, true, nil)
 	DnsmasqContainerized  = createConfigSetting("network-dnsmasq-containerized", SetBool, nil, nil, true, false)
 	DnsmasqContainerImage = createConfigSetting("network-dnsmasq-container", SetString, nil, nil, true, nil)
+
+	// Hyper-V
+	HypervVirtualSwitch = createConfigSetting("hyperv-virtual-switch", SetString, []setFn{validations.IsValidHypervVirtualSwitch}, nil, true, nil)
 )
 
 func createConfigSetting(name string, set func(MinishiftConfig, string, string) error, validations []setFn, callbacks []setFn, isApply bool, defaultVal interface{}) *Setting {

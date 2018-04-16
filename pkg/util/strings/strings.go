@@ -17,6 +17,7 @@ limitations under the License.
 package strings
 
 import (
+	"bufio"
 	"regexp"
 	"strings"
 )
@@ -118,4 +119,15 @@ func SplitAndTrim(s string, separator string) ([]string, error) {
 
 func ConvertSlashes(input string) string {
 	return strings.Replace(input, "\\", "/", -1)
+}
+
+func ParseLines(stdout string) []string {
+	resp := []string{}
+
+	s := bufio.NewScanner(strings.NewReader(stdout))
+	for s.Scan() {
+		resp = append(resp, s.Text())
+	}
+
+	return resp
 }

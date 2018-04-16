@@ -350,18 +350,19 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 
 	// Configuration used for creation/setup of the Virtual Machine
 	machineConfig := &cluster.MachineConfig{
-		MinikubeISO:      determineIsoUrl(viper.GetString(configCmd.ISOUrl.Name)),
-		ISOCacheDir:      state.InstanceDirs.IsoCache,
-		Memory:           calculateMemorySize(viper.GetString(configCmd.Memory.Name)),
-		CPUs:             viper.GetInt(configCmd.CPUs.Name),
-		DiskSize:         calculateDiskSize(viper.GetString(configCmd.DiskSize.Name)),
-		VMDriver:         viper.GetString(configCmd.VmDriver.Name),
-		DockerEnv:        append(dockerEnv, getSlice(configCmd.DockerEnv.Name)...),
-		DockerEngineOpt:  getSlice(configCmd.DockerEngineOpt.Name),
-		InsecureRegistry: determineInsecureRegistry(configCmd.InsecureRegistry.Name),
-		RegistryMirror:   getSlice(configCmd.RegistryMirror.Name),
-		HostOnlyCIDR:     viper.GetString(configCmd.HostOnlyCIDR.Name),
-		ShellProxyEnv:    shellProxyEnv,
+		MinikubeISO:         determineIsoUrl(viper.GetString(configCmd.ISOUrl.Name)),
+		ISOCacheDir:         state.InstanceDirs.IsoCache,
+		Memory:              calculateMemorySize(viper.GetString(configCmd.Memory.Name)),
+		CPUs:                viper.GetInt(configCmd.CPUs.Name),
+		DiskSize:            calculateDiskSize(viper.GetString(configCmd.DiskSize.Name)),
+		VMDriver:            viper.GetString(configCmd.VmDriver.Name),
+		DockerEnv:           append(dockerEnv, getSlice(configCmd.DockerEnv.Name)...),
+		DockerEngineOpt:     getSlice(configCmd.DockerEngineOpt.Name),
+		InsecureRegistry:    determineInsecureRegistry(configCmd.InsecureRegistry.Name),
+		RegistryMirror:      getSlice(configCmd.RegistryMirror.Name),
+		HostOnlyCIDR:        viper.GetString(configCmd.HostOnlyCIDR.Name),
+		HypervVirtualSwitch: viper.GetString(configCmd.HypervVirtualSwitch.Name),
+		ShellProxyEnv:       shellProxyEnv,
 	}
 	minishiftConfig.InstanceConfig.VMDriver = machineConfig.VMDriver
 	minishiftConfig.InstanceConfig.Write()
@@ -604,6 +605,7 @@ func initStartFlags() *flag.FlagSet {
 		startFlagSet.String(configCmd.IPAddress.Name, "", "Specify IP address to assign to the instance (Hyper-V only)")
 		startFlagSet.String(configCmd.Netmask.Name, "", "Specify netmask to use for the IP address. Ignored if no IP address specified (Hyper-V only)")
 		startFlagSet.String(configCmd.Gateway.Name, "", "Specify gateway to use for the instance. Ignored if no IP address specified (Hyper-V only)")
+		startFlagSet.String(configCmd.HypervVirtualSwitch.Name, "", "Specify which Virtual Switch to use for the instance (Hyper-V only)")
 	}
 	startFlagSet.AddFlag(nameServersFlag)
 

@@ -20,13 +20,12 @@ import (
 	"github.com/docker/machine/drivers/hyperv"
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/minishift/minishift/pkg/minikube/constants"
-	"os"
 )
 
 func createHypervHost(config MachineConfig) drivers.Driver {
 	d := hyperv.NewDriver(constants.MachineName, constants.Minipath)
 	d.Boot2DockerURL = config.GetISOFileURI()
-	d.VSwitch = os.Getenv("HYPERV_VIRTUAL_SWITCH") // This should be part of config instead env variable.
+	d.VSwitch = config.HypervVirtualSwitch
 	d.MemSize = config.Memory
 	d.CPU = config.CPUs
 	d.DiskSize = int(config.DiskSize)

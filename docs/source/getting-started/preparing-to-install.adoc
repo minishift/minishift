@@ -45,7 +45,7 @@ Windows::
 +
 [NOTE]
 ====
-To use {project} with Hyper-V ensure that, after you link:https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v[install Hyper-V], you also link:https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/connect-to-network[add a Virtual Switch] using the Hyper-V Manager and set the environment variable `HYPERV_VIRTUAL_SWITCH` to this virtual switch.
+To use {project} with Hyper-V ensure that, after you link:https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v[install Hyper-V], you also link:https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/connect-to-network[add a Virtual Switch] using the Hyper-V Manager and set the configuration option `hyperv-virtual-switch` to this virtual switch.
 For specific configuration steps see the xref:../getting-started/setting-up-virtualization-environment.adoc#setting-up-hyper-v-driver[Setting Up the Hyper-V Driver] section.
 ====
 

@@ -306,35 +306,24 @@ For more information, see xref:../troubleshooting/troubleshooting-driver-plugins
 
 . Verify that you pair the virtual switch with a network card (wired or wireless) that is connected to the network.
 
-. Set the environment variable `HYPERV_VIRTUAL_SWITCH` to the name of the external virtual switch you want to use for {project}.
+. Use the configuration option `hyperv-virtual-switch` or startup flag `--hyperv-virtual-switch` to set the name of the external virtual switch you want to use for {project}.
 +
-For example, on Command Prompt use:
-+
-----
-C:\> set HYPERV_VIRTUAL_SWITCH=External (Wireless)
-----
-+
-Note that using quotes in Command Prompt results in the following error:
+For example, on PowerShell use
 +
 ----
-C:\> set HYPERV_VIRTUAL_SWITCH="External (Wireless)"
-Error creating the VM. Error with pre-create check: "vswitch \"\\\"External (Wireless)\\\"\" not found"
+PS> minishift config set hyperv-virtual-switch "External (Wireless)"
 ----
-+
-PowerShell, however, requires the quotes:
+or
 +
 ----
-PS> $env:HYPERV_VIRTUAL_SWITCH="External (Wireless)"
+PS> minishift start --hyperv-virtual-switch "External (Wireless)"
 ----
 +
-Using `set` in Command Prompt or `$env` in PowerShell will only affect the currently running shell session.
-You may use the `setx` utility to persist this environment variable across shell instances and system restarts.
-Quotes must be used with `setx` for both Command Prompt and PowerShell.
-For example:
-+
-----
-C:\> setx HYPERV_VIRTUAL_SWITCH "External (Wireless)"
-----
+[NOTE]
+====
+- The name of the virtual switch is case sensitive.
+- The use of the environment variable `HYPERV_VIRTUAL_SWITCH` has been deprecated. Instead `MINISHIFT_HYPERV_VIRTUAL_SWITCH` can be used as a configuration option, although this is not recommended as environment variables on Windows do not support non-ASCII characters.
+====
 
 === Next Steps
 

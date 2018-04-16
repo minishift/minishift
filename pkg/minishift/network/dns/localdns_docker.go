@@ -120,9 +120,3 @@ func (s DockerDnsService) Start() (bool, error) {
 func (s DockerDnsService) Stop() (bool, error) {
 	return s.commander.Stop(dnsmasqContainerName)
 }
-
-func (s DockerDnsService) Reset() {
-	// remove container and configuration
-	s.commander.Stop(dnsmasqContainerName)
-	s.commander.LocalExec("docker rm dnsmasq -f")
-}

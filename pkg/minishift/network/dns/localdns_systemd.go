@@ -75,7 +75,3 @@ func (s SystemdDnsService) Stop() (bool, error) {
 func (s SystemdDnsService) Restart() (bool, error) {
 	return s.commander.Restart(dnsmasqServiceName)
 }
-
-func (s SystemdDnsService) Reset() {
-
-}

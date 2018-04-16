@@ -34,7 +34,6 @@ type serviceCommander interface {
 	Stop() (bool, error)
 	Restart() (bool, error)
 	Status() bool
-	Reset()
 }
 
 // checkSupportForAddressAssignment returns true when the instance can support
@@ -111,14 +110,4 @@ func Stop(driver drivers.Driver) (bool, error) {
 	}
 
 	return handleHostDNSSettingsAfterStop(ipAddress)
-}
-
-func Reset(driver drivers.Driver) (bool, error) {
-	sshCommander := provision.GenericSSHCommander{Driver: driver}
-
-	getServiceCommander(driver).Reset()
-
-	sshCommander.SSHCommand("sudo rm -rf /var/lib/minishift/dnsmasq.*; sudo rm -f /var/lib/minishift/resolv.dnsmasq.conf")
-
-	return handleHostDNSSettingsAfterReset()
 }

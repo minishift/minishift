@@ -25,7 +25,7 @@ const (
 	Enable
 	Disable
 	Status
-	//DaemonReload
+	DaemonReload
 )
 
 func (action Action) String() string {
@@ -36,7 +36,7 @@ func (action Action) String() string {
 		"enable",
 		"disable",
 		"status",
-		//"daemon-reload",
+		"daemon-reload",
 	}
 
 	if int(action) >= 0 && int(action) < len(actions) {

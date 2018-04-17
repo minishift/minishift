@@ -75,7 +75,7 @@ func handleConfiguration(sshCommander provision.SSHCommander, ipAddress string, 
 	dnsmasqConfigurationFile := fillDnsmasqConfiguration(dnsmasqConfiguration) // perhaps move this to the struct as a ToString()
 	encodedDnsmasqConfigurationFile := base64.StdEncoding.EncodeToString([]byte(dnsmasqConfigurationFile))
 	configCommand := fmt.Sprintf(
-		"echo %s | base64 --decode | sudo tee /var/lib/minishift/dnsmasq.conf > /dev/null",
+		"echo %s | openssl enc -base64 -d | sudo tee /var/lib/minishift/dnsmasq.conf > /dev/null",
 		encodedDnsmasqConfigurationFile)
 
 	execCommand := fmt.Sprintf("sudo mkdir %s && %s && sudo cp /etc/resolv.conf %s",

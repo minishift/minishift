@@ -102,13 +102,41 @@ $ sudo usermod -a -G kvm,libvirt <username>
 . Update the *libvirt* configuration in *_/etc/libvirt/qemu.conf_* as follows:
 +
 ----
-$ sudo sed -r 's/group=".+"/group="kvm"/1' /etc/libvirt/qemu.conf > /etc/libvirt/qemu.conf
+$ sudo sed -ri 's/.?group\s?=\s?".+"/group = "kvm"/1' /etc/libvirt/qemu.conf
 ----
 
 . Update your current session to apply the group change:
 +
 ----
 $ newgrp libvirt
+----
+
+[[kvm-driver-networking]]
+=== Configure libvirt networking
+
+Some distributions set up the *default* libvirt network for you, while on others this might have to be done manually.
+
+. Check your network status:
++
+----
+$ sudo virsh net-list --all
+Name                 State      Autostart     Persistent
+---------------------------------------------------------
+default              active     yes           yes
+----
+If your output looks like the above then you're done.
+However, if `State` is not `active` or `Autostart` is not `yes` you'll need to follow the steps below.
+
+. Start the *default* libvirt network:
++
+----
+$ sudo virsh net-start default
+----
+
+. Now mark the *default* network as autostart:
++
+----
+$ sudo virsh net-autostart default
 ----
 
 === Next Steps
@@ -350,3 +378,4 @@ If you have already run `minishift start`, ensure that you run `minishift delete
 === Next Steps
 
 {next-steps}
+

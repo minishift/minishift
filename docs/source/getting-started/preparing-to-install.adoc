@@ -1,6 +1,6 @@
 include::variables.adoc[]
 
-[[installing-minishift]]
+[[preparing-minishift-install]]
 = Preparing to Install {project}
 :icons:
 :toc: macro

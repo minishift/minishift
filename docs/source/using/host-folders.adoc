@@ -109,8 +109,8 @@ When you use the Boot2Docker ISO with the VirtualBox driver, VirtualBox guest ad
 
 ==== SSHFS
 
-[[adding-cifs-hostfolder]]
-.Adding a SSHFS based hostfolder
+[[adding-sshfs-hostfolder]]
+.Adding an SSHFS based hostfolder
 ----
 $ minishift hostfolder add -t sshfs --source /Users/john/myshare --target /mnt/sda1/myshare myshare
 ----

@@ -123,6 +123,10 @@ var (
 	SkipCheckOpenShiftRelease = createConfigSetting("skip-check-openshift-release", SetBool, nil, nil, true, nil)
 	WarnCheckOpenShiftRelease = createConfigSetting("warn-check-openshift-release", SetBool, nil, nil, true, false)
 
+	// Pre-flight checks for artifacts (before start)
+	SkipCheckClusterUpFlag = createConfigSetting("skip-check-clusterup-flags", SetBool, nil, nil, true, nil)
+	WarnCheckClusterUpFlag = createConfigSetting("warn-check-clusterup-flags", SetBool, nil, nil, true, nil)
+
 	// Pre-flight checks (after start)
 	SkipInstanceIP        = createConfigSetting("skip-check-instance-ip", SetBool, nil, nil, true, nil)
 	WarnInstanceIP        = createConfigSetting("warn-check-instance-ip", SetBool, nil, nil, true, false)

@@ -30,11 +30,14 @@ By default, {project} does not expose all link:https://github.com/openshift/orig
 
 You can set the `MINISHIFT_ENABLE_EXPERIMENTAL` environment variable to enable the following options for the xref:../command-ref/minishift_start.adoc#[`minishift start`] command:
 
-`service-catalog`::
-Enables provisioning the OpenShift link:https://docs.openshift.org/latest/architecture/service_catalog/index.html[service catalog].
-
 `extra-clusterup-flags`::
-Enables passing flags that are not directly exposed in the {project} CLI directly to `oc cluster up`.
+Enables passing flags directly to `oc cluster up` that are not directly exposed in the {project} CLI.
+
+For example, following command will pass the `--service-catalog` flag to `oc cluster up` to provision the OpenShift link:https://docs.openshift.org/latest/architecture/service_catalog/index.html[*service catalog*]:
+
+----
+$ MINISHIFT_ENABLE_EXPERIMENTAL=y minishift start --extra-clusterup-flags "--service-catalog"
+----
 
 [[hyperv-static-ip]]
 == Assign IP Address to Hyper-V

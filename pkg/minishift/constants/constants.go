@@ -30,6 +30,7 @@ const (
 	OpenshiftOcExec        = "/usr/bin/oc"
 	DefaultProject         = "myproject"
 	DefaultUser            = "developer"
+	BinaryName             = "minishift"
 )
 
 var (

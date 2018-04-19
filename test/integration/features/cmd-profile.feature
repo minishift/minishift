@@ -186,5 +186,3 @@ Feature: Profile commands
     | delete    |
     | logs      |
     | stop      |
-    | version   |
-

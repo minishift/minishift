@@ -22,38 +22,29 @@ import (
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
 	"github.com/minishift/minishift/pkg/minishift/oc"
 	"github.com/minishift/minishift/pkg/util"
-	"github.com/minishift/minishift/pkg/util/os/atexit"
 	flag "github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
 
 // preflightChecksForArtifacts is executed once artifacts are cached.
 func preflightChecksForArtifacts() {
-	artifactsCheckSucceedsOrFails(checkOcFlag, "Checking if provided oc flags are supported", "Provided oc flag not supported")
-}
-
-// artifactCheckFunc returns true when check passed
-type artifactCheckFunc func() bool
-
-// artifactsCheckSucceedsOrFails executes a pre-flight test function and prints
-// the returned status in a standardized way. If the test fails and returns a
-// false, the application will exit with errorMessage to describe what the
-// cause is.
-func artifactsCheckSucceedsOrFails(execute artifactCheckFunc, message string, errorMessage string) {
-	fmt.Printf("-- %s ... ", message)
-
-	if execute() {
-		fmt.Println("OK")
-		return
-	}
-	fmt.Println("FAIL")
-	atexit.ExitWithMessage(1, errorMessage)
+	preflightCheckSucceedsOrFails(
+		configCmd.SkipCheckClusterUpFlag.Name,
+		checkOcFlag,
+		"Checking if provided oc flags are supported",
+		configCmd.WarnCheckClusterUpFlag.Name,
+		"Provided oc flag not supported")
 }
 
 // checkOcFlag checks if provided oc flags are supported
 func checkOcFlag() bool {
 	clusterUpParams := determineInitialClusterupParameters()
 	for _, key := range clusterUpParams {
+
+		// no need to check for extra-clusterup-flags as it is a minishift specific flag
+		if key == configCmd.ExtraClusterUpFlags.Name {
+			continue
+		}
 		if !oc.SupportFlag(key, ocPath, &util.RealRunner{}) {
 			fmt.Printf("Flag '%s' is not supported for oc version %s. Use 'openshift-version' flag to select a different version of OpenShift.\n", key, viper.GetString(configCmd.OpenshiftVersion.Name))
 			return false

@@ -40,8 +40,8 @@ so that user can able to push their container images directly to registry and de
       And executing "oc expose svc nginx" in host shell succeeds
      Then executing "oc set probe dc/nginx --readiness --get-url=http://:8080" in host shell succeeds
       And service "nginx" rollout successfully within "1200" seconds
-      And with up to "10" retries with wait period of "500ms" the "status code" of HTTP request to "/" of service "nginx" in namespace "myproject" is equal to "200"
-      And with up to "10" retries with wait period of "500ms" the "body" of HTTP request to "/" of service "nginx" in namespace "myproject" contains "Welcome to nginx!"
+      And with up to "10" retries with wait period of "50ms" the "status code" of HTTP request to "/" of service "nginx" in namespace "myproject" is equal to "200"
+      And with up to "10" retries with wait period of "50ms" the "body" of HTTP request to "/" of service "nginx" in namespace "myproject" contains "Welcome to nginx!"
 
   Scenario: User deletes Minishift
     Given Minishift has state "Running"

@@ -19,20 +19,20 @@ package hostfolder
 import (
 	"fmt"
 	"runtime"
+	"strings"
 
-	"errors"
 	miniConfig "github.com/minishift/minishift/pkg/minishift/config"
 	hostFolderConfig "github.com/minishift/minishift/pkg/minishift/hostfolder"
 	"github.com/minishift/minishift/pkg/minishift/hostfolder/config"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
-	"github.com/minishift/minishift/pkg/util/strings"
+	minishiftStrings "github.com/minishift/minishift/pkg/util/strings"
 	"github.com/spf13/cobra"
 )
 
 const (
 	usage                = "Usage: minishift hostfolder add --type TYPE --source SOURCE --target TARGET HOST_FOLDER_NAME"
-	interactiveModeUsage = "Usage: minishift hostfolder add --interactive --type TYPE [sshfs|cifs (Default: cifs)] HOST_FOLDER_NAME"
+	noName               = "you need to specify a name"
 	noSource             = "you need to specify the source of the host folder"
 	noTarget             = "you need to specify the target of the host folder"
 	noUserName           = "you need to specify a username"
@@ -93,13 +93,14 @@ func addHostFolder(cmd *cobra.Command, args []string) {
 		// Windows-only (CIFS), all instances
 		name = "Users"
 	} else {
-		if interactive && len(args) < 1 {
-			atexit.ExitWithMessage(1, interactiveModeUsage)
-		}
-		if len(args) < 1 {
+		if len(args) < 1 && !interactive {
 			atexit.ExitWithMessage(1, usage)
 		}
-		name = args[0]
+		if interactive {
+			name, shareType = readNameAndTypeInteractive()
+		} else {
+			name = args[0]
+		}
 	}
 
 	if hostFolderManager.Exist(name) {
@@ -125,9 +126,13 @@ func addHostFolder(cmd *cobra.Command, args []string) {
 }
 
 func addSSHFSInteractive(manager *hostFolderConfig.Manager, name string) error {
-	source := util.ReadInputFromStdin("source path")
+	source := util.ReadInputFromStdin("Source path")
+	if source == "" {
+		atexit.ExitWithMessage(1, noSource)
+	}
+
 	if runtime.GOOS == "windows" {
-		source = strings.ConvertSlashes(source)
+		source = minishiftStrings.ConvertSlashes(source)
 	}
 
 	mountPath := readInputForMountPoint(name)
@@ -152,7 +157,7 @@ func addSSHFSNonInteractive(manager *hostFolderConfig.Manager, name string) erro
 	}
 
 	if runtime.GOOS == "windows" {
-		source = strings.ConvertSlashes(source)
+		source = minishiftStrings.ConvertSlashes(source)
 	}
 
 	if target == "" {
@@ -181,15 +186,22 @@ func addCIFSInteractive(manager *hostFolderConfig.Manager, name string) error {
 		uncPath = util.ReadInputFromStdin("UNC path")
 	}
 
-	if len(uncPath) == 0 {
-		return errors.New("no remote path has been specified")
+	if uncPath == "" {
+		atexit.ExitWithMessage(1, noSource)
 	}
 
 	mountPoint := readInputForMountPoint(name)
 
 	username := util.ReadInputFromStdin("Username")
+	if username == "" {
+		atexit.ExitWithMessage(1, noUserName)
+	}
 
 	password := util.ReadPasswordFromStdin("Password")
+	if password == "" {
+		atexit.ExitWithMessage(1, noPassword)
+	}
+
 	password, err := util.EncryptText(password)
 	if err != nil {
 		return err
@@ -202,7 +214,7 @@ func addCIFSInteractive(manager *hostFolderConfig.Manager, name string) error {
 		Type: hostFolderConfig.CIFS.String(),
 		Options: map[string]string{
 			config.MountPoint: mountPoint,
-			config.UncPath:    strings.ConvertSlashes(uncPath),
+			config.UncPath:    minishiftStrings.ConvertSlashes(uncPath),
 			config.UserName:   username,
 			config.Password:   password,
 			config.Domain:     domain,
@@ -243,7 +255,7 @@ func addCIFSNonInteractive(manager *hostFolderConfig.Manager, name string) {
 		Name: name,
 		Type: hostFolderConfig.CIFS.String(),
 		Options: map[string]string{
-			config.UncPath:    strings.ConvertSlashes(source),
+			config.UncPath:    minishiftStrings.ConvertSlashes(source),
 			config.MountPoint: target,
 			config.UserName:   optionsMap[config.UserName],
 			config.Password:   optionsMap[config.Password],
@@ -252,4 +264,23 @@ func addCIFSNonInteractive(manager *hostFolderConfig.Manager, name string) {
 	}
 	hostFolder := hostFolderConfig.NewCifsHostFolder(config)
 	manager.Add(hostFolder, !instanceOnly)
+}
+
+// returns the name and full-name for shareType
+func readNameAndTypeInteractive() (string, string) {
+	name := util.ReadInputFromStdin("Name")
+	if name == "" {
+		atexit.ExitWithMessage(1, noName)
+	}
+	shareType := strings.ToLower(util.ReadInputFromStdin("Type [cifs, sshfs (C/s)]"))
+
+	if shareType == "s" {
+		return name, hostFolderConfig.SSHFS.String()
+	}
+
+	if shareType == "c" || shareType == "" {
+		return name, hostFolderConfig.CIFS.String()
+	}
+
+	return name, shareType
 }

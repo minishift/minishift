@@ -53,6 +53,12 @@ You can also add this variable in your shell profile so you don't need to manual
 While {project} starts, it runs several startup checks to make sure that the {project} VM and the OpenShift Cluster are able to start without any issues.
 If any configuration is incorrect or missing, the startup checks fail and {project} does not start.
 
+- You can skip the startup checks by executing the following command:
++
+----
+$ minishift config set skip-startup-checks true
+----
+
 The following sections describe the different startup checks.
 
 [[driver-plugin-check]]

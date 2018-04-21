@@ -49,6 +49,9 @@ const (
 
 // preflightChecksBeforeStartingHost is executed before the startHost function.
 func preflightChecksBeforeStartingHost() {
+	if shouldPreflightChecksBeSkipped() {
+		return
+	}
 	driverErrorMessage := "See the 'Setting Up the Virtualization Environment' topic (https://docs.openshift.org/latest/minishift/getting-started/setting-up-virtualization-environment.html) for more information"
 	prerequisiteErrorMessage := "See the 'Installing Prerequisites for Minishift' topic (https://docs.openshift.org/latest/minishift/getting-started/installing.html#install-prerequisites) for more information"
 
@@ -156,6 +159,9 @@ func preflightChecksBeforeStartingHost() {
 
 // preflightChecksAfterStartingHost is executed after the startHost function.
 func preflightChecksAfterStartingHost(driver drivers.Driver) {
+	if shouldPreflightChecksBeSkipped() {
+		return
+	}
 	preflightCheckSucceedsOrFailsWithDriver(
 		configCmd.SkipInstanceIP.Name,
 		checkInstanceIP, driver,

@@ -28,6 +28,9 @@ import (
 
 // preflightChecksForArtifacts is executed once artifacts are cached.
 func preflightChecksForArtifacts() {
+	if shouldPreflightChecksBeSkipped() {
+		return
+	}
 	preflightCheckSucceedsOrFails(
 		configCmd.SkipCheckClusterUpFlag.Name,
 		checkOcFlag,

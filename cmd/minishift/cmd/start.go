@@ -575,6 +575,7 @@ func initStartFlags() *flag.FlagSet {
 	startFlagSet.String(configCmd.Memory.Name, constants.DefaultMemory, "Amount of RAM to allocate to the Minishift VM. Use the format <size><unit>, where unit = MB or GB.")
 	startFlagSet.String(configCmd.DiskSize.Name, constants.DefaultDiskSize, "Disk size to allocate to the Minishift VM. Use the format <size><unit>, where unit = MB or GB.")
 	startFlagSet.String(configCmd.HostOnlyCIDR.Name, "192.168.99.1/24", "The CIDR to be used for the minishift VM. (Only supported with VirtualBox driver.)")
+	startFlagSet.Bool(configCmd.SkipPreflightChecks.Name, false, "Skip the startup checks.")
 	startFlagSet.AddFlag(dockerEnvFlag)
 	startFlagSet.AddFlag(dockerEngineOptFlag)
 	startFlagSet.AddFlag(insecureRegistryFlag)
@@ -729,4 +730,9 @@ func cacheMinishiftISO(config *cluster.MachineConfig) {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error caching the ISO: %s", err.Error()))
 		}
 	}
+}
+
+// if skip-startup-checks set to true then return true and skip preflight checks
+func shouldPreflightChecksBeSkipped() bool {
+	return viper.GetBool(configCmd.SkipPreflightChecks.Name)
 }

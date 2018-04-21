@@ -209,8 +209,8 @@ func (m *MinishiftRunner) GetContainerStatusUsingImageId(imageId string) string 
 
 func NewOcRunner() *OcRunner {
 	jsonDataPath := filepath.Join(os.Getenv(constants.MiniShiftHomeEnv), "machines", constants.MachineName+".json")
-	instanceState.InstanceConfig, _ = instanceState.NewInstanceConfig(jsonDataPath)
-	p := instanceState.InstanceConfig.OcPath
+	instanceState.InstanceStateConfig, _ = instanceState.NewInstanceStateConfig(jsonDataPath)
+	p := instanceState.InstanceStateConfig.OcPath
 	return &OcRunner{CommandPath: p}
 }
 

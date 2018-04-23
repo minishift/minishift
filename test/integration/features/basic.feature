@@ -146,8 +146,8 @@ Feature: Basic
      And executing "oc set probe dc/ruby-ex --readiness --get-url=http://:8080" succeeds
      And service "ruby-ex" rollout successfully within "1200" seconds
 
-    Then with up to "10" retries with wait period of "500ms" the "status code" of HTTP request to "/" of service "ruby-ex" in namespace "ruby" is equal to "200"
-     And with up to "10" retries with wait period of "500ms" the "body" of HTTP request to "/" of service "ruby-ex" in namespace "ruby" contains "Welcome to your Ruby application on OpenShift"
+    Then with up to "10" retries with wait period of "50ms" the "status code" of HTTP request to "/" of service "ruby-ex" in namespace "ruby" is equal to "200"
+     And with up to "10" retries with wait period of "50ms" the "body" of HTTP request to "/" of service "ruby-ex" in namespace "ruby" contains "Welcome to your Ruby application on OpenShift"
 
     When executing "oc delete project ruby" succeeds
     Then stdout should contain "project "ruby" deleted"

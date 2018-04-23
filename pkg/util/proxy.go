@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"github.com/asaskevich/govalidator"
 	"github.com/pkg/errors"
+	"net/url"
 	"os"
 	"strings"
 )
@@ -44,11 +45,11 @@ func NewProxyConfig(httpProxy string, httpsProxy string, noProxy string) (*Proxy
 			httpProxy = os.Getenv("HTTP_PROXY")
 		}
 	}
-
 	err := ValidateProxyURL(httpProxy)
 	if err != nil {
 		return nil, err
 	}
+	httpProxy = parseProxySpecialChar(httpProxy)
 
 	if httpsProxy == "" {
 		httpsProxy = os.Getenv("https_proxy")
@@ -56,11 +57,11 @@ func NewProxyConfig(httpProxy string, httpsProxy string, noProxy string) (*Proxy
 			httpsProxy = os.Getenv("HTTPS_PROXY")
 		}
 	}
-
 	err = ValidateProxyURL(httpsProxy)
 	if err != nil {
 		return nil, err
 	}
+	httpsProxy = parseProxySpecialChar(httpsProxy)
 
 	np := []string{}
 	np = append(np, defaultNoProxies...)
@@ -150,7 +151,7 @@ func (p *ProxyConfig) IsEnabled() bool {
 	return p.httpProxy != "" || p.httpsProxy != ""
 }
 
-// validateProxyURL validates that the specified proxyURL is valid
+// ValidateProxyURL validates that the specified proxyURL is valid
 func ValidateProxyURL(proxyUrl string) error {
 	if proxyUrl == "" {
 		return nil
@@ -160,4 +161,16 @@ func ValidateProxyURL(proxyUrl string) error {
 		return errors.Errorf("Proxy URL '%s' is not valid.", proxyUrl)
 	}
 	return nil
+}
+
+// parseProxySpecialChar parse the URI and convert special char to hex
+func parseProxySpecialChar(uri string) string {
+	u, _ := url.Parse(uri)
+	scheme := fmt.Sprintf("%s://", u.Scheme)
+	if strings.HasPrefix(uri, scheme) {
+		s := strings.Replace(uri, scheme, "", 1)
+		s = url.PathEscape(s)
+		return scheme + s
+	}
+	return ""
 }

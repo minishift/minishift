@@ -162,3 +162,20 @@ func Test_http_proxy_from_env_lowercase_precedence(t *testing.T) {
 	assert.Equal(t, "http://user:pass@someotherproxy.foo:1080", proxyConfig.httpProxy)
 	assert.Equal(t, "https://user:pass@someotherproxy.foo:1080", proxyConfig.httpsProxy)
 }
+
+func Test_parse_special_character_uri(t *testing.T) {
+	var urlList = []struct {
+		givenURI    string
+		expectedURI string
+	}{
+		{"", ""},
+		{"http://foo.com:3128", "http://foo.com:3128"},
+		{"http://user:F@oo!B#ar$@myserver:3128", "http://user:F@oo%21B%23ar$@myserver:3128"},
+		{"https://myuser:my#pass@foo.com:3128", "https://myuser:my%23pass@foo.com:3128"},
+		{"https://newuser:new(pas*)wrd@test.com:3128", "https://newuser:new%28pas%2A%29wrd@test.com:3128"},
+	}
+	for _, proxyUrl := range urlList {
+		got := parseProxySpecialChar(proxyUrl.givenURI)
+		assert.Equal(t, proxyUrl.expectedURI, got)
+	}
+}

@@ -63,7 +63,7 @@ func preflightChecksBeforeStartingHost() {
 			checkOriginRelease,
 			fmt.Sprintf("Checking if requested OpenShift version '%s' is valid", viper.GetString(configCmd.OpenshiftVersion.Name)),
 			configCmd.WarnCheckOpenShiftRelease.Name,
-			fmt.Sprintf("%s is not a valid OpenShift version", viper.GetString(configCmd.OpenshiftVersion.Name)),
+			"",
 		)
 	} else {
 		fmt.Printf("FAIL\n")
@@ -593,7 +593,13 @@ func validateOpenshiftVersion() bool {
 func checkOriginRelease() bool {
 	client := github.Client()
 	_, _, err := client.Repositories.GetReleaseByTag("openshift", "origin", viper.GetString(configCmd.OpenshiftVersion.Name))
+	if err != nil && github.IsRateLimitError(err) {
+		fmt.Println("\n   Hit github rate limit:", err)
+		return false
+	}
+
 	if err != nil {
+		fmt.Printf("%s is not a valid OpenShift version", viper.GetString(configCmd.OpenshiftVersion.Name))
 		return false
 	}
 	return true

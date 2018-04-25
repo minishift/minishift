@@ -326,7 +326,7 @@ function perform_release() {
 
 function perform_pr() {
   make prerelease synopsis_docs link_check_docs
-  MINISHIFT_VM_DRIVER=kvm make integration_pr || true
+  MINISHIFT_VM_DRIVER=kvm make integration_pr
   perform_artifacts_upload $1;
 }
 
@@ -338,8 +338,8 @@ function perform_master() {
 }
 
 function perform_nightly() {
-  make prerelease synopsis_docs link_check_docs
-  MINISHIFT_ISO_URL=$1 MINISHIFT_VM_DRIVER=kvm make integration_all
+#  make prerelease synopsis_docs link_check_docs
+  MINISHIFT_ISO_URL=$1 MINISHIFT_VM_DRIVER=kvm make integration GODOG_OPTS="-tags cmd-version" || true
 }
 
 if [[ "$UID" = 0 ]]; then
@@ -367,7 +367,7 @@ else
     perform_docs_publish "$REPO_OWNER" "$BRANCH" "minishift/docs/ondemand/$REPO_OWNER-$BRANCH";
   elif [[ "$JOB_NAME" = "minishift-release" ]]; then
     perform_release $RSYNC_PASSWORD;
-  elif [[ "$JOB_NAME" = "minishift-nightly-b2d" ]]; then
+  elif [[ "$JOB_NAME" = "minishift-pr" ]]; then
     perform_nightly "b2d";
   elif [[ "$JOB_NAME" = "minishift-nightly-minikube" ]]; then
     perform_nightly "minikube";

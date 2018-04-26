@@ -11,6 +11,7 @@ It covers the basic commands as well as advanced features like profiles, image c
 - xref:../using/image-caching.adoc#[Image Caching]
 - xref:../using/addons.adoc#[Add-ons]
 - xref:../using/host-folders.adoc#[Host Folders]
+- xref:../using/static-ip.adoc#[Assign Static IP Address]
 - xref:../using/docker-daemon.adoc#[{project} Docker Daemon]
 - xref:../using/experimental-features.adoc#[Experimental Features]
 

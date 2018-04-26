@@ -37,6 +37,8 @@ Topics:
         File: addons
       - Name: Host Folders
         File: host-folders
+      - Name: Assign Static IP Address
+        File: static-ip
       - Name: Minishift Docker Daemon
         File: docker-daemon
       - Name: Experimental Features

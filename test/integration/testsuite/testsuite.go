@@ -227,6 +227,9 @@ func FeatureContext(s *godog.Suite) {
 			return nil
 		})
 
+	s.Step(`^deleting minishift home directory "([^"]*)" succeeds$`, MinishiftInstance.deletingMinishiftHomeDirectorySucceeds)
+	s.Step(`^minishift home directory "([^"]*)" shouldn\'t exist$`, MinishiftInstance.minishiftHomeDirectoryShouldntExist)
+
 	s.BeforeSuite(func() {
 		testDir = setUp()
 		testResultDir = filepath.Join(testDir, "..", "test-results")

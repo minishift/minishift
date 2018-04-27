@@ -89,7 +89,7 @@ func FeatureContext(s *godog.Suite) {
 
 	// setting image caching operation
 	s.Step(`^image caching is (disabled|enabled)$`, MinishiftInstance.setImageCaching)
-	s.Step(`^image export completes with (\d+) images$`, MinishiftInstance.imageExportShouldComplete)
+	s.Step(`^image export completes with (\d+) images within (\d+) minutes$`, MinishiftInstance.imageExportShouldComplete)
 	s.Step(`^container image "(.*)" is cached$`, MinishiftInstance.imageShouldHaveCached)
 
 	// steps to execute `oc` commands

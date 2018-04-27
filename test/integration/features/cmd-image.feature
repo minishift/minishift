@@ -14,7 +14,7 @@ Feature: Basic image caching test
      Running this command requires an existing 'minishift' VM, but no VM is defined.
      """
      When executing "minishift start" succeeds
-      And image export completes with 3 images
+      And image export completes with 3 images within 20 minutes
       And container image "openshift\/origin-haproxy-router:v[0-9]+\.[0-9]+\.[0-9]+" is cached
       And container image "openshift\/origin-docker-registry:v[0-9]+\.[0-9]+\.[0-9]+" is cached
       And container image "openshift\/origin:v[0-9]+\.[0-9]+\.[0-9]+" is cached

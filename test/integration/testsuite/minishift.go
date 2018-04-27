@@ -228,9 +228,9 @@ func (m *Minishift) setImageCaching(operation string) error {
 	return m.ExecutingMinishiftCommand(fmt.Sprintf("config set image-caching %s", enabled))
 }
 
-func (m *Minishift) imageExportShouldComplete(noOfImages int) error {
+func (m *Minishift) imageExportShouldComplete(noOfImages, maximumTime int) error {
 	// poll till the output of the `minishift image list` shows number of cached images
-	timeout := time.NewTimer(20 * time.Minute)
+	timeout := time.NewTimer(time.Duration(maximumTime) * time.Minute)
 
 outerPollActive:
 	for {

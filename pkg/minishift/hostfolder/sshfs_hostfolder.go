@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/golang/glog"
-	miniConfig "github.com/minishift/minishift/pkg/minishift/config"
+	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/minishift/hostfolder/config"
 	"github.com/minishift/minishift/pkg/util"
@@ -44,10 +44,10 @@ var (
 
 type SSHFSHostFolder struct {
 	config       config.HostFolderConfig
-	globalConfig *miniConfig.GlobalConfigType
+	globalConfig *minishiftConfig.GlobalConfigType
 }
 
-func NewSSHFSHostFolder(config config.HostFolderConfig, globalConfig *miniConfig.GlobalConfigType) HostFolder {
+func NewSSHFSHostFolder(config config.HostFolderConfig, globalConfig *minishiftConfig.GlobalConfigType) HostFolder {
 	return &SSHFSHostFolder{config: config, globalConfig: globalConfig}
 }
 

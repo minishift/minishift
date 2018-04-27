@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"github.com/docker/machine/libmachine/drivers"
 
-	miniconfig "github.com/minishift/minishift/pkg/minishift/config"
+	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/minishift/hostfolder/config"
 	"github.com/minishift/minishift/pkg/minishift/network"
 	"github.com/minishift/minishift/pkg/util"
@@ -69,7 +69,7 @@ func (h *CifsHostFolder) Mount(driver drivers.Driver) error {
 		h.config.Options[config.UserName],
 		password)
 
-	if miniconfig.InstanceConfig.IsRHELBased {
+	if minishiftConfig.InstanceConfig.IsRHELBased {
 		cmd = fmt.Sprintf("%s,context=system_u:object_r:svirt_sandbox_file_t:s0", cmd)
 	}
 

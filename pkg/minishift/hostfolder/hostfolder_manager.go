@@ -24,7 +24,7 @@ import (
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/state"
 	"github.com/golang/glog"
-	miniConfig "github.com/minishift/minishift/pkg/minishift/config"
+	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/minishift/hostfolder/config"
 )
 
@@ -38,12 +38,12 @@ type MountInfo struct {
 
 // Manager is the central point for all operations around managing hostfolders.
 type Manager struct {
-	instanceConfig     *miniConfig.InstanceConfigType
-	allInstancesConfig *miniConfig.GlobalConfigType
+	instanceConfig     *minishiftConfig.InstanceConfigType
+	allInstancesConfig *minishiftConfig.GlobalConfigType
 }
 
 // NewAddOnManager creates a new add-on manager for the specified add-on directory.
-func NewManager(instanceConfig *miniConfig.InstanceConfigType, allInstancesConfig *miniConfig.GlobalConfigType) (*Manager, error) {
+func NewManager(instanceConfig *minishiftConfig.InstanceConfigType, allInstancesConfig *minishiftConfig.GlobalConfigType) (*Manager, error) {
 	return &Manager{
 		instanceConfig:     instanceConfig,
 		allInstancesConfig: allInstancesConfig}, nil
@@ -78,10 +78,10 @@ func (m *Manager) Remove(name string) error {
 		return fmt.Errorf("no host folder defined with name '%s'", name)
 	}
 
-	m.instanceConfig.HostFolders = m.removeFromHostFolders(name, miniConfig.InstanceConfig.HostFolders)
+	m.instanceConfig.HostFolders = m.removeFromHostFolders(name, minishiftConfig.InstanceConfig.HostFolders)
 	m.instanceConfig.Write()
 
-	m.allInstancesConfig.HostFolders = m.removeFromHostFolders(name, miniConfig.AllInstancesConfig.HostFolders)
+	m.allInstancesConfig.HostFolders = m.removeFromHostFolders(name, minishiftConfig.AllInstancesConfig.HostFolders)
 	m.allInstancesConfig.Write()
 
 	return nil
@@ -101,8 +101,8 @@ func (m *Manager) List(driver drivers.Driver) ([]MountInfo, error) {
 		return nil, errors.New("no host folders defined")
 	}
 
-	hostfolders := miniConfig.AllInstancesConfig.HostFolders
-	hostfolders = append(hostfolders, miniConfig.InstanceConfig.HostFolders...)
+	hostfolders := minishiftConfig.AllInstancesConfig.HostFolders
+	hostfolders = append(hostfolders, minishiftConfig.InstanceConfig.HostFolders...)
 	var mounts []MountInfo
 	for _, hostFolder := range hostfolders {
 
@@ -220,12 +220,12 @@ func (m *Manager) Umount(driver drivers.Driver, name string) error {
 }
 
 func (m *Manager) getHostFolder(name string) HostFolder {
-	config := m.getHostFolderConfig(name, miniConfig.InstanceConfig.HostFolders)
+	config := m.getHostFolderConfig(name, minishiftConfig.InstanceConfig.HostFolders)
 	if config != nil {
 		return m.hostFolderForConfig(config)
 	}
 
-	config = m.getHostFolderConfig(name, miniConfig.AllInstancesConfig.HostFolders)
+	config = m.getHostFolderConfig(name, minishiftConfig.AllInstancesConfig.HostFolders)
 	if config != nil {
 		return m.hostFolderForConfig(config)
 	}

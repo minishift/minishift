@@ -21,7 +21,7 @@ import (
 	"runtime"
 	"strings"
 
-	miniConfig "github.com/minishift/minishift/pkg/minishift/config"
+	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	hostFolderConfig "github.com/minishift/minishift/pkg/minishift/hostfolder"
 	"github.com/minishift/minishift/pkg/minishift/hostfolder/config"
 	"github.com/minishift/minishift/pkg/util"
@@ -145,7 +145,7 @@ func addSSHFSInteractive(manager *hostFolderConfig.Manager, name string) error {
 			config.MountPoint: mountPath,
 		},
 	}
-	hostFolder := hostFolderConfig.NewSSHFSHostFolder(config, miniConfig.AllInstancesConfig)
+	hostFolder := hostFolderConfig.NewSSHFSHostFolder(config, minishiftConfig.AllInstancesConfig)
 	manager.Add(hostFolder, !instanceOnly)
 
 	return nil
@@ -172,7 +172,7 @@ func addSSHFSNonInteractive(manager *hostFolderConfig.Manager, name string) erro
 			config.MountPoint: target,
 		},
 	}
-	hostFolder := hostFolderConfig.NewSSHFSHostFolder(config, miniConfig.AllInstancesConfig)
+	hostFolder := hostFolderConfig.NewSSHFSHostFolder(config, minishiftConfig.AllInstancesConfig)
 	manager.Add(hostFolder, !instanceOnly)
 
 	return nil

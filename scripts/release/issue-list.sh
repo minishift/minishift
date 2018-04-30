@@ -35,7 +35,7 @@ function print_content_with_nonempty_issues() {
 function milestone_issues()
 {
   # get the raw data
-  milestone_data="`curl -s https://api.github.com/repos/minishift/$repository/issues?milestone=$milestone\&state=closed`"
+  milestone_data="`curl -s https://api.github.com/repos/minishift/$repository/issues?per_page=100\&milestone=$milestone\&state=closed`"
 
   issue_list=`echo $milestone_data | jq '.[] | "- Issue [#" + (.number|tostring) + "](" + .url + ") ("
   + (reduce .labels[] as $item (""; (if $item.color == "84b6eb" then (. + $item.name[5:]) else . end)))

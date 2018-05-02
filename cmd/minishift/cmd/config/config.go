@@ -69,12 +69,7 @@ var (
 	SkipRegistryCheck = createConfigSetting("skip-registry-check", SetBool, nil, nil, true, nil)
 	PublicHostname    = createConfigSetting("public-hostname", SetString, nil, nil, true, nil)
 	RoutingSuffix     = createConfigSetting("routing-suffix", SetString, nil, nil, true, nil)
-	HostConfigDir     = createConfigSetting("host-config-dir", SetString, []setFn{validations.IsValidPath}, nil, true, nil)
-	HostVolumeDir     = createConfigSetting("host-volumes-dir", SetString, []setFn{validations.IsValidPath}, nil, true, nil)
-	HostDataDir       = createConfigSetting("host-data-dir", SetString, []setFn{validations.IsValidPath}, nil, true, nil)
-	HostPvDir         = createConfigSetting("host-pv-dir", SetString, []setFn{validations.IsValidPath}, nil, true, nil)
 	ServerLogLevel    = createConfigSetting("server-loglevel", SetInt, []setFn{validations.IsPositive}, nil, true, nil)
-	OpenshiftEnv      = createConfigSetting("openshift-env", nil, nil, nil, false, nil)
 
 	// future enabled flags
 	ExtraClusterUpFlags = createConfigSetting("extra-clusterup-flags", SetString, nil, nil, true, nil)

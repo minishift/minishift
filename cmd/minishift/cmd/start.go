@@ -109,19 +109,15 @@ var (
 	startCmd *cobra.Command
 
 	// Set default value for host data and config dir
-	hostConfigDirectory  = "/var/lib/minishift/openshift.local.config"
-	hostDataDirectory    = "/var/lib/minishift/hostdata"
-	hostVolumesDirectory = "/var/lib/minishift/openshift.local.volumes"
-	hostPvDirectory      = "/var/lib/minishift/openshift.local.pv"
+	dataDirectory = map[string]string{
+		"host-config-dir":  "/var/lib/minishift/openshift.local.config",
+		"host-data-dir":    "/var/lib/minishift/hostdata",
+		"host-volumes-dir": "/var/lib/minishift/openshift.local.volumes",
+		"host-pv-dir":      "/var/lib/minishift/openshift.local.pv",
+	}
 
 	// clusterUpFlagSet contains the command line switches which needs to be passed on to 'cluster up'
 	clusterUpFlagSet *flag.FlagSet
-
-	// minishiftToClusterUp is a mapping between flag names used in minishift CLI and flag name as passed to 'cluster up'
-	minishiftToClusterUp = map[string]string{
-		"openshift-env":     "env",
-		"openshift-version": "version",
-	}
 
 	// ocPath
 	ocPath = ""
@@ -174,7 +170,7 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	// Cache OC binary before starting the VM and perform oc command option check
 	requestedOpenShiftVersion := viper.GetString(configCmd.OpenshiftVersion.Name)
-	ocPath = cmdUtil.CacheOc(clusterup.DetermineOcVersion(requestedOpenShiftVersion))
+	ocPath = cmdUtil.CacheOc(requestedOpenShiftVersion)
 	preflightChecksForArtifacts()
 
 	setSubscriptionManagerParameters()
@@ -221,7 +217,6 @@ func runStart(cmd *cobra.Command, args []string) {
 			Ip:               ip,
 			Port:             constants.APIServerPort,
 			RoutingSuffix:    configCmd.GetDefaultRoutingSuffix(ip),
-			HostPvDir:        viper.GetString(configCmd.HostPvDir.Name),
 			User:             minishiftConstants.DefaultUser,
 			Project:          minishiftConstants.DefaultProject,
 			KubeConfigPath:   constants.KubeConfigPath,
@@ -268,12 +263,11 @@ func postClusterUp(hostVm *host.Host, clusterUpConfig *clusterup.ClusterUpConfig
 
 // getRequiredHostDirectories returns a list of directories we need to ensure exist on the VM.
 func getRequiredHostDirectories() []string {
-	return []string{
-		viper.GetString(configCmd.HostConfigDir.Name),
-		viper.GetString(configCmd.HostDataDir.Name),
-		viper.GetString(configCmd.HostVolumeDir.Name),
-		viper.GetString(configCmd.HostPvDir.Name),
+	var requiredDirectories []string
+	for _, value := range dataDirectory {
+		requiredDirectories = append(requiredDirectories, value)
 	}
+	return requiredDirectories
 }
 
 func handleProxies() *util.ProxyConfig {
@@ -581,6 +575,7 @@ func initStartFlags() *flag.FlagSet {
 	startFlagSet.AddFlag(insecureRegistryFlag)
 	startFlagSet.AddFlag(registryMirrorFlag)
 	startFlagSet.AddFlag(cmdUtil.AddOnEnvFlag)
+	startFlagSet.String(configCmd.OpenshiftVersion.Name, version.GetOpenShiftVersion(), fmt.Sprintf("The OpenShift version to run, eg. %s", version.GetOpenShiftVersion()))
 
 	if runtime.GOOS == "windows" {
 		startFlagSet.String(configCmd.NetworkDevice.Name, "", "Specify the network device to use for the IP address. Ignored if no IP address specified (Hyper-V only)")
@@ -607,13 +602,7 @@ func initClusterUpFlags() *flag.FlagSet {
 	clusterUpFlagSet.Bool(configCmd.SkipRegistryCheck.Name, false, "Skip the Docker daemon registry check.")
 	clusterUpFlagSet.String(configCmd.PublicHostname.Name, "", "Public hostname of the OpenShift cluster.")
 	clusterUpFlagSet.String(configCmd.RoutingSuffix.Name, "", "Default suffix for the server routes.")
-	clusterUpFlagSet.String(configCmd.HostConfigDir.Name, hostConfigDirectory, "Location of the OpenShift configuration on the Docker host.")
-	clusterUpFlagSet.String(configCmd.HostVolumeDir.Name, hostVolumesDirectory, "Location of the OpenShift volumes on the Docker host.")
-	clusterUpFlagSet.String(configCmd.HostDataDir.Name, hostDataDirectory, "Location of the OpenShift data on the Docker host. If not specified, etcd data will not be persisted on the host.")
-	clusterUpFlagSet.String(configCmd.HostPvDir.Name, hostPvDirectory, "Directory on Docker host for OpenShift persistent volumes")
 	clusterUpFlagSet.Int(configCmd.ServerLogLevel.Name, 0, "Log level for the OpenShift server.")
-	clusterUpFlagSet.StringSliceVarP(&openShiftEnv, configCmd.OpenshiftEnv.Name, "e", []string{}, "Specify key-value pairs of environment variables to set on the OpenShift container.")
-	clusterUpFlagSet.String(configCmd.OpenshiftVersion.Name, version.GetOpenShiftVersion(), fmt.Sprintf("The OpenShift version to run, eg. %s", version.GetOpenShiftVersion()))
 	clusterUpFlagSet.String(configCmd.NoProxyList.Name, "", "List of hosts or subnets for which no proxy should be used.")
 	clusterUpFlagSet.AddFlag(cmdUtil.HttpProxyFlag)
 	clusterUpFlagSet.AddFlag(cmdUtil.HttpsProxyFlag)
@@ -640,23 +629,20 @@ func determineClusterUpParameters(config *clusterup.ClusterUpConfig) map[string]
 	clusterUpParams := make(map[string]string)
 
 	// Set default value for host config, data and volumes
-	viper.Set(configCmd.HostConfigDir.Name, viper.GetString(configCmd.HostConfigDir.Name))
-	viper.Set(configCmd.HostDataDir.Name, viper.GetString(configCmd.HostDataDir.Name))
-	viper.Set(configCmd.HostVolumeDir.Name, viper.GetString(configCmd.HostVolumeDir.Name))
-	viper.Set(configCmd.HostPvDir.Name, viper.GetString(configCmd.HostPvDir.Name))
 	viper.Set(configCmd.RoutingSuffix.Name, config.RoutingSuffix)
 
 	clusterUpFlagSet.VisitAll(func(flag *flag.Flag) {
 		if viper.IsSet(flag.Name) {
 			value := viper.GetString(flag.Name)
 			key := flag.Name
-			_, exists := minishiftToClusterUp[key]
-			if exists {
-				key = minishiftToClusterUp[key]
-			}
 			clusterUpParams[key] = value
 		}
 	})
+
+	// This will only required to work with openshift < 3.10
+	for key, value := range dataDirectory {
+		clusterUpParams[key] = value
+	}
 
 	return clusterUpParams
 }

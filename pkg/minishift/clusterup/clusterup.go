@@ -17,7 +17,6 @@ limitations under the License.
 package clusterup
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 
@@ -27,16 +26,13 @@ import (
 
 	"os"
 	"strings"
-	"time"
 
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
-	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minikube/kubeconfig"
 	"github.com/minishift/minishift/pkg/minishift/addon/command"
 	"github.com/minishift/minishift/pkg/minishift/addon/manager"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/minishift/oc"
-	openshiftVersion "github.com/minishift/minishift/pkg/minishift/openshift/version"
 
 	"regexp"
 
@@ -56,7 +52,6 @@ type ClusterUpConfig struct {
 	Ip               string
 	Port             int
 	RoutingSuffix    string
-	HostPvDir        string
 	User             string
 	Project          string
 	KubeConfigPath   string
@@ -125,11 +120,6 @@ func PostClusterUp(clusterUpConfig *ClusterUpConfig, sshCommander provision.SSHC
 		return err
 	}
 
-	err = configurePersistentVolumes(clusterUpConfig.HostPvDir, addOnManager, sshCommander, ocRunner)
-	if err != nil {
-		return err
-	}
-
 	err = applyAddOns(addOnManager, clusterUpConfig.Ip, clusterUpConfig.RoutingSuffix, clusterUpConfig.AddonEnv, ocRunner, sshCommander)
 	if err != nil {
 		return err
@@ -146,19 +136,6 @@ func EnsureHostDirectoriesExist(host *host.Host, dirs []string) error {
 		return err
 	}
 	return nil
-}
-
-// DetermineOcVersion returns the oc version to use.
-// If the requested version is < v3.7.0 we will use oc binary v3.6.0 to provision the requested OpenShift version.
-// If the requested OpenShift version is >= v3.7.0, we align the oc version with the requested OpenShift version.
-// Check Minishift github issue #1417 for details.
-func DetermineOcVersion(requestedVersion string) string {
-	valid, _ := openshiftVersion.IsGreaterOrEqualToBaseVersion(requestedVersion, constants.BackwardIncompatibleOcVersion)
-	if !valid {
-		requestedVersion = constants.MinimumOcBinaryVersion
-	}
-
-	return requestedVersion
 }
 
 // GetExecutionContext creates an ExecutionContext used for variable interpolation during add-on application.
@@ -196,83 +173,6 @@ func GetExecutionContext(ip string, routingSuffix string, addOnEnv []string, ocR
 	}
 
 	return context, nil
-}
-
-// TODO - persistent volume creation should really be fixed upstream, aka 'cluster up'. See https://github.com/openshift/origin/issues/14076 (HF)
-// configurePersistentVolumes makes sure that the default persistent volumes created by 'cluster up' have the right permissions - see https://github.com/minishift/minishift/issues/856
-func configurePersistentVolumes(hostPvDir string, addOnManager *manager.AddOnManager, sshCommander provision.SSHCommander, ocRunner *oc.OcRunner) error {
-	// don't apply this if anyuid is not enabled
-	anyuid := addOnManager.Get("anyuid")
-	if anyuid == nil || !anyuid.IsEnabled() {
-		return nil
-	}
-
-	fmt.Print("-- Waiting for persistent volumes to be created ... ")
-
-	var out, err *bytes.Buffer
-
-	// poll the status of the persistent-volume-setup job to determine when the persitent volume creates is completed
-	timeout := time.NewTimer(5 * time.Minute)
-outerPollActive:
-	for {
-		select {
-		case <-timeout.C:
-			return errors.New("Timed out to poll active state of persistent-volume-setup job")
-		default:
-			out = new(bytes.Buffer)
-			err = new(bytes.Buffer)
-			exitStatus := ocRunner.Run("get job persistent-volume-setup -n default -o 'jsonpath={ .status.active }'", out, err)
-			if exitStatus != 0 || len(err.String()) > 0 {
-				return errors.New("Unable to monitor persistent volume creation")
-			}
-
-			if out.String() != "1" {
-				break outerPollActive
-			}
-
-			time.Sleep(1 * time.Second)
-		}
-	}
-
-	// poll the success status of persistent-volume-setup job.
-outerPollSuccess:
-	for {
-		select {
-		case <-timeout.C:
-			return errors.New("Timed out to poll success state of persistent-volume-setup job")
-		default:
-			out = new(bytes.Buffer)
-			err = new(bytes.Buffer)
-			exitStatus := ocRunner.Run("get job persistent-volume-setup -n default -o 'jsonpath={ .status.succeeded }'", out, err)
-
-			if exitStatus != 0 || len(err.String()) > 0 {
-				return errors.New("Persistent volume creation failed")
-			}
-
-			if out.String() == "1" {
-				break outerPollSuccess
-			}
-
-			time.Sleep(1 * time.Second)
-		}
-	}
-
-	cmd := fmt.Sprintf("sudo chmod -R 777 %s/pv*", hostPvDir)
-	sshCommander.SSHCommand(cmd)
-
-	// if we have SELinux enabled we need to sort things out there as well
-	// 'cluster up' does this as well, but we do it here as well to have all required actions collected in one
-	// place, instead of relying on some implicit knowledge on what 'cluster up does (HF)
-	cmd = fmt.Sprintf("sudo which chcon; if [ $? -eq 0 ]; then chcon -R -t svirt_sandbox_file_t %s/pv*; fi", hostPvDir)
-	sshCommander.SSHCommand(cmd)
-
-	cmd = fmt.Sprintf("sudo which restorecon; if [ $? -eq 0 ]; then restorecon -R %s/pv*; fi", hostPvDir)
-	sshCommander.SSHCommand(cmd)
-
-	fmt.Println("OK")
-	fmt.Println()
-
-	return nil
 }
 
 func applyAddOns(addOnManager *manager.AddOnManager, ip string, routingSuffix string, addonEnv []string, ocRunner *oc.OcRunner, sshCommander provision.SSHCommander) error {

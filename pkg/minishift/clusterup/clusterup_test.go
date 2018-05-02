@@ -24,21 +24,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_DetermineOcVersion(t *testing.T) {
-	var versionTests = []struct {
-		inputVersion string
-		outVersion   string
-	}{
-		{"v1.5.0", "v3.6.1"},
-		{"v3.6.0", "v3.6.1"},
-		{"v3.7.0", "v3.7.0"},
-	}
-	for _, version := range versionTests {
-		actualOcVersion := DetermineOcVersion(version.inputVersion)
-		assert.Equal(t, version.outVersion, actualOcVersion)
-	}
-}
-
 func Test_invalid_addon_variable_leads_to_error_in_context_creation(t *testing.T) {
 	context, err := GetExecutionContext("127.0.0.1", "foo.bar", []string{"FOOBAR"}, nil, nil)
 	assert.Error(t, err, "There should have been an error due to incorrect addon env variable.")

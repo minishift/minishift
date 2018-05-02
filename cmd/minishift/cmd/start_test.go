@@ -131,7 +131,7 @@ func (r *RecordingRunner) Output(command string, args ...string) ([]byte, error)
 
 var (
 	testConfig = &clusterup.ClusterUpConfig{
-		OpenShiftVersion: "v3.6.0",
+		OpenShiftVersion: "v3.9.0",
 		Ip:               "192.168.99.42",
 		OcPath:           "/home/john/.minishift/cache/oc/3.6.0/oc",
 		RoutingSuffix:    "192.168.99.42.nip.io",
@@ -154,98 +154,10 @@ func TestStartClusterUpNoFlags(t *testing.T) {
 		"cluster",
 		"up",
 		"--use-existing-config",
-		"--host-config-dir", hostConfigDirectory,
-		"--host-data-dir", hostDataDirectory,
-		"--host-pv-dir", hostPvDirectory,
-		"--host-volumes-dir", hostVolumesDirectory,
-		"--routing-suffix", testConfig.Ip + ".nip.io",
-	}
-	assertCommandLineArguments(expectedArguments, t)
-}
-
-func TestStartClusterUpWithOverrideHostConfigDirFlag(t *testing.T) {
-	setUp(t)
-	defer tearDown()
-
-	viper.Set("host-config-dir", "/var/tmp/foo")
-
-	clusterUpParams := determineClusterUpParameters(testConfig)
-	clusterup.ClusterUp(testConfig, clusterUpParams, testRunner)
-
-	expectedArguments := []string{
-		"cluster",
-		"up",
-		"--use-existing-config",
-		"--host-config-dir", "/var/tmp/foo",
-		"--host-data-dir", hostDataDirectory,
-		"--host-pv-dir", hostPvDirectory,
-		"--host-volumes-dir", hostVolumesDirectory,
-		"--routing-suffix", testConfig.Ip + ".nip.io",
-	}
-	assertCommandLineArguments(expectedArguments, t)
-}
-
-func TestStartClusterUpWithOverrideHostDataDirFlag(t *testing.T) {
-	setUp(t)
-	defer tearDown()
-
-	viper.Set("host-data-dir", "/var/tmp/foo")
-
-	clusterUpParams := determineClusterUpParameters(testConfig)
-	clusterup.ClusterUp(testConfig, clusterUpParams, testRunner)
-
-	expectedArguments := []string{
-		"cluster",
-		"up",
-		"--use-existing-config",
-		"--host-config-dir", hostConfigDirectory,
-		"--host-data-dir", "/var/tmp/foo",
-		"--host-pv-dir", hostPvDirectory,
-		"--host-volumes-dir", hostVolumesDirectory,
-		"--routing-suffix", testConfig.Ip + ".nip.io",
-	}
-	assertCommandLineArguments(expectedArguments, t)
-}
-
-func TestStartClusterUpWithOverrideHostVolumesDirFlag(t *testing.T) {
-	setUp(t)
-	defer tearDown()
-
-	viper.Set("host-volumes-dir", "/var/tmp/foo")
-
-	clusterUpParams := determineClusterUpParameters(testConfig)
-	clusterup.ClusterUp(testConfig, clusterUpParams, testRunner)
-
-	expectedArguments := []string{
-		"cluster",
-		"up",
-		"--use-existing-config",
-		"--host-config-dir", hostConfigDirectory,
-		"--host-data-dir", hostDataDirectory,
-		"--host-pv-dir", hostPvDirectory,
-		"--host-volumes-dir", "/var/tmp/foo",
-		"--routing-suffix", testConfig.Ip + ".nip.io",
-	}
-	assertCommandLineArguments(expectedArguments, t)
-}
-
-func TestStartClusterUpWithOverrideHostPvDirFlag(t *testing.T) {
-	setUp(t)
-	defer tearDown()
-
-	viper.Set("host-pv-dir", "/var/tmp/foo")
-
-	clusterUpParams := determineClusterUpParameters(testConfig)
-	clusterup.ClusterUp(testConfig, clusterUpParams, testRunner)
-
-	expectedArguments := []string{
-		"cluster",
-		"up",
-		"--use-existing-config",
-		"--host-config-dir", hostConfigDirectory,
-		"--host-data-dir", hostDataDirectory,
-		"--host-pv-dir", "/var/tmp/foo",
-		"--host-volumes-dir", hostVolumesDirectory,
+		"--host-config-dir", dataDirectory["host-config-dir"],
+		"--host-data-dir", dataDirectory["host-data-dir"],
+		"--host-pv-dir", dataDirectory["host-pv-dir"],
+		"--host-volumes-dir", dataDirectory["host-volumes-dir"],
 		"--routing-suffix", testConfig.Ip + ".nip.io",
 	}
 	assertCommandLineArguments(expectedArguments, t)
@@ -265,10 +177,10 @@ func TestStartClusterUpWithFlag(t *testing.T) {
 		"cluster",
 		"up",
 		"--use-existing-config",
-		"--host-config-dir", hostConfigDirectory,
-		"--host-data-dir", hostDataDirectory,
-		"--host-pv-dir", hostPvDirectory,
-		"--host-volumes-dir", hostVolumesDirectory,
+		"--host-config-dir", dataDirectory["host-config-dir"],
+		"--host-data-dir", dataDirectory["host-data-dir"],
+		"--host-pv-dir", dataDirectory["host-pv-dir"],
+		"--host-volumes-dir", dataDirectory["host-volumes-dir"],
 		"--public-hostname", "foobar",
 		"--routing-suffix", testConfig.Ip + ".nip.io",
 		"--skip-registry-check", "true"}
@@ -290,10 +202,10 @@ func TestClusterUpWithProxyFlag(t *testing.T) {
 		"cluster",
 		"up",
 		"--use-existing-config",
-		"--host-config-dir", hostConfigDirectory,
-		"--host-data-dir", hostDataDirectory,
-		"--host-pv-dir", hostPvDirectory,
-		"--host-volumes-dir", hostVolumesDirectory,
+		"--host-config-dir", dataDirectory["host-config-dir"],
+		"--host-data-dir", dataDirectory["host-data-dir"],
+		"--host-pv-dir", dataDirectory["host-pv-dir"],
+		"--host-volumes-dir", dataDirectory["host-volumes-dir"],
 		"--http-proxy", "http://localhost:3128",
 		"--https-proxy", "https://localhost:3128",
 		"--no-proxy", "10.0.0.1",
@@ -301,29 +213,6 @@ func TestClusterUpWithProxyFlag(t *testing.T) {
 	}
 	assertCommandLineArguments(expectedArguments, t)
 
-}
-
-func TestStartClusterUpWithOpenShiftEnv(t *testing.T) {
-	setUp(t)
-	defer tearDown()
-
-	viper.Set("openshift-env", "HTTP_PROXY=http://localhost:3128,HTTP_PROXY_USER=foo,HTTP_PROXY_PASS=bar")
-
-	clusterUpParams := determineClusterUpParameters(testConfig)
-	clusterup.ClusterUp(testConfig, clusterUpParams, testRunner)
-
-	expectedArguments := []string{
-		"cluster",
-		"up",
-		"--use-existing-config",
-		"--host-config-dir", hostConfigDirectory,
-		"--host-data-dir", hostDataDirectory,
-		"--host-pv-dir", hostPvDirectory,
-		"--host-volumes-dir", hostVolumesDirectory,
-		"--env", "HTTP_PROXY=http://localhost:3128,HTTP_PROXY_USER=foo,HTTP_PROXY_PASS=bar",
-		"--routing-suffix", testConfig.Ip + ".nip.io",
-	}
-	assertCommandLineArguments(expectedArguments, t)
 }
 
 func TestCheckMemorySize(t *testing.T) {
@@ -451,12 +340,6 @@ func setUp(t *testing.T) {
 	constants.Minipath = testDir
 
 	testRunner = &RecordingRunner{}
-
-	// Set default value for host config and data
-	viper.Set("host-config-dir", hostConfigDirectory)
-	viper.Set("host-data-dir", hostDataDirectory)
-	viper.Set("host-volumes-dir", hostVolumesDirectory)
-	viper.Set("host-pv-dir", hostPvDirectory)
 
 	provision.SetDetector(&tests.MockDetector{&tests.MockProvisioner{Provisioned: true}})
 

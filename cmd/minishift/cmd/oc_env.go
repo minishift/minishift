@@ -30,7 +30,6 @@ import (
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minishift/cache"
-	"github.com/minishift/minishift/pkg/minishift/clusterup"
 	"github.com/minishift/minishift/pkg/minishift/config"
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
@@ -132,8 +131,7 @@ func init() {
 // Because InstanceConfig.OcPath is set in minishift start or profile set. So when oc-env is called with --profile
 // it points to last minishift start or profile set.
 func getOcPath() string {
-	requestedOpenShiftVersion := viper.GetString(configCmd.OpenshiftVersion.Name)
-	ocVersion := clusterup.DetermineOcVersion(requestedOpenShiftVersion)
+	ocVersion := viper.GetString(configCmd.OpenshiftVersion.Name)
 	ocBinary := cache.Oc{
 		OpenShiftVersion:  ocVersion,
 		MinishiftCacheDir: state.InstanceDirs.Cache,

@@ -62,10 +62,6 @@ func determineInitialClusterupParameters() []string {
 	clusterUpFlagSet.VisitAll(func(flag *flag.Flag) {
 		if viper.IsSet(flag.Name) {
 			key := flag.Name
-			_, exists := minishiftToClusterUp[key]
-			if exists {
-				key = minishiftToClusterUp[key]
-			}
 			clusterUpParams = append(clusterUpParams, key)
 		}
 	})

@@ -1,4 +1,4 @@
-@cmd-openshift @command @openshift 
+@cmd-openshift @command @openshift
 Feature: Openshift commands
 Commands "minishift openshift [sub-command]" are used for interaction with Openshift
 cluster in VM provided by Minishift.
@@ -103,8 +103,8 @@ cluster in VM provided by Minishift.
 
   Scenario: Deployed Node.js application is available
       When service "nodejs-ex" rollout successfully within "1200" seconds
-      Then with up to "5" retries with wait period of "1000ms" the "body" of HTTP request to "/" of service "nodejs-ex" in namespace "myproject" contains "Welcome to your Node.js application on OpenShift"
-       And with up to "5" retries with wait period of "1000ms" the "status code" of HTTP request to "/" of service "nodejs-ex" in namespace "myproject" is equal to "200"
+      Then with up to "30" retries with wait period of "1000ms" the "body" of HTTP request to "/" of service "nodejs-ex" in namespace "myproject" contains "Welcome to your Node.js application on OpenShift"
+       And with up to "30" retries with wait period of "1000ms" the "status code" of HTTP request to "/" of service "nodejs-ex" in namespace "myproject" is equal to "200"
 
   Scenario: Seeing configuration of OpenShift master
   Minishift openshift config view prints YAML configuration of OpenShift cluster.

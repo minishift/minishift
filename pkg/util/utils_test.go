@@ -19,8 +19,10 @@ package util
 import (
 	"fmt"
 	"os"
+	"os/user"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
 
@@ -217,8 +219,9 @@ func TestWritableDirectory(t *testing.T) {
 }
 
 func TestNonWritableDirectory(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("Skipping as Appveyor CI is running in administrator mode")
+	if isAppVeyorUser() ||
+		IsAdministrativeUser() {
+		t.Skip("Skipping as CI runs as root or administrator")
 	}
 
 	testDir, err := ioutil.TempDir("", "minishift-test-")
@@ -227,4 +230,11 @@ func TestNonWritableDirectory(t *testing.T) {
 
 	os.Chmod(testDir, 0400) // make dir read-only
 	assert.False(t, IsDirectoryWritable(testDir))
+
+}
+
+func isAppVeyorUser() bool {
+	// Checking for $env:APPVEYOR does not work !
+	u, _ := user.Current()
+	return strings.Contains(u.Username, "appveyor")
 }

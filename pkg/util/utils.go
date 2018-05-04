@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/user"
 	"path/filepath"
 	"strings"
 	"time"
@@ -194,4 +195,15 @@ func IsDirectoryWritable(path string) bool {
 	defer os.Remove(tmpFilePath)
 
 	return true
+}
+
+// IsAdministrativeUser returns true when user is either root or
+// Administrator
+func IsAdministrativeUser() bool {
+	u, _ := user.Current()
+	username := strings.ToLower(u.Username)
+
+	return u.Uid == "1" ||
+		username == "root" ||
+		strings.Contains(username, "administrator")
 }

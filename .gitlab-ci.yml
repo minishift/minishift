@@ -1,5 +1,5 @@
 build:
-  image: registry.centos.org/gbraad/minishift-build:latest
+  image: registry.centos.org/minishift/minishift-build:latest
   tags:
     - docker
   script:

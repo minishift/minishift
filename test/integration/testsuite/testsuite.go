@@ -109,6 +109,12 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^scenario variable "(.*)" should not be empty$`,
 		variableShouldNotBeEmpty)
 
+	// steps for set and unset environment variable
+	s.Step(`^setting up environment variable "(.*)" with value "(.*)" succeeds$`,
+		setEnvironmentVariable)
+	s.Step(`^unset environment variable "(.*)" succeeds$`,
+		unSetEnvironmentVariable)
+
 	// steps for rollout check
 	s.Step(`^services? "([^"]*)" rollout successfully$`,
 		MinishiftInstance.rolloutServicesSuccessfully)
@@ -777,4 +783,12 @@ func directoryShouldntExist(dir string) error {
 	}
 
 	return fmt.Errorf("Directory %s exists", dir)
+}
+
+func setEnvironmentVariable(key string, value string) error {
+	return os.Setenv(key, value)
+}
+
+func unSetEnvironmentVariable(key string) error {
+	return os.Unsetenv(key)
 }

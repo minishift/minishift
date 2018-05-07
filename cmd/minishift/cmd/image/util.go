@@ -129,7 +129,7 @@ func toStringSlice(interfaceSlice []interface{}) []string {
 	return slice
 }
 
-func getConfiguredCachedImages(minishiftConfig config.MinishiftConfig) []string {
+func GetConfiguredCachedImages(minishiftConfig config.MinishiftConfig) []string {
 	var cacheImages []string
 	if minishiftConfig[config.CacheImages.Name] == nil {
 		cacheImages = []string{}
@@ -137,14 +137,6 @@ func getConfiguredCachedImages(minishiftConfig config.MinishiftConfig) []string 
 		cacheImages = toStringSlice(minishiftConfig[config.CacheImages.Name].([]interface{}))
 	}
 	return cacheImages
-}
-
-func getMinishiftConfig() config.MinishiftConfig {
-	minishiftConfig, err := config.ReadConfig()
-	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot read the Minishift configuration: %s", err.Error()))
-	}
-	return minishiftConfig
 }
 
 func deleteCachedImages(cacheDir string) error {

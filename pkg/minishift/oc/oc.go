@@ -174,8 +174,8 @@ func parseOcHelpCommand(cmdOut []byte) []string {
 	ocOptions := []string{}
 	var openshiftVersion string
 	ocOptionRegex := regexp.MustCompile(`(?s)Options(.*)OpenShift images`)
-	if instanceState.InstanceConfig != nil {
-		openshiftVersion = instanceState.InstanceConfig.OpenshiftVersion
+	if instanceState.InstanceStateConfig != nil {
+		openshiftVersion = instanceState.InstanceStateConfig.OpenshiftVersion
 	}
 	valid, _ := openshiftVersionCheck.IsGreaterOrEqualToBaseVersion(openshiftVersion, constants.RefactoredOcVersion)
 	if valid {

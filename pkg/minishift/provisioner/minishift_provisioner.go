@@ -74,8 +74,8 @@ func (provisioner *MinishiftProvisioner) SetHostname(hostname string) error {
 
 func (provisioner *MinishiftProvisioner) GetRedhatRelease() bool {
 	// Add ISO (RHEL, CentOS, ...etc.) type detail to config
-	minishiftConfig.InstanceConfig.IsRHELBased = true
-	minishiftConfig.InstanceConfig.Write()
+	minishiftConfig.InstanceStateConfig.IsRHELBased = true
+	minishiftConfig.InstanceStateConfig.Write()
 
 	if provisioner.OsReleaseInfo.ID == "rhel" {
 		return true

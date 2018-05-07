@@ -33,10 +33,6 @@ const (
 	DefaultRoutingSuffix = ".nip.io"
 )
 
-type configFile interface {
-	io.ReadWriter
-}
-
 type setFn func(string, string) error
 
 type MinishiftConfig map[string]interface{}

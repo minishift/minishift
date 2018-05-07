@@ -384,8 +384,8 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 		RemoteSSHUser:         viper.GetString(configCmd.RemoteSSHUser.Name),
 		SSHKeyToConnectRemote: viper.GetString(configCmd.SSHKeyToConnectRemote.Name),
 	}
-	minishiftConfig.InstanceConfig.VMDriver = machineConfig.VMDriver
-	minishiftConfig.InstanceConfig.Write()
+	minishiftConfig.InstanceStateConfig.VMDriver = machineConfig.VMDriver
+	minishiftConfig.InstanceStateConfig.Write()
 
 	fmt.Printf(" using '%s' hypervisor ...\n", machineConfig.VMDriver)
 	var hostVm *host.Host
@@ -483,7 +483,7 @@ func importContainerImages(driver drivers.Driver, api libmachine.API, openShiftV
 		return
 	}
 
-	images := viper.GetStringSlice(configCmd.CacheImages.Name)
+	images := minishiftConfig.InstanceConfig.CacheImages
 	for _, coreImage := range image.GetOpenShiftImageNames(openShiftVersion) {
 		if !stringUtils.Contains(images, coreImage) {
 			images = append(images, coreImage)
@@ -522,7 +522,7 @@ func exportContainerImages(driver drivers.Driver, api libmachine.API, version st
 		return
 	}
 
-	images := viper.GetStringSlice(configCmd.CacheImages.Name)
+	images := minishiftConfig.InstanceConfig.CacheImages
 	for _, coreImage := range image.GetOpenShiftImageNames(version) {
 		if !stringUtils.Contains(images, coreImage) {
 			images = append(images, coreImage)

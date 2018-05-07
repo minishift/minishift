@@ -291,10 +291,10 @@ func getContainerConfigFile(target string) string {
 func getOpenshiftVersion() string {
 	var openshiftVersion string
 
-	instanceState.InstanceConfig, _ = instanceState.NewInstanceConfig(minishiftConstants.GetInstanceConfigPath())
+	instanceState.InstanceStateConfig, _ = instanceState.NewInstanceStateConfig(minishiftConstants.GetInstanceStateConfigPath())
 
-	if instanceState.InstanceConfig != nil {
-		openshiftVersion = instanceState.InstanceConfig.OpenshiftVersion
+	if instanceState.InstanceStateConfig != nil {
+		openshiftVersion = instanceState.InstanceStateConfig.OpenshiftVersion
 	}
 	return openshiftVersion
 }

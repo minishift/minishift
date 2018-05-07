@@ -135,6 +135,6 @@ func setup(t *testing.T) string {
 	// Need to create since Minishift config get created in root command
 	os.Mkdir(filepath.Join(testDir, "machines"), 0755)
 	instanceConfigPath := filepath.Join(testDir, "machines", "test.json")
-	minishiftConfig.InstanceConfig, err = minishiftConfig.NewInstanceConfig(instanceConfigPath)
+	minishiftConfig.InstanceStateConfig, err = minishiftConfig.NewInstanceStateConfig(instanceConfigPath)
 	return testDir
 }

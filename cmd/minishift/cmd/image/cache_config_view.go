@@ -20,6 +20,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"fmt"
+	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	"sort"
 	"strings"
 )
@@ -34,8 +35,7 @@ var (
 )
 
 func viewConfiguredImages(cmd *cobra.Command, args []string) {
-	minishiftConfig := getMinishiftConfig()
-	cacheImages := getConfiguredCachedImages(minishiftConfig)
+	cacheImages := minishiftConfig.InstanceConfig.CacheImages
 
 	if len(cacheImages) == 0 {
 		return

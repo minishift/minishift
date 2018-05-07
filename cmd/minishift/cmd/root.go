@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
 	goflag "flag"
 	"fmt"
 	"io/ioutil"
@@ -25,8 +26,6 @@ import (
 	"reflect"
 	"strings"
 
-	"encoding/json"
-
 	"github.com/docker/machine/libmachine/log"
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/cmd/minishift/cmd/addon"
@@ -34,6 +33,7 @@ import (
 	"github.com/minishift/minishift/cmd/minishift/cmd/dns"
 	hostfolderCmd "github.com/minishift/minishift/cmd/minishift/cmd/hostfolder"
 	"github.com/minishift/minishift/cmd/minishift/cmd/image"
+	cmdImage "github.com/minishift/minishift/cmd/minishift/cmd/image"
 	cmdOpenshift "github.com/minishift/minishift/cmd/minishift/cmd/openshift"
 	cmdProfile "github.com/minishift/minishift/cmd/minishift/cmd/profile"
 	cmdUtil "github.com/minishift/minishift/cmd/minishift/cmd/util"
@@ -108,6 +108,17 @@ var RootCmd = &cobra.Command{
 		// creating all directories for minishift run
 		createMinishiftDirs(state.InstanceDirs)
 
+		// Ensure the viper config file exists.
+		ensureConfigFileExists(constants.ConfigFile)
+
+		// Read the config file and get the details about existing image cache.
+		// This should be removed after 2-3 release of minishift.
+		cfg, err := configCmd.ReadConfig()
+		if err != nil {
+			atexit.ExitWithMessage(1, err.Error())
+		}
+		cacheImages := cmdImage.GetConfiguredCachedImages(cfg)
+
 		// If AllInstanceConfig is not defined we should define it now.
 		if minishiftConfig.AllInstancesConfig == nil {
 			ensureAllInstanceConfigPath(constants.AllInstanceConfigPath)
@@ -117,12 +128,46 @@ var RootCmd = &cobra.Command{
 			}
 		}
 
-		ensureConfigFileExists(constants.ConfigFile)
+		// If older instance state config file exists, rename the file else create a new file
+		_, err = os.Stat(minishiftConstants.GetInstanceStateConfigOldPath())
+		if err == nil {
+			if err := os.Rename(minishiftConstants.GetInstanceStateConfigOldPath(), minishiftConstants.GetInstanceStateConfigPath()); err != nil {
+				atexit.ExitWithMessage(1, fmt.Sprintf("Error moving old state config to new one: %s", err.Error()))
+			}
+		}
 
-		// Create MACHINE_NAME.json
+		minishiftConfig.InstanceStateConfig, err = minishiftConfig.NewInstanceStateConfig(minishiftConstants.GetInstanceStateConfigPath())
+		if err != nil {
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error creating config for VM: %s", err.Error()))
+		}
+
+		// Create MACHINE_NAME.json (machine config file)
 		minishiftConfig.InstanceConfig, err = minishiftConfig.NewInstanceConfig(minishiftConstants.GetInstanceConfigPath())
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error creating config for VM: %s", err.Error()))
+		}
+
+		// If hostfolder config exists for an instance then copy it to the new instance state config.
+		// This change should be removed after few releases.
+		hostfolder := minishiftConfig.InstanceStateConfig.HostFolders
+		if len(hostfolder) != 0 {
+			minishiftConfig.InstanceConfig.HostFolders = hostfolder
+			if err != minishiftConfig.InstanceConfig.Write() {
+				atexit.ExitWithMessage(1, fmt.Sprintf("Error coping existing hostfolder to new instance config: %s", err.Error()))
+			}
+		}
+
+		// If cache-config exists then copy it to the new instance config.
+		// This should be removed after 2-3 release of Minishift.
+		if len(cacheImages) != 0 {
+			minishiftConfig.InstanceConfig.CacheImages = cacheImages
+			if err != minishiftConfig.InstanceConfig.Write() {
+				atexit.ExitWithMessage(1, fmt.Sprintf("Error coping existing cache images to new instance config: %s", err.Error()))
+			}
+			delete(cfg, "cache-images")
+			if err != configCmd.WriteConfig(cfg) {
+				atexit.ExitWithMessage(1, fmt.Sprintf("Error removing the cache-images entry from older config %s: %s", constants.ConfigFile, err.Error()))
+			}
 		}
 
 		if isAddonInstallRequired {

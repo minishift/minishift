@@ -17,10 +17,11 @@ limitations under the License.
 package image
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
-	"fmt"
-	"github.com/minishift/minishift/cmd/minishift/cmd/config"
+	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/minishift/minishift/pkg/util/strings"
 )
@@ -45,15 +46,16 @@ func removeConfiguredImage(cmd *cobra.Command, args []string) {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Invalid image name: %v", err))
 	}
 
-	minishiftConfig := getMinishiftConfig()
-	cacheImages := getConfiguredCachedImages(minishiftConfig)
+	cacheImages := minishiftConfig.InstanceConfig.CacheImages
 
 	for _, image := range normalizedImageNames {
 		cacheImages = strings.Remove(cacheImages, image)
 	}
 
-	minishiftConfig[config.CacheImages.Name] = cacheImages
-	config.WriteConfig(minishiftConfig)
+	minishiftConfig.InstanceConfig.CacheImages = cacheImages
+	if err := minishiftConfig.InstanceConfig.Write(); err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error writing the cache image to config: %v", err))
+	}
 }
 
 func init() {

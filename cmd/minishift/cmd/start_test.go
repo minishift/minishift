@@ -334,7 +334,7 @@ func setUp(t *testing.T) {
 
 	machinesDirPath := filepath.Join(testDir, "machines")
 	os.Mkdir(machinesDirPath, 0755)
-	instanceState.InstanceConfig, err = instanceState.NewInstanceConfig(filepath.Join(machinesDirPath, "fake-machines.json"))
+	instanceState.InstanceStateConfig, err = instanceState.NewInstanceStateConfig(filepath.Join(machinesDirPath, "fake-machines.json"))
 
 	assert.NoError(t, err, "Error getting new instance config")
 	constants.Minipath = testDir

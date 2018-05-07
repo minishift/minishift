@@ -57,7 +57,17 @@ func GetOpenshiftImageName(openshiftVersion string) string {
 	return fmt.Sprintf("openshift/origin:%s", openshiftVersion)
 }
 
+// GetInstanceStateConfigPath return the path of instance config json file
+func GetInstanceStateConfigPath() string {
+	return filepath.Join(constants.Minipath, "machines", constants.MachineName+"-state.json")
+}
+
+// GetInstanceStateConfigOldPath return the old path of instance config to make new binary backward compatible
+func GetInstanceStateConfigOldPath() string {
+	return filepath.Join(constants.Minipath, "machines", constants.MachineName+".json")
+}
+
 // GetInstanceConfigPath return the path of instance config json file
 func GetInstanceConfigPath() string {
-	return filepath.Join(constants.Minipath, "machines", constants.MachineName+".json")
+	return filepath.Join(constants.Minipath, "config", constants.MachineName+".json")
 }

@@ -171,7 +171,7 @@ This testaddon is having variable TEST with foo value
 `
 	var err error
 	tmpMinishiftHomeDir := cli.SetupTmpMinishiftHome(t)
-	instanceState.InstanceConfig, err = instanceState.NewInstanceConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
+	instanceState.InstanceStateConfig, err = instanceState.NewInstanceStateConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
 	assert.NoError(t, err, "Unexpected error creating instance config in '%s'", tmpMinishiftHomeDir)
 	path := filepath.Join(basepath, "..", "..", "..", "..", "test", "testdata", "testaddons")
 	manager, err := NewAddOnManager(path, make(map[string]*addon.AddOnConfig))

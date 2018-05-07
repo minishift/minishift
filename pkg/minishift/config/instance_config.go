@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2017 Red Hat, Inc.
+Copyright (C) 2018 Red Hat, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,23 +26,15 @@ import (
 var InstanceConfig *InstanceConfigType
 
 type InstanceConfigType struct {
-	FilePath                  string `json:"-"`
-	OcPath                    string // minishift state
-	IsRegistered              bool   // minishift state
-	IsRHELBased               bool   // minishift state
-	SupportsNetworkAssignment bool   // minishift state
-	SupportsDnsmasqServer     bool   // minishift state
-	OpenshiftVersion          string // minishift state
-
+	FilePath    string   `json:"-"`
+	CacheImages []string `json:"cache-images"`
 	HostFolders []config.HostFolderConfig
-
-	VMDriver string // general config
 }
 
 // Create new object with data if file exists or
 // Create json file and return object if doesn't exists
 func NewInstanceConfig(path string) (*InstanceConfigType, error) {
-	cfg := &InstanceConfigType{HostFolders: []config.HostFolderConfig{}}
+	cfg := &InstanceConfigType{CacheImages: []string{}, HostFolders: []config.HostFolderConfig{}}
 	cfg.FilePath = path
 
 	// Check json file existence

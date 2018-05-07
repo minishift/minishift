@@ -78,7 +78,7 @@ func runApplyAddon(cmd *cobra.Command, args []string) {
 
 	routingSuffix := determineRoutingSuffix(host.Driver)
 	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
-	ocRunner, err := oc.NewOcRunner(minishiftConfig.InstanceConfig.OcPath, constants.KubeConfigPath)
+	ocRunner, err := oc.NewOcRunner(minishiftConfig.InstanceStateConfig.OcPath, constants.KubeConfigPath)
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error applying the add-on: %s", err.Error()))
 	}

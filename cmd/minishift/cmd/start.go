@@ -383,8 +383,8 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 		RemoteSSHUser:         viper.GetString(configCmd.RemoteSSHUser.Name),
 		SSHKeyToConnectRemote: viper.GetString(configCmd.SSHKeyToConnectRemote.Name),
 	}
-	minishiftConfig.InstanceConfig.VMDriver = machineConfig.VMDriver
-	minishiftConfig.InstanceConfig.Write()
+	minishiftConfig.InstanceStateConfig.VMDriver = machineConfig.VMDriver
+	minishiftConfig.InstanceStateConfig.Write()
 
 	fmt.Printf(" using '%s' hypervisor ...\n", machineConfig.VMDriver)
 	var hostVm *host.Host
@@ -447,7 +447,7 @@ func configureNetworkSettings() {
 }
 
 func autoMountHostFolders(driver drivers.Driver) {
-	hostFolderManager, err := hostfolder.NewManager(minishiftConfig.InstanceConfig, minishiftConfig.AllInstancesConfig)
+	hostFolderManager, err := hostfolder.NewManager(minishiftConfig.InstanceStateConfig, minishiftConfig.AllInstancesConfig)
 	if err != nil {
 		atexit.ExitWithMessage(1, err.Error())
 	}

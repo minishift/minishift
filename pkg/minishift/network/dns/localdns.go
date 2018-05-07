@@ -40,8 +40,8 @@ type serviceCommander interface {
 // dnsmasq server from the image
 // Should be using Instance state. See #1796
 func checkSupportForDnsmasqServer() bool {
-	if minishiftConfig.InstanceConfig.IsRHELBased &&
-		minishiftConfig.InstanceConfig.SupportsDnsmasqServer {
+	if minishiftConfig.InstanceStateConfig.IsRHELBased &&
+		minishiftConfig.InstanceStateConfig.SupportsDnsmasqServer {
 		return true
 	}
 	return false

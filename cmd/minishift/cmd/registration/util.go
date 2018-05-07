@@ -33,12 +33,12 @@ var (
 )
 
 func isRegistered() bool {
-	return minishiftConfig.InstanceConfig.IsRegistered
+	return minishiftConfig.InstanceStateConfig.IsRegistered
 }
 
 func setRegistered(state bool) {
-	minishiftConfig.InstanceConfig.IsRegistered = state
-	minishiftConfig.InstanceConfig.Write()
+	minishiftConfig.InstanceStateConfig.IsRegistered = state
+	minishiftConfig.InstanceStateConfig.Write()
 }
 
 func RegisterHost(libMachineClient *libmachine.Client) {

@@ -30,7 +30,7 @@ import (
 func Test_host_folder_name_required(t *testing.T) {
 	var err error
 	tmpMinishiftHomeDir := cli.SetupTmpMinishiftHome(t)
-	config.InstanceConfig, err = config.NewInstanceConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
+	config.InstanceStateConfig, err = config.NewInstanceStateConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
 	config.AllInstancesConfig, err = config.NewAllInstancesConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
 	assert.NoError(t, err, "Unexpected error setting instance config")
 
@@ -45,7 +45,7 @@ func Test_host_folder_name_required(t *testing.T) {
 func Test_source_required(t *testing.T) {
 	var err error
 	tmpMinishiftHomeDir := cli.SetupTmpMinishiftHome(t)
-	config.InstanceConfig, err = config.NewInstanceConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
+	config.InstanceStateConfig, err = config.NewInstanceStateConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
 	config.AllInstancesConfig, err = config.NewAllInstancesConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
 	assert.NoError(t, err, "Unexpected error setting instance config")
 
@@ -60,7 +60,7 @@ func Test_source_required(t *testing.T) {
 func Test_target_required(t *testing.T) {
 	var err error
 	tmpMinishiftHomeDir := cli.SetupTmpMinishiftHome(t)
-	config.InstanceConfig, err = config.NewInstanceConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
+	config.InstanceStateConfig, err = config.NewInstanceStateConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
 	config.AllInstancesConfig, err = config.NewAllInstancesConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
 	assert.NoError(t, err, "Unexpected error setting instance config")
 
@@ -76,7 +76,7 @@ func Test_target_required(t *testing.T) {
 func Test_username_required(t *testing.T) {
 	var err error
 	tmpMinishiftHomeDir := cli.SetupTmpMinishiftHome(t)
-	config.InstanceConfig, err = config.NewInstanceConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
+	config.InstanceStateConfig, err = config.NewInstanceStateConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
 	config.AllInstancesConfig, err = config.NewAllInstancesConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
 	assert.NoError(t, err, "Unexpected error setting instance config")
 
@@ -93,7 +93,7 @@ func Test_username_required(t *testing.T) {
 func Test_password_required(t *testing.T) {
 	var err error
 	tmpMinishiftHomeDir := cli.SetupTmpMinishiftHome(t)
-	config.InstanceConfig, err = config.NewInstanceConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
+	config.InstanceStateConfig, err = config.NewInstanceStateConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
 	config.AllInstancesConfig, err = config.NewAllInstancesConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
 	assert.NoError(t, err, "Unexpected error setting instance config")
 
@@ -111,7 +111,7 @@ func Test_password_required(t *testing.T) {
 func Test_domain_required(t *testing.T) {
 	var err error
 	tmpMinishiftHomeDir := cli.SetupTmpMinishiftHome(t)
-	config.InstanceConfig, err = config.NewInstanceConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
+	config.InstanceStateConfig, err = config.NewInstanceStateConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
 	config.AllInstancesConfig, err = config.NewAllInstancesConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
 	assert.NoError(t, err, "Unexpected error setting instance config")
 
@@ -129,7 +129,7 @@ func Test_domain_required(t *testing.T) {
 func Test_unknown_host_folder_type_exits(t *testing.T) {
 	var err error
 	tmpMinishiftHomeDir := cli.SetupTmpMinishiftHome(t)
-	config.InstanceConfig, err = config.NewInstanceConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
+	config.InstanceStateConfig, err = config.NewInstanceStateConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
 	config.AllInstancesConfig, err = config.NewAllInstancesConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
 	assert.NoError(t, err, "Unexpected error setting instance config")
 

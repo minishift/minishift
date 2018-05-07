@@ -49,13 +49,13 @@ func CacheOc(openShiftVersion string) string {
 	}
 
 	// Update MACHINE_NAME.json for oc path
-	minishiftConfig.InstanceConfig.OcPath = filepath.Join(ocBinary.GetCacheFilepath(), constants.OC_BINARY_NAME)
-	minishiftConfig.InstanceConfig.OpenshiftVersion = openShiftVersion
-	if err := minishiftConfig.InstanceConfig.Write(); err != nil {
+	minishiftConfig.InstanceStateConfig.OcPath = filepath.Join(ocBinary.GetCacheFilepath(), constants.OC_BINARY_NAME)
+	minishiftConfig.InstanceStateConfig.OpenshiftVersion = openShiftVersion
+	if err := minishiftConfig.InstanceStateConfig.Write(); err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error updating oc path in config of VM: %v", err))
 	}
 
-	return minishiftConfig.InstanceConfig.OcPath
+	return minishiftConfig.InstanceStateConfig.OcPath
 }
 
 func SetOcContext(profileName string) error {
@@ -104,7 +104,7 @@ func SetOcContext(profileName string) error {
 
 //RemoveCurrentContext removes the current context from `machinename_kubeconfig`
 func RemoveCurrentContext() error {
-	ocPath := minishiftConfig.InstanceConfig.OcPath
+	ocPath := minishiftConfig.InstanceStateConfig.OcPath
 	cmd := "config unset current-context"
 	errBuffer := new(bytes.Buffer)
 
@@ -135,7 +135,7 @@ func GetOcPathForProfile(profileName string) (error, string) {
 		return err, ""
 	}
 
-	var instanceCfg = minishiftConfig.InstanceConfigType{}
+	var instanceCfg = minishiftConfig.InstanceStateConfigType{}
 	err = json.Unmarshal(raw, &instanceCfg)
 	if err != nil {
 		fmt.Println(err.Error())

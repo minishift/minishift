@@ -38,20 +38,20 @@ type MountInfo struct {
 
 // Manager is the central point for all operations around managing hostfolders.
 type Manager struct {
-	instanceConfig     *minishiftConfig.InstanceConfigType
-	allInstancesConfig *minishiftConfig.GlobalConfigType
+	instanceStateConfig *minishiftConfig.InstanceStateConfigType
+	allInstancesConfig  *minishiftConfig.GlobalConfigType
 }
 
 // NewAddOnManager creates a new add-on manager for the specified add-on directory.
-func NewManager(instanceConfig *minishiftConfig.InstanceConfigType, allInstancesConfig *minishiftConfig.GlobalConfigType) (*Manager, error) {
+func NewManager(instanceStateConfig *minishiftConfig.InstanceStateConfigType, allInstancesConfig *minishiftConfig.GlobalConfigType) (*Manager, error) {
 	return &Manager{
-		instanceConfig:     instanceConfig,
-		allInstancesConfig: allInstancesConfig}, nil
+		instanceStateConfig: instanceStateConfig,
+		allInstancesConfig:  allInstancesConfig}, nil
 }
 
 // ExistAny returns true if at least one host folder configuration exists, false otherwise.
 func (m *Manager) ExistAny() bool {
-	return len(m.instanceConfig.HostFolders) > 0 ||
+	return len(m.instanceStateConfig.HostFolders) > 0 ||
 		len(m.allInstancesConfig.HostFolders) > 0
 }
 
@@ -67,8 +67,8 @@ func (m *Manager) Add(hostFolder HostFolder, allInstances bool) {
 		m.allInstancesConfig.HostFolders = append(m.allInstancesConfig.HostFolders, hostFolder.Config())
 		m.allInstancesConfig.Write()
 	} else {
-		m.instanceConfig.HostFolders = append(m.instanceConfig.HostFolders, hostFolder.Config())
-		m.instanceConfig.Write()
+		m.instanceStateConfig.HostFolders = append(m.instanceStateConfig.HostFolders, hostFolder.Config())
+		m.instanceStateConfig.Write()
 	}
 }
 
@@ -78,8 +78,8 @@ func (m *Manager) Remove(name string) error {
 		return fmt.Errorf("no host folder defined with name '%s'", name)
 	}
 
-	m.instanceConfig.HostFolders = m.removeFromHostFolders(name, minishiftConfig.InstanceConfig.HostFolders)
-	m.instanceConfig.Write()
+	m.instanceStateConfig.HostFolders = m.removeFromHostFolders(name, minishiftConfig.InstanceStateConfig.HostFolders)
+	m.instanceStateConfig.Write()
 
 	m.allInstancesConfig.HostFolders = m.removeFromHostFolders(name, minishiftConfig.AllInstancesConfig.HostFolders)
 	m.allInstancesConfig.Write()
@@ -102,7 +102,7 @@ func (m *Manager) List(driver drivers.Driver) ([]MountInfo, error) {
 	}
 
 	hostfolders := minishiftConfig.AllInstancesConfig.HostFolders
-	hostfolders = append(hostfolders, minishiftConfig.InstanceConfig.HostFolders...)
+	hostfolders = append(hostfolders, minishiftConfig.InstanceStateConfig.HostFolders...)
 	var mounts []MountInfo
 	for _, hostFolder := range hostfolders {
 
@@ -180,7 +180,7 @@ func (m *Manager) MountAll(driver drivers.Driver) error {
 	}
 
 	hostFolderConfigs := m.allInstancesConfig.HostFolders
-	hostFolderConfigs = append(hostFolderConfigs, m.instanceConfig.HostFolders...)
+	hostFolderConfigs = append(hostFolderConfigs, m.instanceStateConfig.HostFolders...)
 	for _, hostFolderConfig := range hostFolderConfigs {
 		m.Mount(driver, hostFolderConfig.Name)
 	}
@@ -220,7 +220,7 @@ func (m *Manager) Umount(driver drivers.Driver, name string) error {
 }
 
 func (m *Manager) getHostFolder(name string) HostFolder {
-	config := m.getHostFolderConfig(name, minishiftConfig.InstanceConfig.HostFolders)
+	config := m.getHostFolderConfig(name, minishiftConfig.InstanceStateConfig.HostFolders)
 	if config != nil {
 		return m.hostFolderForConfig(config)
 	}

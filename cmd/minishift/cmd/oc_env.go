@@ -87,7 +87,7 @@ var ocEnvCmd = &cobra.Command{
 	Short: "Sets the path of the 'oc' binary.",
 	Long:  `Sets the path of OpenShift client binary 'oc'.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if config.InstanceConfig.OcPath == "" {
+		if config.InstanceStateConfig.OcPath == "" {
 			atexit.ExitWithMessage(1, "Cannot find the OpenShift client binary.\nMake sure that OpenShift was provisioned successfully.")
 		}
 
@@ -104,7 +104,7 @@ var ocEnvCmd = &cobra.Command{
 		util.ExitIfNotRunning(host.Driver, constants.MachineName)
 
 		var shellCfg *OcShellConfig
-		ocPath := config.InstanceConfig.OcPath
+		ocPath := config.InstanceStateConfig.OcPath
 		shellCfg, err = getOcShellConfig(api, ocPath, forceShell, noProxy)
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error running the oc-env command: %s", err.Error()))

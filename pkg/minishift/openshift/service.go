@@ -167,7 +167,7 @@ func getRoutes(namespace string) (map[string][]Route, error) {
 	routes := make(map[string][]Route)
 	cmdArgText := fmt.Sprintf("get route -o json --config=%s -n %s", constants.KubeConfigPath, namespace)
 	tokens := strings.Split(cmdArgText, " ")
-	cmdName := instanceState.InstanceConfig.OcPath
+	cmdName := instanceState.InstanceStateConfig.OcPath
 	cmdOut, err := runner.Output(cmdName, tokens...)
 	if err != nil {
 		return nil, err
@@ -288,7 +288,7 @@ func getNodePorts(namespace string) (map[string]string, error) {
 	serviceNodePorts := make(map[string]string)
 	cmdArgText := fmt.Sprintf("get svc -o json --config=%s -n %s", constants.KubeConfigPath, namespace)
 	tokens := strings.Split(cmdArgText, " ")
-	cmdName := instanceState.InstanceConfig.OcPath
+	cmdName := instanceState.InstanceStateConfig.OcPath
 	cmdOut, err := runner.Output(cmdName, tokens...)
 	if err != nil {
 		return nil, err
@@ -320,7 +320,7 @@ func getNodePorts(namespace string) (map[string]string, error) {
 func getProjects() ([]string, error) {
 	cmdArgText := fmt.Sprintf("get projects --config=%s %s", constants.KubeConfigPath, ProjectsCustomCol)
 	tokens := strings.Split(cmdArgText, " ")
-	cmdName := instanceState.InstanceConfig.OcPath
+	cmdName := instanceState.InstanceStateConfig.OcPath
 	cmdOut, err := runner.Output(cmdName, tokens...)
 	if err != nil {
 		return []string{}, err

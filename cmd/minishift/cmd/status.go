@@ -18,7 +18,9 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/docker/go-units"
 	"os"
+	"path/filepath"
 	"strings"
 	"text/template"
 
@@ -37,6 +39,7 @@ var statusFormat = `Minishift:  {{.MinishiftStatus}}
 Profile:    {{.ProfileName}}
 OpenShift:  {{.ClusterStatus}}
 DiskUsage:  {{.DiskUsage}}
+CacheUsage: {{.CacheUsage}} (used by oc binary, ISO or cached images)
 `
 
 type Status struct {
@@ -44,6 +47,7 @@ type Status struct {
 	ProfileName     string
 	ClusterStatus   string
 	DiskUsage       string
+	CacheUsage      string
 }
 
 // statusCmd represents the status command
@@ -70,6 +74,7 @@ func runStatus(cmd *cobra.Command, args []string) {
 
 	openshiftStatus := "Stopped"
 	diskUsage := "Unknown"
+	cacheUsage := "Unknown"
 	profileName := constants.ProfileName
 
 	vmStatus, err := cluster.GetHostStatus(api, constants.MachineName)
@@ -87,7 +92,21 @@ func runStatus(cmd *cobra.Command, args []string) {
 		diskUsage = fmt.Sprintf("%s of %s", diskUse, diskSize)
 	}
 
-	status := Status{vmStatus, profileName, openshiftStatus, diskUsage}
+	cacheDir := filepath.Join(constants.GetMinishiftHomeDir(), "cache")
+	var size int64
+	err = filepath.Walk(cacheDir, func(_ string, info os.FileInfo, err error) error {
+		if !info.IsDir() {
+			size += info.Size()
+		}
+		return err
+	})
+	if err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error finding size of cache: %s", err.Error()))
+	}
+
+	cacheUsage = units.HumanSize(float64(size))
+
+	status := Status{vmStatus, profileName, openshiftStatus, diskUsage, cacheUsage}
 
 	tmpl, err := template.New("status").Parse(statusFormat)
 	if err != nil {

@@ -102,7 +102,7 @@ func determineIsoFromFile(isoUrl string) string {
 	return isoName
 }
 
-func setUp() string {
+func setUp() (string, string) {
 	var err error
 	if testDir == "" {
 		testDir, err = ioutil.TempDir("", "minishift-integration-test-")
@@ -114,12 +114,13 @@ func setUp() string {
 		ensureTestDirEmpty()
 	}
 
-	err = os.Setenv(constants.MiniShiftHomeEnv, testDir)
+	testDefaultHome := fmt.Sprintf("%s/.minishift", testDir)
+	err = os.Setenv(constants.MiniShiftHomeEnv, testDefaultHome)
 	if err != nil {
 		fmt.Printf("Error setting up environmental variable %v: %v\n", constants.MiniShiftHomeEnv, err)
 	}
 
-	return testDir
+	return testDir, testDefaultHome
 }
 
 func ensureTestDirEmpty() {
@@ -134,11 +135,11 @@ func ensureTestDirEmpty() {
 	}
 }
 
-func cleanTestDirConfiguration() {
+func cleanTestDefaultHomeConfiguration() {
 	var foldersToClean []string
-	foldersToClean = append(foldersToClean, filepath.Join(testDir, "addons"))
-	foldersToClean = append(foldersToClean, filepath.Join(testDir, "config"))
-	foldersToClean = append(foldersToClean, filepath.Join(testDir, "cache/images"))
+	foldersToClean = append(foldersToClean, filepath.Join(testDefaultHome, "addons"))
+	foldersToClean = append(foldersToClean, filepath.Join(testDefaultHome, "config"))
+	foldersToClean = append(foldersToClean, filepath.Join(testDefaultHome, "cache/images"))
 
 	for index := range foldersToClean {
 		err := os.RemoveAll(foldersToClean[index])
@@ -170,14 +171,14 @@ func runCommandsBeforeFeature(commands string, runner *util.MinishiftRunner) err
 }
 
 // copyOc copies the oc binary contained in directory structure of /<version>/<platform>/oc(.exe)
-// to cache/oc inside of the testDir.
-func copyOc(ocPath string, testDir string) error {
+// to cache/oc inside of the testDefaultHome.
+func copyOc(ocPath string, testDefaultHome string) error {
 	ocPath = filepath.Clean(ocPath)
 	dir, ocFileName := filepath.Split(ocPath)
 	dir, platformDir := filepath.Split(filepath.Clean(dir))
 	_, versionDir := filepath.Split(filepath.Clean(dir))
 
-	targetDirectory := filepath.Join(testDir, "cache", "oc", versionDir, platformDir)
+	targetDirectory := filepath.Join(testDefaultHome, "cache", "oc", versionDir, platformDir)
 	err := os.MkdirAll(targetDirectory, 0777)
 	if err != nil {
 		return fmt.Errorf("Error creating target directory:%v\n", err)

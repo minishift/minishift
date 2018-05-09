@@ -16,9 +16,9 @@ Feature: Addons command and its subcommands
       And stdout should not contain "anyuid"
 
   Scenario: Installing add-on from a folder
-  Note: working directory when executing Minishift commands is: /test/integration.
+  Note: working directory when executing Minishift commands is: out/test-run.
      When file from "https://raw.githubusercontent.com/minishift/minishift/master/addons/anyuid/anyuid.addon" is downloaded into location "download/anyuid"
-      And executing "minishift addons install ../../out/integration-test/download/anyuid" succeeds
+      And executing "minishift addons install download/anyuid" succeeds
      Then executing "minishift addons list" succeeds
       And stdout should contain "anyuid"
 

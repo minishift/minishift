@@ -26,8 +26,6 @@ import (
 	"time"
 
 	"github.com/minishift/minishift/test/integration/util"
-
-	"os"
 )
 
 var commandOutputs []CommandOutput
@@ -337,16 +335,4 @@ func (m *Minishift) rolloutServicesSuccessfullyBeforeTimeout(servicesToCheck str
 	}
 
 	return nil
-}
-
-func (m *Minishift) deletingMinishiftHomeDirectorySucceeds(dir string) error {
-	return os.RemoveAll(dir)
-}
-
-func (m *Minishift) minishiftHomeDirectoryShouldntExist(dir string) error {
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		return nil
-	}
-
-	return fmt.Errorf("Directory %s exists", dir)
 }

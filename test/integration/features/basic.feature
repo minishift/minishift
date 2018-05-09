@@ -43,17 +43,17 @@ Feature: Basic
 
   Scenario Outline: User can set, get, view and unset values in configuration file
     User is able to setup persistent configuration of Minishift using "config" command
-    and its subcommands, changing values stored in "config/config.json".
+    and its subcommands, changing values stored in ".minishift/config/config.json".
 
     Given Minishift has state "Running"
      When executing "minishift config set <property> <value>" succeeds
-     Then JSON config file "config/config.json" contains key "<property>" with value matching "<value>"
+     Then JSON config file ".minishift/config/config.json" contains key "<property>" with value matching "<value>"
       And stdout of command "minishift config get <property>" is equal to "<value>"
       And stdout of command "minishift config view --format {{.ConfigKey}}:{{.ConfigValue}}" contains "<property>:<value>"
 
      When executing "minishift config unset <property>" succeeds
      Then stdout of command "minishift config get <property>" is equal to "<nil>"
-      And JSON config file "config/config.json" does not have key "<property>"
+      And JSON config file ".minishift/config/config.json" does not have key "<property>"
 
   Examples: Config values to work with
     | property  | value |

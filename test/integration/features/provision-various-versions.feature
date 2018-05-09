@@ -12,7 +12,7 @@ Feature: Provision all major OpenShift versions
       """
       openshift <serverVersion>
       """
-      And JSON config file "machines/minishift.json" contains key "OcPath" with value matching "<ocVersion>"
+      And JSON config file ".minishift/machines/minishift.json" contains key "OcPath" with value matching "<ocVersion>"
      When executing "minishift oc-env" succeeds
      Then stdout should contain
       """

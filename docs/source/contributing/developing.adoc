@@ -263,7 +263,7 @@ $ make integration MINISHIFT_BINARY=<path-to-custom-binary>
 ----
 
 TIMEOUT::
-The `TIMEOUT` parameter can be used to override the default timeout of `3600s`.
+The `TIMEOUT` parameter can be used to override the default timeout of `10800s`.
 To run all the tests with a timeout of `7200s`, use the following command:
 
 ----

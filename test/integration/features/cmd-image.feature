@@ -61,9 +61,9 @@ Feature: Basic image caching test
     Given Minishift has state "Does Not Exist"
       And executing "minishift config set image-caching true" succeeds
       And executing "minishift image cache-config add alpine:latest" succeeds
-     Then JSON config file "config/config.json" contains key "image-caching" with value matching "true"
+     Then JSON config file ".minishift/config/config.json" contains key "image-caching" with value matching "true"
       And stdout of command "minishift config get image-caching" is equal to "true"
-      And JSON config file "config/config.json" contains key "cache-images" with value matching "[alpine:latest]"
+      And JSON config file ".minishift/config/config.json" contains key "cache-images" with value matching "[alpine:latest]"
 
      When executing "minishift start" succeeds
      Then stdout of command "minishift image list --vm" contains "alpine:latest"

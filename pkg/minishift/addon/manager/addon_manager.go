@@ -25,10 +25,11 @@ import (
 
 	"strings"
 
+	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/addon"
 	"github.com/minishift/minishift/pkg/minishift/addon/command"
 	"github.com/minishift/minishift/pkg/minishift/addon/parser"
-	openshiftVersions "github.com/minishift/minishift/pkg/minishift/openshift/version"
+	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/filehelper"
 	utilStrings "github.com/minishift/minishift/pkg/util/strings"
@@ -291,14 +292,11 @@ func verifyRequiredVariablesInContext(context *command.ExecutionContext, meta ad
 }
 
 func verifyRequiredOpenshiftVersion(context *command.ExecutionContext, meta addon.AddOnMeta) error {
-	openShiftVersion, err := openshiftVersions.GetOpenshiftVersionWithoutK8sAndEtcd(context.GetSSHCommander())
-	if err != nil {
-		return err
-	}
+	openShiftVersion := strings.TrimPrefix(instanceState.InstanceConfig.OpenshiftVersion, constants.VersionPrefix)
 	requiredOpenshiftVersions := strings.TrimSpace(meta.OpenShiftVersion())
 	if requiredOpenshiftVersions != "" {
 		for _, requiredOpenshiftVersion := range strings.Split(requiredOpenshiftVersions, versionRangeSeparator) {
-			if err = compareOpenshiftVersions(openShiftVersion, strings.TrimSpace(requiredOpenshiftVersion)); err != nil {
+			if err := compareOpenshiftVersions(openShiftVersion, strings.TrimSpace(requiredOpenshiftVersion)); err != nil {
 				return err
 			}
 		}

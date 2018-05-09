@@ -52,7 +52,7 @@ function github_milestone()
 
 function jira_milestone()
 {
-  milestone_data=`curl -s -X GET -H "Content-Type: application/json" "https://issues.jboss.org/rest/api/2/search?jql=project=CDK%20AND%20component=minishift%20AND%20fixVersion=${milestone}"`
+  milestone_data=`curl -s -X GET -H "Content-Type: application/json" "https://issues.jboss.org/rest/api/2/search?jql=project=CDK%20AND%20fixVersion=${milestone}"`
 
   csv_raw=`echo $milestone_data | jq --compact-output --arg milestone "$milestone" --arg repo "$repository" '.issues[] | ";;;;;;;;;;;"
    + .fields.summary

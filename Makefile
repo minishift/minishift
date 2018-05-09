@@ -22,7 +22,7 @@ COMMIT_SHA=$(shell git rev-parse --short HEAD)
 
 # Go and compilation related variables
 BUILD_DIR ?= out
-INTEGRATION_TEST_DIR = $(CURDIR)/$(BUILD_DIR)/integration-test
+INTEGRATION_TEST_DIR = $(CURDIR)/$(BUILD_DIR)/test-run
 
 GOOS ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)

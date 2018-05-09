@@ -47,9 +47,10 @@ var (
 	minishiftArgs     string
 	minishiftBinary   string
 
-	testDir       string
-	testResultDir string
-	isoName       string
+	testDir         string
+	testDefaultHome string
+	testResultDir   string
+	isoName         string
 
 	runBeforeFeature string
 	testWithShell    string
@@ -227,11 +228,11 @@ func FeatureContext(s *godog.Suite) {
 			return nil
 		})
 
-	s.Step(`^deleting minishift home directory "([^"]*)" succeeds$`, MinishiftInstance.deletingMinishiftHomeDirectorySucceeds)
-	s.Step(`^minishift home directory "([^"]*)" shouldn\'t exist$`, MinishiftInstance.minishiftHomeDirectoryShouldntExist)
+	s.Step(`^deleting directory "([^"]*)" succeeds$`, deletingDirectorySucceeds)
+	s.Step(`^directory "([^"]*)" shouldn\'t exist$`, directoryShouldntExist)
 
 	s.BeforeSuite(func() {
-		testDir = setUp()
+		testDir, testDefaultHome = setUp()
 		testResultDir = filepath.Join(testDir, "..", "test-results")
 		err := os.MkdirAll(testResultDir, os.ModePerm)
 		if err != nil {
@@ -245,7 +246,7 @@ func FeatureContext(s *godog.Suite) {
 			os.Exit(1)
 		}
 
-		fmt.Println("Running Integration test in:", testDir)
+		fmt.Printf("Running Integration test in:%v.\nUsing MINISHIFT_HOME=%v\n", testDir, testDefaultHome)
 		fmt.Println("Using binary:", minishiftBinary)
 	})
 
@@ -276,7 +277,7 @@ func FeatureContext(s *godog.Suite) {
 		}
 
 		if copyOcFrom != "" {
-			err := copyOc(copyOcFrom, testDir)
+			err := copyOc(copyOcFrom, testDefaultHome)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
@@ -284,11 +285,13 @@ func FeatureContext(s *godog.Suite) {
 		}
 
 		util.LogMessage("info", fmt.Sprintf("----- Feature: %s -----", this.Name))
+
+		os.Chdir(testDir)
 	})
 
 	s.AfterFeature(func(this *gherkin.Feature) {
 		util.LogMessage("info", "----- Cleaning after feature -----")
-		cleanTestDirConfiguration()
+		cleanTestDefaultHomeConfiguration()
 	})
 
 	s.BeforeScenario(func(this interface{}) {
@@ -762,4 +765,16 @@ func downloadFileIntoLocation(downloadURL string, destinationFolder string) erro
 
 func startHostShellInstance() error {
 	return util.StartHostShellInstance(testWithShell, minishiftBinary)
+}
+
+func deletingDirectorySucceeds(dir string) error {
+	return os.RemoveAll(dir)
+}
+
+func directoryShouldntExist(dir string) error {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		return nil
+	}
+
+	return fmt.Errorf("Directory %s exists", dir)
 }

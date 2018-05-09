@@ -12,7 +12,7 @@ user defined options which changes default behaviour of Minishift.
   Scenario Outline: Setting values in bad range or format
   Minishift config set should not set a value, if this value is of bad format or in bad range.
      When executing "minishift config set <property> <value>" fails
-     Then JSON config file "config/config.json" does not contain key "<property>" with value matching "<value>"
+     Then JSON config file ".minishift/config/config.json" does not contain key "<property>" with value matching "<value>"
       And stdout of command "minishift config get <property>" is equal to "<nil>"
 
   Examples: Wrong values for unit based keys
@@ -72,12 +72,12 @@ user defined options which changes default behaviour of Minishift.
 
   Scenario Outline: Setting and unsetting with correct values
       When executing "minishift config set <property> "<value>"" succeeds
-      Then JSON config file "config/config.json" contains key "<property>" with value matching "<expected>"
+      Then JSON config file ".minishift/config/config.json" contains key "<property>" with value matching "<expected>"
        And stdout of command "minishift config get <property>" is equal to "<expected>"
        And stdout of command "minishift config view --format {{.ConfigKey}}:{{.ConfigValue}}" contains "<property>:<expected>"
       When executing "minishift config unset <property>" succeeds
       Then stdout of command "minishift config get <property>" is equal to "<nil>"
-       And JSON config file "config/config.json" does not have key "<property>"
+       And JSON config file ".minishift/config/config.json" does not have key "<property>"
 
   Examples: Correct values for unit based keys
     | property  | value   | expected |
@@ -161,12 +161,12 @@ user defined options which changes default behaviour of Minishift.
   @minishift-only
   Scenario Outline: Setting and unsetting values for iso-url key
      When executing "minishift config set <property> "<value>"" succeeds
-     Then JSON config file "config/config.json" contains key "<property>" with value matching "<expected>"
+     Then JSON config file ".minishift/config/config.json" contains key "<property>" with value matching "<expected>"
       And stdout of command "minishift config get <property>" is equal to "<expected>"
       And stdout of command "minishift config view --format {{.ConfigKey}}:{{.ConfigValue}}" contains "<property>:<expected>"
      When executing "minishift config unset <property>" succeeds
      Then stdout of command "minishift config get <property>" is equal to "<nil>"
-      And JSON config file "config/config.json" does not have key "<property>"
+      And JSON config file ".minishift/config/config.json" does not have key "<property>"
 
   Examples: Correct values for iso-url keys
     | property        | value                                                                                            | expected                                                                                        |

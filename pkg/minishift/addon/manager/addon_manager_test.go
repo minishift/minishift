@@ -30,6 +30,7 @@ import (
 	"github.com/minishift/minishift/cmd/testing/cli"
 	"github.com/minishift/minishift/pkg/minishift/addon"
 	"github.com/minishift/minishift/pkg/minishift/addon/command"
+	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/minishift/docker"
 	"github.com/stretchr/testify/assert"
 )
@@ -168,6 +169,10 @@ func TestApplyAddon(t *testing.T) {
 	var expectedApplyAddonOutput = `-- Applying addon 'testaddon':
 This testaddon is having variable TEST with foo value
 `
+	var err error
+	tmpMinishiftHomeDir := cli.SetupTmpMinishiftHome(t)
+	instanceState.InstanceConfig, err = instanceState.NewInstanceConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
+	assert.NoError(t, err, "Unexpected error creating instance config in '%s'", tmpMinishiftHomeDir)
 	path := filepath.Join(basepath, "..", "..", "..", "..", "test", "testdata", "testaddons")
 	manager, err := NewAddOnManager(path, make(map[string]*addon.AddOnConfig))
 	assert.NoError(t, err, "Unexpected error creating manager in directory '%s'", path)

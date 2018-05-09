@@ -27,9 +27,9 @@ import (
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
+	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/minishift/docker"
 	"github.com/minishift/minishift/pkg/minishift/openshift"
-	openshiftVersions "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 )
 
@@ -78,10 +78,7 @@ func runPatch(cmd *cobra.Command, args []string) {
 
 	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
 	dockerCommander := docker.NewVmDockerCommander(sshCommander)
-	openshiftVersion, err := openshiftVersions.GetOpenshiftVersionWithoutK8sAndEtcd(sshCommander)
-	if err != nil {
-		atexit.ExitWithMessage(1, err.Error())
-	}
+	openshiftVersion := instanceState.InstanceConfig.OpenshiftVersion
 
 	_, err = openshift.Patch(patchTarget, patch, dockerCommander, openshiftVersion)
 	if err != nil {

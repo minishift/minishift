@@ -49,6 +49,7 @@ func CacheOc(openShiftVersion string) string {
 
 	// Update MACHINE_NAME.json for oc path
 	minishiftConfig.InstanceConfig.OcPath = filepath.Join(ocBinary.GetCacheFilepath(), constants.OC_BINARY_NAME)
+	minishiftConfig.InstanceConfig.OpenshiftVersion = openShiftVersion
 	if err := minishiftConfig.InstanceConfig.Write(); err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error updating oc path in config of VM: %v", err))
 	}

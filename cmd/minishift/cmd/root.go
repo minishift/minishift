@@ -120,7 +120,7 @@ var RootCmd = &cobra.Command{
 		ensureConfigFileExists(constants.ConfigFile)
 
 		// Create MACHINE_NAME.json
-		instanceConfigPath := filepath.Join(constants.Minipath, "machines", constants.MachineName+".json")
+		instanceConfigPath := filepath.Join(constants.Minipath, "machines", constants.MachineName+"-state.json")
 		minishiftConfig.InstanceConfig, err = minishiftConfig.NewInstanceConfig(instanceConfigPath)
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error creating config for VM: %s", err.Error()))

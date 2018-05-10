@@ -27,6 +27,7 @@ import (
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	minishiftStrings "github.com/minishift/minishift/pkg/util/strings"
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 )
 
@@ -127,6 +128,11 @@ func addHostFolder(cmd *cobra.Command, args []string) {
 
 func addSSHFSInteractive(manager *hostFolderConfig.Manager, name string) error {
 	source := util.ReadInputFromStdin("Source path")
+	source, err := homedir.Expand(source)
+	if err != nil {
+		atexit.ExitWithMessage(1, err.Error())
+	}
+
 	if source == "" {
 		atexit.ExitWithMessage(1, noSource)
 	}

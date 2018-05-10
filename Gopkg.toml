@@ -179,3 +179,7 @@ ignored = ["github.com/Sirupsen/logrus"]
   name = "github.com/pkg/sftp"
   version = "1.0.0"
 
+[[constraint]]
+  name = "github.com/mitchellh/go-homedir"
+  revision = "b8bc1bf767474819792c23f32d8286a45736f1c6"
+

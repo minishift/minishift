@@ -18,6 +18,9 @@ package image
 
 import (
 	"fmt"
+	"os"
+	"sort"
+
 	"github.com/containers/image/docker/reference"
 	"github.com/docker/machine/libmachine"
 	"github.com/minishift/minishift/cmd/minishift/cmd/config"
@@ -29,8 +32,6 @@ import (
 	pkgUtil "github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/pkg/errors"
-	"os"
-	"sort"
 )
 
 func getCachedImages(cacheDir string) []string {
@@ -144,4 +145,11 @@ func getMinishiftConfig() config.MinishiftConfig {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot read the Minishift configuration: %s", err.Error()))
 	}
 	return minishiftConfig
+}
+
+func deleteCachedImages(cacheDir string) error {
+	if err := os.RemoveAll(cacheDir); err != nil {
+		return err
+	}
+	return nil
 }

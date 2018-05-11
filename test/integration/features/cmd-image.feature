@@ -49,7 +49,6 @@ Feature: Basic image caching test
       And executing "minishift image import alpine:latest" succeeds
       And executing "minishift image list --vm" succeeds
      Then stdout should contain "alpine:latest"
-
      When executing "minishift delete --force" succeeds
      Then Minishift should have state "Does Not Exist"
 
@@ -98,7 +97,7 @@ Feature: Basic image caching test
       And stdout should match "Exporting 'foo:latest'.*FAIL"
       And stdout should match "Exporting 'alpine:latest'.*OK"
 
-     When executing "minishift delete --force --clear-cache" succeeds
+     When executing "minishift delete --force" succeeds
      Then Minishift should have state "Does Not Exist"
 
   Scenario: As a user I can view, remove and add the image cache configuration
@@ -116,3 +115,17 @@ Feature: Basic image caching test
      When executing "minishift image cache-config remove busybox:latest" succeeds
       And executing "minishift image cache-config view" succeeds
      Then stdout should be empty
+
+  Scenario: As a user I can prune/delete an image from local cache.
+  Note: alpine:latest is already added to the local cache.
+
+    Given Minishift has state "Does Not Exist"
+      And executing "minishift image prune alpine:latest" succeeds
+     Then stdout should contain "OK"
+      And executing "minishift image list" succeeds
+     Then stdout should not contain "alpine:latest"
+      And executing "minishift image prune --all" succeeds
+     Then stdout should contain "OK"
+      And executing "minishift image list" succeeds
+     Then stdout should be empty
+      And executing "minishift delete --force --clear-cache" succeeds

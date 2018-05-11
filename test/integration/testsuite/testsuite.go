@@ -238,7 +238,11 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^directory "([^"]*)" shouldn\'t exist$`, directoryShouldntExist)
 
 	s.BeforeSuite(func() {
-		testDir, testDefaultHome = setUp()
+		testDir, testDefaultHome = setupTestDirectory()
+		MinishiftInstance.runner.EnsureAllMinishiftHomesDeleted(testDir)
+		SetMinishiftHomeEnv(testDefaultHome)
+		ensureTestDirEmpty()
+
 		testResultDir = filepath.Join(testDir, "..", "test-results")
 		err := os.MkdirAll(testResultDir, os.ModePerm)
 		if err != nil {
@@ -258,7 +262,7 @@ func FeatureContext(s *godog.Suite) {
 
 	s.AfterSuite(func() {
 		util.LogMessage("info", "----- Cleaning Up -----")
-		MinishiftInstance.runner.EnsureDeleted()
+		MinishiftInstance.runner.EnsureAllMinishiftHomesDeleted(testDir)
 		err := util.CloseLog()
 		if err != nil {
 			fmt.Println("Error closing the log:", err)

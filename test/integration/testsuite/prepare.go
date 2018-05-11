@@ -102,7 +102,7 @@ func determineIsoFromFile(isoUrl string) string {
 	return isoName
 }
 
-func setUp() (string, string) {
+func setupTestDirectory() (string, string) {
 	var err error
 	if testDir == "" {
 		testDir, err = ioutil.TempDir("", "minishift-integration-test-")
@@ -110,17 +110,17 @@ func setUp() (string, string) {
 			fmt.Println("Error creating temporary directory:", err)
 			os.Exit(1)
 		}
-	} else {
-		ensureTestDirEmpty()
 	}
-
 	testDefaultHome := fmt.Sprintf("%s/.minishift", testDir)
-	err = os.Setenv(constants.MiniShiftHomeEnv, testDefaultHome)
+
+	return testDir, testDefaultHome
+}
+
+func SetMinishiftHomeEnv(path string) {
+	err := os.Setenv(constants.MiniShiftHomeEnv, path)
 	if err != nil {
 		fmt.Printf("Error setting up environmental variable %v: %v\n", constants.MiniShiftHomeEnv, err)
 	}
-
-	return testDir, testDefaultHome
 }
 
 func ensureTestDirEmpty() {

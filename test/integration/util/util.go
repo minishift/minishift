@@ -21,10 +21,13 @@ package util
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"syscall"
 	"time"
@@ -148,13 +151,60 @@ func (m *MinishiftRunner) GetOcRunner() *OcRunner {
 	return nil
 }
 
-func (m *MinishiftRunner) EnsureDeleted() {
+//EnsureAllMinishiftHomesDeleted retrieves all Minishift homes which must be in format of '.<name>'
+//and then deletes all VMs on all profiles on them
+func (m *MinishiftRunner) EnsureAllMinishiftHomesDeleted(testDir string) {
+	files, err := ioutil.ReadDir(testDir)
+	if err != nil {
+		fmt.Printf("Error getting files in test directory: %v\n", err)
+	}
+
+	for _, file := range files {
+		if file.IsDir() == false {
+			continue
+		}
+
+		dirPath := filepath.Join(testDir, file.Name())
+		err = os.Setenv(constants.MiniShiftHomeEnv, dirPath)
+		if err != nil {
+			fmt.Printf("Error setting up environmental variable %v: %v to delete running instances.\n", constants.MiniShiftHomeEnv, err)
+		}
+
+		m.EnsureAllProfilesDeleted()
+	}
+}
+
+//EnsureAllProfilesDeleted retrieves all available profiles and deletes all running VMs on them
+func (m *MinishiftRunner) EnsureAllProfilesDeleted() {
+	stdOut, _, _ := m.RunCommandAndPrintError("profile list")
+	lines := strings.Split(stdOut, "\n")
+
+	for _, line := range lines {
+		re := regexp.MustCompile("- ([.\\S]+)\\s+.+")
+		match := re.FindStringSubmatch(line)
+		if len(match) != 2 {
+			continue
+		}
+
+		profile := match[1]
+		m.RunCommandAndPrintError(fmt.Sprintf("profile set %v", profile))
+		err := m.EnsureDeleted()
+		if err != nil {
+			fmt.Printf("Error deleting profile '%v': %v", profile, err)
+		}
+	}
+}
+
+//EnsureDeleted deletes VM instance on currently selected profile
+func (m *MinishiftRunner) EnsureDeleted() error {
 	m.RunCommandAndPrintError("delete --force")
 
 	deleted := m.CheckStatus("Does Not Exist")
 	if deleted == false {
-		fmt.Println("Deletion of minishift instance was not successful! Minishift status is not 'Does Not Exist'.")
+		return errors.New("Deletion of minishift instance was not successful!")
 	}
+
+	return nil
 }
 
 func (m *MinishiftRunner) SetEnvFromEnvCmdOutput(dockerEnvVars string) error {

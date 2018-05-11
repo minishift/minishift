@@ -61,10 +61,19 @@ type Manifests []Manifest
 
 type Manifest struct {
 	Annotations Annotations `json:"annotations"`
+	Digest      string      `json:"digest"`
+	MediaType   string      `json:"mediaType"`
+	Platform    Platform    `json:"platform"`
+	Size        int64       `json:"size"`
 }
 
 type Annotations struct {
 	Name string `json:"org.opencontainers.image.ref.name"`
+}
+
+type Platform struct {
+	Architecture string `json:"architecture"`
+	Os           string `json:"os"`
 }
 
 // NewOciImageHandler creates a new ImageHandler which stores cached images in OCI format.
@@ -155,6 +164,32 @@ func (handler *OciImageHandler) ExportImages(config *ImageCacheConfig) ([]string
 	}
 
 	return exportedImages, multiError.ToError()
+}
+
+// PruneImages delete the specified as command line option.
+func (handler *OciImageHandler) PruneImages(config *ImageCacheConfig) ([]string, error) {
+	out := handler.getOutputWriter(config)
+	PruneImages := []string{}
+
+	multiError := util.MultiError{}
+	for _, imageName := range config.CachedImages {
+		fmt.Fprint(out, fmt.Sprintf("Deleting '%s' from the local cache", imageName))
+		var err error
+		progressDots := progressdots.New()
+		progressDots.SetWriter(out)
+		progressDots.Start()
+		if !handler.IsImageCached(config, imageName) {
+			return nil, fmt.Errorf("Image %s is not cached", imageName)
+		}
+		err = handler.pruneImage(imageName, config)
+		handler.endProgress(progressDots, out, handler.progressStatusForError(err))
+		multiError.Collect(err)
+		if err != nil {
+			PruneImages = append(PruneImages, imageName)
+		}
+	}
+
+	return PruneImages, multiError.ToError()
 }
 
 // IsImageCached returns true if the specified image is cached, false otherwise.
@@ -304,6 +339,26 @@ func (handler *OciImageHandler) exportImage(image string, config *ImageCacheConf
 	return nil
 }
 
+func (handler *OciImageHandler) pruneImage(image string, config *ImageCacheConfig) error {
+	index, err := handler.getIndex(config)
+	if index == nil || err != nil {
+		return err
+	}
+
+	for i, manifest := range index.Manifests {
+		if manifest.Annotations.Name == image {
+			if err := os.RemoveAll(filepath.Join(config.HostCacheDir, "blobs", "sha256", strings.TrimPrefix(manifest.Digest, "sha256:"))); err != nil {
+				return err
+			}
+			index.Manifests = append(index.Manifests[:i], index.Manifests[i+1:]...)
+			if err := handler.updateIndex(config, index); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 func (handler *OciImageHandler) copyImage(srcRef types.ImageReference, destRef types.ImageReference, policyContext *signature.PolicyContext) error {
 	err := copy.Image(policyContext, destRef, srcRef, &copy.Options{
 		RemoveSignatures: false,
@@ -400,4 +455,16 @@ func (handler *OciImageHandler) progressStatusForError(err error) ProgressStatus
 		return FAIL
 	}
 	return OK
+}
+
+func (handler *OciImageHandler) updateIndex(config *ImageCacheConfig, index *Index) error {
+	indexPath := filepath.Join(config.HostCacheDir, "index.json")
+	jsonData, err := json.MarshalIndent(index, "", "\t")
+	if err != nil {
+		return err
+	}
+	if err = ioutil.WriteFile(indexPath, jsonData, 0644); err != nil {
+		return err
+	}
+	return nil
 }

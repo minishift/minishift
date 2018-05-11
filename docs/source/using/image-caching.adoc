@@ -151,3 +151,16 @@ You can re-enable the caching of the OpenShift images by setting `image-caching`
 ----
 $ minishift config unset image-caching
 ----
+
+[[prune-images]]
+== Delete Image from local cache
+
+Images are cached under *_$MINISHIFT_HOME/cache/images_* and stored as sha256 blob along with an index which contains detail about matching sha with image name.
+
+To delete an image from the local cache, use the xref:../command-ref/minishift_image_prune.adoc#[`minishift image prune`] command:
+
+----
+$ minishift image prune <image-name-0> <image-name-1> ...
+Deleting <image-name-0> from the local cache OK
+Deleting <image-name-1> from the local cache OK
+----

@@ -118,7 +118,7 @@ Please check link:https://github.com/kubernetes/minikube/blob/master/docs/contri
 
 [NOTE]
 ====
-Minikube ISO image use is experimental in {project}. Work is in progress to make it as stable as CentOS and Boot2Docker ISO images.
+Minikube ISO will be depricated in next release, please use CentOS or Boot2Docker ISO images.
 ====
 
 By default, {project} uses the {project} Boot2Docker ISO image.

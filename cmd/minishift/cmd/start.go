@@ -555,6 +555,7 @@ func determineIsoUrl(iso string) string {
 	case minishiftConstants.CentOsIsoAlias:
 		iso = constants.DefaultCentOsIsoUrl
 	case minishiftConstants.MinikubeIsoAlias:
+		fmt.Printf("\n\nNote: minikube ISO will be depricated in next release, please use b2d or centos ISO.\n\n")
 		iso = constants.DefaultMinikubeIsoURL
 	default:
 		if !(govalidator.IsURL(iso) || strings.HasPrefix(iso, "file:")) {

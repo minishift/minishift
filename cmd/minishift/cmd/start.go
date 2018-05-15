@@ -211,28 +211,48 @@ func runStart(cmd *cobra.Command, args []string) {
 			importContainerImages(hostVm.Driver, libMachineClient, requestedOpenShiftVersion)
 		}
 
+		sshCommander := provision.GenericSSHCommander{Driver: hostVm.Driver}
+		dockerCommander := docker.NewVmDockerCommander(sshCommander)
+
 		clusterUpConfig := &clusterup.ClusterUpConfig{
-			OpenShiftVersion: requestedOpenShiftVersion,
-			MachineName:      constants.MachineName,
-			Ip:               ip,
-			Port:             constants.APIServerPort,
-			RoutingSuffix:    configCmd.GetDefaultRoutingSuffix(ip),
-			User:             minishiftConstants.DefaultUser,
-			Project:          minishiftConstants.DefaultProject,
-			KubeConfigPath:   constants.KubeConfigPath,
-			OcPath:           ocPath,
-			AddonEnv:         viper.GetStringSlice(cmdUtil.AddOnEnv),
-			PublicHostname:   viper.GetString(configCmd.PublicHostname.Name),
+			OpenShiftVersion:     requestedOpenShiftVersion,
+			MachineName:          constants.MachineName,
+			Ip:                   ip,
+			Port:                 constants.APIServerPort,
+			RoutingSuffix:        configCmd.GetDefaultRoutingSuffix(ip),
+			User:                 minishiftConstants.DefaultUser,
+			Project:              minishiftConstants.DefaultProject,
+			KubeConfigPath:       constants.KubeConfigPath,
+			OcPath:               ocPath,
+			AddonEnv:             viper.GetStringSlice(cmdUtil.AddOnEnv),
+			PublicHostname:       configCmd.GetDefaultPublicHostName(ip),
+			SSHCommander:         sshCommander,
+			OcBinaryPathInsideVM: fmt.Sprintf("%s/oc", minishiftConstants.OcPathInsideVM),
 		}
 
 		clusterUpParams := determineClusterUpParameters(clusterUpConfig)
 		fmt.Println("-- OpenShift cluster will be configured with ...")
 		fmt.Println("   Version:", requestedOpenShiftVersion)
-		err = clusterup.ClusterUp(clusterUpConfig, clusterUpParams, &util.RealRunner{})
 
+		fmt.Printf("-- Copying oc binary from the OpenShift container image to VM ")
+		progressDots := progressdots.New()
+		progressDots.Start()
+		err = clusterup.CopyOcBinaryFromImageToVM(dockerCommander, minishiftConstants.GetOpenshiftImageName(requestedOpenShiftVersion), minishiftConstants.OcPathInsideVM)
+		if err != nil {
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error copying the oc binary to %s: %v", minishiftConstants.OcPathInsideVM, err))
+		}
+		progressDots.Stop()
+		fmt.Println(" OK")
+
+		fmt.Printf("-- Starting OpenShift cluster ")
+		progressDots = progressdots.New()
+		progressDots.Start()
+		out, err := clusterup.ClusterUp(clusterUpConfig, clusterUpParams)
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error during 'cluster up' execution: %v", err))
 		}
+		progressDots.Stop()
+		fmt.Printf("\n%s\n", out)
 
 		if !IsOpenShiftRunning(hostVm.Driver) {
 			atexit.ExitWithMessage(1, "OpenShift provisioning failed. origin container failed to start.")
@@ -267,6 +287,7 @@ func getRequiredHostDirectories() []string {
 	for _, value := range dataDirectory {
 		requiredDirectories = append(requiredDirectories, value)
 	}
+	requiredDirectories = append(requiredDirectories, minishiftConstants.OcPathInsideVM)
 	return requiredDirectories
 }
 
@@ -631,6 +652,7 @@ func determineClusterUpParameters(config *clusterup.ClusterUpConfig) map[string]
 
 	// Set default value for host config, data and volumes
 	viper.Set(configCmd.RoutingSuffix.Name, config.RoutingSuffix)
+	viper.Set(configCmd.PublicHostname.Name, config.PublicHostname)
 
 	clusterUpFlagSet.VisitAll(func(flag *flag.Flag) {
 		if viper.IsSet(flag.Name) {

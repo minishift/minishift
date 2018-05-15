@@ -28,3 +28,11 @@ func GetDefaultRoutingSuffix(ip string) string {
 		return ip + DefaultRoutingSuffix
 	}
 }
+
+func GetDefaultPublicHostName(ip string) string {
+	if viper.IsSet(PublicHostname.Name) {
+		return viper.GetString(PublicHostname.Name)
+	} else {
+		return ip
+	}
+}

@@ -21,7 +21,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"bytes"
+	"fmt"
+	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/pkg/util"
 	"gopkg.in/yaml.v2"
 )
@@ -59,20 +60,26 @@ func GetConfigPath() string {
 }
 
 // Cache system admin entries to be used to run oc commands
-func CacheSystemAdminEntries(systemEntriesConfigPath string, ocPath string, runner util.Runner) error {
+func CacheSystemAdminEntries(systemEntriesConfigPath string, ocPath string, sshCommander provision.SSHCommander) error {
 	// There is another easy way to get config for current context
 	// oc login -u system:admin
 	// oc config view --minify --raw=true
 	// We need to login as system:admin because then only config view will have client-certificate-data
 	// and client-key-data which is associated with admin and all the operation we do as oc runner.
-	var buffer bytes.Buffer
-	cmdArgs := []string{"login", "-u", "system:admin"}
-	runner.Run(nil, os.Stderr, ocPath, cmdArgs...)
-	cmdArgs = []string{"config", "view", "--minify", "--raw=true"}
-	runner.Run(&buffer, os.Stderr, ocPath, cmdArgs...)
+	cmd := fmt.Sprintf("%s login -u system:admin", ocPath)
+	_, err := sshCommander.SSHCommand(cmd)
+	if err != nil {
+		return err
+	}
+
+	cmd = fmt.Sprintf("%s config view --minify --raw=true", ocPath)
+	out, err := sshCommander.SSHCommand(cmd)
+	if err != nil {
+		return err
+	}
 
 	// Write to machines/<MACHINE_NAME>_kubeconfig
-	if err := ioutil.WriteFile(systemEntriesConfigPath, buffer.Bytes(), 0644); err != nil {
+	if err := ioutil.WriteFile(systemEntriesConfigPath, []byte(out), 0644); err != nil {
 		return err
 	}
 

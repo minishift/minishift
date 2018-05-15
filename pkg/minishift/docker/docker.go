@@ -51,9 +51,21 @@ type DockerCommander interface {
 	// Any occurring error is also returned.
 	Restart(container string) (bool, error)
 
-	// Cp copies a file from the Docker host to the specified destination in the specified container.
+	// Create creates the container with specified image. Returns output string in case the creation was successful.
+	// Any occurring error is also returned.
+	Create(options string, image string) (string, error)
+
+	// CpToContainer copies a file from the Docker host to the specified destination in the specified container.
+	// A successful copy will return nil. An error indicates that the copy failed.
+	CpToContainer(source string, container string, target string) error
+
+	// Cp copies a file from the specified destination in the specified container to the Docker host.
 	// A successful copy will return nil. An error indicates that the copy failed.
 	Cp(source string, container string, target string) error
+
+	// Rm removes a specified container from the Docker host.
+	// An error indicates that the remove failed.
+	Rm(container string) error
 
 	// Exec runs 'docker exec' with the specified options, against the specified container, using the specified
 	// command and arguments. The output of the command is returned as well as any occurring error.
@@ -144,6 +156,13 @@ func (c VmDockerCommander) Restart(container string) (bool, error) {
 }
 
 func (c VmDockerCommander) Cp(source string, container string, target string) error {
+	cmd := fmt.Sprintf("docker cp %s:%s %s", container, source, target)
+	c.logCommand(cmd)
+	_, err := c.commander.SSHCommand(cmd)
+	return err
+}
+
+func (c VmDockerCommander) CpToContainer(source string, container string, target string) error {
 	cmd := fmt.Sprintf("docker cp %s %s:%s", source, container, target)
 	c.logCommand(cmd)
 	_, err := c.commander.SSHCommand(cmd)
@@ -182,4 +201,24 @@ func (c VmDockerCommander) Run(options string, container string) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+func (c VmDockerCommander) Create(options string, image string) (string, error) {
+	cmd := fmt.Sprintf("docker create %s %s", options, image)
+	c.logCommand(cmd)
+	out, err := c.commander.SSHCommand(cmd)
+	if err != nil {
+		return "", err
+	}
+	return out, nil
+}
+
+func (c VmDockerCommander) Rm(container string) error {
+	cmd := fmt.Sprintf("docker rm %s", container)
+	c.logCommand(cmd)
+	_, err := c.commander.SSHCommand(cmd)
+	if err != nil {
+		return err
+	}
+	return nil
 }

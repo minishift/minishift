@@ -32,10 +32,12 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/addon/command"
 	"github.com/minishift/minishift/pkg/minishift/addon/manager"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
+	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/minishift/oc"
 
 	"regexp"
 
+	"github.com/minishift/minishift/pkg/minishift/docker"
 	"github.com/minishift/minishift/pkg/util"
 	minishiftStrings "github.com/minishift/minishift/pkg/util/strings"
 )
@@ -47,21 +49,23 @@ const (
 )
 
 type ClusterUpConfig struct {
-	OpenShiftVersion string
-	MachineName      string
-	Ip               string
-	Port             int
-	RoutingSuffix    string
-	User             string
-	Project          string
-	KubeConfigPath   string
-	OcPath           string
-	AddonEnv         []string
-	PublicHostname   string
+	OpenShiftVersion     string
+	MachineName          string
+	Ip                   string
+	Port                 int
+	RoutingSuffix        string
+	User                 string
+	Project              string
+	KubeConfigPath       string
+	OcPath               string
+	AddonEnv             []string
+	PublicHostname       string
+	SSHCommander         provision.SSHCommander
+	OcBinaryPathInsideVM string
 }
 
-// ClusterUp downloads and installs the oc binary in order to run 'cluster up'
-func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string, runner util.Runner) error {
+// ClusterUp execute oc binary in order to run 'cluster up'
+func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string) (string, error) {
 	cmdArgs := []string{"cluster", "up", "--use-existing-config"}
 
 	// Deal with extra flags (remove from cluster up params)
@@ -91,16 +95,17 @@ func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string, runne
 	if glog.V(2) {
 		fmt.Printf("-- Running 'oc' with: '%s'\n", strings.Join(cmdArgs, " "))
 	}
-	exitCode := runner.Run(os.Stdout, os.Stderr, config.OcPath, cmdArgs...)
-	if exitCode != 0 {
-		return errors.New("Error starting the cluster.")
+	cmd := fmt.Sprintf("%s %s", config.OcBinaryPathInsideVM, strings.Join(cmdArgs, " "))
+	out, err := config.SSHCommander.SSHCommand(cmd)
+	if err != nil {
+		return "", fmt.Errorf("Error starting the cluster. %v", err)
 	}
-	return nil
+	return out, nil
 }
 
 // PostClusterUp runs the Minishift specific provisioning after 'cluster up' has run
 func PostClusterUp(clusterUpConfig *ClusterUpConfig, sshCommander provision.SSHCommander, addOnManager *manager.AddOnManager, runner util.Runner) error {
-	err := kubeconfig.CacheSystemAdminEntries(clusterUpConfig.KubeConfigPath, clusterUpConfig.OcPath, runner)
+	err := kubeconfig.CacheSystemAdminEntries(clusterUpConfig.KubeConfigPath, clusterUpConfig.OcBinaryPathInsideVM, sshCommander)
 	if err != nil {
 		return err
 	}
@@ -115,7 +120,7 @@ func PostClusterUp(clusterUpConfig *ClusterUpConfig, sshCommander provision.SSHC
 		return err
 	}
 
-	err = ocRunner.AddCliContext(clusterUpConfig.MachineName, clusterUpConfig.Ip, clusterUpConfig.User, clusterUpConfig.Project)
+	err = ocRunner.AddCliContext(clusterUpConfig.MachineName, clusterUpConfig.Ip, clusterUpConfig.User, clusterUpConfig.Project, runner, clusterUpConfig.OcPath)
 	if err != nil {
 		return err
 	}
@@ -130,7 +135,7 @@ func PostClusterUp(clusterUpConfig *ClusterUpConfig, sshCommander provision.SSHC
 
 // EnsureHostDirectoriesExist ensures that the specified directories exist on the VM and creates them if not.
 func EnsureHostDirectoriesExist(host *host.Host, dirs []string) error {
-	cmd := fmt.Sprintf("sudo mkdir -p %s", strings.Join(dirs, " "))
+	cmd := fmt.Sprintf("sudo install -d -o docker -g docker -m 755 %s", strings.Join(dirs, " "))
 	_, err := host.RunSSHCommand(cmd)
 	if err != nil {
 		return err
@@ -173,6 +178,22 @@ func GetExecutionContext(ip string, routingSuffix string, addOnEnv []string, ocR
 	}
 
 	return context, nil
+}
+
+func CopyOcBinaryFromImageToVM(dockerCommander docker.DockerCommander, image string, pathInVm string) error {
+	if _, err := dockerCommander.Create("--name tmp", image); err != nil {
+		return err
+	}
+	if err := dockerCommander.Cp(minishiftConstants.OpenshiftOcExec, "tmp", pathInVm); err != nil {
+		return err
+	}
+	if _, err := dockerCommander.Stop("tmp"); err != nil {
+		return err
+	}
+	if err := dockerCommander.Rm("tmp"); err != nil {
+		return err
+	}
+	return nil
 }
 
 func applyAddOns(addOnManager *manager.AddOnManager, ip string, routingSuffix string, addonEnv []string, ocRunner *oc.OcRunner, sshCommander provision.SSHCommander) error {

@@ -34,6 +34,7 @@ import (
 	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/minishift/oc"
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
+	utils "github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 )
 
@@ -93,7 +94,7 @@ func SetOcContext(profileName string) error {
 	if err != nil {
 		return errors.New(fmt.Sprintf("Error during setting '%s' as active profile: %s", profileName, err.Error()))
 	}
-	err = ocRunner.AddCliContext(constants.MachineName, ip, minishiftConstants.DefaultUser, minishiftConstants.DefaultProject)
+	err = ocRunner.AddCliContext(constants.MachineName, ip, minishiftConstants.DefaultUser, minishiftConstants.DefaultProject, &utils.RealRunner{}, ocPath)
 	if err != nil {
 		return errors.New(fmt.Sprintf("Error during setting '%s' as active profile: %s", profileName, err.Error()))
 	}

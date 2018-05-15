@@ -17,6 +17,7 @@ limitations under the License.
 package constants
 
 import (
+	"fmt"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"path/filepath"
 )
@@ -30,7 +31,10 @@ const (
 	OpenshiftOcExec        = "/usr/bin/oc"
 	DefaultProject         = "myproject"
 	DefaultUser            = "developer"
+	DefaultUserPassword    = "developer"
+	SkipVerifyInsecureTLS  = "insecure-skip-tls-verify=true"
 	BinaryName             = "minishift"
+	OcPathInsideVM         = "/var/lib/minishift/bin"
 )
 
 var (
@@ -45,4 +49,8 @@ func ProfileAuthorizedKeysPath() string {
 // ProfilePrivateKeyPath returns the path of private key of VM present in profile dir which is used for authentication purpose
 func ProfilePrivateKeyPath() string {
 	return filepath.Join(constants.Minipath, "certs", "id_rsa")
+}
+
+func GetOpenshiftImageName(openshiftVersion string) string {
+	return fmt.Sprintf("openshift/origin:%s", openshiftVersion)
 }

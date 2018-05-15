@@ -146,7 +146,7 @@ func TestStartClusterUpNoFlags(t *testing.T) {
 	defer tearDown()
 
 	clusterUpParams := determineClusterUpParameters(testConfig)
-	clusterup.ClusterUp(testConfig, clusterUpParams, testRunner)
+	clusterup.ClusterUp(testConfig, clusterUpParams)
 
 	assert.Equal(t, testConfig.OcPath, testRunner.Cmd)
 
@@ -171,7 +171,7 @@ func TestStartClusterUpWithFlag(t *testing.T) {
 	viper.Set("skip-registry-check", "true")
 
 	clusterUpParams := determineClusterUpParameters(testConfig)
-	clusterup.ClusterUp(testConfig, clusterUpParams, testRunner)
+	clusterup.ClusterUp(testConfig, clusterUpParams)
 
 	expectedArguments := []string{
 		"cluster",
@@ -196,7 +196,7 @@ func TestClusterUpWithProxyFlag(t *testing.T) {
 	viper.Set("no-proxy", "10.0.0.1")
 
 	clusterUpParams := determineClusterUpParameters(testConfig)
-	clusterup.ClusterUp(testConfig, clusterUpParams, testRunner)
+	clusterup.ClusterUp(testConfig, clusterUpParams)
 
 	expectedArguments := []string{
 		"cluster",

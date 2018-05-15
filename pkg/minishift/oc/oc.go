@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/cmd"
 	"github.com/minishift/minishift/pkg/util/filehelper"
@@ -85,12 +86,23 @@ func (oc *OcRunner) AddSudoerRoleForUser(user string) error {
 
 // AddCliContext adds a CLI context for the user and namespace for the current OpenShift cluster. See also
 // https://docs.openshift.com/enterprise/3.0/cli_reference/manage_cli_profiles.html
-func (oc *OcRunner) AddCliContext(context string, ip string, username string, namespace string) error {
+func (oc *OcRunner) AddCliContext(context string, ip string, username string, namespace string, runner util.Runner, ocPath string) error {
+	cmdArgs := []string{"login",
+		fmt.Sprintf("--%s", minishiftConstants.SkipVerifyInsecureTLS),
+		fmt.Sprintf("-u=%s", username),
+		fmt.Sprintf("-p=%s", minishiftConstants.DefaultUserPassword),
+		fmt.Sprintf("%s:8443", ip)}
+
+	stdBuffer := new(bytes.Buffer)
+	exitCode := runner.Run(stdBuffer, os.Stderr, ocPath, cmdArgs...)
+	if exitCode != 0 {
+		return fmt.Errorf("Unable to login to cluster")
+	}
+
 	ip = strings.Replace(ip, ".", "-", -1)
 	cmd := fmt.Sprintf("config set-context %s --cluster=%s:%d --user=%s/%s:%d --namespace=%s", context, ip, constants.APIServerPort, username, ip, constants.APIServerPort, namespace)
 	errorBuffer := new(bytes.Buffer)
-
-	exitCode := oc.RunAsUser(cmd, nil, errorBuffer)
+	exitCode = oc.RunAsUser(cmd, nil, errorBuffer)
 	if exitCode != 0 {
 		return fmt.Errorf("Unable to create CLI context: %v", errorBuffer)
 	}

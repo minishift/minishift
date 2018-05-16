@@ -29,7 +29,7 @@ import (
 )
 
 const (
-	DefaultConfigViewFormat = "- {{.ConfigKey | printf \"%-21s\"}}: {{.ConfigValue}}"
+	DefaultConfigViewFormat = "- {{.ConfigKey | printf \"%-35s\"}}: {{.ConfigValue}}"
 )
 
 var configViewFormat string

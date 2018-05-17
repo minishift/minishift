@@ -18,24 +18,19 @@ package cmd
 
 import (
 	"fmt"
-
-	"github.com/minishift/minishift/pkg/minikube/constants"
-
 	"os"
 	"path/filepath"
 	"text/template"
 
 	"github.com/docker/machine/libmachine"
-	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/cmd/minishift/state"
-	"github.com/minishift/minishift/pkg/minishift/cache"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/config"
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/minishift/minishift/pkg/util/shell"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 const (
@@ -57,6 +52,10 @@ func getOcShellConfig(api libmachine.API, ocPath string, forcedShell string, noP
 	}
 
 	cmdLine := "minishift oc-env"
+	if constants.ProfileName != profileActions.GetActiveProfile() {
+		cmdLine = fmt.Sprintf("minishift oc-env --profile=%s", constants.ProfileName)
+	}
+
 	shellCfg := &OcShellConfig{
 		OcDirPath: filepath.Dir(ocPath),
 	}
@@ -104,14 +103,7 @@ var ocEnvCmd = &cobra.Command{
 		util.ExitIfNotRunning(host.Driver, constants.MachineName)
 
 		var shellCfg *OcShellConfig
-		var ocPath string
-		if constants.ProfileName != profileActions.GetActiveProfile() {
-			// When PROFILE_NAME is not an active profile i.e. oc-env --profile PROFILE_NAME
-			// is used we need to findout the oc path
-			ocPath = getOcPath()
-		} else {
-			ocPath = config.InstanceConfig.OcPath
-		}
+		ocPath := config.InstanceConfig.OcPath
 		shellCfg, err = getOcShellConfig(api, ocPath, forceShell, noProxy)
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error running the oc-env command: %s", err.Error()))
@@ -125,16 +117,4 @@ func init() {
 	RootCmd.AddCommand(ocEnvCmd)
 	ocEnvCmd.Flags().BoolVar(&noProxy, "no-proxy", false, "Add the virtual machine IP to the NO_PROXY environment variable.")
 	ocEnvCmd.Flags().StringVar(&forceShell, "shell", "", "Force setting the environment for a specified shell: [fish, cmd, powershell, tcsh, bash, zsh]. Default is auto-detect.")
-}
-
-// Get the oc path as per the current profile.
-// Because InstanceConfig.OcPath is set in minishift start or profile set. So when oc-env is called with --profile
-// it points to last minishift start or profile set.
-func getOcPath() string {
-	ocVersion := viper.GetString(configCmd.OpenshiftVersion.Name)
-	ocBinary := cache.Oc{
-		OpenShiftVersion:  ocVersion,
-		MinishiftCacheDir: state.InstanceDirs.Cache,
-	}
-	return filepath.Join(ocBinary.GetCacheFilepath(), constants.OC_BINARY_NAME)
 }

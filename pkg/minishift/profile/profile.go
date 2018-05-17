@@ -74,7 +74,10 @@ func SetActiveProfile(name string) error {
 
 // Get Active Profile from AllInstancesConfig
 func GetActiveProfile() string {
-	return config.AllInstancesConfig.ActiveProfile
+	if config.AllInstancesConfig != nil {
+		return config.AllInstancesConfig.ActiveProfile
+	}
+	return ""
 }
 
 // Placeholder function to change variables related to a VM instance

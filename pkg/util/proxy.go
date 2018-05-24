@@ -97,12 +97,15 @@ func (p *ProxyConfig) ProxyConfig() []string {
 
 	if p.httpProxy != "" {
 		config = append(config, fmt.Sprintf("HTTP_PROXY=%s", p.httpProxy))
+		config = append(config, fmt.Sprintf("http_proxy=%s", p.httpProxy))
 	}
 
 	if p.httpsProxy != "" {
 		config = append(config, fmt.Sprintf("HTTPS_PROXY=%s", p.httpsProxy))
+		config = append(config, fmt.Sprintf("https_proxy=%s", p.httpsProxy))
 	}
 	config = append(config, fmt.Sprintf("NO_PROXY=%s", p.NoProxy()))
+	config = append(config, fmt.Sprintf("no_proxy=%s", p.NoProxy()))
 
 	return config
 }
@@ -139,11 +142,14 @@ func (p *ProxyConfig) ApplyToEnvironment() {
 
 	if p.httpProxy != "" {
 		os.Setenv("HTTP_PROXY", p.httpProxy)
+		os.Setenv("http_proxy", p.httpProxy)
 	}
 	if p.httpsProxy != "" {
 		os.Setenv("HTTPS_PROXY", p.httpsProxy)
+		os.Setenv("https_proxy", p.httpsProxy)
 	}
 	os.Setenv("NO_PROXY", p.NoProxy())
+	os.Setenv("no_proxy", p.NoProxy())
 }
 
 // Enabled returns true if at least one proxy (HTTP or HTTPS) is configured. Returns false otherwise.

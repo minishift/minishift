@@ -34,7 +34,12 @@ func Test_proxy_config_as_slice(t *testing.T) {
 	proxyConfig, err := NewProxyConfig("http://foobar.com", "https://snafu.de", "")
 	assert.NoError(t, err, "Error in getting new proxy config")
 
-	expectedConfig := []string{"HTTP_PROXY=http://foobar.com", "HTTPS_PROXY=https://snafu.de", "NO_PROXY=localhost,127.0.0.1,172.30.1.1"}
+	expectedConfig := []string{"HTTP_PROXY=http://foobar.com",
+		"http_proxy=http://foobar.com",
+		"HTTPS_PROXY=https://snafu.de",
+		"https_proxy=https://snafu.de",
+		"NO_PROXY=localhost,127.0.0.1,172.30.1.1",
+		"no_proxy=localhost,127.0.0.1,172.30.1.1"}
 	actualConfig := proxyConfig.ProxyConfig()
 
 	assert.Len(t, expectedConfig, len(actualConfig))

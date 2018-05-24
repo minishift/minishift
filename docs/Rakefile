@@ -33,7 +33,7 @@ task :clean do
   rm_f ADOC_VARIABLES
   # find ditaa images based on the fact that they have a cache file
   DITAA_IMAGES = Rake::FileList.new do |list|
-    Rake::FileList.new("source/**/images/*.png.cache").each do |f|
+    Rake::FileList.new("source/**/images/*-template.png.cache").each do |f|
       list.add(f)
       list.add(f.gsub(/\.cache/, ''))
     end
@@ -80,6 +80,7 @@ task :serve, [:server_args] => [:init, :markdown_to_asciidoc, :adoc_variables] d
   if args[:server_args].nil? then
     sh "bundle exec middleman server"
   else
+    sh "cp -f source/using/images/minishift-architecture-template.png source/using/images/minishift-architecture.png"
     sh "bundle exec middleman server #{args[:server_args]}"
   end
 end
@@ -132,6 +133,11 @@ task :link_check => :gen do
   # Without this restriction we are getting errors for TLS certificate verification of
   # docs.openshift.org. This can be prevented by custom installing missing certificates, but
   # for now that is not required (HF)
+
+  # Don't need minishift-architecture.html file as it is unnecessary
+  # TODO: Investigate asciidoctor-diagram gem to see how we can prevent it
+  sh "rm -f build/using/minishift-architecture.html"
+  sh "cp -f build/using/images/minishift-architecture-template.png build/using/images/minishift-architecture.png"
   sh "bundle exec htmlproofer build --only-4xx"
 end
 

@@ -25,6 +25,12 @@ cluster in VM provided by Minishift.
        And stdout should contain "kubernetes"
        And stdout should contain "router"
 
+  Scenario: Pods docker-registry and router are ready before OpenShift restart
+     Given user waits "30" seconds
+      When executing "oc get pods -n default --as system:admin" succeeds
+      Then stdout should match "docker-registry-\d-\w{5}\s*1\/1\s*Running"
+       And stdout should match "router-\d-\w{5}\s*1\/1\s*Running"
+
   Scenario: Restarting the OpenShift cluster
   Note: This step is based on observation and might be unstable in some environments. It checks for the time when container
         finished last time. When container is new and had never finished then this time value is set to 0001-01-01T00:00:00Z.
@@ -34,6 +40,12 @@ cluster in VM provided by Minishift.
       When executing "minishift openshift restart" succeeds
       Then stdout should contain "OpenShift restarted successfully"
        And stdout of command "minishift ssh -- "docker inspect --format={{.State.FinishedAt}} origin"" is not equal to "0001-01-01T00:00:00Z"
+
+  Scenario: Pods docker-registry and router are ready after OpenShift restart
+     Given user waits "30" seconds
+      When executing "oc get pods -n default --as system:admin" succeeds
+      Then stdout should match "docker-registry-\d-\w{5}\s*1\/1\s*Running"
+       And stdout should match "router-\d-\w{5}\s*1\/1\s*Running"
 
   Scenario: User deploys nodejs example application from OpenShift repository
      Given Minishift has state "Running"

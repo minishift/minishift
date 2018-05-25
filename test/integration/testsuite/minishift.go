@@ -115,6 +115,7 @@ func (m *Minishift) executingRetryingTimesWithWaitPeriodOfSeconds(command string
 		if lastCommandOutput.ExitCode == 0 {
 			break
 		}
+		fmt.Printf("Command returned non-zero exit code: '%v', stdErr: '%v', stdOut: '%v', retrying...", lastCommandOutput.ExitCode, lastCommandOutput.StdErr, lastCommandOutput.StdOut)
 		time.Sleep(time.Duration(sleep) * time.Second)
 	}
 

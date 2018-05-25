@@ -1,0 +1,9 @@
+FROM fedora:26
+
+MAINTAINER Gerard Braad <me@gbraad.nl>
+
+RUN yum install -y rpm-build
+
+RUN rpmdev-setuptree
+WORKDIR /root/rpmbuild/SPECS
+

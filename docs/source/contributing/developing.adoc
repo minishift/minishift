@@ -103,12 +103,29 @@ $ go get github.com/golang/dep/cmd/dep
 This will install the `dep` binary into *_$GOPATH/bin_*.
 Make sure to use Dep version 0.4.1 or later.
 
-[[bootstrap-dependencies]]
-=== Bootstrapping Dependencies
+[[update-dependencies]]
+=== Updating Dependencies
 
-After a clean checkout or after a `make clean`, there won't be a *_vendor_* directory containing the needed {project} dependencies.
+If your work requires a change to the dependencies, you need to update the Dep configuration.
 
-To install the dependencies, you can run the following command:
+. Edit *_Gopkg.toml_* to change the dependencies as needed.
+
+. Run `make vendor` to fetch changed dependencies.
+
+. Test that everything still compiles with changed files in place by running `make clean && make`.
+
+Refer dep documents for more information.
+
+. link:https://golang.github.io/dep/docs/daily-dep.html#updating-dependencies[dep document about updating dependencies]
+
+. link:https://golang.github.io/dep/docs/daily-dep.html#adding-a-new-dependency[dep document about adding a dependency]
+
+[[recreate-vendor-directory]]
+=== Re-creating vendor Directory
+
+If you delete *_vendor_* directory which contain the needed {project} dependencies.
+
+To recreate *_vendor_* directory, you can run the following command:
 
 ----
 $ make vendor
@@ -120,20 +137,6 @@ Alternatively, you can run the Dep command directly.
 ----
 $ dep ensure -v
 ----
-
-[[update-dependencies]]
-=== Updating Dependencies
-
-If your work requires a change to the dependencies, you need to update the Dep configuration.
-
-. Edit *_Gopkg.toml_* to change the dependencies as needed.
-
-. Delete *_Gopkg.lock_* and re-create the vendor directory by running `make vendor`.
-Dep will recognize that there is no lock file and recalculate the required dependencies.
-
-. Check-in the updated *_Gopkg.toml_* and *_Gopkg.lock_* files.
-
-. Test that everything still compiles with the new lock file in place by running `make clean && make`.
 
 [TIP]
 ====

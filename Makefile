@@ -82,8 +82,10 @@ __check_defined = \
 # Start of the actual build targets
 
 .PHONY: $(GOPATH)/bin/minishift$(IS_EXE)
-$(GOPATH)/bin/minishift$(IS_EXE): $(ADDON_ASSET_FILE) vendor ## Builds the binary into $GOPATH/bin
+$(GOPATH)/bin/minishift$(IS_EXE): $(ADDON_ASSET_FILE) ## Builds the binary into $GOPATH/bin
 	go install -tags "$(BUILD_TAGS)" -pkgdir=$(ADDON_BINDATA_DIR) -ldflags="$(VERSION_VARIABLES)" ./cmd/minishift
+
+.PHONY: vendor
 vendor:
 	dep ensure -v
 
@@ -94,13 +96,13 @@ $(ADDON_ASSET_FILE): $(GOPATH)/bin/go-bindata ## Compiles the built-in add-on in
 $(BUILD_DIR)/$(GOOS)-$(GOARCH):
 	mkdir -p $(BUILD_DIR)/$(GOOS)-$(GOARCH)
 
-$(BUILD_DIR)/darwin-amd64/minishift: $(ADDON_ASSET_FILE) vendor $(BUILD_DIR)/$(GOOS)-$(GOARCH) ## Cross compiles the darwin executable and places it in $(BUILD_DIR)/darwin-amd64/minishift
+$(BUILD_DIR)/darwin-amd64/minishift: $(ADDON_ASSET_FILE) $(BUILD_DIR)/$(GOOS)-$(GOARCH) ## Cross compiles the darwin executable and places it in $(BUILD_DIR)/darwin-amd64/minishift
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build -tags "$(BUILD_TAGS)" -pkgdir=$(ADDON_BINDATA_DIR) --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/darwin-amd64/minishift ./cmd/minishift
 
-$(BUILD_DIR)/linux-amd64/minishift: $(ADDON_ASSET_FILE) vendor $(BUILD_DIR)/$(GOOS)-$(GOARCH) ## Cross compiles the linux executable and places it in $(BUILD_DIR)/linux-amd64/minishift
+$(BUILD_DIR)/linux-amd64/minishift: $(ADDON_ASSET_FILE) $(BUILD_DIR)/$(GOOS)-$(GOARCH) ## Cross compiles the linux executable and places it in $(BUILD_DIR)/linux-amd64/minishift
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -tags "$(BUILD_TAGS)" -pkgdir=$(ADDON_BINDATA_DIR) --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/linux-amd64/minishift ./cmd/minishift
 
-$(BUILD_DIR)/windows-amd64/minishift.exe: $(ADDON_ASSET_FILE) vendor $(BUILD_DIR)/$(GOOS)-$(GOARCH) ## Cross compiles the windows executable and places it in $(BUILD_DIR)/windows-amd64/minishift
+$(BUILD_DIR)/windows-amd64/minishift.exe: $(ADDON_ASSET_FILE) $(BUILD_DIR)/$(GOOS)-$(GOARCH) ## Cross compiles the windows executable and places it in $(BUILD_DIR)/windows-amd64/minishift
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build -tags "$(BUILD_TAGS)" -pkgdir=$(ADDON_BINDATA_DIR) --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/windows-amd64/minishift.exe ./cmd/minishift
 
 $(GOPATH)/bin/gh-release:
@@ -140,7 +142,7 @@ serve_docs: synopsis_docs ## Builds and serves the documentation using Middleman
 link_check_docs: gen_docs ## Checks the documentation for broken links
 	cd docs && docker run -u $(DOCS_UID) $(DOC_VARIABLES) -tiv $(LOCAL_DOCS_DIR):$(CONTAINER_DOCS_DIR):Z $(DOCS_BUILDER_IMAGE) link_check
 
-$(DOCS_SYNOPISIS_DIR)/*.md: vendor $(ADDON_ASSET_FILE)
+$(DOCS_SYNOPISIS_DIR)/*.md: $(ADDON_ASSET_FILE)
 	@# https://github.com/golang/go/issues/15038#issuecomment-207631885 ( CGO_ENABLED=0 )
 	DOCS_SYNOPISIS_DIR=$(DOCS_SYNOPISIS_DIR) CGO_ENABLED=0 go run -tags "$(BUILD_TAGS) gendocs" -ldflags="$(LDFLAGS)" gen_help_text.go
 
@@ -192,7 +194,6 @@ clean:
 	rm -rf $(GOPATH)/pkg/$(GOOS)_$(GOARCH)/$(ORG)
 	rm -rf $(BUILD_DIR)
 	rm -rf release
-	rm -rf vendor
 	rm -f  $(DOCS_SYNOPISIS_DIR)/*.md
 
 .PHONY: clean_bindata ## Remove $(ADDON_BINDATA_DIR)
@@ -200,7 +201,7 @@ clean_bindata:
 	rm -rf $(ADDON_BINDATA_DIR)
 
 .PHONY: test
-test: vendor $(ADDON_ASSET_FILE)  ## Run unit tests
+test: $(ADDON_ASSET_FILE)  ## Run unit tests
 	@go test -v -tags "$(BUILD_TAGS)" -ldflags="$(VERSION_VARIABLES)" $(shell $(PACKAGES))
 
 .PHONY: integration

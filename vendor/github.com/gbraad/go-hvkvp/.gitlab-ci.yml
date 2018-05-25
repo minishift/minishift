@@ -1,0 +1,34 @@
+stages:
+  - build
+  - publish
+
+build:
+  stage: build
+  image: fedora:26
+  variables:
+    DOCKER_HOST: "tcp://gbraad__dind-options:2375"
+  services:
+    - gbraad/dind-options:latest
+  script:
+    - dnf install -y docker make git
+    - make
+    - mkdir -p public
+    - mv out/hvkvp-* ./public
+  artifacts:
+    paths:
+      - public
+
+pages:
+  stage: publish
+  image: registry.gitlab.com/gbraad/docker:git
+  script:
+    - echo '<html><body>' > index.html
+    - ls ./public/ | sed 's/^.*/<a href="&">&<\/a><br\/>/' >> index.html
+    - echo '</body></html>' >> index.html
+    - mv index.html ./public/
+  artifacts:
+    paths:
+      - public
+  only:
+    - master
+

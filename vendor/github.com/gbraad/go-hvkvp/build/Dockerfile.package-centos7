@@ -1,0 +1,16 @@
+FROM centos:7
+
+MAINTAINER Gerard Braad <me@gbraad.nl>
+
+RUN yum install -y rpm-build
+
+RUN rpmdev-setuptree
+WORKDIR /root/rpmbuild/SPECS
+
+#$ docker build -t package-centos7
+#$ docker run --name=centos7 package-centos7
+#$ docker cp hvkvp-centos-0.0.3.tar.gz centos7:/root/rpmbuild/SOURCES/go-hvkvp-0.0.3.tar.gz
+#$ docker cp hvkvp.spec centos7:/root/rpmbuild/SPECS
+#$ docker exec centos7 rpmbuild -bb /root/rpmbuild/SPECS/hvkvp.spec
+#$ docker cp centos7:/root/rpmbuild/RPMS/x86_64/go-hvkvp-0.0.3-1.el7.centos.x86_64.rpm ./out/
+

@@ -690,7 +690,7 @@ func verifyHTTPResponse(partOfResponse string, url string, assertion string, exp
 	client := &http.Client{Transport: transport}
 	response, err := client.Get(url)
 	if err != nil {
-		return fmt.Errorf("Server returned error on url: %s", url)
+		return fmt.Errorf("On url: '%v' the server returned an error: '%v'.", url, err)
 	}
 	defer response.Body.Close()
 	var result string

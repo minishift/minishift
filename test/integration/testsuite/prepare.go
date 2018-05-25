@@ -140,6 +140,7 @@ func cleanTestDefaultHomeConfiguration() {
 	foldersToClean = append(foldersToClean, filepath.Join(testDefaultHome, "addons"))
 	foldersToClean = append(foldersToClean, filepath.Join(testDefaultHome, "config"))
 	foldersToClean = append(foldersToClean, filepath.Join(testDefaultHome, "cache/images"))
+	foldersToClean = append(foldersToClean, filepath.Join(testDefaultHome, "logs"))
 
 	for index := range foldersToClean {
 		err := os.RemoveAll(foldersToClean[index])

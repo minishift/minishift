@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"text/template"
 
 	"github.com/docker/machine/libmachine"
@@ -115,6 +116,10 @@ var ocEnvCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(ocEnvCmd)
-	ocEnvCmd.Flags().BoolVar(&noProxy, "no-proxy", false, "Add the virtual machine IP to the NO_PROXY environment variable.")
+	if runtime.GOOS == "windows" {
+		ocEnvCmd.Flags().BoolVar(&noProxy, "no-proxy", false, "Add the virtual machine IP to the NO_PROXY environment variable.")
+	} else {
+		ocEnvCmd.Flags().BoolVar(&noProxy, "no-proxy", false, "Add the virtual machine IP to the no_proxy/NO_PROXY environment variable.")
+	}
 	ocEnvCmd.Flags().StringVar(&forceShell, "shell", "", "Force setting the environment for a specified shell: [fish, cmd, powershell, tcsh, bash, zsh]. Default is auto-detect.")
 }

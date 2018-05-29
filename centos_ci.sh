@@ -230,7 +230,7 @@ function add_release_notes() {
   release_id=$(curl -s "https://api.github.com/repos/${REPO_OWNER}/minishift/releases" | jq --arg release "v$RELEASE_VERSION" -r ' .[] | if .name == $release then .id else empty end')
 
   if [[ "$release_id" != "" ]]; then
-    MILESTONE_ID=`curl -s https://api.github.com/repos/minishift/minishift/milestones?state=all  | jq --arg version "v$RELEASE_VERSION" -r ' .[] | if .title == $version then .number else empty end'`
+    MILESTONE_ID=`curl -s 'https://api.github.com/repos/minishift/minishift/milestones?state=all&page=1&per_page=100'  | jq --arg version "v$RELEASE_VERSION" -r ' .[] | if .title == $version then .number else empty end'`
 
     if [[ "$MILESTONE_ID" != "" ]]; then
       # Generate required json payload for release note

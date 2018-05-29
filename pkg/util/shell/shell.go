@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"github.com/docker/machine/libmachine/shell"
 	"os"
+	"runtime"
 	"strings"
 )
 
@@ -59,10 +60,22 @@ func FindNoProxyFromEnv() (string, string) {
 	noProxyVar := "no_proxy"
 	noProxyValue := os.Getenv(noProxyVar)
 
-	// otherwise default to allcaps HTTP_PROXY
+	// otherwise default to allcaps NO_PROXY
 	if noProxyValue == "" {
 		noProxyVar = "NO_PROXY"
 		noProxyValue = os.Getenv("NO_PROXY")
+	}
+
+	// On Windows, we've got to cheat a little bit because there is no way to
+	// get a specificially lowercase or uppercase env var. Furthermore, if
+	// both no_proxy and NO_PROXY are set, os.Getenv() will always get
+	// the value for NO_PROXY because it has higher sorting precedence.
+	// Effectively, that means that an uppercase env var on Windows always has
+	// precedence. In addition, it is common practice to write env vars in
+	// Windows in uppercase. All in all, this makes it reasonable to always
+	// uppercase the NO_PROXY var for Windows.
+	if runtime.GOOS == "windows" {
+		noProxyVar = strings.ToUpper(noProxyVar)
 	}
 	return noProxyVar, noProxyValue
 }

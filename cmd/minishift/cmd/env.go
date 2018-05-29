@@ -22,6 +22,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"runtime"
 	"text/template"
 
 	"github.com/minishift/minishift/pkg/minikube/constants"
@@ -152,7 +153,11 @@ var dockerEnvCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(dockerEnvCmd)
-	dockerEnvCmd.Flags().BoolVar(&noProxy, "no-proxy", false, "Add the virtual machine IP to the NO_PROXY environment variable.")
+	if runtime.GOOS == "windows" {
+		dockerEnvCmd.Flags().BoolVar(&noProxy, "no-proxy", false, "Add the virtual machine IP to the NO_PROXY environment variable.")
+	} else {
+		dockerEnvCmd.Flags().BoolVar(&noProxy, "no-proxy", false, "Add the virtual machine IP to the no_proxy/NO_PROXY environment variable.")
+	}
 	dockerEnvCmd.Flags().StringVar(&forceShell, "shell", "", "Force setting the environment for a specified shell: [fish, cmd, powershell, tcsh, bash, zsh]. Default is auto-detect.")
 	dockerEnvCmd.Flags().BoolVarP(&unset, "unset", "u", false, "Clear the environment variable values instead of setting them.")
 }

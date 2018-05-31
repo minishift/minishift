@@ -68,13 +68,13 @@ func HandleISOVersion() {
 		GodogTags += "~cdk-only"
 		isoUrl := os.Getenv("MINISHIFT_ISO_URL")
 		switch isoUrl {
-		case "", "b2d":
+		case "b2d":
 			fmt.Println("Test run using Boot2Docker iso image.")
 			isoName = "b2d"
 		case "minikube":
 			fmt.Println("Test run using Minikube iso image.")
 			isoName = "minikube"
-		case "centos":
+		case "", "centos":
 			fmt.Println("Test run using CentOS iso image.")
 			isoName = "centos"
 		default:

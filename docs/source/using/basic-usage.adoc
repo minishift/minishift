@@ -87,23 +87,23 @@ Please check link:https://github.com/kubernetes/minikube/blob/master/docs/contri
 Minikube ISO will be depricated in next release, please use CentOS or Boot2Docker ISO images.
 ====
 
-By default, {project} uses the {project} Boot2Docker ISO image.
-To choose the {project} CentOS ISO image instead, you can do one of the following:
+By default, {project} uses the {project} CentOS ISO image.
+To choose the {project} Boot2Docker ISO image instead, you can do one of the following:
 
-- Use the *centos* alias to download and use the latest CentOS ISO:
+- Use the *b2d* alias to download and use the latest Boot2Docker ISO:
 +
 ----
-$ minishift start --iso-url centos
+$ minishift start --iso-url b2d
 ----
 
-- Specify explicitly the download URL of the {project} CentOS ISO image. For example:
+- Specify explicitly the download URL of the {project} Boot2Docker ISO image. For example:
 +
 [subs="attributes"]
 ----
-$ minishift start --iso-url https://github.com/minishift/minishift-centos-iso/releases/download/{centos-iso-version}/minishift-centos7.iso
+$ minishift start --iso-url https://github.com/minishift/minishift-b2d-iso/releases/download/{b2d-iso-version}/minishift-b2d.iso
 ----
 
-- Manually download the {project} CentSO ISO image from the link:https://github.com/minishift/minishift-centos-iso/releases[releases page] and enter the file URI to the image:
+- Manually download the {project} Boot2Docker ISO image from the link:https://github.com/minishift/minishift-b2d-iso/releases[releases page] and enter the file URI to the image:
 
 [NOTE]
 ====

@@ -611,9 +611,9 @@ func initStartFlags() *flag.FlagSet {
 
 	if minishiftConfig.EnableExperimental {
 		startFlagSet.Bool(configCmd.NoProvision.Name, false, "Do not provision the VM with OpenShift (experimental)")
-		startFlagSet.String(configCmd.ISOUrl.Name, minishiftConstants.B2dIsoAlias, "Location of the minishift ISO. Can be an URL, file URI or one of the following short names: [b2d centos minikube].")
+		startFlagSet.String(configCmd.ISOUrl.Name, minishiftConstants.CentOsIsoAlias, "Location of the minishift ISO. Can be a URL, file URI or one of the following short names: [b2d centos minikube].")
 	} else {
-		startFlagSet.String(configCmd.ISOUrl.Name, minishiftConstants.B2dIsoAlias, "Location of the minishift ISO. Can be an URL, file URI or one of the following short names: [b2d centos].")
+		startFlagSet.String(configCmd.ISOUrl.Name, minishiftConstants.CentOsIsoAlias, "Location of the minishift ISO. Can be a URL, file URI or one of the following short names: [b2d centos].")
 	}
 
 	return startFlagSet

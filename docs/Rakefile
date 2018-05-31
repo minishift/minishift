@@ -112,6 +112,7 @@ task :adoc_variables => :init do
   openshift_version    = ENV['OPENSHIFT_VERSION']    || 'unset'
   centos_iso_version   = ENV['CENTOS_ISO_VERSION']   || 'unset'
   minikube_iso_version = ENV['MINIKUBE_ISO_VERSION'] || 'unset'
+  b2d_iso_version      = ENV['B2D_ISO_VERSION']      || 'unset'
 
   contents = <<EOF
 :project: Minishift
@@ -122,6 +123,7 @@ task :adoc_variables => :init do
 :openshift-version: #{openshift_version}
 :centos-iso-version: #{centos_iso_version}
 :minikube-iso-version: #{minikube_iso_version}
+:b2d-iso-version: #{b2d_iso_version}
 EOF
 
   ADOC_VARIABLES.each { |f| File.write(f, contents) }

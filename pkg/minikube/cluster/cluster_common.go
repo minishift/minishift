@@ -17,6 +17,8 @@ limitations under the License.
 package cluster
 
 import (
+	"path/filepath"
+
 	"github.com/docker/machine/drivers/generic"
 	"github.com/docker/machine/drivers/virtualbox"
 	"github.com/docker/machine/libmachine/drivers"
@@ -71,4 +73,37 @@ func createVirtualboxHost(config MachineConfig) drivers.Driver {
 	d.DiskSize = int(config.DiskSize)
 	d.HostOnlyCIDR = config.HostOnlyCIDR
 	return d
+}
+
+type vmwareDriver struct {
+	*drivers.BaseDriver
+
+	Memory         int
+	DiskSize       int
+	CPU            int
+	ISO            string
+	Boot2DockerURL string
+
+	SSHPassword    string
+	ConfigDriveISO string
+	ConfigDriveURL string
+	NoShare        bool
+}
+
+func createVmwareHost(config MachineConfig) *vmwareDriver {
+	return &vmwareDriver{
+		BaseDriver: &drivers.BaseDriver{
+			MachineName: constants.MachineName,
+			StorePath:   constants.Minipath,
+			SSHUser:     "docker",
+			SSHPort:     22,
+		},
+		Boot2DockerURL: config.GetISOFileURI(),
+		DiskSize:       config.DiskSize,
+		Memory:         config.Memory,
+		CPU:            config.CPUs,
+		ISO:            filepath.Join(constants.Minipath, "machines", constants.MachineName, "boot2docker.iso"),
+		NoShare:        true,
+		SSHPassword:    "tcuser",
+	}
 }

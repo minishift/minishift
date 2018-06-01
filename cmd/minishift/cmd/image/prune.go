@@ -29,10 +29,11 @@ import (
 var (
 	pruneAll      bool
 	imagePruneCmd = &cobra.Command{
-		Use:   "prune [image ...]",
-		Short: "Deletes the specified container images.",
-		Long:  "Deletes the specified container images.",
-		Run:   pruneImage,
+		Use:     "delete [image ...]",
+		Aliases: []string{"prune"},
+		Short:   "Deletes the specified container images.",
+		Long:    "Deletes the specified container images.",
+		Run:     pruneImage,
 	}
 )
 

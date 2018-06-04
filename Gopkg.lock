@@ -326,15 +326,6 @@
   version = "v1.6.1"
 
 [[projects]]
-  name = "github.com/gorillalabs/go-powershell"
-  packages = [
-    ".",
-    "backend",
-    "utils"
-  ]
-  revision = "3bc7a60b1df80a5766820c4a53d59668f4553f75"
-
-[[projects]]
   branch = "master"
   name = "github.com/hashicorp/hcl"
   packages = [
@@ -370,12 +361,6 @@
   packages = ["."]
   revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
   version = "v1.0"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/juju/errors"
-  packages = ["."]
-  revision = "c7d06af17c68cd34c835053720b21f6549d9b0ee"
 
 [[projects]]
   name = "github.com/kardianos/osext"

@@ -17,31 +17,32 @@ limitations under the License.
 package powershell
 
 import (
-	ps "github.com/gorillalabs/go-powershell"
-	"github.com/gorillalabs/go-powershell/backend"
+	"bytes"
+
+	"os/exec"
 )
 
 type PowerShell struct {
-	powerShell ps.Shell
+	powerShell string
 }
 
 func New() *PowerShell {
+	ps, _ := exec.LookPath("powershell.exe")
 	return &PowerShell{
-		powerShell: createPowerShell(),
+		powerShell: ps,
 	}
 }
 
-func (p *PowerShell) Close() {
-	p.powerShell.Exit()
-}
+func (p *PowerShell) Execute(args ...string) (stdOut string, stdErr string, err error) {
+	args = append([]string{"-NoProfile", "-NonInteractive"}, args...)
+	cmd := exec.Command(p.powerShell, args...)
 
-func (p *PowerShell) Execute(command string) (stdOut string, stdErr string) {
-	stdOut, stdErr, _ = p.powerShell.Execute(command)
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	err = cmd.Run()
+	stdOut, stdErr = stdout.String(), stderr.String()
 	return
-}
-
-func createPowerShell() ps.Shell {
-	back := &backend.Local{}
-	shell, _ := ps.New(back)
-	return shell
 }

@@ -61,10 +61,6 @@ ignored = ["github.com/Sirupsen/logrus"]
   revision = "30a21ee1a3839fb4a408efe331f226b73faac379"
 
 [[constraint]]
-  name = "github.com/gorillalabs/go-powershell"
-  revision = "3bc7a60b1df80a5766820c4a53d59668f4553f75"
-
-[[constraint]]
   name = "github.com/inconshreveable/go-update"
   revision = "8152e7eb6ccf8679a64582a66b78519688d156ad"
 

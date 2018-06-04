@@ -19,18 +19,17 @@ package config
 import (
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/minishift/minishift/pkg/minishift/shell/powershell"
 )
 
 func IsValidHypervVirtualSwitch(name string, vswitch string) error {
 	posh := powershell.New()
-	defer posh.Close()
 
-	checkIfVirtualSwitchExists := fmt.Sprintf("Get-VMSwitch %s| ForEach-Object { $_.SwitchType }", vswitch)
-	_, stdErr := posh.Execute(checkIfVirtualSwitchExists)
-	if strings.Contains(stdErr, "Get-VMSwitch") {
+	checkIfVirtualSwitchExists := fmt.Sprintf("Get-VMSwitch '%s'", vswitch)
+	_, _, err := posh.Execute(checkIfVirtualSwitchExists)
+
+	if err != nil {
 		return errors.New("Virtual Switch not found")
 	}
 

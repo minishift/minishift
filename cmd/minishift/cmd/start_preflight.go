@@ -407,14 +407,13 @@ func checkLibvirtDefaultNetworkActive() bool {
 // checkHypervDriverSwitch returns true if Virtual Switch has been selected
 func checkHypervDriverSwitch() bool {
 	posh := powershell.New()
-	defer posh.Close()
 
 	switchName := viper.GetString(configCmd.HypervVirtualSwitch.Name)
 
 	// check for default switch
 	if switchName == "" {
 		checkIfDefaultSwitchExists := fmt.Sprintf("Get-VMSwitch -Id %s | ForEach-Object { $_.Name }", hypervDefaultVirtualSwitchId)
-		stdOut, stdErr := posh.Execute(checkIfDefaultSwitchExists)
+		stdOut, stdErr, _ := posh.Execute(checkIfDefaultSwitchExists)
 
 		if !strings.Contains(stdErr, "Get-VMSwitch") {
 			// force setting the config variable
@@ -438,11 +437,10 @@ func checkHypervDriverInstalled() bool {
 
 	// check to see if a hypervisor is present. if hyper-v is installed and enabled,
 	posh := powershell.New()
-	defer posh.Close()
 
 	checkHypervisorPresent := `@(Get-Wmiobject Win32_ComputerSystem).HypervisorPresent`
 
-	stdOut, _ := posh.Execute(checkHypervisorPresent)
+	stdOut, _, _ := posh.Execute(checkHypervisorPresent)
 	if !strings.Contains(stdOut, "True") {
 		return false
 	}
@@ -453,7 +451,6 @@ func checkHypervDriverInstalled() bool {
 // checkHypervDriverUser returns true if user is member of Hyper-V admin
 func checkHypervDriverUser() bool {
 	posh := powershell.New()
-	defer posh.Close()
 
 	// Use RID to prevent issues with localized groups: https://github.com/minishift/minishift/issues/1541
 	// https://support.microsoft.com/en-us/help/243330/well-known-security-identifiers-in-windows-operating-systems
@@ -464,7 +461,7 @@ func checkHypervDriverUser() bool {
 	checkIfMemberOfHyperVAdmins :=
 		`$sid = New-Object System.Security.Principal.SecurityIdentifier("S-1-5-32-578")
 	@([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole($sid)`
-	stdOut, _ := posh.Execute(checkIfMemberOfHyperVAdmins)
+	stdOut, _, _ := posh.Execute(checkIfMemberOfHyperVAdmins)
 	if !strings.Contains(stdOut, "True") {
 		return false
 	}

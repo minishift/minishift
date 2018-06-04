@@ -39,9 +39,8 @@ import (
 func IsValidDriver(string, driver string) error {
 	if runtime.GOOS == "windows" {
 		posh := powershell.New()
-		defer posh.Close()
 		checkWindowsName := `(Get-WmiObject -Class Win32_OperatingSystem).Caption`
-		stdOut, _ := posh.Execute(checkWindowsName)
+		stdOut, _, _ := posh.Execute(checkWindowsName)
 		if driver == "hyperv" && strings.Contains(stdOut, "Windows 7") {
 			return fmt.Errorf("Driver '%s' is not supported", driver)
 		}

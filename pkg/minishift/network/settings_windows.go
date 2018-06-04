@@ -49,10 +49,9 @@ func isUsingDefaultSwitch() bool {
 
 func getAddressAssignedToDefaultSwitch() string {
 	posh := powershell.New()
-	defer posh.Close()
 
 	command := `Get-NetIPInterface -InterfaceAlias "vEthernet (Default Switch)" -AddressFamily IPv4 | Get-NetIPAddress | ForEach-Object { $_.IPAddress }`
-	result, _ := posh.Execute(command)
+	result, _, _ := posh.Execute(command)
 
 	return strings.TrimSpace(result)
 }
@@ -70,10 +69,9 @@ func determineNameservers() []string {
 	}
 
 	posh := powershell.New()
-	defer posh.Close()
 
 	command := `Get-DnsClientServerAddress | Where-Object { $_.InterfaceAlias -like 'vEthernet*' } | ForEach-Object { $_.ServerAddresses }`
-	result, _ := posh.Execute(command)
+	result, _, _ := posh.Execute(command)
 
 	nameservers := strings.Split(result, "\r\n")
 	ipv4ns := []string{}
@@ -156,8 +154,7 @@ func ConfigureNetworking(machineName string, networkSettings NetworkSettings) {
 
 func doConfigure(success chan bool, command string) {
 	posh := powershell.New()
-	defer posh.Close()
-	result, _ := posh.Execute(command)
+	result, _, _ := posh.Execute(command)
 
 	if strings.Contains(result, resultSuccess) {
 		if glog.V(5) {

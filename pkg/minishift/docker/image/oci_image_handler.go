@@ -136,7 +136,7 @@ func (handler *OciImageHandler) ImportImages(config *ImageCacheConfig) ([]string
 }
 
 // ExportImages exports the images specified as part of the ImageCacheConfig from the VM to the host.
-func (handler *OciImageHandler) ExportImages(config *ImageCacheConfig) ([]string, error) {
+func (handler *OciImageHandler) ExportImages(config *ImageCacheConfig, overwrite bool) ([]string, error) {
 	out := handler.getOutputWriter(config)
 	exportedImages := []string{}
 
@@ -153,8 +153,8 @@ func (handler *OciImageHandler) ExportImages(config *ImageCacheConfig) ([]string
 		progressDots.SetWriter(out)
 		progressDots.Start()
 
-		if !handler.IsImageCached(config, imageName) {
-			err = handler.exportImage(imageName, config, policyContext, out)
+		if !handler.IsImageCached(config, imageName) || overwrite {
+			err = handler.exportImage(imageName, config, policyContext, out, overwrite)
 		}
 		handler.endProgress(progressDots, out, handler.progressStatusForError(err))
 		multiError.Collect(err)
@@ -308,13 +308,13 @@ func (handler *OciImageHandler) importImage(image string, config *ImageCacheConf
 	return nil
 }
 
-func (handler *OciImageHandler) exportImage(image string, config *ImageCacheConfig, policyContext *signature.PolicyContext, out io.Writer) error {
+func (handler *OciImageHandler) exportImage(image string, config *ImageCacheConfig, policyContext *signature.PolicyContext, out io.Writer, overwrite bool) error {
 	availableImages, err := handler.GetDockerImages()
 	if err != nil {
 		return err
 	}
 
-	if _, found := availableImages[image]; !found {
+	if _, found := availableImages[image]; !found || overwrite {
 		err := handler.pullImage(image, config.Out)
 		if err != nil {
 			return err

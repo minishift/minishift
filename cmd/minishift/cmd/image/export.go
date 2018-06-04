@@ -22,6 +22,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"io"
+
 	"github.com/docker/machine/libmachine"
 	"github.com/minishift/minishift/cmd/minishift/cmd/config"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
@@ -32,12 +34,12 @@ import (
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"io"
 )
 
 var (
 	logToFile bool
 	exportAll bool
+	overwrite bool
 
 	imageExportCmd = &cobra.Command{
 		Use:   "export [image ...]",
@@ -97,7 +99,7 @@ func exportImage(cmd *cobra.Command, args []string) {
 		ImageMissStrategy: image.Pull,
 	}
 
-	_, err = handler.ExportImages(imageCacheConfig)
+	_, err = handler.ExportImages(imageCacheConfig, overwrite)
 	if err != nil {
 		msg := fmt.Sprintf("Container image export failed:\n%v", err)
 		if logToFile {
@@ -144,5 +146,6 @@ func createLogFile() *os.File {
 func init() {
 	imageExportCmd.Flags().BoolVar(&exportAll, "all", false, "Exports all images currently available in the Docker daemon.")
 	imageExportCmd.Flags().BoolVar(&logToFile, "log-to-file", false, "Logs export progress to file instead of standard out.")
+	imageExportCmd.Flags().BoolVar(&overwrite, "overwrite", false, "Forces an image export when the image is already available in the Docker daemon.")
 	ImageCmd.AddCommand(imageExportCmd)
 }

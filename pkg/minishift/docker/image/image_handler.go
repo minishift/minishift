@@ -45,7 +45,7 @@ type ImageHandler interface {
 
 	// ExportImages exports the images specified as part of the ImageCacheConfig from the VM to the host.
 	// The method returns the list of successfully exported images and an error if one occurred.
-	ExportImages(config *ImageCacheConfig) ([]string, error)
+	ExportImages(config *ImageCacheConfig, overwrite bool) ([]string, error)
 
 	// IsImageCached returns true if the specified image is cached, false otherwise.
 	IsImageCached(config *ImageCacheConfig, image string) bool

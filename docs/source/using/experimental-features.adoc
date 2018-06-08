@@ -4,7 +4,7 @@ include::variables.adoc[]
 :icons:
 :toc: macro
 :toc-title:
-:toclevels: 2
+:toclevels: 3
 
 toc::[]
 
@@ -150,6 +150,173 @@ To get the status of the DNS server:
 
 ----
 $ minishift dns status
+----
+
+[[local-dns-setup-macos]]
+=== Local DNS Setup for macOS
+
+Recent versions of macOS do not send out DNS queries in offline mode, and the process for using a local DNS server from {project} is more involved than other operating systems.
+
+==== Enable tap devices
+
+Check for the presence of `tap` devices in *_/dev_*:
+
+----
+$ ls /dev | grep tap
+----
+
+If no `tap` devices are present, install the *tuntap* package:
+
+----
+$ brew install tuntap
+----
+
+==== Use a tap device to create a network service
+
+As root, open the *_/Library/Preferences/SystemConfiguration/preferences.plist_* file and add the following XML under the `<key>NetworkServices</key>` element:
+
+[source, xml]
+----
+<key>D16F22CE-6DDE-4E63-837C-E16538EA5CCB</key>	<!--1-->
+<dict>
+    <key>DNS</key>
+    <dict />
+    <key>IPv4</key>
+    <dict>
+        <key>Addresses</key>
+        <array>
+            <string>10.10.90.1</string>		<!--2-->
+        </array>
+        <key>ConfigMethod</key>
+        <string>Manual</string>
+        <key>SubnetMasks</key>
+        <array>
+            <string>255.255.0.0</string>
+        </array>
+    </dict>
+    <key>IPv6</key>
+    <dict>
+        <key>ConfigMethod</key>
+        <string>Automatic</string>
+    </dict>
+    <key>Interface</key>
+    <dict>
+        <key>DeviceName</key>
+        <string>tap0</string>			<!--3-->
+        <key>Hardware</key>
+        <string>Ethernet</string>
+        <key>Type</key>
+        <string>Ethernet</string>
+        <key>UserDefinedName</key>
+        <string>MiniTap</string>		<!--4-->
+    </dict>
+    <key>Proxies</key>
+    <dict>
+        <key>ExceptionsList</key>
+        <array>
+            <string>*.local</string>
+            <string>169.254/16</string>
+        </array>
+        <key>FTPPassive</key>
+        <integer>1</integer>
+    </dict>
+    <key>SMB</key>
+    <dict />
+    <key>UserDefinedName</key>
+    <string>MiniTap</string>			<!--4-->
+</dict>
+----
+
+<1> This is the UUID for the network service. Replace this value with the output of `uuidgen`.
+<2> The IP address for the network service.
+<3> The `/dev/tap` device to use.
+<4> Name for the network service (This will appear in the Network Preferences GUI).
+
+==== Adding the Network Service to _ServiceOrder_ array
+
+In the *_/Library/Preferences/SystemConfiguration/preferences.plist_* file, look for the `<key>ServiceOrder</key>` element.
+As root, append the UUID for our *MiniTap* network service to this array. 
+
+[source, xml]
+----
+<key>ServiceOrder</key>
+    <array>
+        <string>06BFF3C7-13DA-420F-AE9C-B036401184D7</string>
+	<string>58231F56-CA25-4D41-930F-46D83CA07BFE</string>
+	<string>304203B0-AC87-459F-9761-C2799EEBB2E3</string>
+	<string>8655D244-C6E7-4CC0-BF06-BB18F9C3BB85</string>
+	<string>3C26FB9D-D918-4B79-9C7B-ADECD8EFE00F</string>
+	<string>D16F22CE-6DDE-4E63-837C-E16538EA5CCB</string>	<!--1-->
+    </array>
+----
+
+<1> The UUID for *MiniTap* network service.
+
+==== Adding the Network Service to _Service_ dictionary
+
+In the *_/Library/Preferences/SystemConfiguration/preferences.plist_* file, look for the `<key>Service</key>` element.
+As root, append the following XML to its dictionary:
+
+[source, xml]
+----
+<key>Service</key>
+    <dict>
+        <key>06BFF3C7-13DA-420F-AE9C-B036401184D7</key>
+        <dict>
+            <key>__LINK__</key>
+            <string>/NetworkServices/06BFF3C7-13DA-420F-AE9C-B036401184D7</string>
+        </dict>
+        <key>304203B0-AC87-459F-9761-C2799EEBB2E3</key>
+        <dict>
+            <key>__LINK__</key>
+            <string>/NetworkServices/304203B0-AC87-459F-9761-C2799EEBB2E3</string>
+        </dict>
+        <key>3C26FB9D-D918-4B79-9C7B-ADECD8EFE00F</key>
+        <dict>
+            <key>__LINK__</key>
+            <string>/NetworkServices/3C26FB9D-D918-4B79-9C7B-ADECD8EFE00F</string>
+        </dict>
+        <key>58231F56-CA25-4D41-930F-46D83CA07BFE</key>
+        <dict>
+            <key>__LINK__</key>
+            <string>/NetworkServices/58231F56-CA25-4D41-930F-46D83CA07BFE</string>
+        </dict>
+        <key>8655D244-C6E7-4CC0-BF06-BB18F9C3BB85</key>
+        <dict>
+            <key>__LINK__</key>
+            <string>/NetworkServices/8655D244-C6E7-4CC0-BF06-BB18F9C3BB85</string>
+        </dict>
+        <key>D16F22CE-6DDE-4E63-837C-E16538EA5CCB</key>				  <!--1-->
+        <dict>
+            <key>__LINK__</key>
+            <string>/NetworkServices/D16F22CE-6DDE-4E63-837C-E16538EA5CCB</string><!--2-->
+        </dict>
+    </dict>
+----
+
+<1> The UUID of the *MiniTap* service.
+<2> Replace this UUID with the UUID of your *MiniTap* service.
+
+Reboot macOS and you should see a *MiniTap* service in the Network Preferences GUI.
+This service will be disconnected.
+To turn it on, issue the following commands:
+
+----
+$ exec 4<>/dev/tap0			<!--1-->
+$ ifconfig tap0 10.10.90.1 255.255.0.0  <!--1--> <!--2-->
+$ ifconfig tap0 up			<!--1-->
+----
+
+<1> Replace it with the `/dev/tap` device used by *MiniTap* Service.
+<2> IP address should be same as the one in the *MiniTap* Service definition.
+
+==== Adding resolver config
+
+Create the file `/etc/resolver/nip.io` with the following content:
+
+----
+nameserver <ip_address_of_the_minishfit_vm>
+search_order 1
 ----
 
 [[run-against-an-existing-machine]]

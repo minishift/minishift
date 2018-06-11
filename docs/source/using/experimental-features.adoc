@@ -100,7 +100,13 @@ Failing to do so will result in connectivity issues.
 This only works with the CentOS or RHEL xref:../using/basic-usage.adoc#choosing-iso-image[ISO] and is currently not supported on KVM as the driver plug-in relies on the DHCP offer to determine the IP address.
 ====
 
-include::con_static-ip-overview.adoc[]
+Most hypervisors do not support extending the lease time when the IP is assigned using DHCP.
+This might lead to a new IP being assigned to the VM after a restart as it will conflict with the security certificates generated for the old IP.
+This will make {project} completely unusable until a new instance is set up by running `minishift delete` followed by `minishift start`.
+
+To prevent this, {project} includes the functionality to set a static IP address to the VM.
+This will prevent the IP address from changing between restarts.
+However, it will not work on all of the driver plug-ins at the moment due to the way the IP address is resolved.
 
 The following command will set the IP address that was assigned as fixed:
 

@@ -37,11 +37,11 @@ type CommandHandler interface {
 	// Create attempts to parse the given string into a Command instance of its type. In case
 	// s does not represent a command which can be handled by this Command instance, Create of the specified next
 	// Command is called. If there is no next Command, nil is returned.
-	Handle(next CommandHandler, s string, ignoreError bool) (command.Command, error)
+	Handle(next CommandHandler, s string, ignoreError bool, outputVariable string) (command.Command, error)
 
 	// Parse attempts to parse the given string into a Command instance of its type. nil is returned in case
 	// s does not represent a command which can be handled by this Command instance.
-	Parse(s string, ignoreError bool) command.Command
+	Parse(s string, ignoreError bool, outputVariable string) command.Command
 }
 
 type defaultCommandHandler struct {
@@ -54,12 +54,12 @@ func (dc *defaultCommandHandler) SetNext(next CommandHandler) {
 	dc.next = next
 }
 
-func (dc *defaultCommandHandler) Handle(c CommandHandler, s string, ignoreError bool) (command.Command, error) {
-	newCommand := c.Parse(s, ignoreError)
+func (dc *defaultCommandHandler) Handle(c CommandHandler, s string, ignoreError bool, outputVariable string) (command.Command, error) {
+	newCommand := c.Parse(s, ignoreError, outputVariable)
 	if newCommand != nil {
 		return newCommand, nil
 	} else if dc.next != nil {
-		return dc.next.Handle(dc.next, s, ignoreError)
+		return dc.next.Handle(dc.next, s, ignoreError, outputVariable)
 	} else {
 		return nil, errors.New(fmt.Sprintf("Unable to process command: '%s'", s))
 	}
@@ -69,9 +69,9 @@ type DockerCommandHandler struct {
 	*defaultCommandHandler
 }
 
-func (c *DockerCommandHandler) Parse(s string, ignoreError bool) command.Command {
+func (c *DockerCommandHandler) Parse(s string, ignoreError bool, outputVariable string) command.Command {
 	if strings.HasPrefix(s, dockerCommand) {
-		return command.NewDockerCommand(s, ignoreError)
+		return command.NewDockerCommand(s, ignoreError, outputVariable)
 	}
 	return nil
 }
@@ -80,9 +80,9 @@ type OcCommandHandler struct {
 	*defaultCommandHandler
 }
 
-func (c *OcCommandHandler) Parse(s string, ignoreError bool) command.Command {
+func (c *OcCommandHandler) Parse(s string, ignoreError bool, outputVariable string) command.Command {
 	if strings.HasPrefix(s, ocCommand) {
-		return command.NewOcCommand(s, ignoreError)
+		return command.NewOcCommand(s, ignoreError, outputVariable)
 	}
 	return nil
 }
@@ -91,9 +91,9 @@ type OpenShiftCommandHandler struct {
 	*defaultCommandHandler
 }
 
-func (c *OpenShiftCommandHandler) Parse(s string, ignoreError bool) command.Command {
+func (c *OpenShiftCommandHandler) Parse(s string, ignoreError bool, outputVariable string) command.Command {
 	if strings.HasPrefix(s, openShiftCommand) {
-		return command.NewOpenShiftCommand(s, ignoreError)
+		return command.NewOpenShiftCommand(s, ignoreError, outputVariable)
 	}
 	return nil
 }
@@ -102,7 +102,7 @@ type SleepCommandHandler struct {
 	*defaultCommandHandler
 }
 
-func (c *SleepCommandHandler) Parse(s string, ignoreError bool) command.Command {
+func (c *SleepCommandHandler) Parse(s string, ignoreError bool, outputVariable string) command.Command {
 	if strings.HasPrefix(s, sleepCommand) {
 		return command.NewSleepCommand(s, ignoreError)
 	}
@@ -113,9 +113,9 @@ type SSHCommandHandler struct {
 	*defaultCommandHandler
 }
 
-func (c *SSHCommandHandler) Parse(s string, ignoreError bool) command.Command {
+func (c *SSHCommandHandler) Parse(s string, ignoreError bool, outputVariable string) command.Command {
 	if strings.HasPrefix(s, sshCommand) {
-		return command.NewSshCommand(s, ignoreError)
+		return command.NewSshCommand(s, ignoreError, outputVariable)
 	}
 	return nil
 }
@@ -124,7 +124,7 @@ type EchoCommandHandler struct {
 	*defaultCommandHandler
 }
 
-func (c *EchoCommandHandler) Parse(s string, ignoreError bool) command.Command {
+func (c *EchoCommandHandler) Parse(s string, ignoreError bool, outputVariable string) command.Command {
 	if strings.HasPrefix(s, echoCommand) {
 		return command.NewEchoCommand(s, ignoreError)
 	}

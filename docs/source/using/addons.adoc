@@ -28,13 +28,18 @@ The following example shows the contents of an add-on file, including the name a
 # Required-Vars: ACME_TOKEN                                                             // <3>
 # OpenShift-Version: >3.6.0                                                             // <4>
 
-oc adm policy add-scc-to-group anyuid system:authenticated                              // <5>
+mytoken := oc sa get-token oauth-client                                                 // <5>
+
+oc new-app -p OPENSHIFT_OAUTH_CLIENT_SECRET=#{mytoken}                                  // <6>
+oc adm policy add-scc-to-group anyuid system:authenticated                              // <7>
 ----
 <1> (Required) Name of the add-on.
 <2> (Required) Description of the add-on.
 <3> (Optional) Comma separated list of required interpolation variables. See xref:../using/addons.adoc#addon-variable-interpolation[Variable Interpolation]
 <4> (Optional) OpenShift version required to run a specific add-on. See xref:../using/addons.adoc#addon-openshift-version-semantics[OpenShift Version Semantic]
-<5> Actual add-on command. In this case, the command executes the *oc* binary.
+<5> Run an actual add-on command and store its output in a variable. See xref:../using/addons.adoc#internal-addon-variable[Internal Variable]
+<6> Actual add-on command. In this case, the command executes the *oc* binary using the `mytoken` variable value.
+<7> Actual add-on command. In this case, the command executes the *oc* binary.
 
 [NOTE]
 ====
@@ -220,6 +225,22 @@ Multiple default key/value pairs need to be comma separated.
 ====
 Variable values specified via the command line using the `--addon-env` or set via `minishift config set addon-env` have precedence over _Var-Defaults_.
 ====
+
+
+[[internal-addon-variable]]
+=== Internal Variables
+
+Add-on allows to define variables in an add-on.
+These variables can be used to store output of an xref:../using/addons.adoc#addon-commands[add-on command]
+
+For example, you can save a `oc` command output in a variable `mytoken` and use it in the subsequent add-on commands.
+
+example :
+----
+mytoken := oc sa get-token oauth-client
+oc new-app -p OPENSHIFT_OAUTH_CLIENT_SECRET=#{mytoken}
+----
+
 
 [[default-addons]]
 == Default Add-ons

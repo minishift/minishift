@@ -39,7 +39,7 @@ func NewSleepCommand(command string, ignoreError bool) *SleepCommand {
 	return sleepCommand
 }
 
-func (c *SleepCommand) doExecute(ec *ExecutionContext, ignoreError bool) error {
+func (c *SleepCommand) doExecute(ec *ExecutionContext, ignoreError bool, outputVariable string) error {
 	duration, err := c.getSleepTime()
 	if err != nil {
 		return err

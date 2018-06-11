@@ -33,7 +33,7 @@ func NewEchoCommand(command string, ignoreError bool) *EchoCommand {
 	return echoCommand
 }
 
-func (c *EchoCommand) doExecute(ec *ExecutionContext, ignoreError bool) error {
+func (c *EchoCommand) doExecute(ec *ExecutionContext, ignoreError bool, outputVariable string) error {
 	var err error
 
 	// split off the actual 'echo' command. As we need to print rest of the string

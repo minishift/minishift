@@ -19,18 +19,26 @@ which are then available in OpenShift to the user.
 
   Scenario Outline: User deploys, checks out and deletes several templates from XpaaS imagestream
    Given Minishift has state "Running"
+     And user waits "60" seconds
+     And executing "oc delete all --all" succeeds
     When executing "oc new-app <template-name>" succeeds
      And executing "oc set probe dc/<service-name> --readiness --get-url=http://:8080<http-endpoint>" succeeds
      And service "<service-name>" rollout successfully within "1200" seconds
     Then with up to "10" retries with wait period of "500ms" the "body" of HTTP request to "<http-endpoint>" of service "<service-name>" in namespace "myproject" contains "<expected-hello>"
      And with up to "10" retries with wait period of "500ms" the "status code" of HTTP request to "<http-endpoint>" of service "<service-name>" in namespace "myproject" is equal to "200"
-     And executing "oc delete all --all" succeeds
 
   Examples: Required information to test the templates
     | template-name           | service-name   | http-endpoint | expected-hello                        |
     | datagrid65-basic        | datagrid-app   | /             | Welcome to the JBoss Data Grid Server |
     | eap70-basic-s2i         | eap-app        | /index.jsf    | Welcome to JBoss!                     |
+    | eap71-basic-s2i         | eap-app        | /index.jsf    | Welcome to JBoss!                     |
     | eap71-tx-recovery-s2i   | eap-app        | /index.jsf    | Welcome to JBoss!                     |
+    # new
+    #| amq62-basic                | eap-app        | /             | Welcome to JBoss!                     |
+    #| amq63-basic                | eap-app        | /             | Welcome to JBoss!                     |
+    #| datagrid71-basic           | eap-app        | /index.jsf    | Welcome to the JBoss Data Grid Server |
+    #| jws31-tomcat8-basic-s2i    | eap-app        | /index.jsf    | Welcome to JBoss!                     |
+    #| decisionserver64-basic-s2i | eap-app        | /index.jsf    | Welcome to JBoss!                     |
 
   Scenario: User deletes Minishift
      When executing "minishift delete --force" succeeds

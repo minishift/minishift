@@ -17,6 +17,7 @@ limitations under the License.
 package command
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -28,27 +29,34 @@ type OcCommand struct {
 	*defaultCommand
 }
 
-func NewOcCommand(command string, ignoreError bool) *OcCommand {
-	defaultCommand := &defaultCommand{rawCommand: command, ignoreError: ignoreError}
+func NewOcCommand(command string, ignoreError bool, outputVariable string) *OcCommand {
+	defaultCommand := &defaultCommand{rawCommand: command, ignoreError: ignoreError, outputVariable: outputVariable}
 	ocCommand := &OcCommand{defaultCommand}
 	defaultCommand.fn = ocCommand.doExecute
 	return ocCommand
 }
 
-func (c *OcCommand) doExecute(ec *ExecutionContext, ignoreError bool) error {
+func (c *OcCommand) doExecute(ec *ExecutionContext, ignoreError bool, outputVariable string) error {
 	// split off the actual 'oc' command. We are using our cached oc version to run oc commands
 	cmd := strings.Replace(c.rawCommand, "oc ", "", 1)
 	cmd = ec.Interpolate(cmd)
 	fmt.Print(".")
 
 	commander := ec.GetOcCommander()
+
 	if ignoreError {
 		commander.Run(ec.Interpolate(cmd), ioutil.Discard, ioutil.Discard)
 		return nil
 	}
-	exitStatus := commander.Run(ec.Interpolate(cmd), ioutil.Discard, os.Stdin)
+
+	output := new(bytes.Buffer)
+	exitStatus := commander.Run(ec.Interpolate(cmd), output, os.Stdin)
 	if exitStatus != 0 {
 		return errors.New(fmt.Sprintf("Error executing command '%s'.", c.String()))
+	}
+
+	if outputVariable != "" {
+		ec.AddToContext(outputVariable, strings.TrimSpace(output.String()))
 	}
 
 	return nil

@@ -19,26 +19,32 @@ package command
 import (
 	"errors"
 	"fmt"
+	"strings"
 )
 
 type DockerCommand struct {
 	*defaultCommand
 }
 
-func NewDockerCommand(command string, ignoreError bool) *DockerCommand {
-	defaultCommand := &defaultCommand{rawCommand: command, ignoreError: ignoreError}
+func NewDockerCommand(command string, ignoreError bool, outputVariable string) *DockerCommand {
+	defaultCommand := &defaultCommand{rawCommand: command, ignoreError: ignoreError, outputVariable: outputVariable}
 	dockerCommand := &DockerCommand{defaultCommand}
 	defaultCommand.fn = dockerCommand.doExecute
 	return dockerCommand
 }
 
-func (c *DockerCommand) doExecute(ec *ExecutionContext, ignoreError bool) error {
+func (c *DockerCommand) doExecute(ec *ExecutionContext, ignoreError bool, outputVariable string) error {
 	commander := ec.GetDockerCommander()
 	cmd := ec.Interpolate(c.rawCommand)
 	fmt.Print(".")
-	_, err := commander.LocalExec(cmd)
+
+	output, err := commander.LocalExec(cmd)
 	if err != nil {
 		return errors.New(fmt.Sprintf("Error executing command '%s':", err.Error()))
+	}
+
+	if outputVariable != "" {
+		ec.AddToContext(outputVariable, strings.TrimSpace(output))
 	}
 
 	return nil

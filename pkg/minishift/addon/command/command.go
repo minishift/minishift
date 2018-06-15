@@ -26,18 +26,19 @@ type Command interface {
 	String() string
 }
 
-type doExecute func(ec *ExecutionContext, ignoreError bool) error
+type doExecute func(ec *ExecutionContext, ignoreError bool, outputVariable string) error
 
 type defaultCommand struct {
 	Command
 
-	rawCommand  string
-	fn          doExecute
-	ignoreError bool
+	rawCommand     string
+	fn             doExecute
+	ignoreError    bool
+	outputVariable string
 }
 
 func (c *defaultCommand) Execute(ec *ExecutionContext) error {
-	err := c.fn(ec, c.ignoreError)
+	err := c.fn(ec, c.ignoreError, c.outputVariable)
 	if c.ignoreError {
 		return nil
 	}

@@ -28,11 +28,13 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/addon"
 	"github.com/minishift/minishift/pkg/minishift/addon/command"
 	"github.com/minishift/minishift/pkg/util/filehelper"
+	minishiftStrings "github.com/minishift/minishift/pkg/util/strings"
 )
 
 const (
 	commentChar     = "#"
 	ignoreErrorChar = "!"
+	evaluationChar  = ":="
 
 	noAddOnDefinitionFoundError         = "There needs to be an addon file per addon directory. Found none in '%s'"
 	multipleAddOnDefinitionsError       = "There can only be one addon file per addon directory. Found '%s'"
@@ -192,6 +194,7 @@ func (parser *AddOnParser) parseHeader(scanner *bufio.Scanner) (addon.AddOnMeta,
 func (parser *AddOnParser) parseCommands(scanner *bufio.Scanner) ([]command.Command, error) {
 	var commands []command.Command
 	for scanner.Scan() {
+		var outputVariable string
 		ignoreError := false
 		line := scanner.Text()
 
@@ -204,7 +207,14 @@ func (parser *AddOnParser) parseCommands(scanner *bufio.Scanner) ([]command.Comm
 			ignoreError = true
 			line = strings.TrimPrefix(line, ignoreErrorChar)
 		}
-		newCommand, err := parser.handler.Handle(parser.handler, line, ignoreError)
+		if strings.Contains(line, evaluationChar) {
+			cmdToken, err := minishiftStrings.SplitAndTrim(line, evaluationChar)
+			if err != nil {
+				return nil, err
+			}
+			outputVariable, line = cmdToken[0], cmdToken[1]
+		}
+		newCommand, err := parser.handler.Handle(parser.handler, line, ignoreError, outputVariable)
 		if err != nil {
 			return nil, err
 		}

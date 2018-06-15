@@ -28,23 +28,27 @@ type OpenShiftCommand struct {
 	*defaultCommand
 }
 
-func NewOpenShiftCommand(command string, ignoreError bool) *OpenShiftCommand {
-	defaultCommand := &defaultCommand{rawCommand: command, ignoreError: ignoreError}
+func NewOpenShiftCommand(command string, ignoreError bool, outputVariable string) *OpenShiftCommand {
+	defaultCommand := &defaultCommand{rawCommand: command, ignoreError: ignoreError, outputVariable: outputVariable}
 	openShiftCommand := &OpenShiftCommand{defaultCommand}
 	defaultCommand.fn = openShiftCommand.doExecute
 	return openShiftCommand
 }
 
-func (c *OpenShiftCommand) doExecute(ec *ExecutionContext, ignoreError bool) error {
+func (c *OpenShiftCommand) doExecute(ec *ExecutionContext, ignoreError bool, outputVariable string) error {
 	// split off the actual 'openshift' command. We are using origin container to run those commands
 	cmd := strings.Replace(c.rawCommand, "openshift ", "", 1)
 	cmd = ec.Interpolate(cmd)
 	fmt.Print(".")
 
 	commander := ec.GetDockerCommander()
-	_, err := commander.Exec("-t", constants.OpenshiftContainerName, constants.OpenshiftOcExec, ec.Interpolate(cmd))
+	output, err := commander.Exec("-t", constants.OpenshiftContainerName, constants.OpenshiftOcExec, ec.Interpolate(cmd))
 	if err != nil {
 		return errors.New(fmt.Sprintf("Error executing command '%s':", err.Error()))
+	}
+
+	if outputVariable != "" {
+		ec.AddToContext(outputVariable, strings.TrimSpace(output))
 	}
 
 	return nil

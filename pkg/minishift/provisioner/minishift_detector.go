@@ -70,7 +70,7 @@ func (detector *MinishiftProvisionerDetector) isMinishiftIso(osReleaseInfo *prov
 }
 
 func (detector *MinishiftProvisionerDetector) isRHELVariantIso(osReleaseInfo *provision.OsRelease) bool {
-	if osReleaseInfo.ID == "centos" || osReleaseInfo.ID == "fedora" || osReleaseInfo.ID == "redhat" {
+	if osReleaseInfo.ID == "centos" || osReleaseInfo.ID == "fedora" || osReleaseInfo.ID == "rhel" {
 		return true
 	}
 	return false

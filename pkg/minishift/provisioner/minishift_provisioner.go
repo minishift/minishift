@@ -77,7 +77,7 @@ func (provisioner *MinishiftProvisioner) GetRedhatRelease() bool {
 	minishiftConfig.InstanceConfig.IsRHELBased = true
 	minishiftConfig.InstanceConfig.Write()
 
-	if provisioner.OsReleaseInfo.ID == "redhat" {
+	if provisioner.OsReleaseInfo.ID == "rhel" {
 		return true
 	}
 	return false

@@ -107,6 +107,47 @@ REDHAT_SUPPORT_PRODUCT_VERSION="7"
 	assert.NotEqual(t, "minishift", osRelease.Variant, "Release info should not contain 'minishift' variant")
 }
 
+func TestDefaultRHELOSProvisionerSelected(t *testing.T) {
+	s, _ := tests.NewSSHServer()
+	s.CommandToOutput = make(map[string]string)
+	s.CommandToOutput["cat /etc/os-release"] = `NAME="Red Hat Enterprise Linux Server"
+VERSION="7.5 (Maipo)"
+ID="rhel"
+ID_LIKE="fedora"
+VARIANT="Server"
+VARIANT_ID="server"
+VERSION_ID="7.5"
+PRETTY_NAME="Red Hat Enterprise Linux Server 7.5 (Maipo)"
+ANSI_COLOR="0;31"
+CPE_NAME="cpe:/o:redhat:enterprise_linux:7.5:GA:server"
+HOME_URL="https://www.redhat.com/"
+BUG_REPORT_URL="https://bugzilla.redhat.com/"
+
+REDHAT_BUGZILLA_PRODUCT="Red Hat Enterprise Linux 7"
+REDHAT_BUGZILLA_PRODUCT_VERSION=7.5
+REDHAT_SUPPORT_PRODUCT="Red Hat Enterprise Linux"
+REDHAT_SUPPORT_PRODUCT_VERSION="7.5"
+`
+	port, err := s.Start()
+	assert.NoError(t, err, "Error starting ssh server")
+	d := &tests.MockDriver{
+		Port: port,
+		BaseDriver: drivers.BaseDriver{
+			IPAddress:  "127.0.0.1",
+			SSHKeyPath: "",
+		},
+	}
+
+	detector := MinishiftProvisionerDetector{Delegate: provision.StandardDetector{}}
+	provisioner, err := detector.DetectProvisioner(d)
+	assert.NoError(t, err, "Error Getting detector")
+
+	assert.IsType(t, new(MinishiftProvisioner), provisioner)
+
+	osRelease, _ := provisioner.GetOsReleaseInfo()
+	assert.NotEqual(t, "minishift", osRelease.Variant, "Release info should not contain 'minishift' variant")
+}
+
 func TestDefaultUbuntuProvisionerSelected(t *testing.T) {
 	s, _ := tests.NewSSHServer()
 	s.CommandToOutput = make(map[string]string)

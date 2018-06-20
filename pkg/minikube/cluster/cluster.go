@@ -38,6 +38,7 @@ import (
 	"github.com/docker/machine/libmachine/state"
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	minishiftNetwork "github.com/minishift/minishift/pkg/minishift/network"
 	minishiftUtil "github.com/minishift/minishift/pkg/minishift/util"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
@@ -354,7 +355,13 @@ func createHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 			fmt.Println("FAIL")
 			return nil, fmt.Errorf("Error getting VM IP: %s", err)
 		}
+		hostIP, err := minishiftNetwork.DetermineHostIP(h.Driver)
+		if err != nil {
+			fmt.Println("FAIL")
+			return nil, fmt.Errorf("Error getting host IP: %s", err)
+		}
 		config.ShellProxyEnv.AddNoProxy(vmIP)
+		config.ShellProxyEnv.AddNoProxy(hostIP)
 		shellProxyEnv := strings.Join(config.ShellProxyEnv.ProxyConfig(), " ")
 		if err := minishiftUtil.SetProxyToShellEnv(h, shellProxyEnv); err != nil {
 			fmt.Println("FAIL")

@@ -207,8 +207,13 @@ func runStart(cmd *cobra.Command, args []string) {
 	ip, _ := hostVm.Driver.GetIP()
 
 	if proxyConfig.IsEnabled() {
-		// once we know the IP, we need to make sure it is not proxied in a proxy environment
+		// Once we know the IP, we need to make sure it is not proxied in a proxy environment.
+		// In addition, we also add the host interface's IP to NoProxy so that
+		// we can reach the host machine. This is useful when accessing
+		// services running on the host machine.
+		hostip, _ := minishiftNetwork.DetermineHostIP(hostVm.Driver)
 		proxyConfig.AddNoProxy(ip)
+		proxyConfig.AddNoProxy(hostip)
 		proxyConfig.ApplyToEnvironment()
 	}
 

@@ -29,7 +29,6 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
-	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	pkgUtil "github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
@@ -76,7 +75,7 @@ func runDelete(cmd *cobra.Command, args []string) {
 	}
 
 	if host.Driver.DriverName() == "generic" {
-		if err := ocClusterDown(host); err != nil {
+		if err := util.OcClusterDown(host); err != nil {
 			atexit.ExitWithMessage(1, err.Error())
 		}
 		if err := deleteExistingDirectory(host); err != nil {
@@ -136,15 +135,6 @@ func removeInstanceAndKubeConfig() {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting '%s'", constants.KubeConfigPath))
 		}
 	}
-}
-
-// ocClusterDown down the cluster and if there is any issue during the minishift start before even
-// oc binary cached then it just ignore the error [PK]
-func ocClusterDown(hostVm *host.Host) error {
-	sshCommander := provision.GenericSSHCommander{Driver: hostVm.Driver}
-	cmd := fmt.Sprintf("%s/oc cluster down", minishiftConstants.OcPathInsideVM)
-	sshCommander.SSHCommand(cmd)
-	return nil
 }
 
 // deleteExistingDirectory delete the directory which minishift create in case of generic driver.

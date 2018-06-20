@@ -23,6 +23,8 @@ import (
 
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/drivers"
+	"github.com/docker/machine/libmachine/host"
+	"github.com/docker/machine/libmachine/provision"
 	"github.com/docker/machine/libmachine/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
@@ -32,6 +34,7 @@ import (
 	cmdState "github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/out/bindata"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/util/shell"
 )
 
@@ -148,4 +151,12 @@ func ValidateGenericDriverFlags(remoteIPAddress, remoteSSHUser, sshKeyToConnectR
 			"--%s string\n--%s string\n--%s string\n", configCmd.RemoteIPAddress.Name, configCmd.RemoteSSHUser.Name, configCmd.SSHKeyToConnectRemote.Name)
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error: %s", msg))
 	}
+}
+
+// OcClusterDown stop Openshift cluster using oc binary inside the remote machine
+func OcClusterDown(hostVm *host.Host) error {
+	sshCommander := provision.GenericSSHCommander{Driver: hostVm.Driver}
+	cmd := fmt.Sprintf("%s/oc cluster down", minishiftConstants.OcPathInsideVM)
+	_, err := sshCommander.SSHCommand(cmd)
+	return err
 }

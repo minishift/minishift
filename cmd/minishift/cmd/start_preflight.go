@@ -59,7 +59,7 @@ func preflightChecksBeforeStartingHost() {
 	preflightCheckSucceedsOrFails(
 		configCmd.SkipDeprecationCheck.Name,
 		checkDeprecation,
-		"Check if depereccated options are used",
+		"Check if deprecated options are used",
 		configCmd.WarnDeprecationCheck.Name,
 		"")
 

@@ -55,13 +55,19 @@ func runStop(cmd *cobra.Command, args []string) {
 		atexit.ExitWithMessage(0, fmt.Sprintf("The '%s' VM is already stopped.", constants.MachineName))
 	}
 
-	fmt.Println("Stopping local OpenShift cluster...")
+	fmt.Println("Stopping the OpenShift cluster...")
 
-	// Unregister, allow to be skipped and force deletion is ignored
-	registrationUtil.UnregisterHost(api, true, false)
+	if hostVm.Driver.DriverName() == "generic" {
+		if err := util.OcClusterDown(hostVm); err != nil {
+			atexit.ExitWithMessage(1, err.Error())
+		}
+	} else {
+		// Unregister, allow to be skipped and force deletion is ignored
+		registrationUtil.UnregisterHost(api, true, false)
 
-	if err := cluster.StopHost(api); err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Error stopping cluster: %s", err.Error()))
+		if err := cluster.StopHost(api); err != nil {
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error stopping cluster: %s", err.Error()))
+		}
 	}
 	fmt.Println("Cluster stopped.")
 }

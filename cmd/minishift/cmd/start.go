@@ -280,7 +280,7 @@ func runStart(cmd *cobra.Command, args []string) {
 		if isRestart {
 			err = cmdUtil.SetOcContext(minishiftConfig.AllInstancesConfig.ActiveProfile)
 			if err != nil {
-				fmt.Println(fmt.Sprintf("Could not set oc CLI context for: '%s'", profileActions.GetActiveProfile()))
+				fmt.Println(fmt.Sprintf("Could not set oc CLI context for '%s' profile: %v", profileActions.GetActiveProfile(), err))
 			}
 		}
 	}
@@ -710,7 +710,7 @@ func ensureNotRunning(client *libmachine.Client, machineName string) {
 		atexit.ExitWithMessage(1, err.Error())
 	}
 
-	if cmdUtil.IsHostRunning(hostVm.Driver) {
+	if cmdUtil.IsHostRunning(hostVm.Driver) && hostVm.DriverName != "generic" {
 		atexit.ExitWithMessage(0, fmt.Sprintf("The '%s' VM is already running.", machineName))
 	}
 }

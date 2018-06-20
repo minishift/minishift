@@ -11,7 +11,8 @@ ADOC_VARIABLES     = FileList.new('source/variables.adoc',
  'source/getting-started/variables.adoc',
  'source/openshift/variables.adoc',
  'source/troubleshooting/variables.adoc',
- 'source/using/variables.adoc'
+ 'source/using/variables.adoc',
+ 'source/tutorial/variables.adoc'
 )
 GENERATED_ADOC_DIR = "source/command-ref"
 ADOC_FILES = Rake::FileList.new do |list|

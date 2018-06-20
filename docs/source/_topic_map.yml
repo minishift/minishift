@@ -78,6 +78,13 @@ Topics:
         File: writing-docs
       - Name: Releasing Minishift
         File: releasing
+  - Name: Tutorial
+    Dir: tutorial
+    Topics:
+      - Name: Overview
+        File: index
+      - Name: Hello Minishift
+        File: hello
   - Name: Command Reference
     Dir: command-ref
     Topics:

@@ -28,6 +28,7 @@ import (
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 
+	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
 	cmdState "github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/out/bindata"
 	"github.com/minishift/minishift/pkg/minikube/constants"
@@ -138,4 +139,13 @@ func GetNoProxyConfig(api libmachine.API) (string, string, error) {
 		noProxyValue = fmt.Sprintf("%s,%s", noProxyValue, ip)
 	}
 	return noProxyVar, noProxyValue, nil
+}
+
+func ValidateGenericDriverFlags(remoteIPAddress, remoteSSHUser, sshKeyToConnectRemote string) {
+	if remoteIPAddress == "" || remoteSSHUser == "" || sshKeyToConnectRemote == "" {
+		msg := fmt.Sprintf("Generic driver require additional information i.e. IP address of remote machine, path to ssh key and ssh username of the remote host.\n"+
+			"Enable experimental features of Minisift and provide following flags to use generic driver:\n"+
+			"--%s string\n--%s string\n--%s string\n", configCmd.RemoteIPAddress.Name, configCmd.RemoteSSHUser.Name, configCmd.SSHKeyToConnectRemote.Name)
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error: %s", msg))
+	}
 }

@@ -161,6 +161,12 @@ func runStart(cmd *cobra.Command, args []string) {
 	libMachineClient := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
 	defer libMachineClient.Close()
 
+	if viper.GetString(configCmd.VmDriver.Name) == genericDriver {
+		cmdUtil.ValidateGenericDriverFlags(viper.GetString(configCmd.RemoteIPAddress.Name),
+			viper.GetString(configCmd.RemoteSSHUser.Name),
+			viper.GetString(configCmd.SSHKeyToConnectRemote.Name))
+	}
+
 	ensureNotRunning(libMachineClient, constants.MachineName)
 	addVersionPrefixToOpenshiftVersion()
 

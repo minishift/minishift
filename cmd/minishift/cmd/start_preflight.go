@@ -44,6 +44,7 @@ import (
 
 const (
 	StorageDisk                  = "/mnt/?da1"
+	StorageDiskForGeneric        = "/"
 	GithubAddress                = "https://github.com"
 	hypervDefaultVirtualSwitchId = "c08cb7b8-9b3c-408e-8e30-5e16a3aeb444"
 )
@@ -511,7 +512,7 @@ func checkStorageMounted(driver drivers.Driver) bool {
 // checkStorageUsage checks if the persistent storage volume has enough storage
 // space available.
 func checkStorageUsage(driver drivers.Driver) bool {
-	_, usedPercentage := getDiskUsage(driver, StorageDisk)
+	_, usedPercentage, _ := getDiskUsage(driver, StorageDisk)
 	fmt.Printf("%s used ", usedPercentage)
 	usage, err := strconv.Atoi(stringUtils.GetOnlyNumbers(usedPercentage))
 	if err != nil {
@@ -528,20 +529,21 @@ func checkStorageUsage(driver drivers.Driver) bool {
 }
 
 // isMounted checks returns usage of mountpoint known to the VM instance
-func getDiskUsage(driver drivers.Driver, mountpoint string) (string, string) {
+func getDiskUsage(driver drivers.Driver, mountpoint string) (string, string, string) {
 	cmd := fmt.Sprintf(
-		"df -h %s | awk 'FNR > 1 {print $2,$5}'",
+		"df -h %s | awk 'FNR > 1 {print $2,$5,$6}'",
 		mountpoint)
 
 	out, err := drivers.RunSSHCommandFromDriver(driver, cmd)
 
 	if err != nil {
-		return "", "ERR"
+		return "", "ERR", ""
 	}
 	diskDetails := strings.Split(strings.Trim(out, "\n"), " ")
 	diskSize := diskDetails[0]
 	diskUsage := diskDetails[1]
-	return diskSize, diskUsage
+	diskMountPoint := diskDetails[2]
+	return diskSize, diskUsage, diskMountPoint
 }
 
 // isMounted checks if mountpoint is mounted to the VM instance

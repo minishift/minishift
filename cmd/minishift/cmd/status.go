@@ -18,11 +18,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/docker/go-units"
 	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/docker/go-units"
 
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/provision"
@@ -88,8 +89,11 @@ func runStatus(cmd *cobra.Command, args []string) {
 			openshiftStatus = fmt.Sprintf("Running (%s)", strings.Split(openshiftVersion, "\n")[0])
 		}
 
-		diskSize, diskUse := getDiskUsage(host.Driver, StorageDisk)
-		diskUsage = fmt.Sprintf("%s of %s", diskUse, diskSize)
+		diskSize, diskUse, mountpoint := getDiskUsage(host.Driver, StorageDisk)
+		if host.Driver.DriverName() == "generic" {
+			diskSize, diskUse, mountpoint = getDiskUsage(host.Driver, StorageDiskForGeneric)
+		}
+		diskUsage = fmt.Sprintf("%s of %s (Mounted On: %s)", diskUse, diskSize, mountpoint)
 	}
 
 	cacheDir := filepath.Join(constants.GetMinishiftHomeDir(), "cache")

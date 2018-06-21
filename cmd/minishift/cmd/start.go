@@ -243,6 +243,7 @@ func runStart(cmd *cobra.Command, args []string) {
 			PublicHostname:       configCmd.GetDefaultPublicHostName(ip),
 			SSHCommander:         sshCommander,
 			OcBinaryPathInsideVM: fmt.Sprintf("%s/oc", minishiftConstants.OcPathInsideVM),
+			SshUser:              sshCommander.Driver.GetSSHUsername(),
 		}
 
 		clusterUpParams := determineClusterUpParameters(clusterUpConfig)

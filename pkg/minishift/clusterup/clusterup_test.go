@@ -25,7 +25,7 @@ import (
 )
 
 func Test_invalid_addon_variable_leads_to_error_in_context_creation(t *testing.T) {
-	context, err := GetExecutionContext("127.0.0.1", "foo.bar", []string{"FOOBAR"}, nil, nil)
+	context, err := GetExecutionContext("127.0.0.1", "foo.bar", "foo", []string{"FOOBAR"}, nil, nil)
 	assert.Error(t, err, "There should have been an error due to incorrect addon env variable.")
 	assert.Nil(t, context, "There should be no InterpolationContext returned.")
 }
@@ -35,7 +35,7 @@ func Test_addon_variable_can_be_interpolated(t *testing.T) {
 }
 
 func Test_nil_can_be_passed_to_create_context(t *testing.T) {
-	_, err := GetExecutionContext("127.0.0.1", "foo.bar", nil, nil, nil)
+	_, err := GetExecutionContext("127.0.0.1", "foo.bar", "foo", nil, nil, nil)
 
 	assert.NoError(t, err, "Error in getting execution context")
 }
@@ -55,7 +55,7 @@ func Test_addon_variable_can_be_interpolated_from_environment(t *testing.T) {
 }
 
 func assertInterpolation(variables []string, testString string, expectedResult string, t *testing.T) {
-	context, err := GetExecutionContext("127.0.0.1", "foo.bar", variables, nil, nil)
+	context, err := GetExecutionContext("127.0.0.1", "foo.bar", "foo", variables, nil, nil)
 	assert.NoError(t, err)
 
 	result := context.Interpolate(testString)

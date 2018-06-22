@@ -20,8 +20,12 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
+	"os/user"
+	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 
 	"github.com/minishift/minishift/pkg/minikube/constants"
@@ -86,11 +90,48 @@ func (oc *OcRunner) AddSudoerRoleForUser(user string) error {
 	return nil
 }
 
+// AddSystemAdminEntrytoKubeConfig adds the system:admin certs to ~/.kube/config
+// This function actually mimic the KUBECONFIG magical power of merging different kubeconfig file.
+// KUBECONFIG=~config1:config2 oc config view  --flatten
+// https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/#set-the-kubeconfig-environment-variable
+func (oc *OcRunner) AddSystemAdminEntryToKubeConfig(ocPath string) error {
+	user, err := user.Current()
+	if err != nil {
+		return fmt.Errorf("unable to find current user: %v", err)
+	}
+
+	minishiftKubeConfigPath := oc.KubeConfigPath
+	kubeConfigGlobalPath := filepath.Join(user.HomeDir, ".kube", "config")
+
+	// For Linux and Mac, the list is colon-delimited. For Windows, the list is semicolon-delimited for kubeconfig  env variable
+	// https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable
+	kubeconfig := fmt.Sprintf("%s:%s", minishiftKubeConfigPath, kubeConfigGlobalPath)
+	if runtime.GOOS == "windows" {
+		kubeconfig = fmt.Sprintf("%s;%s", minishiftKubeConfigPath, kubeConfigGlobalPath)
+	}
+	realrunner := util.RealRunner{Env: []string{fmt.Sprintf("KUBECONFIG=%s", kubeconfig)}}
+
+	outBuffer := new(bytes.Buffer)
+	cmdArgs := []string{"config", "view", "--flatten"}
+	exitCode := realrunner.Run(outBuffer, nil, ocPath, cmdArgs...)
+	if exitCode != 0 {
+		return fmt.Errorf("unable to view kubeconfig file")
+	}
+
+	if err := os.MkdirAll(filepath.Join(user.HomeDir, ".kube"), 0755); err != nil {
+		return fmt.Errorf("unable to create kubeconfig dir ($HOME/.kube): %v", err)
+	}
+
+	if err := ioutil.WriteFile(kubeConfigGlobalPath, outBuffer.Bytes(), 0600); err != nil {
+		return fmt.Errorf("unable to write in kubeconfig file %s: %v", kubeConfigGlobalPath, err)
+	}
+	return nil
+}
+
 // AddCliContext adds a CLI context for the user and namespace for the current OpenShift cluster. See also
 // https://docs.openshift.com/enterprise/3.0/cli_reference/manage_cli_profiles.html
 func (oc *OcRunner) AddCliContext(context string, ip string, username string, namespace string, runner util.Runner, ocPath string) error {
 	cmdArgs := []string{"login",
-		fmt.Sprintf("--%s", minishiftConstants.SkipVerifyInsecureTLS),
 		fmt.Sprintf("-u=%s", username),
 		fmt.Sprintf("-p=%s", minishiftConstants.DefaultUserPassword),
 		fmt.Sprintf("%s:8443", ip)}

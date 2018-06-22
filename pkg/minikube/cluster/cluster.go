@@ -167,8 +167,8 @@ type MachineConfig struct {
 	DockerEngineOpt       []string
 	InsecureRegistry      []string
 	RegistryMirror        []string
-	HostOnlyCIDR          string // Only used by the virtualbox driver
-	ShellProxyEnv         string // Only used for proxy purpose
+	HostOnlyCIDR          string           // Only used by the virtualbox driver
+	ShellProxyEnv         util.ProxyConfig // Only used for proxy purpose
 	HypervVirtualSwitch   string
 	RemoteIPAddress       string // Only used for generic driver purpose to connect remote machine
 	RemoteSSHUser         string // Only used for generic driver purpose to specify ssh user
@@ -347,9 +347,16 @@ func createHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 		return nil, fmt.Errorf("Error attempting to save store: %s", err)
 	}
 
-	if config.ShellProxyEnv != "" {
+	if config.ShellProxyEnv.IsEnabled() {
 		fmt.Print("-- Setting proxy information ... ")
-		if err := minishiftUtil.SetProxyToShellEnv(h, config.ShellProxyEnv); err != nil {
+		vmIP, err := h.Driver.GetIP()
+		if err != nil {
+			fmt.Println("FAIL")
+			return nil, fmt.Errorf("Error getting VM IP: %s", err)
+		}
+		config.ShellProxyEnv.AddNoProxy(vmIP)
+		shellProxyEnv := strings.Join(config.ShellProxyEnv.ProxyConfig(), " ")
+		if err := minishiftUtil.SetProxyToShellEnv(h, shellProxyEnv); err != nil {
 			fmt.Println("FAIL")
 			return nil, fmt.Errorf("Error setting proxy to VM: %s", err)
 		}

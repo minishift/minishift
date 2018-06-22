@@ -68,7 +68,7 @@ const (
 var (
 	dockerEnv               []string
 	openShiftEnv            []string
-	shellProxyEnv           string
+	shellProxyEnv           util.ProxyConfig
 	unsupportedIsoUrlFormat = fmt.Sprintf("Unsupported value for iso-url. It can be a URL, file URI or one of the following aliases: [%s].",
 		strings.Join(minishiftConstants.ValidIsoAliases, ","))
 
@@ -312,7 +312,7 @@ func handleProxies() *util.ProxyConfig {
 		fmt.Println("-- Using proxy for the setup")
 		proxyConfig.ApplyToEnvironment()
 		dockerEnv = append(dockerEnv, proxyConfig.ProxyConfig()...)
-		shellProxyEnv += strings.Join(proxyConfig.ProxyConfig(), " ")
+		shellProxyEnv = *proxyConfig
 
 		// It could be that the proxy config is retrieved from the environment. To make sure that
 		// proxy settings are properly passed to cluster up we need to explicitly set the values.

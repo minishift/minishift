@@ -24,7 +24,6 @@ You can use the `hostfolder` command to mount multiple shared folders onto custo
 [NOTE]
 ====
 Currently link:https://en.wikipedia.org/wiki/Server_Message_Block[CIFS] and link:https://en.wikipedia.org/wiki/SSHFS[SSHFS] based host folders are supported.
-SSHFS support is experimental.
 ====
 
 [NOTE]
@@ -36,21 +35,19 @@ This will be addressed in a future release of the minikube ISO.
 [[host-folder-prerequisite]]
 === Prerequisites
 
+==== SSHFS
+
+SSHFS is the default technology for sharing host folders. It works without any prerequisite.
+
 ==== CIFS
 
-To use the `minishift hostfolder` command for CIFS based host folders, you need to be able to share directories using CIFS.
-On Windows, CIFS is the default technology for sharing directories.
-For example, on Windows 10 the *_C:\Users_* directory is shared by default and can be accessed by locally-authenticated users.
+Host folders can be shared using CIFS.
+It is possible to use CIFS on Windows, macOS and Linux.
 
-It is also possible to use CIFS on macOS and Linux.
 On macOS, you can enable CIFS-based shares under *System Preferences > Sharing*.
 See link:https://support.apple.com/en-us/HT204445[How to connect with File Sharing on your Mac] for detailed setup instructions.
 
 On Linux, follow your distribution-specific instructions to install link:https://www.samba.org[Samba].
-
-==== SSHFS
-
-SSHFS based host folders work without prerequisite.
 
 [[displaying-host-folders]]
 === Displaying Host Folders

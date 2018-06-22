@@ -69,7 +69,7 @@ var addCmd = &cobra.Command{
 
 func init() {
 	HostFolderCmd.AddCommand(addCmd)
-	addCmd.Flags().StringVarP(&shareType, shareTypeFlag, "t", "cifs", "The host folder type. Allowed types are [cifs|sshfs]. SSHFS is experimental.")
+	addCmd.Flags().StringVarP(&shareType, shareTypeFlag, "t", "sshfs", "The host folder type. Allowed types are [cifs|sshfs].")
 	addCmd.Flags().StringVar(&source, sourceFlag, "", "The source of the host folder.")
 	addCmd.Flags().StringVar(&target, targetFlag, "", "The target (mount point) of the host folder.")
 	addCmd.Flags().StringVar(&options, optionsFlag, "", "Host folder type specific options.")
@@ -278,13 +278,13 @@ func readNameAndTypeInteractive() (string, string) {
 	if name == "" {
 		atexit.ExitWithMessage(1, noName)
 	}
-	shareType := strings.ToLower(util.ReadInputFromStdin("Type [cifs, sshfs (C/s)]"))
+	shareType := strings.ToLower(util.ReadInputFromStdin("Type [sshfs, cifs (S/c)]"))
 
-	if shareType == "s" {
+	if shareType == "s" || shareType == "" {
 		return name, hostFolderConfig.SSHFS.String()
 	}
 
-	if shareType == "c" || shareType == "" {
+	if shareType == "c" {
 		return name, hostFolderConfig.CIFS.String()
 	}
 

@@ -127,6 +127,11 @@ func PostClusterUp(clusterUpConfig *ClusterUpConfig, sshCommander provision.SSHC
 		return err
 	}
 
+	err = ocRunner.AddSystemAdminEntryToKubeConfig(clusterUpConfig.OcPath)
+	if err != nil {
+		return err
+	}
+
 	err = ocRunner.AddCliContext(clusterUpConfig.MachineName, clusterUpConfig.Ip, clusterUpConfig.User, clusterUpConfig.Project, runner, clusterUpConfig.OcPath)
 	if err != nil {
 		return err

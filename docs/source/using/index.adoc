@@ -14,5 +14,6 @@ It covers the basic commands as well as advanced features like profiles, image c
 - xref:../using/static-ip.adoc#[Assign Static IP Address]
 - xref:../using/docker-daemon.adoc#[{project} Docker Daemon]
 - xref:../using/experimental-features.adoc#[Experimental Features]
+- xref:../using/run-against-an-existing-machine.adoc#[Run Against an Existing Machine]
 
 For details about using {project} to manage your local OpenShift cluster, see the xref:../openshift/index.adoc#[Interacting with OpenShift] section.

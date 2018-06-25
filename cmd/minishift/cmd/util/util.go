@@ -144,7 +144,7 @@ func GetNoProxyConfig(api libmachine.API) (string, string, error) {
 func ValidateGenericDriverFlags(remoteIPAddress, remoteSSHUser, sshKeyToConnectRemote string) {
 	if remoteIPAddress == "" || remoteSSHUser == "" || sshKeyToConnectRemote == "" {
 		msg := fmt.Sprintf("Generic driver require additional information i.e. IP address of remote machine, path to ssh key and ssh username of the remote host.\n"+
-			"Enable experimental features of Minisift and provide following flags to use generic driver:\n"+
+			"Provide following flags to use generic driver:\n"+
 			"--%s string\n--%s string\n--%s string\n", configCmd.RemoteIPAddress.Name, configCmd.RemoteSSHUser.Name, configCmd.SSHKeyToConnectRemote.Name)
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error: %s", msg))
 	}

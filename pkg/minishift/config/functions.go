@@ -17,7 +17,7 @@ limitations under the License.
 package config
 
 func checkDriver(driverName string) bool {
-	if InstanceConfig.VMDriver == driverName {
+	if InstanceStateConfig.VMDriver == driverName {
 		return true
 	}
 	return false

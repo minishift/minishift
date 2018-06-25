@@ -33,7 +33,7 @@ func TestNewInstanceConfig(t *testing.T) {
 	defer teardown()
 
 	expectedFilePath := filepath.Join(testDir, "fake-machine.json")
-	cfg, _ := NewInstanceConfig(expectedFilePath)
+	cfg, _ := NewInstanceStateConfig(expectedFilePath)
 	assert.Equal(t, expectedFilePath, cfg.FilePath)
 
 	_, err := os.Stat(cfg.FilePath)
@@ -46,7 +46,7 @@ func TestConfigOnFileExists(t *testing.T) {
 
 	filePath := filepath.Join(testDir, "fake-machine.json")
 	expectedOcPath := filepath.Join(testDir, "fakeOc")
-	cfg := &InstanceConfigType{
+	cfg := &InstanceStateConfigType{
 		FilePath: filePath,
 		OcPath:   expectedOcPath,
 	}
@@ -55,7 +55,7 @@ func TestConfigOnFileExists(t *testing.T) {
 	// create config file before NewInstanceConfig
 	ioutil.WriteFile(cfg.FilePath, jsonData, 0644)
 
-	newCfg, _ := NewInstanceConfig(filePath)
+	newCfg, _ := NewInstanceStateConfig(filePath)
 	assert.Equal(t, expectedOcPath, newCfg.OcPath)
 }
 
@@ -64,14 +64,14 @@ func TestWrite(t *testing.T) {
 	defer teardown()
 
 	path := filepath.Join(testDir, "fake-machine.json")
-	cfg, _ := NewInstanceConfig(path)
+	cfg, _ := NewInstanceStateConfig(path)
 
 	expectedOcPath := filepath.Join(testDir, "fakeOc")
 	cfg.OcPath = expectedOcPath
 	cfg.Write()
 
 	// read config file and verify content
-	var testCfg *InstanceConfigType
+	var testCfg *InstanceStateConfigType
 	raw, err := ioutil.ReadFile(path)
 	assert.NoError(t, err, "Error in reading config file %s", path)
 
@@ -84,7 +84,7 @@ func TestDelete(t *testing.T) {
 	defer teardown()
 
 	path := filepath.Join(testDir, "fake-machine.json")
-	cfg, _ := NewInstanceConfig(path)
+	cfg, _ := NewInstanceStateConfig(path)
 
 	cfg.Delete()
 

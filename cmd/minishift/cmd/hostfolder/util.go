@@ -39,7 +39,7 @@ var (
 )
 
 func getHostFolderManager() *hostfolder.Manager {
-	hostFolderManager, err := hostfolder.NewManager(config.InstanceConfig, config.AllInstancesConfig)
+	hostFolderManager, err := hostfolder.NewManager(config.InstanceStateConfig, config.AllInstancesConfig)
 	if err != nil {
 		atexit.ExitWithMessage(1, err.Error())
 	}

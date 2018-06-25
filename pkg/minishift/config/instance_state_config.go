@@ -23,9 +23,9 @@ import (
 	"os"
 )
 
-var InstanceConfig *InstanceConfigType
+var InstanceStateConfig *InstanceStateConfigType
 
-type InstanceConfigType struct {
+type InstanceStateConfigType struct {
 	FilePath                  string `json:"-"`
 	OcPath                    string // minishift state
 	IsRegistered              bool   // minishift state
@@ -41,8 +41,8 @@ type InstanceConfigType struct {
 
 // Create new object with data if file exists or
 // Create json file and return object if doesn't exists
-func NewInstanceConfig(path string) (*InstanceConfigType, error) {
-	cfg := &InstanceConfigType{HostFolders: []config.HostFolderConfig{}}
+func NewInstanceStateConfig(path string) (*InstanceStateConfigType, error) {
+	cfg := &InstanceStateConfigType{HostFolders: []config.HostFolderConfig{}}
 	cfg.FilePath = path
 
 	// Check json file existence
@@ -60,7 +60,7 @@ func NewInstanceConfig(path string) (*InstanceConfigType, error) {
 	return cfg, nil
 }
 
-func (cfg *InstanceConfigType) Write() error {
+func (cfg *InstanceStateConfigType) Write() error {
 	jsonData, err := json.MarshalIndent(cfg, "", "\t")
 	if err != nil {
 		return err
@@ -73,7 +73,7 @@ func (cfg *InstanceConfigType) Write() error {
 	return nil
 }
 
-func (cfg *InstanceConfigType) Delete() error {
+func (cfg *InstanceStateConfigType) Delete() error {
 	if err := os.Remove(cfg.FilePath); err != nil {
 		return err
 	}
@@ -81,7 +81,7 @@ func (cfg *InstanceConfigType) Delete() error {
 	return nil
 }
 
-func (cfg *InstanceConfigType) read() error {
+func (cfg *InstanceStateConfigType) read() error {
 	raw, err := ioutil.ReadFile(cfg.FilePath)
 	if err != nil {
 		return err

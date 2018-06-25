@@ -48,6 +48,7 @@ var (
 	KubeConfigPath        = filepath.Join(Minipath, "machines", MachineName+"_kubeconfig")
 	ConfigFile            = MakeMiniPath("config", "config.json")
 	AllInstanceConfigPath = filepath.Join(Minipath, "config", "allinstances.json")
+	InstanceConfig        = filepath.Join(Minipath, "config", MachineName+".json")
 
 	DefaultB2dIsoUrl      = "https://github.com/minishift/minishift-b2d-iso/releases/download/" + version.GetB2dIsoVersion() + "/" + "minishift-b2d.iso"
 	DefaultCentOsIsoUrl   = "https://github.com/minishift/minishift-centos-iso/releases/download/" + version.GetCentOsIsoVersion() + "/" + "minishift-centos7.iso"

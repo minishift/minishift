@@ -64,8 +64,8 @@ type NetworkSettings struct {
 // checkSupportForAddressAssignment returns true when the instance can support
 // minishift-set-ipaddress
 func checkSupportForAddressAssignment() bool {
-	if minishiftConfig.InstanceConfig.IsRHELBased &&
-		minishiftConfig.InstanceConfig.SupportsNetworkAssignment {
+	if minishiftConfig.InstanceStateConfig.IsRHELBased &&
+		minishiftConfig.InstanceStateConfig.SupportsNetworkAssignment {
 		return true
 	} else {
 		atexit.ExitWithMessage(1, configureNetworkNotSupportedMessage)

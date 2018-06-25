@@ -79,7 +79,7 @@ func comapareServices(t *testing.T, got, expected []Service) {
 }
 
 func setup(t *testing.T, namespace string) {
-	instanceState.InstanceConfig = &instanceState.InstanceConfigType{OcPath: "oc"}
+	instanceState.InstanceStateConfig = &instanceState.InstanceStateConfigType{OcPath: "oc"}
 
 	fakeRunner := test.NewFakeRunner(t)
 	runner = fakeRunner.Runner
@@ -98,5 +98,5 @@ func setup(t *testing.T, namespace string) {
 }
 
 func teardown() {
-	instanceState.InstanceConfig = nil
+	instanceState.InstanceStateConfig = nil
 }

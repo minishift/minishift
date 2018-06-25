@@ -47,6 +47,7 @@ import (
 const (
 	ipKey            = "ip"
 	routingSuffixKey = "routing-suffix"
+	user             = "user"
 	envPrefix        = "env."
 )
 
@@ -64,6 +65,7 @@ type ClusterUpConfig struct {
 	PublicHostname       string
 	SSHCommander         provision.SSHCommander
 	OcBinaryPathInsideVM string
+	SshUser              string
 }
 
 // ClusterUp execute oc binary in order to run 'cluster up'
@@ -130,7 +132,7 @@ func PostClusterUp(clusterUpConfig *ClusterUpConfig, sshCommander provision.SSHC
 		return err
 	}
 
-	err = applyAddOns(addOnManager, clusterUpConfig.Ip, clusterUpConfig.RoutingSuffix, clusterUpConfig.AddonEnv, ocRunner, sshCommander)
+	err = applyAddOns(addOnManager, clusterUpConfig.Ip, clusterUpConfig.RoutingSuffix, clusterUpConfig.SshUser, clusterUpConfig.AddonEnv, ocRunner, sshCommander)
 	if err != nil {
 		return err
 	}
@@ -150,7 +152,7 @@ func EnsureHostDirectoriesExist(host *host.Host, dirs []string) error {
 
 // GetExecutionContext creates an ExecutionContext used for variable interpolation during add-on application.
 // The context contains variables to interpolate during add-on execution, as well as the means to communicate with the VM (SSHCommander) and OpenShift (OcRunner).
-func GetExecutionContext(ip string, routingSuffix string, addOnEnv []string, ocRunner *oc.OcRunner, sshCommander provision.SSHCommander) (*command.ExecutionContext, error) {
+func GetExecutionContext(ip string, routingSuffix string, sshUser string, addOnEnv []string, ocRunner *oc.OcRunner, sshCommander provision.SSHCommander) (*command.ExecutionContext, error) {
 	context, err := command.NewExecutionContext(ocRunner, sshCommander)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("Unable to initialise execution context: %s", err.Error()))
@@ -158,6 +160,7 @@ func GetExecutionContext(ip string, routingSuffix string, addOnEnv []string, ocR
 
 	context.AddToContext(ipKey, ip)
 	context.AddToContext(routingSuffixKey, routingSuffix)
+	context.AddToContext(user, sshUser)
 
 	for _, env := range addOnEnv {
 		match, _ := regexp.Match(".*=.*", []byte(env))
@@ -201,8 +204,8 @@ func CopyOcBinaryFromImageToVM(dockerCommander docker.DockerCommander, image str
 	return nil
 }
 
-func applyAddOns(addOnManager *manager.AddOnManager, ip string, routingSuffix string, addonEnv []string, ocRunner *oc.OcRunner, sshCommander provision.SSHCommander) error {
-	context, err := GetExecutionContext(ip, routingSuffix, addonEnv, ocRunner, sshCommander)
+func applyAddOns(addOnManager *manager.AddOnManager, ip string, routingSuffix string, sshUser string, addonEnv []string, ocRunner *oc.OcRunner, sshCommander provision.SSHCommander) error {
+	context, err := GetExecutionContext(ip, routingSuffix, sshUser, addonEnv, ocRunner, sshCommander)
 	if err != nil {
 		return err
 	}

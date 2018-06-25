@@ -160,6 +160,9 @@ The following table shows these variables.
 
 |addon-name
 |Name of the current add-on.
+
+|user
+|User used by {project} for execution of commands through ssh
 |===
 
 [[addon-dynamic-variables]]

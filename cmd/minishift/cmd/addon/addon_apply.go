@@ -78,6 +78,7 @@ func runApplyAddon(cmd *cobra.Command, args []string) {
 
 	routingSuffix := determineRoutingSuffix(host.Driver)
 	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
+	sshUser := sshCommander.Driver.GetSSHUsername()
 	ocRunner, err := oc.NewOcRunner(minishiftConfig.InstanceConfig.OcPath, constants.KubeConfigPath)
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error applying the add-on: %s", err.Error()))
@@ -86,7 +87,7 @@ func runApplyAddon(cmd *cobra.Command, args []string) {
 	for i := range args {
 		addonName := args[i]
 		addon := addOnManager.Get(addonName)
-		addonContext, err := clusterup.GetExecutionContext(ip, routingSuffix, viper.GetStringSlice(util.AddOnEnv), ocRunner, sshCommander)
+		addonContext, err := clusterup.GetExecutionContext(ip, routingSuffix, sshUser, viper.GetStringSlice(util.AddOnEnv), ocRunner, sshCommander)
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprint("Error applying the add-on: ", err))
 		}

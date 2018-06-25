@@ -1,0 +1,65 @@
+include::variables.adoc[]
+
+= Run Against An Existing Machine
+:icons:
+:toc: macro
+:toc-title:
+:toclevels: 1
+
+[[run-against-an-existing-machine-overview]]
+== Overview
+
+{project} can be run against an existing remote machine using `vm-driver` as `generic`.
+To use an existing machine with {project} , it needs to be configured as follows:
+
+[NOTE]
+====
+CentOS7/RHEL7/Fedora(>26) are the suggested Linux distributions for this feature.
+====
+
+Lets assume that 10.1.1.1 is the IP of remote machine which you want to run against {project}.
+
+Establish password-less SSH from the host to existing remote machine:
+
+----
+Host$ ssh-copy-id <user>@10.1.1.1  // Make sure user have sudo access without password or use root
+Host$ ssh <user>@10.1.1.1  // Make sure this login without password
+----
+
+Prerequisite steps for configuring the existing machine:
+
+----
+Remote_Machine$ yum install -y docker net-tools firewalld
+Remote_Machine$ systemctl start docker
+Remote_Machine$ systemctl enable docker
+Remote_Machine$ systemctl start firewalld
+Remote_Machine$ systemctl enable firewalld
+----
+
+You also need to allow `2376`, `8443`, `80` tcp port on the machine from firewall to have communication from the host and `53`, `8053` udp port to have containers access to OpenShift master API and DNS endpoints.
+
+Determine the Docker bridge network container subnet:
+----
+docker network inspect -f "{{range .IPAM.Config }}{{ .Subnet }}{{end}}" bridge
+----
+
+Above command provide you subnet like: `172.17.0.0/16`
+
+----
+firewall-cmd --permanent --add-port 2376/tcp --add-port 8443/tcp --add-port 80/tcp
+firewall-cmd --permanent --new-zone minishift
+firewall-cmd --permanent --zone minishift --add-source 172.17.0.0/16
+firewall-cmd --permanent --zone minishift --add-port 53/udp --add-port 8053/udp
+firewall-cmd --reload
+----
+
+Use the following to run {project} against a remote machine:
+
+----
+Host$ minishift start --vm-driver generic --remote-ipaddress 10.1.1.1 --remote-ssh-user <username> --remote-ssh-key <private_ssh_key>
+----
+
+[NOTE]
+====
+The value of the `--remote-ssh-key` flag must be the location of a private SSH key on the host machine.
+====

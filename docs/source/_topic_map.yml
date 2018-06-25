@@ -43,6 +43,8 @@ Topics:
         File: docker-daemon
       - Name: Experimental Features
         File: experimental-features
+      - Name: Run Against An Existing Machine
+        File: run-against-an-existing-machine
   - Name: Interacting with OpenShift
     Dir: openshift
     Topics:

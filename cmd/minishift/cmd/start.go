@@ -188,7 +188,7 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	setSubscriptionManagerParameters()
 
-	fmt.Print("-- Starting local OpenShift cluster")
+	fmt.Print("-- Starting the OpenShift cluster")
 
 	hostVm := startHost(libMachineClient)
 	registrationUtil.RegisterHost(libMachineClient)
@@ -405,6 +405,8 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 		cacheMinishiftISO(machineConfig)
 
 		fmt.Print("-- Starting Minishift VM ...")
+	} else {
+		fmt.Print("-- Starting to provision the remote machine ...")
 	}
 	progressDots.Start()
 	start := func() (err error) {

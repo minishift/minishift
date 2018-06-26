@@ -21,6 +21,7 @@ import (
 	"fmt"
 	minishiftStrings "github.com/minishift/minishift/pkg/util/strings"
 	"regexp"
+	"strings"
 )
 
 var requiredMetaTags = []string{NameMetaTagName, DescriptionMetaTagName}
@@ -109,6 +110,10 @@ func (meta *DefaultAddOnMeta) VarDefaults() ([]RequiredVar, error) {
 		defaults := make([]RequiredVar, 0, len(items))
 		for _, item := range items {
 			varDefault, _ := minishiftStrings.SplitAndTrim(item, "=")
+			// In case of value of varDefault is null/Null/NULL then value converted to empty string.
+			if strings.ToLower(varDefault[1]) == "null" {
+				varDefault[1] = ""
+			}
 			defaults = append(defaults, RequiredVar{Key: varDefault[0], Value: varDefault[1]})
 		}
 

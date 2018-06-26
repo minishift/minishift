@@ -74,8 +74,11 @@ func (h *SSHFSHostFolder) Mount(driver drivers.Driver) error {
 
 	// Mount command seems to fail occasionally. Give it a couple of attempts
 	mount := func() (err error) {
+		// compression=no: do not use compression for the connection
+		// kernel_cache: allow kernel to cache files
+		// large_read: read large byte chunks
 		cmd := fmt.Sprintf(
-			"sudo sshfs docker@%s:%s %s -o IdentityFile=%s -o 'StrictHostKeyChecking=no' -o reconnect -o allow_other -o idmap=none -p %d",
+			"sudo sshfs docker@%s:%s %s -o compression=no -o kernel_cache -o large_read -o IdentityFile=%s -o 'StrictHostKeyChecking=no' -o reconnect -o allow_other -p %d",
 			ip,
 			h.config.Option(config.Source),
 			h.config.MountPoint(),

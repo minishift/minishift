@@ -1,0 +1,6 @@
+# Name: anyuid
+# Description: Remove anyuid addon
+
+oc adm policy remove-scc-from-group anyuid system:authenticated
+echo
+echo  anyuid removed

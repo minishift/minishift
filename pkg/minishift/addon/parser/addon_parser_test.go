@@ -105,16 +105,13 @@ var (
 )
 
 func Test_successful_parsing_of_addon_dir_without_remove_addon_file(t *testing.T) {
-	path := filepath.Join(basepath, "..", "..", "..", "..", "addons", "anyuid")
+	path := filepath.Join(basepath, "..", "..", "..", "..", "addons", "xpaas")
 	addOn, err := testParser.Parse(path)
 
 	assert.NoError(t, err, "Error in parsing addon content")
 
-	expectedName := "anyuid"
+	expectedName := "xpaas"
 	assert.Equal(t, expectedName, addOn.MetaData().Name())
-
-	expectedNumberOfCommands := 5
-	assert.Len(t, addOn.Commands(), expectedNumberOfCommands)
 
 	assert.Empty(t, addOn.RemoveCommands())
 

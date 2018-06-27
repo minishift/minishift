@@ -42,7 +42,7 @@ type Manager struct {
 	allInstancesConfig *minishiftConfig.GlobalConfigType
 }
 
-// NewAddOnManager creates a new add-on manager for the specified add-on directory.
+// NewManager creates a new add-on manager for the specified add-on directory.
 func NewManager(instanceConfig *minishiftConfig.InstanceConfigType, allInstancesConfig *minishiftConfig.GlobalConfigType) (*Manager, error) {
 	return &Manager{
 		instanceConfig:     instanceConfig,

@@ -17,12 +17,13 @@ limitations under the License.
 package config
 
 const (
-	Source     = "source"
-	UncPath    = "uncpath"
-	MountPoint = "mountpoint"
-	UserName   = "username"
-	Password   = "password"
-	Domain     = "domain"
+	Source       = "source"
+	UncPath      = "uncpath"
+	MountPoint   = "mountpoint"
+	UserName     = "username"
+	Password     = "password"
+	Domain       = "domain"
+	ExtraOptions = "extra-options"
 )
 
 type HostFolderConfig struct {

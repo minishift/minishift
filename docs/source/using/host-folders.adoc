@@ -114,6 +114,15 @@ $ minishift hostfolder add -t sshfs --source /Users/john/myshare --target /mnt/s
 
 For the case of a SSHFS based host folder only the source and target of the host folder need to be specified.
 
+[TIP]
+====
+When adding hostfolders, one can give type specific options to be used while mounting by using the `--options` flag, for example:
+
+----
+$ minishift hostfolder add -t sshfs --source ~/myshare/ --target /mnt/sda1/myshare --options "-o compression=no" myshare
+----
+====
+
 [[instance-host-folders]]
 ==== Instance-Specific Host Folders
 

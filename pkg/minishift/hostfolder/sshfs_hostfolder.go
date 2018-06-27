@@ -75,11 +75,12 @@ func (h *SSHFSHostFolder) Mount(driver drivers.Driver) error {
 	// Mount command seems to fail occasionally. Give it a couple of attempts
 	mount := func() (err error) {
 		cmd := fmt.Sprintf(
-			"sudo sshfs docker@%s:%s %s -o IdentityFile=%s -o 'StrictHostKeyChecking=no' -o reconnect -o allow_other -o idmap=none -p %d",
+			"sudo sshfs docker@%s:%s %s -o IdentityFile=%s -o 'StrictHostKeyChecking=no' -o reconnect -o allow_other -o idmap=none %s -p %d",
 			ip,
 			h.config.Option(config.Source),
 			h.config.MountPoint(),
 			keyFile,
+			h.config.Option(config.ExtraOptions),
 			SftpPort)
 
 		if glog.V(2) {

@@ -174,8 +174,9 @@ func addSSHFSNonInteractive(manager *hostFolderConfig.Manager, name string) erro
 		Name: name,
 		Type: hostFolderConfig.SSHFS.String(),
 		Options: map[string]string{
-			config.Source:     source,
-			config.MountPoint: target,
+			config.Source:       source,
+			config.MountPoint:   target,
+			config.ExtraOptions: options,
 		},
 	}
 	hostFolder := hostFolderConfig.NewSSHFSHostFolder(config, minishiftConfig.AllInstancesConfig)
@@ -219,11 +220,12 @@ func addCIFSInteractive(manager *hostFolderConfig.Manager, name string) error {
 		Name: name,
 		Type: hostFolderConfig.CIFS.String(),
 		Options: map[string]string{
-			config.MountPoint: mountPoint,
-			config.UncPath:    minishiftStrings.ConvertSlashes(uncPath),
-			config.UserName:   username,
-			config.Password:   password,
-			config.Domain:     domain,
+			config.MountPoint:   mountPoint,
+			config.UncPath:      minishiftStrings.ConvertSlashes(uncPath),
+			config.UserName:     username,
+			config.Password:     password,
+			config.Domain:       domain,
+			config.ExtraOptions: options,
 		},
 	}
 	hostFolder := hostFolderConfig.NewCifsHostFolder(config)

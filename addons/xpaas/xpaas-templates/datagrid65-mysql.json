@@ -6,7 +6,7 @@
             "iconClass": "icon-datagrid",
             "description": "Application template for JDG 6.5 and MySQL applications.",
             "tags": "datagrid,jboss,hidden",
-            "version": "1.4.8",
+            "version": "1.4.12",
             "openshift.io/display-name": "JBoss Data Grid 6.5 + MySQL (Ephemeral with https)",
             "openshift.io/provider-display-name": "Red Hat, Inc."
         },
@@ -14,7 +14,7 @@
     },
     "labels": {
         "template": "datagrid65-mysql",
-        "xpaas": "1.4.8"
+        "xpaas": "1.4.12"
     },
     "message": "A new data grid service (using MySQL) has been created in your project. It supports connector type(s) \"${INFINISPAN_CONNECTORS}\". The username/password for accessing the MySQL database \"${DB_DATABASE}\" is ${DB_USERNAME}/${DB_PASSWORD}. Please be sure to create the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications.",
     "parameters": [
@@ -809,6 +809,21 @@
                                         "protocol": "TCP"
                                     }
                                 ],
+                                "readinessProbe": {
+                                    "timeoutSeconds": 1,
+                                    "initialDelaySeconds": 5,
+                                    "exec": {
+                                        "command": [ "/bin/sh", "-i", "-c",
+                                            "MYSQL_PWD=\"$MYSQL_PASSWORD\" mysql -h 127.0.0.1 -u $MYSQL_USER -D $MYSQL_DATABASE -e 'SELECT 1'"]
+                                    }
+                                },
+                                "livenessProbe": {
+                                    "timeoutSeconds": 1,
+                                    "initialDelaySeconds": 30,
+                                    "tcpSocket": {
+                                        "port": 3306
+                                    }
+                                },
                                 "env": [
                                     {
                                         "name": "MYSQL_USER",

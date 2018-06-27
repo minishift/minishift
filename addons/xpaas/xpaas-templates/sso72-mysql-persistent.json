@@ -5,21 +5,21 @@
         "annotations": {
             "iconClass" : "icon-sso",
             "tags" : "sso,keycloak,jboss,hidden",
-            "version": "1.4.8",
-            "openshift.io/display-name": "Single Sign-On 7.1 + PostgreSQL (Ephemeral)",
+            "version": "1.4.12",
+            "openshift.io/display-name": "Red Hat Single Sign-On 7.2 + MySQL (Persistent with passthrough TLS)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
-            "description": "An example SSO 7 application with a PostgreSQL database. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
-            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat Single Sign-On 7.1 server based deployment and deployment configuration for PostgreSQL using ephemeral (temporary) storage.",
+            "description": "An example RH-SSO 7 application with a MySQL database. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
+            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat Single Sign-On 7.2 server based deployment, deployment configuration for MySQL using persistence, and securing RH-SSO communication using passthrough TLS.",
             "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-single-sign-on/",
             "template.openshift.io/support-url": "https://access.redhat.com"
         },
-        "name": "sso71-postgresql"
+        "name": "sso72-mysql-persistent"
     },
     "labels": {
-        "template": "sso71-postgresql",
-        "xpaas": "1.4.8"
+        "template": "sso72-mysql-persistent",
+        "xpaas": "1.4.12"
     },
-    "message": "A new SSO service (using PostgreSQL) has been created in your project. The admin username/password for accessing the master realm via the SSO console is ${SSO_ADMIN_USERNAME}/${SSO_ADMIN_PASSWORD}. The username/password for accessing the PostgreSQL database \"${DB_DATABASE}\" is ${DB_USERNAME}/${DB_PASSWORD}. Please be sure to create the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications; \"${SSO_TRUSTSTORE_SECRET}\" containing the ${SSO_TRUSTSTORE} file used for securing SSO requests.",
+    "message": "A new persistent RH-SSO service (using MySQL) has been created in your project. The admin username/password for accessing the master realm via the RH-SSO console is ${SSO_ADMIN_USERNAME}/${SSO_ADMIN_PASSWORD}. The username/password for accessing the MySQL database \"${DB_DATABASE}\" is ${DB_USERNAME}/${DB_PASSWORD}. Please be sure to create the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications; \"${SSO_TRUSTSTORE_SECRET}\" containing the ${SSO_TRUSTSTORE} file used for securing RH-SSO requests.",
     "parameters": [
         {
             "displayName": "Application Name",
@@ -30,21 +30,21 @@
         },
         {
             "displayName": "Custom http Route Hostname",
-            "description": "Custom hostname for http service route.  Leave blank for default hostname, e.g.: <application-name>.<project>.<default-domain-suffix>",
+            "description": "Custom hostname for http service route. Leave blank for default hostname, e.g.: <application-name>.<project>.<default-domain-suffix>",
             "name": "HOSTNAME_HTTP",
             "value": "",
             "required": false
         },
         {
             "displayName": "Custom https Route Hostname",
-            "description": "Custom hostname for https service route.  Leave blank for default hostname, e.g.: <application-name>.<project>.<default-domain-suffix>",
+            "description": "Custom hostname for https service route. Leave blank for default hostname, e.g.: <application-name>.<project>.<default-domain-suffix>",
             "name": "HOSTNAME_HTTPS",
             "value": "",
             "required": false
         },
         {
             "displayName": "Database JNDI Name",
-            "description": "Database JNDI name used by application to resolve the datasource, e.g. java:/jboss/datasources/postgresql",
+            "description": "Database JNDI name used by application to resolve the datasource, e.g. java:/jboss/datasources/mysql",
             "name": "DB_JNDI",
             "value": "java:jboss/datasources/KeycloakDS",
             "required": false
@@ -110,15 +110,33 @@
             "required": false
         },
         {
-            "displayName": "PostgreSQL Maximum number of connections",
-            "description": "The maximum number of client connections allowed. This also sets the maximum number of prepared transactions.",
-            "name": "POSTGRESQL_MAX_CONNECTIONS",
+            "displayName": "MySQL Lower Case Table Names",
+            "description": "Sets how the table names are stored and compared.",
+            "name": "MYSQL_LOWER_CASE_TABLE_NAMES",
             "required": false
         },
         {
-            "displayName": "PostgreSQL Shared Buffers",
-            "description": "Configures how much memory is dedicated to PostgreSQL for caching data.",
-            "name": "POSTGRESQL_SHARED_BUFFERS",
+            "displayName": "MySQL Maximum number of connections",
+            "description": "The maximum permitted number of simultaneous client connections.",
+            "name": "MYSQL_MAX_CONNECTIONS",
+            "required": false
+        },
+        {
+            "displayName": "MySQL FullText Minimum Word Length",
+            "description": "The minimum length of the word to be included in a FULLTEXT index.",
+            "name": "MYSQL_FT_MIN_WORD_LEN",
+            "required": false
+        },
+        {
+            "displayName": "MySQL FullText Maximum Word Length",
+            "description": "The maximum length of the word to be included in a FULLTEXT index.",
+            "name": "MYSQL_FT_MAX_WORD_LEN",
+            "required": false
+        },
+        {
+            "displayName": "MySQL AIO",
+            "description": "Controls the innodb_use_native_aio setting value if the native AIO is broken.",
+            "name": "MYSQL_AIO",
             "required": false
         },
         {
@@ -135,6 +153,13 @@
             "name": "DB_PASSWORD",
             "from": "[a-zA-Z0-9]{8}",
             "generate": "expression",
+            "required": true
+        },
+        {
+            "displayName": "Database Volume Capacity",
+            "description": "Size of persistent storage for database volume.",
+            "name": "VOLUME_CAPACITY",
+            "value": "1Gi",
             "required": true
         },
         {
@@ -181,72 +206,73 @@
             "required": true
         },
         {
-            "displayName": "SSO Admin Username",
-            "description": "SSO Server admin username",
+            "displayName": "RH-SSO Administrator Username",
+            "description": "RH-SSO Server administrator username",
             "name": "SSO_ADMIN_USERNAME",
             "from": "[a-zA-Z0-9]{8}",
             "generate": "expression",
             "required": true
         },
         {
-            "displayName": "SSO Admin Password",
-            "description": "SSO Server admin  password",
+            "displayName": "RH-SSO Administrator Password",
+            "description": "RH-SSO Server administrator password",
             "name": "SSO_ADMIN_PASSWORD",
             "from": "[a-zA-Z0-9]{8}",
             "generate": "expression",
             "required": true
         },
         {
-            "displayName": "SSO Realm",
-            "description": "Realm to be created in the SSO server (e.g. demo).",
+            "displayName": "RH-SSO Realm",
+            "description": "Realm to be created in the RH-SSO server (e.g. demorealm).",
             "name": "SSO_REALM",
             "value": "",
             "required": false
         },
         {
-            "displayName": "SSO Service Username",
-            "description": "The username used to access the SSO service.  This is used by clients to create the appliction client(s) within the specified SSO realm.",
+            "displayName": "RH-SSO Service Username",
+            "description": "The username used to access the RH-SSO service. This is used by clients to create the appliction client(s) within the specified RH-SSO realm.",
             "name": "SSO_SERVICE_USERNAME",
             "value": "",
             "required": false
         },
         {
-            "displayName": "SSO Service Password",
-            "description": "The password for the SSO service user.",
+            "displayName": "RH-SSO Service Password",
+            "description": "The password for the RH-SSO service user.",
             "name": "SSO_SERVICE_PASSWORD",
             "value": "",
             "required": false
         },
         {
-            "displayName": "SSO Trust Store",
+            "displayName": "RH-SSO Trust Store",
             "description": "The name of the truststore file within the secret (e.g. truststore.jks)",
             "name": "SSO_TRUSTSTORE",
             "value": "",
             "required": false
         },
         {
-            "displayName": "SSO Trust Store Password",
+            "displayName": "RH-SSO Trust Store Password",
             "description": "The password for the truststore and certificate (e.g. mykeystorepass)",
             "name": "SSO_TRUSTSTORE_PASSWORD",
             "value": "",
             "required": false
         },
         {
-            "displayName": "SSO Trust Store Secret",
+            "displayName": "RH-SSO Trust Store Secret",
             "description": "The name of the secret containing the truststore file (e.g. truststore-secret). Used for volume secretName",
             "name": "SSO_TRUSTSTORE_SECRET",
             "value": "sso-app-secret",
             "required": false
         },
         {
-            "displayName": "PostgreSQL Image Stream Tag",
-            "description": "The tag to use for the \"postgresql\" image stream.  Typically, this aligns with the major.minor version of PostgreSQL.",
-            "name": "POSTGRESQL_IMAGE_STREAM_TAG",
-            "value": "9.5",
+            "displayName": "MySQL Image Stream Tag",
+            "description": "The tag to use for the \"mysql\" image stream. Typically, this aligns with the major.minor version of MySQL.",
+            "name": "MYSQL_IMAGE_STREAM_TAG",
+            "value": "5.7",
             "required": true
         },
         {
-            "description": "Container memory limit",
+            "displayName": "Container Memory Limit",
+            "description": "Container memory limit.",
             "name": "MEMORY_LIMIT",
             "value": "1Gi",
             "required": false
@@ -270,12 +296,11 @@
             "metadata": {
                 "name": "${APPLICATION_NAME}",
                 "labels": {
-                    "application": "${APPLICATION_NAME}",
-                    "component": "server"
+                    "application": "${APPLICATION_NAME}"
                 },
                 "annotations": {
                     "description": "The web server's http port.",
-                    "service.alpha.openshift.io/dependencies": "[{\"name\": \"${APPLICATION_NAME}-postgresql\", \"kind\": \"Service\"}]"
+                    "service.alpha.openshift.io/dependencies": "[{\"name\": \"${APPLICATION_NAME}-mysql\", \"kind\": \"Service\"}]"
                 }
             }
         },
@@ -296,12 +321,11 @@
             "metadata": {
                 "name": "secure-${APPLICATION_NAME}",
                 "labels": {
-                    "application": "${APPLICATION_NAME}",
-                    "component": "server"
+                    "application": "${APPLICATION_NAME}"
                 },
                 "annotations": {
                     "description": "The web server's https port.",
-                    "service.alpha.openshift.io/dependencies": "[{\"name\": \"${APPLICATION_NAME}-postgresql\", \"kind\": \"Service\"}]"
+                    "service.alpha.openshift.io/dependencies": "[{\"name\": \"${APPLICATION_NAME}-mysql\", \"kind\": \"Service\"}]"
                 }
             }
         },
@@ -311,19 +335,18 @@
             "spec": {
                 "ports": [
                     {
-                        "port": 5432,
-                        "targetPort": 5432
+                        "port": 3306,
+                        "targetPort": 3306
                     }
                 ],
                 "selector": {
-                    "deploymentConfig": "${APPLICATION_NAME}-postgresql"
+                    "deploymentConfig": "${APPLICATION_NAME}-mysql"
                 }
             },
             "metadata": {
-                "name": "${APPLICATION_NAME}-postgresql",
+                "name": "${APPLICATION_NAME}-mysql",
                 "labels": {
-                    "application": "${APPLICATION_NAME}",
-                    "component": "database"
+                    "application": "${APPLICATION_NAME}"
                 },
                 "annotations": {
                     "description": "The database server's port."
@@ -363,8 +386,7 @@
             "metadata": {
                 "name": "${APPLICATION_NAME}",
                 "labels": {
-                    "application": "${APPLICATION_NAME}",
-                    "component": "server"
+                    "application": "${APPLICATION_NAME}"
                 },
                 "annotations": {
                     "description": "Route for application's http service."
@@ -384,8 +406,7 @@
             "metadata": {
                 "name": "secure-${APPLICATION_NAME}",
                 "labels": {
-                    "application": "${APPLICATION_NAME}",
-                    "component": "server"
+                    "application": "${APPLICATION_NAME}"
                 },
                 "annotations": {
                     "description": "Route for application's https service."
@@ -407,8 +428,7 @@
             "metadata": {
                 "name": "${APPLICATION_NAME}",
                 "labels": {
-                    "application": "${APPLICATION_NAME}",
-                    "component": "server"
+                    "application": "${APPLICATION_NAME}"
                 }
             },
             "spec": {
@@ -426,7 +446,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "redhat-sso71-openshift:1.3"
+                                "name": "redhat-sso72-openshift:1.1"
                             }
                         }
                     },
@@ -443,8 +463,7 @@
                         "name": "${APPLICATION_NAME}",
                         "labels": {
                             "deploymentConfig": "${APPLICATION_NAME}",
-                            "application": "${APPLICATION_NAME}",
-                            "component": "server"
+                            "application": "${APPLICATION_NAME}"
                         }
                     },
                     "spec": {
@@ -520,7 +539,7 @@
                                 "env": [
                                     {
                                         "name": "DB_SERVICE_PREFIX_MAPPING",
-                                        "value": "${APPLICATION_NAME}-postgresql=DB"
+                                        "value": "${APPLICATION_NAME}-mysql=DB"
                                     },
                                     {
                                         "name": "DB_JNDI",
@@ -540,7 +559,7 @@
                                     },
                                     {
                                         "name": "TX_DATABASE_PREFIX_MAPPING",
-                                        "value": "${APPLICATION_NAME}-postgresql=DB"
+                                        "value": "${APPLICATION_NAME}-mysql=DB"
                                     },
                                     {
                                         "name": "DB_MIN_POOL_SIZE",
@@ -673,10 +692,9 @@
             "kind": "DeploymentConfig",
             "apiVersion": "v1",
             "metadata": {
-                "name": "${APPLICATION_NAME}-postgresql",
+                "name": "${APPLICATION_NAME}-mysql",
                 "labels": {
-                    "application": "${APPLICATION_NAME}",
-                    "component": "database"
+                    "application": "${APPLICATION_NAME}"
                 }
             },
             "spec": {
@@ -689,12 +707,12 @@
                         "imageChangeParams": {
                             "automatic": true,
                             "containerNames": [
-                                "${APPLICATION_NAME}-postgresql"
+                                "${APPLICATION_NAME}-mysql"
                             ],
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "postgresql:${POSTGRESQL_IMAGE_STREAM_TAG}"
+                                "name": "mysql:${MYSQL_IMAGE_STREAM_TAG}"
                             }
                         }
                     },
@@ -704,72 +722,114 @@
                 ],
                 "replicas": 1,
                 "selector": {
-                    "deploymentConfig": "${APPLICATION_NAME}-postgresql"
+                    "deploymentConfig": "${APPLICATION_NAME}-mysql"
                 },
                 "template": {
                     "metadata": {
-                        "name": "${APPLICATION_NAME}-postgresql",
+                        "name": "${APPLICATION_NAME}-mysql",
                         "labels": {
-                            "deploymentConfig": "${APPLICATION_NAME}-postgresql",
-                            "application": "${APPLICATION_NAME}",
-                            "component": "database"
+                            "deploymentConfig": "${APPLICATION_NAME}-mysql",
+                            "application": "${APPLICATION_NAME}"
                         }
                     },
                     "spec": {
                         "terminationGracePeriodSeconds": 60,
                         "containers": [
                             {
-                                "name": "${APPLICATION_NAME}-postgresql",
-                                "image": "postgresql",
+                                "name": "${APPLICATION_NAME}-mysql",
+                                "image": "mysql",
                                 "imagePullPolicy": "Always",
                                 "ports": [
                                     {
-                                        "containerPort": 5432,
+                                        "containerPort": 3306,
                                         "protocol": "TCP"
+                                    }
+                                ],
+                                "readinessProbe": {
+                                    "timeoutSeconds": 1,
+                                    "initialDelaySeconds": 5,
+                                    "exec": {
+                                        "command": [ "/bin/sh", "-i", "-c",
+                                            "MYSQL_PWD=\"$MYSQL_PASSWORD\" mysql -h 127.0.0.1 -u $MYSQL_USER -D $MYSQL_DATABASE -e 'SELECT 1'"]
+                                    }
+                                },
+                                "livenessProbe": {
+                                    "timeoutSeconds": 1,
+                                    "initialDelaySeconds": 30,
+                                    "tcpSocket": {
+                                        "port": 3306
+                                    }
+                                },
+                                "volumeMounts": [
+                                    {
+                                        "mountPath": "/var/lib/mysql/data",
+                                        "name": "${APPLICATION_NAME}-mysql-pvol"
                                     }
                                 ],
                                 "env": [
                                     {
-                                        "name": "POSTGRESQL_USER",
+                                        "name": "MYSQL_USER",
                                         "value": "${DB_USERNAME}"
                                     },
                                     {
-                                        "name": "POSTGRESQL_PASSWORD",
+                                        "name": "MYSQL_PASSWORD",
                                         "value": "${DB_PASSWORD}"
                                     },
                                     {
-                                        "name": "POSTGRESQL_DATABASE",
+                                        "name": "MYSQL_DATABASE",
                                         "value": "${DB_DATABASE}"
                                     },
                                     {
-                                        "name": "POSTGRESQL_MAX_CONNECTIONS",
-                                        "value": "${POSTGRESQL_MAX_CONNECTIONS}"
+                                        "name": "MYSQL_LOWER_CASE_TABLE_NAMES",
+                                        "value": "${MYSQL_LOWER_CASE_TABLE_NAMES}"
                                     },
                                     {
-                                        "name": "POSTGRESQL_MAX_PREPARED_TRANSACTIONS",
-                                        "value": "${POSTGRESQL_MAX_CONNECTIONS}"
+                                        "name": "MYSQL_MAX_CONNECTIONS",
+                                        "value": "${MYSQL_MAX_CONNECTIONS}"
                                     },
                                     {
-                                        "name": "POSTGRESQL_SHARED_BUFFERS",
-                                        "value": "${POSTGRESQL_SHARED_BUFFERS}"
-                                    }
-                                ],
-                                "volumeMounts": [
+                                        "name": "MYSQL_FT_MIN_WORD_LEN",
+                                        "value": "${MYSQL_FT_MIN_WORD_LEN}"
+                                    },
                                     {
-                                        "mountPath": "/var/lib/pgsql/data",
-                                        "name": "${APPLICATION_NAME}-data"
+                                        "name": "MYSQL_FT_MAX_WORD_LEN",
+                                        "value": "${MYSQL_FT_MAX_WORD_LEN}"
+                                    },
+                                    {
+                                        "name": "MYSQL_AIO",
+                                        "value": "${MYSQL_AIO}"
                                     }
                                 ]
                             }
                         ],
                         "volumes": [
                             {
-                                "emptyDir": {
-                                    "medium": ""
-                                },
-                                "name": "${APPLICATION_NAME}-data"
+                                "name": "${APPLICATION_NAME}-mysql-pvol",
+                                "persistentVolumeClaim": {
+                                    "claimName": "${APPLICATION_NAME}-mysql-claim"
+                                }
                             }
                         ]
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "PersistentVolumeClaim",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-mysql-claim",
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "accessModes": [
+                    "ReadWriteOnce"
+                ],
+                "resources": {
+                    "requests": {
+                        "storage": "${VOLUME_CAPACITY}"
                     }
                 }
             }

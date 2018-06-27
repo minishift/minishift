@@ -1,41 +1,58 @@
 # Name: xpaas
 # Description: Imports xPaaS templates
-# Url: https://github.com/openshift/openshift-ansible/tree/master/roles/openshift_examples/files/examples/v3.7
+# Url: https://github.com/openshift/openshift-ansible/tree/release-3.9/roles/openshift_examples/files/examples/v3.9
 
+# Image Streams
+oc apply -f xpaas-streams/amq62-image-stream.json -n openshift
+oc apply -f xpaas-streams/amq63-image-stream.json -n openshift
+oc apply -f xpaas-streams/datagrid65-image-stream.json -n openshift
+oc apply -f xpaas-streams/datagrid71-image-stream.json -n openshift
+oc apply -f xpaas-streams/datavirt63-image-stream.json -n openshift
+oc apply -f xpaas-streams/decisionserver62-image-stream.json -n openshift
+oc apply -f xpaas-streams/decisionserver63-image-stream.json -n openshift
+oc apply -f xpaas-streams/decisionserver64-image-stream.json -n openshift
+oc apply -f xpaas-streams/eap70-image-stream.json -n openshift
+oc apply -f xpaas-streams/eap71-image-stream.json -n openshift
 oc apply -f xpaas-streams/fis-image-streams.json -n openshift
-oc apply -f xpaas-streams/jboss-image-streams.json -n openshift
+oc apply -f xpaas-streams/jws30-tomcat7-image-stream.json -n openshift
+oc apply -f xpaas-streams/jws30-tomcat8-image-stream.json -n openshift
+oc apply -f xpaas-streams/jws31-tomcat7-image-stream.json -n openshift
+oc apply -f xpaas-streams/jws31-tomcat8-image-stream.json -n openshift
+oc apply -f xpaas-streams/openjdk18-image-stream.json -n openshift
+oc apply -f xpaas-streams/processserver63-image-stream.json -n openshift
+oc apply -f xpaas-streams/processserver64-image-stream.json -n openshift
+oc apply -f xpaas-streams/sso70-image-stream.json -n openshift
+oc apply -f xpaas-streams/sso71-image-stream.json -n openshift
+oc apply -f xpaas-streams/sso72-image-stream.json -n openshift
 
+# Templates
 oc apply -f xpaas-templates/amq62-basic.json -n openshift
-oc apply -f xpaas-templates/amq62-persistent-ssl.json -n openshift
 oc apply -f xpaas-templates/amq62-persistent.json -n openshift
+oc apply -f xpaas-templates/amq62-persistent-ssl.json -n openshift
 oc apply -f xpaas-templates/amq62-ssl.json -n openshift
 oc apply -f xpaas-templates/amq63-basic.json -n openshift
-oc apply -f xpaas-templates/amq63-persistent-ssl.json -n openshift
 oc apply -f xpaas-templates/amq63-persistent.json -n openshift
+oc apply -f xpaas-templates/amq63-persistent-ssl.json -n openshift
 oc apply -f xpaas-templates/amq63-ssl.json -n openshift
-
 oc apply -f xpaas-templates/datagrid65-basic.json -n openshift
 oc apply -f xpaas-templates/datagrid65-https.json -n openshift
-oc apply -f xpaas-templates/datagrid65-mysql-persistent.json -n openshift
 oc apply -f xpaas-templates/datagrid65-mysql.json -n openshift
-oc apply -f xpaas-templates/datagrid65-postgresql-persistent.json -n openshift
+oc apply -f xpaas-templates/datagrid65-mysql-persistent.json -n openshift
 oc apply -f xpaas-templates/datagrid65-postgresql.json -n openshift
+oc apply -f xpaas-templates/datagrid65-postgresql-persistent.json -n openshift
 oc apply -f xpaas-templates/datagrid71-basic.json -n openshift
 oc apply -f xpaas-templates/datagrid71-https.json -n openshift
-oc apply -f xpaas-templates/datagrid71-mysql-persistent.json -n openshift
 oc apply -f xpaas-templates/datagrid71-mysql.json -n openshift
+oc apply -f xpaas-templates/datagrid71-mysql-persistent.json -n openshift
 oc apply -f xpaas-templates/datagrid71-partition.json -n openshift
-oc apply -f xpaas-templates/datagrid71-postgresql-persistent.json -n openshift
 oc apply -f xpaas-templates/datagrid71-postgresql.json -n openshift
-
+oc apply -f xpaas-templates/datagrid71-postgresql-persistent.json -n openshift
 oc apply -f xpaas-templates/datavirt63-basic-s2i.json -n openshift
 oc apply -f xpaas-templates/datavirt63-extensions-support-s2i.json -n openshift
 oc apply -f xpaas-templates/datavirt63-secure-s2i.json -n openshift
-
 oc apply -f xpaas-templates/decisionserver64-amq-s2i.json -n openshift
 oc apply -f xpaas-templates/decisionserver64-basic-s2i.json -n openshift
 oc apply -f xpaas-templates/decisionserver64-https-s2i.json -n openshift
-
 oc apply -f xpaas-templates/eap70-amq-persistent-s2i.json -n openshift
 oc apply -f xpaas-templates/eap70-amq-s2i.json -n openshift
 oc apply -f xpaas-templates/eap70-basic-s2i.json -n openshift
@@ -62,7 +79,6 @@ oc apply -f xpaas-templates/eap71-postgresql-s2i.json -n openshift
 oc apply -f xpaas-templates/eap71-sso-s2i.json -n openshift
 oc apply -f xpaas-templates/eap71-third-party-db-s2i.json -n openshift
 oc apply -f xpaas-templates/eap71-tx-recovery-s2i.json -n openshift
-
 oc apply -f xpaas-templates/jws31-tomcat7-basic-s2i.json -n openshift
 oc apply -f xpaas-templates/jws31-tomcat7-https-s2i.json -n openshift
 oc apply -f xpaas-templates/jws31-tomcat7-mongodb-persistent-s2i.json -n openshift
@@ -79,14 +95,11 @@ oc apply -f xpaas-templates/jws31-tomcat8-mysql-persistent-s2i.json -n openshift
 oc apply -f xpaas-templates/jws31-tomcat8-mysql-s2i.json -n openshift
 oc apply -f xpaas-templates/jws31-tomcat8-postgresql-persistent-s2i.json -n openshift
 oc apply -f xpaas-templates/jws31-tomcat8-postgresql-s2i.json -n openshift
-
 oc apply -f xpaas-templates/karaf2-camel-amq-template.json -n openshift
 oc apply -f xpaas-templates/karaf2-camel-log-template.json -n openshift
 oc apply -f xpaas-templates/karaf2-camel-rest-sql-template.json -n openshift
 oc apply -f xpaas-templates/karaf2-cxf-rest-template.json -n openshift
-
 oc apply -f xpaas-templates/openjdk18-web-basic-s2i.json -n openshift
-
 oc apply -f xpaas-templates/processserver64-amq-mysql-persistent-s2i.json -n openshift
 oc apply -f xpaas-templates/processserver64-amq-mysql-s2i.json -n openshift
 oc apply -f xpaas-templates/processserver64-amq-postgresql-persistent-s2i.json -n openshift
@@ -96,7 +109,6 @@ oc apply -f xpaas-templates/processserver64-mysql-persistent-s2i.json -n openshi
 oc apply -f xpaas-templates/processserver64-mysql-s2i.json -n openshift
 oc apply -f xpaas-templates/processserver64-postgresql-persistent-s2i.json -n openshift
 oc apply -f xpaas-templates/processserver64-postgresql-s2i.json -n openshift
-
 oc apply -f xpaas-templates/spring-boot-camel-amq-template.json -n openshift
 oc apply -f xpaas-templates/spring-boot-camel-config-template.json -n openshift
 oc apply -f xpaas-templates/spring-boot-camel-drools-template.json -n openshift
@@ -107,12 +119,13 @@ oc apply -f xpaas-templates/spring-boot-camel-template.json -n openshift
 oc apply -f xpaas-templates/spring-boot-camel-xml-template.json -n openshift
 oc apply -f xpaas-templates/spring-boot-cxf-jaxrs-template.json -n openshift
 oc apply -f xpaas-templates/spring-boot-cxf-jaxws-template.json -n openshift
-
-oc apply -f xpaas-templates/sso71-https.json -n openshift
-oc apply -f xpaas-templates/sso71-mysql-persistent.json -n openshift
-oc apply -f xpaas-templates/sso71-mysql.json -n openshift
-oc apply -f xpaas-templates/sso71-postgresql-persistent.json -n openshift
-oc apply -f xpaas-templates/sso71-postgresql.json -n openshift
+oc apply -f xpaas-templates/sso72-https.json -n openshift
+oc apply -f xpaas-templates/sso72-mysql.json -n openshift
+oc apply -f xpaas-templates/sso72-mysql-persistent.json -n openshift
+oc apply -f xpaas-templates/sso72-postgresql.json -n openshift
+oc apply -f xpaas-templates/sso72-x509-https.json -n openshift
+oc apply -f xpaas-templates/sso72-x509-mysql-persistent.json -n openshift
+oc apply -f xpaas-templates/sso72-x509-postgresql-persistent.json -n openshift
 
 echo XPaaS OpenShift imagestream and templates installed
-echo See https://github.com/openshift/openshift-ansible/tree/master/roles/openshift_examples/files/examples/v3.7
+echo See https://github.com/openshift/openshift-ansible/tree/release-3.9/roles/openshift_examples/files/examples/v3.9

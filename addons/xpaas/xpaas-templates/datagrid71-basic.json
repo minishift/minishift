@@ -5,7 +5,7 @@
         "annotations": {
             "iconClass": "icon-datagrid",
             "tags": "datagrid,jboss",
-            "version": "1.4.8",
+            "version": "1.4.12",
             "openshift.io/display-name": "JBoss Data Grid 7.1 (Ephemeral, no https)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example JBoss Data Grid application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "datagrid71-basic",
-        "xpaas": "1.4.8"
+        "xpaas": "1.4.12"
     },
     "message": "A new data grid service has been created in your project. It supports connector type(s) \"${INFINISPAN_CONNECTORS}\".",
     "parameters": [
@@ -291,7 +291,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "jboss-datagrid71-openshift:1.2"
+                                "name": "jboss-datagrid71-openshift:1.3"
                             }
                         }
                     },

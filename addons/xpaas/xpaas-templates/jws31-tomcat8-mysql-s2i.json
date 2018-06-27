@@ -7,14 +7,14 @@
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "Application template for JWS MySQL applications built using S2I.",
             "tags": "tomcat,tomcat8,java,jboss,hidden",
-            "version": "1.4.8",
+            "version": "1.4.12",
             "openshift.io/display-name": "JBoss Web Server 3.1 Apache Tomcat 8 + MySQL (Ephemeral with https)"
         },
         "name": "jws31-tomcat8-mysql-s2i"
     },
     "labels": {
         "template": "jws31-tomcat8-mysql-s2i",
-        "xpaas": "1.4.8"
+        "xpaas": "1.4.12"
     },
     "message": "A new JWS application for Apache Tomcat 8 (using MySQL) has been created in your project. The username/password for administering your JWS is ${JWS_ADMIN_USERNAME}/${JWS_ADMIN_PASSWORD}. For accessing the MySQL database \"${DB_DATABASE}\" use the credentials ${DB_USERNAME}/${DB_PASSWORD}. Please be sure to create the secret named \"${JWS_HTTPS_SECRET}\" containing the ${JWS_HTTPS_CERTIFICATE} file used for serving secure content.",
     "parameters": [
@@ -389,7 +389,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-webserver31-tomcat8-openshift:1.1"
+                            "name": "jboss-webserver31-tomcat8-openshift:1.2"
                         }
                     }
                 },
@@ -633,6 +633,21 @@
                                         "protocol": "TCP"
                                     }
                                 ],
+                                "readinessProbe": {
+                                    "timeoutSeconds": 1,
+                                    "initialDelaySeconds": 5,
+                                    "exec": {
+                                        "command": [ "/bin/sh", "-i", "-c",
+                                            "MYSQL_PWD=\"$MYSQL_PASSWORD\" mysql -h 127.0.0.1 -u $MYSQL_USER -D $MYSQL_DATABASE -e 'SELECT 1'"]
+                                    }
+                                },
+                                "livenessProbe": {
+                                    "timeoutSeconds": 1,
+                                    "initialDelaySeconds": 30,
+                                    "tcpSocket": {
+                                        "port": 3306
+                                    }
+                                },
                                 "env": [
                                     {
                                         "name": "MYSQL_USER",

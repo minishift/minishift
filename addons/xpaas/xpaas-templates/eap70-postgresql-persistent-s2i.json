@@ -5,7 +5,7 @@
         "annotations": {
             "iconClass": "icon-eap",
             "tags": "eap,javaee,java,jboss",
-            "version": "1.4.8",
+            "version": "1.4.12",
             "openshift.io/display-name": "JBoss EAP 7.0 + PostgreSQL (Persistent with https)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example EAP 7 application with a PostgreSQL database. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "eap70-postgresql-persistent-s2i",
-        "xpaas": "1.4.8"
+        "xpaas": "1.4.12"
     },
     "message": "A new EAP 7 and PostgreSQL persistent based application with SSL support has been created in your project. The username/password for accessing the PostgreSQL database \"${DB_DATABASE}\" is ${DB_USERNAME}/${DB_PASSWORD}. Please be sure to create the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications.",
     "parameters": [
@@ -805,6 +805,20 @@
                                         "protocol": "TCP"
                                     }
                                 ],
+                                "readinessProbe": {
+                                    "timeoutSeconds": 1,
+                                    "initialDelaySeconds": 5,
+                                    "exec": {
+                                        "command": [ "/bin/sh", "-i", "-c", "psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d $POSTGRESQL_DATABASE -c 'SELECT 1'"]
+                                    }
+                                },
+                                "livenessProbe": {
+                                    "timeoutSeconds": 1,
+                                    "initialDelaySeconds": 30,
+                                    "tcpSocket": {
+                                        "port": 5432
+                                    }
+                                },
                                 "volumeMounts": [
                                     {
                                         "mountPath": "/var/lib/pgsql/data",

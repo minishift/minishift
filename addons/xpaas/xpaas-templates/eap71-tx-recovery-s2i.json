@@ -5,7 +5,7 @@
         "annotations": {
             "iconClass": "icon-eap",
             "tags": "eap,javaee,java,jboss",
-            "version": "1.4.8",
+            "version": "1.4.12",
             "openshift.io/display-name": "JBoss EAP 7.1 (tx recovery)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example EAP 7 application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "eap71-tx-recovery-s2i",
-        "xpaas": "1.4.8"
+        "xpaas": "1.4.12"
     },
     "message": "A new EAP 7 based application has been created in your project.",
     "parameters": [
@@ -46,7 +46,7 @@
             "displayName": "Git Reference",
             "description": "Git branch/tag reference",
             "name": "SOURCE_REPOSITORY_REF",
-            "value": "7.0.0.GA",
+            "value": "7.1.0.GA",
             "required": false
         },
         {
@@ -121,6 +121,13 @@
             "description": "Maven mirror to use for S2I builds",
             "name": "MAVEN_MIRROR_URL",
             "value": "",
+            "required": false
+        },
+        {
+            "displayName": "Maven Additional Arguments",
+            "description": "Maven additional arguments to use for S2I builds",
+            "name": "MAVEN_ARGS_APPEND",
+            "value": "-Dcom.redhat.xpaas.repo.jbossorg",
             "required": false
         },
         {
@@ -258,6 +265,10 @@
                                 "value": "${MAVEN_MIRROR_URL}"
                             },
                             {
+                                "name": "MAVEN_ARGS_APPEND",
+                                "value": "${MAVEN_ARGS_APPEND}"
+                            },
+                            {
                                 "name": "ARTIFACT_DIR",
                                 "value": "${ARTIFACT_DIR}"
                             }
@@ -266,7 +277,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-eap71-openshift:1.1"
+                            "name": "jboss-eap71-openshift:1.2"
                         }
                     }
                 },

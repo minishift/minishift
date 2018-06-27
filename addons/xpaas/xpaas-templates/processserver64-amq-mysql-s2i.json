@@ -5,7 +5,7 @@
         "annotations": {
             "iconClass": "icon-processserver",
             "tags": "processserver,jboss,hidden",
-            "version": "1.4.8",
+            "version": "1.4.12",
             "openshift.io/display-name": "JBoss BPM Suite 6.4 intelligent process server + A-MQ + MySQL (Ephemeral with https)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example BPM Suite application with A-MQ and a MySQL database. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "processserver64-amq-mysql-s2i",
-        "xpaas": "1.4.8"
+        "xpaas": "1.4.12"
     },
     "message": "A new BPMS application (using MySQL and A-MQ) has been created in your project. The username/password for accessing the KIE Server REST or JMS interface is ${KIE_SERVER_USER}/${KIE_SERVER_PASSWORD}. For accessing the MySQL database \"${DB_DATABASE}\" use the credentials ${DB_USERNAME}/${DB_PASSWORD}. And for the A-MQ service use the credentials ${MQ_USERNAME}/${MQ_PASSWORD}. Please be sure to create the secret named \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content.",
     "parameters": [
@@ -565,7 +565,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                            "name": "jboss-processserver64-openshift:1.2"
+                            "name": "jboss-processserver64-openshift:1.3"
                         }
                     }
                 },
@@ -889,6 +889,21 @@
                                         "protocol": "TCP"
                                     }
                                 ],
+                                "readinessProbe": {
+                                    "timeoutSeconds": 1,
+                                    "initialDelaySeconds": 5,
+                                    "exec": {
+                                        "command": [ "/bin/sh", "-i", "-c",
+                                            "MYSQL_PWD=\"$MYSQL_PASSWORD\" mysql -h 127.0.0.1 -u $MYSQL_USER -D $MYSQL_DATABASE -e 'SELECT 1'"]
+                                    }
+                                },
+                                "livenessProbe": {
+                                    "timeoutSeconds": 1,
+                                    "initialDelaySeconds": 30,
+                                    "tcpSocket": {
+                                        "port": 3306
+                                    }
+                                },
                                 "env": [
                                     {
                                         "name": "MYSQL_USER",

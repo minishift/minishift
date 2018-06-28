@@ -30,12 +30,15 @@ import (
 	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/cache"
+	"github.com/minishift/minishift/pkg/minishift/clusterup"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
+	"github.com/minishift/minishift/pkg/minishift/docker"
 	"github.com/minishift/minishift/pkg/minishift/oc"
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	utils "github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
+	"github.com/minishift/minishift/pkg/util/progressdots"
 )
 
 // CacheOc ensures that the oc binary matching the requested OpenShift version is cached on the host
@@ -142,4 +145,31 @@ func GetOcPathForProfile(profileName string) (error, string) {
 		return err, ""
 	}
 	return nil, instanceCfg.OcPath
+}
+
+// PullOpenshiftImageAndCopyOcBinary pull the openshift image if not available and then copy the client binary to Remote/VM machine
+// Any occurring error is also returned.
+func PullOpenshiftImageAndCopyOcBinary(dockerCommander docker.DockerCommander, requestedOpenShiftVersion string) error {
+	fmt.Printf("-- Pulling the Openshift Container Image ")
+	progressDots := progressdots.New()
+	progressDots.Start()
+	// We need to make sure if images are already exist from the cache then don't pull it again.
+	imageExist, err := dockerCommander.IsImageExist(minishiftConstants.GetOpenshiftImageName(requestedOpenShiftVersion))
+	if !imageExist {
+		_, err = dockerCommander.Pull(minishiftConstants.GetOpenshiftImageName(requestedOpenShiftVersion))
+		if err != nil {
+			return fmt.Errorf("Error pulling the openshift container image: %v", err)
+		}
+		progressDots.Stop()
+		fmt.Println(" OK")
+	} else {
+		fmt.Println(" EXISTS")
+	}
+	fmt.Printf("-- Copying oc binary from the OpenShift container image to VM ...")
+	err = clusterup.CopyOcBinaryFromImageToVM(dockerCommander, minishiftConstants.GetOpenshiftImageName(requestedOpenShiftVersion), minishiftConstants.OcPathInsideVM)
+	if err != nil {
+		return fmt.Errorf("Error copying the oc binary to %s: %v", minishiftConstants.OcPathInsideVM, err)
+	}
+	fmt.Println(" OK")
+	return nil
 }

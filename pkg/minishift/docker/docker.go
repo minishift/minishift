@@ -35,6 +35,10 @@ type DockerCommander interface {
 	// and exited. See also https://docs.docker.com/engine/api/v1.21/
 	Status(container string) (string, error)
 
+	// Pull the specified container image. Returns output in case the run was successful.
+	// Any occurring error is also returned.
+	Pull(image string) (string, error)
+
 	// Runs the specified container. Returns true in case the run was successful, false otherwise.
 	// Any occurring error is also returned.
 	Run(options string, container string) (bool, error)
@@ -74,6 +78,10 @@ type DockerCommander interface {
 	// Exec runs 'docker exec' with the specified options, against the specified container, using the specified
 	// command and arguments. The output of the command is returned as well as any occurring error.
 	Exec(options string, container string, command string, args string) (string, error)
+
+	// IsImageExist provide a bool value if an image exist.
+	// Any occurring error is also returned.
+	IsImageExist(image string) (bool, error)
 
 	// LocalExec runs the specified command on the Docker host
 	LocalExec(cmd string) (string, error)
@@ -233,4 +241,24 @@ func (c VmDockerCommander) GetID(container string) (string, error) {
 	out, err := c.commander.SSHCommand(cmd)
 	out = strings.TrimSpace(out)
 	return out, err
+}
+
+func (c VmDockerCommander) Pull(image string) (string, error) {
+	cmd := fmt.Sprintf("docker pull %s", image)
+	c.logCommand(cmd)
+	out, err := c.commander.SSHCommand(cmd)
+	out = strings.TrimSpace(out)
+	return out, err
+}
+
+func (c VmDockerCommander) IsImageExist(image string) (bool, error) {
+	cmd := fmt.Sprintf("docker images -q %s", image)
+	var exist bool
+	c.logCommand(cmd)
+	out, err := c.commander.SSHCommand(cmd)
+	out = strings.TrimSpace(out)
+	if out != "" {
+		exist = true
+	}
+	return exist, err
 }

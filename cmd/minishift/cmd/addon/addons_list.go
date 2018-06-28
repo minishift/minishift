@@ -93,7 +93,13 @@ func printAddOnList(manager *manager.AddOnManager, writer io.Writer, template *t
 
 func stringFromStatus(addonStatus bool) string {
 	if addonStatus {
+		if verbose {
+			return "true"
+		}
 		return "enabled"
+	}
+	if verbose {
+		return "false"
 	}
 	return "disabled"
 }

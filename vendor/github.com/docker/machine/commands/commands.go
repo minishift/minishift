@@ -237,7 +237,7 @@ var Commands = []cli.Command{
 			},
 			cli.StringFlag{
 				Name:  "shell",
-				Usage: "Force environment to be configured for a specified shell: [fish, cmd, powershell, tcsh], default is auto-detect",
+				Usage: "Force environment to be configured for a specified shell: [fish, cmd, powershell, tcsh, emacs], default is auto-detect",
 			},
 			cli.BoolFlag{
 				Name:  "unset, u",
@@ -314,6 +314,10 @@ var Commands = []cli.Command{
 				Name:  "force, f",
 				Usage: "Force rebuild and do not prompt",
 			},
+			cli.BoolFlag{
+				Name:  "client-certs",
+				Usage: "Also regenerate client certificates and CA.",
+			},
 		},
 	},
 	{
@@ -358,6 +362,10 @@ var Commands = []cli.Command{
 			cli.BoolFlag{
 				Name:  "delta, d",
 				Usage: "Reduce amount of data sent over network by sending only the differences (uses rsync)",
+			},
+			cli.BoolFlag{
+				Name:  "quiet, q",
+				Usage: "Disables the progress meter as well as warning and diagnostic messages from ssh",
 			},
 		},
 	},
@@ -428,14 +436,15 @@ func printIP(h *host.Host) func() error {
 func machineCommand(actionName string, host *host.Host, errorChan chan<- error) {
 	// TODO: These actions should have their own type.
 	commands := map[string](func() error){
-		"configureAuth": host.ConfigureAuth,
-		"start":         host.Start,
-		"stop":          host.Stop,
-		"restart":       host.Restart,
-		"kill":          host.Kill,
-		"upgrade":       host.Upgrade,
-		"ip":            printIP(host),
-		"provision":     host.Provision,
+		"configureAuth":    host.ConfigureAuth,
+		"configureAllAuth": host.ConfigureAllAuth,
+		"start":            host.Start,
+		"stop":             host.Stop,
+		"restart":          host.Restart,
+		"kill":             host.Kill,
+		"upgrade":          host.Upgrade,
+		"ip":               printIP(host),
+		"provision":        host.Provision,
 	}
 
 	log.Debugf("command=%s machine=%s", actionName, host.Name)

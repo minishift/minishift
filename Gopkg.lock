@@ -258,8 +258,8 @@
     "libmachine/versioncmp",
     "version"
   ]
-  revision = "9ba6da9ebd1140b65eb73e1ce08086ca72764c60"
-  version = "v0.13.0"
+  revision = "b48dc28d9139c93d166f07d8b3a049b59bceef9c"
+  version = "v0.15.0"
 
 [[projects]]
   name = "github.com/elazarl/goproxy"
@@ -687,6 +687,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f899fbdd9a5e7232dc5570aec2da884bfbdd5ebb4247bf0906670ae1fbaaa0c2"
+  inputs-digest = "c062d9667906c804d14b7b749761195f395c92cca6485027ee0aacdc53f01c07"
   solver-name = "gps-cdcl"
   solver-version = 1

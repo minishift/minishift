@@ -1,6 +1,6 @@
 @addon-registry-route @addon
 Feature: registry-route add-on
-registry-route addon exposes the route for the OpenShift integrated registry,
+registry-route add-on exposes the route for the OpenShift integrated registry,
 so that user can able to push their container images directly to registry and deploy it.
 
   Scenario: As a user, I can enable the registry-route add-on
@@ -8,7 +8,7 @@ so that user can able to push their container images directly to registry and de
      When executing "minishift addons enable registry-route" succeeds
      Then stdout should contain "Add-on 'registry-route' enabled"
 
-  Scenario: As a user, I can start Minishift with registry-route addon enabled
+  Scenario: As a user, I can start Minishift with registry-route add-on enabled
     Given Minishift has state "Does Not Exist"
       And image caching is disabled
      When executing "minishift start --iso-url centos" succeeds

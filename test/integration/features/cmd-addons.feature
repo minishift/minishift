@@ -3,12 +3,40 @@ Feature: Addons command and its subcommands
 
   @minishift-only
   Scenario: Default add-ons are installed but not enabled by default
-     Note: default addons were installed during previous commands automatically.
+     Note: default add-ons were installed during previous commands automatically.
      When executing "minishift addons list"
      Then stdout should match "admin-user\s*: disabled\s*P\(0\)"
       And stdout should match "anyuid\s*: disabled\s*P\(0\)"
       And stdout should match "registry-route\s*: disabled\s*P\(0\)"
       And stdout should match "xpaas\s*: disabled\s*P\(0\)"
+
+@minishift-only
+  Scenario: Verbose listing of add-ons installed by default
+     When executing "minishift addons list --verbose"
+     Then stdout should match "Name\s*: admin-user"
+      And stdout should match "Description\s*: Create admin user and assign the cluster-admin role to it."
+      And stdout should match "Enabled\s*: false"
+      And stdout should match "Priority\s*: 0"
+      And stdout should match "Url\s*:"
+      And stdout should match "Openshift Version\s*:"
+      And stdout should match "Name\s*: anyuid"
+      And stdout should match "Description\s*: Changes the default security context constraints to allow pods to run as any user."
+      And stdout should match "Enabled\s*: false"
+      And stdout should match "Priority\s*: 0"
+      And stdout should match "Url\s*:"
+      And stdout should match "Openshift Version\s*:"
+      And stdout should match "Name\s*: registry-route"
+      And stdout should match "Description\s*: Create an edge terminated route for the OpenShift registry"
+      And stdout should match "Enabled\s*: false"
+      And stdout should match "Priority\s*: 0"
+      And stdout should match "Url\s*:"
+      And stdout should match "Openshift Version\s*:"
+      And stdout should match "Name\s*: xpaas"
+      And stdout should match "Description\s*: Imports xPaaS templates"
+      And stdout should match "Enabled\s*: false"
+      And stdout should match "Priority\s*: 0"
+      And stdout should match "Url\s*:"
+      And stdout should match "Openshift Version\s*:"
 
   Scenario: Uninstalling an add-on
      When executing "minishift addons uninstall anyuid" succeeds

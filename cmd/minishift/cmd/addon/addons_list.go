@@ -34,19 +34,23 @@ import (
 
 var verbose bool
 
-var verboseAddonListFormat = `Name       : {{.Name}}
-Description: {{.Description}}
-Enabled    : {{.Status}}
-Priority   : {{.Priority}}
+var verboseAddonListFormat = `Name              : {{.Name}}
+Description       : {{.Description}}
+Url               : {{.Url}}
+Openshift Version : {{.RequiredOpenshiftVerison}}
+Enabled           : {{.Status}}
+Priority          : {{.Priority}}
 
 `
 var verboseListTemplate *template.Template
 
 type DisplayAddOn struct {
-	Name        string
-	Description string
-	Status      string
-	Priority    int
+	Name                     string
+	Description              string
+	Status                   string
+	Priority                 int
+	Url                      string
+	RequiredOpenshiftVerison string
 }
 
 var addonsListCmd = &cobra.Command{
@@ -78,7 +82,9 @@ func printAddOnList(manager *manager.AddOnManager, writer io.Writer, template *t
 
 	for _, addon := range addOns {
 		description := strings.Join(addon.MetaData().Description(), fmt.Sprintf("\n%13s", " "))
-		addonInfo := DisplayAddOn{addon.MetaData().Name(), description, stringFromStatus(addon.IsEnabled()), addon.GetPriority()}
+		addonInfo := DisplayAddOn{addon.MetaData().Name(), description,
+			stringFromStatus(addon.IsEnabled()), addon.GetPriority(),
+			addon.MetaData().Url(), addon.MetaData().OpenShiftVersion()}
 		if verbose {
 			err := template.Execute(writer, addonInfo)
 			if err != nil {

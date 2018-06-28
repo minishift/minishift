@@ -47,6 +47,7 @@ type AddOnMeta interface {
 	VarDefaults() ([]RequiredVar, error)
 	GetValue(key string) string
 	OpenShiftVersion() string
+	Url() string
 }
 
 type DefaultAddOnMeta struct {
@@ -78,6 +79,19 @@ func (meta *DefaultAddOnMeta) Name() string {
 
 func (meta *DefaultAddOnMeta) Description() []string {
 	return meta.headers[requiredMetaTags[1]].([]string)
+}
+
+func (meta *DefaultAddOnMeta) Url() string {
+	if meta.headers["url"] != nil {
+		return meta.headers["url"].(string)
+	}
+	if meta.headers["URL"] != nil {
+		return meta.headers["URL"].(string)
+	}
+	if meta.headers["Url"] != nil {
+		return meta.headers["Url"].(string)
+	}
+	return ""
 }
 
 func (meta *DefaultAddOnMeta) RequiredVars() ([]string, error) {

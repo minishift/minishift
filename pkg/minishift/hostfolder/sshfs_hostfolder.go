@@ -95,7 +95,8 @@ func (h *SSHFSHostFolder) Mount(driver drivers.Driver) error {
 
 	err = util.Retry(3, mount)
 	if err != nil {
-		return fmt.Errorf("error occurred while mounting host folder: %s", err)
+		errMsg := fmt.Sprintf("\nNote: Make sure that your network and firewall settings on the host allows port %d to be opened\n\n", SftpPort)
+		return fmt.Errorf("%s%s", errMsg, err)
 	}
 
 	return nil

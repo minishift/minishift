@@ -250,18 +250,13 @@ func runStart(cmd *cobra.Command, args []string) {
 		fmt.Println("-- OpenShift cluster will be configured with ...")
 		fmt.Println("   Version:", requestedOpenShiftVersion)
 
-		fmt.Printf("-- Copying oc binary from the OpenShift container image to VM ")
-		progressDots := progressdots.New()
-		progressDots.Start()
-		err = clusterup.CopyOcBinaryFromImageToVM(dockerCommander, minishiftConstants.GetOpenshiftImageName(requestedOpenShiftVersion), minishiftConstants.OcPathInsideVM)
+		err := cmdUtil.PullOpenshiftImageAndCopyOcBinary(dockerCommander, requestedOpenShiftVersion)
 		if err != nil {
-			atexit.ExitWithMessage(1, fmt.Sprintf("Error copying the oc binary to %s: %v", minishiftConstants.OcPathInsideVM, err))
+			atexit.ExitWithMessage(1, err.Error())
 		}
-		progressDots.Stop()
-		fmt.Println(" OK")
 
 		fmt.Printf("-- Starting OpenShift cluster ")
-		progressDots = progressdots.New()
+		progressDots := progressdots.New()
 		progressDots.Start()
 		out, err := clusterup.ClusterUp(clusterUpConfig, clusterUpParams)
 		if err != nil {

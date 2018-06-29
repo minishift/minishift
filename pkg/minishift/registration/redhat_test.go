@@ -39,7 +39,7 @@ var (
 func setup(t *testing.T) (registrator Registrator) {
 	s, _ := tests.NewSSHServer()
 	s.CommandToOutput = make(map[string]string)
-	s.CommandToOutput["sudo -E subscription-manager version"] = `server type: This system is currently not registered.`
+	s.CommandToOutput["sudo -E subscription-manager list"] = `Status:         Unknown`
 	port, err := s.Start()
 	if err != nil {
 		t.Fatalf("Error starting ssh server: %s", err)
@@ -93,7 +93,7 @@ func TestRedHatRegistratorRegister(t *testing.T) {
 	commander := provision.GenericSSHCommander{Driver: d}
 	registrator := NewRedHatRegistrator(commander)
 
-	s.CommandToOutput["sudo -E subscription-manager version"] = `server type: This system is currently not registered.`
+	s.CommandToOutput["sudo -E subscription-manager list"] = `Status:         Unknown`
 	err = registrator.Register(param)
 	assert.NoError(t, err, "Distribution should be able to register")
 	_, ok := s.Commands[expectedCMDRegistration]
@@ -116,7 +116,7 @@ func TestRedHatRegistratorUnregister(t *testing.T) {
 	commander := provision.GenericSSHCommander{Driver: d}
 	registrator := NewRedHatRegistrator(commander)
 
-	s.CommandToOutput["sudo -E subscription-manager version"] = `server type: RedHat Subscription Management`
+	s.CommandToOutput["sudo -E subscription-manager list"] = `Status:         Registered`
 	err = registrator.Unregister(param)
 	assert.NoError(t, err, "Distribution should be able to unregister")
 	_, ok := s.Commands[expectedCMDUnregistration]

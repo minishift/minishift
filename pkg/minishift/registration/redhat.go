@@ -144,10 +144,10 @@ func (registrator *RedHatRegistrator) Unregister(param *RegistrationParameters) 
 
 // isRegistered returns registration state of RHSM or errors when undetermined
 func (registrator *RedHatRegistrator) isRegistered() (bool, error) {
-	if output, err := registrator.SSHCommand("sudo -E subscription-manager version"); err != nil {
+	if output, err := registrator.SSHCommand("sudo -E subscription-manager list"); err != nil {
 		return false, err
 	} else {
-		if !strings.Contains(output, "not registered") {
+		if !strings.Contains(output, "Unknown") {
 			return true, nil
 		}
 		return false, nil

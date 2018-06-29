@@ -18,6 +18,7 @@ package update
 
 import (
 	"bytes"
+	"context"
 	"crypto"
 	"encoding/hex"
 	"errors"
@@ -132,7 +133,8 @@ func getLatestVersionFromGitHub(githubOwner, githubRepo string) (semver.Version,
 	)
 
 	client := githubutils.Client()
-	release, resp, err = client.Repositories.GetLatestRelease(githubOwner, githubRepo)
+	ctx := context.Background()
+	release, resp, err = client.Repositories.GetLatestRelease(ctx, githubOwner, githubRepo)
 	if err != nil {
 		return semver.Version{}, err
 	}

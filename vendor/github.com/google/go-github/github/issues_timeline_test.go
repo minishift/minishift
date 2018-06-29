@@ -6,6 +6,7 @@
 package github
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -13,7 +14,7 @@ import (
 )
 
 func TestIssuesService_ListIssueTimeline(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/repos/o/r/issues/1/timeline", func(w http.ResponseWriter, r *http.Request) {
@@ -27,12 +28,12 @@ func TestIssuesService_ListIssueTimeline(t *testing.T) {
 	})
 
 	opt := &ListOptions{Page: 1, PerPage: 2}
-	events, _, err := client.Issues.ListIssueTimeline("o", "r", 1, opt)
+	events, _, err := client.Issues.ListIssueTimeline(context.Background(), "o", "r", 1, opt)
 	if err != nil {
 		t.Errorf("Issues.ListIssueTimeline returned error: %v", err)
 	}
 
-	want := []*Timeline{{ID: Int(1)}}
+	want := []*Timeline{{ID: Int64(1)}}
 	if !reflect.DeepEqual(events, want) {
 		t.Errorf("Issues.ListIssueTimeline = %+v, want %+v", events, want)
 	}

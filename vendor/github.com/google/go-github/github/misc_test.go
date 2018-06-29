@@ -6,6 +6,7 @@
 package github
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -14,7 +15,7 @@ import (
 )
 
 func TestMarkdown(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	input := &markdownRequest{
@@ -33,7 +34,7 @@ func TestMarkdown(t *testing.T) {
 		fmt.Fprint(w, `<h1>text</h1>`)
 	})
 
-	md, _, err := client.Markdown("# text #", &MarkdownOptions{
+	md, _, err := client.Markdown(context.Background(), "# text #", &MarkdownOptions{
 		Mode:    "gfm",
 		Context: "google/go-github",
 	})
@@ -47,7 +48,7 @@ func TestMarkdown(t *testing.T) {
 }
 
 func TestListEmojis(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/emojis", func(w http.ResponseWriter, r *http.Request) {
@@ -55,7 +56,7 @@ func TestListEmojis(t *testing.T) {
 		fmt.Fprint(w, `{"+1": "+1.png"}`)
 	})
 
-	emoji, _, err := client.ListEmojis()
+	emoji, _, err := client.ListEmojis(context.Background())
 	if err != nil {
 		t.Errorf("ListEmojis returned error: %v", err)
 	}
@@ -66,8 +67,69 @@ func TestListEmojis(t *testing.T) {
 	}
 }
 
+func TestListCodesOfConduct(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/codes_of_conduct", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		testHeader(t, r, "Accept", mediaTypeCodesOfConductPreview)
+		fmt.Fprint(w, `[{
+						"key": "key",
+						"name": "name",
+						"url": "url"}
+						]`)
+	})
+
+	cs, _, err := client.ListCodesOfConduct(context.Background())
+	if err != nil {
+		t.Errorf("ListCodesOfConduct returned error: %v", err)
+	}
+
+	want := []*CodeOfConduct{
+		{
+			Key:  String("key"),
+			Name: String("name"),
+			URL:  String("url"),
+		}}
+	if !reflect.DeepEqual(want, cs) {
+		t.Errorf("ListCodesOfConduct returned %+v, want %+v", cs, want)
+	}
+}
+
+func TestGetCodeOfConduct(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/codes_of_conduct/k", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		testHeader(t, r, "Accept", mediaTypeCodesOfConductPreview)
+		fmt.Fprint(w, `{
+						"key": "key",
+						"name": "name",
+						"url": "url",
+						"body": "body"}`,
+		)
+	})
+
+	coc, _, err := client.GetCodeOfConduct(context.Background(), "k")
+	if err != nil {
+		t.Errorf("ListCodesOfConduct returned error: %v", err)
+	}
+
+	want := &CodeOfConduct{
+		Key:  String("key"),
+		Name: String("name"),
+		URL:  String("url"),
+		Body: String("body"),
+	}
+	if !reflect.DeepEqual(want, coc) {
+		t.Errorf("GetCodeOfConductByKey returned %+v, want %+v", coc, want)
+	}
+}
+
 func TestAPIMeta(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/meta", func(w http.ResponseWriter, r *http.Request) {
@@ -75,7 +137,7 @@ func TestAPIMeta(t *testing.T) {
 		fmt.Fprint(w, `{"hooks":["h"], "git":["g"], "pages":["p"], "verifiable_password_authentication": true}`)
 	})
 
-	meta, _, err := client.APIMeta()
+	meta, _, err := client.APIMeta(context.Background())
 	if err != nil {
 		t.Errorf("APIMeta returned error: %v", err)
 	}
@@ -92,7 +154,7 @@ func TestAPIMeta(t *testing.T) {
 }
 
 func TestOctocat(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	input := "input"
@@ -105,7 +167,7 @@ func TestOctocat(t *testing.T) {
 		fmt.Fprint(w, output)
 	})
 
-	got, _, err := client.Octocat(input)
+	got, _, err := client.Octocat(context.Background(), input)
 	if err != nil {
 		t.Errorf("Octocat returned error: %v", err)
 	}
@@ -116,7 +178,7 @@ func TestOctocat(t *testing.T) {
 }
 
 func TestZen(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	output := "sample text"
@@ -127,7 +189,7 @@ func TestZen(t *testing.T) {
 		fmt.Fprint(w, output)
 	})
 
-	got, _, err := client.Zen()
+	got, _, err := client.Zen(context.Background())
 	if err != nil {
 		t.Errorf("Zen returned error: %v", err)
 	}
@@ -137,8 +199,8 @@ func TestZen(t *testing.T) {
 	}
 }
 
-func TestRepositoriesService_ListServiceHooks(t *testing.T) {
-	setup()
+func TestListServiceHooks(t *testing.T) {
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/hooks", func(w http.ResponseWriter, r *http.Request) {
@@ -153,9 +215,9 @@ func TestRepositoriesService_ListServiceHooks(t *testing.T) {
 		}]`)
 	})
 
-	hooks, _, err := client.Repositories.ListServiceHooks()
+	hooks, _, err := client.ListServiceHooks(context.Background())
 	if err != nil {
-		t.Errorf("Repositories.ListHooks returned error: %v", err)
+		t.Errorf("ListServiceHooks returned error: %v", err)
 	}
 
 	want := []*ServiceHook{{
@@ -165,6 +227,6 @@ func TestRepositoriesService_ListServiceHooks(t *testing.T) {
 		Schema:          [][]string{{"a", "b"}},
 	}}
 	if !reflect.DeepEqual(hooks, want) {
-		t.Errorf("Repositories.ListServiceHooks returned %+v, want %+v", hooks, want)
+		t.Errorf("ListServiceHooks returned %+v, want %+v", hooks, want)
 	}
 }

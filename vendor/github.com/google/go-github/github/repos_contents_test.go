@@ -6,47 +6,13 @@
 package github
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"reflect"
 	"testing"
 )
-
-func TestRepositoryContent_Decode(t *testing.T) {
-	tests := []struct {
-		encoding, content *string // input encoding and content
-		want              string  // desired output
-		wantErr           bool    // whether an error is expected
-	}{
-		{
-			encoding: String("base64"),
-			content:  String("aGVsbG8="),
-			want:     "hello",
-			wantErr:  false,
-		},
-		{
-			encoding: String("bad"),
-			content:  String("aGVsbG8="),
-			want:     "",
-			wantErr:  true,
-		},
-	}
-
-	for _, tt := range tests {
-		r := RepositoryContent{Encoding: tt.encoding, Content: tt.content}
-		o, err := r.Decode()
-		if err != nil && !tt.wantErr {
-			t.Errorf("RepositoryContent(%q, %q) returned unexpected error: %v", tt.encoding, tt.content, err)
-		}
-		if err == nil && tt.wantErr {
-			t.Errorf("RepositoryContent(%q, %q) did not return unexpected error", tt.encoding, tt.content)
-		}
-		if got, want := string(o), tt.want; got != want {
-			t.Errorf("RepositoryContent.Decode returned %+v, want %+v", got, want)
-		}
-	}
-}
 
 func TestRepositoryContent_GetContent(t *testing.T) {
 	tests := []struct {
@@ -102,7 +68,7 @@ func TestRepositoryContent_GetContent(t *testing.T) {
 }
 
 func TestRepositoriesService_GetReadme(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 	mux.HandleFunc("/repos/o/r/readme", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
@@ -114,7 +80,7 @@ func TestRepositoriesService_GetReadme(t *testing.T) {
 		  "path": "README.md"
 		}`)
 	})
-	readme, _, err := client.Repositories.GetReadme("o", "r", &RepositoryContentGetOptions{})
+	readme, _, err := client.Repositories.GetReadme(context.Background(), "o", "r", &RepositoryContentGetOptions{})
 	if err != nil {
 		t.Errorf("Repositories.GetReadme returned error: %v", err)
 	}
@@ -125,14 +91,14 @@ func TestRepositoriesService_GetReadme(t *testing.T) {
 }
 
 func TestRepositoriesService_DownloadContents_Success(t *testing.T) {
-	setup()
+	client, mux, serverURL, teardown := setup()
 	defer teardown()
 	mux.HandleFunc("/repos/o/r/contents/d", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
 		fmt.Fprint(w, `[{
 		  "type": "file",
 		  "name": "f",
-		  "download_url": "`+server.URL+`/download/f"
+		  "download_url": "`+serverURL+baseURLPath+`/download/f"
 		}]`)
 	})
 	mux.HandleFunc("/download/f", func(w http.ResponseWriter, r *http.Request) {
@@ -140,7 +106,7 @@ func TestRepositoriesService_DownloadContents_Success(t *testing.T) {
 		fmt.Fprint(w, "foo")
 	})
 
-	r, err := client.Repositories.DownloadContents("o", "r", "d/f", nil)
+	r, err := client.Repositories.DownloadContents(context.Background(), "o", "r", "d/f", nil)
 	if err != nil {
 		t.Errorf("Repositories.DownloadContents returned error: %v", err)
 	}
@@ -157,7 +123,7 @@ func TestRepositoriesService_DownloadContents_Success(t *testing.T) {
 }
 
 func TestRepositoriesService_DownloadContents_NoDownloadURL(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 	mux.HandleFunc("/repos/o/r/contents/d", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
@@ -167,28 +133,28 @@ func TestRepositoriesService_DownloadContents_NoDownloadURL(t *testing.T) {
 		}]`)
 	})
 
-	_, err := client.Repositories.DownloadContents("o", "r", "d/f", nil)
+	_, err := client.Repositories.DownloadContents(context.Background(), "o", "r", "d/f", nil)
 	if err == nil {
 		t.Errorf("Repositories.DownloadContents did not return expected error")
 	}
 }
 
 func TestRepositoriesService_DownloadContents_NoFile(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 	mux.HandleFunc("/repos/o/r/contents/d", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
 		fmt.Fprint(w, `[]`)
 	})
 
-	_, err := client.Repositories.DownloadContents("o", "r", "d/f", nil)
+	_, err := client.Repositories.DownloadContents(context.Background(), "o", "r", "d/f", nil)
 	if err == nil {
 		t.Errorf("Repositories.DownloadContents did not return expected error")
 	}
 }
 
 func TestRepositoriesService_GetContents_File(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 	mux.HandleFunc("/repos/o/r/contents/p", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
@@ -200,7 +166,7 @@ func TestRepositoriesService_GetContents_File(t *testing.T) {
 		  "path": "LICENSE"
 		}`)
 	})
-	fileContents, _, _, err := client.Repositories.GetContents("o", "r", "p", &RepositoryContentGetOptions{})
+	fileContents, _, _, err := client.Repositories.GetContents(context.Background(), "o", "r", "p", &RepositoryContentGetOptions{})
 	if err != nil {
 		t.Errorf("Repositories.GetContents returned error: %v", err)
 	}
@@ -211,46 +177,46 @@ func TestRepositoriesService_GetContents_File(t *testing.T) {
 }
 
 func TestRepositoriesService_GetContents_FilenameNeedsEscape(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 	mux.HandleFunc("/repos/o/r/contents/p#?%/中.go", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
 		fmt.Fprint(w, `{}`)
 	})
-	_, _, _, err := client.Repositories.GetContents("o", "r", "p#?%/中.go", &RepositoryContentGetOptions{})
+	_, _, _, err := client.Repositories.GetContents(context.Background(), "o", "r", "p#?%/中.go", &RepositoryContentGetOptions{})
 	if err != nil {
 		t.Fatalf("Repositories.GetContents returned error: %v", err)
 	}
 }
 
 func TestRepositoriesService_GetContents_DirectoryWithSpaces(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 	mux.HandleFunc("/repos/o/r/contents/some directory/file.go", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
 		fmt.Fprint(w, `{}`)
 	})
-	_, _, _, err := client.Repositories.GetContents("o", "r", "some directory/file.go", &RepositoryContentGetOptions{})
+	_, _, _, err := client.Repositories.GetContents(context.Background(), "o", "r", "some directory/file.go", &RepositoryContentGetOptions{})
 	if err != nil {
 		t.Fatalf("Repositories.GetContents returned error: %v", err)
 	}
 }
 
 func TestRepositoriesService_GetContents_DirectoryWithPlusChars(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 	mux.HandleFunc("/repos/o/r/contents/some directory+name/file.go", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
 		fmt.Fprint(w, `{}`)
 	})
-	_, _, _, err := client.Repositories.GetContents("o", "r", "some directory+name/file.go", &RepositoryContentGetOptions{})
+	_, _, _, err := client.Repositories.GetContents(context.Background(), "o", "r", "some directory+name/file.go", &RepositoryContentGetOptions{})
 	if err != nil {
 		t.Fatalf("Repositories.GetContents returned error: %v", err)
 	}
 }
 
 func TestRepositoriesService_GetContents_Directory(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 	mux.HandleFunc("/repos/o/r/contents/p", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
@@ -266,7 +232,7 @@ func TestRepositoriesService_GetContents_Directory(t *testing.T) {
 		  "path": "LICENSE"
 		}]`)
 	})
-	_, directoryContents, _, err := client.Repositories.GetContents("o", "r", "p", &RepositoryContentGetOptions{})
+	_, directoryContents, _, err := client.Repositories.GetContents(context.Background(), "o", "r", "p", &RepositoryContentGetOptions{})
 	if err != nil {
 		t.Errorf("Repositories.GetContents returned error: %v", err)
 	}
@@ -278,7 +244,7 @@ func TestRepositoriesService_GetContents_Directory(t *testing.T) {
 }
 
 func TestRepositoriesService_CreateFile(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 	mux.HandleFunc("/repos/o/r/contents/p", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "PUT")
@@ -299,7 +265,7 @@ func TestRepositoriesService_CreateFile(t *testing.T) {
 		Content:   content,
 		Committer: &CommitAuthor{Name: String("n"), Email: String("e")},
 	}
-	createResponse, _, err := client.Repositories.CreateFile("o", "r", "p", repositoryContentsOptions)
+	createResponse, _, err := client.Repositories.CreateFile(context.Background(), "o", "r", "p", repositoryContentsOptions)
 	if err != nil {
 		t.Errorf("Repositories.CreateFile returned error: %v", err)
 	}
@@ -316,7 +282,7 @@ func TestRepositoriesService_CreateFile(t *testing.T) {
 }
 
 func TestRepositoriesService_UpdateFile(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 	mux.HandleFunc("/repos/o/r/contents/p", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "PUT")
@@ -339,7 +305,7 @@ func TestRepositoriesService_UpdateFile(t *testing.T) {
 		SHA:       &sha,
 		Committer: &CommitAuthor{Name: String("n"), Email: String("e")},
 	}
-	updateResponse, _, err := client.Repositories.UpdateFile("o", "r", "p", repositoryContentsOptions)
+	updateResponse, _, err := client.Repositories.UpdateFile(context.Background(), "o", "r", "p", repositoryContentsOptions)
 	if err != nil {
 		t.Errorf("Repositories.UpdateFile returned error: %v", err)
 	}
@@ -356,7 +322,7 @@ func TestRepositoriesService_UpdateFile(t *testing.T) {
 }
 
 func TestRepositoriesService_DeleteFile(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 	mux.HandleFunc("/repos/o/r/contents/p", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "DELETE")
@@ -375,7 +341,7 @@ func TestRepositoriesService_DeleteFile(t *testing.T) {
 		SHA:       &sha,
 		Committer: &CommitAuthor{Name: String("n"), Email: String("e")},
 	}
-	deleteResponse, _, err := client.Repositories.DeleteFile("o", "r", "p", repositoryContentsOptions)
+	deleteResponse, _, err := client.Repositories.DeleteFile(context.Background(), "o", "r", "p", repositoryContentsOptions)
 	if err != nil {
 		t.Errorf("Repositories.DeleteFile returned error: %v", err)
 	}
@@ -392,13 +358,13 @@ func TestRepositoriesService_DeleteFile(t *testing.T) {
 }
 
 func TestRepositoriesService_GetArchiveLink(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 	mux.HandleFunc("/repos/o/r/tarball", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
 		http.Redirect(w, r, "http://github.com/a", http.StatusFound)
 	})
-	url, resp, err := client.Repositories.GetArchiveLink("o", "r", Tarball, &RepositoryContentGetOptions{})
+	url, resp, err := client.Repositories.GetArchiveLink(context.Background(), "o", "r", Tarball, &RepositoryContentGetOptions{})
 	if err != nil {
 		t.Errorf("Repositories.GetArchiveLink returned error: %v", err)
 	}

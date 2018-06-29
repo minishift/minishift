@@ -3,9 +3,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// This tool tests for the JSON mappings in the go-github data types.  It will
+// This tool tests for the JSON mappings in the go-github data types. It will
 // identify fields that are returned by the live GitHub API, but that are not
-// currently mapped into a struct field of the relevant go-github type.  This
+// currently mapped into a struct field of the relevant go-github type. This
 // helps to ensure that all relevant data returned by the API is being made
 // accessible, particularly new fields that are periodically (and sometimes
 // quietly) added to the API over time.
@@ -17,6 +17,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -43,10 +44,10 @@ func main() {
 
 	token := os.Getenv("GITHUB_AUTH_TOKEN")
 	if token == "" {
-		print("!!! No OAuth token.  Some tests won't run. !!!\n\n")
+		print("!!! No OAuth token. Some tests won't run. !!!\n\n")
 		client = github.NewClient(nil)
 	} else {
-		tc := oauth2.NewClient(oauth2.NoContext, oauth2.StaticTokenSource(
+		tc := oauth2.NewClient(context.Background(), oauth2.StaticTokenSource(
 			&oauth2.Token{AccessToken: token},
 		))
 		client = github.NewClient(tc)
@@ -63,6 +64,7 @@ func main() {
 		{"users/willnorris/keys", &[]github.Key{}},
 		{"orgs/google-test", &github.Organization{}},
 		{"repos/google/go-github", &github.Repository{}},
+		{"repos/google/go-github/issues/1", &github.Issue{}},
 		{"/gists/9257657", &github.Gist{}},
 	} {
 		err := testType(tt.url, tt.typ)
@@ -84,7 +86,7 @@ func testType(urlStr string, typ interface{}) error {
 
 	// start with a json.RawMessage so we can decode multiple ways below
 	raw := new(json.RawMessage)
-	_, err = client.Do(req, raw)
+	_, err = client.Do(context.Background(), req, raw)
 	if err != nil {
 		return err
 	}

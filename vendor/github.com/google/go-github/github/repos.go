@@ -6,6 +6,8 @@
 package github
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 )
@@ -13,17 +15,18 @@ import (
 // RepositoriesService handles communication with the repository related
 // methods of the GitHub API.
 //
-// GitHub API docs: http://developer.github.com/v3/repos/
+// GitHub API docs: https://developer.github.com/v3/repos/
 type RepositoriesService service
 
 // Repository represents a GitHub repository.
 type Repository struct {
-	ID               *int             `json:"id,omitempty"`
+	ID               *int64           `json:"id,omitempty"`
 	Owner            *User            `json:"owner,omitempty"`
 	Name             *string          `json:"name,omitempty"`
 	FullName         *string          `json:"full_name,omitempty"`
 	Description      *string          `json:"description,omitempty"`
 	Homepage         *string          `json:"homepage,omitempty"`
+	CodeOfConduct    *CodeOfConduct   `json:"code_of_conduct,omitempty"`
 	DefaultBranch    *string          `json:"default_branch,omitempty"`
 	MasterBranch     *string          `json:"master_branch,omitempty"`
 	CreatedAt        *Timestamp       `json:"created_at,omitempty"`
@@ -36,7 +39,7 @@ type Repository struct {
 	SSHURL           *string          `json:"ssh_url,omitempty"`
 	SVNURL           *string          `json:"svn_url,omitempty"`
 	Language         *string          `json:"language,omitempty"`
-	Fork             *bool            `json:"fork"`
+	Fork             *bool            `json:"fork,omitempty"`
 	ForksCount       *int             `json:"forks_count,omitempty"`
 	NetworkCount     *int             `json:"network_count,omitempty"`
 	OpenIssuesCount  *int             `json:"open_issues_count,omitempty"`
@@ -52,21 +55,24 @@ type Repository struct {
 	AllowRebaseMerge *bool            `json:"allow_rebase_merge,omitempty"`
 	AllowSquashMerge *bool            `json:"allow_squash_merge,omitempty"`
 	AllowMergeCommit *bool            `json:"allow_merge_commit,omitempty"`
+	Topics           []string         `json:"topics,omitempty"`
 
 	// Only provided when using RepositoriesService.Get while in preview
 	License *License `json:"license,omitempty"`
 
 	// Additional mutable fields when creating and editing a repository
-	Private           *bool   `json:"private"`
-	HasIssues         *bool   `json:"has_issues"`
-	HasWiki           *bool   `json:"has_wiki"`
-	HasPages          *bool   `json:"has_pages"`
-	HasDownloads      *bool   `json:"has_downloads"`
+	Private           *bool   `json:"private,omitempty"`
+	HasIssues         *bool   `json:"has_issues,omitempty"`
+	HasWiki           *bool   `json:"has_wiki,omitempty"`
+	HasPages          *bool   `json:"has_pages,omitempty"`
+	HasProjects       *bool   `json:"has_projects,omitempty"`
+	HasDownloads      *bool   `json:"has_downloads,omitempty"`
 	LicenseTemplate   *string `json:"license_template,omitempty"`
 	GitignoreTemplate *string `json:"gitignore_template,omitempty"`
+	Archived          *bool   `json:"archived,omitempty"`
 
 	// Creating an organization repository. Required for non-owners.
-	TeamID *int `json:"team_id"`
+	TeamID *int64 `json:"team_id,omitempty"`
 
 	// API URLs
 	URL              *string `json:"url,omitempty"`
@@ -151,11 +157,11 @@ type RepositoryListOptions struct {
 	ListOptions
 }
 
-// List the repositories for a user.  Passing the empty string will list
+// List the repositories for a user. Passing the empty string will list
 // repositories for the authenticated user.
 //
-// GitHub API docs: http://developer.github.com/v3/repos/#list-user-repositories
-func (s *RepositoriesService) List(user string, opt *RepositoryListOptions) ([]*Repository, *Response, error) {
+// GitHub API docs: https://developer.github.com/v3/repos/#list-user-repositories
+func (s *RepositoriesService) List(ctx context.Context, user string, opt *RepositoryListOptions) ([]*Repository, *Response, error) {
 	var u string
 	if user != "" {
 		u = fmt.Sprintf("users/%v/repos", user)
@@ -172,11 +178,12 @@ func (s *RepositoriesService) List(user string, opt *RepositoryListOptions) ([]*
 		return nil, nil, err
 	}
 
-	// TODO: remove custom Accept header when license support fully launches
-	req.Header.Set("Accept", mediaTypeLicensesPreview)
+	// TODO: remove custom Accept headers when APIs fully launch.
+	acceptHeaders := []string{mediaTypeLicensesPreview, mediaTypeCodesOfConductPreview, mediaTypeTopicsPreview}
+	req.Header.Set("Accept", strings.Join(acceptHeaders, ", "))
 
 	var repos []*Repository
-	resp, err := s.client.Do(req, &repos)
+	resp, err := s.client.Do(ctx, req, &repos)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -187,8 +194,8 @@ func (s *RepositoriesService) List(user string, opt *RepositoryListOptions) ([]*
 // RepositoryListByOrgOptions specifies the optional parameters to the
 // RepositoriesService.ListByOrg method.
 type RepositoryListByOrgOptions struct {
-	// Type of repositories to list.  Possible values are: all, public, private,
-	// forks, sources, member.  Default is "all".
+	// Type of repositories to list. Possible values are: all, public, private,
+	// forks, sources, member. Default is "all".
 	Type string `url:"type,omitempty"`
 
 	ListOptions
@@ -196,8 +203,8 @@ type RepositoryListByOrgOptions struct {
 
 // ListByOrg lists the repositories for an organization.
 //
-// GitHub API docs: http://developer.github.com/v3/repos/#list-organization-repositories
-func (s *RepositoriesService) ListByOrg(org string, opt *RepositoryListByOrgOptions) ([]*Repository, *Response, error) {
+// GitHub API docs: https://developer.github.com/v3/repos/#list-organization-repositories
+func (s *RepositoriesService) ListByOrg(ctx context.Context, org string, opt *RepositoryListByOrgOptions) ([]*Repository, *Response, error) {
 	u := fmt.Sprintf("orgs/%v/repos", org)
 	u, err := addOptions(u, opt)
 	if err != nil {
@@ -209,11 +216,12 @@ func (s *RepositoriesService) ListByOrg(org string, opt *RepositoryListByOrgOpti
 		return nil, nil, err
 	}
 
-	// TODO: remove custom Accept header when license support fully launches
-	req.Header.Set("Accept", mediaTypeLicensesPreview)
+	// TODO: remove custom Accept headers when APIs fully launch.
+	acceptHeaders := []string{mediaTypeLicensesPreview, mediaTypeCodesOfConductPreview, mediaTypeTopicsPreview}
+	req.Header.Set("Accept", strings.Join(acceptHeaders, ", "))
 
 	var repos []*Repository
-	resp, err := s.client.Do(req, &repos)
+	resp, err := s.client.Do(ctx, req, &repos)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -225,15 +233,13 @@ func (s *RepositoriesService) ListByOrg(org string, opt *RepositoryListByOrgOpti
 // RepositoriesService.ListAll method.
 type RepositoryListAllOptions struct {
 	// ID of the last repository seen
-	Since int `url:"since,omitempty"`
-
-	ListOptions
+	Since int64 `url:"since,omitempty"`
 }
 
 // ListAll lists all GitHub repositories in the order that they were created.
 //
-// GitHub API docs: http://developer.github.com/v3/repos/#list-all-public-repositories
-func (s *RepositoriesService) ListAll(opt *RepositoryListAllOptions) ([]*Repository, *Response, error) {
+// GitHub API docs: https://developer.github.com/v3/repos/#list-all-public-repositories
+func (s *RepositoriesService) ListAll(ctx context.Context, opt *RepositoryListAllOptions) ([]*Repository, *Response, error) {
 	u, err := addOptions("repositories", opt)
 	if err != nil {
 		return nil, nil, err
@@ -245,7 +251,7 @@ func (s *RepositoriesService) ListAll(opt *RepositoryListAllOptions) ([]*Reposit
 	}
 
 	var repos []*Repository
-	resp, err := s.client.Do(req, &repos)
+	resp, err := s.client.Do(ctx, req, &repos)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -253,12 +259,12 @@ func (s *RepositoriesService) ListAll(opt *RepositoryListAllOptions) ([]*Reposit
 	return repos, resp, nil
 }
 
-// Create a new repository.  If an organization is specified, the new
-// repository will be created under that org.  If the empty string is
+// Create a new repository. If an organization is specified, the new
+// repository will be created under that org. If the empty string is
 // specified, it will be created for the authenticated user.
 //
-// GitHub API docs: http://developer.github.com/v3/repos/#create
-func (s *RepositoriesService) Create(org string, repo *Repository) (*Repository, *Response, error) {
+// GitHub API docs: https://developer.github.com/v3/repos/#create
+func (s *RepositoriesService) Create(ctx context.Context, org string, repo *Repository) (*Repository, *Response, error) {
 	var u string
 	if org != "" {
 		u = fmt.Sprintf("orgs/%v/repos", org)
@@ -272,7 +278,7 @@ func (s *RepositoriesService) Create(org string, repo *Repository) (*Repository,
 	}
 
 	r := new(Repository)
-	resp, err := s.client.Do(req, r)
+	resp, err := s.client.Do(ctx, req, r)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -282,8 +288,8 @@ func (s *RepositoriesService) Create(org string, repo *Repository) (*Repository,
 
 // Get fetches a repository.
 //
-// GitHub API docs: http://developer.github.com/v3/repos/#get
-func (s *RepositoriesService) Get(owner, repo string) (*Repository, *Response, error) {
+// GitHub API docs: https://developer.github.com/v3/repos/#get
+func (s *RepositoriesService) Get(ctx context.Context, owner, repo string) (*Repository, *Response, error) {
 	u := fmt.Sprintf("repos/%v/%v", owner, repo)
 	req, err := s.client.NewRequest("GET", u, nil)
 	if err != nil {
@@ -292,11 +298,11 @@ func (s *RepositoriesService) Get(owner, repo string) (*Repository, *Response, e
 
 	// TODO: remove custom Accept header when the license support fully launches
 	// https://developer.github.com/v3/licenses/#get-a-repositorys-license
-	acceptHeaders := []string{mediaTypeLicensesPreview, mediaTypeSquashPreview}
+	acceptHeaders := []string{mediaTypeLicensesPreview, mediaTypeCodesOfConductPreview, mediaTypeTopicsPreview}
 	req.Header.Set("Accept", strings.Join(acceptHeaders, ", "))
 
 	repository := new(Repository)
-	resp, err := s.client.Do(req, repository)
+	resp, err := s.client.Do(ctx, req, repository)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -304,10 +310,32 @@ func (s *RepositoriesService) Get(owner, repo string) (*Repository, *Response, e
 	return repository, resp, nil
 }
 
+// GetCodeOfConduct gets the contents of a repository's code of conduct.
+//
+// GitHub API docs: https://developer.github.com/v3/codes_of_conduct/#get-the-contents-of-a-repositorys-code-of-conduct
+func (s *RepositoriesService) GetCodeOfConduct(ctx context.Context, owner, repo string) (*CodeOfConduct, *Response, error) {
+	u := fmt.Sprintf("repos/%v/%v/community/code_of_conduct", owner, repo)
+	req, err := s.client.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// TODO: remove custom Accept header when this API fully launches.
+	req.Header.Set("Accept", mediaTypeCodesOfConductPreview)
+
+	coc := new(CodeOfConduct)
+	resp, err := s.client.Do(ctx, req, coc)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return coc, resp, nil
+}
+
 // GetByID fetches a repository.
 //
 // Note: GetByID uses the undocumented GitHub API endpoint /repositories/:id.
-func (s *RepositoriesService) GetByID(id int) (*Repository, *Response, error) {
+func (s *RepositoriesService) GetByID(ctx context.Context, id int64) (*Repository, *Response, error) {
 	u := fmt.Sprintf("repositories/%d", id)
 	req, err := s.client.NewRequest("GET", u, nil)
 	if err != nil {
@@ -319,7 +347,7 @@ func (s *RepositoriesService) GetByID(id int) (*Repository, *Response, error) {
 	req.Header.Set("Accept", mediaTypeLicensesPreview)
 
 	repository := new(Repository)
-	resp, err := s.client.Do(req, repository)
+	resp, err := s.client.Do(ctx, req, repository)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -329,19 +357,16 @@ func (s *RepositoriesService) GetByID(id int) (*Repository, *Response, error) {
 
 // Edit updates a repository.
 //
-// GitHub API docs: http://developer.github.com/v3/repos/#edit
-func (s *RepositoriesService) Edit(owner, repo string, repository *Repository) (*Repository, *Response, error) {
+// GitHub API docs: https://developer.github.com/v3/repos/#edit
+func (s *RepositoriesService) Edit(ctx context.Context, owner, repo string, repository *Repository) (*Repository, *Response, error) {
 	u := fmt.Sprintf("repos/%v/%v", owner, repo)
 	req, err := s.client.NewRequest("PATCH", u, repository)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	// TODO: Remove this preview header after API is fully vetted.
-	req.Header.Add("Accept", mediaTypeSquashPreview)
-
 	r := new(Repository)
-	resp, err := s.client.Do(req, r)
+	resp, err := s.client.Do(ctx, req, r)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -352,20 +377,20 @@ func (s *RepositoriesService) Edit(owner, repo string, repository *Repository) (
 // Delete a repository.
 //
 // GitHub API docs: https://developer.github.com/v3/repos/#delete-a-repository
-func (s *RepositoriesService) Delete(owner, repo string) (*Response, error) {
+func (s *RepositoriesService) Delete(ctx context.Context, owner, repo string) (*Response, error) {
 	u := fmt.Sprintf("repos/%v/%v", owner, repo)
 	req, err := s.client.NewRequest("DELETE", u, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return s.client.Do(req, nil)
+	return s.client.Do(ctx, req, nil)
 }
 
 // Contributor represents a repository contributor
 type Contributor struct {
 	Login             *string `json:"login,omitempty"`
-	ID                *int    `json:"id,omitempty"`
+	ID                *int64  `json:"id,omitempty"`
 	AvatarURL         *string `json:"avatar_url,omitempty"`
 	GravatarID        *string `json:"gravatar_id,omitempty"`
 	URL               *string `json:"url,omitempty"`
@@ -380,7 +405,7 @@ type Contributor struct {
 	EventsURL         *string `json:"events_url,omitempty"`
 	ReceivedEventsURL *string `json:"received_events_url,omitempty"`
 	Type              *string `json:"type,omitempty"`
-	SiteAdmin         *bool   `json:"site_admin"`
+	SiteAdmin         *bool   `json:"site_admin,omitempty"`
 	Contributions     *int    `json:"contributions,omitempty"`
 }
 
@@ -395,8 +420,8 @@ type ListContributorsOptions struct {
 
 // ListContributors lists contributors for a repository.
 //
-// GitHub API docs: http://developer.github.com/v3/repos/#list-contributors
-func (s *RepositoriesService) ListContributors(owner string, repository string, opt *ListContributorsOptions) ([]*Contributor, *Response, error) {
+// GitHub API docs: https://developer.github.com/v3/repos/#list-contributors
+func (s *RepositoriesService) ListContributors(ctx context.Context, owner string, repository string, opt *ListContributorsOptions) ([]*Contributor, *Response, error) {
 	u := fmt.Sprintf("repos/%v/%v/contributors", owner, repository)
 	u, err := addOptions(u, opt)
 	if err != nil {
@@ -409,7 +434,7 @@ func (s *RepositoriesService) ListContributors(owner string, repository string, 
 	}
 
 	var contributor []*Contributor
-	resp, err := s.client.Do(req, &contributor)
+	resp, err := s.client.Do(ctx, req, &contributor)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -426,8 +451,8 @@ func (s *RepositoriesService) ListContributors(owner string, repository string, 
 //       "Python": 7769
 //     }
 //
-// GitHub API Docs: http://developer.github.com/v3/repos/#list-languages
-func (s *RepositoriesService) ListLanguages(owner string, repo string) (map[string]int, *Response, error) {
+// GitHub API docs: https://developer.github.com/v3/repos/#list-languages
+func (s *RepositoriesService) ListLanguages(ctx context.Context, owner string, repo string) (map[string]int, *Response, error) {
 	u := fmt.Sprintf("repos/%v/%v/languages", owner, repo)
 	req, err := s.client.NewRequest("GET", u, nil)
 	if err != nil {
@@ -435,7 +460,7 @@ func (s *RepositoriesService) ListLanguages(owner string, repo string) (map[stri
 	}
 
 	languages := make(map[string]int)
-	resp, err := s.client.Do(req, &languages)
+	resp, err := s.client.Do(ctx, req, &languages)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -446,7 +471,7 @@ func (s *RepositoriesService) ListLanguages(owner string, repo string) (map[stri
 // ListTeams lists the teams for the specified repository.
 //
 // GitHub API docs: https://developer.github.com/v3/repos/#list-teams
-func (s *RepositoriesService) ListTeams(owner string, repo string, opt *ListOptions) ([]*Team, *Response, error) {
+func (s *RepositoriesService) ListTeams(ctx context.Context, owner string, repo string, opt *ListOptions) ([]*Team, *Response, error) {
 	u := fmt.Sprintf("repos/%v/%v/teams", owner, repo)
 	u, err := addOptions(u, opt)
 	if err != nil {
@@ -458,8 +483,10 @@ func (s *RepositoriesService) ListTeams(owner string, repo string, opt *ListOpti
 		return nil, nil, err
 	}
 
+	req.Header.Set("Accept", mediaTypeNestedTeamsPreview)
+
 	var teams []*Team
-	resp, err := s.client.Do(req, &teams)
+	resp, err := s.client.Do(ctx, req, &teams)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -478,7 +505,7 @@ type RepositoryTag struct {
 // ListTags lists tags for the specified repository.
 //
 // GitHub API docs: https://developer.github.com/v3/repos/#list-tags
-func (s *RepositoriesService) ListTags(owner string, repo string, opt *ListOptions) ([]*RepositoryTag, *Response, error) {
+func (s *RepositoriesService) ListTags(ctx context.Context, owner string, repo string, opt *ListOptions) ([]*RepositoryTag, *Response, error) {
 	u := fmt.Sprintf("repos/%v/%v/tags", owner, repo)
 	u, err := addOptions(u, opt)
 	if err != nil {
@@ -491,7 +518,7 @@ func (s *RepositoriesService) ListTags(owner string, repo string, opt *ListOptio
 	}
 
 	var tags []*RepositoryTag
-	resp, err := s.client.Do(req, &tags)
+	resp, err := s.client.Do(ctx, req, &tags)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -508,22 +535,22 @@ type Branch struct {
 
 // Protection represents a repository branch's protection.
 type Protection struct {
-	RequiredStatusChecks       *RequiredStatusChecks       `json:"required_status_checks"`
-	RequiredPullRequestReviews *RequiredPullRequestReviews `json:"required_pull_request_reviews"`
-	Restrictions               *BranchRestrictions         `json:"restrictions"`
+	RequiredStatusChecks       *RequiredStatusChecks          `json:"required_status_checks"`
+	RequiredPullRequestReviews *PullRequestReviewsEnforcement `json:"required_pull_request_reviews"`
+	EnforceAdmins              *AdminEnforcement              `json:"enforce_admins"`
+	Restrictions               *BranchRestrictions            `json:"restrictions"`
 }
 
 // ProtectionRequest represents a request to create/edit a branch's protection.
 type ProtectionRequest struct {
-	RequiredStatusChecks       *RequiredStatusChecks       `json:"required_status_checks"`
-	RequiredPullRequestReviews *RequiredPullRequestReviews `json:"required_pull_request_reviews"`
-	Restrictions               *BranchRestrictionsRequest  `json:"restrictions"`
+	RequiredStatusChecks       *RequiredStatusChecks                 `json:"required_status_checks"`
+	RequiredPullRequestReviews *PullRequestReviewsEnforcementRequest `json:"required_pull_request_reviews"`
+	EnforceAdmins              bool                                  `json:"enforce_admins"`
+	Restrictions               *BranchRestrictionsRequest            `json:"restrictions"`
 }
 
 // RequiredStatusChecks represents the protection status of a individual branch.
 type RequiredStatusChecks struct {
-	// Enforce required status checks for repository administrators. (Required.)
-	IncludeAdmins bool `json:"include_admins"`
 	// Require branches to be up to date before merging. (Required.)
 	Strict bool `json:"strict"`
 	// The list of status checks to require in order to merge into this
@@ -531,10 +558,71 @@ type RequiredStatusChecks struct {
 	Contexts []string `json:"contexts"`
 }
 
-// RequiredPullRequestReviews represents the protection configuration for pull requests.
-type RequiredPullRequestReviews struct {
-	// Enforce pull request reviews for repository administrators. (Required.)
-	IncludeAdmins bool `json:"include_admins"`
+// PullRequestReviewsEnforcement represents the pull request reviews enforcement of a protected branch.
+type PullRequestReviewsEnforcement struct {
+	// Specifies which users and teams can dismiss pull request reviews.
+	DismissalRestrictions DismissalRestrictions `json:"dismissal_restrictions"`
+	// Specifies if approved reviews are dismissed automatically, when a new commit is pushed.
+	DismissStaleReviews bool `json:"dismiss_stale_reviews"`
+	// RequireCodeOwnerReviews specifies if an approved review is required in pull requests including files with a designated code owner.
+	RequireCodeOwnerReviews bool `json:"require_code_owner_reviews"`
+}
+
+// PullRequestReviewsEnforcementRequest represents request to set the pull request review
+// enforcement of a protected branch. It is separate from PullRequestReviewsEnforcement above
+// because the request structure is different from the response structure.
+type PullRequestReviewsEnforcementRequest struct {
+	// Specifies which users and teams should be allowed to dismiss pull request reviews. Can be nil to disable the restrictions.
+	DismissalRestrictionsRequest *DismissalRestrictionsRequest `json:"dismissal_restrictions"`
+	// Specifies if approved reviews can be dismissed automatically, when a new commit is pushed. (Required)
+	DismissStaleReviews bool `json:"dismiss_stale_reviews"`
+	// RequireCodeOwnerReviews specifies if an approved review is required in pull requests including files with a designated code owner.
+	RequireCodeOwnerReviews bool `json:"require_code_owner_reviews"`
+}
+
+// MarshalJSON implements the json.Marshaler interface.
+// Converts nil value of PullRequestReviewsEnforcementRequest.DismissalRestrictionsRequest to empty array
+func (req PullRequestReviewsEnforcementRequest) MarshalJSON() ([]byte, error) {
+	if req.DismissalRestrictionsRequest == nil {
+		newReq := struct {
+			R []interface{} `json:"dismissal_restrictions"`
+			D bool          `json:"dismiss_stale_reviews"`
+			O bool          `json:"require_code_owner_reviews"`
+		}{
+			R: []interface{}{},
+			D: req.DismissStaleReviews,
+			O: req.RequireCodeOwnerReviews,
+		}
+		return json.Marshal(newReq)
+	}
+	newReq := struct {
+		R *DismissalRestrictionsRequest `json:"dismissal_restrictions"`
+		D bool                          `json:"dismiss_stale_reviews"`
+		O bool                          `json:"require_code_owner_reviews"`
+	}{
+		R: req.DismissalRestrictionsRequest,
+		D: req.DismissStaleReviews,
+		O: req.RequireCodeOwnerReviews,
+	}
+	return json.Marshal(newReq)
+}
+
+// PullRequestReviewsEnforcementUpdate represents request to patch the pull request review
+// enforcement of a protected branch. It is separate from PullRequestReviewsEnforcementRequest above
+// because the patch request does not require all fields to be initialized.
+type PullRequestReviewsEnforcementUpdate struct {
+	// Specifies which users and teams can dismiss pull request reviews. Can be omitted.
+	DismissalRestrictionsRequest *DismissalRestrictionsRequest `json:"dismissal_restrictions,omitempty"`
+	// Specifies if approved reviews can be dismissed automatically, when a new commit is pushed. Can be omitted.
+	DismissStaleReviews *bool `json:"dismiss_stale_reviews,omitempty"`
+	// RequireCodeOwnerReviews specifies if an approved review is required in pull requests including files with a designated code owner.
+	RequireCodeOwnerReviews bool `json:"require_code_owner_reviews,omitempty"`
+}
+
+// AdminEnforcement represents the configuration to enforce required status checks for repository administrators.
+type AdminEnforcement struct {
+	URL     *string `json:"url,omitempty"`
+	Enabled bool    `json:"enabled"`
 }
 
 // BranchRestrictions represents the restriction that only certain users or
@@ -557,10 +645,29 @@ type BranchRestrictionsRequest struct {
 	Teams []string `json:"teams"`
 }
 
+// DismissalRestrictions specifies which users and teams can dismiss pull request reviews.
+type DismissalRestrictions struct {
+	// The list of users who can dimiss pull request reviews.
+	Users []*User `json:"users"`
+	// The list of teams which can dismiss pull request reviews.
+	Teams []*Team `json:"teams"`
+}
+
+// DismissalRestrictionsRequest represents the request to create/edit the
+// restriction to allows only specific users or teams to dimiss pull request reviews. It is
+// separate from DismissalRestrictions above because the request structure is
+// different from the response structure.
+type DismissalRestrictionsRequest struct {
+	// The list of user logins who can dismiss pull request reviews. (Required; use []string{} instead of nil for empty list.)
+	Users []string `json:"users"`
+	// The list of team slugs which can dismiss pull request reviews. (Required; use []string{} instead of nil for empty list.)
+	Teams []string `json:"teams"`
+}
+
 // ListBranches lists branches for the specified repository.
 //
-// GitHub API docs: http://developer.github.com/v3/repos/#list-branches
-func (s *RepositoriesService) ListBranches(owner string, repo string, opt *ListOptions) ([]*Branch, *Response, error) {
+// GitHub API docs: https://developer.github.com/v3/repos/#list-branches
+func (s *RepositoriesService) ListBranches(ctx context.Context, owner string, repo string, opt *ListOptions) ([]*Branch, *Response, error) {
 	u := fmt.Sprintf("repos/%v/%v/branches", owner, repo)
 	u, err := addOptions(u, opt)
 	if err != nil {
@@ -576,7 +683,7 @@ func (s *RepositoriesService) ListBranches(owner string, repo string, opt *ListO
 	req.Header.Set("Accept", mediaTypeProtectedBranchesPreview)
 
 	var branches []*Branch
-	resp, err := s.client.Do(req, &branches)
+	resp, err := s.client.Do(ctx, req, &branches)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -587,7 +694,7 @@ func (s *RepositoriesService) ListBranches(owner string, repo string, opt *ListO
 // GetBranch gets the specified branch for a repository.
 //
 // GitHub API docs: https://developer.github.com/v3/repos/#get-branch
-func (s *RepositoriesService) GetBranch(owner, repo, branch string) (*Branch, *Response, error) {
+func (s *RepositoriesService) GetBranch(ctx context.Context, owner, repo, branch string) (*Branch, *Response, error) {
 	u := fmt.Sprintf("repos/%v/%v/branches/%v", owner, repo, branch)
 	req, err := s.client.NewRequest("GET", u, nil)
 	if err != nil {
@@ -598,7 +705,7 @@ func (s *RepositoriesService) GetBranch(owner, repo, branch string) (*Branch, *R
 	req.Header.Set("Accept", mediaTypeProtectedBranchesPreview)
 
 	b := new(Branch)
-	resp, err := s.client.Do(req, b)
+	resp, err := s.client.Do(ctx, req, b)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -609,7 +716,7 @@ func (s *RepositoriesService) GetBranch(owner, repo, branch string) (*Branch, *R
 // GetBranchProtection gets the protection of a given branch.
 //
 // GitHub API docs: https://developer.github.com/v3/repos/branches/#get-branch-protection
-func (s *RepositoriesService) GetBranchProtection(owner, repo, branch string) (*Protection, *Response, error) {
+func (s *RepositoriesService) GetBranchProtection(ctx context.Context, owner, repo, branch string) (*Protection, *Response, error) {
 	u := fmt.Sprintf("repos/%v/%v/branches/%v/protection", owner, repo, branch)
 	req, err := s.client.NewRequest("GET", u, nil)
 	if err != nil {
@@ -620,7 +727,7 @@ func (s *RepositoriesService) GetBranchProtection(owner, repo, branch string) (*
 	req.Header.Set("Accept", mediaTypeProtectedBranchesPreview)
 
 	p := new(Protection)
-	resp, err := s.client.Do(req, p)
+	resp, err := s.client.Do(ctx, req, p)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -628,10 +735,53 @@ func (s *RepositoriesService) GetBranchProtection(owner, repo, branch string) (*
 	return p, resp, nil
 }
 
+// GetRequiredStatusChecks gets the required status checks for a given protected branch.
+//
+// GitHub API docs: https://developer.github.com/v3/repos/branches/#get-required-status-checks-of-protected-branch
+func (s *RepositoriesService) GetRequiredStatusChecks(ctx context.Context, owner, repo, branch string) (*RequiredStatusChecks, *Response, error) {
+	u := fmt.Sprintf("repos/%v/%v/branches/%v/protection/required_status_checks", owner, repo, branch)
+	req, err := s.client.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// TODO: remove custom Accept header when this API fully launches
+	req.Header.Set("Accept", mediaTypeProtectedBranchesPreview)
+
+	p := new(RequiredStatusChecks)
+	resp, err := s.client.Do(ctx, req, p)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return p, resp, nil
+}
+
+// ListRequiredStatusChecksContexts lists the required status checks contexts for a given protected branch.
+//
+// GitHub API docs: https://developer.github.com/v3/repos/branches/#list-required-status-checks-contexts-of-protected-branch
+func (s *RepositoriesService) ListRequiredStatusChecksContexts(ctx context.Context, owner, repo, branch string) (contexts []string, resp *Response, err error) {
+	u := fmt.Sprintf("repos/%v/%v/branches/%v/protection/required_status_checks/contexts", owner, repo, branch)
+	req, err := s.client.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// TODO: remove custom Accept header when this API fully launches
+	req.Header.Set("Accept", mediaTypeProtectedBranchesPreview)
+
+	resp, err = s.client.Do(ctx, req, &contexts)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return contexts, resp, nil
+}
+
 // UpdateBranchProtection updates the protection of a given branch.
 //
 // GitHub API docs: https://developer.github.com/v3/repos/branches/#update-branch-protection
-func (s *RepositoriesService) UpdateBranchProtection(owner, repo, branch string, preq *ProtectionRequest) (*Protection, *Response, error) {
+func (s *RepositoriesService) UpdateBranchProtection(ctx context.Context, owner, repo, branch string, preq *ProtectionRequest) (*Protection, *Response, error) {
 	u := fmt.Sprintf("repos/%v/%v/branches/%v/protection", owner, repo, branch)
 	req, err := s.client.NewRequest("PUT", u, preq)
 	if err != nil {
@@ -642,7 +792,7 @@ func (s *RepositoriesService) UpdateBranchProtection(owner, repo, branch string,
 	req.Header.Set("Accept", mediaTypeProtectedBranchesPreview)
 
 	p := new(Protection)
-	resp, err := s.client.Do(req, p)
+	resp, err := s.client.Do(ctx, req, p)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -653,7 +803,7 @@ func (s *RepositoriesService) UpdateBranchProtection(owner, repo, branch string,
 // RemoveBranchProtection removes the protection of a given branch.
 //
 // GitHub API docs: https://developer.github.com/v3/repos/branches/#remove-branch-protection
-func (s *RepositoriesService) RemoveBranchProtection(owner, repo, branch string) (*Response, error) {
+func (s *RepositoriesService) RemoveBranchProtection(ctx context.Context, owner, repo, branch string) (*Response, error) {
 	u := fmt.Sprintf("repos/%v/%v/branches/%v/protection", owner, repo, branch)
 	req, err := s.client.NewRequest("DELETE", u, nil)
 	if err != nil {
@@ -663,13 +813,13 @@ func (s *RepositoriesService) RemoveBranchProtection(owner, repo, branch string)
 	// TODO: remove custom Accept header when this API fully launches
 	req.Header.Set("Accept", mediaTypeProtectedBranchesPreview)
 
-	return s.client.Do(req, nil)
+	return s.client.Do(ctx, req, nil)
 }
 
 // License gets the contents of a repository's license if one is detected.
 //
 // GitHub API docs: https://developer.github.com/v3/licenses/#get-the-contents-of-a-repositorys-license
-func (s *RepositoriesService) License(owner, repo string) (*RepositoryLicense, *Response, error) {
+func (s *RepositoriesService) License(ctx context.Context, owner, repo string) (*RepositoryLicense, *Response, error) {
 	u := fmt.Sprintf("repos/%v/%v/license", owner, repo)
 	req, err := s.client.NewRequest("GET", u, nil)
 	if err != nil {
@@ -677,7 +827,247 @@ func (s *RepositoriesService) License(owner, repo string) (*RepositoryLicense, *
 	}
 
 	r := &RepositoryLicense{}
-	resp, err := s.client.Do(req, r)
+	resp, err := s.client.Do(ctx, req, r)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return r, resp, nil
+}
+
+// GetPullRequestReviewEnforcement gets pull request review enforcement of a protected branch.
+//
+// GitHub API docs: https://developer.github.com/v3/repos/branches/#get-pull-request-review-enforcement-of-protected-branch
+func (s *RepositoriesService) GetPullRequestReviewEnforcement(ctx context.Context, owner, repo, branch string) (*PullRequestReviewsEnforcement, *Response, error) {
+	u := fmt.Sprintf("repos/%v/%v/branches/%v/protection/required_pull_request_reviews", owner, repo, branch)
+	req, err := s.client.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// TODO: remove custom Accept header when this API fully launches
+	req.Header.Set("Accept", mediaTypeProtectedBranchesPreview)
+
+	r := new(PullRequestReviewsEnforcement)
+	resp, err := s.client.Do(ctx, req, r)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return r, resp, nil
+}
+
+// UpdatePullRequestReviewEnforcement patches pull request review enforcement of a protected branch.
+// It requires admin access and branch protection to be enabled.
+//
+// GitHub API docs: https://developer.github.com/v3/repos/branches/#update-pull-request-review-enforcement-of-protected-branch
+func (s *RepositoriesService) UpdatePullRequestReviewEnforcement(ctx context.Context, owner, repo, branch string, patch *PullRequestReviewsEnforcementUpdate) (*PullRequestReviewsEnforcement, *Response, error) {
+	u := fmt.Sprintf("repos/%v/%v/branches/%v/protection/required_pull_request_reviews", owner, repo, branch)
+	req, err := s.client.NewRequest("PATCH", u, patch)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// TODO: remove custom Accept header when this API fully launches
+	req.Header.Set("Accept", mediaTypeProtectedBranchesPreview)
+
+	r := new(PullRequestReviewsEnforcement)
+	resp, err := s.client.Do(ctx, req, r)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return r, resp, err
+}
+
+// DisableDismissalRestrictions disables dismissal restrictions of a protected branch.
+// It requires admin access and branch protection to be enabled.
+//
+// GitHub API docs: https://developer.github.com/v3/repos/branches/#update-pull-request-review-enforcement-of-protected-branch
+func (s *RepositoriesService) DisableDismissalRestrictions(ctx context.Context, owner, repo, branch string) (*PullRequestReviewsEnforcement, *Response, error) {
+	u := fmt.Sprintf("repos/%v/%v/branches/%v/protection/required_pull_request_reviews", owner, repo, branch)
+
+	data := struct {
+		R []interface{} `json:"dismissal_restrictions"`
+	}{[]interface{}{}}
+
+	req, err := s.client.NewRequest("PATCH", u, data)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// TODO: remove custom Accept header when this API fully launches
+	req.Header.Set("Accept", mediaTypeProtectedBranchesPreview)
+
+	r := new(PullRequestReviewsEnforcement)
+	resp, err := s.client.Do(ctx, req, r)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return r, resp, err
+}
+
+// RemovePullRequestReviewEnforcement removes pull request enforcement of a protected branch.
+//
+// GitHub API docs: https://developer.github.com/v3/repos/branches/#remove-pull-request-review-enforcement-of-protected-branch
+func (s *RepositoriesService) RemovePullRequestReviewEnforcement(ctx context.Context, owner, repo, branch string) (*Response, error) {
+	u := fmt.Sprintf("repos/%v/%v/branches/%v/protection/required_pull_request_reviews", owner, repo, branch)
+	req, err := s.client.NewRequest("DELETE", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: remove custom Accept header when this API fully launches
+	req.Header.Set("Accept", mediaTypeProtectedBranchesPreview)
+
+	return s.client.Do(ctx, req, nil)
+}
+
+// GetAdminEnforcement gets admin enforcement information of a protected branch.
+//
+// GitHub API docs: https://developer.github.com/v3/repos/branches/#get-admin-enforcement-of-protected-branch
+func (s *RepositoriesService) GetAdminEnforcement(ctx context.Context, owner, repo, branch string) (*AdminEnforcement, *Response, error) {
+	u := fmt.Sprintf("repos/%v/%v/branches/%v/protection/enforce_admins", owner, repo, branch)
+	req, err := s.client.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// TODO: remove custom Accept header when this API fully launches
+	req.Header.Set("Accept", mediaTypeProtectedBranchesPreview)
+
+	r := new(AdminEnforcement)
+	resp, err := s.client.Do(ctx, req, r)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return r, resp, nil
+}
+
+// AddAdminEnforcement adds admin enforcement to a protected branch.
+// It requires admin access and branch protection to be enabled.
+//
+// GitHub API docs: https://developer.github.com/v3/repos/branches/#add-admin-enforcement-of-protected-branch
+func (s *RepositoriesService) AddAdminEnforcement(ctx context.Context, owner, repo, branch string) (*AdminEnforcement, *Response, error) {
+	u := fmt.Sprintf("repos/%v/%v/branches/%v/protection/enforce_admins", owner, repo, branch)
+	req, err := s.client.NewRequest("POST", u, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// TODO: remove custom Accept header when this API fully launches
+	req.Header.Set("Accept", mediaTypeProtectedBranchesPreview)
+
+	r := new(AdminEnforcement)
+	resp, err := s.client.Do(ctx, req, r)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return r, resp, err
+}
+
+// RemoveAdminEnforcement removes admin enforcement from a protected branch.
+//
+// GitHub API docs: https://developer.github.com/v3/repos/branches/#remove-admin-enforcement-of-protected-branch
+func (s *RepositoriesService) RemoveAdminEnforcement(ctx context.Context, owner, repo, branch string) (*Response, error) {
+	u := fmt.Sprintf("repos/%v/%v/branches/%v/protection/enforce_admins", owner, repo, branch)
+	req, err := s.client.NewRequest("DELETE", u, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: remove custom Accept header when this API fully launches
+	req.Header.Set("Accept", mediaTypeProtectedBranchesPreview)
+
+	return s.client.Do(ctx, req, nil)
+}
+
+// repositoryTopics represents a collection of repository topics.
+type repositoryTopics struct {
+	Names []string `json:"names"`
+}
+
+// ListAllTopics lists topics for a repository.
+//
+// GitHub API docs: https://developer.github.com/v3/repos/#list-all-topics-for-a-repository
+func (s *RepositoriesService) ListAllTopics(ctx context.Context, owner, repo string) ([]string, *Response, error) {
+	u := fmt.Sprintf("repos/%v/%v/topics", owner, repo)
+	req, err := s.client.NewRequest("GET", u, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// TODO: remove custom Accept header when this API fully launches.
+	req.Header.Set("Accept", mediaTypeTopicsPreview)
+
+	topics := new(repositoryTopics)
+	resp, err := s.client.Do(ctx, req, topics)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return topics.Names, resp, nil
+}
+
+// ReplaceAllTopics replaces topics for a repository.
+//
+// GitHub API docs: https://developer.github.com/v3/repos/#replace-all-topics-for-a-repository
+func (s *RepositoriesService) ReplaceAllTopics(ctx context.Context, owner, repo string, topics []string) ([]string, *Response, error) {
+	u := fmt.Sprintf("repos/%v/%v/topics", owner, repo)
+	t := &repositoryTopics{
+		Names: topics,
+	}
+	if t.Names == nil {
+		t.Names = []string{}
+	}
+	req, err := s.client.NewRequest("PUT", u, t)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// TODO: remove custom Accept header when this API fully launches.
+	req.Header.Set("Accept", mediaTypeTopicsPreview)
+
+	t = new(repositoryTopics)
+	resp, err := s.client.Do(ctx, req, t)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return t.Names, resp, nil
+}
+
+// TransferRequest represents a request to transfer a repository.
+type TransferRequest struct {
+	NewOwner string  `json:"new_owner"`
+	TeamID   []int64 `json:"team_id,omitempty"`
+}
+
+// Transfer transfers a repository from one account or organization to another.
+//
+// This method might return an *AcceptedError and a status code of
+// 202. This is because this is the status that GitHub returns to signify that
+// it has now scheduled the transfer of the repository in a background task.
+// A follow up request, after a delay of a second or so, should result
+// in a successful request.
+//
+// GitHub API docs: https://developer.github.com/v3/repos/#transfer-a-repository
+func (s *RepositoriesService) Transfer(ctx context.Context, owner, repo string, transfer TransferRequest) (*Repository, *Response, error) {
+	u := fmt.Sprintf("repos/%v/%v/transfer", owner, repo)
+
+	req, err := s.client.NewRequest("POST", u, &transfer)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// TODO: remove custom Accept header when this API fully launches.
+	req.Header.Set("Accept", mediaTypeRepositoryTransferPreview)
+
+	r := new(Repository)
+	resp, err := s.client.Do(ctx, req, r)
 	if err != nil {
 		return nil, resp, err
 	}

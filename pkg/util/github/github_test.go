@@ -17,6 +17,7 @@ limitations under the License.
 package github
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -45,7 +46,7 @@ var assetSet = []struct {
 	binary           OpenShiftBinaryType
 	os               minishiftos.OS
 	version          string
-	expectedAssetId  int
+	expectedAssetId  int64
 	expectedFilename string
 }{
 	{OC, minishiftos.LINUX, testVersion, 2489310, "openshift-origin-client-tools-v1.3.1-dad658de7465ba8a234a4fb40b5b446a45a4cee1-linux-64bit.tar.gz"},
@@ -57,7 +58,8 @@ func TestGetAssetIdAndFilename(t *testing.T) {
 	EnsureGitHubApiAccessTokenSet(t)
 
 	for _, testAsset := range assetSet {
-		release, resp, err = gitHubClient.Repositories.GetReleaseByTag("openshift", "origin", testAsset.version)
+		ctx := context.Background()
+		release, resp, err = gitHubClient.Repositories.GetReleaseByTag(ctx, "openshift", "origin", testAsset.version)
 		assert.NoError(t, err, "Could not get OpenShift release")
 		defer func() {
 			_ = resp.Body.Close()

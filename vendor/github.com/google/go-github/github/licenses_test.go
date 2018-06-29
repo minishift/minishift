@@ -6,6 +6,7 @@
 package github
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -13,7 +14,7 @@ import (
 )
 
 func TestLicensesService_List(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/licenses", func(w http.ResponseWriter, r *http.Request) {
@@ -22,7 +23,7 @@ func TestLicensesService_List(t *testing.T) {
 		fmt.Fprint(w, `[{"key":"mit","name":"MIT","spdx_id":"MIT","url":"https://api.github.com/licenses/mit","featured":true}]`)
 	})
 
-	licenses, _, err := client.Licenses.List()
+	licenses, _, err := client.Licenses.List(context.Background())
 	if err != nil {
 		t.Errorf("Licenses.List returned error: %v", err)
 	}
@@ -40,7 +41,7 @@ func TestLicensesService_List(t *testing.T) {
 }
 
 func TestLicensesService_Get(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/licenses/mit", func(w http.ResponseWriter, r *http.Request) {
@@ -49,7 +50,7 @@ func TestLicensesService_Get(t *testing.T) {
 		fmt.Fprint(w, `{"key":"mit","name":"MIT"}`)
 	})
 
-	license, _, err := client.Licenses.Get("mit")
+	license, _, err := client.Licenses.Get(context.Background(), "mit")
 	if err != nil {
 		t.Errorf("Licenses.Get returned error: %v", err)
 	}
@@ -61,6 +62,9 @@ func TestLicensesService_Get(t *testing.T) {
 }
 
 func TestLicensesService_Get_invalidTemplate(t *testing.T) {
-	_, _, err := client.Licenses.Get("%")
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, _, err := client.Licenses.Get(context.Background(), "%")
 	testURLParseError(t, err)
 }

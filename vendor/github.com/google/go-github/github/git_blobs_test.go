@@ -6,6 +6,7 @@
 package github
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -14,20 +15,20 @@ import (
 )
 
 func TestGitService_GetBlob(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/repos/o/r/git/blobs/s", func(w http.ResponseWriter, r *http.Request) {
-		if m := "GET"; m != r.Method {
-			t.Errorf("Request method = %v, want %v", r.Method, m)
-		}
+		testMethod(t, r, "GET")
+		testHeader(t, r, "Accept", mediaTypeGraphQLNodeIDPreview)
+
 		fmt.Fprint(w, `{
 			  "sha": "s",
 			  "content": "blob content"
 			}`)
 	})
 
-	blob, _, err := client.Git.GetBlob("o", "r", "s")
+	blob, _, err := client.Git.GetBlob(context.Background(), "o", "r", "s")
 	if err != nil {
 		t.Errorf("Git.GetBlob returned error: %v", err)
 	}
@@ -43,12 +44,15 @@ func TestGitService_GetBlob(t *testing.T) {
 }
 
 func TestGitService_GetBlob_invalidOwner(t *testing.T) {
-	_, _, err := client.Git.GetBlob("%", "%", "%")
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, _, err := client.Git.GetBlob(context.Background(), "%", "%", "%")
 	testURLParseError(t, err)
 }
 
 func TestGitService_CreateBlob(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	input := &Blob{
@@ -62,9 +66,8 @@ func TestGitService_CreateBlob(t *testing.T) {
 		v := new(Blob)
 		json.NewDecoder(r.Body).Decode(v)
 
-		if m := "POST"; m != r.Method {
-			t.Errorf("Request method = %v, want %v", r.Method, m)
-		}
+		testMethod(t, r, "POST")
+		testHeader(t, r, "Accept", mediaTypeGraphQLNodeIDPreview)
 
 		want := input
 		if !reflect.DeepEqual(v, want) {
@@ -79,7 +82,7 @@ func TestGitService_CreateBlob(t *testing.T) {
 		}`)
 	})
 
-	blob, _, err := client.Git.CreateBlob("o", "r", input)
+	blob, _, err := client.Git.CreateBlob(context.Background(), "o", "r", input)
 	if err != nil {
 		t.Errorf("Git.CreateBlob returned error: %v", err)
 	}
@@ -92,6 +95,9 @@ func TestGitService_CreateBlob(t *testing.T) {
 }
 
 func TestGitService_CreateBlob_invalidOwner(t *testing.T) {
-	_, _, err := client.Git.CreateBlob("%", "%", &Blob{})
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, _, err := client.Git.CreateBlob(context.Background(), "%", "%", &Blob{})
 	testURLParseError(t, err)
 }

@@ -6,6 +6,7 @@
 package github
 
 import (
+	"context"
 	"fmt"
 	"time"
 )
@@ -15,7 +16,7 @@ import (
 // It is similar to an IssueEvent but may contain more information.
 // GitHub API docs: https://developer.github.com/v3/issues/timeline/
 type Timeline struct {
-	ID        *int    `json:"id,omitempty"`
+	ID        *int64  `json:"id,omitempty"`
 	URL       *string `json:"url,omitempty"`
 	CommitURL *string `json:"commit_url,omitempty"`
 
@@ -119,7 +120,7 @@ type Timeline struct {
 
 // Source represents a reference's source.
 type Source struct {
-	ID    *int    `json:"id,omitempty"`
+	ID    *int64  `json:"id,omitempty"`
 	URL   *string `json:"url,omitempty"`
 	Actor *User   `json:"actor,omitempty"`
 }
@@ -127,7 +128,7 @@ type Source struct {
 // ListIssueTimeline lists events for the specified issue.
 //
 // GitHub API docs: https://developer.github.com/v3/issues/timeline/#list-events-for-an-issue
-func (s *IssuesService) ListIssueTimeline(owner, repo string, number int, opt *ListOptions) ([]*Timeline, *Response, error) {
+func (s *IssuesService) ListIssueTimeline(ctx context.Context, owner, repo string, number int, opt *ListOptions) ([]*Timeline, *Response, error) {
 	u := fmt.Sprintf("repos/%v/%v/issues/%v/timeline", owner, repo, number)
 	u, err := addOptions(u, opt)
 	if err != nil {
@@ -143,6 +144,6 @@ func (s *IssuesService) ListIssueTimeline(owner, repo string, number int, opt *L
 	req.Header.Set("Accept", mediaTypeTimelinePreview)
 
 	var events []*Timeline
-	resp, err := s.client.Do(req, &events)
+	resp, err := s.client.Do(ctx, req, &events)
 	return events, resp, err
 }

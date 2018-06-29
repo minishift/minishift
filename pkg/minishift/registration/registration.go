@@ -52,6 +52,9 @@ type Registrator interface {
 
 	// Figure out whether this is a matching registrar
 	CompatibleWithDistribution(osReleaseInfo *provision.OsRelease) bool
+
+	// Check if registered
+	IsRegistered() (bool, error)
 }
 
 // RegisteredRegistrator creates a new registrator

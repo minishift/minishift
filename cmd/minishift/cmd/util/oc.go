@@ -150,12 +150,13 @@ func GetOcPathForProfile(profileName string) (error, string) {
 // PullOpenshiftImageAndCopyOcBinary pull the openshift image if not available and then copy the client binary to Remote/VM machine
 // Any occurring error is also returned.
 func PullOpenshiftImageAndCopyOcBinary(dockerCommander docker.DockerCommander, requestedOpenShiftVersion string) error {
-	fmt.Printf("-- Pulling the Openshift Container Image ")
-	progressDots := progressdots.New()
-	progressDots.Start()
+
 	// We need to make sure if images are already exist from the cache then don't pull it again.
 	imageExist, err := dockerCommander.IsImageExist(minishiftConstants.GetOpenshiftImageName(requestedOpenShiftVersion))
 	if !imageExist {
+		fmt.Printf("-- Pulling the Openshift Container Image ")
+		progressDots := progressdots.New()
+		progressDots.Start()
 		_, err = dockerCommander.Pull(minishiftConstants.GetOpenshiftImageName(requestedOpenShiftVersion))
 		if err != nil {
 			return fmt.Errorf("Error pulling the openshift container image: %v", err)
@@ -163,7 +164,9 @@ func PullOpenshiftImageAndCopyOcBinary(dockerCommander docker.DockerCommander, r
 		progressDots.Stop()
 		fmt.Println(" OK")
 	} else {
-		fmt.Println(" EXISTS")
+		if glog.V(2) {
+			fmt.Printf("-- OpenShift container image exists ...")
+		}
 	}
 	fmt.Printf("-- Copying oc binary from the OpenShift container image to VM ...")
 	err = clusterup.CopyOcBinaryFromImageToVM(dockerCommander, minishiftConstants.GetOpenshiftImageName(requestedOpenShiftVersion), minishiftConstants.OcPathInsideVM)

@@ -94,6 +94,9 @@ func StartHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 		if err := api.Save(h); err != nil {
 			return nil, fmt.Errorf("Error saving started host: %s", err)
 		}
+		if err := setProxyToShell(config, h); err != nil {
+			return nil, err
+		}
 	}
 
 	if err := h.ConfigureAuth(); err != nil {
@@ -348,26 +351,8 @@ func createHost(api libmachine.API, config MachineConfig) (*host.Host, error) {
 		return nil, fmt.Errorf("Error attempting to save store: %s", err)
 	}
 
-	if config.ShellProxyEnv.IsEnabled() {
-		fmt.Print("-- Setting proxy information ... ")
-		vmIP, err := h.Driver.GetIP()
-		if err != nil {
-			fmt.Println("FAIL")
-			return nil, fmt.Errorf("Error getting VM IP: %s", err)
-		}
-		hostIP, err := minishiftNetwork.DetermineHostIP(h.Driver)
-		if err != nil {
-			fmt.Println("FAIL")
-			return nil, fmt.Errorf("Error getting host IP: %s", err)
-		}
-		config.ShellProxyEnv.AddNoProxy(vmIP)
-		config.ShellProxyEnv.AddNoProxy(hostIP)
-		shellProxyEnv := strings.Join(config.ShellProxyEnv.ProxyConfig(), " ")
-		if err := minishiftUtil.SetProxyToShellEnv(h, shellProxyEnv); err != nil {
-			fmt.Println("FAIL")
-			return nil, fmt.Errorf("Error setting proxy to VM: %s", err)
-		}
-		fmt.Println("OK")
+	if err = setProxyToShell(config, h); err != nil {
+		return nil, err
 	}
 
 	return h, nil
@@ -524,4 +509,30 @@ func GetHostIP(api libmachine.API) (string, error) {
 		return "", err
 	}
 	return ip, nil
+}
+
+// setProxyToShell set the proxy details to machine env.
+func setProxyToShell(config MachineConfig, h *host.Host) error {
+	if config.ShellProxyEnv.IsEnabled() {
+		fmt.Print("-- Setting proxy information ... ")
+		vmIP, err := h.Driver.GetIP()
+		if err != nil {
+			fmt.Println("FAIL")
+			return fmt.Errorf("Error getting VM IP: %s", err)
+		}
+		hostIP, err := minishiftNetwork.DetermineHostIP(h.Driver)
+		if err != nil {
+			fmt.Println("FAIL")
+			return fmt.Errorf("Error getting host IP: %s", err)
+		}
+		config.ShellProxyEnv.AddNoProxy(vmIP)
+		config.ShellProxyEnv.AddNoProxy(hostIP)
+		shellProxyEnv := strings.Join(config.ShellProxyEnv.ProxyConfig(), " ")
+		if err := minishiftUtil.SetProxyToShellEnv(h, shellProxyEnv); err != nil {
+			fmt.Println("FAIL")
+			return fmt.Errorf("Error setting proxy to VM: %s", err)
+		}
+		fmt.Println("OK")
+	}
+	return nil
 }

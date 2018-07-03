@@ -285,7 +285,7 @@ func checkDeprecation() bool {
 	// Check for deprecated options
 	switchValue := os.Getenv("HYPERV_VIRTUAL_SWITCH")
 	if switchValue != "" {
-		fmt.Println("\n   Use of HYPERV_VIRTUAL_SWITCH has been deprecated\n   Please use: minishift config set hyper-virtual-switch", switchValue)
+		fmt.Println("\n   Use of HYPERV_VIRTUAL_SWITCH has been deprecated\n   Please use: minishift config set hyperv-virtual-switch", switchValue)
 		return false
 	}
 	return true

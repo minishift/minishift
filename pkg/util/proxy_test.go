@@ -68,24 +68,6 @@ func Test_set_to_environment(t *testing.T) {
 	assert.Equal(t, expectedValue, os.Getenv("NO_PROXY"))
 }
 
-func Test_invalid_http_proxy(t *testing.T) {
-	_, err := NewProxyConfig("foo", "", "")
-	assert.Error(t, err, "Error in getting new proxy config")
-
-	expectedError := "Proxy URL 'foo' is not valid."
-	assert.EqualError(t, err, expectedError)
-
-}
-
-func Test_invalid_https_proxy(t *testing.T) {
-	_, err := NewProxyConfig("", "bar", "")
-	assert.Error(t, err, "Error in getting new proxy config")
-
-	expectedError := "Proxy URL 'bar' is not valid."
-	assert.EqualError(t, err, expectedError)
-
-}
-
 func Test_add_no_proxy(t *testing.T) {
 	proxyConfig, err := NewProxyConfig("http://foobar.com", "https://snafu.de", "42.42.42.42")
 	assert.NoError(t, err, "Error in getting new proxy config")
@@ -100,7 +82,8 @@ func Test_add_no_proxy(t *testing.T) {
 
 func Test_validate_proxy_url(t *testing.T) {
 	urlList := map[string]bool{
-		"": true,
+		"":                                     true,
+		"foo.com:3128":                         true,
 		"http://foo.com:3128":                  true, // special case for us as part of ProxyConfig
 		"http://127.0.0.1:3128":                true,
 		"http://foo:bar@test.com:324":          true,
@@ -113,7 +96,7 @@ func Test_validate_proxy_url(t *testing.T) {
 		"http://foo:bar@test.com:abc":          false,
 	}
 	for proxyUrl, valid := range urlList {
-		err := ValidateProxyURL(proxyUrl)
+		err := ValidateProxyURL(proxyUrl, "http")
 		if valid {
 			assert.NoError(t, err)
 		}
@@ -172,15 +155,17 @@ func Test_parse_special_character_uri(t *testing.T) {
 	var urlList = []struct {
 		givenURI    string
 		expectedURI string
+		scheme      string
 	}{
-		{"", ""},
-		{"http://foo.com:3128", "http://foo.com:3128"},
-		{"http://user:F@oo!B#ar$@myserver:3128", "http://user:F@oo%21B%23ar$@myserver:3128"},
-		{"https://myuser:my#pass@foo.com:3128", "https://myuser:my%23pass@foo.com:3128"},
-		{"https://newuser:new(pas*)wrd@test.com:3128", "https://newuser:new%28pas%2A%29wrd@test.com:3128"},
+		{"", "", "http"},
+		{"foo.com:3128", "http://foo.com:3128", "http"},
+		{"http://foo.com:3128", "http://foo.com:3128", "http"},
+		{"http://user:F@oo!B#ar$@myserver:3128", "http://user:F@oo%21B%23ar$@myserver:3128", "http"},
+		{"https://myuser:my#pass@foo.com:3128", "https://myuser:my%23pass@foo.com:3128", "https"},
+		{"https://newuser:new(pas*)wrd@test.com:3128", "https://newuser:new%28pas%2A%29wrd@test.com:3128", "https"},
 	}
 	for _, proxyUrl := range urlList {
-		got := parseProxySpecialChar(proxyUrl.givenURI)
+		got := parseProxySpecialChar(proxyUrl.givenURI, proxyUrl.scheme)
 		assert.Equal(t, proxyUrl.expectedURI, got)
 	}
 }

@@ -186,7 +186,7 @@ func TestValidProxyURL(t *testing.T) {
 			shouldErr: true,
 		},
 	}
-	runValidations(t, tests, "iso-url", IsValidProxy)
+	runValidations(t, tests, "http-proxy", IsValidHttpProxy)
 }
 
 func TestValidIPv4Address(t *testing.T) {

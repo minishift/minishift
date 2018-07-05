@@ -85,13 +85,15 @@ func (m *Minishift) isTheActiveProfile(profileName string) error {
 	return nil
 }
 
-func (m *Minishift) containerStatus(retryCount int, retryWaitPeriod int, imageName string, expected string) error {
+// containerStatus take the formatted name of container and check the status as per expectation.
+// Return if any error
+func (m *Minishift) containerStatus(retryCount int, retryWaitPeriod int, containerName string, expected string) error {
 	var containerState string
 	for i := 0; i < retryCount; i++ {
-		runningContainers := m.runner.GetOpenshiftContainers()
+		runningContainers := m.runner.GetOpenshiftContainers(containerName)
 		individualContainerRows := strings.Split(runningContainers, "\n")
 		for _, individualContainer := range individualContainerRows {
-			if strings.Contains(individualContainer, imageName) {
+			if strings.Contains(individualContainer, containerName) {
 				containerId := strings.Split(individualContainer, " ")[0]
 				containerState = m.runner.GetContainerStatusUsingImageId(containerId)
 				if !strings.Contains(containerState, expected) {

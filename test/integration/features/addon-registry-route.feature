@@ -24,7 +24,7 @@ so that user can able to push their container images directly to registry and de
       And evaluating stdout of the previous command in host shell
       And executing "minishift oc-env" in host shell succeeds
       And evaluating stdout of the previous command in host shell
-     Then with up to "20" retries with wait period of "3" seconds container image "origin-docker-registry" should be "running"
+     Then with up to "20" retries with wait period of "3" seconds container name "registry_docker-registry" should be "running"
       And with up to "60" retries with wait period of "1" second command "curl -ik https://docker-registry-default.$(minishift ip).nip.io" output should contain "200 OK"
       And executing "docker login -u developer -p `oc whoami -t` docker-registry-default.$(minishift ip).nip.io" in host shell succeeds
       And stdout of host shell should contain "Login Succeeded"

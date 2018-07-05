@@ -224,7 +224,7 @@ func FeatureContext(s *godog.Suite) {
 		util.ExecuteInHostShellLineByLine)
 
 	// steps for container status
-	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)" (?:second|seconds) container image "(.*)" should be "(running|exited)"$`,
+	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)" (?:second|seconds) container name "(.*)" should be "(running|exited)"$`,
 		MinishiftInstance.containerStatus)
 
 	// steps for prototyping or debugging purposes, please do not use in production

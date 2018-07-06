@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"context"
 	"testing"
 
 	"github.com/containers/image/docker/reference"
@@ -152,7 +153,7 @@ func TestReferencePolicyConfigurationNamespaces(t *testing.T) {
 func TestReferenceNewImage(t *testing.T) {
 	ref, err := ParseReference("//busybox")
 	require.NoError(t, err)
-	img, err := ref.NewImage(&types.SystemContext{
+	img, err := ref.NewImage(context.Background(), &types.SystemContext{
 		RegistriesDirPath:        "/this/doesnt/exist",
 		DockerPerHostCertDirPath: "/this/doesnt/exist",
 		ArchitectureChoice:       "amd64",
@@ -165,7 +166,8 @@ func TestReferenceNewImage(t *testing.T) {
 func TestReferenceNewImageSource(t *testing.T) {
 	ref, err := ParseReference("//busybox")
 	require.NoError(t, err)
-	src, err := ref.NewImageSource(&types.SystemContext{RegistriesDirPath: "/this/doesnt/exist", DockerPerHostCertDirPath: "/this/doesnt/exist"})
+	src, err := ref.NewImageSource(context.Background(),
+		&types.SystemContext{RegistriesDirPath: "/this/doesnt/exist", DockerPerHostCertDirPath: "/this/doesnt/exist"})
 	assert.NoError(t, err)
 	defer src.Close()
 }
@@ -173,7 +175,8 @@ func TestReferenceNewImageSource(t *testing.T) {
 func TestReferenceNewImageDestination(t *testing.T) {
 	ref, err := ParseReference("//busybox")
 	require.NoError(t, err)
-	dest, err := ref.NewImageDestination(&types.SystemContext{RegistriesDirPath: "/this/doesnt/exist", DockerPerHostCertDirPath: "/this/doesnt/exist"})
+	dest, err := ref.NewImageDestination(context.Background(),
+		&types.SystemContext{RegistriesDirPath: "/this/doesnt/exist", DockerPerHostCertDirPath: "/this/doesnt/exist"})
 	require.NoError(t, err)
 	defer dest.Close()
 }

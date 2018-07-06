@@ -38,6 +38,17 @@ func TestGetRegistriesWithBadData(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestGetRegistriesWithTrailingSlash(t *testing.T) {
+	answer := []string{"no-slash.com:5000/path", "one-slash.com", "two-slashes.com", "three-slashes.com:5000"}
+	testConfig = []byte(`[registries.search]
+	registries= ['no-slash.com:5000/path', 'one-slash.com', 'two-slashes.com//', 'three-slashes.com:5000///']
+`)
+	// note: only one trailing gets removed
+	registriesConfig, err := GetRegistries(nil)
+	assert.Nil(t, err)
+	assert.Equal(t, registriesConfig, answer)
+}
+
 func TestGetInsecureRegistriesWithBlankData(t *testing.T) {
 	answer := []string(nil)
 	testConfig = []byte("")

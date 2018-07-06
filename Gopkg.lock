@@ -55,6 +55,12 @@
   version = "v3.5.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/containerd/continuity"
+  packages = ["pathdriver"]
+  revision = "246e49050efdf45e8f17fbbcf1547ee376f9939e"
+
+[[projects]]
   name = "github.com/containers/image"
   packages = [
     "copy",
@@ -86,7 +92,7 @@
     "types",
     "version"
   ]
-  revision = "8b24210344a448e58be6ed53636e2eacaa30be32"
+  revision = "9c324204a4faf22ae8405fbd6a9faec55d8a1e47"
 
 [[projects]]
   branch = "master"
@@ -179,15 +185,12 @@
     "client",
     "pkg/homedir",
     "pkg/idtools",
-    "pkg/ioutils",
-    "pkg/longpath",
     "pkg/mount",
     "pkg/system",
     "pkg/term",
-    "pkg/term/windows",
-    "pkg/tlsconfig"
+    "pkg/term/windows"
   ]
-  revision = "30eb4d8cdc422b023d5f11f29a82ecb73554183b"
+  revision = "da99009bbb1165d1ac5688b5c81d2f589d418341"
 
 [[projects]]
   name = "github.com/docker/docker-credential-helpers"
@@ -688,6 +691,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6b88a617e3e5d8476e788f02c191863418dd1f202e8d1e4b1bde96217b09c943"
+  inputs-digest = "f9a4506ef0f8c90b1cbb309d0d219787ce79333340232a705388ae97130626a0"
   solver-name = "gps-cdcl"
   solver-version = 1

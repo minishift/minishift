@@ -94,7 +94,7 @@ func TestDefaultPolicyPath(t *testing.T) {
 	const rootPrefix = "/root/prefix"
 
 	for _, c := range []struct {
-		ctx      *types.SystemContext
+		sys      *types.SystemContext
 		expected string
 	}{
 		// The common case
@@ -119,7 +119,7 @@ func TestDefaultPolicyPath(t *testing.T) {
 		// No environment expansion happens in the overridden paths
 		{&types.SystemContext{SignaturePolicyPath: variableReference}, variableReference},
 	} {
-		path := defaultPolicyPath(c.ctx)
+		path := defaultPolicyPath(c.sys)
 		assert.Equal(t, c.expected, path)
 	}
 }

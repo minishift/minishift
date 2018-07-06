@@ -6,8 +6,9 @@ import (
 	"time"
 
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/versions"
 	"github.com/docker/docker/integration-cli/checker"
-	"github.com/docker/docker/integration-cli/request"
+	"github.com/docker/docker/internal/test/request"
 	"github.com/go-check/check"
 )
 
@@ -23,11 +24,19 @@ func (s *DockerSuite) TestAPICreateWithInvalidHealthcheckParams(c *check.C) {
 		},
 	}
 
-	status, body, err := request.SockRequest("POST", "/containers/create?name="+name, config, daemonHost())
+	res, body, err := request.Post("/containers/create?name="+name, request.JSONBody(config))
 	c.Assert(err, check.IsNil)
-	c.Assert(status, check.Equals, http.StatusBadRequest)
+	if versions.LessThan(testEnv.DaemonAPIVersion(), "1.32") {
+		c.Assert(res.StatusCode, check.Equals, http.StatusInternalServerError)
+	} else {
+		c.Assert(res.StatusCode, check.Equals, http.StatusBadRequest)
+	}
+
+	buf, err := request.ReadBody(body)
+	c.Assert(err, checker.IsNil)
+
 	expected := fmt.Sprintf("Interval in Healthcheck cannot be less than %s", container.MinimumDuration)
-	c.Assert(getErrorMessage(c, body), checker.Contains, expected)
+	c.Assert(getErrorMessage(c, buf), checker.Contains, expected)
 
 	// test invalid Interval in Healthcheck: larger than 0s but less than 1ms
 	name = "test2"
@@ -39,10 +48,18 @@ func (s *DockerSuite) TestAPICreateWithInvalidHealthcheckParams(c *check.C) {
 			"Retries":  int(1000),
 		},
 	}
-	status, body, err = request.SockRequest("POST", "/containers/create?name="+name, config, daemonHost())
+	res, body, err = request.Post("/containers/create?name="+name, request.JSONBody(config))
 	c.Assert(err, check.IsNil)
-	c.Assert(status, check.Equals, http.StatusBadRequest)
-	c.Assert(getErrorMessage(c, body), checker.Contains, expected)
+
+	buf, err = request.ReadBody(body)
+	c.Assert(err, checker.IsNil)
+
+	if versions.LessThan(testEnv.DaemonAPIVersion(), "1.32") {
+		c.Assert(res.StatusCode, check.Equals, http.StatusInternalServerError)
+	} else {
+		c.Assert(res.StatusCode, check.Equals, http.StatusBadRequest)
+	}
+	c.Assert(getErrorMessage(c, buf), checker.Contains, expected)
 
 	// test invalid Timeout in Healthcheck: less than 1ms
 	name = "test3"
@@ -54,11 +71,19 @@ func (s *DockerSuite) TestAPICreateWithInvalidHealthcheckParams(c *check.C) {
 			"Retries":  int(1000),
 		},
 	}
-	status, body, err = request.SockRequest("POST", "/containers/create?name="+name, config, daemonHost())
+	res, body, err = request.Post("/containers/create?name="+name, request.JSONBody(config))
 	c.Assert(err, check.IsNil)
-	c.Assert(status, check.Equals, http.StatusBadRequest)
+	if versions.LessThan(testEnv.DaemonAPIVersion(), "1.32") {
+		c.Assert(res.StatusCode, check.Equals, http.StatusInternalServerError)
+	} else {
+		c.Assert(res.StatusCode, check.Equals, http.StatusBadRequest)
+	}
+
+	buf, err = request.ReadBody(body)
+	c.Assert(err, checker.IsNil)
+
 	expected = fmt.Sprintf("Timeout in Healthcheck cannot be less than %s", container.MinimumDuration)
-	c.Assert(getErrorMessage(c, body), checker.Contains, expected)
+	c.Assert(getErrorMessage(c, buf), checker.Contains, expected)
 
 	// test invalid Retries in Healthcheck: less than 0
 	name = "test4"
@@ -70,11 +95,19 @@ func (s *DockerSuite) TestAPICreateWithInvalidHealthcheckParams(c *check.C) {
 			"Retries":  int(-10),
 		},
 	}
-	status, body, err = request.SockRequest("POST", "/containers/create?name="+name, config, daemonHost())
+	res, body, err = request.Post("/containers/create?name="+name, request.JSONBody(config))
 	c.Assert(err, check.IsNil)
-	c.Assert(status, check.Equals, http.StatusBadRequest)
+	if versions.LessThan(testEnv.DaemonAPIVersion(), "1.32") {
+		c.Assert(res.StatusCode, check.Equals, http.StatusInternalServerError)
+	} else {
+		c.Assert(res.StatusCode, check.Equals, http.StatusBadRequest)
+	}
+
+	buf, err = request.ReadBody(body)
+	c.Assert(err, checker.IsNil)
+
 	expected = "Retries in Healthcheck cannot be negative"
-	c.Assert(getErrorMessage(c, body), checker.Contains, expected)
+	c.Assert(getErrorMessage(c, buf), checker.Contains, expected)
 
 	// test invalid StartPeriod in Healthcheck: not 0 and less than 1ms
 	name = "test3"
@@ -87,9 +120,17 @@ func (s *DockerSuite) TestAPICreateWithInvalidHealthcheckParams(c *check.C) {
 			"StartPeriod": 100 * time.Microsecond,
 		},
 	}
-	status, body, err = request.SockRequest("POST", "/containers/create?name="+name, config, daemonHost())
+	res, body, err = request.Post("/containers/create?name="+name, request.JSONBody(config))
 	c.Assert(err, check.IsNil)
-	c.Assert(status, check.Equals, http.StatusBadRequest)
+	if versions.LessThan(testEnv.DaemonAPIVersion(), "1.32") {
+		c.Assert(res.StatusCode, check.Equals, http.StatusInternalServerError)
+	} else {
+		c.Assert(res.StatusCode, check.Equals, http.StatusBadRequest)
+	}
+
+	buf, err = request.ReadBody(body)
+	c.Assert(err, checker.IsNil)
+
 	expected = fmt.Sprintf("StartPeriod in Healthcheck cannot be less than %s", container.MinimumDuration)
-	c.Assert(getErrorMessage(c, body), checker.Contains, expected)
+	c.Assert(getErrorMessage(c, buf), checker.Contains, expected)
 }

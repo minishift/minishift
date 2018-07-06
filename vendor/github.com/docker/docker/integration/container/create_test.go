@@ -1,4 +1,4 @@
-package container
+package container // import "github.com/docker/docker/integration/container"
 
 import (
 	"context"
@@ -7,8 +7,10 @@ import (
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
-	"github.com/docker/docker/integration/util/request"
-	"github.com/docker/docker/pkg/testutil"
+	"github.com/docker/docker/internal/test/request"
+	"github.com/gotestyourself/gotestyourself/assert"
+	is "github.com/gotestyourself/gotestyourself/assert/cmp"
+	"github.com/gotestyourself/gotestyourself/skip"
 )
 
 func TestCreateFailsWhenIdentifierDoesNotExist(t *testing.T) {
@@ -45,9 +47,9 @@ func TestCreateFailsWhenIdentifierDoesNotExist(t *testing.T) {
 				&container.Config{Image: tc.image},
 				&container.HostConfig{},
 				&network.NetworkingConfig{},
-				"foo",
+				"",
 			)
-			testutil.ErrorContains(t, err, tc.expectedError)
+			assert.Check(t, is.ErrorContains(err, tc.expectedError))
 		})
 	}
 }
@@ -85,9 +87,53 @@ func TestCreateWithInvalidEnv(t *testing.T) {
 				},
 				&container.HostConfig{},
 				&network.NetworkingConfig{},
-				"foo",
+				"",
 			)
-			testutil.ErrorContains(t, err, tc.expectedError)
+			assert.Check(t, is.ErrorContains(err, tc.expectedError))
 		})
+	}
+}
+
+// Test case for #30166 (target was not validated)
+func TestCreateTmpfsMountsTarget(t *testing.T) {
+	skip.If(t, testEnv.DaemonInfo.OSType != "linux")
+
+	defer setupTest(t)()
+	client := request.NewAPIClient(t)
+
+	testCases := []struct {
+		target        string
+		expectedError string
+	}{
+		{
+			target:        ".",
+			expectedError: "mount path must be absolute",
+		},
+		{
+			target:        "foo",
+			expectedError: "mount path must be absolute",
+		},
+		{
+			target:        "/",
+			expectedError: "destination can't be '/'",
+		},
+		{
+			target:        "//",
+			expectedError: "destination can't be '/'",
+		},
+	}
+
+	for _, tc := range testCases {
+		_, err := client.ContainerCreate(context.Background(),
+			&container.Config{
+				Image: "busybox",
+			},
+			&container.HostConfig{
+				Tmpfs: map[string]string{tc.target: ""},
+			},
+			&network.NetworkingConfig{},
+			"",
+		)
+		assert.Check(t, is.ErrorContains(err, tc.expectedError))
 	}
 }

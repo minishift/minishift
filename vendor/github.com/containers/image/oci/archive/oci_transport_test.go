@@ -1,6 +1,7 @@
 package archive
 
 import (
+	"context"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -260,21 +261,21 @@ func TestReferencePolicyConfigurationNamespaces(t *testing.T) {
 func TestReferenceNewImage(t *testing.T) {
 	ref, tmpDir := refToTempOCI(t)
 	defer os.RemoveAll(tmpDir)
-	_, err := ref.NewImage(nil)
+	_, err := ref.NewImage(context.Background(), nil)
 	assert.Error(t, err)
 }
 
 func TestReferenceNewImageSource(t *testing.T) {
 	ref, tmpTarFile := refToTempOCIArchive(t)
 	defer os.RemoveAll(tmpTarFile)
-	_, err := ref.NewImageSource(nil)
+	_, err := ref.NewImageSource(context.Background(), nil)
 	assert.NoError(t, err)
 }
 
 func TestReferenceNewImageDestination(t *testing.T) {
 	ref, tmpDir := refToTempOCI(t)
 	defer os.RemoveAll(tmpDir)
-	dest, err := ref.NewImageDestination(nil)
+	dest, err := ref.NewImageDestination(context.Background(), nil)
 	assert.NoError(t, err)
 	defer dest.Close()
 }
@@ -282,6 +283,6 @@ func TestReferenceNewImageDestination(t *testing.T) {
 func TestReferenceDeleteImage(t *testing.T) {
 	ref, tmpDir := refToTempOCI(t)
 	defer os.RemoveAll(tmpDir)
-	err := ref.DeleteImage(nil)
+	err := ref.DeleteImage(context.Background(), nil)
 	assert.Error(t, err)
 }

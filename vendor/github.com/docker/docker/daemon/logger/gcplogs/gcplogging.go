@@ -1,4 +1,4 @@
-package gcplogs
+package gcplogs // import "github.com/docker/docker/daemon/logger/gcplogs"
 
 import (
 	"fmt"
@@ -6,12 +6,13 @@ import (
 	"sync/atomic"
 	"time"
 
+	"context"
+
 	"github.com/docker/docker/daemon/logger"
 
 	"cloud.google.com/go/compute/metadata"
 	"cloud.google.com/go/logging"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/net/context"
 	mrpb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 

@@ -1,15 +1,23 @@
 .PHONY: all tools test validate lint .gitvalidation fmt
 
-# Which github repostiory and branch to use for testing with skopeo
+# Which github repository and branch to use for testing with skopeo
 SKOPEO_REPO = projectatomic/skopeo
 SKOPEO_BRANCH = master
 # Set SUDO=sudo to run container integration tests using sudo.
 SUDO =
 
+# when cross compiling _for_ a Darwin or windows host, then we must use openpgp
+BUILD_TAGS_WINDOWS_CROSS = containers_image_ostree_stub containers_image_openpgp
+BUILD_TAGS_DARWIN_CROSS = containers_image_ostree_stub containers_image_openpgp
+# when compiling _on_ a Darwin host, then we can link against gpgme
+BUILD_TAGS_DARWIN_NATIVE = containers_image_ostree_stub
+
 ifeq ($(shell uname),Darwin)
-DARWIN_BUILD_TAG = containers_image_ostree_stub
+PLATFORM_BUILD_TAG = $(BUILD_TAGS_DARWIN_NATIVE)
 endif
-BUILDTAGS = btrfs_noversion libdm_no_deferred_remove $(DARWIN_BUILD_TAG)
+
+
+BUILDTAGS = btrfs_noversion libdm_no_deferred_remove $(PLATFORM_BUILD_TAG)
 BUILDFLAGS := -tags "$(BUILDTAGS)"
 
 PACKAGES := $(shell go list $(BUILDFLAGS) ./... | grep -v github.com/containers/image/vendor)
@@ -25,8 +33,14 @@ GPGME_ENV = CGO_CFLAGS="$(shell gpgme-config --cflags 2>/dev/null)" CGO_LDFLAGS=
 
 all: tools test validate .gitvalidation
 
-build: vendor
-	@$(GPGME_ENV) go build $(BUILDFLAGS) $(PACKAGES)
+build: vendor build-internal
+
+build-internal:
+	$(GPGME_ENV) go build $(BUILDFLAGS) $(PACKAGES)
+
+cross: vendor
+	GOOS=windows $(MAKE) build-internal BUILDTAGS="$(BUILDTAGS) $(BUILD_TAGS_WINDOWS_CROSS)"
+	GOOS=darwin $(MAKE) build-internal BUILDTAGS="$(BUILDTAGS) $(BUILD_TAGS_DARWIN_CROSS)"
 
 tools: tools.timestamp
 
@@ -47,7 +61,7 @@ test: vendor
 	@$(GPGME_ENV) go test $(BUILDFLAGS) -cover $(PACKAGES)
 
 # This is not run as part of (make all), but Travis CI does run this.
-# Demonstarting a working version of skopeo (possibly with modified SKOPEO_REPO/SKOPEO_BRANCH, e.g.
+# Demonstrating a working version of skopeo (possibly with modified SKOPEO_REPO/SKOPEO_BRANCH, e.g.
 #    make test-skopeo SKOPEO_REPO=runcom/skopeo-1 SKOPEO_BRANCH=oci-3 SUDO=sudo
 # ) is a requirement before merging; note that Travis will only test
 # the master branch of the upstream repo.

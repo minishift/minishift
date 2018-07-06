@@ -1,11 +1,10 @@
-package store
+package store // import "github.com/docker/docker/volume/store"
 
 import (
 	"sync"
 
 	"github.com/boltdb/bolt"
 	"github.com/docker/docker/volume"
-	"github.com/docker/docker/volume/drivers"
 	"github.com/sirupsen/logrus"
 )
 
@@ -33,7 +32,7 @@ func (s *VolumeStore) restore() {
 			var v volume.Volume
 			var err error
 			if meta.Driver != "" {
-				v, err = lookupVolume(meta.Driver, meta.Name)
+				v, err = lookupVolume(s.drivers, meta.Driver, meta.Name)
 				if err != nil && err != errNoSuchVolume {
 					logrus.WithError(err).WithField("driver", meta.Driver).WithField("volume", meta.Name).Warn("Error restoring volume")
 					return
@@ -59,7 +58,7 @@ func (s *VolumeStore) restore() {
 			}
 
 			// increment driver refcount
-			volumedrivers.CreateDriver(meta.Driver)
+			s.drivers.CreateDriver(meta.Driver)
 
 			// cache the volume
 			s.globalLock.Lock()

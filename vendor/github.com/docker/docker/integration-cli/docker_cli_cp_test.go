@@ -11,9 +11,8 @@ import (
 	"strings"
 
 	"github.com/docker/docker/integration-cli/checker"
-	"github.com/docker/docker/pkg/testutil"
-	icmd "github.com/docker/docker/pkg/testutil/cmd"
 	"github.com/go-check/check"
+	"github.com/gotestyourself/gotestyourself/icmd"
 )
 
 const (
@@ -380,7 +379,7 @@ func (s *DockerSuite) TestCpSymlinkComponent(c *check.C) {
 
 // Check that cp with unprivileged user doesn't return any error
 func (s *DockerSuite) TestCpUnprivilegedUser(c *check.C) {
-	testRequires(c, DaemonIsLinux)
+	testRequires(c, DaemonIsLinux, SameHostDaemon)
 	testRequires(c, UnixCli) // uses chmod/su: not available on windows
 
 	out, _ := dockerCmd(c, "run", "-d", "busybox", "/bin/sh", "-c", "touch "+cpTestName)
@@ -548,7 +547,7 @@ func (s *DockerSuite) TestCpToStdout(c *check.C) {
 	// failed to set up container
 	c.Assert(strings.TrimSpace(out), checker.Equals, "0")
 
-	out, _, err := testutil.RunCommandPipelineWithOutput(
+	out, err := RunCommandPipelineWithOutput(
 		exec.Command(dockerBinary, "cp", containerID+":/test", "-"),
 		exec.Command("tar", "-vtf", "-"))
 

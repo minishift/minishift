@@ -1,20 +1,20 @@
 // +build !windows
 
-package config
+package config // import "github.com/docker/docker/daemon/config"
 
 import (
 	"testing"
 
 	"github.com/docker/docker/opts"
-	"github.com/docker/docker/pkg/testutil/tempfile"
-	"github.com/docker/go-units"
+	units "github.com/docker/go-units"
+	"github.com/gotestyourself/gotestyourself/assert"
+	is "github.com/gotestyourself/gotestyourself/assert/cmp"
+	"github.com/gotestyourself/gotestyourself/fs"
 	"github.com/spf13/pflag"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestGetConflictFreeConfiguration(t *testing.T) {
-	configFileData := string([]byte(`
+	configFileData := `
 		{
 			"debug": true,
 			"default-ulimits": {
@@ -27,9 +27,9 @@ func TestGetConflictFreeConfiguration(t *testing.T) {
 			"log-opts": {
 				"tag": "test_tag"
 			}
-		}`))
+		}`
 
-	file := tempfile.NewTempFile(t, "docker-config", configFileData)
+	file := fs.NewFile(t, "docker-config", fs.WithContent(configFileData))
 	defer file.Remove()
 
 	flags := pflag.NewFlagSet("test", pflag.ContinueOnError)
@@ -38,10 +38,10 @@ func TestGetConflictFreeConfiguration(t *testing.T) {
 	flags.Var(opts.NewNamedUlimitOpt("default-ulimits", nil), "default-ulimit", "")
 	flags.Var(opts.NewNamedMapOpts("log-opts", nil, nil), "log-opt", "")
 
-	cc, err := getConflictFreeConfiguration(file.Name(), flags)
-	require.NoError(t, err)
+	cc, err := getConflictFreeConfiguration(file.Path(), flags)
+	assert.NilError(t, err)
 
-	assert.True(t, cc.Debug)
+	assert.Check(t, cc.Debug)
 
 	expectedUlimits := map[string]*units.Ulimit{
 		"nofile": {
@@ -51,11 +51,11 @@ func TestGetConflictFreeConfiguration(t *testing.T) {
 		},
 	}
 
-	assert.Equal(t, expectedUlimits, cc.Ulimits)
+	assert.Check(t, is.DeepEqual(expectedUlimits, cc.Ulimits))
 }
 
 func TestDaemonConfigurationMerge(t *testing.T) {
-	configFileData := string([]byte(`
+	configFileData := `
 		{
 			"debug": true,
 			"default-ulimits": {
@@ -68,9 +68,9 @@ func TestDaemonConfigurationMerge(t *testing.T) {
 			"log-opts": {
 				"tag": "test_tag"
 			}
-		}`))
+		}`
 
-	file := tempfile.NewTempFile(t, "docker-config", configFileData)
+	file := fs.NewFile(t, "docker-config", fs.WithContent(configFileData))
 	defer file.Remove()
 
 	c := &Config{
@@ -90,18 +90,18 @@ func TestDaemonConfigurationMerge(t *testing.T) {
 	flags.Var(opts.NewNamedUlimitOpt("default-ulimits", nil), "default-ulimit", "")
 	flags.Var(opts.NewNamedMapOpts("log-opts", nil, nil), "log-opt", "")
 
-	cc, err := MergeDaemonConfigurations(c, flags, file.Name())
-	require.NoError(t, err)
+	cc, err := MergeDaemonConfigurations(c, flags, file.Path())
+	assert.NilError(t, err)
 
-	assert.True(t, cc.Debug)
-	assert.True(t, cc.AutoRestart)
+	assert.Check(t, cc.Debug)
+	assert.Check(t, cc.AutoRestart)
 
 	expectedLogConfig := LogConfig{
 		Type:   "syslog",
 		Config: map[string]string{"tag": "test_tag"},
 	}
 
-	assert.Equal(t, expectedLogConfig, cc.LogConfig)
+	assert.Check(t, is.DeepEqual(expectedLogConfig, cc.LogConfig))
 
 	expectedUlimits := map[string]*units.Ulimit{
 		"nofile": {
@@ -111,16 +111,13 @@ func TestDaemonConfigurationMerge(t *testing.T) {
 		},
 	}
 
-	assert.Equal(t, expectedUlimits, cc.Ulimits)
+	assert.Check(t, is.DeepEqual(expectedUlimits, cc.Ulimits))
 }
 
 func TestDaemonConfigurationMergeShmSize(t *testing.T) {
-	data := string([]byte(`
-		{
-			"default-shm-size": "1g"
-		}`))
+	data := `{"default-shm-size": "1g"}`
 
-	file := tempfile.NewTempFile(t, "docker-config", data)
+	file := fs.NewFile(t, "docker-config", fs.WithContent(data))
 	defer file.Remove()
 
 	c := &Config{}
@@ -129,11 +126,9 @@ func TestDaemonConfigurationMergeShmSize(t *testing.T) {
 	shmSize := opts.MemBytes(DefaultShmSize)
 	flags.Var(&shmSize, "default-shm-size", "")
 
-	cc, err := MergeDaemonConfigurations(c, flags, file.Name())
-	require.NoError(t, err)
+	cc, err := MergeDaemonConfigurations(c, flags, file.Path())
+	assert.NilError(t, err)
 
 	expectedValue := 1 * 1024 * 1024 * 1024
-	if cc.ShmSize.Value() != int64(expectedValue) {
-		t.Fatalf("expected default shm size %d, got %d", expectedValue, cc.ShmSize.Value())
-	}
+	assert.Check(t, is.Equal(int64(expectedValue), cc.ShmSize.Value()))
 }

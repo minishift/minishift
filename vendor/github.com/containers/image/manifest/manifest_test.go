@@ -138,3 +138,25 @@ func TestMIMETypeIsMultiImage(t *testing.T) {
 		assert.Equal(t, c.expected, res, c.mt)
 	}
 }
+
+func TestNormalizedMIMEType(t *testing.T) {
+	for _, c := range []string{ // Valid MIME types, normalized to themselves
+		DockerV2Schema1MediaType,
+		DockerV2Schema1SignedMediaType,
+		DockerV2Schema2MediaType,
+		DockerV2ListMediaType,
+		imgspecv1.MediaTypeImageManifest,
+	} {
+		res := NormalizedMIMEType(c)
+		assert.Equal(t, c, res, c)
+	}
+	for _, c := range []string{
+		"application/json",
+		"text/plain",
+		"not at all a valid MIME type",
+		"",
+	} {
+		res := NormalizedMIMEType(c)
+		assert.Equal(t, DockerV2Schema1SignedMediaType, res, c)
+	}
+}

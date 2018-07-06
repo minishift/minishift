@@ -3,11 +3,15 @@ package docker
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
+	"time"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/containers/image/pkg/docker/config"
 	"github.com/containers/image/types"
@@ -21,11 +25,11 @@ func TestDockerCertDir(t *testing.T) {
 	const nondefaultPerHostDir = "/this/is/not/the/default/certs.d"
 	const variableReference = "$HOME"
 	const rootPrefix = "/root/prefix"
-	const registryHostPort = "localhost:5000"
+	const registryHostPort = "thishostdefinitelydoesnotexist:5000"
 
-	systemPerHostResult := filepath.Join(systemPerHostCertDirPath, registryHostPort)
+	systemPerHostResult := filepath.Join(systemPerHostCertDirPaths[len(systemPerHostCertDirPaths)-1], registryHostPort)
 	for _, c := range []struct {
-		ctx      *types.SystemContext
+		sys      *types.SystemContext
 		expected string
 	}{
 		// The common case
@@ -83,7 +87,8 @@ func TestDockerCertDir(t *testing.T) {
 			filepath.Join(variableReference, registryHostPort),
 		},
 	} {
-		path := dockerCertDir(c.ctx, registryHostPort)
+		path, err := dockerCertDir(c.sys, registryHostPort)
+		require.Equal(t, nil, err)
 		assert.Equal(t, c.expected, path)
 	}
 }
@@ -139,7 +144,7 @@ func TestGetAuth(t *testing.T) {
 			expectedUsername string
 			expectedPassword string
 			expectedError    error
-			ctx              *types.SystemContext
+			sys              *types.SystemContext
 		}{
 			{
 				name:       "empty hostname",
@@ -235,7 +240,7 @@ func TestGetAuth(t *testing.T) {
 				}),
 				expectedUsername: "foo",
 				expectedPassword: "bar",
-				ctx: &types.SystemContext{
+				sys: &types.SystemContext{
 					DockerAuthConfig: &types.DockerAuthConfig{
 						Username: "foo",
 						Password: "bar",
@@ -253,11 +258,11 @@ func TestGetAuth(t *testing.T) {
 				continue
 			}
 
-			var ctx *types.SystemContext
-			if tc.ctx != nil {
-				ctx = tc.ctx
+			var sys *types.SystemContext
+			if tc.sys != nil {
+				sys = tc.sys
 			}
-			username, password, err := config.GetAuthentication(ctx, tc.hostname)
+			username, password, err := config.GetAuthentication(sys, tc.hostname)
 			if err == nil && tc.expectedError != nil {
 				t.Errorf("[%s] got unexpected non error and username=%q, password=%q", tc.name, username, password)
 				continue
@@ -507,6 +512,62 @@ func TestGetAuthFailsOnBadInput(t *testing.T) {
 	}
 }
 
+func TestNewBearerTokenFromJsonBlob(t *testing.T) {
+	expected := &bearerToken{Token: "IAmAToken", ExpiresIn: 100, IssuedAt: time.Unix(1514800802, 0)}
+	tokenBlob := []byte(`{"token":"IAmAToken","expires_in":100,"issued_at":"2018-01-01T10:00:02+00:00"}`)
+	token, err := newBearerTokenFromJSONBlob(tokenBlob)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	assertBearerTokensEqual(t, expected, token)
+}
+
+func TestNewBearerAccessTokenFromJsonBlob(t *testing.T) {
+	expected := &bearerToken{Token: "IAmAToken", ExpiresIn: 100, IssuedAt: time.Unix(1514800802, 0)}
+	tokenBlob := []byte(`{"access_token":"IAmAToken","expires_in":100,"issued_at":"2018-01-01T10:00:02+00:00"}`)
+	token, err := newBearerTokenFromJSONBlob(tokenBlob)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	assertBearerTokensEqual(t, expected, token)
+}
+
+func TestNewBearerTokenFromInvalidJsonBlob(t *testing.T) {
+	tokenBlob := []byte("IAmNotJson")
+	_, err := newBearerTokenFromJSONBlob(tokenBlob)
+	if err == nil {
+		t.Fatalf("unexpected an error unmarshalling JSON")
+	}
+}
+
+func TestNewBearerTokenSmallExpiryFromJsonBlob(t *testing.T) {
+	expected := &bearerToken{Token: "IAmAToken", ExpiresIn: 60, IssuedAt: time.Unix(1514800802, 0)}
+	tokenBlob := []byte(`{"token":"IAmAToken","expires_in":1,"issued_at":"2018-01-01T10:00:02+00:00"}`)
+	token, err := newBearerTokenFromJSONBlob(tokenBlob)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	assertBearerTokensEqual(t, expected, token)
+}
+
+func TestNewBearerTokenIssuedAtZeroFromJsonBlob(t *testing.T) {
+	zeroTime := time.Time{}.Format(time.RFC3339)
+	now := time.Now()
+	tokenBlob := []byte(fmt.Sprintf(`{"token":"IAmAToken","expires_in":100,"issued_at":"%s"}`, zeroTime))
+	token, err := newBearerTokenFromJSONBlob(tokenBlob)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if token.IssuedAt.Before(now) {
+		t.Fatalf("expected [%s] not to be before [%s]", token.IssuedAt, now)
+	}
+
+}
+
 type testAuthConfigData struct {
 	username string
 	password string
@@ -542,4 +603,16 @@ func makeTestAuthConfig(authConfigData map[string]testAuthConfigData) testAuthCo
 		}
 	}
 	return ac
+}
+
+func assertBearerTokensEqual(t *testing.T, expected, subject *bearerToken) {
+	if expected.Token != subject.Token {
+		t.Fatalf("expected [%s] to equal [%s], it did not", subject.Token, expected.Token)
+	}
+	if expected.ExpiresIn != subject.ExpiresIn {
+		t.Fatalf("expected [%d] to equal [%d], it did not", subject.ExpiresIn, expected.ExpiresIn)
+	}
+	if !expected.IssuedAt.Equal(subject.IssuedAt) {
+		t.Fatalf("expected [%s] to equal [%s], it did not", subject.IssuedAt, expected.IssuedAt)
+	}
 }

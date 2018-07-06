@@ -1,6 +1,7 @@
 package copy
 
 import (
+	"context"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -42,7 +43,7 @@ func TestCreateSignature(t *testing.T) {
 	defer os.RemoveAll(tempDir)
 	dirRef, err := directory.NewReference(tempDir)
 	require.NoError(t, err)
-	dirDest, err := dirRef.NewImageDestination(nil)
+	dirDest, err := dirRef.NewImageDestination(context.Background(), nil)
 	require.NoError(t, err)
 	defer dirDest.Close()
 	c := &copier{
@@ -55,7 +56,8 @@ func TestCreateSignature(t *testing.T) {
 	// Set up a docker: reference
 	dockerRef, err := docker.ParseReference("//busybox")
 	require.NoError(t, err)
-	dockerDest, err := dockerRef.NewImageDestination(&types.SystemContext{RegistriesDirPath: "/this/doesnt/exist", DockerPerHostCertDirPath: "/this/doesnt/exist"})
+	dockerDest, err := dockerRef.NewImageDestination(context.Background(),
+		&types.SystemContext{RegistriesDirPath: "/this/doesnt/exist", DockerPerHostCertDirPath: "/this/doesnt/exist"})
 	require.NoError(t, err)
 	defer dockerDest.Close()
 	c = &copier{

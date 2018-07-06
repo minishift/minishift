@@ -1,16 +1,16 @@
 // +build windows
 
-package dockerfile
+package dockerfile // import "github.com/docker/docker/builder/dockerfile"
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/docker/docker/pkg/testutil"
-	"github.com/stretchr/testify/assert"
+	"github.com/gotestyourself/gotestyourself/assert"
+	is "github.com/gotestyourself/gotestyourself/assert/cmp"
 )
 
-func TestNormaliseDest(t *testing.T) {
+func TestNormalizeDest(t *testing.T) {
 	tests := []struct{ current, requested, expected, etext string }{
 		{``, `D:\`, ``, `Windows does not support destinations not on the system drive (C:)`},
 		{``, `e:/`, ``, `Windows does not support destinations not on the system drive (C:)`},
@@ -40,14 +40,14 @@ func TestNormaliseDest(t *testing.T) {
 	}
 	for _, testcase := range tests {
 		msg := fmt.Sprintf("Input: %s, %s", testcase.current, testcase.requested)
-		actual, err := normaliseDest(testcase.current, testcase.requested)
+		actual, err := normalizeDest(testcase.current, testcase.requested, "windows")
 		if testcase.etext == "" {
-			if !assert.NoError(t, err, msg) {
+			if !assert.Check(t, err, msg) {
 				continue
 			}
-			assert.Equal(t, testcase.expected, actual, msg)
+			assert.Check(t, is.Equal(testcase.expected, actual), msg)
 		} else {
-			testutil.ErrorContains(t, err, testcase.etext)
+			assert.Check(t, is.ErrorContains(err, testcase.etext))
 		}
 	}
 }

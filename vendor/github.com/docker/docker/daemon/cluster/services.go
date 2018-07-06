@@ -1,6 +1,7 @@
-package cluster
+package cluster // import "github.com/docker/docker/daemon/cluster"
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -16,12 +17,12 @@ import (
 	types "github.com/docker/docker/api/types/swarm"
 	timetypes "github.com/docker/docker/api/types/time"
 	"github.com/docker/docker/daemon/cluster/convert"
+	"github.com/docker/docker/errdefs"
 	runconfigopts "github.com/docker/docker/runconfig/opts"
 	swarmapi "github.com/docker/swarmkit/api"
 	gogotypes "github.com/gogo/protobuf/types"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/net/context"
 )
 
 // GetServices returns all services of a managed swarm cluster.
@@ -74,7 +75,7 @@ func (c *Cluster) GetServices(options apitypes.ServiceListOptions) ([]types.Serv
 	services := make([]types.Service, 0, len(r.Services))
 
 	for _, service := range r.Services {
-		if options.Filters.Include("mode") {
+		if options.Filters.Contains("mode") {
 			var mode string
 			switch service.Spec.GetMode().(type) {
 			case *swarmapi.ServiceSpec_Global:
@@ -128,7 +129,7 @@ func (c *Cluster) CreateService(s types.ServiceSpec, encodedAuth string, queryRe
 
 		serviceSpec, err := convert.ServiceSpecToGRPC(s)
 		if err != nil {
-			return convertError{err}
+			return errdefs.InvalidParameter(err)
 		}
 
 		resp = &apitypes.ServiceCreateResponse{}
@@ -232,7 +233,7 @@ func (c *Cluster) UpdateService(serviceIDOrName string, version uint64, spec typ
 
 		serviceSpec, err := convert.ServiceSpecToGRPC(spec)
 		if err != nil {
-			return convertError{err}
+			return errdefs.InvalidParameter(err)
 		}
 
 		currentService, err := getService(ctx, state.controlClient, serviceIDOrName, false)
@@ -569,7 +570,7 @@ func (c *Cluster) imageWithDigestString(ctx context.Context, image string, authC
 			return "", errors.Errorf("image reference not tagged: %s", image)
 		}
 
-		repo, _, err := c.config.Backend.GetRepository(ctx, taggedRef, authConfig)
+		repo, _, err := c.config.ImageBackend.GetRepository(ctx, taggedRef, authConfig)
 		if err != nil {
 			return "", err
 		}

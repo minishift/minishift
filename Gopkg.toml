@@ -103,7 +103,7 @@ ignored = ["github.com/Sirupsen/logrus"]
 # Get all dependencies for containers/image which is used for OCI image chaching
 [[constraint]]
   name = "github.com/containers/image"
-  revision = "8b24210344a448e58be6ed53636e2eacaa30be32"
+  revision = "9c324204a4faf22ae8405fbd6a9faec55d8a1e47"
 
 [[constraint]]
   name = "github.com/opencontainers/runc"
@@ -117,7 +117,7 @@ ignored = ["github.com/Sirupsen/logrus"]
 # In particular we need a version which uses the altest logrus
 [[override]]
   name = "github.com/docker/docker"
-  revision = "30eb4d8cdc422b023d5f11f29a82ecb73554183b"
+  revision = "da99009bbb1165d1ac5688b5c81d2f589d418341"
 
 [[override]]
   name = "github.com/docker/distribution"
@@ -125,7 +125,7 @@ ignored = ["github.com/Sirupsen/logrus"]
 
 [[constraint]]
   name = "github.com/opencontainers/image-spec"
-  version = "=v1.0.0"
+  version = "=v1.0.1"
 
 [[constraint]]
   name = "gopkg.in/yaml.v2"

@@ -1,4 +1,4 @@
-package dockerfile
+package dockerfile // import "github.com/docker/docker/builder/dockerfile"
 
 import (
 	"errors"
@@ -14,23 +14,23 @@ import (
 
 var pattern = regexp.MustCompile(`^[a-zA-Z]:\.$`)
 
-// normaliseWorkdir normalises a user requested working directory in a
+// normalizeWorkdir normalizes a user requested working directory in a
 // platform semantically consistent way.
-func normaliseWorkdir(platform string, current string, requested string) (string, error) {
+func normalizeWorkdir(platform string, current string, requested string) (string, error) {
 	if platform == "" {
 		platform = "windows"
 	}
 	if platform == "windows" {
-		return normaliseWorkdirWindows(current, requested)
+		return normalizeWorkdirWindows(current, requested)
 	}
-	return normaliseWorkdirUnix(current, requested)
+	return normalizeWorkdirUnix(current, requested)
 }
 
-// normaliseWorkdirUnix normalises a user requested working directory in a
+// normalizeWorkdirUnix normalizes a user requested working directory in a
 // platform semantically consistent way.
-func normaliseWorkdirUnix(current string, requested string) (string, error) {
+func normalizeWorkdirUnix(current string, requested string) (string, error) {
 	if requested == "" {
-		return "", errors.New("cannot normalise nothing")
+		return "", errors.New("cannot normalize nothing")
 	}
 	current = strings.Replace(current, string(os.PathSeparator), "/", -1)
 	requested = strings.Replace(requested, string(os.PathSeparator), "/", -1)
@@ -40,11 +40,11 @@ func normaliseWorkdirUnix(current string, requested string) (string, error) {
 	return requested, nil
 }
 
-// normaliseWorkdirWindows normalises a user requested working directory in a
+// normalizeWorkdirWindows normalizes a user requested working directory in a
 // platform semantically consistent way.
-func normaliseWorkdirWindows(current string, requested string) (string, error) {
+func normalizeWorkdirWindows(current string, requested string) (string, error) {
 	if requested == "" {
-		return "", errors.New("cannot normalise nothing")
+		return "", errors.New("cannot normalize nothing")
 	}
 
 	// `filepath.Clean` will replace "" with "." so skip in that case
@@ -92,29 +92,4 @@ func normaliseWorkdirWindows(current string, requested string) (string, error) {
 	}
 	// Upper-case drive letter
 	return (strings.ToUpper(string(requested[0])) + requested[1:]), nil
-}
-
-func errNotJSON(command, original string) error {
-	// For Windows users, give a hint if it looks like it might contain
-	// a path which hasn't been escaped such as ["c:\windows\system32\prog.exe", "-param"],
-	// as JSON must be escaped. Unfortunate...
-	//
-	// Specifically looking for quote-driveletter-colon-backslash, there's no
-	// double backslash and a [] pair. No, this is not perfect, but it doesn't
-	// have to be. It's simply a hint to make life a little easier.
-	extra := ""
-	original = filepath.FromSlash(strings.ToLower(strings.Replace(strings.ToLower(original), strings.ToLower(command)+" ", "", -1)))
-	if len(regexp.MustCompile(`"[a-z]:\\.*`).FindStringSubmatch(original)) > 0 &&
-		!strings.Contains(original, `\\`) &&
-		strings.Contains(original, "[") &&
-		strings.Contains(original, "]") {
-		extra = fmt.Sprintf(`. It looks like '%s' includes a file path without an escaped back-slash. JSON requires back-slashes to be escaped such as ["c:\\path\\to\\file.exe", "/parameter"]`, original)
-	}
-	return fmt.Errorf("%s requires the arguments to be in JSON form%s", command, extra)
-}
-
-// equalEnvKeys compare two strings and returns true if they are equal. On
-// Windows this comparison is case insensitive.
-func equalEnvKeys(from, to string) bool {
-	return strings.ToUpper(from) == strings.ToUpper(to)
 }

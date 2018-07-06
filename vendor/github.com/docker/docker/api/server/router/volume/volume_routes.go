@@ -1,13 +1,16 @@
-package volume
+package volume // import "github.com/docker/docker/api/server/router/volume"
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
+	"io"
 	"net/http"
 
 	"github.com/docker/docker/api/server/httputils"
 	"github.com/docker/docker/api/types/filters"
 	volumetypes "github.com/docker/docker/api/types/volume"
-	"golang.org/x/net/context"
+	"github.com/docker/docker/errdefs"
 )
 
 func (v *volumeRouter) getVolumesList(ctx context.Context, w http.ResponseWriter, r *http.Request, vars map[string]string) error {
@@ -19,7 +22,7 @@ func (v *volumeRouter) getVolumesList(ctx context.Context, w http.ResponseWriter
 	if err != nil {
 		return err
 	}
-	return httputils.WriteJSON(w, http.StatusOK, &volumetypes.VolumesListOKBody{Volumes: volumes, Warnings: warnings})
+	return httputils.WriteJSON(w, http.StatusOK, &volumetypes.VolumeListOKBody{Volumes: volumes, Warnings: warnings})
 }
 
 func (v *volumeRouter) getVolumeByName(ctx context.Context, w http.ResponseWriter, r *http.Request, vars map[string]string) error {
@@ -43,8 +46,11 @@ func (v *volumeRouter) postVolumesCreate(ctx context.Context, w http.ResponseWri
 		return err
 	}
 
-	var req volumetypes.VolumesCreateBody
+	var req volumetypes.VolumeCreateBody
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		if err == io.EOF {
+			return errdefs.InvalidParameter(errors.New("got EOF while reading request body"))
+		}
 		return err
 	}
 
@@ -72,7 +78,7 @@ func (v *volumeRouter) postVolumesPrune(ctx context.Context, w http.ResponseWrit
 		return err
 	}
 
-	pruneFilters, err := filters.FromParam(r.Form.Get("filters"))
+	pruneFilters, err := filters.FromJSON(r.Form.Get("filters"))
 	if err != nil {
 		return err
 	}

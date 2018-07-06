@@ -1,4 +1,4 @@
-package client
+package client // import "github.com/docker/docker/client"
 
 import (
 	"bytes"
@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/docker/docker/api/types"
+	"context"
 
-	"golang.org/x/net/context"
+	"github.com/docker/docker/api/types"
 )
 
 func TestNodeRemoveError(t *testing.T) {

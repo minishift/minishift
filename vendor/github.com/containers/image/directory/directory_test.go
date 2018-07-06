@@ -19,7 +19,7 @@ func TestDestinationReference(t *testing.T) {
 	ref, tmpDir := refToTempDir(t)
 	defer os.RemoveAll(tmpDir)
 
-	dest, err := ref.NewImageDestination(nil)
+	dest, err := ref.NewImageDestination(context.Background(), nil)
 	require.NoError(t, err)
 	defer dest.Close()
 	ref2 := dest.Reference()
@@ -31,18 +31,18 @@ func TestGetPutManifest(t *testing.T) {
 	defer os.RemoveAll(tmpDir)
 
 	man := []byte("test-manifest")
-	dest, err := ref.NewImageDestination(nil)
+	dest, err := ref.NewImageDestination(context.Background(), nil)
 	require.NoError(t, err)
 	defer dest.Close()
-	err = dest.PutManifest(man)
+	err = dest.PutManifest(context.Background(), man)
 	assert.NoError(t, err)
-	err = dest.Commit()
+	err = dest.Commit(context.Background())
 	assert.NoError(t, err)
 
-	src, err := ref.NewImageSource(nil)
+	src, err := ref.NewImageSource(context.Background(), nil)
 	require.NoError(t, err)
 	defer src.Close()
-	m, mt, err := src.GetManifest(nil)
+	m, mt, err := src.GetManifest(context.Background(), nil)
 	assert.NoError(t, err)
 	assert.Equal(t, man, m)
 	assert.Equal(t, "", mt)
@@ -50,7 +50,7 @@ func TestGetPutManifest(t *testing.T) {
 	// Non-default instances are not supported
 	md, err := manifest.Digest(man)
 	require.NoError(t, err)
-	_, _, err = src.GetManifest(&md)
+	_, _, err = src.GetManifest(context.Background(), &md)
 	assert.Error(t, err)
 }
 
@@ -59,22 +59,21 @@ func TestGetPutBlob(t *testing.T) {
 	defer os.RemoveAll(tmpDir)
 
 	blob := []byte("test-blob")
-	dest, err := ref.NewImageDestination(nil)
+	dest, err := ref.NewImageDestination(context.Background(), nil)
 	require.NoError(t, err)
 	defer dest.Close()
-	compress := dest.ShouldCompressLayers()
-	assert.False(t, compress)
-	info, err := dest.PutBlob(bytes.NewReader(blob), types.BlobInfo{Digest: digest.Digest("sha256:digest-test"), Size: int64(9)})
+	assert.Equal(t, types.PreserveOriginal, dest.DesiredLayerCompression())
+	info, err := dest.PutBlob(context.Background(), bytes.NewReader(blob), types.BlobInfo{Digest: digest.Digest("sha256:digest-test"), Size: int64(9)}, false)
 	assert.NoError(t, err)
-	err = dest.Commit()
+	err = dest.Commit(context.Background())
 	assert.NoError(t, err)
 	assert.Equal(t, int64(9), info.Size)
 	assert.Equal(t, digest.FromBytes(blob), info.Digest)
 
-	src, err := ref.NewImageSource(nil)
+	src, err := ref.NewImageSource(context.Background(), nil)
 	require.NoError(t, err)
 	defer src.Close()
-	rc, size, err := src.GetBlob(info)
+	rc, size, err := src.GetBlob(context.Background(), info)
 	assert.NoError(t, err)
 	defer rc.Close()
 	b, err := ioutil.ReadAll(rc)
@@ -118,13 +117,13 @@ func TestPutBlobDigestFailure(t *testing.T) {
 		return 0, errors.Errorf(digestErrorString)
 	})
 
-	dest, err := ref.NewImageDestination(nil)
+	dest, err := ref.NewImageDestination(context.Background(), nil)
 	require.NoError(t, err)
 	defer dest.Close()
-	_, err = dest.PutBlob(reader, types.BlobInfo{Digest: blobDigest, Size: -1})
+	_, err = dest.PutBlob(context.Background(), reader, types.BlobInfo{Digest: blobDigest, Size: -1}, false)
 	assert.Error(t, err)
 	assert.Contains(t, digestErrorString, err.Error())
-	err = dest.Commit()
+	err = dest.Commit(context.Background())
 	assert.NoError(t, err)
 
 	_, err = os.Lstat(blobPath)
@@ -136,7 +135,7 @@ func TestGetPutSignatures(t *testing.T) {
 	ref, tmpDir := refToTempDir(t)
 	defer os.RemoveAll(tmpDir)
 
-	dest, err := ref.NewImageDestination(nil)
+	dest, err := ref.NewImageDestination(context.Background(), nil)
 	require.NoError(t, err)
 	defer dest.Close()
 	man := []byte("test-manifest")
@@ -144,17 +143,17 @@ func TestGetPutSignatures(t *testing.T) {
 		[]byte("sig1"),
 		[]byte("sig2"),
 	}
-	err = dest.SupportsSignatures()
+	err = dest.SupportsSignatures(context.Background())
 	assert.NoError(t, err)
-	err = dest.PutManifest(man)
+	err = dest.PutManifest(context.Background(), man)
 	require.NoError(t, err)
 
-	err = dest.PutSignatures(signatures)
+	err = dest.PutSignatures(context.Background(), signatures)
 	assert.NoError(t, err)
-	err = dest.Commit()
+	err = dest.Commit(context.Background())
 	assert.NoError(t, err)
 
-	src, err := ref.NewImageSource(nil)
+	src, err := ref.NewImageSource(context.Background(), nil)
 	require.NoError(t, err)
 	defer src.Close()
 	sigs, err := src.GetSignatures(context.Background(), nil)
@@ -172,7 +171,7 @@ func TestSourceReference(t *testing.T) {
 	ref, tmpDir := refToTempDir(t)
 	defer os.RemoveAll(tmpDir)
 
-	src, err := ref.NewImageSource(nil)
+	src, err := ref.NewImageSource(context.Background(), nil)
 	require.NoError(t, err)
 	defer src.Close()
 	ref2 := src.Reference()

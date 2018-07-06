@@ -1,10 +1,11 @@
-package daemon
+package daemon // import "github.com/docker/docker/daemon"
 
 import (
 	"context"
 	"time"
 
 	containerpkg "github.com/docker/docker/container"
+	"github.com/docker/docker/errdefs"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -28,7 +29,7 @@ func (daemon *Daemon) ContainerStop(name string, seconds *int) error {
 		seconds = &stopTimeout
 	}
 	if err := daemon.containerStop(container, *seconds); err != nil {
-		return errors.Wrapf(systemError{err}, "cannot stop container: %s", name)
+		return errdefs.System(errors.Wrapf(err, "cannot stop container: %s", name))
 	}
 	return nil
 }
@@ -42,8 +43,6 @@ func (daemon *Daemon) containerStop(container *containerpkg.Container, seconds i
 	if !container.IsRunning() {
 		return nil
 	}
-
-	daemon.stopHealthchecks(container)
 
 	stopSignal := container.StopSignal()
 	// 1. Send a stop signal
@@ -78,7 +77,7 @@ func (daemon *Daemon) containerStop(container *containerpkg.Container, seconds i
 		// 3. If it doesn't, then send SIGKILL
 		if err := daemon.Kill(container); err != nil {
 			// Wait without a timeout, ignore result.
-			_ = <-container.Wait(context.Background(), containerpkg.WaitConditionNotRunning)
+			<-container.Wait(context.Background(), containerpkg.WaitConditionNotRunning)
 			logrus.Warn(err) // Don't return error because we only care that container is stopped, not what function stopped it
 		}
 	}

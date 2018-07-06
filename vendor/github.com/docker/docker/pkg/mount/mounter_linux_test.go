@@ -1,6 +1,6 @@
 // +build linux
 
-package mount
+package mount // import "github.com/docker/docker/pkg/mount"
 
 import (
 	"fmt"
@@ -8,11 +8,13 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	selinux "github.com/opencontainers/selinux/go-selinux"
 )
 
 func TestMount(t *testing.T) {
 	if os.Getuid() != 0 {
-		t.Skip("not root tests would fail")
+		t.Skip("root required")
 	}
 
 	source, err := ioutil.TempDir("", "mount-test-source-")
@@ -101,7 +103,11 @@ func TestMount(t *testing.T) {
 				t.Fatal(err)
 			}
 			defer ensureUnmount(t, target)
-			validateMount(t, target, tc.expectedOpts, tc.expectedOptional, tc.expectedVFS)
+			expectedVFS := tc.expectedVFS
+			if selinux.GetEnabled() && expectedVFS != "" {
+				expectedVFS = expectedVFS + ",seclabel"
+			}
+			validateMount(t, target, tc.expectedOpts, tc.expectedOptional, expectedVFS)
 		})
 	}
 }
@@ -115,7 +121,7 @@ func ensureUnmount(t *testing.T, mnt string) {
 
 // validateMount checks that mnt has the given options
 func validateMount(t *testing.T, mnt string, opts, optional, vfs string) {
-	info, err := GetMounts()
+	info, err := GetMounts(nil)
 	if err != nil {
 		t.Fatal(err)
 	}

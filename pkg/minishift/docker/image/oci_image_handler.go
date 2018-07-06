@@ -23,6 +23,7 @@ import (
 	"strconv"
 
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"github.com/containers/image/copy"
@@ -360,7 +361,8 @@ func (handler *OciImageHandler) pruneImage(image string, config *ImageCacheConfi
 }
 
 func (handler *OciImageHandler) copyImage(srcRef types.ImageReference, destRef types.ImageReference, policyContext *signature.PolicyContext) error {
-	err := copy.Image(policyContext, destRef, srcRef, &copy.Options{
+	ctx := context.TODO()
+	err := copy.Image(ctx, policyContext, destRef, srcRef, &copy.Options{
 		RemoveSignatures: false,
 		SignBy:           "",
 		ReportWriter:     nil,
@@ -389,6 +391,9 @@ func (handler *OciImageHandler) getSystemContext() *types.SystemContext {
 		DockerDaemonHost:                  handler.dockerClientSettings.DockerHost,
 		DockerDaemonCertPath:              handler.dockerClientSettings.DockerCertPath,
 		DockerDaemonInsecureSkipTLSVerify: !handler.dockerClientSettings.DockerTLSVerify,
+		OSChoice:                    "linux",
+		ArchitectureChoice:          "amd64",
+		OCIAcceptUncompressedLayers: true,
 	}
 }
 

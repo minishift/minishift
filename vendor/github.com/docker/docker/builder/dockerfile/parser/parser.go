@@ -1,5 +1,5 @@
 // Package parser implements a parser and parse tree dumper for Dockerfiles.
-package parser
+package parser // import "github.com/docker/docker/builder/dockerfile/parser"
 
 import (
 	"bufio"
@@ -7,13 +7,11 @@ import (
 	"fmt"
 	"io"
 	"regexp"
-	"runtime"
 	"strconv"
 	"strings"
 	"unicode"
 
 	"github.com/docker/docker/builder/dockerfile/command"
-	"github.com/docker/docker/pkg/system"
 	"github.com/pkg/errors"
 )
 
@@ -81,28 +79,22 @@ func (node *Node) AddChild(child *Node, startLine, endLine int) {
 }
 
 var (
-	dispatch             map[string]func(string, *Directive) (*Node, map[string]bool, error)
-	tokenWhitespace      = regexp.MustCompile(`[\t\v\f\r ]+`)
-	tokenEscapeCommand   = regexp.MustCompile(`^#[ \t]*escape[ \t]*=[ \t]*(?P<escapechar>.).*$`)
-	tokenPlatformCommand = regexp.MustCompile(`^#[ \t]*platform[ \t]*=[ \t]*(?P<platform>.*)$`)
-	tokenComment         = regexp.MustCompile(`^#.*$`)
+	dispatch           map[string]func(string, *Directive) (*Node, map[string]bool, error)
+	tokenWhitespace    = regexp.MustCompile(`[\t\v\f\r ]+`)
+	tokenEscapeCommand = regexp.MustCompile(`^#[ \t]*escape[ \t]*=[ \t]*(?P<escapechar>.).*$`)
+	tokenComment       = regexp.MustCompile(`^#.*$`)
 )
 
 // DefaultEscapeToken is the default escape token
 const DefaultEscapeToken = '\\'
 
-// defaultPlatformToken is the platform assumed for the build if not explicitly provided
-var defaultPlatformToken = runtime.GOOS
-
 // Directive is the structure used during a build run to hold the state of
 // parsing directives.
 type Directive struct {
 	escapeToken           rune           // Current escape token
-	platformToken         string         // Current platform token
 	lineContinuationRegex *regexp.Regexp // Current line continuation regex
 	processingComplete    bool           // Whether we are done looking for directives
 	escapeSeen            bool           // Whether the escape directive has been seen
-	platformSeen          bool           // Whether the platform directive has been seen
 }
 
 // setEscapeToken sets the default token for escaping characters in a Dockerfile.
@@ -115,25 +107,9 @@ func (d *Directive) setEscapeToken(s string) error {
 	return nil
 }
 
-// setPlatformToken sets the default platform for pulling images in a Dockerfile.
-func (d *Directive) setPlatformToken(s string) error {
-	s = strings.ToLower(s)
-	valid := []string{runtime.GOOS}
-	if system.LCOWSupported() {
-		valid = append(valid, "linux")
-	}
-	for _, item := range valid {
-		if s == item {
-			d.platformToken = s
-			return nil
-		}
-	}
-	return fmt.Errorf("invalid PLATFORM '%s'. Must be one of %v", s, valid)
-}
-
-// possibleParserDirective looks for one or more parser directives '# escapeToken=<char>' and
-// '# platform=<string>'. Parser directives must precede any builder instruction
-// or other comments, and cannot be repeated.
+// possibleParserDirective looks for parser directives, eg '# escapeToken=<char>'.
+// Parser directives must precede any builder instruction or other comments,
+// and cannot be repeated.
 func (d *Directive) possibleParserDirective(line string) error {
 	if d.processingComplete {
 		return nil
@@ -143,28 +119,11 @@ func (d *Directive) possibleParserDirective(line string) error {
 	if len(tecMatch) != 0 {
 		for i, n := range tokenEscapeCommand.SubexpNames() {
 			if n == "escapechar" {
-				if d.escapeSeen == true {
+				if d.escapeSeen {
 					return errors.New("only one escape parser directive can be used")
 				}
 				d.escapeSeen = true
 				return d.setEscapeToken(tecMatch[i])
-			}
-		}
-	}
-
-	// TODO @jhowardmsft LCOW Support: Eventually this check can be removed,
-	// but only recognise a platform token if running in LCOW mode.
-	if system.LCOWSupported() {
-		tpcMatch := tokenPlatformCommand.FindStringSubmatch(strings.ToLower(line))
-		if len(tpcMatch) != 0 {
-			for i, n := range tokenPlatformCommand.SubexpNames() {
-				if n == "platform" {
-					if d.platformSeen == true {
-						return errors.New("only one platform parser directive can be used")
-					}
-					d.platformSeen = true
-					return d.setPlatformToken(tpcMatch[i])
-				}
 			}
 		}
 	}
@@ -177,7 +136,6 @@ func (d *Directive) possibleParserDirective(line string) error {
 func NewDefaultDirective() *Directive {
 	directive := Directive{}
 	directive.setEscapeToken(string(DefaultEscapeToken))
-	directive.setPlatformToken(defaultPlatformToken)
 	return &directive
 }
 
@@ -242,7 +200,6 @@ func newNodeFromLine(line string, directive *Directive) (*Node, error) {
 type Result struct {
 	AST         *Node
 	EscapeToken rune
-	Platform    string
 	Warnings    []string
 }
 
@@ -290,6 +247,10 @@ func Parse(rwc io.Reader) (*Result, error) {
 			}
 			currentLine++
 
+			if isComment(scanner.Bytes()) {
+				// original line was a comment (processLine strips comments)
+				continue
+			}
 			if isEmptyContinuationLine(bytesRead) {
 				hasEmptyContinuationLine = true
 				continue
@@ -319,8 +280,7 @@ func Parse(rwc io.Reader) (*Result, error) {
 		AST:         root,
 		Warnings:    warnings,
 		EscapeToken: d.escapeToken,
-		Platform:    d.platformToken,
-	}, nil
+	}, handleScannerError(scanner.Err())
 }
 
 func trimComments(src []byte) []byte {
@@ -331,8 +291,12 @@ func trimWhitespace(src []byte) []byte {
 	return bytes.TrimLeftFunc(src, unicode.IsSpace)
 }
 
+func isComment(line []byte) bool {
+	return tokenComment.Match(trimWhitespace(line))
+}
+
 func isEmptyContinuationLine(line []byte) bool {
-	return len(trimComments(trimWhitespace(line))) == 0
+	return len(trimWhitespace(line)) == 0
 }
 
 var utf8bom = []byte{0xEF, 0xBB, 0xBF}
@@ -352,4 +316,13 @@ func processLine(d *Directive, token []byte, stripLeftWhitespace bool) ([]byte, 
 		token = trimWhitespace(token)
 	}
 	return trimComments(token), d.possibleParserDirective(string(token))
+}
+
+func handleScannerError(err error) error {
+	switch err {
+	case bufio.ErrTooLong:
+		return errors.Errorf("dockerfile line greater than max allowed size of %d", bufio.MaxScanTokenSize-1)
+	default:
+		return err
+	}
 }

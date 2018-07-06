@@ -84,6 +84,20 @@ func TestSkipTLSVerifyOnly(t *testing.T) {
 	assert.Len(t, tlsConfig.Certificates, 0, "There should be no certificate")
 }
 
+func TestSpecifyPlainHTTPViaHostScheme(t *testing.T) {
+	host := "http://127.0.0.1:2376"
+	ctx := &types.SystemContext{
+		DockerDaemonHost: host,
+	}
+
+	client, err := newDockerClient(ctx)
+
+	assert.Nil(t, err, "There should be no error creating the Docker client")
+	assert.NotNil(t, client, "A Docker client reference should have been returned")
+
+	assert.Equal(t, host, client.DaemonHost())
+}
+
 func testDir(t *testing.T) string {
 	testDir, err := os.Getwd()
 	if err != nil {

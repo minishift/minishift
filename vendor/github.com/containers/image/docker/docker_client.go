@@ -8,7 +8,10 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -24,10 +27,9 @@ import (
 )
 
 const (
-	dockerHostname = "docker.io"
-	dockerRegistry = "registry-1.docker.io"
-
-	systemPerHostCertDirPath = "/etc/docker/certs.d"
+	dockerHostname   = "docker.io"
+	dockerV1Hostname = "index.docker.io"
+	dockerRegistry   = "registry-1.docker.io"
 
 	resolvedPingV2URL       = "%s://%s/v2/"
 	resolvedPingV1URL       = "%s://%s/v1/_ping"
@@ -49,6 +51,7 @@ var (
 	ErrV1NotSupported = errors.New("can't talk to a V1 docker registry")
 	// ErrUnauthorizedForCredentials is returned when the status code returned is 401
 	ErrUnauthorizedForCredentials = errors.New("unable to retrieve auth token: invalid username/password")
+	systemPerHostCertDirPaths     = [2]string{"/etc/containers/certs.d", "/etc/docker/certs.d"}
 )
 
 // extensionSignature and extensionSignatureList come from github.com/openshift/origin/pkg/dockerregistry/server/signaturedispatcher.go:
@@ -66,15 +69,16 @@ type extensionSignatureList struct {
 }
 
 type bearerToken struct {
-	Token     string    `json:"token"`
-	ExpiresIn int       `json:"expires_in"`
-	IssuedAt  time.Time `json:"issued_at"`
+	Token       string    `json:"token"`
+	AccessToken string    `json:"access_token"`
+	ExpiresIn   int       `json:"expires_in"`
+	IssuedAt    time.Time `json:"issued_at"`
 }
 
 // dockerClient is configuration for dealing with a single Docker registry.
 type dockerClient struct {
 	// The following members are set by newDockerClient and do not change afterwards.
-	ctx           *types.SystemContext
+	sys           *types.SystemContext
 	registry      string
 	username      string
 	password      string
@@ -96,6 +100,24 @@ type authScope struct {
 	actions    string
 }
 
+func newBearerTokenFromJSONBlob(blob []byte) (*bearerToken, error) {
+	token := new(bearerToken)
+	if err := json.Unmarshal(blob, &token); err != nil {
+		return nil, err
+	}
+	if token.Token == "" {
+		token.Token = token.AccessToken
+	}
+	if token.ExpiresIn < minimumTokenLifetimeSeconds {
+		token.ExpiresIn = minimumTokenLifetimeSeconds
+		logrus.Debugf("Increasing token expiration to: %d seconds", token.ExpiresIn)
+	}
+	if token.IssuedAt.IsZero() {
+		token.IssuedAt = time.Now().UTC()
+	}
+	return token, nil
+}
+
 // this is cloned from docker/go-connections because upstream docker has changed
 // it and make deps here fails otherwise.
 // We'll drop this once we upgrade to docker 1.13.x deps.
@@ -109,40 +131,63 @@ func serverDefault() *tls.Config {
 }
 
 // dockerCertDir returns a path to a directory to be consumed by tlsclientconfig.SetupCertificates() depending on ctx and hostPort.
-func dockerCertDir(ctx *types.SystemContext, hostPort string) string {
-	if ctx != nil && ctx.DockerCertPath != "" {
-		return ctx.DockerCertPath
+func dockerCertDir(sys *types.SystemContext, hostPort string) (string, error) {
+	if sys != nil && sys.DockerCertPath != "" {
+		return sys.DockerCertPath, nil
 	}
-	var hostCertDir string
-	if ctx != nil && ctx.DockerPerHostCertDirPath != "" {
-		hostCertDir = ctx.DockerPerHostCertDirPath
-	} else if ctx != nil && ctx.RootForImplicitAbsolutePaths != "" {
-		hostCertDir = filepath.Join(ctx.RootForImplicitAbsolutePaths, systemPerHostCertDirPath)
-	} else {
-		hostCertDir = systemPerHostCertDirPath
+	if sys != nil && sys.DockerPerHostCertDirPath != "" {
+		return filepath.Join(sys.DockerPerHostCertDirPath, hostPort), nil
 	}
-	return filepath.Join(hostCertDir, hostPort)
+
+	var (
+		hostCertDir     string
+		fullCertDirPath string
+	)
+	for _, systemPerHostCertDirPath := range systemPerHostCertDirPaths {
+		if sys != nil && sys.RootForImplicitAbsolutePaths != "" {
+			hostCertDir = filepath.Join(sys.RootForImplicitAbsolutePaths, systemPerHostCertDirPath)
+		} else {
+			hostCertDir = systemPerHostCertDirPath
+		}
+
+		fullCertDirPath = filepath.Join(hostCertDir, hostPort)
+		_, err := os.Stat(fullCertDirPath)
+		if err == nil {
+			break
+		}
+		if os.IsNotExist(err) {
+			continue
+		}
+		if os.IsPermission(err) {
+			logrus.Debugf("error accessing certs directory due to permissions: %v", err)
+			continue
+		}
+		if err != nil {
+			return "", err
+		}
+	}
+	return fullCertDirPath, nil
 }
 
 // newDockerClientFromRef returns a new dockerClient instance for refHostname (a host a specified in the Docker image reference, not canonicalized to dockerRegistry)
 // “write” specifies whether the client will be used for "write" access (in particular passed to lookaside.go:toplevelFromSection)
-func newDockerClientFromRef(ctx *types.SystemContext, ref dockerReference, write bool, actions string) (*dockerClient, error) {
+func newDockerClientFromRef(sys *types.SystemContext, ref dockerReference, write bool, actions string) (*dockerClient, error) {
 	registry := reference.Domain(ref.ref)
-	username, password, err := config.GetAuthentication(ctx, reference.Domain(ref.ref))
+	username, password, err := config.GetAuthentication(sys, reference.Domain(ref.ref))
 	if err != nil {
 		return nil, errors.Wrapf(err, "error getting username and password")
 	}
-	sigBase, err := configuredSignatureStorageBase(ctx, ref, write)
+	sigBase, err := configuredSignatureStorageBase(sys, ref, write)
 	if err != nil {
 		return nil, err
 	}
 	remoteName := reference.Path(ref.ref)
 
-	return newDockerClientWithDetails(ctx, registry, username, password, actions, sigBase, remoteName)
+	return newDockerClientWithDetails(sys, registry, username, password, actions, sigBase, remoteName)
 }
 
 // newDockerClientWithDetails returns a new dockerClient instance for the given parameters
-func newDockerClientWithDetails(ctx *types.SystemContext, registry, username, password, actions string, sigBase signatureStorageBase, remoteName string) (*dockerClient, error) {
+func newDockerClientWithDetails(sys *types.SystemContext, registry, username, password, actions string, sigBase signatureStorageBase, remoteName string) (*dockerClient, error) {
 	hostName := registry
 	if registry == dockerHostname {
 		registry = dockerRegistry
@@ -155,17 +200,20 @@ func newDockerClientWithDetails(ctx *types.SystemContext, registry, username, pa
 	// dockerHostname here, because it is more symmetrical to read the configuration in that case as well, and because
 	// generally the UI hides the existence of the different dockerRegistry.  But note that this behavior is
 	// undocumented and may change if docker/docker changes.
-	certDir := dockerCertDir(ctx, hostName)
+	certDir, err := dockerCertDir(sys, hostName)
+	if err != nil {
+		return nil, err
+	}
 	if err := tlsclientconfig.SetupCertificates(certDir, tr.TLSClientConfig); err != nil {
 		return nil, err
 	}
 
-	if ctx != nil && ctx.DockerInsecureSkipTLSVerify {
+	if sys != nil && sys.DockerInsecureSkipTLSVerify {
 		tr.TLSClientConfig.InsecureSkipVerify = true
 	}
 
 	return &dockerClient{
-		ctx:           ctx,
+		sys:           sys,
 		registry:      registry,
 		username:      username,
 		password:      password,
@@ -180,8 +228,8 @@ func newDockerClientWithDetails(ctx *types.SystemContext, registry, username, pa
 
 // CheckAuth validates the credentials by attempting to log into the registry
 // returns an error if an error occcured while making the http request or the status code received was 401
-func CheckAuth(ctx context.Context, sCtx *types.SystemContext, username, password, registry string) error {
-	newLoginClient, err := newDockerClientWithDetails(sCtx, registry, username, password, "", nil, "")
+func CheckAuth(ctx context.Context, sys *types.SystemContext, username, password, registry string) error {
+	newLoginClient, err := newDockerClientWithDetails(sys, registry, username, password, "", nil, "")
 	if err != nil {
 		return errors.Wrapf(err, "error creating new docker client")
 	}
@@ -200,6 +248,106 @@ func CheckAuth(ctx context.Context, sCtx *types.SystemContext, username, passwor
 	default:
 		return errors.Errorf("error occured with status code %q", resp.StatusCode)
 	}
+}
+
+// SearchResult holds the information of each matching image
+// It matches the output returned by the v1 endpoint
+type SearchResult struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	// StarCount states the number of stars the image has
+	StarCount int  `json:"star_count"`
+	IsTrusted bool `json:"is_trusted"`
+	// IsAutomated states whether the image is an automated build
+	IsAutomated bool `json:"is_automated"`
+	// IsOfficial states whether the image is an official build
+	IsOfficial bool `json:"is_official"`
+}
+
+// SearchRegistry queries a registry for images that contain "image" in their name
+// The limit is the max number of results desired
+// Note: The limit value doesn't work with all registries
+// for example registry.access.redhat.com returns all the results without limiting it to the limit value
+func SearchRegistry(ctx context.Context, sys *types.SystemContext, registry, image string, limit int) ([]SearchResult, error) {
+	type V2Results struct {
+		// Repositories holds the results returned by the /v2/_catalog endpoint
+		Repositories []string `json:"repositories"`
+	}
+	type V1Results struct {
+		// Results holds the results returned by the /v1/search endpoint
+		Results []SearchResult `json:"results"`
+	}
+	v2Res := &V2Results{}
+	v1Res := &V1Results{}
+
+	// Get credentials from authfile for the underlying hostname
+	username, password, err := config.GetAuthentication(sys, registry)
+	if err != nil {
+		return nil, errors.Wrapf(err, "error getting username and password")
+	}
+
+	// The /v2/_catalog endpoint has been disabled for docker.io therefore the call made to that endpoint will fail
+	// So using the v1 hostname for docker.io for simplicity of implementation and the fact that it returns search results
+	if registry == dockerHostname {
+		registry = dockerV1Hostname
+	}
+
+	client, err := newDockerClientWithDetails(sys, registry, username, password, "", nil, "")
+	if err != nil {
+		return nil, errors.Wrapf(err, "error creating new docker client")
+	}
+
+	logrus.Debugf("trying to talk to v2 search endpoint\n")
+	resp, err := client.makeRequest(ctx, "GET", "/v2/_catalog", nil, nil)
+	if err != nil {
+		logrus.Debugf("error getting search results from v2 endpoint %q: %v", registry, err)
+	} else {
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			logrus.Debugf("error getting search results from v2 endpoint %q, status code %q", registry, resp.StatusCode)
+		} else {
+			if err := json.NewDecoder(resp.Body).Decode(v2Res); err != nil {
+				return nil, err
+			}
+			searchRes := []SearchResult{}
+			for _, repo := range v2Res.Repositories {
+				if strings.Contains(repo, image) {
+					res := SearchResult{
+						Name: repo,
+					}
+					searchRes = append(searchRes, res)
+				}
+			}
+			return searchRes, nil
+		}
+	}
+
+	// set up the query values for the v1 endpoint
+	u := url.URL{
+		Path: "/v1/search",
+	}
+	q := u.Query()
+	q.Set("q", image)
+	q.Set("n", strconv.Itoa(limit))
+	u.RawQuery = q.Encode()
+
+	logrus.Debugf("trying to talk to v1 search endpoint\n")
+	resp, err = client.makeRequest(ctx, "GET", u.String(), nil, nil)
+	if err != nil {
+		logrus.Debugf("error getting search results from v1 endpoint %q: %v", registry, err)
+	} else {
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			logrus.Debugf("error getting search results from v1 endpoint %q, status code %q", registry, resp.StatusCode)
+		} else {
+			if err := json.NewDecoder(resp.Body).Decode(v1Res); err != nil {
+				return nil, err
+			}
+			return v1Res.Results, nil
+		}
+	}
+
+	return nil, errors.Wrapf(err, "couldn't search registry %q", registry)
 }
 
 // makeRequest creates and executes a http.Request with the specified parameters, adding authentication and TLS options for the Docker client.
@@ -232,8 +380,8 @@ func (c *dockerClient) makeRequestToResolvedURL(ctx context.Context, method, url
 			req.Header.Add(n, hh)
 		}
 	}
-	if c.ctx != nil && c.ctx.DockerRegistryUserAgent != "" {
-		req.Header.Add("User-Agent", c.ctx.DockerRegistryUserAgent)
+	if c.sys != nil && c.sys.DockerRegistryUserAgent != "" {
+		req.Header.Add("User-Agent", c.sys.DockerRegistryUserAgent)
 	}
 	if sendAuth {
 		if err := c.setupRequestAuth(req); err != nil {
@@ -332,18 +480,8 @@ func (c *dockerClient) getBearerToken(ctx context.Context, realm, service, scope
 	if err != nil {
 		return nil, err
 	}
-	var token bearerToken
-	if err := json.Unmarshal(tokenBlob, &token); err != nil {
-		return nil, err
-	}
-	if token.ExpiresIn < minimumTokenLifetimeSeconds {
-		token.ExpiresIn = minimumTokenLifetimeSeconds
-		logrus.Debugf("Increasing token expiration to: %d seconds", token.ExpiresIn)
-	}
-	if token.IssuedAt.IsZero() {
-		token.IssuedAt = time.Now().UTC()
-	}
-	return &token, nil
+
+	return newBearerTokenFromJSONBlob(tokenBlob)
 }
 
 // detectProperties detects various properties of the registry.
@@ -363,7 +501,7 @@ func (c *dockerClient) detectProperties(ctx context.Context) error {
 		defer resp.Body.Close()
 		logrus.Debugf("Ping %s status %d", url, resp.StatusCode)
 		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusUnauthorized {
-			return errors.Errorf("error pinging repository, response code %d", resp.StatusCode)
+			return errors.Errorf("error pinging registry %s, response code %d", c.registry, resp.StatusCode)
 		}
 		c.challenges = parseAuthHeader(resp.Header)
 		c.scheme = scheme
@@ -371,12 +509,12 @@ func (c *dockerClient) detectProperties(ctx context.Context) error {
 		return nil
 	}
 	err := ping("https")
-	if err != nil && c.ctx != nil && c.ctx.DockerInsecureSkipTLSVerify {
+	if err != nil && c.sys != nil && c.sys.DockerInsecureSkipTLSVerify {
 		err = ping("http")
 	}
 	if err != nil {
 		err = errors.Wrap(err, "pinging docker registry returned")
-		if c.ctx != nil && c.ctx.DockerDisableV1Ping {
+		if c.sys != nil && c.sys.DockerDisableV1Ping {
 			return err
 		}
 		// best effort to understand if we're talking to a V1 registry
@@ -395,7 +533,7 @@ func (c *dockerClient) detectProperties(ctx context.Context) error {
 			return true
 		}
 		isV1 := pingV1("https")
-		if !isV1 && c.ctx != nil && c.ctx.DockerInsecureSkipTLSVerify {
+		if !isV1 && c.sys != nil && c.sys.DockerInsecureSkipTLSVerify {
 			isV1 = pingV1("http")
 		}
 		if isV1 {
@@ -415,7 +553,7 @@ func (c *dockerClient) getExtensionsSignatures(ctx context.Context, ref dockerRe
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
-		return nil, client.HandleErrorResponse(res)
+		return nil, errors.Wrapf(client.HandleErrorResponse(res), "Error downloading signatures for %s in %s", manifestDigest, ref.ref.Name())
 	}
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {

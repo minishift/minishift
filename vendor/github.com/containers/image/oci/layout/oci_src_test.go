@@ -1,6 +1,7 @@
 package layout
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
@@ -50,7 +51,7 @@ func TestGetBlobForRemoteLayers(t *testing.T) {
 		},
 	}
 
-	reader, _, err := imageSource.GetBlob(layerInfo)
+	reader, _, err := imageSource.GetBlob(context.Background(), layerInfo)
 	require.NoError(t, err)
 	defer reader.Close()
 
@@ -64,7 +65,7 @@ func TestGetBlobForRemoteLayersWithTLS(t *testing.T) {
 		OCICertPath: "fixtures/accepted_certs",
 	})
 
-	layer, size, err := imageSource.GetBlob(types.BlobInfo{
+	layer, size, err := imageSource.GetBlob(context.Background(), types.BlobInfo{
 		URLs: []string{httpServerAddr},
 	})
 	require.NoError(t, err)
@@ -78,7 +79,7 @@ func TestGetBlobForRemoteLayersOnTLSFailure(t *testing.T) {
 	imageSource := createImageSource(t, &types.SystemContext{
 		OCICertPath: "fixtures/rejected_certs",
 	})
-	layer, size, err := imageSource.GetBlob(types.BlobInfo{
+	layer, size, err := imageSource.GetBlob(context.Background(), types.BlobInfo{
 		URLs: []string{httpServerAddr},
 	})
 
@@ -123,10 +124,10 @@ func startRemoteLayerServer() (*httptest.Server, error) {
 	return httpServer, nil
 }
 
-func createImageSource(t *testing.T, context *types.SystemContext) types.ImageSource {
+func createImageSource(t *testing.T, sys *types.SystemContext) types.ImageSource {
 	imageRef, err := NewReference("fixtures/manifest", "")
 	require.NoError(t, err)
-	imageSource, err := imageRef.NewImageSource(context)
+	imageSource, err := imageRef.NewImageSource(context.Background(), sys)
 	require.NoError(t, err)
 	return imageSource
 }

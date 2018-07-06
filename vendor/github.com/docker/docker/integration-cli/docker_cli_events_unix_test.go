@@ -49,7 +49,7 @@ func (s *DockerSuite) TestEventsRedirectStdout(c *check.C) {
 }
 
 func (s *DockerSuite) TestEventsOOMDisableFalse(c *check.C) {
-	testRequires(c, DaemonIsLinux, oomControl, memoryLimitSupport, swapMemorySupport)
+	testRequires(c, DaemonIsLinux, oomControl, memoryLimitSupport, swapMemorySupport, NotPpc64le)
 
 	errChan := make(chan error)
 	go func() {
@@ -79,7 +79,7 @@ func (s *DockerSuite) TestEventsOOMDisableFalse(c *check.C) {
 }
 
 func (s *DockerSuite) TestEventsOOMDisableTrue(c *check.C) {
-	testRequires(c, DaemonIsLinux, oomControl, memoryLimitSupport, NotArm, swapMemorySupport)
+	testRequires(c, DaemonIsLinux, oomControl, memoryLimitSupport, NotArm, swapMemorySupport, NotPpc64le)
 
 	errChan := make(chan error)
 	observer, err := newEventObserver(c)
@@ -97,7 +97,7 @@ func (s *DockerSuite) TestEventsOOMDisableTrue(c *check.C) {
 	}()
 
 	c.Assert(waitRun("oomTrue"), checker.IsNil)
-	defer dockerCmd(c, "kill", "oomTrue")
+	defer dockerCmdWithResult("kill", "oomTrue")
 	containerID := inspectField(c, "oomTrue", "Id")
 
 	testActions := map[string]chan bool{

@@ -1,12 +1,14 @@
-package graphdriver
+package graphdriver // import "github.com/docker/docker/daemon/graphdriver"
 
-import "golang.org/x/sys/unix"
+import (
+	"syscall"
+
+	"golang.org/x/sys/unix"
+)
 
 var (
-	// Slice of drivers that should be used in an order
-	priority = []string{
-		"zfs",
-	}
+	// List of drivers that should be used in an order
+	priority = "zfs"
 )
 
 // Mounted checks if the given path is mounted as the fs type

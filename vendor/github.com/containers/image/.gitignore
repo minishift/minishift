@@ -7,3 +7,6 @@ tools.timestamp
 
 # Visual Studio Code
 .vscode/*
+
+# trash
+trash.lock

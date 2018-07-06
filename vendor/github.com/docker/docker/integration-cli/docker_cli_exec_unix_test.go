@@ -25,7 +25,10 @@ func (s *DockerSuite) TestExecInteractiveStdinClose(c *check.C) {
 	c.Assert(err, checker.IsNil)
 
 	b := bytes.NewBuffer(nil)
-	go io.Copy(b, p)
+	go func() {
+		io.Copy(b, p)
+		p.Close()
+	}()
 
 	ch := make(chan error)
 	go func() { ch <- cmd.Wait() }()

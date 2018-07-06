@@ -3,6 +3,7 @@
 package ostree
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -243,14 +244,14 @@ func TestReferencePolicyConfigurationNamespaces(t *testing.T) {
 func TestReferenceNewImage(t *testing.T) {
 	ref, err := Transport.ParseReference("busybox")
 	require.NoError(t, err)
-	_, err = ref.NewImage(nil)
+	_, err = ref.NewImage(context.Background(), nil)
 	assert.Error(t, err)
 }
 
 func TestReferenceNewImageSource(t *testing.T) {
 	ref, err := Transport.ParseReference("busybox")
 	require.NoError(t, err)
-	_, err = ref.NewImageSource(nil)
+	_, err = ref.NewImageSource(context.Background(), nil)
 	require.NoError(t, err)
 }
 
@@ -260,7 +261,7 @@ func TestReferenceNewImageDestination(t *testing.T) {
 	defer os.RemoveAll(otherTmpDir)
 
 	for _, c := range []struct {
-		ctx    *types.SystemContext
+		sys    *types.SystemContext
 		tmpDir string
 	}{
 		{nil, os.TempDir()},
@@ -269,7 +270,7 @@ func TestReferenceNewImageDestination(t *testing.T) {
 	} {
 		ref, err := Transport.ParseReference("busybox")
 		require.NoError(t, err)
-		dest, err := ref.NewImageDestination(c.ctx)
+		dest, err := ref.NewImageDestination(context.Background(), c.sys)
 		require.NoError(t, err)
 		ostreeDest, ok := dest.(*ostreeImageDestination)
 		require.True(t, ok)
@@ -285,7 +286,7 @@ func TestReferenceDeleteImage(t *testing.T) {
 
 	ref, err := Transport.ParseReference(withTmpDir("busybox@$TMP/this-repo-does-not-exist", tmpDir))
 	require.NoError(t, err)
-	err = ref.DeleteImage(nil)
+	err = ref.DeleteImage(context.Background(), nil)
 	assert.Error(t, err)
 }
 

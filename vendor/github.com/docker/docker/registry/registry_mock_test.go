@@ -1,6 +1,4 @@
-// +build !solaris
-
-package registry
+package registry // import "github.com/docker/docker/registry"
 
 import (
 	"encoding/json"
@@ -175,7 +173,7 @@ func makePublicIndex() *registrytypes.IndexInfo {
 	return index
 }
 
-func makeServiceConfig(mirrors []string, insecureRegistries []string) *serviceConfig {
+func makeServiceConfig(mirrors []string, insecureRegistries []string) (*serviceConfig, error) {
 	options := ServiceOptions{
 		Mirrors:            mirrors,
 		InsecureRegistries: insecureRegistries,

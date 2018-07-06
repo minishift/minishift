@@ -9,15 +9,7 @@
 # docker run -v `pwd`:/go/src/github.com/docker/docker --privileged -i -t docker bash
 #
 # # Run the test suite:
-# docker run --privileged docker hack/make.sh test-unit test-integration-cli test-docker-py
-#
-# # Publish a release:
-# docker run --privileged \
-#  -e AWS_S3_BUCKET=baz \
-#  -e AWS_ACCESS_KEY=foo \
-#  -e AWS_SECRET_KEY=bar \
-#  -e GPG_PASSPHRASE=gloubiboulga \
-#  docker hack/release.sh
+# docker run --privileged docker hack/make.sh test-unit test-integration test-docker-py
 #
 # Note: AppArmor used to mess with privileged mode, but this is no longer
 # the case. Therefore, you don't have to disable it anymore.

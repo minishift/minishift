@@ -1,6 +1,7 @@
 package layout
 
 import (
+	"context"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -11,6 +12,18 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+// TestGetManifestDescriptor is testing a regression issue where a nil error was being wrapped,
+// this causes the returned error to be nil as well and the user wasn't getting a proper error output.
+//
+// More info: https://github.com/projectatomic/skopeo/issues/496
+func TestGetManifestDescriptor(t *testing.T) {
+	imageRef, err := NewReference("fixtures/two_images_manifest", "")
+	require.NoError(t, err)
+
+	_, err = imageRef.(ociReference).getManifestDescriptor()
+	assert.EqualError(t, err, ErrMoreThanOneImage.Error())
+}
 
 func TestTransportName(t *testing.T) {
 	assert.Equal(t, "oci", Transport.Name())
@@ -228,21 +241,21 @@ func TestReferencePolicyConfigurationNamespaces(t *testing.T) {
 func TestReferenceNewImage(t *testing.T) {
 	ref, tmpDir := refToTempOCI(t)
 	defer os.RemoveAll(tmpDir)
-	_, err := ref.NewImage(nil)
+	_, err := ref.NewImage(context.Background(), nil)
 	assert.Error(t, err)
 }
 
 func TestReferenceNewImageSource(t *testing.T) {
 	ref, tmpDir := refToTempOCI(t)
 	defer os.RemoveAll(tmpDir)
-	_, err := ref.NewImageSource(nil)
+	_, err := ref.NewImageSource(context.Background(), nil)
 	assert.NoError(t, err)
 }
 
 func TestReferenceNewImageDestination(t *testing.T) {
 	ref, tmpDir := refToTempOCI(t)
 	defer os.RemoveAll(tmpDir)
-	dest, err := ref.NewImageDestination(nil)
+	dest, err := ref.NewImageDestination(context.Background(), nil)
 	assert.NoError(t, err)
 	defer dest.Close()
 }
@@ -250,7 +263,7 @@ func TestReferenceNewImageDestination(t *testing.T) {
 func TestReferenceDeleteImage(t *testing.T) {
 	ref, tmpDir := refToTempOCI(t)
 	defer os.RemoveAll(tmpDir)
-	err := ref.DeleteImage(nil)
+	err := ref.DeleteImage(context.Background(), nil)
 	assert.Error(t, err)
 }
 

@@ -37,6 +37,11 @@ func GetIP(driver drivers.Driver) (string, error) {
 }
 
 func DetermineHostIP(driver drivers.Driver) (string, error) {
+	// In case of generic driver we don't need to get the bridge network
+	// since it's by default ping able from host IP.
+	if driver.DriverName() == "generic" {
+		return "", nil
+	}
 	instanceIP, err := driver.GetIP()
 	if err != nil {
 		return "", err
@@ -46,10 +51,13 @@ func DetermineHostIP(driver drivers.Driver) (string, error) {
 
 		if NetworkContains(hostaddr, instanceIP) {
 			hostip, _, _ := net.ParseCIDR(hostaddr)
-			if IsIPReachable(driver, hostip.String(), false) {
+			// This step is not working with Windows + VirtualBox as of now
+			// This test is required for CIFS mount-folder case.
+			// Details: https://github.com/minishift/minishift/issues/2561
+			/*if IsIPReachable(driver, hostip.String(), false) {
 				return hostip.String(), nil
-			}
-			return "", errors.New("unreachable")
+			}*/
+			return hostip.String(), nil
 		}
 	}
 

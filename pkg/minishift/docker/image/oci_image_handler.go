@@ -236,7 +236,11 @@ func (handler *OciImageHandler) GetDockerImages() (map[string]bool, error) {
 	}
 	defer session.Close()
 
-	cmd := "docker images --format '{{.Repository}}:{{.Tag}}'"
+	// We don't want to have an image which have <none> tag in our output list
+	// Also in case there is no image in docker daemon then exit code should be 0 instead 1
+	// and `|| true` is used.
+	// which refer to dangling image for docker.
+	cmd := "docker images --format '{{.Repository}}:{{.Tag}}' | grep -vw '<none>' || true"
 	var buffer bytes.Buffer
 	session.Stdout = &buffer
 	err = session.Run(cmd)

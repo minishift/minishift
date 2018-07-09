@@ -214,6 +214,8 @@ func init() {
 	}
 	viper.BindPFlags(RootCmd.PersistentFlags())
 	cobra.OnInitialize(initConfig)
+	verbosity := pflag.Lookup("v")
+	verbosity.Usage += ". Level varies from 1 to 5 (default 1)."
 }
 
 // initConfig reads in config file and ENV variables if set.

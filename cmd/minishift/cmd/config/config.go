@@ -72,6 +72,10 @@ var (
 	NoProxyList = createConfigSetting("no-proxy", SetString, nil, nil, true, nil)
 	HttpProxy   = createConfigSetting("http-proxy", SetString, []setFn{validations.IsValidProxy}, nil, true, nil)
 	HttpsProxy  = createConfigSetting("https-proxy", SetString, []setFn{validations.IsValidProxy}, nil, true, nil)
+	// when local proxy is set, it will override the assigned proxies
+	LocalProxy          = createConfigSetting("local-proxy", SetBool, nil, nil, true, nil)
+	LocalProxyReencrypt = createConfigSetting("local-proxy-reencrypt", SetBool, nil, nil, true, nil)
+	LocalProxyUpstream  = createConfigSetting("local-proxy-upstream", SetString, []setFn{validations.IsValidProxy}, nil, true, nil)
 
 	// Subscription Manager
 	Username         = createConfigSetting("username", SetString, nil, nil, true, nil)
@@ -85,7 +89,10 @@ var (
 	// Host Folders
 	HostFoldersMountPath = createConfigSetting("hostfolders-mountpath", SetString, nil, nil, true, nil)
 	HostFoldersAutoMount = createConfigSetting("hostfolders-automount", SetBool, nil, nil, true, nil)
-	HostFoldersSftpPort  = createConfigSetting("hostfolders-sftp-port", SetInt, []setFn{validations.IsValidPort}, nil, true, nil)
+
+	// Services
+	ServicesSftpPort       = createConfigSetting("hostfolders-sftp-port", SetInt, []setFn{validations.IsValidPort}, nil, true, nil)
+	ServicesLocalProxyPort = createConfigSetting("services-proxy-port", SetInt, []setFn{validations.IsValidPort}, nil, true, nil)
 
 	// No Provision
 	NoProvision = createConfigSetting("no-provision", SetBool, nil, nil, true, nil)

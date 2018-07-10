@@ -31,6 +31,7 @@ type GlobalConfigType struct {
 	HostFolders   []config.HostFolderConfig
 	ActiveProfile string
 	SftpdPID      int
+	ProxyPID      int
 }
 
 // Create new object with data if file exists or

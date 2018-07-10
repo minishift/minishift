@@ -73,6 +73,38 @@ If you prefer to use dynamic assignment, you can use:
 $ minishift ip --set-dhcp
 ----
 
+[[local-proxy-server]]
+== Local Proxy Server
+
+{project} provides an option to run a local proxy server on the host, which the {project} instance can use to access the internet.
+This can help in the situation when local security certificates are used in the organization, but can not easily be shared with the instance.
+
+Enabling the proxy server is done using the following command:
+
+----
+$ minishift config set local-proxy true
+----
+
+This will start a proxy server on the host which on start will automatically be assigned to the {project} instance.
+
+When the corporate or upstream proxy is known, you can specify this with the following configuration option:
+
+----
+$ minishift config set upstream-proxy [username:password@host:port]
+----
+
+When this option is used, all traffic will be re-encrypted with a {project} specific certificate. It is therefore advised not to use this proxy for any other purposes then development and use with {project}.
+
+[NOTE]
+====
+The proxy server configuration will only work when specified on global level as there can only be one proxy process active at all times.
+Specifying the configuration for a specific profile will not work.
+====
+
+[IMPORTANT]
+====
+Depending on your setup you might have to enable port `3128/tcp` for use from the localhost.
+====
 
 [[local-dns-server]]
 == Local DNS Server

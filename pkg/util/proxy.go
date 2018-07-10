@@ -119,6 +119,16 @@ func (p *ProxyConfig) ProxyConfig() []string {
 	return config
 }
 
+// Override proxy for local/intermediate proxy
+func (p *ProxyConfig) OverrideHttpProxy(proxy string) {
+	p.httpProxy = proxy
+}
+
+// Override proxy for local/intermediate proxy
+func (p *ProxyConfig) OverrideHttpsProxy(proxy string) {
+	p.httpsProxy = proxy
+}
+
 // HttpProxy returns the configured value for the HTTP proxy. The empty string is returned in case HTTP proxy is not set.
 func (p *ProxyConfig) HttpProxy() string {
 	return p.httpProxy

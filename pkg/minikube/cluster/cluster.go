@@ -177,6 +177,7 @@ type MachineConfig struct {
 	RemoteIPAddress       string // Only used for generic driver purpose to connect remote machine
 	RemoteSSHUser         string // Only used for generic driver purpose to specify ssh user
 	SSHKeyToConnectRemote string // Only used for generic driver purpose to specify ssh key path
+	UsingLocalProxy       bool
 }
 
 func engineOptions(config MachineConfig) *engine.Options {
@@ -525,6 +526,13 @@ func setProxyToShell(config MachineConfig, h *host.Host) error {
 			fmt.Println("FAIL")
 			return fmt.Errorf("Error getting host IP: %s", err)
 		}
+
+		if config.UsingLocalProxy {
+			localPropxyAddr := "http://localproxy:3128"
+			config.ShellProxyEnv.OverrideHttpProxy(localPropxyAddr)
+			config.ShellProxyEnv.OverrideHttpsProxy(localPropxyAddr)
+		}
+
 		config.ShellProxyEnv.AddNoProxy(vmIP)
 		config.ShellProxyEnv.AddNoProxy(hostIP)
 		shellProxyEnv := strings.Join(config.ShellProxyEnv.ProxyConfig(), " ")

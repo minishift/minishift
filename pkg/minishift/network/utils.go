@@ -17,10 +17,13 @@ limitations under the License.
 package network
 
 import (
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net"
+	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -79,6 +82,13 @@ func HasNameserversConfigured(driver drivers.Driver) bool {
 	return i != 0
 }
 
+// AddHostEntryToInstance will add an entry to /etc/hosts
+func AddHostEntryToInstance(driver drivers.Driver, hostname string, ipAddress string) {
+	executeCommandOrExit(driver, fmt.Sprintf("echo '%s %s' | sudo tee -a /etc/hosts",
+		ipAddress, hostname),
+		"Error adding host entry to instance")
+}
+
 // AddNameserversToInstance will add additional nameservers to the end of the
 // /etc/resolv.conf file inside the instance.
 func AddNameserversToInstance(driver drivers.Driver, nameservers []string) {
@@ -103,4 +113,24 @@ func HasNameserverConfiguredLocally(nameserver string) (bool, error) {
 	}
 
 	return strings.Contains(string(file), nameserver), nil
+}
+
+// AllowInsecureCertificatesOnLocalConnections will not verify certificates for TLS connections
+func OverrideInsecureSkipVerifyForLocalConnections(insecureSkipVerify bool) error {
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: insecureSkipVerify}
+	// We need to force a connection, else this will not work
+	_, err := http.Get("http://localhost")
+	return err
+}
+
+// OverrideProxyForLocalConnections will set a single proxy target for the default connection
+func OverrideProxyForLocalConnections(proxyAddr string) error {
+	proxy := func(*http.Request) (*url.URL, error) {
+		u, _ := url.Parse(proxyAddr)
+		return u, nil
+	}
+	http.DefaultTransport.(*http.Transport).Proxy = proxy
+	// We need to force a connection, else this will not work
+	_, err := http.Get("http://localhost")
+	return err
 }

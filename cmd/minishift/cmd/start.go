@@ -45,11 +45,13 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/docker/image"
 	"github.com/minishift/minishift/pkg/minishift/hostfolder"
 	minishiftNetwork "github.com/minishift/minishift/pkg/minishift/network"
+	minishiftProxy "github.com/minishift/minishift/pkg/minishift/network/proxy"
 	"github.com/minishift/minishift/pkg/minishift/openshift"
 	openshiftVersion "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
 	"github.com/minishift/minishift/pkg/minishift/remotehost"
+	minishiftTLS "github.com/minishift/minishift/pkg/minishift/tls"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/minishift/minishift/pkg/util/progressdots"
@@ -177,7 +179,8 @@ func runStart(cmd *cobra.Command, args []string) {
 	// we need to determine whether this is a restart prior to potentially creating a new VM
 	isRestart := cmdUtil.VMExists(libMachineClient, constants.MachineName)
 
-	proxyConfig := handleProxies()
+	// create and handle proxy config for local environment
+	proxyConfig := handleProxyConfig()
 
 	// Get proper OpenShift version
 	requestedOpenShiftVersion, err := cmdUtil.GetOpenShiftReleaseVersion()
@@ -205,6 +208,28 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	// Forcibly set nameservers when configured
 	minishiftNetwork.AddNameserversToInstance(hostVm.Driver, getSlice(configCmd.NameServers.Name))
+	// to support intermediate proxy
+	minishiftTLS.SetCACertificate(hostVm.Driver)
+
+	ip, _ := hostVm.Driver.GetIP()
+
+	// This is a hack/workaround as the actual values are modified in `cluster.go` for the VM
+	if proxyConfig.IsEnabled() {
+		// Once we know the IP, we need to make sure it is not proxied in a proxy environment.
+		// In addition, we also add the host interface's IP to NoProxy so that
+		// we can reach the host machine. This is useful when accessing
+		// services running on the host machine.
+		hostip, _ := minishiftNetwork.DetermineHostIP(hostVm.Driver)
+
+		localProxy := viper.GetBool(configCmd.LocalProxy.Name)
+		if localProxy {
+			minishiftNetwork.AddHostEntryToInstance(hostVm.Driver, "localproxy", hostip)
+		}
+
+		proxyConfig.AddNoProxy(ip)
+		proxyConfig.AddNoProxy(hostip)
+		proxyConfig.ApplyToEnvironment()
+	}
 
 	// preflight checks (after start)
 	if viper.GetString(configCmd.VmDriver.Name) != genericDriver {
@@ -213,19 +238,6 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	// Adding active profile information to all instance config
 	addActiveProfileInformation()
-
-	ip, _ := hostVm.Driver.GetIP()
-
-	if proxyConfig.IsEnabled() {
-		// Once we know the IP, we need to make sure it is not proxied in a proxy environment.
-		// In addition, we also add the host interface's IP to NoProxy so that
-		// we can reach the host machine. This is useful when accessing
-		// services running on the host machine.
-		hostip, _ := minishiftNetwork.DetermineHostIP(hostVm.Driver)
-		proxyConfig.AddNoProxy(ip)
-		proxyConfig.AddNoProxy(hostip)
-		proxyConfig.ApplyToEnvironment()
-	}
 
 	applyDockerEnvToProcessEnv(libMachineClient)
 
@@ -318,8 +330,26 @@ func getRequiredHostDirectories() []string {
 	return requiredDirectories
 }
 
-func handleProxies() *util.ProxyConfig {
-	proxyConfig, err := util.NewProxyConfig(viper.GetString(cmdUtil.HttpProxy), viper.GetString(cmdUtil.HttpsProxy), viper.GetString(configCmd.NoProxyList.Name))
+func handleProxyConfig() *util.ProxyConfig {
+	httpProxy := viper.GetString(cmdUtil.HttpProxy)
+	httpsProxy := viper.GetString(cmdUtil.HttpsProxy)
+	noProxy := viper.GetString(configCmd.NoProxyList.Name)
+
+	localProxy := viper.GetBool(configCmd.LocalProxy.Name)
+	if localProxy {
+		fmt.Println("-- Starting local proxy")
+		err := minishiftProxy.EnsureProxyDaemonRunning()
+		httpProxy = "http://localproxy:3128"
+		httpsProxy = "http://localproxy:3128"
+		if err != nil {
+			atexit.ExitWithMessage(1, err.Error())
+		}
+
+		minishiftNetwork.OverrideInsecureSkipVerifyForLocalConnections(true)
+		minishiftNetwork.OverrideProxyForLocalConnections("http://localhost:3128")
+	}
+
+	proxyConfig, err := util.NewProxyConfig(httpProxy, httpsProxy, noProxy)
 
 	if err != nil {
 		atexit.ExitWithMessage(1, err.Error())
@@ -391,6 +421,7 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 		RemoteIPAddress:       viper.GetString(configCmd.RemoteIPAddress.Name),
 		RemoteSSHUser:         viper.GetString(configCmd.RemoteSSHUser.Name),
 		SSHKeyToConnectRemote: viper.GetString(configCmd.SSHKeyToConnectRemote.Name),
+		UsingLocalProxy:       viper.GetBool(configCmd.LocalProxy.Name),
 	}
 	minishiftConfig.InstanceStateConfig.VMDriver = machineConfig.VMDriver
 	minishiftConfig.InstanceStateConfig.Write()

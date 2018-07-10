@@ -44,7 +44,7 @@ func getHostFolderManager() *hostfolder.Manager {
 		atexit.ExitWithMessage(1, err.Error())
 	}
 
-	port := viper.GetInt(cmdConfig.HostFoldersSftpPort.Name)
+	port := viper.GetInt(cmdConfig.ServicesSftpPort.Name)
 	if port != 0 {
 		hostfolder.SftpPort = port
 	}

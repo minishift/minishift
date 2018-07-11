@@ -62,7 +62,7 @@ func (registrator *RedHatRegistrator) CompatibleWithDistribution(osReleaseInfo *
 
 // Register attempts to register the system with RHSM
 func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) error {
-	if isRegistered, err := registrator.isRegistered(); !isRegistered && err == nil {
+	if isRegistered, err := registrator.IsRegistered(); !isRegistered && err == nil {
 		for i := 1; i < 4; i++ {
 			// Initialize progressDots channel
 			progressDots := progressdots.New()
@@ -127,7 +127,7 @@ func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) er
 
 // Unregister attempts to unregister the system from RHSM
 func (registrator *RedHatRegistrator) Unregister(param *RegistrationParameters) error {
-	if isRegistered, err := registrator.isRegistered(); isRegistered {
+	if isRegistered, err := registrator.IsRegistered(); isRegistered {
 		if _, err := registrator.SSHCommand(
 			"sudo -E subscription-manager unregister"); err != nil {
 			return err
@@ -143,7 +143,7 @@ func (registrator *RedHatRegistrator) Unregister(param *RegistrationParameters) 
 }
 
 // isRegistered returns registration state of RHSM or errors when undetermined
-func (registrator *RedHatRegistrator) isRegistered() (bool, error) {
+func (registrator *RedHatRegistrator) IsRegistered() (bool, error) {
 	if output, err := registrator.SSHCommand("sudo -E subscription-manager list"); err != nil {
 		return false, err
 	} else {

@@ -32,6 +32,7 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	openshiftVersion "github.com/minishift/minishift/pkg/minishift/openshift/version"
+	"github.com/minishift/minishift/pkg/minishift/registration"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
@@ -43,12 +44,25 @@ DiskUsage:  {{.DiskUsage}}
 CacheUsage: {{.CacheUsage}} (used by oc binary, ISO or cached images)
 `
 
+var statusFormatWithRegistration = `Minishift:  {{.MinishiftStatus}}
+Profile:    {{.ProfileName}}
+OpenShift:  {{.ClusterStatus}}
+DiskUsage:  {{.DiskUsage}}
+CacheUsage: {{.CacheUsage}} (used by oc binary, ISO or cached images)
+RHSM: 	    {{.Registration}}
+`
+
 type Status struct {
 	MinishiftStatus string
 	ProfileName     string
 	ClusterStatus   string
 	DiskUsage       string
 	CacheUsage      string
+}
+
+type StatusWithRegistration struct {
+	Status
+	Registration string
 }
 
 // statusCmd represents the status command
@@ -83,6 +97,9 @@ func runStatus(cmd *cobra.Command, args []string) {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error getting cluster status: %s", err.Error()))
 	}
 
+	var supportsRegistration bool
+	rhelRegistration := "Not Registered"
+
 	if vmStatus == state.Running.String() {
 		openshiftVersion, err := openshiftVersion.GetOpenshiftVersion(sshCommander)
 		if err == nil {
@@ -94,6 +111,14 @@ func runStatus(cmd *cobra.Command, args []string) {
 			diskSize, diskUse, mountpoint = getDiskUsage(host.Driver, StorageDiskForGeneric)
 		}
 		diskUsage = fmt.Sprintf("%s of %s (Mounted On: %s)", diskUse, diskSize, mountpoint)
+
+		_, supportsRegistration, _ = registration.DetectRegistrator(sshCommander)
+		if supportsRegistration {
+			redHatRegistrator := registration.NewRedHatRegistrator(sshCommander)
+			if registered, err := redHatRegistrator.IsRegistered(); registered && err == nil {
+				rhelRegistration = "Registered"
+			}
+		}
 	}
 
 	cacheDir := filepath.Join(constants.GetMinishiftHomeDir(), "cache")
@@ -109,9 +134,16 @@ func runStatus(cmd *cobra.Command, args []string) {
 	}
 
 	cacheUsage = units.HumanSize(float64(size))
+	if supportsRegistration {
+		status := StatusWithRegistration{Status{vmStatus, profileName, openshiftStatus, diskUsage, cacheUsage}, rhelRegistration}
+		printStatus(status, statusFormatWithRegistration)
+	} else {
+		status := Status{vmStatus, profileName, openshiftStatus, diskUsage, cacheUsage}
+		printStatus(status, statusFormat)
+	}
+}
 
-	status := Status{vmStatus, profileName, openshiftStatus, diskUsage, cacheUsage}
-
+func printStatus(status interface{}, statusFormat string) {
 	tmpl, err := template.New("status").Parse(statusFormat)
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error creating status template: %s", err.Error()))

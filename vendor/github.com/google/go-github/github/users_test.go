@@ -6,6 +6,7 @@
 package github
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -18,7 +19,7 @@ func TestUser_marshall(t *testing.T) {
 
 	u := &User{
 		Login:       String("l"),
-		ID:          Int(1),
+		ID:          Int64(1),
 		URL:         String("u"),
 		AvatarURL:   String("a"),
 		GravatarID:  String("g"),
@@ -56,7 +57,7 @@ func TestUser_marshall(t *testing.T) {
 }
 
 func TestUsersService_Get_authenticatedUser(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
@@ -64,19 +65,19 @@ func TestUsersService_Get_authenticatedUser(t *testing.T) {
 		fmt.Fprint(w, `{"id":1}`)
 	})
 
-	user, _, err := client.Users.Get("")
+	user, _, err := client.Users.Get(context.Background(), "")
 	if err != nil {
 		t.Errorf("Users.Get returned error: %v", err)
 	}
 
-	want := &User{ID: Int(1)}
+	want := &User{ID: Int64(1)}
 	if !reflect.DeepEqual(user, want) {
 		t.Errorf("Users.Get returned %+v, want %+v", user, want)
 	}
 }
 
 func TestUsersService_Get_specifiedUser(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/users/u", func(w http.ResponseWriter, r *http.Request) {
@@ -84,24 +85,27 @@ func TestUsersService_Get_specifiedUser(t *testing.T) {
 		fmt.Fprint(w, `{"id":1}`)
 	})
 
-	user, _, err := client.Users.Get("u")
+	user, _, err := client.Users.Get(context.Background(), "u")
 	if err != nil {
 		t.Errorf("Users.Get returned error: %v", err)
 	}
 
-	want := &User{ID: Int(1)}
+	want := &User{ID: Int64(1)}
 	if !reflect.DeepEqual(user, want) {
 		t.Errorf("Users.Get returned %+v, want %+v", user, want)
 	}
 }
 
 func TestUsersService_Get_invalidUser(t *testing.T) {
-	_, _, err := client.Users.Get("%")
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, _, err := client.Users.Get(context.Background(), "%")
 	testURLParseError(t, err)
 }
 
 func TestUsersService_GetByID(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/user/1", func(w http.ResponseWriter, r *http.Request) {
@@ -109,19 +113,19 @@ func TestUsersService_GetByID(t *testing.T) {
 		fmt.Fprint(w, `{"id":1}`)
 	})
 
-	user, _, err := client.Users.GetByID(1)
+	user, _, err := client.Users.GetByID(context.Background(), 1)
 	if err != nil {
-		t.Errorf("Users.GetByID returned error: %v", err)
+		t.Fatalf("Users.GetByID returned error: %v", err)
 	}
 
-	want := &User{ID: Int(1)}
+	want := &User{ID: Int64(1)}
 	if !reflect.DeepEqual(user, want) {
 		t.Errorf("Users.GetByID returned %+v, want %+v", user, want)
 	}
 }
 
 func TestUsersService_Edit(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	input := &User{Name: String("n")}
@@ -138,19 +142,19 @@ func TestUsersService_Edit(t *testing.T) {
 		fmt.Fprint(w, `{"id":1}`)
 	})
 
-	user, _, err := client.Users.Edit(input)
+	user, _, err := client.Users.Edit(context.Background(), input)
 	if err != nil {
 		t.Errorf("Users.Edit returned error: %v", err)
 	}
 
-	want := &User{ID: Int(1)}
+	want := &User{ID: Int64(1)}
 	if !reflect.DeepEqual(user, want) {
 		t.Errorf("Users.Edit returned %+v, want %+v", user, want)
 	}
 }
 
 func TestUsersService_ListAll(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
@@ -160,19 +164,19 @@ func TestUsersService_ListAll(t *testing.T) {
 	})
 
 	opt := &UserListOptions{1, ListOptions{Page: 2}}
-	users, _, err := client.Users.ListAll(opt)
+	users, _, err := client.Users.ListAll(context.Background(), opt)
 	if err != nil {
 		t.Errorf("Users.Get returned error: %v", err)
 	}
 
-	want := []*User{{ID: Int(2)}}
+	want := []*User{{ID: Int64(2)}}
 	if !reflect.DeepEqual(users, want) {
 		t.Errorf("Users.ListAll returned %+v, want %+v", users, want)
 	}
 }
 
 func TestUsersService_ListInvitations(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/user/repository_invitations", func(w http.ResponseWriter, r *http.Request) {
@@ -181,19 +185,37 @@ func TestUsersService_ListInvitations(t *testing.T) {
 		fmt.Fprintf(w, `[{"id":1}, {"id":2}]`)
 	})
 
-	got, _, err := client.Users.ListInvitations()
+	got, _, err := client.Users.ListInvitations(context.Background(), nil)
 	if err != nil {
 		t.Errorf("Users.ListInvitations returned error: %v", err)
 	}
 
-	want := []*RepositoryInvitation{{ID: Int(1)}, {ID: Int(2)}}
+	want := []*RepositoryInvitation{{ID: Int64(1)}, {ID: Int64(2)}}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("Users.ListInvitations = %+v, want %+v", got, want)
 	}
 }
 
+func TestUsersService_ListInvitations_withOptions(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/user/repository_invitations", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		testFormValues(t, r, values{
+			"page": "2",
+		})
+		testHeader(t, r, "Accept", mediaTypeRepositoryInvitationsPreview)
+		fmt.Fprintf(w, `[{"id":1}, {"id":2}]`)
+	})
+
+	_, _, err := client.Users.ListInvitations(context.Background(), &ListOptions{Page: 2})
+	if err != nil {
+		t.Errorf("Users.ListInvitations returned error: %v", err)
+	}
+}
 func TestUsersService_AcceptInvitation(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/user/repository_invitations/1", func(w http.ResponseWriter, r *http.Request) {
@@ -202,13 +224,13 @@ func TestUsersService_AcceptInvitation(t *testing.T) {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
-	if _, err := client.Users.AcceptInvitation(1); err != nil {
+	if _, err := client.Users.AcceptInvitation(context.Background(), 1); err != nil {
 		t.Errorf("Users.AcceptInvitation returned error: %v", err)
 	}
 }
 
 func TestUsersService_DeclineInvitation(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/user/repository_invitations/1", func(w http.ResponseWriter, r *http.Request) {
@@ -217,7 +239,7 @@ func TestUsersService_DeclineInvitation(t *testing.T) {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
-	if _, err := client.Users.DeclineInvitation(1); err != nil {
+	if _, err := client.Users.DeclineInvitation(context.Background(), 1); err != nil {
 		t.Errorf("Users.DeclineInvitation returned error: %v", err)
 	}
 }

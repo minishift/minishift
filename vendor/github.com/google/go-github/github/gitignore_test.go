@@ -6,6 +6,7 @@
 package github
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -13,7 +14,7 @@ import (
 )
 
 func TestGitignoresService_List(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/gitignore/templates", func(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +22,7 @@ func TestGitignoresService_List(t *testing.T) {
 		fmt.Fprint(w, `["C", "Go"]`)
 	})
 
-	available, _, err := client.Gitignores.List()
+	available, _, err := client.Gitignores.List(context.Background())
 	if err != nil {
 		t.Errorf("Gitignores.List returned error: %v", err)
 	}
@@ -33,7 +34,7 @@ func TestGitignoresService_List(t *testing.T) {
 }
 
 func TestGitignoresService_Get(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/gitignore/templates/name", func(w http.ResponseWriter, r *http.Request) {
@@ -41,7 +42,7 @@ func TestGitignoresService_Get(t *testing.T) {
 		fmt.Fprint(w, `{"name":"Name","source":"template source"}`)
 	})
 
-	gitignore, _, err := client.Gitignores.Get("name")
+	gitignore, _, err := client.Gitignores.Get(context.Background(), "name")
 	if err != nil {
 		t.Errorf("Gitignores.List returned error: %v", err)
 	}
@@ -53,6 +54,9 @@ func TestGitignoresService_Get(t *testing.T) {
 }
 
 func TestGitignoresService_Get_invalidTemplate(t *testing.T) {
-	_, _, err := client.Gitignores.Get("%")
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, _, err := client.Gitignores.Get(context.Background(), "%")
 	testURLParseError(t, err)
 }

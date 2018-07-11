@@ -6,13 +6,14 @@
 package github
 
 import (
+	"context"
 	"fmt"
 	"time"
 )
 
 // PullRequestReview represents a review of a pull request.
 type PullRequestReview struct {
-	ID             *int       `json:"id,omitempty"`
+	ID             *int64     `json:"id,omitempty"`
 	User           *User      `json:"user,omitempty"`
 	Body           *string    `json:"body,omitempty"`
 	SubmittedAt    *time.Time `json:"submitted_at,omitempty"`
@@ -39,6 +40,7 @@ func (c DraftReviewComment) String() string {
 
 // PullRequestReviewRequest represents a request to create a review.
 type PullRequestReviewRequest struct {
+	CommitID *string               `json:"commit_id,omitempty"`
 	Body     *string               `json:"body,omitempty"`
 	Event    *string               `json:"event,omitempty"`
 	Comments []*DraftReviewComment `json:"comments,omitempty"`
@@ -64,19 +66,20 @@ func (r PullRequestReviewDismissalRequest) String() string {
 // Read more about it here - https://github.com/google/go-github/issues/540
 //
 // GitHub API docs: https://developer.github.com/v3/pulls/reviews/#list-reviews-on-a-pull-request
-func (s *PullRequestsService) ListReviews(owner, repo string, number int) ([]*PullRequestReview, *Response, error) {
+func (s *PullRequestsService) ListReviews(ctx context.Context, owner, repo string, number int, opt *ListOptions) ([]*PullRequestReview, *Response, error) {
 	u := fmt.Sprintf("repos/%v/%v/pulls/%d/reviews", owner, repo, number)
+	u, err := addOptions(u, opt)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	req, err := s.client.NewRequest("GET", u, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	// TODO: remove custom Accept header when this API fully launches
-	req.Header.Set("Accept", mediaTypePullRequestReviewsPreview)
-
 	var reviews []*PullRequestReview
-	resp, err := s.client.Do(req, &reviews)
+	resp, err := s.client.Do(ctx, req, &reviews)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -91,7 +94,7 @@ func (s *PullRequestsService) ListReviews(owner, repo string, number int) ([]*Pu
 // Read more about it here - https://github.com/google/go-github/issues/540
 //
 // GitHub API docs: https://developer.github.com/v3/pulls/reviews/#get-a-single-review
-func (s *PullRequestsService) GetReview(owner, repo string, number, reviewID int) (*PullRequestReview, *Response, error) {
+func (s *PullRequestsService) GetReview(ctx context.Context, owner, repo string, number, reviewID int64) (*PullRequestReview, *Response, error) {
 	u := fmt.Sprintf("repos/%v/%v/pulls/%d/reviews/%d", owner, repo, number, reviewID)
 
 	req, err := s.client.NewRequest("GET", u, nil)
@@ -99,11 +102,8 @@ func (s *PullRequestsService) GetReview(owner, repo string, number, reviewID int
 		return nil, nil, err
 	}
 
-	// TODO: remove custom Accept header when this API fully launches
-	req.Header.Set("Accept", mediaTypePullRequestReviewsPreview)
-
 	review := new(PullRequestReview)
-	resp, err := s.client.Do(req, review)
+	resp, err := s.client.Do(ctx, req, review)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -118,7 +118,7 @@ func (s *PullRequestsService) GetReview(owner, repo string, number, reviewID int
 // Read more about it here - https://github.com/google/go-github/issues/540
 //
 // GitHub API docs: https://developer.github.com/v3/pulls/reviews/#delete-a-pending-review
-func (s *PullRequestsService) DeletePendingReview(owner, repo string, number, reviewID int) (*PullRequestReview, *Response, error) {
+func (s *PullRequestsService) DeletePendingReview(ctx context.Context, owner, repo string, number, reviewID int64) (*PullRequestReview, *Response, error) {
 	u := fmt.Sprintf("repos/%v/%v/pulls/%d/reviews/%d", owner, repo, number, reviewID)
 
 	req, err := s.client.NewRequest("DELETE", u, nil)
@@ -126,11 +126,8 @@ func (s *PullRequestsService) DeletePendingReview(owner, repo string, number, re
 		return nil, nil, err
 	}
 
-	// TODO: remove custom Accept header when this API fully launches
-	req.Header.Set("Accept", mediaTypePullRequestReviewsPreview)
-
 	review := new(PullRequestReview)
-	resp, err := s.client.Do(req, review)
+	resp, err := s.client.Do(ctx, req, review)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -144,20 +141,21 @@ func (s *PullRequestsService) DeletePendingReview(owner, repo string, number, re
 // returned error format and remove this comment once it's fixed.
 // Read more about it here - https://github.com/google/go-github/issues/540
 //
-// GitHub API docs: https://developer.github.com/v3/pulls/reviews/#get-a-single-reviews-comments
-func (s *PullRequestsService) ListReviewComments(owner, repo string, number, reviewID int) ([]*PullRequestComment, *Response, error) {
+// GitHub API docs: https://developer.github.com/v3/pulls/reviews/#get-comments-for-a-single-review
+func (s *PullRequestsService) ListReviewComments(ctx context.Context, owner, repo string, number, reviewID int64, opt *ListOptions) ([]*PullRequestComment, *Response, error) {
 	u := fmt.Sprintf("repos/%v/%v/pulls/%d/reviews/%d/comments", owner, repo, number, reviewID)
+	u, err := addOptions(u, opt)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	req, err := s.client.NewRequest("GET", u, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	// TODO: remove custom Accept header when this API fully launches
-	req.Header.Set("Accept", mediaTypePullRequestReviewsPreview)
-
 	var comments []*PullRequestComment
-	resp, err := s.client.Do(req, &comments)
+	resp, err := s.client.Do(ctx, req, &comments)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -172,7 +170,7 @@ func (s *PullRequestsService) ListReviewComments(owner, repo string, number, rev
 // Read more about it here - https://github.com/google/go-github/issues/540
 //
 // GitHub API docs: https://developer.github.com/v3/pulls/reviews/#create-a-pull-request-review
-func (s *PullRequestsService) CreateReview(owner, repo string, number int, review *PullRequestReviewRequest) (*PullRequestReview, *Response, error) {
+func (s *PullRequestsService) CreateReview(ctx context.Context, owner, repo string, number int, review *PullRequestReviewRequest) (*PullRequestReview, *Response, error) {
 	u := fmt.Sprintf("repos/%v/%v/pulls/%d/reviews", owner, repo, number)
 
 	req, err := s.client.NewRequest("POST", u, review)
@@ -180,11 +178,8 @@ func (s *PullRequestsService) CreateReview(owner, repo string, number int, revie
 		return nil, nil, err
 	}
 
-	// TODO: remove custom Accept header when this API fully launches
-	req.Header.Set("Accept", mediaTypePullRequestReviewsPreview)
-
 	r := new(PullRequestReview)
-	resp, err := s.client.Do(req, r)
+	resp, err := s.client.Do(ctx, req, r)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -199,7 +194,7 @@ func (s *PullRequestsService) CreateReview(owner, repo string, number int, revie
 // Read more about it here - https://github.com/google/go-github/issues/540
 //
 // GitHub API docs: https://developer.github.com/v3/pulls/reviews/#submit-a-pull-request-review
-func (s *PullRequestsService) SubmitReview(owner, repo string, number, reviewID int, review *PullRequestReviewRequest) (*PullRequestReview, *Response, error) {
+func (s *PullRequestsService) SubmitReview(ctx context.Context, owner, repo string, number, reviewID int64, review *PullRequestReviewRequest) (*PullRequestReview, *Response, error) {
 	u := fmt.Sprintf("repos/%v/%v/pulls/%d/reviews/%d/events", owner, repo, number, reviewID)
 
 	req, err := s.client.NewRequest("POST", u, review)
@@ -207,11 +202,8 @@ func (s *PullRequestsService) SubmitReview(owner, repo string, number, reviewID 
 		return nil, nil, err
 	}
 
-	// TODO: remove custom Accept header when this API fully launches
-	req.Header.Set("Accept", mediaTypePullRequestReviewsPreview)
-
 	r := new(PullRequestReview)
-	resp, err := s.client.Do(req, r)
+	resp, err := s.client.Do(ctx, req, r)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -226,7 +218,7 @@ func (s *PullRequestsService) SubmitReview(owner, repo string, number, reviewID 
 // Read more about it here - https://github.com/google/go-github/issues/540
 //
 // GitHub API docs: https://developer.github.com/v3/pulls/reviews/#dismiss-a-pull-request-review
-func (s *PullRequestsService) DismissReview(owner, repo string, number, reviewID int, review *PullRequestReviewDismissalRequest) (*PullRequestReview, *Response, error) {
+func (s *PullRequestsService) DismissReview(ctx context.Context, owner, repo string, number, reviewID int64, review *PullRequestReviewDismissalRequest) (*PullRequestReview, *Response, error) {
 	u := fmt.Sprintf("repos/%v/%v/pulls/%d/reviews/%d/dismissals", owner, repo, number, reviewID)
 
 	req, err := s.client.NewRequest("PUT", u, review)
@@ -234,11 +226,8 @@ func (s *PullRequestsService) DismissReview(owner, repo string, number, reviewID
 		return nil, nil, err
 	}
 
-	// TODO: remove custom Accept header when this API fully launches
-	req.Header.Set("Accept", mediaTypePullRequestReviewsPreview)
-
 	r := new(PullRequestReview)
-	resp, err := s.client.Do(req, r)
+	resp, err := s.client.Do(ctx, req, r)
 	if err != nil {
 		return nil, resp, err
 	}

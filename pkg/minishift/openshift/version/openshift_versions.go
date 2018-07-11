@@ -17,6 +17,7 @@ limitations under the License.
 package version
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -137,9 +138,10 @@ func IsGreaterOrEqualToBaseVersion(version string, baseVersion string) (bool, er
 
 func getGithubReleases() ([]string, error) {
 	var releaseTags []string
+	ctx := context.Background()
 	client := github.Client()
 	listOptions := github.ListOptions()
-	releases, _, err := client.Repositories.ListReleases("openshift", "origin", listOptions)
+	releases, _, err := client.Repositories.ListReleases(ctx, "openshift", "origin", listOptions)
 	if err != nil {
 		if github.IsRateLimitError(err) {
 			return nil, fmt.Errorf("Hit github rate limit: %v", err)

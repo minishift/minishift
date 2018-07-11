@@ -13,10 +13,10 @@
 # limitations under the License.
 
 # Various versions - Minishift, default OpenShift, default B2D ISO
-MINISHIFT_VERSION = 1.20.0
+MINISHIFT_VERSION = 1.21.0
 OPENSHIFT_VERSION = v3.9.0
 B2D_ISO_VERSION = v1.3.0
-CENTOS_ISO_VERSION = v1.10.0
+CENTOS_ISO_VERSION = v1.12.0
 MINIKUBE_ISO_VERSION = v0.25.1
 COMMIT_SHA=$(shell git rev-parse --short HEAD)
 

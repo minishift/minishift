@@ -18,6 +18,7 @@ package github
 
 import (
 	"bufio"
+	"context"
 	"encoding/hex"
 	"io"
 	"net/http"
@@ -103,6 +104,7 @@ func IsRateLimitError(err error) bool {
 
 func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minishiftos.OS, version, outputPath string) error {
 	client := Client()
+	ctx := context.Background()
 	var (
 		err     error
 		release *github.RepositoryRelease
@@ -111,10 +113,10 @@ func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minis
 	// Get the GitHub release information - either latest or for the specified version
 	errorMessage := ""
 	if len(version) > 1 {
-		release, resp, err = client.Repositories.GetReleaseByTag("openshift", "origin", version)
+		release, resp, err = client.Repositories.GetReleaseByTag(ctx, "openshift", "origin", version)
 		errorMessage = fmt.Sprintf("Cannot get the OpenShift release version %s", version)
 	} else {
-		release, resp, err = client.Repositories.GetLatestRelease("openshift", "origin")
+		release, resp, err = client.Repositories.GetLatestRelease(ctx, "openshift", "origin")
 		errorMessage = "Cannot get the latest OpenShift release."
 
 	}
@@ -133,7 +135,7 @@ func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minis
 
 	// Download the asset
 	var asset io.Reader
-	asset, url, err := client.Repositories.DownloadReleaseAsset("openshift", "origin", assetID)
+	asset, url, err := client.Repositories.DownloadReleaseAsset(ctx, "openshift", "origin", assetID)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("Cannot download OpenShift release asset %d", assetID))
 	}
@@ -187,7 +189,7 @@ func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minis
 
 	// Hash verification for download oc binary
 	hash := hex.EncodeToString(hasher.Sum(nil))
-	downloadedHash, err := downloadHash(release, assetFilename)
+	downloadedHash, err := downloadHash(ctx, release, assetFilename)
 	if err != nil {
 		return errors.Wrap(err, "Failed to download hash")
 	}
@@ -282,7 +284,7 @@ func listDirExcluding(dir string, excludeRegexp string) ([]string, error) {
 	return result, nil
 }
 
-func getAssetIdAndFilename(binaryType OpenShiftBinaryType, osType minishiftos.OS, release *github.RepositoryRelease) (int, string) {
+func getAssetIdAndFilename(binaryType OpenShiftBinaryType, osType minishiftos.OS, release *github.RepositoryRelease) (int64, string) {
 	prefix := ""
 	switch binaryType {
 	case OC:
@@ -313,13 +315,13 @@ func getAssetIdAndFilename(binaryType OpenShiftBinaryType, osType minishiftos.OS
 	return 0, ""
 }
 
-func downloadHash(release *github.RepositoryRelease, filename string) (string, error) {
+func downloadHash(ctx context.Context, release *github.RepositoryRelease, filename string) (string, error) {
 	checksumAssetID := getOpenShiftChecksumAssetID(release)
 	if checksumAssetID == 0 {
 		return "", errors.New("Cannot get the OpenShift release checksum URL.")
 	}
 	var asset io.Reader
-	asset, url, err := client.Repositories.DownloadReleaseAsset("openshift", "origin", checksumAssetID)
+	asset, url, err := client.Repositories.DownloadReleaseAsset(ctx, "openshift", "origin", checksumAssetID)
 	if err != nil {
 		return "", errors.Wrap(err, "Cannot download the OpenShift release checksum asset.")
 	}
@@ -344,7 +346,7 @@ func downloadHash(release *github.RepositoryRelease, filename string) (string, e
 	return "", nil
 }
 
-func getOpenShiftChecksumAssetID(release *github.RepositoryRelease) int {
+func getOpenShiftChecksumAssetID(release *github.RepositoryRelease) int64 {
 	for _, asset := range release.Assets {
 		if *asset.Name == "CHECKSUM" {
 			return *asset.ID

@@ -121,8 +121,15 @@ func IsValidPath(name string, path string) error {
 	return nil
 }
 
-func IsValidProxy(name string, uri string) error {
-	if err := util.ValidateProxyURL(uri); err != nil {
+func IsValidHttpProxy(name string, uri string) error {
+	if err := util.ValidateProxyURL(uri, "http"); err != nil {
+		return fmt.Errorf("'%s' path is not valid: %v", name, err)
+	}
+	return nil
+}
+
+func IsValidHttpsProxy(name string, uri string) error {
+	if err := util.ValidateProxyURL(uri, "https"); err != nil {
 		return fmt.Errorf("'%s' path is not valid: %v", name, err)
 	}
 	return nil

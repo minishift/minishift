@@ -226,6 +226,13 @@ Multiple default key/value pairs need to be comma separated.
 
 [NOTE]
 ====
+Empty value will be set if NULL, Null or null specified as value for a _Var-Defaults key.
+
+# Var-Defaults: PROJECT_USER=null
+====
+
+[NOTE]
+====
 Variable values specified via the command line using the `--addon-env` or set via `minishift config set addon-env` have precedence over _Var-Defaults_.
 ====
 

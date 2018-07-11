@@ -58,7 +58,7 @@ ignored = ["github.com/Sirupsen/logrus"]
 
 [[constraint]]
   name = "github.com/google/go-github"
-  revision = "30a21ee1a3839fb4a408efe331f226b73faac379"
+  version = "=15.0.0"
 
 [[constraint]]
   name = "github.com/inconshreveable/go-update"

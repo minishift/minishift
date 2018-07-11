@@ -247,8 +247,8 @@ func (m *MinishiftRunner) GetProfileList() string {
 	return strings.Trim(cmdOut, " \n")
 }
 
-func (m *MinishiftRunner) GetOpenshiftContainers() string {
-	cmdOut, _, _ := m.RunCommand("ssh -- docker ps")
+func (m *MinishiftRunner) GetOpenshiftContainers(containerName string) string {
+	cmdOut, _, _ := m.RunCommand(fmt.Sprintf(`ssh -- docker ps -f "name=%s"`, containerName))
 	return strings.Trim(cmdOut, " \n")
 }
 

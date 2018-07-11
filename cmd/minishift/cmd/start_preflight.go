@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"os"
@@ -599,7 +600,8 @@ func validateOpenshiftVersion() bool {
 // checkOriginRelease return true if specified version of OpenShift is released
 func checkOriginRelease() bool {
 	client := github.Client()
-	_, _, err := client.Repositories.GetReleaseByTag("openshift", "origin", viper.GetString(configCmd.OpenshiftVersion.Name))
+	ctx := context.Background()
+	_, _, err := client.Repositories.GetReleaseByTag(ctx, "openshift", "origin", viper.GetString(configCmd.OpenshiftVersion.Name))
 	if err != nil && github.IsRateLimitError(err) {
 		fmt.Println("\n   Hit github rate limit:", err)
 		return false

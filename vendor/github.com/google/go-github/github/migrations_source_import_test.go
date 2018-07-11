@@ -6,6 +6,7 @@
 package github
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -14,7 +15,7 @@ import (
 )
 
 func TestMigrationService_StartImport(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	input := &Import{
@@ -38,7 +39,7 @@ func TestMigrationService_StartImport(t *testing.T) {
 		fmt.Fprint(w, `{"status":"importing"}`)
 	})
 
-	got, _, err := client.Migrations.StartImport("o", "r", input)
+	got, _, err := client.Migrations.StartImport(context.Background(), "o", "r", input)
 	if err != nil {
 		t.Errorf("StartImport returned error: %v", err)
 	}
@@ -49,7 +50,7 @@ func TestMigrationService_StartImport(t *testing.T) {
 }
 
 func TestMigrationService_ImportProgress(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/repos/o/r/import", func(w http.ResponseWriter, r *http.Request) {
@@ -58,7 +59,7 @@ func TestMigrationService_ImportProgress(t *testing.T) {
 		fmt.Fprint(w, `{"status":"complete"}`)
 	})
 
-	got, _, err := client.Migrations.ImportProgress("o", "r")
+	got, _, err := client.Migrations.ImportProgress(context.Background(), "o", "r")
 	if err != nil {
 		t.Errorf("ImportProgress returned error: %v", err)
 	}
@@ -69,7 +70,7 @@ func TestMigrationService_ImportProgress(t *testing.T) {
 }
 
 func TestMigrationService_UpdateImport(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	input := &Import{
@@ -93,7 +94,7 @@ func TestMigrationService_UpdateImport(t *testing.T) {
 		fmt.Fprint(w, `{"status":"importing"}`)
 	})
 
-	got, _, err := client.Migrations.UpdateImport("o", "r", input)
+	got, _, err := client.Migrations.UpdateImport(context.Background(), "o", "r", input)
 	if err != nil {
 		t.Errorf("UpdateImport returned error: %v", err)
 	}
@@ -104,7 +105,7 @@ func TestMigrationService_UpdateImport(t *testing.T) {
 }
 
 func TestMigrationService_CommitAuthors(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/repos/o/r/import/authors", func(w http.ResponseWriter, r *http.Request) {
@@ -113,13 +114,13 @@ func TestMigrationService_CommitAuthors(t *testing.T) {
 		fmt.Fprint(w, `[{"id":1,"name":"a"},{"id":2,"name":"b"}]`)
 	})
 
-	got, _, err := client.Migrations.CommitAuthors("o", "r")
+	got, _, err := client.Migrations.CommitAuthors(context.Background(), "o", "r")
 	if err != nil {
 		t.Errorf("CommitAuthors returned error: %v", err)
 	}
 	want := []*SourceImportAuthor{
-		{ID: Int(1), Name: String("a")},
-		{ID: Int(2), Name: String("b")},
+		{ID: Int64(1), Name: String("a")},
+		{ID: Int64(2), Name: String("b")},
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("CommitAuthors = %+v, want %+v", got, want)
@@ -127,7 +128,7 @@ func TestMigrationService_CommitAuthors(t *testing.T) {
 }
 
 func TestMigrationService_MapCommitAuthor(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	input := &SourceImportAuthor{Name: String("n"), Email: String("e")}
@@ -145,18 +146,18 @@ func TestMigrationService_MapCommitAuthor(t *testing.T) {
 		fmt.Fprint(w, `{"id": 1}`)
 	})
 
-	got, _, err := client.Migrations.MapCommitAuthor("o", "r", 1, input)
+	got, _, err := client.Migrations.MapCommitAuthor(context.Background(), "o", "r", 1, input)
 	if err != nil {
 		t.Errorf("MapCommitAuthor returned error: %v", err)
 	}
-	want := &SourceImportAuthor{ID: Int(1)}
+	want := &SourceImportAuthor{ID: Int64(1)}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("MapCommitAuthor = %+v, want %+v", got, want)
 	}
 }
 
 func TestMigrationService_SetLFSPreference(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	input := &Import{UseLFS: String("opt_in")}
@@ -175,7 +176,7 @@ func TestMigrationService_SetLFSPreference(t *testing.T) {
 		fmt.Fprint(w, `{"status":"importing"}`)
 	})
 
-	got, _, err := client.Migrations.SetLFSPreference("o", "r", input)
+	got, _, err := client.Migrations.SetLFSPreference(context.Background(), "o", "r", input)
 	if err != nil {
 		t.Errorf("SetLFSPreference returned error: %v", err)
 	}
@@ -186,7 +187,7 @@ func TestMigrationService_SetLFSPreference(t *testing.T) {
 }
 
 func TestMigrationService_LargeFiles(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/repos/o/r/import/large_files", func(w http.ResponseWriter, r *http.Request) {
@@ -195,7 +196,7 @@ func TestMigrationService_LargeFiles(t *testing.T) {
 		fmt.Fprint(w, `[{"oid":"a"},{"oid":"b"}]`)
 	})
 
-	got, _, err := client.Migrations.LargeFiles("o", "r")
+	got, _, err := client.Migrations.LargeFiles(context.Background(), "o", "r")
 	if err != nil {
 		t.Errorf("LargeFiles returned error: %v", err)
 	}
@@ -209,7 +210,7 @@ func TestMigrationService_LargeFiles(t *testing.T) {
 }
 
 func TestMigrationService_CancelImport(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/repos/o/r/import", func(w http.ResponseWriter, r *http.Request) {
@@ -218,7 +219,7 @@ func TestMigrationService_CancelImport(t *testing.T) {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
-	_, err := client.Migrations.CancelImport("o", "r")
+	_, err := client.Migrations.CancelImport(context.Background(), "o", "r")
 	if err != nil {
 		t.Errorf("CancelImport returned error: %v", err)
 	}

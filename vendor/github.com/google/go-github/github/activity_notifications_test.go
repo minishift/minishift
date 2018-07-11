@@ -6,6 +6,7 @@
 package github
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -15,7 +16,7 @@ import (
 )
 
 func TestActivityService_ListNotification(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/notifications", func(w http.ResponseWriter, r *http.Request) {
@@ -36,7 +37,7 @@ func TestActivityService_ListNotification(t *testing.T) {
 		Since:         time.Date(2006, 01, 02, 15, 04, 05, 0, time.UTC),
 		Before:        time.Date(2007, 03, 04, 15, 04, 05, 0, time.UTC),
 	}
-	notifications, _, err := client.Activity.ListNotifications(opt)
+	notifications, _, err := client.Activity.ListNotifications(context.Background(), opt)
 	if err != nil {
 		t.Errorf("Activity.ListNotifications returned error: %v", err)
 	}
@@ -48,7 +49,7 @@ func TestActivityService_ListNotification(t *testing.T) {
 }
 
 func TestActivityService_ListRepositoryNotification(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/repos/o/r/notifications", func(w http.ResponseWriter, r *http.Request) {
@@ -56,7 +57,7 @@ func TestActivityService_ListRepositoryNotification(t *testing.T) {
 		fmt.Fprint(w, `[{"id":"1"}]`)
 	})
 
-	notifications, _, err := client.Activity.ListRepositoryNotifications("o", "r", nil)
+	notifications, _, err := client.Activity.ListRepositoryNotifications(context.Background(), "o", "r", nil)
 	if err != nil {
 		t.Errorf("Activity.ListRepositoryNotifications returned error: %v", err)
 	}
@@ -68,7 +69,7 @@ func TestActivityService_ListRepositoryNotification(t *testing.T) {
 }
 
 func TestActivityService_MarkNotificationsRead(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/notifications", func(w http.ResponseWriter, r *http.Request) {
@@ -79,14 +80,14 @@ func TestActivityService_MarkNotificationsRead(t *testing.T) {
 		w.WriteHeader(http.StatusResetContent)
 	})
 
-	_, err := client.Activity.MarkNotificationsRead(time.Date(2006, 01, 02, 15, 04, 05, 0, time.UTC))
+	_, err := client.Activity.MarkNotificationsRead(context.Background(), time.Date(2006, 01, 02, 15, 04, 05, 0, time.UTC))
 	if err != nil {
 		t.Errorf("Activity.MarkNotificationsRead returned error: %v", err)
 	}
 }
 
 func TestActivityService_MarkRepositoryNotificationsRead(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/repos/o/r/notifications", func(w http.ResponseWriter, r *http.Request) {
@@ -97,14 +98,14 @@ func TestActivityService_MarkRepositoryNotificationsRead(t *testing.T) {
 		w.WriteHeader(http.StatusResetContent)
 	})
 
-	_, err := client.Activity.MarkRepositoryNotificationsRead("o", "r", time.Date(2006, 01, 02, 15, 04, 05, 0, time.UTC))
+	_, err := client.Activity.MarkRepositoryNotificationsRead(context.Background(), "o", "r", time.Date(2006, 01, 02, 15, 04, 05, 0, time.UTC))
 	if err != nil {
 		t.Errorf("Activity.MarkRepositoryNotificationsRead returned error: %v", err)
 	}
 }
 
 func TestActivityService_GetThread(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/notifications/threads/1", func(w http.ResponseWriter, r *http.Request) {
@@ -112,7 +113,7 @@ func TestActivityService_GetThread(t *testing.T) {
 		fmt.Fprint(w, `{"id":"1"}`)
 	})
 
-	notification, _, err := client.Activity.GetThread("1")
+	notification, _, err := client.Activity.GetThread(context.Background(), "1")
 	if err != nil {
 		t.Errorf("Activity.GetThread returned error: %v", err)
 	}
@@ -124,7 +125,7 @@ func TestActivityService_GetThread(t *testing.T) {
 }
 
 func TestActivityService_MarkThreadRead(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/notifications/threads/1", func(w http.ResponseWriter, r *http.Request) {
@@ -132,14 +133,14 @@ func TestActivityService_MarkThreadRead(t *testing.T) {
 		w.WriteHeader(http.StatusResetContent)
 	})
 
-	_, err := client.Activity.MarkThreadRead("1")
+	_, err := client.Activity.MarkThreadRead(context.Background(), "1")
 	if err != nil {
 		t.Errorf("Activity.MarkThreadRead returned error: %v", err)
 	}
 }
 
 func TestActivityService_GetThreadSubscription(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/notifications/threads/1/subscription", func(w http.ResponseWriter, r *http.Request) {
@@ -147,7 +148,7 @@ func TestActivityService_GetThreadSubscription(t *testing.T) {
 		fmt.Fprint(w, `{"subscribed":true}`)
 	})
 
-	sub, _, err := client.Activity.GetThreadSubscription("1")
+	sub, _, err := client.Activity.GetThreadSubscription(context.Background(), "1")
 	if err != nil {
 		t.Errorf("Activity.GetThreadSubscription returned error: %v", err)
 	}
@@ -159,7 +160,7 @@ func TestActivityService_GetThreadSubscription(t *testing.T) {
 }
 
 func TestActivityService_SetThreadSubscription(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	input := &Subscription{Subscribed: Bool(true)}
@@ -176,7 +177,7 @@ func TestActivityService_SetThreadSubscription(t *testing.T) {
 		fmt.Fprint(w, `{"ignored":true}`)
 	})
 
-	sub, _, err := client.Activity.SetThreadSubscription("1", input)
+	sub, _, err := client.Activity.SetThreadSubscription(context.Background(), "1", input)
 	if err != nil {
 		t.Errorf("Activity.SetThreadSubscription returned error: %v", err)
 	}
@@ -188,7 +189,7 @@ func TestActivityService_SetThreadSubscription(t *testing.T) {
 }
 
 func TestActivityService_DeleteThreadSubscription(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/notifications/threads/1/subscription", func(w http.ResponseWriter, r *http.Request) {
@@ -196,7 +197,7 @@ func TestActivityService_DeleteThreadSubscription(t *testing.T) {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
-	_, err := client.Activity.DeleteThreadSubscription("1")
+	_, err := client.Activity.DeleteThreadSubscription(context.Background(), "1")
 	if err != nil {
 		t.Errorf("Activity.DeleteThreadSubscription returned error: %v", err)
 	}

@@ -6,6 +6,7 @@
 package github
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -15,13 +16,14 @@ import (
 )
 
 func TestGistsService_List_specifiedUser(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	since := "2013-01-01T00:00:00Z"
 
 	mux.HandleFunc("/users/u/gists", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		testHeader(t, r, "Accept", mediaTypeGraphQLNodeIDPreview)
 		testFormValues(t, r, values{
 			"since": since,
 		})
@@ -29,7 +31,7 @@ func TestGistsService_List_specifiedUser(t *testing.T) {
 	})
 
 	opt := &GistListOptions{Since: time.Date(2013, time.January, 1, 0, 0, 0, 0, time.UTC)}
-	gists, _, err := client.Gists.List("u", opt)
+	gists, _, err := client.Gists.List(context.Background(), "u", opt)
 	if err != nil {
 		t.Errorf("Gists.List returned error: %v", err)
 	}
@@ -41,15 +43,16 @@ func TestGistsService_List_specifiedUser(t *testing.T) {
 }
 
 func TestGistsService_List_authenticatedUser(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/gists", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		testHeader(t, r, "Accept", mediaTypeGraphQLNodeIDPreview)
 		fmt.Fprint(w, `[{"id": "1"}]`)
 	})
 
-	gists, _, err := client.Gists.List("", nil)
+	gists, _, err := client.Gists.List(context.Background(), "", nil)
 	if err != nil {
 		t.Errorf("Gists.List returned error: %v", err)
 	}
@@ -61,18 +64,22 @@ func TestGistsService_List_authenticatedUser(t *testing.T) {
 }
 
 func TestGistsService_List_invalidUser(t *testing.T) {
-	_, _, err := client.Gists.List("%", nil)
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, _, err := client.Gists.List(context.Background(), "%", nil)
 	testURLParseError(t, err)
 }
 
 func TestGistsService_ListAll(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	since := "2013-01-01T00:00:00Z"
 
 	mux.HandleFunc("/gists/public", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		testHeader(t, r, "Accept", mediaTypeGraphQLNodeIDPreview)
 		testFormValues(t, r, values{
 			"since": since,
 		})
@@ -80,7 +87,7 @@ func TestGistsService_ListAll(t *testing.T) {
 	})
 
 	opt := &GistListOptions{Since: time.Date(2013, time.January, 1, 0, 0, 0, 0, time.UTC)}
-	gists, _, err := client.Gists.ListAll(opt)
+	gists, _, err := client.Gists.ListAll(context.Background(), opt)
 	if err != nil {
 		t.Errorf("Gists.ListAll returned error: %v", err)
 	}
@@ -92,13 +99,14 @@ func TestGistsService_ListAll(t *testing.T) {
 }
 
 func TestGistsService_ListStarred(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	since := "2013-01-01T00:00:00Z"
 
 	mux.HandleFunc("/gists/starred", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		testHeader(t, r, "Accept", mediaTypeGraphQLNodeIDPreview)
 		testFormValues(t, r, values{
 			"since": since,
 		})
@@ -106,7 +114,7 @@ func TestGistsService_ListStarred(t *testing.T) {
 	})
 
 	opt := &GistListOptions{Since: time.Date(2013, time.January, 1, 0, 0, 0, 0, time.UTC)}
-	gists, _, err := client.Gists.ListStarred(opt)
+	gists, _, err := client.Gists.ListStarred(context.Background(), opt)
 	if err != nil {
 		t.Errorf("Gists.ListStarred returned error: %v", err)
 	}
@@ -118,15 +126,16 @@ func TestGistsService_ListStarred(t *testing.T) {
 }
 
 func TestGistsService_Get(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/gists/1", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		testHeader(t, r, "Accept", mediaTypeGraphQLNodeIDPreview)
 		fmt.Fprint(w, `{"id": "1"}`)
 	})
 
-	gist, _, err := client.Gists.Get("1")
+	gist, _, err := client.Gists.Get(context.Background(), "1")
 	if err != nil {
 		t.Errorf("Gists.Get returned error: %v", err)
 	}
@@ -138,20 +147,24 @@ func TestGistsService_Get(t *testing.T) {
 }
 
 func TestGistsService_Get_invalidID(t *testing.T) {
-	_, _, err := client.Gists.Get("%")
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, _, err := client.Gists.Get(context.Background(), "%")
 	testURLParseError(t, err)
 }
 
 func TestGistsService_GetRevision(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/gists/1/s", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		testHeader(t, r, "Accept", mediaTypeGraphQLNodeIDPreview)
 		fmt.Fprint(w, `{"id": "1"}`)
 	})
 
-	gist, _, err := client.Gists.GetRevision("1", "s")
+	gist, _, err := client.Gists.GetRevision(context.Background(), "1", "s")
 	if err != nil {
 		t.Errorf("Gists.Get returned error: %v", err)
 	}
@@ -163,12 +176,15 @@ func TestGistsService_GetRevision(t *testing.T) {
 }
 
 func TestGistsService_GetRevision_invalidID(t *testing.T) {
-	_, _, err := client.Gists.GetRevision("%", "%")
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, _, err := client.Gists.GetRevision(context.Background(), "%", "%")
 	testURLParseError(t, err)
 }
 
 func TestGistsService_Create(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	input := &Gist{
@@ -184,6 +200,7 @@ func TestGistsService_Create(t *testing.T) {
 		json.NewDecoder(r.Body).Decode(v)
 
 		testMethod(t, r, "POST")
+		testHeader(t, r, "Accept", mediaTypeGraphQLNodeIDPreview)
 		if !reflect.DeepEqual(v, input) {
 			t.Errorf("Request body = %+v, want %+v", v, input)
 		}
@@ -202,7 +219,7 @@ func TestGistsService_Create(t *testing.T) {
 			}`)
 	})
 
-	gist, _, err := client.Gists.Create(input)
+	gist, _, err := client.Gists.Create(context.Background(), input)
 	if err != nil {
 		t.Errorf("Gists.Create returned error: %v", err)
 	}
@@ -221,7 +238,7 @@ func TestGistsService_Create(t *testing.T) {
 }
 
 func TestGistsService_Edit(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	input := &Gist{
@@ -236,6 +253,7 @@ func TestGistsService_Edit(t *testing.T) {
 		json.NewDecoder(r.Body).Decode(v)
 
 		testMethod(t, r, "PATCH")
+		testHeader(t, r, "Accept", mediaTypeGraphQLNodeIDPreview)
 		if !reflect.DeepEqual(v, input) {
 			t.Errorf("Request body = %+v, want %+v", v, input)
 		}
@@ -257,7 +275,7 @@ func TestGistsService_Edit(t *testing.T) {
 			}`)
 	})
 
-	gist, _, err := client.Gists.Edit("1", input)
+	gist, _, err := client.Gists.Edit(context.Background(), "1", input)
 	if err != nil {
 		t.Errorf("Gists.Edit returned error: %v", err)
 	}
@@ -277,16 +295,20 @@ func TestGistsService_Edit(t *testing.T) {
 }
 
 func TestGistsService_Edit_invalidID(t *testing.T) {
-	_, _, err := client.Gists.Edit("%", nil)
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, _, err := client.Gists.Edit(context.Background(), "%", nil)
 	testURLParseError(t, err)
 }
 
 func TestGistsService_ListCommits(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/gists/1/commits", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		testHeader(t, r, "Accept", mediaTypeGraphQLNodeIDPreview)
 		testFormValues(t, r, nil)
 		fmt.Fprint(w, `
 		  [
@@ -301,22 +323,22 @@ func TestGistsService_ListCommits(t *testing.T) {
 		        "additions": 180,
 		        "total": 180
 		      },
-		      "commited_at": "2010-01-01T00:00:00Z"
+		      "committed_at": "2010-01-01T00:00:00Z"
 		    }
 		  ]
 		`)
 	})
 
-	gistCommits, _, err := client.Gists.ListCommits("1")
+	gistCommits, _, err := client.Gists.ListCommits(context.Background(), "1", nil)
 	if err != nil {
 		t.Errorf("Gists.ListCommits returned error: %v", err)
 	}
 
 	want := []*GistCommit{{
-		URL:        String("https://api.github.com/gists/1/1"),
-		Version:    String("1"),
-		User:       &User{ID: Int(1)},
-		CommitedAt: &Timestamp{time.Date(2010, 1, 1, 00, 00, 00, 0, time.UTC)},
+		URL:         String("https://api.github.com/gists/1/1"),
+		Version:     String("1"),
+		User:        &User{ID: Int64(1)},
+		CommittedAt: &Timestamp{time.Date(2010, 1, 1, 00, 00, 00, 0, time.UTC)},
 		ChangeStatus: &CommitStats{
 			Additions: Int(180),
 			Deletions: Int(0),
@@ -328,65 +350,93 @@ func TestGistsService_ListCommits(t *testing.T) {
 	}
 }
 
+func TestGistsService_ListCommits_withOptions(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/gists/1/commits", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		testHeader(t, r, "Accept", mediaTypeGraphQLNodeIDPreview)
+		testFormValues(t, r, values{
+			"page": "2",
+		})
+		fmt.Fprint(w, `[]`)
+	})
+
+	_, _, err := client.Gists.ListCommits(context.Background(), "1", &ListOptions{Page: 2})
+	if err != nil {
+		t.Errorf("Gists.ListCommits returned error: %v", err)
+	}
+}
+
 func TestGistsService_Delete(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/gists/1", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "DELETE")
 	})
 
-	_, err := client.Gists.Delete("1")
+	_, err := client.Gists.Delete(context.Background(), "1")
 	if err != nil {
 		t.Errorf("Gists.Delete returned error: %v", err)
 	}
 }
 
 func TestGistsService_Delete_invalidID(t *testing.T) {
-	_, err := client.Gists.Delete("%")
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, err := client.Gists.Delete(context.Background(), "%")
 	testURLParseError(t, err)
 }
 
 func TestGistsService_Star(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/gists/1/star", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "PUT")
 	})
 
-	_, err := client.Gists.Star("1")
+	_, err := client.Gists.Star(context.Background(), "1")
 	if err != nil {
 		t.Errorf("Gists.Star returned error: %v", err)
 	}
 }
 
 func TestGistsService_Star_invalidID(t *testing.T) {
-	_, err := client.Gists.Star("%")
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, err := client.Gists.Star(context.Background(), "%")
 	testURLParseError(t, err)
 }
 
 func TestGistsService_Unstar(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/gists/1/star", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "DELETE")
 	})
 
-	_, err := client.Gists.Unstar("1")
+	_, err := client.Gists.Unstar(context.Background(), "1")
 	if err != nil {
 		t.Errorf("Gists.Unstar returned error: %v", err)
 	}
 }
 
 func TestGistsService_Unstar_invalidID(t *testing.T) {
-	_, err := client.Gists.Unstar("%")
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, err := client.Gists.Unstar(context.Background(), "%")
 	testURLParseError(t, err)
 }
 
 func TestGistsService_IsStarred_hasStar(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/gists/1/star", func(w http.ResponseWriter, r *http.Request) {
@@ -394,7 +444,7 @@ func TestGistsService_IsStarred_hasStar(t *testing.T) {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
-	star, _, err := client.Gists.IsStarred("1")
+	star, _, err := client.Gists.IsStarred(context.Background(), "1")
 	if err != nil {
 		t.Errorf("Gists.Starred returned error: %v", err)
 	}
@@ -404,7 +454,7 @@ func TestGistsService_IsStarred_hasStar(t *testing.T) {
 }
 
 func TestGistsService_IsStarred_noStar(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/gists/1/star", func(w http.ResponseWriter, r *http.Request) {
@@ -412,7 +462,7 @@ func TestGistsService_IsStarred_noStar(t *testing.T) {
 		w.WriteHeader(http.StatusNotFound)
 	})
 
-	star, _, err := client.Gists.IsStarred("1")
+	star, _, err := client.Gists.IsStarred(context.Background(), "1")
 	if err != nil {
 		t.Errorf("Gists.Starred returned error: %v", err)
 	}
@@ -422,20 +472,24 @@ func TestGistsService_IsStarred_noStar(t *testing.T) {
 }
 
 func TestGistsService_IsStarred_invalidID(t *testing.T) {
-	_, _, err := client.Gists.IsStarred("%")
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, _, err := client.Gists.IsStarred(context.Background(), "%")
 	testURLParseError(t, err)
 }
 
 func TestGistsService_Fork(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/gists/1/forks", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "POST")
+		testHeader(t, r, "Accept", mediaTypeGraphQLNodeIDPreview)
 		fmt.Fprint(w, `{"id": "2"}`)
 	})
 
-	gist, _, err := client.Gists.Fork("1")
+	gist, _, err := client.Gists.Fork(context.Background(), "1")
 	if err != nil {
 		t.Errorf("Gists.Fork returned error: %v", err)
 	}
@@ -447,11 +501,12 @@ func TestGistsService_Fork(t *testing.T) {
 }
 
 func TestGistsService_ListForks(t *testing.T) {
-	setup()
+	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/gists/1/forks", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		testHeader(t, r, "Accept", mediaTypeGraphQLNodeIDPreview)
 		testFormValues(t, r, nil)
 		fmt.Fprint(w, `
 		  [
@@ -465,7 +520,7 @@ func TestGistsService_ListForks(t *testing.T) {
 		`)
 	})
 
-	gistForks, _, err := client.Gists.ListForks("1")
+	gistForks, _, err := client.Gists.ListForks(context.Background(), "1")
 	if err != nil {
 		t.Errorf("Gists.ListForks returned error: %v", err)
 	}
@@ -473,7 +528,7 @@ func TestGistsService_ListForks(t *testing.T) {
 	want := []*GistFork{{
 		URL:       String("https://api.github.com/gists/1"),
 		ID:        String("1"),
-		User:      &User{ID: Int(1)},
+		User:      &User{ID: Int64(1)},
 		CreatedAt: &Timestamp{time.Date(2010, 1, 1, 00, 00, 00, 0, time.UTC)},
 		UpdatedAt: &Timestamp{time.Date(2013, 1, 1, 00, 00, 00, 0, time.UTC)}}}
 
@@ -483,6 +538,9 @@ func TestGistsService_ListForks(t *testing.T) {
 }
 
 func TestGistsService_Fork_invalidID(t *testing.T) {
-	_, _, err := client.Gists.Fork("%")
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	_, _, err := client.Gists.Fork(context.Background(), "%")
 	testURLParseError(t, err)
 }

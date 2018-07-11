@@ -11,7 +11,7 @@ so that user can able to push their container images directly to registry and de
   Scenario: As a user, I can start Minishift with registry-route add-on enabled
     Given Minishift has state "Does Not Exist"
       And image caching is disabled
-     When executing "minishift start --iso-url centos" succeeds
+     When executing "minishift start" succeeds
      Then Minishift should have state "Running"
       And stdout should contain
       """
@@ -24,7 +24,7 @@ so that user can able to push their container images directly to registry and de
       And evaluating stdout of the previous command in host shell
       And executing "minishift oc-env" in host shell succeeds
       And evaluating stdout of the previous command in host shell
-     Then with up to "20" retries with wait period of "3" seconds container image "origin-docker-registry" should be "running"
+     Then with up to "20" retries with wait period of "3" seconds container name "registry_docker-registry" should be "running"
       And with up to "60" retries with wait period of "1" second command "curl -ik https://docker-registry-default.$(minishift ip).nip.io" output should contain "200 OK"
       And executing "docker login -u developer -p `oc whoami -t` docker-registry-default.$(minishift ip).nip.io" in host shell succeeds
       And stdout of host shell should contain "Login Succeeded"
@@ -42,6 +42,17 @@ so that user can able to push their container images directly to registry and de
       And service "nginx" rollout successfully within "1200" seconds
       And with up to "10" retries with wait period of "500ms" the "status code" of HTTP request to "/" of service "nginx" in namespace "myproject" is equal to "200"
       And with up to "10" retries with wait period of "500ms" the "body" of HTTP request to "/" of service "nginx" in namespace "myproject" contains "Welcome to nginx!"
+
+  Scenario: As a user, I can login to OpenShift integrated docker registry after restart minishift
+    Given Minishift has state "Running"
+     When executing "minishift stop" succeeds
+     Then executing "minishift start" succeeds
+      And Minishift should have state "Running"
+      And executing "minishift addon apply registry-route" succeeds
+     Then with up to "60" retries with wait period of "3" seconds container name "registry_docker-registry" should be "running"
+      And with up to "60" retries with wait period of "1" second command "curl -ik https://docker-registry-default.$(minishift ip).nip.io" output should contain "200 OK"
+      And executing "docker login -u developer -p `oc whoami -t` docker-registry-default.$(minishift ip).nip.io" in host shell succeeds
+      And stdout of host shell should contain "Login Succeeded"
 
   Scenario: User deletes Minishift
     Given Minishift has state "Running"

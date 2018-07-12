@@ -150,7 +150,7 @@ $(DOCS_SYNOPISIS_DIR)/*.md: $(ADDON_ASSET_FILE)
 synopsis_docs: $(DOCS_SYNOPISIS_DIR)/*.md ## Builds the Markdown command synopsis
 
 .PHONY: prerelease
-prerelease: clean fmtcheck vet test cross ## Pre-release target to verify tests pass and style requirements are met
+prerelease: clean fmtcheck test cross ## Pre-release target to verify tests pass and style requirements are met
 	$(eval files = $(shell ./scripts/boilerplate/boilerplate.py --rootdir . --boilerplate-dir ./scripts/boilerplate | grep -v vendor))
 	@if test "$(files)" != ""; then \
 		echo "The following files don't pass the boilerplate checks:"; \
@@ -228,10 +228,6 @@ integration_pr: $(MINISHIFT_BINARY)
 .PHONY: fmt
 fmt: ## Format source using gofmt
 	@gofmt -l -s -w $(SOURCE_DIRS)
-
-.PHONY: vet
-vet: ## Vet the source using 'go vet'
-	@go vet $(shell $(PACKAGES))
 
 .PHONY: fmtcheck
 fmtcheck: ## Checks for style violation using gofmt

@@ -7,7 +7,7 @@ jobs:
     macos:
       xcode: "9.0"
     environment:
-        GOVERSION: 1.8.3
+        GOVERSION: 1.10.2
         XCODE_SCHEME: symbolicator
         XCODE_WORKSPACE: symbolicator
 
@@ -17,10 +17,10 @@ jobs:
     - run:
         name: Configure GOPATH
         command: echo 'export GOPATH=$HOME/go' >> $BASH_ENV
-    - run: 
+    - run:
         name: Configure Path
         command: echo 'export PATH=$GOPATH/bin:/usr/local/go/bin/:$PATH' >> $BASH_ENV
-    - run: 
+    - run:
         name: Prepare minishift
         command: mkdir -p $GOPATH/src/github.com/minishift/minishift && cp -r ~/project/ $GOPATH/src/github.com/minishift/minishift
     - run:

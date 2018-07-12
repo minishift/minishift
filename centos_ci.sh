@@ -45,7 +45,6 @@ function install_core_deps() {
   # We are installing golang from offical repository to make sure our downstream builds works as expected.
   # CDK side golang always comes from the offical RHEL repository.
   yum -y install gcc \
-                 golang \
                  make \
                  tar \
                  zip \
@@ -55,6 +54,22 @@ function install_core_deps() {
 
   echo 'CICO: Core dependencies installed'
 }
+
+function install_golang() {
+  # Install virt7-container-common-candidate to install latest golang package
+  # from the repo
+  cat > /etc/yum.repos.d/virt7-container-common-candidate.repo << EOF
+[virt7-container-common-candidate]
+name=virt7-container-common-candidate
+baseurl=https://cbs.centos.org/repos/virt7-container-common-candidate/x86_64/os/
+enabled=1
+gpgcheck=0
+EOF
+  yum -y install golang
+
+  echo 'CICO: Golang installed installed'
+}
+
 
 function install_kvm_virt() {
   sudo yum -y install kvm \
@@ -254,6 +269,7 @@ function setup_build_environment() {
   install_core_deps;
   install_kvm_virt;
   install_docker;
+  install_golang;
   prepare_for_proxy;
   runuser -l minishift_ci -c "/bin/bash centos_ci.sh"
 }

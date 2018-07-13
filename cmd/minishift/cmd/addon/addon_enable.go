@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/minishift/minishift/pkg/minishift/addon/manager"
+	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
@@ -65,7 +66,8 @@ func enableAddon(addOnManager *manager.AddOnManager, addOnName string, priority 
 		fmt.Println(fmt.Sprintf("Add-on '%s' enabled", addOnName))
 	}
 
-	addOnConfigMap := GetAddOnConfiguration()
-	addOnConfigMap[addOnConfig.Name] = addOnConfig
-	WriteAddOnConfig(addOnConfigMap)
+	minishiftConfig.InstanceConfig.AddonConfig[addOnConfig.Name] = addOnConfig
+	if err := minishiftConfig.InstanceConfig.Write(); err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error writing addon config data: %v", err))
+	}
 }

@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/minishift/minishift/pkg/minishift/addon/manager"
+	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
@@ -57,5 +58,9 @@ func unInstallAddon(addOnManager *manager.AddOnManager, addOnName string) {
 	} else {
 		fmt.Println(fmt.Sprintf("Add-on '%s' uninstalled", addOnName))
 	}
-	RemoveAddOnFromConfig(addOnName)
+
+	delete(minishiftConfig.InstanceConfig.AddonConfig, addOnName)
+	if err := minishiftConfig.InstanceConfig.Write(); err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error writing addon config data: %v", err))
+	}
 }

@@ -24,8 +24,9 @@ import (
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/cmd/minishift/cmd/config"
 	"github.com/minishift/minishift/cmd/minishift/state"
-	"github.com/minishift/minishift/pkg/minishift/addon"
+	addOnConfig "github.com/minishift/minishift/pkg/minishift/addon/config"
 	"github.com/minishift/minishift/pkg/minishift/addon/manager"
+	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/minishift/docker"
 	"github.com/minishift/minishift/pkg/minishift/openshift"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
@@ -34,7 +35,7 @@ import (
 
 // GetAddOnManager returns the addon manager
 func GetAddOnManager() *manager.AddOnManager {
-	addOnConfigs := GetAddOnConfiguration()
+	addOnConfigs := minishiftConfig.InstanceConfig.AddonConfig
 	m, err := manager.NewAddOnManager(state.InstanceDirs.Addons, addOnConfigs)
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot initialize the add-on manager: %s", err.Error()))
@@ -43,23 +44,9 @@ func GetAddOnManager() *manager.AddOnManager {
 	return m
 }
 
-func WriteAddOnConfig(addOnConfigMap map[string]*addon.AddOnConfig) {
-	c, err := config.ReadConfig()
-	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot read the Minishift configuration: %s", err.Error()))
-	}
-
-	c[addOnConfigKey] = addOnConfigMap
-
-	err = config.WriteConfig(c)
-	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot write the Minishift configuration: %s", err.Error()))
-	}
-}
-
 // GetAddOnConfiguration reads the Minishift configuration in $MINISHIFT_HOME/config/config.json related to addons and returns
 // a map of addon names to AddOnConfig
-func GetAddOnConfiguration() map[string]*addon.AddOnConfig {
+func GetAddOnConfiguration() map[string]*addOnConfig.AddOnConfig {
 	c, err := config.ReadConfig()
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot read the Minishift configuration: %s", err.Error()))
@@ -72,9 +59,9 @@ func GetAddOnConfiguration() map[string]*addon.AddOnConfig {
 		configSlice = make(map[string]interface{})
 	}
 
-	addOnConfigs := make(map[string]*addon.AddOnConfig)
+	addOnConfigs := make(map[string]*addOnConfig.AddOnConfig)
 	for _, entry := range configSlice {
-		addOnConfig := &addon.AddOnConfig{}
+		addOnConfig := &addOnConfig.AddOnConfig{}
 		addOnMap := entry.(map[string]interface{})
 		fillStruct(addOnMap, addOnConfig)
 		addOnConfigs[addOnConfig.Name] = addOnConfig
@@ -90,13 +77,6 @@ func fillStruct(data map[string]interface{}, result interface{}) {
 		val := t.FieldByName(k)
 		val.Set(reflect.ValueOf(v))
 	}
-}
-
-// RemoveAddOnFromConfig remove given add-on name entry from config file
-func RemoveAddOnFromConfig(addOnName string) {
-	addOnConfigMap := GetAddOnConfiguration()
-	delete(addOnConfigMap, addOnName)
-	WriteAddOnConfig(addOnConfigMap)
 }
 
 func determineRoutingSuffix(driver drivers.Driver) string {

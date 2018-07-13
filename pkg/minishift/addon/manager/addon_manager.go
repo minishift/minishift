@@ -28,6 +28,7 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/addon"
 	"github.com/minishift/minishift/pkg/minishift/addon/command"
+	"github.com/minishift/minishift/pkg/minishift/addon/config"
 	"github.com/minishift/minishift/pkg/minishift/addon/parser"
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/util"
@@ -46,7 +47,7 @@ type AddOnManager struct {
 }
 
 // NewAddOnManager creates a new addon manager for the specified addon directory.
-func NewAddOnManager(baseDir string, configMap map[string]*addon.AddOnConfig) (*AddOnManager, error) {
+func NewAddOnManager(baseDir string, configMap map[string]*config.AddOnConfig) (*AddOnManager, error) {
 	if !filehelper.IsDirectory(baseDir) {
 		return nil, errors.New(fmt.Sprintf("Unable to create addon manager for non existing directory '%s'", baseDir))
 	}
@@ -126,7 +127,7 @@ func (m *AddOnManager) Get(name string) addon.AddOn {
 
 // Enable enables the addon specified via addonName to be run during startup. The priority determines when the addon is run in relation
 // the other addons.
-func (m *AddOnManager) Enable(addonName string, priority int) (*addon.AddOnConfig, error) {
+func (m *AddOnManager) Enable(addonName string, priority int) (*config.AddOnConfig, error) {
 	addOn := m.addOns[addonName]
 	if addOn == nil {
 		return nil, errors.New(fmt.Sprintf("Unable to find addon '%s' in addon directory '%s'", addonName, m.baseDir))
@@ -135,7 +136,7 @@ func (m *AddOnManager) Enable(addonName string, priority int) (*addon.AddOnConfi
 	addOn.SetEnabled(true)
 	addOn.SetPriority(priority)
 
-	return &addon.AddOnConfig{addonName, true, float64(priority)}, nil
+	return &config.AddOnConfig{addonName, true, float64(priority)}, nil
 }
 
 // UnInstall uninstalls the addon specified via addonName.
@@ -156,7 +157,7 @@ func (m *AddOnManager) UnInstall(addonName string) error {
 }
 
 // Disable disables the addon with the specified name.
-func (m *AddOnManager) Disable(addonName string) (*addon.AddOnConfig, error) {
+func (m *AddOnManager) Disable(addonName string) (*config.AddOnConfig, error) {
 	addOn := m.addOns[addonName]
 	if addOn == nil {
 		return nil, errors.New(fmt.Sprintf("Unable to find addon '%s' in addon directory '%s'", addonName, m.baseDir))
@@ -164,7 +165,7 @@ func (m *AddOnManager) Disable(addonName string) (*addon.AddOnConfig, error) {
 
 	addOn.SetEnabled(false)
 
-	return &addon.AddOnConfig{addonName, false, float64(addOn.GetPriority())}, nil
+	return &config.AddOnConfig{addonName, false, float64(addOn.GetPriority())}, nil
 }
 
 // Apply executes all enabled addons.
@@ -305,7 +306,7 @@ func verifyRequiredOpenshiftVersion(context *command.ExecutionContext, meta addo
 	return nil
 }
 
-func setStateAndPriority(addOn addon.AddOn, configMap map[string]*addon.AddOnConfig) {
+func setStateAndPriority(addOn addon.AddOn, configMap map[string]*config.AddOnConfig) {
 	addOnConfig := configMap[addOn.MetaData().Name()]
 	if addOnConfig == nil {
 		return

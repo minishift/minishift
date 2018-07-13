@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package addon
+package config
 
 type AddOnConfig struct {
 	Name     string

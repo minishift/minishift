@@ -79,7 +79,7 @@ Remote_Machine$ firewall-cmd --reload
 Use the following command on the host to run {project} against a remote machine:
 
 ----
-$ minishift start --vm-driver generic --remote-ipaddress 10.1.1.1 --remote-ssh-user <username> --remote-ssh-key <private_ssh_key>
+$ minishift start --vm-driver generic --remote-ipaddress <remote_IP_address> --remote-ssh-user <username> --remote-ssh-key <private_ssh_key>
 ----
 
 [NOTE]

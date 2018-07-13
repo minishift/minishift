@@ -292,7 +292,7 @@ func verifyRequiredVariablesInContext(context *command.ExecutionContext, meta ad
 }
 
 func verifyRequiredOpenshiftVersion(context *command.ExecutionContext, meta addon.AddOnMeta) error {
-	openShiftVersion := strings.TrimPrefix(instanceState.InstanceConfig.OpenshiftVersion, constants.VersionPrefix)
+	openShiftVersion := strings.TrimPrefix(instanceState.InstanceStateConfig.OpenshiftVersion, constants.VersionPrefix)
 	requiredOpenshiftVersions := strings.TrimSpace(meta.OpenShiftVersion())
 	if requiredOpenshiftVersions != "" {
 		for _, requiredOpenshiftVersion := range strings.Split(requiredOpenshiftVersions, versionRangeSeparator) {

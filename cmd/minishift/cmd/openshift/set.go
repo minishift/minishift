@@ -78,7 +78,7 @@ func runPatch(cmd *cobra.Command, args []string) {
 
 	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
 	dockerCommander := docker.NewVmDockerCommander(sshCommander)
-	openshiftVersion := instanceState.InstanceConfig.OpenshiftVersion
+	openshiftVersion := instanceState.InstanceStateConfig.OpenshiftVersion
 
 	_, err = openshift.Patch(patchTarget, patch, dockerCommander, openshiftVersion)
 	if err != nil {

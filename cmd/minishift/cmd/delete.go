@@ -123,10 +123,10 @@ func handleFailedHostDeletion(err error) {
 }
 
 func removeInstanceAndKubeConfig() {
-	exists := filehelper.Exists(minishiftConfig.InstanceConfig.FilePath)
+	exists := filehelper.Exists(minishiftConfig.InstanceStateConfig.FilePath)
 	if exists {
-		if err := minishiftConfig.InstanceConfig.Delete(); err != nil {
-			atexit.ExitWithMessage(1, fmt.Sprintln(fmt.Sprintf("Error deleting '%s': ", minishiftConfig.InstanceConfig.FilePath), err))
+		if err := minishiftConfig.InstanceStateConfig.Delete(); err != nil {
+			atexit.ExitWithMessage(1, fmt.Sprintln(fmt.Sprintf("Error deleting '%s': ", minishiftConfig.InstanceStateConfig.FilePath), err))
 		}
 	}
 	exists = filehelper.Exists(constants.KubeConfigPath)

@@ -43,7 +43,7 @@ func isRegistryRouteEnabled(registryAddonEnabled bool) bool {
 	namespace := "default"
 	cmdArgText := fmt.Sprintf("get route docker-registry -n %s --config=%s", namespace, constants.KubeConfigPath)
 	tokens := strings.Split(cmdArgText, " ")
-	cmdName := instanceState.InstanceConfig.OcPath
+	cmdName := instanceState.InstanceStateConfig.OcPath
 	_, err := runner.Output(cmdName, tokens...)
 	if err != nil {
 		return false
@@ -56,7 +56,7 @@ func fetchRegistryRoute(openshiftVersion string) (string, error) {
 	route := "route/docker-registry"
 	cmdArgText := fmt.Sprintf("get -o jsonpath={.spec.host} %s -n %s --config=%s", route, namespace, constants.KubeConfigPath)
 	tokens := strings.Split(cmdArgText, " ")
-	cmdName := instanceState.InstanceConfig.OcPath
+	cmdName := instanceState.InstanceStateConfig.OcPath
 	cmdOut, err := runner.Output(cmdName, tokens...)
 	if err != nil {
 		return "", err
@@ -71,7 +71,7 @@ func fetchRegistryService() (string, error) {
 	service := "service/docker-registry"
 	cmdArgText := fmt.Sprintf("get -o jsonpath={.spec.clusterIP}:{.spec.ports[*].port} %s -n %s --config=%s", service, namespace, constants.KubeConfigPath)
 	tokens := strings.Split(cmdArgText, " ")
-	cmdName := instanceState.InstanceConfig.OcPath
+	cmdName := instanceState.InstanceStateConfig.OcPath
 	cmdOut, err := runner.Output(cmdName, tokens...)
 	if err != nil {
 		return "", errors.New(fmt.Sprintf("No information found for '%s'", service))

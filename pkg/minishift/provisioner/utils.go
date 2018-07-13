@@ -194,18 +194,18 @@ func doFeatureDetection(p provision.Provisioner) error {
 	testFor := "test -f %s && echo '1' || echo '0'"
 
 	if networkAssignment, err := p.SSHCommand(fmt.Sprintf(testFor, "/usr/local/bin/minishift-set-ipaddress")); err == nil {
-		minishiftConfig.InstanceConfig.SupportsNetworkAssignment = checkDetectionValue(networkAssignment)
+		minishiftConfig.InstanceStateConfig.SupportsNetworkAssignment = checkDetectionValue(networkAssignment)
 	} else {
 		return err
 	}
 
 	if dnsmasqServer, err := p.SSHCommand(fmt.Sprintf(testFor, "/usr/sbin/dnsmasq")); err == nil {
-		minishiftConfig.InstanceConfig.SupportsDnsmasqServer = checkDetectionValue(dnsmasqServer)
+		minishiftConfig.InstanceStateConfig.SupportsDnsmasqServer = checkDetectionValue(dnsmasqServer)
 	} else {
 		return err
 	}
 
-	minishiftConfig.InstanceConfig.Write()
+	minishiftConfig.InstanceStateConfig.Write()
 
 	return nil
 }

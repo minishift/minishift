@@ -53,7 +53,7 @@ var registryCmd = &cobra.Command{
 		if registryRoute == nil || !registryRoute.IsEnabled() {
 			registryAddonEnabled = false
 		}
-		openshiftVersion := instanceState.InstanceConfig.OpenshiftVersion
+		openshiftVersion := instanceState.InstanceStateConfig.OpenshiftVersion
 		if err != nil {
 			atexit.ExitWithMessage(1, err.Error())
 		}

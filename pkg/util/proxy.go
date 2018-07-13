@@ -39,17 +39,19 @@ type ProxyConfig struct {
 // NewProxyConfig creates a proxy configuration with the specified parameters. If a empty string is passed
 // the corresponding environment variable is checked.
 func NewProxyConfig(httpProxy string, httpsProxy string, noProxy string) (*ProxyConfig, error) {
+	defaultScheme := "http"
+
 	if httpProxy == "" {
 		httpProxy = os.Getenv("http_proxy")
 		if httpProxy == "" {
 			httpProxy = os.Getenv("HTTP_PROXY")
 		}
 	}
-	err := ValidateProxyURL(httpProxy, "http")
+	err := ValidateProxyURL(httpProxy, defaultScheme)
 	if err != nil {
 		return nil, err
 	}
-	httpProxy = parseProxySpecialChar(httpProxy, "http")
+	httpProxy = parseProxySpecialChar(httpProxy, defaultScheme)
 
 	if httpsProxy == "" {
 		httpsProxy = os.Getenv("https_proxy")
@@ -57,11 +59,11 @@ func NewProxyConfig(httpProxy string, httpsProxy string, noProxy string) (*Proxy
 			httpsProxy = os.Getenv("HTTPS_PROXY")
 		}
 	}
-	err = ValidateProxyURL(httpsProxy, "https")
+	err = ValidateProxyURL(httpsProxy, defaultScheme)
 	if err != nil {
 		return nil, err
 	}
-	httpsProxy = parseProxySpecialChar(httpsProxy, "https")
+	httpsProxy = parseProxySpecialChar(httpsProxy, defaultScheme)
 
 	np := []string{}
 	np = append(np, defaultNoProxies...)
@@ -158,13 +160,14 @@ func (p *ProxyConfig) IsEnabled() bool {
 }
 
 // ValidateProxyURL validates that the specified proxyURL is valid
-func ValidateProxyURL(proxyUrl string, scheme string) error {
+func ValidateProxyURL(proxyUrl string, defaultScheme string) error {
 	if proxyUrl == "" {
 		return nil
 	}
 
-	if !strings.HasPrefix(proxyUrl, scheme) {
-		proxyUrl = fmt.Sprintf("%s://%s", scheme, proxyUrl)
+	if !strings.HasPrefix(proxyUrl, "http://") &&
+		!strings.HasPrefix(proxyUrl, "https://") {
+		proxyUrl = fmt.Sprintf("%s://%s", defaultScheme, proxyUrl)
 	}
 
 	if !govalidator.IsURL(proxyUrl) {
@@ -174,18 +177,22 @@ func ValidateProxyURL(proxyUrl string, scheme string) error {
 }
 
 // parseProxySpecialChar parse the URI and convert special char to hex
-func parseProxySpecialChar(uri string, scheme string) string {
-	if uri == "" {
+func parseProxySpecialChar(proxyUrl string, defaultScheme string) string {
+	if proxyUrl == "" {
 		return ""
 	}
 
-	u, _ := url.Parse(uri)
-	if strings.HasPrefix(uri, scheme) {
-		scheme := fmt.Sprintf("%s://", u.Scheme)
-		s := strings.Replace(uri, scheme, "", 1)
+	if !strings.HasPrefix(proxyUrl, "http://") &&
+		!strings.HasPrefix(proxyUrl, "https://") {
+		proxyUrl = fmt.Sprintf("%s://%s", defaultScheme, proxyUrl)
+	}
+
+	u, _ := url.Parse(proxyUrl)
+	scheme := fmt.Sprintf("%s://", u.Scheme)
+	if strings.HasPrefix(proxyUrl, scheme) {
+		s := strings.Replace(proxyUrl, scheme, "", 1)
 		s = url.PathEscape(s)
 		return scheme + s
 	}
-
-	return fmt.Sprintf("%s://%s", scheme, uri)
+	return ""
 }

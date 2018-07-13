@@ -18,9 +18,11 @@ package config
 
 import (
 	"encoding/json"
-	"github.com/minishift/minishift/pkg/minishift/hostfolder/config"
 	"io/ioutil"
 	"os"
+
+	addOnConfig "github.com/minishift/minishift/pkg/minishift/addon/config"
+	hostFolderConfig "github.com/minishift/minishift/pkg/minishift/hostfolder/config"
 )
 
 var InstanceConfig *InstanceConfigType
@@ -28,13 +30,14 @@ var InstanceConfig *InstanceConfigType
 type InstanceConfigType struct {
 	FilePath    string   `json:"-"`
 	CacheImages []string `json:"cache-images"`
-	HostFolders []config.HostFolderConfig
+	HostFolders []hostFolderConfig.HostFolderConfig
+	AddonConfig map[string]*addOnConfig.AddOnConfig `json:"addons"`
 }
 
 // Create new object with data if file exists or
 // Create json file and return object if doesn't exists
 func NewInstanceConfig(path string) (*InstanceConfigType, error) {
-	cfg := &InstanceConfigType{CacheImages: []string{}, HostFolders: []config.HostFolderConfig{}}
+	cfg := &InstanceConfigType{CacheImages: []string{}, HostFolders: []hostFolderConfig.HostFolderConfig{}, AddonConfig: make(map[string]*addOnConfig.AddOnConfig)}
 	cfg.FilePath = path
 
 	// Check json file existence

@@ -29,6 +29,7 @@ import (
 	"github.com/docker/machine/libmachine/log"
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/cmd/minishift/cmd/addon"
+	cmdAddon "github.com/minishift/minishift/cmd/minishift/cmd/addon"
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
 	"github.com/minishift/minishift/cmd/minishift/cmd/dns"
 	hostfolderCmd "github.com/minishift/minishift/cmd/minishift/cmd/hostfolder"
@@ -118,6 +119,7 @@ var RootCmd = &cobra.Command{
 			atexit.ExitWithMessage(1, err.Error())
 		}
 		cacheImages := cmdImage.GetConfiguredCachedImages(cfg)
+		addonConfig := cmdAddon.GetAddOnConfiguration()
 
 		// If AllInstanceConfig is not defined we should define it now.
 		if minishiftConfig.AllInstancesConfig == nil {
@@ -167,6 +169,19 @@ var RootCmd = &cobra.Command{
 			delete(cfg, "cache-images")
 			if err != configCmd.WriteConfig(cfg) {
 				atexit.ExitWithMessage(1, fmt.Sprintf("Error removing the cache-images entry from older config %s: %s", constants.ConfigFile, err.Error()))
+			}
+		}
+
+		// If addon config exists then copy it to the new instance config.
+		// This should be removed after 2-3 release of Minishift.
+		if len(addonConfig) != 0 {
+			minishiftConfig.InstanceConfig.AddonConfig = addonConfig
+			if err != minishiftConfig.InstanceConfig.Write() {
+				atexit.ExitWithMessage(1, fmt.Sprintf("Error coping existing addon config to new instance config: %s", err.Error()))
+			}
+			delete(cfg, "addons")
+			if err != configCmd.WriteConfig(cfg) {
+				atexit.ExitWithMessage(1, fmt.Sprintf("Error removing the addon config entry from older config %s: %s", constants.ConfigFile, err.Error()))
 			}
 		}
 

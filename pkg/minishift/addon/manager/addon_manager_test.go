@@ -30,6 +30,7 @@ import (
 	"github.com/minishift/minishift/cmd/testing/cli"
 	"github.com/minishift/minishift/pkg/minishift/addon"
 	"github.com/minishift/minishift/pkg/minishift/addon/command"
+	"github.com/minishift/minishift/pkg/minishift/addon/config"
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/minishift/docker"
 	"github.com/stretchr/testify/assert"
@@ -50,7 +51,7 @@ var expectedInvalidAddonOperationError = errors.New("The variable(s) 'TEST' are 
 func Test_creating_addon_manager_for_non_existing_directory_returns_an_error(t *testing.T) {
 	path := filepath.Join("this", "path", "really", "should", "not", "exists", "unless", "you", "have", "a", "crazy", "setup")
 
-	_, err := NewAddOnManager(path, make(map[string]*addon.AddOnConfig))
+	_, err := NewAddOnManager(path, make(map[string]*config.AddOnConfig))
 	assert.Error(t, err, fmt.Sprintf("Creating the manager in directory '%s' should have failed", path))
 	assert.Regexp(t, "^Unable to create addon manager", err.Error(), "Unexpected error message '%s'", err)
 }
@@ -58,7 +59,7 @@ func Test_creating_addon_manager_for_non_existing_directory_returns_an_error(t *
 func Test_create_addon_manager(t *testing.T) {
 	path := filepath.Join(basepath, "..", "..", "..", "..", "addons")
 
-	manager, err := NewAddOnManager(path, make(map[string]*addon.AddOnConfig))
+	manager, err := NewAddOnManager(path, make(map[string]*config.AddOnConfig))
 	assert.NoError(t, err, "Unexpected error creating manager in directory '%s'", path)
 
 	addOns := manager.List()
@@ -71,7 +72,7 @@ func Test_installing_addon_for_non_existing_directory_returns_an_error(t *testin
 	testDir, err := ioutil.TempDir("", "minishift-test-addon-manager-")
 	defer os.RemoveAll(testDir)
 
-	manager, err := NewAddOnManager(testDir, make(map[string]*addon.AddOnConfig))
+	manager, err := NewAddOnManager(testDir, make(map[string]*config.AddOnConfig))
 	_, err = manager.Install("foo", false)
 
 	assert.Error(t, err, "Creation of addon should have failed")
@@ -98,7 +99,7 @@ func Test_invalid_addons_get_skipped(t *testing.T) {
 	_, err = os.Create(filepath.Join(addOn2Path, "foo.addon"))
 	assert.NoError(t, err, "Error in creating file for addon")
 
-	manager, err := NewAddOnManager(testDir, make(map[string]*addon.AddOnConfig))
+	manager, err := NewAddOnManager(testDir, make(map[string]*config.AddOnConfig))
 
 	assert.NoError(t, err, "Error in getting addon manager")
 
@@ -174,7 +175,7 @@ This testaddon is having variable TEST with foo value
 	instanceState.InstanceStateConfig, err = instanceState.NewInstanceStateConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
 	assert.NoError(t, err, "Unexpected error creating instance config in '%s'", tmpMinishiftHomeDir)
 	path := filepath.Join(basepath, "..", "..", "..", "..", "test", "testdata", "testaddons")
-	manager, err := NewAddOnManager(path, make(map[string]*addon.AddOnConfig))
+	manager, err := NewAddOnManager(path, make(map[string]*config.AddOnConfig))
 	assert.NoError(t, err, "Unexpected error creating manager in directory '%s'", path)
 
 	testaddon := manager.Get("testaddon")
@@ -192,7 +193,7 @@ func TestRemoveAddon(t *testing.T) {
 Removing testaddon with variable TEST of foo value
 `
 	path := filepath.Join(basepath, "..", "..", "..", "..", "test", "testdata", "testaddons")
-	manager, err := NewAddOnManager(path, make(map[string]*addon.AddOnConfig))
+	manager, err := NewAddOnManager(path, make(map[string]*config.AddOnConfig))
 	assert.NoError(t, err, "Unexpected error creating manager in directory '%s'", path)
 
 	testaddon := manager.Get("testaddon")
@@ -210,7 +211,7 @@ func TestRemoveMetaAddon(t *testing.T) {
 Removing metaaddon without depending on addon default variables
 `
 	path := filepath.Join(basepath, "..", "..", "..", "..", "test", "testdata", "testaddons")
-	manager, err := NewAddOnManager(path, make(map[string]*addon.AddOnConfig))
+	manager, err := NewAddOnManager(path, make(map[string]*config.AddOnConfig))
 	assert.NoError(t, err, "Unexpected error creating manager in directory '%s'", path)
 
 	testaddon := manager.Get("metaaddon")
@@ -225,7 +226,7 @@ Removing metaaddon without depending on addon default variables
 
 func TestMetadataAddon(t *testing.T) {
 	path := filepath.Join(basepath, "..", "..", "..", "..", "test", "testdata", "testaddons")
-	manager, err := NewAddOnManager(path, make(map[string]*addon.AddOnConfig))
+	manager, err := NewAddOnManager(path, make(map[string]*config.AddOnConfig))
 	assert.NoError(t, err, "Unexpected error creating manager in directory '%s'", path)
 
 	testaddon := manager.Get("metaaddon")
@@ -238,7 +239,7 @@ func TestMetadataAddon(t *testing.T) {
 
 func TestApplyInvalidAddon(t *testing.T) {
 	path := filepath.Join(basepath, "..", "..", "..", "..", "test", "testdata", "testaddons")
-	manager, err := NewAddOnManager(path, make(map[string]*addon.AddOnConfig))
+	manager, err := NewAddOnManager(path, make(map[string]*config.AddOnConfig))
 	assert.NoError(t, err, "Unexpected error creating manager in directory '%s'", path)
 
 	testaddon := manager.Get("invalidaddon")
@@ -251,7 +252,7 @@ func TestApplyInvalidAddon(t *testing.T) {
 
 func TestRemoveInvalidAddon(t *testing.T) {
 	path := filepath.Join(basepath, "..", "..", "..", "..", "test", "testdata", "testaddons")
-	manager, err := NewAddOnManager(path, make(map[string]*addon.AddOnConfig))
+	manager, err := NewAddOnManager(path, make(map[string]*config.AddOnConfig))
 	assert.NoError(t, err, "Unexpected error creating manager in directory '%s'", path)
 
 	testaddon := manager.Get("invalidaddon")

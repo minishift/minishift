@@ -182,6 +182,8 @@ func parseProxySpecialChar(proxyUrl string, defaultScheme string) string {
 		return ""
 	}
 
+	proxyUrl = strings.TrimSuffix(proxyUrl, "/")
+
 	if !strings.HasPrefix(proxyUrl, "http://") &&
 		!strings.HasPrefix(proxyUrl, "https://") {
 		proxyUrl = fmt.Sprintf("%s://%s", defaultScheme, proxyUrl)

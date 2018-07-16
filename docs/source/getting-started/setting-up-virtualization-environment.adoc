@@ -111,6 +111,21 @@ $ sudo sed -ri 's/.?group\s?=\s?".+"/group = "kvm"/1' /etc/libvirt/qemu.conf
 $ newgrp libvirt
 ----
 
+[[kvm-driver-libvirtd-service]]
+=== Start libvirtd service
+
+. Check the status of **libvirtd**:
+
+----
+$ systemctl is-active libvirtd
+----
+
+. If **libvirtd** is not active, start the **libvirtd** service:
+
+----
+$ sudo systemctl start libvirtd
+----
+
 [[kvm-driver-networking]]
 === Configure libvirt networking
 

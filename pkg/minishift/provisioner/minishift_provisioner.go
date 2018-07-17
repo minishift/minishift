@@ -91,6 +91,13 @@ func (provisioner *MinishiftProvisioner) Package(name string, action pkgaction.P
 func (provisioner *MinishiftProvisioner) dockerDaemonResponding() bool {
 	log.Debug("checking docker daemon")
 
+	// Start the docker daemon service if not running.
+	if out, err := provisioner.SSHCommand("sudo systemctl -f start docker"); err != nil {
+		log.Warnf("Error getting SSH command to check if the daemon is running: %s", err)
+		log.Debugf("'sudo systemctl docker start' output:\n%s", out)
+		return false
+	}
+
 	if out, err := provisioner.SSHCommand("sudo docker version"); err != nil {
 		log.Warnf("Error getting SSH command to check if the daemon is running: %s", err)
 		log.Debugf("'sudo docker version' output:\n%s", out)

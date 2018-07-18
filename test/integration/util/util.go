@@ -263,6 +263,22 @@ func (m *MinishiftRunner) GetContainerStatusUsingImageId(imageId string) (string
 	return strings.Trim(cmdOut, " \n"), nil
 }
 
+func (m *MinishiftRunner) CpuInfo() (string, error) {
+	cmdOut, cmdErr, _ := m.RunCommand("ssh -- cat /proc/cpuinfo")
+	if cmdErr != "" {
+		return strings.Trim(cmdOut, " \n"), fmt.Errorf(cmdErr)
+	}
+	return strings.Trim(cmdOut, " \n"), nil
+}
+
+func (m *MinishiftRunner) DiskInfo() (string, error) {
+	cmdOut, cmdErr, _ := m.RunCommand("ssh -- sudo fdisk -l | grep Disk")
+	if cmdErr != "" {
+		return strings.Trim(cmdOut, " \n"), fmt.Errorf(cmdErr)
+	}
+	return strings.Trim(cmdOut, " \n"), nil
+}
+
 func NewOcRunner() *OcRunner {
 	jsonDataPath := filepath.Join(os.Getenv(constants.MiniShiftHomeEnv), "machines", constants.MachineName+"-state.json")
 	instanceState.InstanceStateConfig, _ = instanceState.NewInstanceStateConfig(jsonDataPath)

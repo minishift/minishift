@@ -227,6 +227,10 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)" (?:second|seconds) container name "(.*)" should be "(running|exited)"$`,
 		MinishiftInstance.containerStatus)
 
+	//Steps for resource check in a running VM
+	s.Step(`^Minishift VM should run with "(\d+)" vCPUs`, MinishiftInstance.ShouldHaveNoOfProcessors)
+	s.Step(`^Minishift VM should run within "(\d+)" to "(\d+)" GB of disk size`, MinishiftInstance.ShouldHaveDiskSize)
+
 	// steps for prototyping or debugging purposes, please do not use in production
 	s.Step(`^user (?:waits|waited) "(\d+)" seconds?$`,
 		func(seconds int) error {

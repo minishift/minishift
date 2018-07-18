@@ -210,17 +210,8 @@ user defined options which changes default behaviour of Minishift.
      Then stdout should match "Disk size\s*:\s*25 GB"
      Then stdout should match "vCPUs\s*:\s*3"
       And Minishift should have state "Running"
-
-  Scenario: Checking that disk-size value was applied
-     When executing "minishift ssh -- sudo fdisk -l | grep Disk" succeeds
-     Then stdout should match "Disk \/dev\/.da: 2[4-6]\.?[0-9]{0,2} (GB|GiB)"
-
-  Scenario: Checking that cpus value was applied
-     When executing "minishift ssh -- cat /proc/cpuinfo" succeeds
-     Then stdout should match "processor\s*: 0"
-      And stdout should match "processor\s*: 1"
-      And stdout should match "processor\s*: 2"
-      And stdout should not match "processor\s*: [3-9]"
+      And Minishift VM should run with "3" vCPUs
+      And Minishift VM should run within "25" to "27" GB of disk size
 
   Scenario: Checking that docker-env value was applied
      When printing Docker daemon configuration to stdout

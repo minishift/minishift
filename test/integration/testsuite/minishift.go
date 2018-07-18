@@ -21,6 +21,8 @@ package testsuite
 import (
 	"errors"
 	"fmt"
+	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -70,6 +72,40 @@ func (m *Minishift) profileShouldHaveState(profile string, expected string) erro
 	}
 
 	return nil
+}
+
+func (m *Minishift) ShouldHaveNoOfProcessors(noOfprocessor int) error {
+	cpuInfo, err := m.runner.CpuInfo()
+	if err != nil {
+		return err
+	}
+	cpuString := "processor\\s*:\\s*\\d"
+	re := regexp.MustCompile(cpuString)
+	listItems := re.FindAllString(cpuInfo, -1)
+	if len(listItems) != noOfprocessor {
+		return fmt.Errorf("The vm is running with %d no. of cpus. Expected: %d", len(listItems), noOfprocessor)
+	}
+	return nil
+}
+
+func (m *Minishift) ShouldHaveDiskSize(minDiskSize int, maxDiskSize int) error {
+	diskInfo, err := m.runner.DiskInfo()
+	if err != nil {
+		return err
+	}
+	re := regexp.MustCompile("Disk\\s*\\/dev\\/.da:\\s*(\\d+\\.[0-9]{0,2})\\s*(GB|GiB)")
+	matches := re.FindStringSubmatch(diskInfo)
+	if matches == nil {
+		return fmt.Errorf("Unable to find disk size string from command output: %s", diskInfo)
+	}
+	diskSize, err := strconv.ParseFloat(matches[1], 64)
+	if err != nil {
+		return fmt.Errorf("Unable to parse disk size %v GB to float number. Error: %v", matches[1], err)
+	}
+	if diskSize >= float64(minDiskSize) && diskSize <= float64(maxDiskSize) {
+		return nil
+	}
+	return fmt.Errorf("The vm is running with disk size of %v. Expected range : %d GB - %d GB", matches[1], minDiskSize, maxDiskSize)
 }
 
 func (m *Minishift) isTheActiveProfile(profileName string) error {

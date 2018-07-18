@@ -63,6 +63,29 @@ func NewSSHClient(d drivers.Driver) (*ssh.Client, error) {
 	return client, nil
 }
 
+func NewRawSSHClient(ip, sshKeyPath, username string) (*ssh.Client, error) {
+	h := &sshHost{
+		IP:         ip,
+		Port:       22,
+		SSHKeyPath: sshKeyPath,
+		Username:   username,
+	}
+	auth := &machinessh.Auth{}
+	if h.SSHKeyPath != "" {
+		auth.Keys = []string{h.SSHKeyPath}
+	}
+	config, err := machinessh.NewNativeConfig(h.Username, auth)
+	if err != nil {
+		return nil, err
+	}
+
+	client, err := ssh.Dial("tcp", net.JoinHostPort(h.IP, strconv.Itoa(h.Port)), &config)
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
 func TransferFile(f assets.CopyableFile, client *ssh.Client) error {
 	return Transfer(f, f.GetLength(),
 		f.GetTargetDir(), f.GetTargetName(),

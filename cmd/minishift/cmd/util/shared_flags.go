@@ -17,9 +17,8 @@ limitations under the License.
 package util
 
 import (
-	"strings"
-
 	flag "github.com/spf13/pflag"
+	"strings"
 )
 
 const (

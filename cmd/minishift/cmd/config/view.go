@@ -24,6 +24,8 @@ import (
 	"sort"
 	"text/template"
 
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
@@ -45,7 +47,11 @@ var configViewCmd = &cobra.Command{
 	Short: "Display the properties and values of the Minishift configuration file.",
 	Long:  "Display the properties and values of the Minishift configuration file. You can set the output format from one of the available Go templates.",
 	Run: func(cmd *cobra.Command, args []string) {
-		cfg, err := ReadConfig()
+		confFile := constants.ConfigFile
+		if global {
+			confFile = constants.GlobalConfigFile
+		}
+		cfg, err := config.ReadViperConfig(confFile)
 		if err != nil {
 			atexit.ExitWithMessage(1, err.Error())
 		}
@@ -64,6 +70,7 @@ func init() {
 		`Go template format to apply to the configuration file. For more information about Go templates, see: https://golang.org/pkg/text/template/
 		For the list of configurable variables for the template, see the struct values section of ConfigViewTemplate at: https://godoc.org/github.com/minishift/minishift/cmd/minishift/cmd/config#ConfigViewTemplate`)
 	ConfigCmd.AddCommand(configViewCmd)
+	configViewCmd.Flags().BoolVar(&global, "global", false, "View the global configuration properties and values")
 }
 
 func determineTemplate(tempFormat string) (tmpl *template.Template) {
@@ -74,7 +81,7 @@ func determineTemplate(tempFormat string) (tmpl *template.Template) {
 	return tmpl
 }
 
-func configView(cfg MinishiftConfig, tmpl *template.Template, writer io.Writer) error {
+func configView(cfg config.ViperConfig, tmpl *template.Template, writer io.Writer) error {
 	var lines []string
 	for k, v := range cfg {
 		_, excluded := excludedConfigKeys[k]

@@ -20,7 +20,9 @@ import (
 	"fmt"
 	"github.com/docker/machine/libmachine/provision"
 
-	"github.com/minishift/minishift/cmd/minishift/cmd/config"
+	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/minishift/docker"
 )
 
@@ -79,12 +81,12 @@ func (s DockerDnsService) Restart() (bool, error) {
 }
 
 func (s DockerDnsService) getDnsmasqContainerImage() (string, error) {
-	minishiftConfig, err := config.ReadConfig()
+	minishiftConfig, err := config.ReadViperConfig(constants.ConfigFile)
 	if err != nil {
 		return "", err
 	}
 
-	dnsmasqContainerImage := minishiftConfig[config.DnsmasqContainerImage.Name]
+	dnsmasqContainerImage := minishiftConfig[configCmd.DnsmasqContainerImage.Name]
 	if dnsmasqContainerImage != nil {
 		return fmt.Sprintf("%v", dnsmasqContainerImage), nil
 	}

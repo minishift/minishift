@@ -20,6 +20,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
@@ -41,6 +43,7 @@ var configUnsetCmd = &cobra.Command{
 
 func init() {
 	ConfigCmd.AddCommand(configUnsetCmd)
+	configUnsetCmd.Flags().BoolVar(&global, "global", false, "Unset the value of a configuration property in the global configuration file.")
 }
 
 func unset(name string) error {
@@ -48,7 +51,11 @@ func unset(name string) error {
 	if err != nil {
 		return err
 	}
-	m, err := ReadConfig()
+	confFile := constants.ConfigFile
+	if global {
+		confFile = constants.GlobalConfigFile
+	}
+	m, err := config.ReadViperConfig(confFile)
 	if err != nil {
 		return err
 	}
@@ -57,5 +64,5 @@ func unset(name string) error {
 	}
 	delete(m, name)
 	fmt.Printf("Property name '%s' successfully unset\n", name)
-	return WriteConfig(m)
+	return config.WriteViperConfig(confFile, m)
 }

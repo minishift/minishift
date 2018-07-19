@@ -28,6 +28,7 @@ import (
 	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	viperConfig "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/minishift/docker/image"
 	pkgUtil "github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
@@ -129,7 +130,7 @@ func toStringSlice(interfaceSlice []interface{}) []string {
 	return slice
 }
 
-func GetConfiguredCachedImages(minishiftConfig config.MinishiftConfig) []string {
+func GetConfiguredCachedImages(minishiftConfig viperConfig.ViperConfig) []string {
 	var cacheImages []string
 	if minishiftConfig[config.CacheImages.Name] == nil {
 		cacheImages = []string{}

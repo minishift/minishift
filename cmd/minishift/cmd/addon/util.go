@@ -22,8 +22,8 @@ import (
 
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/provision"
-	"github.com/minishift/minishift/cmd/minishift/cmd/config"
 	"github.com/minishift/minishift/cmd/minishift/state"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 	addOnConfig "github.com/minishift/minishift/pkg/minishift/addon/config"
 	"github.com/minishift/minishift/pkg/minishift/addon/manager"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
@@ -47,7 +47,7 @@ func GetAddOnManager() *manager.AddOnManager {
 // GetAddOnConfiguration reads the Minishift configuration in $MINISHIFT_HOME/config/config.json related to addons and returns
 // a map of addon names to AddOnConfig
 func GetAddOnConfiguration() map[string]*addOnConfig.AddOnConfig {
-	c, err := config.ReadConfig()
+	c, err := minishiftConfig.ReadViperConfig(constants.ConfigFile)
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot read the Minishift configuration: %s", err.Error()))
 	}

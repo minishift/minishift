@@ -20,6 +20,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
 )
@@ -45,10 +47,15 @@ var configGetCmd = &cobra.Command{
 
 func init() {
 	ConfigCmd.AddCommand(configGetCmd)
+	configGetCmd.Flags().BoolVar(&global, "global", false, "Get the value of a configuration property in the global configuration file.")
 }
 
 func get(name string) (string, error) {
-	m, err := ReadConfig()
+	confFile := constants.ConfigFile
+	if global {
+		confFile = constants.GlobalConfigFile
+	}
+	m, err := config.ReadViperConfig(confFile)
 	if err != nil {
 		return "", err
 	}

@@ -195,10 +195,25 @@ user defined options which changes default behaviour of Minishift.
     | property          | value              | expected             |
     | memory            | 3500               | 3500                 |
     | disk-size         | 25g                | 25g                  |
-    | cpus              | 3                  | 3                    |
     | docker-env        | FOO=BAR,hello=hi   | [FOO=BAR hello=hi]   |
     | docker-opt        | dns=8.8.8.8        | [dns=8.8.8.8]        |
-    | insecure-registry | test-registry:5000 | [test-registry:5000] |
+
+
+  Scenario Outline: Globally Setting values, getting values and keeping them
+  Setting values, not unsetting them so they will be used on next Minishift start.
+  Not every key possible is being tested only those which are less complicated,
+  for example the http-proxy key is being tested in separate feature file.
+    When executing "minishift config set --global <property> "<value>"" succeeds
+    Then stdout of command "minishift config get --global <property>" is equal to "<expected>"
+
+    Examples: Values to be used on next Minishift start
+      | property          | value              | expected             |
+      | memory            | 4200               | 4200                 |
+      | disk-size         | 40g                | 40g                  |
+      | cpus              | 3                  | 3                    |
+      | docker-env        | HI=BYE,hello=hi    | [HI=BYE hello=hi]    |
+      | docker-opt        | dns=1.1.1.1        | [dns=1.1.1.1]        |
+      | insecure-registry | test-registry:5000 | [test-registry:5000] |
 
   Scenario: Minishift informs about starting with correct setup of memory, disk and CPU
   Note: Minishift rounds the values for the report to make it more readable.

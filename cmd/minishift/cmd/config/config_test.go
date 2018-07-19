@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -96,7 +97,7 @@ var configTestCases = []configTestCase{
 func TestReadConfig(t *testing.T) {
 	for _, tt := range configTestCases {
 		r := bytes.NewBufferString(tt.data)
-		config, err := decode(r)
+		config, err := config.Decode(r)
 		assert.NoError(t, err, "Error Decoding config")
 		assert.ObjectsAreEqualValues(tt.data, config)
 	}
@@ -105,7 +106,7 @@ func TestReadConfig(t *testing.T) {
 func TestWriteConfig(t *testing.T) {
 	var b bytes.Buffer
 	for _, tt := range configTestCases {
-		err := encode(&b, tt.config)
+		err := config.Encode(&b, tt.config)
 		assert.NoError(t, err, "Error Encoding config")
 		assert.Equal(t, b.String(), tt.data)
 		b.Reset()

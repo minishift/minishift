@@ -177,9 +177,12 @@ This environment variable is currently experimental and semantics might change i
 === Persistent Configuration
 
 Using persistent configuration allows you to control {project} behavior without specifying actual command line flags, similar to the way you use environment variables.
+You can also define global configuration using--global flag. Global configuration is applicable to all profiles.
 
 {project} maintains a configuration file in *_$MINISHIFT_HOME/config/config.json_*.
-This file can be used to set commonly-used command line flags persistently.
+This file can be used to set commonly-used command line flags persistently for individual profiles.
+{The global configuration file is maintained at *_$MINISHIFT_HOME/config/global.json_*.
+
 
 [NOTE]
 ====
@@ -196,6 +199,13 @@ For example:
 ----
 # Set default memory 4096 MB
 $ minishift config set memory 4096
+----
+
+The easiest way to set a persistent configuration option across all profiles is with the xref:../command-ref/minishift_config_set.adoc#[`minishift config set --global`] sub-command.
+
+For example, you can set the default memory to 8192 MB for every profile as follows:
+----
+$ minishift config set --global memory 8192
 ----
 
 Flags which can be used multiple times per command invocation, like `docker-env` or `insecure-registry`, need to be comma-separated when used with the `config set` command.
@@ -218,6 +228,13 @@ $ minishift config view
 - memory: 4096
 ----
 
+To view all persistent configuration values in the global configuration file, you can use the xref:../command-ref/minishift_config_view.adoc#[`minishift config view --global`] sub-command:
+
+----
+$ minishift config view --global
+- memory: 8192
+----
+
 Alternatively, you can display a single value with the xref:../command-ref/minishift_config_get.adoc#[`minishift config get`] sub-command:
 
 ----
@@ -234,6 +251,16 @@ For example:
 ----
 $ minishift config unset memory
 ----
+
+[NOTE]
+====
+The precedence for user-defined values is as follows:
+
+. Command line flags.
+. Environment variable.
+. Instance-specific configuration.
+. Global configuration.
+====
 
 [[persistent-volumes]]
 == Persistent Volumes

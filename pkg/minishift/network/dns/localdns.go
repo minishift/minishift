@@ -24,6 +24,7 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/network"
 
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 
 	"github.com/minishift/minishift/pkg/util/os/atexit"
@@ -50,7 +51,7 @@ func checkSupportForDnsmasqServer() bool {
 // isContainerized allows to force containerized deployment
 // Should be using Instance config. See #1796
 func isContainerized() (bool, error) {
-	minishiftConfig, err := configCmd.ReadConfig()
+	minishiftConfig, err := minishiftConfig.ReadViperConfig(constants.ConfigFile)
 	if err != nil || minishiftConfig[configCmd.DnsmasqContainerized.Name] == nil {
 		return false, err
 	}

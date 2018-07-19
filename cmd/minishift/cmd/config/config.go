@@ -17,13 +17,8 @@ limitations under the License.
 package config
 
 import (
-	"encoding/json"
-	"fmt"
-	"io"
-	"os"
 	"strings"
 
-	"github.com/minishift/minishift/pkg/minikube/constants"
 	validations "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -39,7 +34,7 @@ type MinishiftConfig map[string]interface{}
 
 type Setting struct {
 	Name        string
-	set         func(MinishiftConfig, string, string) error
+	set         func(validations.ViperConfig, string, string) error
 	validations []setFn
 	callbacks   []setFn
 }
@@ -159,7 +154,7 @@ var (
 	HypervVirtualSwitch = createConfigSetting("hyperv-virtual-switch", SetString, []setFn{validations.IsValidHypervVirtualSwitch}, nil, true, nil)
 )
 
-func createConfigSetting(name string, set func(MinishiftConfig, string, string) error, validations []setFn, callbacks []setFn, isApply bool, defaultVal interface{}) *Setting {
+func createConfigSetting(name string, set func(validations.ViperConfig, string, string) error, validations []setFn, callbacks []setFn, isApply bool, defaultVal interface{}) *Setting {
 	flag := Setting{
 		Name:        name,
 		set:         set,
@@ -175,17 +170,20 @@ func createConfigSetting(name string, set func(MinishiftConfig, string, string) 
 	return &flag
 }
 
-var ConfigCmd = &cobra.Command{
-	Use:   "config SUBCOMMAND [flags]",
-	Short: "Modifies Minishift configuration properties.",
-	Long: `Modifies Minishift configuration properties. Some of the configuration properties are equivalent
+var (
+	ConfigCmd = &cobra.Command{
+		Use:   "config SUBCOMMAND [flags]",
+		Short: "Modifies Minishift configuration properties.",
+		Long: `Modifies Minishift configuration properties. Some of the configuration properties are equivalent
 to the options that you set when you run the 'minishift start' command.
 
 Configurable properties (enter as SUBCOMMAND): ` + "\n\n" + configurableFields(),
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
-	},
-}
+		Run: func(cmd *cobra.Command, args []string) {
+			cmd.Help()
+		},
+	}
+	global bool
+)
 
 func configurableFields() string {
 	var fields []string
@@ -193,53 +191,4 @@ func configurableFields() string {
 		fields = append(fields, " * "+s.Name)
 	}
 	return strings.Join(fields, "\n")
-}
-
-// ReadConfig reads the config from $MINISHIFT_HOME/config/config.json file
-func ReadConfig() (MinishiftConfig, error) {
-	f, err := os.Open(constants.ConfigFile)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return make(map[string]interface{}), nil
-		}
-		return nil, fmt.Errorf("Cannot open file '%s': %s", constants.ConfigFile, err)
-	}
-	var m MinishiftConfig
-	m, err = decode(f)
-	if err != nil {
-		return nil, fmt.Errorf("Cannot decode config '%s': %s", constants.ConfigFile, err)
-	}
-
-	return m, nil
-}
-
-// Writes a config to the $MINISHIFT_HOME/config/config.json file
-func WriteConfig(m MinishiftConfig) error {
-	f, err := os.Create(constants.ConfigFile)
-	if err != nil {
-		return fmt.Errorf("Cannot create file '%s': %s", constants.ConfigFile, err)
-	}
-	defer f.Close()
-	err = encode(f, m)
-	if err != nil {
-		return fmt.Errorf("Cannot encode config '%s': %s", constants.ConfigFile, err)
-	}
-	return nil
-}
-
-func decode(r io.Reader) (MinishiftConfig, error) {
-	var data MinishiftConfig
-	err := json.NewDecoder(r).Decode(&data)
-	return data, err
-}
-
-func encode(w io.Writer, m MinishiftConfig) error {
-	b, err := json.MarshalIndent(m, "", "    ")
-	if err != nil {
-		return err
-	}
-
-	_, err = w.Write(b)
-
-	return err
 }

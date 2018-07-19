@@ -20,10 +20,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/stretchr/testify/assert"
 )
 
-var minikubeConfig = MinishiftConfig{
+var minikubeConfig = config.ViperConfig{
 	"vm-driver":            "kvm",
 	"cpus":                 12,
 	"show-libmachine-logs": true,

@@ -72,13 +72,15 @@ func FeatureContext(s *godog.Suite) {
 
 	MinishiftInstance = &Minishift{runner: runner}
 
-	// steps to execute `minishift` commands
+	// Checking Minishift status and profiles
 	s.Step(`^Minishift (?:has|should have) state "(Does Not Exist|Running|Stopped)"$`,
 		MinishiftInstance.shouldHaveState)
 	s.Step(`^profile (.*) (?:has|should have) state "(Does Not Exist|Running|Stopped)"$`,
 		MinishiftInstance.profileShouldHaveState)
 	s.Step(`profile (.*) (?:is the|should be the) active profile$`,
 		MinishiftInstance.isTheActiveProfile)
+
+	// Execution of `minishift` commands
 	s.Step(`^executing "minishift (.*)"$`,
 		MinishiftInstance.ExecutingMinishiftCommand)
 	s.Step(`^executing "minishift (.*)" (succeeds|fails)$`,
@@ -88,12 +90,8 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^([^"]*) of command "minishift (.*)" (contains|does not contain) "(.*)"$`,
 		commandReturnContains)
 
-	// setting image caching operation
-	s.Step(`^image caching is (disabled|enabled)$`, MinishiftInstance.setImageCaching)
-	s.Step(`^image export completes with (\d+) images within (\d+) minutes$`, MinishiftInstance.imageExportShouldComplete)
-	s.Step(`^container image "(.*)" is cached$`, MinishiftInstance.imageShouldHaveCached)
-
-	// steps to execute `oc` commands
+	// Execution of `oc` commands
+	// will use default version of oc binary at stored at .minishift/cache/oc
 	s.Step(`^executing "oc (.*)" retrying (\d+) times with wait period of (\d+) seconds$`,
 		MinishiftInstance.executingRetryingTimesWithWaitPeriodOfSeconds)
 	s.Step(`^executing "oc (.*)"$`,
@@ -101,37 +99,9 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^executing "oc (.*)" (succeeds|fails)$`,
 		ExecutingOcCommandSucceedsOrFails)
 
-	// steps for scenario variables
-	s.Step(`^setting scenario variable "(.*)" to the stdout from executing "oc (.*)"$`,
-		MinishiftInstance.setVariableExecutingOcCommand)
-	s.Step(`^setting scenario variable "(.*)" to the stdout from executing "minishift (.*)"$`,
-		MinishiftInstance.setVariableExecutingMinishiftCommand)
-	s.Step(`^scenario variable "(.*)" should not be empty$`,
-		variableShouldNotBeEmpty)
-
-	// steps for set and unset environment variable
-	s.Step(`^setting up environment variable "(.*)" with value "(.*)" succeeds$`,
-		setEnvironmentVariable)
-	s.Step(`^unset environment variable "(.*)" succeeds$`,
-		unSetEnvironmentVariable)
-
-	// steps for rollout check
-	s.Step(`^services? "([^"]*)" rollout successfully$`,
-		MinishiftInstance.rolloutServicesSuccessfully)
-	s.Step(`^services? "([^"]*)" rollout successfully within "(\d+)" seconds$`,
-		MinishiftInstance.rolloutServicesSuccessfullyBeforeTimeout)
-
-	// steps for proxying
-	s.Step(`^user starts proxy server and sets MINISHIFT_HTTP_PROXY variable$`,
-		testProxy.SetProxy)
-	s.Step(`^user stops proxy server and unsets MINISHIFT_HTTP_PROXY variable$`,
-		testProxy.UnsetProxy)
-	s.Step(`^proxy log should contain "(.*)"$`,
-		proxyLogShouldContain)
-	s.Step(`^proxy log should contain$`,
-		proxyLogShouldContainContent)
-
-	// steps to verify `stdout`, `stderr` and `exitcode` of commands executed
+	// Command output verification
+	// steps to verify `stdout`, `stderr` and `exitcode` of last executed command,
+	// supports simple string verification and also regular expressions.
 	s.Step(`^(stdout|stderr|exitcode) should contain "(.*)"$`,
 		commandReturnShouldContain)
 	s.Step(`^(stdout|stderr|exitcode) should not contain "(.*)"$`,
@@ -150,7 +120,6 @@ func FeatureContext(s *godog.Suite) {
 		commandReturnShouldNotBeEmpty)
 	s.Step(`^(stdout|stderr|exitcode) should be valid (.*)$`,
 		shouldBeInValidFormat)
-	// steps for matching stdout, stderr or exitcode with regular expression
 	s.Step(`^(stdout|stderr|exitcode) should match "(.*)"$`,
 		commandReturnShouldMatchRegex)
 	s.Step(`^(stdout|stderr|exitcode) should not match "(.*)"$`,
@@ -160,40 +129,9 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^(stdout|stderr|exitcode) should not match$`,
 		commandReturnShouldNotMatchRegexContent)
 
-	// step for HTTP requests to OpenShift instance
-	s.Step(`^"(body|status code)" of HTTP request to "([^"]*)" (contains|is equal to) "(.*)"$`,
-		verifyRequestToURL)
-	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)ms" the "(body|status code)" of HTTP request to "([^"]*)" (contains|is equal to) "(.*)"$`,
-		verifyRequestToURLWithRetry)
-	s.Step(`^"(body|status code)" of HTTP request to "([^"]*)" of OpenShift instance (contains|is equal to) "(.*)"$`,
-		verifyRequestToOpenShift)
-	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)ms" the "(body|status code)" of HTTP request to "([^"]*)" of OpenShift instance (contains|is equal to) "(.*)"$`,
-		verifyRequestToOpenShiftWithRetry)
-	s.Step(`^"(body|status code)" of HTTP request to "([^"]*)" of service "([^"]*)" in namespace "([^"]*)" (contains|is equal to) "(.*)"$`,
-		verifyRequestToService)
-	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)ms" the "(body|status code)" of HTTP request to "([^"]*)" of service "([^"]*)" in namespace "([^"]*)" (contains|is equal to) "(.*)"$`,
-		verifyRequestToServiceWithRetry)
-
-	// steps for verifying config file content
-	s.Step(`^(JSON|YAML) config file "(.*)" (contains|does not contain) key "(.*)" with value matching "(.*)"$`,
-		configFileContainsKeyMatchingValue)
-	s.Step(`^(JSON|YAML) config file "(.*)" (has|does not have) key "(.*)"$`,
-		configFileContainsKey)
-
-	s.Step(`^(stdout|stderr) is (JSON|YAML) which (contains|does not contain) key "(.*)" with value matching "(.*)"$`,
-		stdoutContainsKeyMatchingValue)
-	s.Step(`^(stdout|stderr) is (JSON|YAML) which (has|does not have) key "(.*)"$`,
-		stdoutContainsKey)
-
-	// iso dependent steps
-	s.Step(`^printing Docker daemon configuration to stdout$`,
-		catDockerConfigFile)
-
-	// steps for download of minishift-addons repository
-	s.Step(`^file from "(.*)" is downloaded into location "(.*)"$`,
-		downloadFileIntoLocation)
-
-	// steps for executing commands in shell
+	// Executing commands in shells
+	// for testing of integration with specific shells, for example, to test oc-env and docker-env
+	// commands which uses `export` command (and its cmd and powershell alternatives)
 	s.Step(`^user starts shell instance on host machine$`,
 		startHostShellInstance)
 	s.Step(`^user closes shell instance on host machine$`,
@@ -206,6 +144,8 @@ func FeatureContext(s *godog.Suite) {
 		util.ExecuteInHostShell)
 	s.Step(`^executing "(.*)" in host shell (succeeds|fails)$`,
 		util.ExecuteInHostShellSucceedsOrFails)
+
+	// Shell output verification
 	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)" (?:second|seconds) command "(.*)" output (?:should contain|contains) "(.*)"$`,
 		util.ExecuteCommandInHostShellWithRetry)
 	s.Step(`^(stdout|stderr) of host shell (?:should contain|contains) "(.*)"$`,
@@ -223,23 +163,103 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^evaluating stdout of the previous command in host shell$`,
 		util.ExecuteInHostShellLineByLine)
 
-	// steps for container status
+	// Scenario variables
+	// allows to set a scenario variable to the output values of minishift and oc commands
+	// and then refer to it by $(NAME_OF_VARIABLE) directly in the text of feature file
+	s.Step(`^setting scenario variable "(.*)" to the stdout from executing "oc (.*)"$`,
+		MinishiftInstance.setVariableExecutingOcCommand)
+	s.Step(`^setting scenario variable "(.*)" to the stdout from executing "minishift (.*)"$`,
+		MinishiftInstance.setVariableExecutingMinishiftCommand)
+	s.Step(`^scenario variable "(.*)" should not be empty$`,
+		variableShouldNotBeEmpty)
+
+	// Environment variables
+	s.Step(`^setting up environment variable "(.*)" with value "(.*)" succeeds$`,
+		setEnvironmentVariable)
+	s.Step(`^unset environment variable "(.*)" succeeds$`,
+		unSetEnvironmentVariable)
+
+	// Image caching operations
+	s.Step(`^image caching is (disabled|enabled)$`,
+		MinishiftInstance.setImageCaching)
+	s.Step(`^image export completes with (\d+) images within (\d+) minutes$`,
+		MinishiftInstance.imageExportShouldComplete)
+	s.Step(`^container image "(.*)" is cached$`,
+		MinishiftInstance.imageShouldHaveCached)
+
+	// Service rollout
+	// to wait until service is deployed and ready before followin steps are started
+	s.Step(`^services? "([^"]*)" rollout successfully$`,
+		MinishiftInstance.rolloutServicesSuccessfully)
+	s.Step(`^services? "([^"]*)" rollout successfully within "(\d+)" seconds$`,
+		MinishiftInstance.rolloutServicesSuccessfullyBeforeTimeout)
+
+	// Proxy testing
+	// starts and sets a proxy server, checks for traffic on it, stops and unsets the server
+	s.Step(`^user starts proxy server and sets MINISHIFT_HTTP_PROXY variable$`,
+		testProxy.SetProxy)
+	s.Step(`^user stops proxy server and unsets MINISHIFT_HTTP_PROXY variable$`,
+		testProxy.UnsetProxy)
+	s.Step(`^proxy log should contain "(.*)"$`,
+		proxyLogShouldContain)
+	s.Step(`^proxy log should contain$`,
+		proxyLogShouldContainContent)
+
+	// HTTP requests to OpenShift instance
+	// to check OpenShift console and HTTP endpoint of deployed applications
+	s.Step(`^"(body|status code)" of HTTP request to "([^"]*)" (contains|is equal to) "(.*)"$`,
+		verifyRequestToURL)
+	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)ms" the "(body|status code)" of HTTP request to "([^"]*)" (contains|is equal to) "(.*)"$`,
+		verifyRequestToURLWithRetry)
+	s.Step(`^"(body|status code)" of HTTP request to "([^"]*)" of OpenShift instance (contains|is equal to) "(.*)"$`,
+		verifyRequestToOpenShift)
+	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)ms" the "(body|status code)" of HTTP request to "([^"]*)" of OpenShift instance (contains|is equal to) "(.*)"$`,
+		verifyRequestToOpenShiftWithRetry)
+	s.Step(`^"(body|status code)" of HTTP request to "([^"]*)" of service "([^"]*)" in namespace "([^"]*)" (contains|is equal to) "(.*)"$`,
+		verifyRequestToService)
+	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)ms" the "(body|status code)" of HTTP request to "([^"]*)" of service "([^"]*)" in namespace "([^"]*)" (contains|is equal to) "(.*)"$`,
+		verifyRequestToServiceWithRetry)
+
+	// Config file content, JSON and YAML
+	s.Step(`^(JSON|YAML) config file "(.*)" (contains|does not contain) key "(.*)" with value matching "(.*)"$`,
+		configFileContainsKeyMatchingValue)
+	s.Step(`^(JSON|YAML) config file "(.*)" (has|does not have) key "(.*)"$`,
+		configFileContainsKey)
+	s.Step(`^(stdout|stderr) is (JSON|YAML) which (contains|does not contain) key "(.*)" with value matching "(.*)"$`,
+		stdoutContainsKeyMatchingValue)
+	s.Step(`^(stdout|stderr) is (JSON|YAML) which (has|does not have) key "(.*)"$`,
+		stdoutContainsKey)
+
+	// Container status
 	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)" (?:second|seconds) container name "(.*)" should be "(running|exited)"$`,
 		MinishiftInstance.containerStatus)
 
-	//Steps for resource check in a running VM
-	s.Step(`^Minishift VM should run with "(\d+)" vCPUs`, MinishiftInstance.ShouldHaveNoOfProcessors)
-	s.Step(`^Minishift VM should run within "(\d+)" to "(\d+)" GB of disk size`, MinishiftInstance.ShouldHaveDiskSize)
+	// Resource and config checks inside the running VM
+	s.Step(`^Minishift VM should run with "(\d+)" vCPUs`,
+		MinishiftInstance.ShouldHaveNoOfProcessors)
+	s.Step(`^Minishift VM should run within "(\d+)" to "(\d+)" GB of disk size`,
+		MinishiftInstance.ShouldHaveDiskSize)
+	s.Step(`^printing Docker daemon configuration to stdout$`,
+		catDockerConfigFile)
 
-	// steps for prototyping or debugging purposes, please do not use in production
+	// File download
+	// when external file is needed, for example, when downloading addon from minishift-addons
+	s.Step(`^file from "(.*)" is downloaded into location "(.*)"$`,
+		downloadFileIntoLocation)
+
+	// Directory operations
+	s.Step(`^deleting directory "([^"]*)" succeeds$`,
+		deletingDirectorySucceeds)
+	s.Step(`^directory "([^"]*)" shouldn\'t exist$`,
+		directoryShouldntExist)
+
+	// Prototyping and debugging
+	// please do not use in production
 	s.Step(`^user (?:waits|waited) "(\d+)" seconds?$`,
 		func(seconds int) error {
 			time.Sleep(time.Duration(seconds) * time.Second)
 			return nil
 		})
-
-	s.Step(`^deleting directory "([^"]*)" succeeds$`, deletingDirectorySucceeds)
-	s.Step(`^directory "([^"]*)" shouldn\'t exist$`, directoryShouldntExist)
 
 	s.BeforeSuite(func() {
 		testDir, testDefaultHome = setupTestDirectory()

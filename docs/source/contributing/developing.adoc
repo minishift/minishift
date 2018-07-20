@@ -362,6 +362,7 @@ Multiple values for a `GODOG_OPTS` option must be separated by a comma without w
 For example, `-tags basic,openshift` will be parsed properly by `make`, whereas `-tags basic, openshift` will result in only `@basic` being used.
 ====
 
+[[viewing-results]]
 ==== Viewing Results
 
 The integration test logs its progress directly into a console.
@@ -370,6 +371,31 @@ This information is often enough to find and debug the reason for a failure.
 However, for cases which require further investigation, the integration test also logs more detailed progress into a log file.
 This file is located at *_$GOPATH/github.com/minishift/minishift/out/test-results/integration_YYYY-MM-DD_HH:MM:SS.log_*.
 
+[[writing-features]]
+==== Writing features
+
+Minishift integration testsuite offers a comprehensive set of implemented Gherkin steps which allow for comfortable writing of feature files.
+All available steps are defined in the file link:https://github.com/minishift/minishift/blob/master/test/integration/testsuite/testsuite.go[/test/integration/testsuite.go].
+Definitions of steps are simple and self-documenting, for example:
+
+----
+s.Step(`^executing "minishift (.*)" (succeeds|fails)$`,
+    ExecutingMinishiftCommandSucceedsOrFails)
+----
+
+This defines a step which matches regular expression `^executing "minishift (.*)" (succeeds|fails)$`.
+If matched, the two capturing groups are passed as parameters to the function `ExecutingMinishiftCommandSucceedsOrFails(command string, expectedResult string)`, which implements the actual behaviour of the step.
+
+To use the step in the feature file, you need to make sure it matches with the regular expression and prepend one of the Gherkin keywords: `Given`, `When`, `Then`, `And` or `But`, for example:
+
+----
+Then executing "minishift config set memory 3gb" succeeds
+----
+
+[NOTE]
+====
+See the link:https://docs.cucumber.io/gherkin/reference[Gherkin Reference] for more general information about the structure of Gherkin, its features, scenarios, and steps.
+====
 
 [[integration-tests-as-package]]
 ==== Using Integration Tests as a Package

@@ -22,3 +22,4 @@ extend {project}:
 - xref:./troubleshooting/index.adoc#[Troubleshooting {project}]
 - xref:./contributing/index.adoc#[Contributing to {project}]
 - xref:./command-ref/minishift.adoc#[Command Reference]
+- xref:./tutorial/index.adoc#[Tutorial]

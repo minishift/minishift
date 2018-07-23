@@ -1,0 +1,46 @@
+include::variables.adoc[]
+
+= Hello {project}
+:icons:
+:toc: macro
+:toc-title:
+:toclevels: 2
+
+toc::[]
+
+[[hello-overview]]
+== Overview
+
+This page will describe the different ways of setting up the {project} environment and deploy your first "hello world" application.
+
+[[basic-setup]]
+== Basic Setup
+
+To get the very basic setup, follow the instructions as described in xref:../getting-started/quickstart.adoc#[Minishift Quickstart].
+In this setup, your environment (VM) will have 2GB of memory, 20GB hard disk space and booted with default link:https://github.com/Minishift/minishift-centos-iso[CentOS ISO].
+
+[[customized-setup]]
+== Customized Setup
+
+There can be scenarios in your development environment where you want to persist some of your configurations prior starting your your environment.
+For example, you want to set memory other than default or use different ISO altogether.
+
+For such case, you can follow this approach of setting up your environment.
+
+Few common configurations are listed here and rest of the configurable properties can be found in xref:../command-ref/minishift_config.adoc#[minishift config] command reference.
+
+===== Set default memory as 4096 MB or 4GB
+----
+$ minishift config set memory 4096
+----
+
+or
+
+----
+$ minishift config set memory 4GB
+----
+
+===== Set multiple insecure registries
+----
+$ minishift config set insecure-registry hub.foo.com,hub.bar.com
+----

@@ -1,0 +1,8 @@
+include::variables.adoc[]
+
+= {project} Tutorial
+:icons:
+
+This tutorial provides a walkthrough of the basics right from the various ways of setting up {project} environment and advanced concepts like configurations, profiles, image-caching, addons, host folders etc.
+
+- xref:../tutorial/hello.adoc#[Hello Minishift]

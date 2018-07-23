@@ -75,8 +75,8 @@ var (
 
 	// Setting proxy
 	NoProxyList = createConfigSetting("no-proxy", SetString, nil, nil, true, nil)
-	HttpProxy   = createConfigSetting("http-proxy", SetString, []setFn{validations.IsValidHttpProxy}, nil, true, nil)
-	HttpsProxy  = createConfigSetting("https-proxy", SetString, []setFn{validations.IsValidHttpsProxy}, nil, true, nil)
+	HttpProxy   = createConfigSetting("http-proxy", SetString, []setFn{validations.IsValidProxy}, nil, true, nil)
+	HttpsProxy  = createConfigSetting("https-proxy", SetString, []setFn{validations.IsValidProxy}, nil, true, nil)
 
 	// Subscription Manager
 	Username         = createConfigSetting("username", SetString, nil, nil, true, nil)

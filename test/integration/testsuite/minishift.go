@@ -90,12 +90,18 @@ func (m *Minishift) isTheActiveProfile(profileName string) error {
 func (m *Minishift) containerStatus(retryCount int, retryWaitPeriod int, containerName string, expected string) error {
 	var containerState string
 	for i := 0; i < retryCount; i++ {
-		runningContainers := m.runner.GetOpenshiftContainers(containerName)
+		runningContainers, err := m.runner.GetOpenshiftContainers(containerName)
+		if err != nil {
+			return err
+		}
 		individualContainerRows := strings.Split(runningContainers, "\n")
 		for _, individualContainer := range individualContainerRows {
 			if strings.Contains(individualContainer, containerName) {
 				containerId := strings.Split(individualContainer, " ")[0]
-				containerState = m.runner.GetContainerStatusUsingImageId(containerId)
+				containerState, err = m.runner.GetContainerStatusUsingImageId(containerId)
+				if err != nil {
+					return err
+				}
 				if !strings.Contains(containerState, expected) {
 					return fmt.Errorf("Container state did not match. Expected: %s, Actual: %s", expected, containerState)
 				}

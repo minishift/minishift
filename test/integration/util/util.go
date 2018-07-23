@@ -247,14 +247,20 @@ func (m *MinishiftRunner) GetProfileList() string {
 	return strings.Trim(cmdOut, " \n")
 }
 
-func (m *MinishiftRunner) GetOpenshiftContainers(containerName string) string {
-	cmdOut, _, _ := m.RunCommand(fmt.Sprintf(`ssh -- docker ps -f "name=%s"`, containerName))
-	return strings.Trim(cmdOut, " \n")
+func (m *MinishiftRunner) GetOpenshiftContainers(containerName string) (string, error) {
+	cmdOut, cmdErr, _ := m.RunCommand(fmt.Sprintf(`ssh -- docker ps -f "name=%s"`, containerName))
+	if cmdErr != "" {
+		return strings.Trim(cmdOut, " \n"), fmt.Errorf(cmdErr)
+	}
+	return strings.Trim(cmdOut, " \n"), nil
 }
 
-func (m *MinishiftRunner) GetContainerStatusUsingImageId(imageId string) string {
-	cmdOut, _, _ := m.RunCommand("ssh -- docker inspect -f '{{.State.Status}}'" + " " + imageId)
-	return strings.Trim(cmdOut, " \n")
+func (m *MinishiftRunner) GetContainerStatusUsingImageId(imageId string) (string, error) {
+	cmdOut, cmdErr, _ := m.RunCommand("ssh -- docker inspect -f '{{.State.Status}}'" + " " + imageId)
+	if cmdErr != "" {
+		return strings.Trim(cmdOut, " \n"), fmt.Errorf(cmdErr)
+	}
+	return strings.Trim(cmdOut, " \n"), nil
 }
 
 func NewOcRunner() *OcRunner {

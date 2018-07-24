@@ -54,7 +54,7 @@ func init() {
 
 func runViewConfig(cmd *cobra.Command, args []string) {
 	configFileTarget := determineTarget(configTarget)
-	if configFileTarget == openshift.UNKNOWN {
+	if configFileTarget == openshift.GetOpenShiftPatchTarget("unknown") {
 		atexit.ExitWithMessage(1, unknownConfigTargetError)
 	}
 

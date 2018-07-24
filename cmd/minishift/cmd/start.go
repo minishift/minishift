@@ -177,13 +177,18 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	proxyConfig := handleProxies()
 
+	// Get proper OpenShift version
+	requestedOpenShiftVersion, err := cmdUtil.GetOpenShiftReleaseVersion()
+	if err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error getting OpenShift version: %v", err))
+	}
+
 	// preflight check (before start)
 	if viper.GetString(configCmd.VmDriver.Name) != genericDriver {
 		preflightChecksBeforeStartingHost()
 	}
 
 	// Cache OC binary before starting the VM and perform oc command option check
-	requestedOpenShiftVersion := viper.GetString(configCmd.OpenshiftVersion.Name)
 	ocPath = cmdUtil.CacheOc(requestedOpenShiftVersion)
 	preflightChecksForArtifacts()
 
@@ -220,7 +225,7 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	applyDockerEnvToProcessEnv(libMachineClient)
 
-	err := clusterup.EnsureHostDirectoriesExist(hostVm, getRequiredHostDirectories())
+	err = clusterup.EnsureHostDirectoriesExist(hostVm, getRequiredHostDirectories())
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error creating required host directories: %v", err))
 	}
@@ -626,7 +631,7 @@ func initStartFlags() *flag.FlagSet {
 	startFlagSet.String(configCmd.DiskSize.Name, constants.DefaultDiskSize, "Disk size to allocate to the Minishift VM. Use the format <size><unit>, where unit = MB or GB.")
 	startFlagSet.String(configCmd.HostOnlyCIDR.Name, "192.168.99.1/24", "The CIDR to be used for the minishift VM. (Only supported with VirtualBox driver.)")
 	startFlagSet.Bool(configCmd.SkipPreflightChecks.Name, false, "Skip the startup checks.")
-	startFlagSet.String(configCmd.OpenshiftVersion.Name, version.GetOpenShiftVersion(), fmt.Sprintf("The OpenShift version to run, eg. %s", version.GetOpenShiftVersion()))
+	startFlagSet.String(configCmd.OpenshiftVersion.Name, version.GetOpenShiftVersion(), fmt.Sprintf("The OpenShift version to run, eg. latest or %s", version.GetOpenShiftVersion()))
 
 	startFlagSet.String(configCmd.RemoteIPAddress.Name, "", "IP address of the remote machine to provision OpenShift on")
 	startFlagSet.String(configCmd.RemoteSSHUser.Name, "", "The username of the remote machine to provision OpenShift on")

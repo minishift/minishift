@@ -34,6 +34,7 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/docker"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/github"
+	"github.com/minishift/minishift/pkg/version"
 )
 
 func GetOpenshiftVersion(sshCommander provision.SSHCommander) (string, error) {
@@ -77,23 +78,16 @@ func PrintDownStreamVersions(output io.Writer, minSupportedVersion string) error
 // 	1. Major versions greater than or equal to the minimum supported and default version
 //	2. Pre-release versions greater than default version
 func PrintUpStreamVersions(output io.Writer, minSupportedVersion string, defaultVersion string) error {
-	var releaseList []string
-	data, err := getGithubReleases()
+	tags, err := GetGithubReleases()
 	if err != nil {
 		return err
 	}
-	for _, releaseTag := range data {
-		if valid, _ := IsGreaterOrEqualToBaseVersion(releaseTag, minSupportedVersion); valid {
-			if valid, _ := IsGreaterOrEqualToBaseVersion(releaseTag, defaultVersion); valid {
-				releaseList = append(releaseList, releaseTag)
-			} else {
-				if !isPrerelease(releaseTag) {
-					releaseList = append(releaseList, releaseTag)
-				}
-			}
-		}
+
+	releaseList, err := OpenShiftTagsByAscending(tags, minSupportedVersion, defaultVersion)
+	if err != nil {
+		return err
 	}
-	sort.Strings(releaseList)
+
 	fmt.Fprint(output, "The following OpenShift versions are available: \n")
 	for _, tag := range releaseList {
 		fmt.Fprintf(output, "\t- %s\n", tag)
@@ -136,7 +130,7 @@ func IsGreaterOrEqualToBaseVersion(version string, baseVersion string) (bool, er
 	return false, nil
 }
 
-func getGithubReleases() ([]string, error) {
+func GetGithubReleases() ([]string, error) {
 	var releaseTags []string
 	ctx := context.Background()
 	client := github.Client()
@@ -152,4 +146,43 @@ func getGithubReleases() ([]string, error) {
 		releaseTags = append(releaseTags, *release.Name)
 	}
 	return releaseTags, nil
+}
+
+func OpenShiftTagsByAscending(tags []string, minSupportedVersion, defaultVersion string) ([]string, error) {
+	var tagList []string
+
+	for _, tag := range tags {
+		if valid, _ := IsGreaterOrEqualToBaseVersion(tag, minSupportedVersion); valid {
+			if valid, _ := IsGreaterOrEqualToBaseVersion(tag, defaultVersion); valid {
+				tagList = append(tagList, tag)
+			} else {
+				if !isPrerelease(tag) {
+					tagList = append(tagList, tag)
+				}
+			}
+		}
+	}
+
+	return sortTagsViaSemverSort(tagList), nil
+}
+
+func sortTagsViaSemverSort(tags []string) []string {
+	var (
+		versionTags   []semver.Version
+		tagsInStrings []string
+	)
+
+	for _, tag := range tags {
+		semVerTag, _ := semver.Parse(strings.TrimPrefix(tag, version.VersionPrefix))
+		versionTags = append(versionTags, semVerTag)
+	}
+
+	semver.Sort(versionTags)
+
+	// again apply prefix to tag
+	for _, tag := range versionTags {
+		tagsInStrings = append(tagsInStrings, fmt.Sprintf("v%s", tag))
+	}
+
+	return tagsInStrings
 }

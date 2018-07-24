@@ -25,7 +25,7 @@ import (
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/minishift/docker"
-	openshiftVersionCheck "github.com/minishift/minishift/pkg/minishift/openshift/version"
+	openshiftVersion "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	"github.com/pborman/uuid"
 )
 
@@ -79,8 +79,8 @@ func RestartOpenShift(commander docker.DockerCommander) (bool, error) {
 		ok  bool
 		err error
 	)
-	openshiftVersion := getOpenshiftVersion()
-	valid, _ := openshiftVersionCheck.IsGreaterOrEqualToBaseVersion(openshiftVersion, constants.RefactoredOcVersion)
+	version := getOpenshiftVersion()
+	valid, _ := openshiftVersion.IsGreaterOrEqualToBaseVersion(version, constants.RefactoredOcVersion)
 	if valid {
 		containerID, err := commander.GetID(minishiftConstants.OpenshiftApiContainerName)
 		if err != nil {
@@ -161,8 +161,8 @@ func ViewConfig(target OpenShiftPatchTarget, commander docker.DockerCommander) (
 	if err != nil {
 		return "", err
 	}
-	openshiftVersion := getOpenshiftVersion()
-	valid, _ := openshiftVersionCheck.IsGreaterOrEqualToBaseVersion(openshiftVersion, constants.RefactoredOcVersion)
+	version := getOpenshiftVersion()
+	valid, _ := openshiftVersion.IsGreaterOrEqualToBaseVersion(version, constants.RefactoredOcVersion)
 	if !valid || target.target == "node" {
 		result, err = commander.Exec("-t", minishiftConstants.OpenshiftContainerName, "cat", path)
 		if err != nil {
@@ -256,8 +256,8 @@ func deleteBackup(target OpenShiftPatchTarget, id string, commander docker.Docke
 }
 
 func getLocalConfigFile(target string) string {
-	openshiftVersion := getOpenshiftVersion()
-	valid, _ := openshiftVersionCheck.IsGreaterOrEqualToBaseVersion(openshiftVersion, constants.RefactoredOcVersion)
+	version := getOpenshiftVersion()
+	valid, _ := openshiftVersion.IsGreaterOrEqualToBaseVersion(version, constants.RefactoredOcVersion)
 	switch target {
 	case "master":
 		if !valid {
@@ -274,8 +274,8 @@ func getLocalConfigFile(target string) string {
 }
 
 func getContainerConfigFile(target string) string {
-	openshiftVersion := getOpenshiftVersion()
-	valid, _ := openshiftVersionCheck.IsGreaterOrEqualToBaseVersion(openshiftVersion, constants.RefactoredOcVersion)
+	version := getOpenshiftVersion()
+	valid, _ := openshiftVersion.IsGreaterOrEqualToBaseVersion(version, constants.RefactoredOcVersion)
 	switch target {
 	case "master":
 		if !valid {

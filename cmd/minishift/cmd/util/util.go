@@ -35,7 +35,10 @@ import (
 	"github.com/minishift/minishift/out/bindata"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
+	openshiftVersion "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	"github.com/minishift/minishift/pkg/util/shell"
+	"github.com/minishift/minishift/pkg/version"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -159,4 +162,23 @@ func OcClusterDown(hostVm *host.Host) error {
 	cmd := fmt.Sprintf("%s/oc cluster down", minishiftConstants.OcPathInsideVM)
 	_, err := sshCommander.SSHCommand(cmd)
 	return err
+}
+func GetOpenShiftReleaseVersion() (string, error) {
+	tag := viper.GetString(configCmd.OpenshiftVersion.Name)
+	// tag is in the form of vMajor.minor.patch e.g v3.9.0
+	if tag == fmt.Sprintf("%slatest", constants.VersionPrefix) {
+		tags, err := openshiftVersion.GetGithubReleases()
+		if err != nil {
+			return "", err
+		}
+
+		sortedtags, err := openshiftVersion.OpenShiftTagsByAscending(tags, constants.MinimumSupportedOpenShiftVersion, version.GetOpenShiftVersion())
+		if err != nil {
+			return "", err
+		}
+
+		return sortedtags[len(sortedtags)-1], nil
+	}
+
+	return tag, nil
 }

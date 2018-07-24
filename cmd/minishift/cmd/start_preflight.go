@@ -65,30 +65,32 @@ func preflightChecksBeforeStartingHost() {
 		configCmd.WarnDeprecationCheck.Name,
 		"")
 
-	// Conectivity logic
+	requestedOpenShiftVersion, _ := cmdUtil.GetOpenShiftReleaseVersion()
+
+	// Connectivity logic
 	fmt.Printf("-- Checking if %s is reachable ... ", GithubAddress)
 	if network.CheckInternetConnectivity(GithubAddress) {
 		fmt.Printf("OK\n")
 		preflightCheckSucceedsOrFails(
 			configCmd.SkipCheckOpenShiftRelease.Name,
 			checkOriginRelease,
-			fmt.Sprintf("Checking if requested OpenShift version '%s' is valid", viper.GetString(configCmd.OpenshiftVersion.Name)),
+			fmt.Sprintf("Checking if requested OpenShift version '%s' is valid", requestedOpenShiftVersion),
 			configCmd.WarnCheckOpenShiftRelease.Name,
 			"",
 		)
 	} else {
 		fmt.Printf("FAIL\n")
-		fmt.Printf("-- Checking if requested OpenShift version '%s' is valid ... SKIP\n", viper.GetString(configCmd.OpenshiftVersion.Name))
+		fmt.Printf("-- Checking if requested OpenShift version '%s' is valid ... SKIP\n", requestedOpenShiftVersion)
 	}
 	// end of connectivity logic
 
 	preflightCheckSucceedsOrFails(
 		configCmd.SkipCheckOpenShiftVersion.Name,
 		validateOpenshiftVersion,
-		fmt.Sprintf("Checking if requested OpenShift version '%s' is supported", viper.GetString(configCmd.OpenshiftVersion.Name)),
+		fmt.Sprintf("Checking if requested OpenShift version '%s' is supported", requestedOpenShiftVersion),
 		configCmd.WarnCheckOpenShiftVersion.Name,
 		fmt.Sprintf("Minishift does not support OpenShift version %s. "+
-			"You need to use a version >= %s\n", viper.GetString(configCmd.OpenshiftVersion.Name),
+			"You need to use a version >= %s\n", requestedOpenShiftVersion,
 			constants.MinimumSupportedOpenShiftVersion),
 	)
 
@@ -584,9 +586,8 @@ func checkVMDriver() bool {
 }
 
 func validateOpenshiftVersion() bool {
-	requestedVersion := viper.GetString(configCmd.OpenshiftVersion.Name)
-
-	valid, err := openshiftVersion.IsGreaterOrEqualToBaseVersion(requestedVersion, constants.MinimumSupportedOpenShiftVersion)
+	requestedOpenShiftVersion, _ := cmdUtil.GetOpenShiftReleaseVersion()
+	valid, err := openshiftVersion.IsGreaterOrEqualToBaseVersion(requestedOpenShiftVersion, constants.MinimumSupportedOpenShiftVersion)
 	if err != nil {
 		return false
 	}
@@ -601,14 +602,16 @@ func validateOpenshiftVersion() bool {
 func checkOriginRelease() bool {
 	client := github.Client()
 	ctx := context.Background()
-	_, _, err := client.Repositories.GetReleaseByTag(ctx, "openshift", "origin", viper.GetString(configCmd.OpenshiftVersion.Name))
+
+	requestedOpenShiftVersion, _ := cmdUtil.GetOpenShiftReleaseVersion()
+	_, _, err := client.Repositories.GetReleaseByTag(ctx, "openshift", "origin", requestedOpenShiftVersion)
 	if err != nil && github.IsRateLimitError(err) {
 		fmt.Println("\n   Hit github rate limit:", err)
 		return false
 	}
 
 	if err != nil {
-		fmt.Printf("%s is not a valid OpenShift version", viper.GetString(configCmd.OpenshiftVersion.Name))
+		fmt.Printf("%s is not a valid OpenShift version", requestedOpenShiftVersion)
 		return false
 	}
 	return true

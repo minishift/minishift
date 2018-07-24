@@ -128,3 +128,10 @@ func TestIsPrerelease(t *testing.T) {
 		assert.Equal(t, versionTest.expectedResult, actualResult)
 	}
 }
+
+func TestOpenShiftTagsByAscending(t *testing.T) {
+	var testTags = []string{"v3.7.0", "v3.10.0", "v3.7.2", "v3.9.0", "v3.7.1"}
+
+	sortTags, _ := OpenShiftTagsByAscending(testTags, "v3.7.0", "v3.9.0")
+	assert.Equal(t, sortTags[len(sortTags)-1], "v3.10.0")
+}

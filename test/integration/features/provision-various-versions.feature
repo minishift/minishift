@@ -30,3 +30,11 @@ Feature: Provision all major OpenShift versions
   Examples:
     | serverVersion | ocVersion |
     | v3.9.0        | v3.9.0    |
+
+  Scenario: Provision latest OpenShift version
+    Given Minishift has state "Does Not Exist"
+      And image caching is disabled
+     When executing "minishift start --openshift-version latest" succeeds
+     Then Minishift should have state "Running"
+     When executing "minishift delete --force" succeeds
+     Then Minishift should have state "Does Not Exist"

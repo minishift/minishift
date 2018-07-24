@@ -35,25 +35,28 @@ type OpenShiftPatchTarget struct {
 	localConfigFile     string
 }
 
-var (
-	MASTER = OpenShiftPatchTarget{
-		"master",
-		getContainerConfigFile("master"),
-		getLocalConfigFile("master"),
+func GetOpenShiftPatchTarget(target string) OpenShiftPatchTarget {
+	switch target {
+	case "master":
+		return OpenShiftPatchTarget{
+			"master",
+			getContainerConfigFile("master"),
+			getLocalConfigFile("master"),
+		}
+	case "node":
+		return OpenShiftPatchTarget{
+			"node",
+			getContainerConfigFile("node"),
+			getLocalConfigFile("node"),
+		}
+	default:
+		return OpenShiftPatchTarget{
+			"unkown",
+			"",
+			"",
+		}
 	}
-
-	NODE = OpenShiftPatchTarget{
-		"node",
-		getContainerConfigFile("node"),
-		getLocalConfigFile("node"),
-	}
-
-	UNKNOWN = OpenShiftPatchTarget{
-		"unkown",
-		"",
-		"",
-	}
-)
+}
 
 func (t *OpenShiftPatchTarget) containerConfigFilePath() (string, error) {
 	if t.target == "node" {

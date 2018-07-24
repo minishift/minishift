@@ -62,7 +62,7 @@ func init() {
 
 func runPatch(cmd *cobra.Command, args []string) {
 	patchTarget := determineTarget(target)
-	if patchTarget == openshift.UNKNOWN {
+	if patchTarget == openshift.GetOpenShiftPatchTarget("unknown") {
 		atexit.ExitWithMessage(1, unknownPatchTargetError)
 	}
 
@@ -89,11 +89,11 @@ func runPatch(cmd *cobra.Command, args []string) {
 func determineTarget(target string) openshift.OpenShiftPatchTarget {
 	switch target {
 	case "master":
-		return openshift.MASTER
+		return openshift.GetOpenShiftPatchTarget("master")
 	case "node":
-		return openshift.NODE
+		return openshift.GetOpenShiftPatchTarget("node")
 	default:
-		return openshift.UNKNOWN
+		return openshift.GetOpenShiftPatchTarget("unknown")
 	}
 }
 

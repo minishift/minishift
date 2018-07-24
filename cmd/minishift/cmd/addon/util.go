@@ -109,7 +109,7 @@ func determineRoutingSuffix(driver drivers.Driver) string {
 	sshCommander := provision.GenericSSHCommander{Driver: driver}
 	dockerCommander := docker.NewVmDockerCommander(sshCommander)
 
-	raw, err := openshift.ViewConfig(openshift.MASTER, dockerCommander)
+	raw, err := openshift.ViewConfig(openshift.GetOpenShiftPatchTarget("master"), dockerCommander)
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot get the OpenShift master configuration: %s", err.Error()))
 	}

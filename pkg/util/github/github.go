@@ -79,7 +79,7 @@ func Client() *github.Client {
 	return client
 }
 
-var tokenEnvVars = []string{"MINISHIFT_GITHUB_API_TOKEN", "HOMEBREW_GITHUB_API_TOKEN", "GH_TOKEN"}
+var tokenEnvVars = []string{"MINISHIFT_GITHUB_API_TOKEN", "GH_TOKEN"}
 
 func GetGitHubApiToken() string {
 	for _, envVar := range tokenEnvVars {

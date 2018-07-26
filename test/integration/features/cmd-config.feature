@@ -244,3 +244,25 @@ user defined options which changes default behaviour of Minishift.
   Scenario: Deleting Minishift instance
      When executing "minishift delete --force" succeeds
      Then Minishift should have state "Does Not Exist"
+
+  Scenario: Minishift should preserve start flags when started with non-defaults parameters.
+    Given Minishift has state "Does Not Exist"
+      And image caching is disabled
+     When executing "minishift start --memory 5000 --disk-size 30g --cpus 2 --docker-env FOO=BAR --docker-opt dns=8.8.8.8 --insecure-registry foo.bar:5000" succeeds
+
+  Scenario Outline: Check the config flag values
+     When Minishift should have state "Running"
+     Then stdout of command "minishift config get <property>" is equal to "<value>"
+
+      Examples: Correct value show in the config
+        | property          | value              |
+        | memory            | 5000               |
+        | disk-size         | 30g                |
+        | cpus              | 2                  |
+        | docker-env        | [FOO=BAR]          |
+        | docker-opt        | [dns=8.8.8.8]      |
+        | insecure-registry | [foo.bar:5000]     |
+
+  Scenario: Deleting Minishift instance
+    When executing "minishift delete --force" succeeds
+    Then Minishift should have state "Does Not Exist"

@@ -28,7 +28,7 @@ import (
 )
 
 func TestNotFound(t *testing.T) {
-	err := set("nonexistant", "10")
+	err := Set("nonexistant", "10", true)
 	assert.Error(t, err, "Set did not return error for unknown property")
 }
 
@@ -63,6 +63,6 @@ func verifyValueUnset(t *testing.T, key string) {
 }
 
 func persistValue(t *testing.T, key string, value string) {
-	err := set(key, value)
+	err := Set(key, value, true)
 	assert.NoError(t, err, "Error setting value")
 }

@@ -124,6 +124,7 @@ var (
 
 	// clusterUpFlagSet contains the command line switches which needs to be passed on to 'cluster up'
 	clusterUpFlagSet *flag.FlagSet
+	startFlagSet     *flag.FlagSet
 
 	// ocPath
 	ocPath = ""
@@ -146,7 +147,8 @@ For the latter see 'minishift config -h'.`,
 
 	clusterUpFlagSet = initClusterUpFlags()
 	startCmd.Flags().AddFlagSet(clusterUpFlagSet)
-	startCmd.Flags().AddFlagSet(initStartFlags())
+	startFlagSet = initStartFlags()
+	startCmd.Flags().AddFlagSet(startFlagSet)
 	startCmd.Flags().AddFlagSet(initSubscriptionManagerFlags())
 
 	viper.BindPFlags(startCmd.Flags())
@@ -187,6 +189,8 @@ func runStart(cmd *cobra.Command, args []string) {
 	if viper.GetString(configCmd.VmDriver.Name) != genericDriver {
 		preflightChecksBeforeStartingHost()
 	}
+
+	populateStartFlagsToViperConfig()
 
 	// Cache OC binary before starting the VM and perform oc command option check
 	ocPath = cmdUtil.CacheOc(requestedOpenShiftVersion)
@@ -687,6 +691,35 @@ func initSubscriptionManagerFlags() *flag.FlagSet {
 	subscriptionManagerFlagSet.Bool(configCmd.SkipRegistration.Name, false, "Skip the virtual machine registration.")
 
 	return subscriptionManagerFlagSet
+}
+
+// Get config from the start flags and set it to viper config so that in
+// stop start case user don't need to remember the start flags.
+func populateStartFlagsToViperConfig() {
+	startFlagSet.AddFlag(cmdUtil.HttpProxyFlag)
+	startFlagSet.AddFlag(cmdUtil.HttpsProxyFlag)
+	startFlagSet.VisitAll(func(flag *flag.Flag) {
+		if viper.IsSet(flag.Name) {
+			switch value := viper.Get(flag.Name).(type) {
+			case string:
+				if err := configCmd.Set(flag.Name, viper.GetString(flag.Name), false); err != nil {
+					atexit.ExitWithMessage(1, fmt.Sprintf("Not able to populate %s flag with %s value", flag.Name, value))
+				}
+			case int:
+				if err := configCmd.Set(flag.Name, viper.GetString(flag.Name), false); err != nil {
+					atexit.ExitWithMessage(1, fmt.Sprintf("Not able to populate %s flag with %d value", flag.Name, value))
+				}
+			case []interface{}:
+				if err := configCmd.Set(flag.Name, strings.Join(viper.GetStringSlice(flag.Name), ","), false); err != nil {
+					atexit.ExitWithMessage(1, fmt.Sprintf("Not able to populate %s flag with %#v value", flag.Name, value))
+				}
+			case bool:
+				if err := configCmd.Set(flag.Name, viper.GetString(flag.Name), false); err != nil {
+					atexit.ExitWithMessage(1, fmt.Sprintf("Not able to populate %s flag with %#v value", flag.Name, value))
+				}
+			}
+		}
+	})
 }
 
 // determineClusterUpParameters returns a map of flag names and values for the cluster up call.

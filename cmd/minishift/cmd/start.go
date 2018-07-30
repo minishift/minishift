@@ -18,13 +18,12 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"runtime"
 	"strings"
 
-	"os"
-
 	"github.com/asaskevich/govalidator"
-	units "github.com/docker/go-units"
+	"github.com/docker/go-units"
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/host"
@@ -37,6 +36,7 @@ import (
 	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
+	"github.com/minishift/minishift/pkg/minikube/sshutil"
 	minishiftCluster "github.com/minishift/minishift/pkg/minishift/cluster"
 	"github.com/minishift/minishift/pkg/minishift/clusterup"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
@@ -49,6 +49,7 @@ import (
 	openshiftVersion "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
+	"github.com/minishift/minishift/pkg/minishift/remotehost"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/minishift/minishift/pkg/util/progressdots"
@@ -363,8 +364,6 @@ func determineInsecureRegistry(key string) []string {
 }
 
 func startHost(libMachineClient *libmachine.Client) *host.Host {
-	progressDots := progressdots.New()
-
 	// Configuration used for creation/setup of the Virtual Machine
 	machineConfig := &cluster.MachineConfig{
 		MinikubeISO:           determineIsoUrl(viper.GetString(configCmd.ISOUrl.Name)),
@@ -406,8 +405,21 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 
 		fmt.Print("-- Starting Minishift VM ...")
 	} else {
+		s, err := sshutil.NewRawSSHClient(machineConfig.RemoteIPAddress, machineConfig.SSHKeyToConnectRemote, machineConfig.RemoteSSHUser)
+		if err != nil {
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error creating ssh client: %v", err))
+		}
+		fmt.Printf("-- Preparing Remote Machine ...")
+		progressDots := progressdots.New()
+		progressDots.Start()
+		if err := remotehost.PrepareRemoteMachine(s); err != nil {
+			atexit.ExitWithMessage(1, err.Error())
+		}
+		progressDots.Stop()
+		fmt.Println(" OK")
 		fmt.Print("-- Starting to provision the remote machine ...")
 	}
+	progressDots := progressdots.New()
 	progressDots.Start()
 	start := func() (err error) {
 		hostVm, err = cluster.StartHost(libMachineClient, *machineConfig)

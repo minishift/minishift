@@ -23,12 +23,16 @@ CentOS 7, Red Hat Enterprise Linux 7, and Fedora > 26 are the suggested Linux di
 
 To use an existing machine with {project}, it needs to be configured as follows:
 
-. Establish password-less SSH from the host to the existing remote machine:
-+
+Establish password-less SSH from the host to the existing remote machine:
 ----
 Host$ ssh-copy-id <user>@<remote_IP_address> # Ensure that the user has sudo access without a password or use root
 Host$ ssh <user>@<remote_IP_address>         # Ensure that this login works without a password
 ----
+
+[NOTE]
+====
+Skip following steps if you are using suggested Linux distribution (ie. CentOS 7, Red Hat Enterprise Linux 7, and Fedora > 26).
+====
 
 . Configure the existing remote machine:
 +

@@ -39,6 +39,8 @@ const (
 	OcPathInsideVM                 = "/var/lib/minishift/bin"
 	BaseDirInsideInstance          = "/var/lib/minishift/base"
 	ImageNameForClusterUpImageFlag = "openshift/origin-${component}"
+	HypervDefaultVirtualSwitchId   = "c08cb7b8-9b3c-408e-8e30-5e16a3aeb444"
+	HypervDefaultVirtualSwitchName = "Default Switch"
 )
 
 var (

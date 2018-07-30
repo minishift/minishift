@@ -194,6 +194,7 @@ func runStart(cmd *cobra.Command, args []string) {
 	if viper.GetString(configCmd.VmDriver.Name) != genericDriver {
 		preflightChecksBeforeStartingHost()
 	}
+	minishiftNetwork.VMSwitch = viper.GetString(configCmd.HypervVirtualSwitch.Name)
 
 	// Populate start flags to viper config if save-start-flags true in config file
 	if viper.GetBool(configCmd.SaveStartFlags.Name) {

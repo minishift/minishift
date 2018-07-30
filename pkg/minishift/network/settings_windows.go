@@ -20,7 +20,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net"
-	"os"
 	"strings"
 	"time"
 
@@ -40,13 +39,6 @@ var (
 	successCount = 0
 )
 
-func isUsingDefaultSwitch() bool {
-	switchEnvName := "HYPERV_VIRTUAL_SWITCH"
-	switchEnvValue := os.Getenv(switchEnvName)
-
-	return switchEnvValue == "Default Switch" || switchEnvValue == ""
-}
-
 func getAddressAssignedToDefaultSwitch() string {
 	posh := powershell.New()
 
@@ -57,14 +49,14 @@ func getAddressAssignedToDefaultSwitch() string {
 }
 
 func determineNetmask() string {
-	if isUsingDefaultSwitch() {
+	if IsUsingDefaultSwitch() {
 		return "255.255.255.240" // 28
 	}
 	return "255.255.255.0" // 24
 }
 
 func determineNameservers() []string {
-	if isUsingDefaultSwitch() {
+	if IsUsingDefaultSwitch() {
 		return []string{getAddressAssignedToDefaultSwitch()}
 	}
 
@@ -85,7 +77,7 @@ func determineNameservers() []string {
 }
 
 func determineDefaultGateway(ipaddress string) string {
-	if isUsingDefaultSwitch() {
+	if IsUsingDefaultSwitch() {
 		return getAddressAssignedToDefaultSwitch()
 	}
 

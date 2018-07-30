@@ -28,7 +28,12 @@ import (
 	"strings"
 
 	"github.com/docker/machine/libmachine/drivers"
+	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
+	"github.com/minishift/minishift/pkg/minishift/profile"
+	"github.com/minishift/minishift/pkg/minishift/shell/powershell"
 )
+
+var VMSwitch string
 
 // This will return the address as used by libmachine
 func GetIP(driver drivers.Driver) (string, error) {
@@ -133,4 +138,43 @@ func OverrideProxyForLocalConnections(proxyAddr string) error {
 	// We need to force a connection, else this will not work
 	_, err := http.Get("http://localhost")
 	return err
+}
+
+// IsUsingDefaultSwitch returns true if the Default Switch is used before creating the VM
+func IsUsingDefaultSwitch() bool {
+	posh := powershell.New()
+
+	checkIfDefaultSwitchExists := fmt.Sprintf("Get-VMSwitch -Id %s | ForEach-Object { $_.Name }", minishiftConstants.HypervDefaultVirtualSwitchId)
+	stdOut, stdErr, _ := posh.Execute(checkIfDefaultSwitchExists)
+
+	// If the config variable is epmty and default switch exists
+	// If stdErr contains the command then execution failed
+	if VMSwitch == "" && !strings.Contains(stdErr, "Get-VMSwitch") {
+		return true
+	}
+	// if the config variable was set to use the default switch
+	if VMSwitch == strings.TrimSpace(stdOut) {
+		return true
+	}
+	return false
+}
+
+// GetVMSwitchId returns the ID of the vswitch in use by the running minishift vm on hyperv
+func GetVMSwitchId() string {
+	posh := powershell.New()
+
+	switchIdCommand := fmt.Sprintf("(Get-VMSwitch (Get-VM \"%s\" | Get-VMNetworkAdapter | select SwitchName).SwitchName).Id.Guid", profile.GetActiveProfile())
+	stdOut, _, _ := posh.Execute(switchIdCommand)
+
+	return strings.TrimSpace(stdOut)
+}
+
+// GetVMSwitchName returns the name of the vswitch in use by the running minishift vm on hyperv
+func GetVMSwitchName() string {
+	posh := powershell.New()
+
+	switchNameCommand := fmt.Sprintf("(Get-VM \"%s\" | Get-VMNetworkAdapter | select SwitchName).SwitchName", profile.GetActiveProfile())
+	stdOut, _, _ := posh.Execute(switchNameCommand)
+
+	return strings.TrimSpace(stdOut)
 }

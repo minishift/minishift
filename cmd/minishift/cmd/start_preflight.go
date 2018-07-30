@@ -30,6 +30,7 @@ import (
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	validations "github.com/minishift/minishift/pkg/minishift/config"
+	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/minishift/network"
 	"github.com/minishift/minishift/pkg/minishift/shell/powershell"
 	"github.com/minishift/minishift/pkg/util/github"
@@ -44,10 +45,9 @@ import (
 )
 
 const (
-	StorageDisk                  = "/mnt/?da1"
-	StorageDiskForGeneric        = "/"
-	GithubAddress                = "https://github.com"
-	hypervDefaultVirtualSwitchId = "c08cb7b8-9b3c-408e-8e30-5e16a3aeb444"
+	StorageDisk           = "/mnt/?da1"
+	StorageDiskForGeneric = "/"
+	GithubAddress         = "https://github.com"
 )
 
 // preflightChecksBeforeStartingHost is executed before the startHost function.
@@ -414,9 +414,9 @@ func checkHypervDriverSwitch() bool {
 
 	switchName := viper.GetString(configCmd.HypervVirtualSwitch.Name)
 
-	// check for default switch
-	if switchName == "" {
-		checkIfDefaultSwitchExists := fmt.Sprintf("Get-VMSwitch -Id %s | ForEach-Object { $_.Name }", hypervDefaultVirtualSwitchId)
+	// check for default switch by using the Id
+	if switchName == minishiftConstants.HypervDefaultVirtualSwitchName {
+		checkIfDefaultSwitchExists := fmt.Sprintf("Get-VMSwitch -Id %s | ForEach-Object { $_.Name }", minishiftConstants.HypervDefaultVirtualSwitchId)
 		stdOut, stdErr, _ := posh.Execute(checkIfDefaultSwitchExists)
 
 		if !strings.Contains(stdErr, "Get-VMSwitch") {

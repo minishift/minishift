@@ -158,8 +158,8 @@ var (
 	DnsmasqContainerized  = createConfigSetting("network-dnsmasq-containerized", SetBool, nil, nil, true, false)
 	DnsmasqContainerImage = createConfigSetting("network-dnsmasq-container", SetString, nil, nil, true, nil)
 
-	// Hyper-V
-	HypervVirtualSwitch = createConfigSetting("hyperv-virtual-switch", SetString, []setFn{validations.IsValidHypervVirtualSwitch}, nil, true, nil)
+	// Hyper-V vSwitch set to Default Switch by default
+	HypervVirtualSwitch = createConfigSetting("hyperv-virtual-switch", SetString, []setFn{validations.IsValidHypervVirtualSwitch}, nil, true, "Default Switch")
 
 	// Save start flags to viper config
 	SaveStartFlags = createConfigSetting("save-start-flags", SetBool, nil, nil, true, true)

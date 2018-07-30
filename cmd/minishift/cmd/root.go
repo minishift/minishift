@@ -109,12 +109,15 @@ var RootCmd = &cobra.Command{
 		// creating all directories for minishift run
 		createMinishiftDirs(state.InstanceDirs)
 
+		// Ensure the global viper config file exists.
+		ensureConfigFileExists(constants.GlobalConfigFile)
+
 		// Ensure the viper config file exists.
 		ensureConfigFileExists(constants.ConfigFile)
 
 		// Read the config file and get the details about existing image cache.
 		// This should be removed after 2-3 release of minishift.
-		cfg, err := configCmd.ReadConfig()
+		cfg, err := minishiftConfig.ReadViperConfig(constants.ConfigFile)
 		if err != nil {
 			atexit.ExitWithMessage(1, err.Error())
 		}
@@ -167,7 +170,7 @@ var RootCmd = &cobra.Command{
 				atexit.ExitWithMessage(1, fmt.Sprintf("Error coping existing cache images to new instance config: %s", err.Error()))
 			}
 			delete(cfg, "cache-images")
-			if err != configCmd.WriteConfig(cfg) {
+			if err != minishiftConfig.WriteViperConfig(constants.ConfigFile, cfg) {
 				atexit.ExitWithMessage(1, fmt.Sprintf("Error removing the cache-images entry from older config %s: %s", constants.ConfigFile, err.Error()))
 			}
 		}
@@ -180,7 +183,7 @@ var RootCmd = &cobra.Command{
 				atexit.ExitWithMessage(1, fmt.Sprintf("Error coping existing addon config to new instance config: %s", err.Error()))
 			}
 			delete(cfg, "addons")
-			if err != configCmd.WriteConfig(cfg) {
+			if err != minishiftConfig.WriteViperConfig(constants.ConfigFile, cfg) {
 				atexit.ExitWithMessage(1, fmt.Sprintf("Error removing the addon config entry from older config %s: %s", constants.ConfigFile, err.Error()))
 			}
 		}
@@ -285,10 +288,19 @@ func initConfig() {
 		constants.ProfileName = profile
 		constants.ConfigFile = constants.MakeMiniPath("profiles", profile, "config", "config.json")
 	}
+
+	// Initializing the global config file with Viper
+	viper.SetConfigFile(constants.GlobalConfigFile)
+	viper.SetConfigType("json")
+	err := viper.ReadInConfig()
+	if err != nil {
+		glog.Warningf("Error reading config file at '%s': %s", constants.GlobalConfigFile, err)
+	}
+
 	configPath := constants.ConfigFile
 	viper.SetConfigFile(configPath)
 	viper.SetConfigType("json")
-	err := viper.ReadInConfig()
+	err = viper.MergeInConfig()
 	if err != nil {
 		glog.Warningf("Error reading config file at '%s': %s", configPath, err)
 	}

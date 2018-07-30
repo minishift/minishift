@@ -26,6 +26,7 @@ import (
 
 	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
+	viperConfig "github.com/minishift/minishift/pkg/minishift/config"
 )
 
 // Runs all the validation or callback functions and collects errors
@@ -55,12 +56,12 @@ func findSetting(name string) (Setting, error) {
 
 // Set Functions
 
-func SetString(m MinishiftConfig, name string, val string) error {
+func SetString(m viperConfig.ViperConfig, name string, val string) error {
 	m[name] = val
 	return nil
 }
 
-func SetInt(m MinishiftConfig, name string, val string) error {
+func SetInt(m viperConfig.ViperConfig, name string, val string) error {
 	i, err := strconv.Atoi(val)
 	if err != nil {
 		return err
@@ -69,7 +70,7 @@ func SetInt(m MinishiftConfig, name string, val string) error {
 	return nil
 }
 
-func SetBool(m MinishiftConfig, name string, val string) error {
+func SetBool(m viperConfig.ViperConfig, name string, val string) error {
 	b, err := strconv.ParseBool(val)
 	if err != nil {
 		return err
@@ -78,7 +79,7 @@ func SetBool(m MinishiftConfig, name string, val string) error {
 	return nil
 }
 
-func SetSlice(m MinishiftConfig, name string, val string) error {
+func SetSlice(m viperConfig.ViperConfig, name string, val string) error {
 	var tmpSlice []string
 	if val != "" {
 		for _, v := range strings.Split(val, ",") {

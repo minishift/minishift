@@ -35,7 +35,7 @@ Functionality is provided to assign an IP address on startup using the Data Exch
 
 [IMPORTANT]
 ====
-This only works with the CentOS or RHEL xref:../using/basic-usage.adoc#choosing-iso-image[ISO] in combation with Hyper-V.
+This only works with the CentOS or RHEL xref:../using/basic-usage.adoc#choosing-iso-image[ISO] in combination with Hyper-V.
 The Boot2Docker ISO image experiences a problem when the values are being sent to the {project} instance and consumed by the Boot2Docker ISO.
 We are looking into the issue and hope to provide a solution in the future.
 ====
@@ -51,9 +51,8 @@ For more details about capabilities and limitations, please see the link:https:/
 The following command will attempt to assign an IP address for use on the Internal Virtual Switch 'MyInternal':
 
 ----
-PS> $env:HYPERV_VIRTUAL_SWITCH="MyInternal"
+PS> minishift.exe config set hyperv-virtual-switch "MyInternal"
 PS> minishift.exe start `
-  --iso-url centos `
   --network-ipaddress 192.168.1.10 `
   --network-gateway 192.168.1.1 `
   --network-nameserver 8.8.8.8
@@ -63,9 +62,8 @@ If you want to use the 'DockerNAT' network, the following commands are needed to
 
 ----
 PS> New-NetNat -Name SharedNAT -InternalIPInterfaceAddressPrefix 10.0.75.1/24
-PS> $env:HYPERV_VIRTUAL_SWITCH="DockerNAT"
+PS> minishift.exe config set hyperv-virtual-switch "DockerNAT"
 PS> minishift.exe start `
-  --iso-url centos `
   --network-ipaddress 10.0.75.128 `
   --network-gateway 10.0.75.1 `
   --network-nameserver 8.8.8.8

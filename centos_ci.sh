@@ -311,7 +311,7 @@ function perform_release() {
   make prerelease
   exit_on_failure "$?" "Pre-release tests failed."
 
-  MINISHIFT_VM_DRIVER=kvm make integration_all
+  MINISHIFT_VM_DRIVER=kvm make integration_pr
   exit_on_failure "$?" "Integration tests failed."
 
   make link_check_docs # Test docs builds and all links are valid

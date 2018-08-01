@@ -606,9 +606,6 @@ func determineIsoUrl(iso string) string {
 		iso = constants.DefaultB2dIsoUrl
 	case minishiftConstants.CentOsIsoAlias:
 		iso = constants.DefaultCentOsIsoUrl
-	case minishiftConstants.MinikubeIsoAlias:
-		fmt.Printf("\n\nNote: minikube ISO will be depricated in next release, please use b2d or centos ISO.\n\n")
-		iso = constants.DefaultMinikubeIsoURL
 	default:
 		if !(govalidator.IsURL(iso) || strings.HasPrefix(iso, "file:")) {
 			fmt.Println()
@@ -634,6 +631,7 @@ func initStartFlags() *flag.FlagSet {
 	startFlagSet.String(configCmd.RemoteIPAddress.Name, "", "IP address of the remote machine to provision OpenShift on")
 	startFlagSet.String(configCmd.RemoteSSHUser.Name, "", "The username of the remote machine to provision OpenShift on")
 	startFlagSet.String(configCmd.SSHKeyToConnectRemote.Name, "", "SSH private key location on the host to connect remote machine")
+	startFlagSet.String(configCmd.ISOUrl.Name, minishiftConstants.CentOsIsoAlias, "Location of the minishift ISO. Can be a URL, file URI or one of the following short names: [centos b2d].")
 
 	startFlagSet.AddFlag(dockerEnvFlag)
 	startFlagSet.AddFlag(dockerEngineOptFlag)
@@ -652,9 +650,6 @@ func initStartFlags() *flag.FlagSet {
 
 	if minishiftConfig.EnableExperimental {
 		startFlagSet.Bool(configCmd.NoProvision.Name, false, "Do not provision the VM with OpenShift (experimental)")
-		startFlagSet.String(configCmd.ISOUrl.Name, minishiftConstants.CentOsIsoAlias, "Location of the minishift ISO. Can be a URL, file URI or one of the following short names: [b2d centos minikube].")
-	} else {
-		startFlagSet.String(configCmd.ISOUrl.Name, minishiftConstants.CentOsIsoAlias, "Location of the minishift ISO. Can be a URL, file URI or one of the following short names: [b2d centos].")
 	}
 
 	return startFlagSet

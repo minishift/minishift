@@ -26,7 +26,6 @@ import (
 const (
 	B2dIsoAlias               = "b2d"
 	CentOsIsoAlias            = "centos"
-	MinikubeIsoAlias          = "minikube"
 	OpenshiftContainerName    = "origin"
 	OpenshiftApiContainerName = "k8s_apiserver_openshift-apiserver"
 	OpenshiftExec             = "/usr/bin/openshift"
@@ -40,7 +39,7 @@ const (
 )
 
 var (
-	ValidIsoAliases = []string{B2dIsoAlias, CentOsIsoAlias, MinikubeIsoAlias}
+	ValidIsoAliases = []string{B2dIsoAlias, CentOsIsoAlias}
 )
 
 // ProfileAuthorizedKeysPath returns the path of authorized_keys file in profile dir used for authentication purpose

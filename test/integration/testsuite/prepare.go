@@ -71,9 +71,6 @@ func HandleISOVersion() {
 		case "b2d":
 			fmt.Println("Test run using Boot2Docker iso image.")
 			isoName = "b2d"
-		case "minikube":
-			fmt.Println("Test run using Minikube iso image.")
-			isoName = "minikube"
 		case "", "centos":
 			fmt.Println("Test run using CentOS iso image.")
 			isoName = "centos"
@@ -89,15 +86,12 @@ func determineIsoFromFile(isoUrl string) string {
 	if matched, _ := regexp.MatchString(".*b2d\\.iso", isoUrl); matched {
 		fmt.Println("Boot2docker variant was assumed from the filename of ISO.")
 		isoName = "b2d"
-	} else if matched, _ := regexp.MatchString(".*minikube\\.iso", isoUrl); matched {
-		fmt.Println("Minikube variant was assumed from the filename of ISO.")
-		isoName = "minikube"
 	} else if matched, _ := regexp.MatchString(".*centos7\\.iso", isoUrl); matched {
 		fmt.Println("CentOS variant was assumed from the filename of ISO.")
 		isoName = "centos"
 	} else {
-		fmt.Println("Can't assume ISO variant from its filename. Will use Boot2Docker. To avoid this situation please name your ISO to end with 'b2d.iso', 'centos7.iso' or 'minikube.iso'.")
-		isoName = "b2d"
+		fmt.Println("Can't assume ISO variant from its filename. Will use CentOS. To avoid this situation please name your ISO to end with 'b2d.iso' or 'centos7.iso'.")
+		isoName = "centos"
 	}
 	return isoName
 }

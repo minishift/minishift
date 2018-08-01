@@ -127,10 +127,6 @@ func TestValidURL(t *testing.T) {
 			shouldErr: false,
 		},
 		{
-			value:     "minikube",
-			shouldErr: false,
-		},
-		{
 			value:     "random",
 			shouldErr: true,
 		},

@@ -736,8 +736,6 @@ func catDockerConfigFile() error {
 	switch isoName {
 	case "b2d":
 		err = ExecutingMinishiftCommandSucceedsOrFails("ssh -- cat /var/lib/boot2docker/profile", "succeeds")
-	case "minikube":
-		err = ExecutingMinishiftCommandSucceedsOrFails("ssh -- cat /usr/lib/systemd/system/docker.service", "succeeds")
 	case "centos", "rhel":
 		err = ExecutingMinishiftCommandSucceedsOrFails("ssh -- cat /etc/systemd/system/docker.service.d/10-machine.conf", "succeeds")
 	default:

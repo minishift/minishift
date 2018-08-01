@@ -34,8 +34,6 @@ func GetIsoPath(isoURL string) string {
 		return filepath.Join(minishiftConstants.B2dIsoAlias, getIsoVersion(uri.Path))
 	case strings.Contains(filepath.Base(isoURL), minishiftConstants.CentOsIsoAlias):
 		return filepath.Join(minishiftConstants.CentOsIsoAlias, getIsoVersion(uri.Path))
-	case strings.Contains(filepath.Base(isoURL), minishiftConstants.MinikubeIsoAlias):
-		return filepath.Join(minishiftConstants.MinikubeIsoAlias, getIsoVersion(uri.Path))
 	default:
 		// This handle any random URI
 		return filepath.Join("unnamed")

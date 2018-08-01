@@ -48,11 +48,11 @@ Feature: Experimental Flags
     Given Minishift has state "Does Not Exist"
       And image caching is disabled
       And setting up environment variable "MINISHIFT_ENABLE_EXPERIMENTAL" with value "y" succeeds
-     Then executing "minishift start --extra-clusterup-flags --service-catalog" succeeds
+     Then executing "minishift start --extra-clusterup-flags '--enable=*,service-catalog'" succeeds
       And stdout should contain
       """
       -- Extra 'oc' cluster up flags (experimental) ... 
-         '--service-catalog'
+         '--enable=*,service-catalog'
       """
       And unset environment variable "MINISHIFT_ENABLE_EXPERIMENTAL" succeeds
 

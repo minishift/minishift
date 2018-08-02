@@ -300,9 +300,7 @@ The environment variables can be specified in lower case or upper case.
 The lower case variables take higher precedence over upper case variables.
 If these variables are set, they are implicitly used during `minishift start` unless explicitly overridden by the corresponding command line flags.
 
-- Using the proxy options requires that you run OpenShift version 1.5.0 or later.
-Use the `openshift-version` option to request a specific version of OpenShift.
-You can list all {project}-compatible OpenShift versions with the xref:../command-ref/minishift_openshift_version_list.adoc#[`minishift openshift version list`] command.
+- Minishift does not escape the special characters in the environment variables for proxy so user need to escape special characters manually to get it working.
 ====
 
 [[networking]]

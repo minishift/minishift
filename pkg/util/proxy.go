@@ -41,6 +41,15 @@ type ProxyConfig struct {
 func NewProxyConfig(httpProxy string, httpsProxy string, noProxy string) (*ProxyConfig, error) {
 	defaultScheme := "http"
 
+	// We only parse the Proxy Special char if it is coming from the config file
+	// or user defined flag. In case of Env variable we just ignore parsing.
+	if httpProxy != "" {
+		httpProxy = parseProxySpecialChar(httpProxy, defaultScheme)
+	}
+	if httpsProxy != "" {
+		httpsProxy = parseProxySpecialChar(httpsProxy, defaultScheme)
+	}
+
 	if httpProxy == "" {
 		httpProxy = os.Getenv("http_proxy")
 		if httpProxy == "" {
@@ -51,7 +60,6 @@ func NewProxyConfig(httpProxy string, httpsProxy string, noProxy string) (*Proxy
 	if err != nil {
 		return nil, err
 	}
-	httpProxy = parseProxySpecialChar(httpProxy, defaultScheme)
 
 	if httpsProxy == "" {
 		httpsProxy = os.Getenv("https_proxy")
@@ -63,7 +71,6 @@ func NewProxyConfig(httpProxy string, httpsProxy string, noProxy string) (*Proxy
 	if err != nil {
 		return nil, err
 	}
-	httpsProxy = parseProxySpecialChar(httpsProxy, defaultScheme)
 
 	np := []string{}
 	np = append(np, defaultNoProxies...)

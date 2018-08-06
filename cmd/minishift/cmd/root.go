@@ -92,6 +92,8 @@ var RootCmd = &cobra.Command{
 		// If profile name is 'minishift' then ignore the vaild profile check.
 		if constants.ProfileName != constants.DefaultProfileName {
 			checkForValidProfileOrExit(cmd)
+			//create the default profile dirs for global config
+			createMinishiftDirs(state.NewMinishiftDirs(constants.GetProfileHomeDir(constants.DefaultProfileName)))
 		}
 
 		constants.MachineName = constants.ProfileName

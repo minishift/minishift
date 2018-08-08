@@ -31,7 +31,9 @@ const (
 	NameMetaTagName          = "Name"
 	DescriptionMetaTagName   = "Description"
 	RequiredOpenShiftVersion = "OpenShift-Version"
+	RequiredMinishiftVersion = "Minishift-Version"
 	anyOpenShiftVersion      = ""
+	anyMinishiftVersion      = ""
 	varDefaults              = "Var-Defaults"
 )
 
@@ -48,6 +50,7 @@ type AddOnMeta interface {
 	VarDefaults() ([]RequiredVar, error)
 	GetValue(key string) string
 	OpenShiftVersion() string
+	MinishiftVersion() string
 	Url() string
 }
 
@@ -60,6 +63,9 @@ func NewAddOnMeta(headers map[string]interface{}) (AddOnMeta, error) {
 		return nil, err
 	}
 	if err := requiredOpenShiftVersionCheck(headers); err != nil {
+		return nil, err
+	}
+	if err := requiredMinishiftVersionCheck(headers); err != nil {
 		return nil, err
 	}
 	if err := varDefaultsCheck(headers); err != nil {
@@ -134,6 +140,13 @@ func (meta *DefaultAddOnMeta) OpenShiftVersion() string {
 	return anyOpenShiftVersion
 }
 
+func (meta *DefaultAddOnMeta) MinishiftVersion() string {
+	if val, contains := meta.headers[RequiredMinishiftVersion].(string); contains {
+		return val
+	}
+	return anyMinishiftVersion
+}
+
 func checkVersionSemantic(version string) bool {
 	// Strict match for <major> or <major>.<minor> or <major>.<minor>.<patch>
 	// (>=|>|<|<=)3.6.0, (>=|>|<|<=)3.6.0
@@ -166,6 +179,16 @@ func requiredOpenShiftVersionCheck(headers map[string]interface{}) error {
 	if headers[RequiredOpenShiftVersion] != nil {
 		if !checkVersionSemantic(headers[RequiredOpenShiftVersion].(string)) {
 			return errors.New("Add-on supports OpenShift version semantics (eg. 3.6.0, >3.6.0, <3.6.0 or >=3.6 etc.")
+		}
+	}
+
+	return nil
+}
+
+func requiredMinishiftVersionCheck(headers map[string]interface{}) error {
+	if headers[RequiredMinishiftVersion] != nil {
+		if !checkVersionSemantic(headers[RequiredMinishiftVersion].(string)) {
+			return errors.New("Add-on supports Minishift version semantics (eg. 1.22.0, >1.21.0, <1.22.0 or >=1.22.0 etc.")
 		}
 	}
 

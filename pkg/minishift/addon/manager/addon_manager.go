@@ -34,6 +34,7 @@ import (
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/filehelper"
 	utilStrings "github.com/minishift/minishift/pkg/util/strings"
+	"github.com/minishift/minishift/pkg/version"
 	"github.com/pkg/errors"
 )
 
@@ -203,7 +204,10 @@ func (m *AddOnManager) ApplyAddOn(addOn addon.AddOn, context *command.ExecutionC
 	}
 
 	addonMetadata := addOn.MetaData()
-	if err := verifyRequiredOpenshiftVersion(context, addonMetadata); err != nil {
+	if err := verifyRequiredOpenshiftVersion(addonMetadata); err != nil {
+		return err
+	}
+	if err := verifyRequiredMinishiftVersion(addonMetadata); err != nil {
 		return err
 	}
 	if err := verifyRequiredVariablesInContext(context, addonMetadata); err != nil {
@@ -235,7 +239,10 @@ func (m *AddOnManager) RemoveAddOn(addOn addon.AddOn, context *command.Execution
 	}
 
 	addonMetadata := addOn.MetaDataForAddonRemove()
-	if err := verifyRequiredOpenshiftVersion(context, addonMetadata); err != nil {
+	if err := verifyRequiredOpenshiftVersion(addonMetadata); err != nil {
+		return err
+	}
+	if err := verifyRequiredMinishiftVersion(addonMetadata); err != nil {
 		return err
 	}
 	if err := verifyRequiredVariablesInContext(context, addonMetadata); err != nil {
@@ -292,17 +299,31 @@ func verifyRequiredVariablesInContext(context *command.ExecutionContext, meta ad
 	return nil
 }
 
-func verifyRequiredOpenshiftVersion(context *command.ExecutionContext, meta addon.AddOnMeta) error {
+func verifyRequiredOpenshiftVersion(meta addon.AddOnMeta) error {
 	openShiftVersion := strings.TrimPrefix(instanceState.InstanceStateConfig.OpenshiftVersion, constants.VersionPrefix)
 	requiredOpenshiftVersions := strings.TrimSpace(meta.OpenShiftVersion())
 	if requiredOpenshiftVersions != "" {
 		for _, requiredOpenshiftVersion := range strings.Split(requiredOpenshiftVersions, versionRangeSeparator) {
-			if err := compareOpenshiftVersions(openShiftVersion, strings.TrimSpace(requiredOpenshiftVersion)); err != nil {
+			if err := compareComponentVersions(openShiftVersion, strings.TrimSpace(requiredOpenshiftVersion), "OpenShift", meta.OpenShiftVersion()); err != nil {
 				return err
 			}
 		}
 	}
 
+	return nil
+}
+
+func verifyRequiredMinishiftVersion(meta addon.AddOnMeta) error {
+	minishiftVersionWithHash := strings.TrimPrefix(version.GetMinishiftVersion(), constants.VersionPrefix)
+	minishiftVersion := strings.Split(minishiftVersionWithHash, "+")[0]
+	requiredMinishiftVersions := strings.TrimSpace(meta.MinishiftVersion())
+	if requiredMinishiftVersions != "" {
+		for _, requiredMinishiftVersion := range strings.Split(requiredMinishiftVersions, versionRangeSeparator) {
+			if err := compareComponentVersions(minishiftVersion, strings.TrimSpace(requiredMinishiftVersion), "Minishift", meta.MinishiftVersion()); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 
@@ -315,39 +336,39 @@ func setStateAndPriority(addOn addon.AddOn, configMap map[string]*config.AddOnCo
 	addOn.SetPriority(int(addOnConfig.Priority))
 }
 
-func compareOpenshiftVersions(openShiftVersion, requiredOpenshiftVersion string) error {
-	if strings.HasPrefix(requiredOpenshiftVersion, ">=") {
+func compareComponentVersions(currentVersion, requiredVersion string, componentName string, versionRange string) error {
+	if strings.HasPrefix(requiredVersion, ">=") {
 		// This will work for both upstream and downstream.
-		if util.VersionOrdinal(openShiftVersion) < util.VersionOrdinal(strings.TrimPrefix(requiredOpenshiftVersion, ">=")) {
-			return fmt.Errorf("\nAdd-on does not support OpenShift version %s. "+
-				"You need to use a version %s", openShiftVersion, requiredOpenshiftVersion)
+		if util.VersionOrdinal(currentVersion) < util.VersionOrdinal(strings.TrimPrefix(requiredVersion, ">=")) {
+			return fmt.Errorf("\nAdd-on does not support %s version %s. "+
+				"You need to use a version %s", componentName, currentVersion, versionRange)
 		}
 		return nil
 	}
-	if strings.HasPrefix(requiredOpenshiftVersion, ">") {
-		if util.VersionOrdinal(openShiftVersion) <= util.VersionOrdinal(strings.TrimPrefix(requiredOpenshiftVersion, ">")) {
-			return fmt.Errorf("\nAdd-on does not support OpenShift version %s. "+
-				"You need to use a version %s", openShiftVersion, requiredOpenshiftVersion)
+	if strings.HasPrefix(requiredVersion, ">") {
+		if util.VersionOrdinal(currentVersion) <= util.VersionOrdinal(strings.TrimPrefix(requiredVersion, ">")) {
+			return fmt.Errorf("\nAdd-on does not support %s version %s. "+
+				"You need to use a version %s", componentName, currentVersion, versionRange)
 		}
 		return nil
 	}
-	if strings.HasPrefix(requiredOpenshiftVersion, "<=") {
-		if util.VersionOrdinal(openShiftVersion) > util.VersionOrdinal(strings.TrimPrefix(requiredOpenshiftVersion, "<=")) {
-			return fmt.Errorf("\nAdd-on does not support OpenShift version %s. "+
-				"You need to use a version %s", openShiftVersion, requiredOpenshiftVersion)
+	if strings.HasPrefix(requiredVersion, "<=") {
+		if util.VersionOrdinal(currentVersion) > util.VersionOrdinal(strings.TrimPrefix(requiredVersion, "<=")) {
+			return fmt.Errorf("\nAdd-on does not support %s version %s. "+
+				"You need to use a version %s", componentName, currentVersion, versionRange)
 		}
 		return nil
 	}
-	if strings.HasPrefix(requiredOpenshiftVersion, "<") {
-		if util.VersionOrdinal(openShiftVersion) >= util.VersionOrdinal(strings.TrimPrefix(requiredOpenshiftVersion, "<")) {
-			return fmt.Errorf("\nAdd-on does not support OpenShift version %s. "+
-				"You need to use a version %s", openShiftVersion, requiredOpenshiftVersion)
+	if strings.HasPrefix(requiredVersion, "<") {
+		if util.VersionOrdinal(currentVersion) >= util.VersionOrdinal(strings.TrimPrefix(requiredVersion, "<")) {
+			return fmt.Errorf("\nAdd-on does not support %s version %s. "+
+				"You need to use a version %s", componentName, currentVersion, versionRange)
 		}
 		return nil
 	}
-	if openShiftVersion != requiredOpenshiftVersion {
-		return fmt.Errorf("\nAddon does not support OpenShift version %s. "+
-			"You need to use a version %s", openShiftVersion, requiredOpenshiftVersion)
+	if currentVersion != requiredVersion {
+		return fmt.Errorf("\nAddon does not support %s version %s. "+
+			"You need to use a version %s", componentName, currentVersion, requiredVersion)
 	}
 
 	return nil

@@ -29,7 +29,7 @@ var versionCmd = &cobra.Command{
 	Short: "Gets the version of Minishift.",
 	Long:  `Gets the currently installed version of Minishift and prints it to standard output.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		RootCmd.PersistentPreRun(cmd, args)
+		// NOOP
 	},
 	Run: runPrintVersion,
 }

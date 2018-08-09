@@ -44,7 +44,6 @@ import (
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
-	minishiftStrings "github.com/minishift/minishift/pkg/util/strings"
 	"github.com/minishift/minishift/pkg/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -62,10 +61,6 @@ const (
 	invalidProfileName    = "Profile names must consist of alphanumeric characters only."
 )
 
-var noPersistentPreRunForCmds = []string{
-	"version",
-	"completion",
-}
 var viperWhiteList = []string{
 	"v",
 	"alsologtostderr",
@@ -78,12 +73,6 @@ var RootCmd = &cobra.Command{
 	Short: "Minishift is a tool for application development in local OpenShift clusters.",
 	Long:  `Minishift is a command-line tool that provisions and manages single-node OpenShift clusters optimized for development workflows.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		// Return from here for commands included in 'noPersistentPreRunForCmds' and "minishift" as its parent.
-		// This will result in no home dir when executing such commands.
-		if minishiftStrings.Contains(noPersistentPreRunForCmds, cmd.Name()) && cmd.Parent().Name() == minishiftConstants.BinaryName {
-			return
-		}
-
 		var (
 			err                    error
 			isAddonInstallRequired bool

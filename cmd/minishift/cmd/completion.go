@@ -73,6 +73,9 @@ var completionCmd = &cobra.Command{
 	Use:   "completion SHELL",
 	Short: "Outputs minishift shell completion for the given shell (bash or zsh)",
 	Long:  longDescription,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		// NOOP
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
 			fmt.Println("Usage: minishift completion SHELL")

@@ -35,6 +35,7 @@ const (
 	anyOpenShiftVersion      = ""
 	anyMinishiftVersion      = ""
 	varDefaults              = "Var-Defaults"
+	dependsOn                = "Depends-On"
 )
 
 type RequiredVar struct {
@@ -51,6 +52,7 @@ type AddOnMeta interface {
 	GetValue(key string) string
 	OpenShiftVersion() string
 	MinishiftVersion() string
+	Dependency() ([]string, error)
 	Url() string
 }
 
@@ -70,6 +72,9 @@ func NewAddOnMeta(headers map[string]interface{}) (AddOnMeta, error) {
 	}
 	if err := varDefaultsCheck(headers); err != nil {
 		return nil, err
+	}
+	if !checkDependencySemantic(headers) {
+		return nil, fmt.Errorf("The Dependencies should be a comma seperated list of Add-ons.")
 	}
 
 	metaData := &DefaultAddOnMeta{headers: headers}
@@ -145,6 +150,23 @@ func (meta *DefaultAddOnMeta) MinishiftVersion() string {
 		return val
 	}
 	return anyMinishiftVersion
+}
+
+func (meta *DefaultAddOnMeta) Dependency() ([]string, error) {
+	if val, contains := meta.headers[dependsOn].(string); contains {
+		return minishiftStrings.SplitAndTrim(val, ",")
+	}
+	return []string{}, nil
+}
+
+func checkDependencySemantic(headers map[string]interface{}) bool {
+	// Comma seperated list of dependencies
+	if headers[dependsOn] != nil {
+		dependencies := headers[dependsOn].(string)
+		match, _ := regexp.MatchString("^(([a-zA-Z][-[a-zA-Z]*)([,][ ]?[a-zA-Z][-[a-zA-Z]*)*)$", dependencies)
+		return match
+	}
+	return true
 }
 
 func checkVersionSemantic(version string) bool {

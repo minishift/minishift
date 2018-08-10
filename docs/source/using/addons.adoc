@@ -104,6 +104,25 @@ If the metadata field *Minishift-Version* is not specified in the add-on header,
 *Minishift-Version* only supports versions in the form of <major>.<minor>.<patch>.
 ====
 
+[[addon-defining-addon-dependencies]]
+== Defining Add-on Dependencies
+
+Add-on dependencies can be defined using the _Depends-On_ metadata field.
+Multiple dependencies may be defined using a comma-separated list of add-on names.
+
+[[example-addon-dependency]]
+.Example: Defining add-on dependency in add-on definition file
+
+----
+# Name: example
+# Description: Shows the use of Depends-On tag
+# Depends-On: anyuid, admin-user
+
+# This add-on depends on anyuid and admin-user add-on
+
+echo Depends on anyuid, admin-user add-on, and requires them to be installed
+----
+
 [[addon-commands]]
 == Add-on Commands
 

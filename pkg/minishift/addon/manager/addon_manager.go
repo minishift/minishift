@@ -213,6 +213,9 @@ func (m *AddOnManager) ApplyAddOn(addOn addon.AddOn, context *command.ExecutionC
 	if err := verifyRequiredVariablesInContext(context, addonMetadata); err != nil {
 		return err
 	}
+	if err := m.verifyRequiredAddons(addonMetadata); err != nil {
+		return err
+	}
 
 	oldDir, err := os.Getwd()
 	if err != nil {
@@ -325,6 +328,23 @@ func verifyRequiredMinishiftVersion(meta addon.AddOnMeta) error {
 		}
 	}
 	return nil
+}
+
+func (m *AddOnManager) verifyRequiredAddons(metadata addon.AddOnMeta) error {
+	var depsNotInstalled []string
+	dependencies, err := metadata.Dependency()
+	if err == nil && len(dependencies) > 0 {
+		for _, dep := range dependencies {
+			if m.IsInstalled(dep) {
+				continue
+			}
+			depsNotInstalled = append(depsNotInstalled, dep)
+		}
+		if len(depsNotInstalled) != 0 {
+			return errors.New(fmt.Sprintf("Dependent add-ons [%s] not found for this instance. Please install and apply them before running this add-on.", strings.Join(depsNotInstalled, ", ")))
+		}
+	}
+	return err
 }
 
 func setStateAndPriority(addOn addon.AddOn, configMap map[string]*config.AddOnConfig) {

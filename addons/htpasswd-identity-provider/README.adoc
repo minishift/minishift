@@ -1,0 +1,85 @@
+:linkattrs:
+
+= htpasswd-identity-provider
+
+This add-on configures OpenShift to use HTPasswordIdentityProvider.  For more info on the Identity Providers refer to https://docs.openshift.org/3.9/install_config/configuring_authentication.html
+
+== Add-on Variables
+
+The following list of variables can be used while configuring the add-on:
+
+[%header,cols=3] 
+|===
+|Variable Name
+|Description
+|Default value
+
+|MINISHIFT_DATA_HOME
+|The minishift data directory within the vm instance
+|/var/lib/minishift
+
+|CONFIG_LOCATION
+|The openshift master configuration folder
+|openshift.local.config/master
+
+|MASTER_CONFIG_FILE
+|The openshift master configuration file name
+|master-config.yaml
+
+|USERNAME
+|The username that will be added to users.htpasswd file
+|developer
+
+|USER_PASSWORD^*^
+|This **mandatory** variable sets password to the user specified via **USERNAME**.  If the **USERNAME** variable is not specified this sets the password for the default username **developer**
+|
+|===
+
+NOTE: Variables marked with * are required while applying the addon, please check the <<apply-addon>> section for an example
+
+== Installing add-on
+
+Run the following command to install `htpasswd-identity-provider` add-on:
+
+[code,sh]
+----
+$ git clone https://github.com/minishift/minishift-addons
+$ minishift addon install ./minishift-addons/add-ons/htpasswd-identity-provider
+----
+
+[[apply-addon]]
+== Applying add-on
+
+To apply the addon run the following command,
+[code,sh]
+----
+$ minishift addon apply htpasswd-identity-provider --addon-env  USER_PASSWORD=superS3cret
+----
+
+== Undeploy add-on
+
+Removing the `htpasswd-identity-provider` add-on will be reverting the authentication policy to what minishift configures by default:
+
+Run the following command to remove the `htpasswd-identity-provider` add-on:
+
+[code,sh]
+----
+$ minishift addon remove htpasswd-identity-provider
+----
+
+== Uninstall htpasswd-identity-provider add-on
+
+Run the following command to delete and remove the `htpasswd-identity-provider` add-on artifacts from the machine:
+
+[code,sh]
+----
+$ minishift addon uninstall htpasswd-identity-provider
+----
+
+== Check and Verify Configuration
+
+The tool https://github.com/mikefarah/yq/[yq] allows performing YAML operations via the command line,  run the following command to check the configuration that was applied via this add-on:
+[code,sh]
+----
+$ minishift openshift config view | yq r - oauthConfig
+----

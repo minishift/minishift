@@ -64,7 +64,7 @@ func Test_create_addon_manager(t *testing.T) {
 
 	addOns := manager.List()
 
-	expectedNumberOfAddOns := 5
+	expectedNumberOfAddOns := 6
 	assert.Len(t, addOns, expectedNumberOfAddOns)
 }
 

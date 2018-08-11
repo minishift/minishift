@@ -39,7 +39,7 @@ import (
 )
 
 var (
-	DefaultAssets = []string{"anyuid", "admin-user", "xpaas", "registry-route", "che"}
+	DefaultAssets = []string{"anyuid", "admin-user", "xpaas", "registry-route", "che", "htpasswd-identity-provider"}
 )
 
 func VMExists(client *libmachine.Client, machineName string) bool {

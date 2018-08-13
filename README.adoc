@@ -35,20 +35,20 @@ is provisioned. Make sure that the hypervisor of your choice is installed and en
 your system before you start Minishift.
 
 For detailed installation instructions for Minishift and the required dependencies, see
-the https://docs.openshift.org/latest/minishift/getting-started/index.html[Getting started] documentation.
+the https://docs.okd.io/latest/minishift/getting-started/index.html[Getting started] documentation.
 
 [[documentation]]
 == Documentation
 
 Minishift documentation is published as a part of the
-OpenShift Origin link:https://docs.openshift.org/latest[documentation library].
+OpenShift Origin link:https://docs.okd.io/latest[documentation library].
 Check out the latest official Minishift documentation for information about getting started,
 using, and contributing to Minishift:
 
-- https://docs.openshift.org/latest/minishift/getting-started/index.html[Getting started with Minishift]
-- https://docs.openshift.org/latest/minishift/using/index.html[Using Minishift]
-- https://docs.openshift.org/latest/minishift/contributing/index.html[Developing and contributing to Minishift]
-- https://docs.openshift.org/latest/minishift/command-ref/minishift.html[Command Reference]
+- https://docs.okd.io/latest/minishift/getting-started/index.html[Getting started with Minishift]
+- https://docs.okd.io/latest/minishift/using/index.html[Using Minishift]
+- https://docs.okd.io/latest/minishift/contributing/index.html[Developing and contributing to Minishift]
+- https://docs.okd.io/latest/minishift/command-ref/minishift.html[Command Reference]
 
 In addition, you can review the release notes and project roadmap here on GitHub:
 
@@ -66,7 +66,7 @@ You can reach the Minishift community by:
 - Joining the #minishift channel on https://freenode.net/[Freenode IRC]
 
 For information about contributing, building, and releasing Minishift, as well as guidelines for
-writing documentation, see the https://docs.openshift.org/latest/minishift/contributing/index.html[Contributing to Minishift] topics.
+writing documentation, see the https://docs.okd.io/latest/minishift/contributing/index.html[Contributing to Minishift] topics.
 
 If you want to contribute, make sure to follow the link:CONTRIBUTING.adoc[contribution guidelines]
 when you open issues or submit pull requests.

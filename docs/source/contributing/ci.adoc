@@ -41,7 +41,7 @@ The artifacts of a successful pull request build can be found at link:http://art
 
 As part of master build, {project} documentation which is compiled from the _master_ branch and integrated with OpenShift documentation is hosted at link:http://artifacts.ci.centos.org/minishift/minishift/docs/master/openshift-origin/latest/minishift/index.html[artifacts.ci.centos.org/minishift/minishift/docs/master/openshift-origin/latest/minishift/].
 
-On top of building the master branch and pull requests, CentOS CI is also used to build the tar bundle used for xref:../contributing/writing-docs.adoc#integration-with-docs-openshift-org[integration with docs.openshift.org], as well as to build xref:../contributing/releasing.adoc#automated-release[releases].
+On top of building the master branch and pull requests, CentOS CI is also used to build the tar bundle used for xref:../contributing/writing-docs.adoc#integration-with-docs-okd-io[integration with docs.okd.io], as well as to build xref:../contributing/releasing.adoc#automated-release[releases].
 
 Nightly jobs(link:https://ci.centos.org/job/minishift-nightly-b2d/[b2d], link:https://ci.centos.org/job/minishift-nightly-centos/[centos], link:https://ci.centos.org/job/minishift-nightly-minikube/[minikube]) run daily at midnight.
 These jobs execute all integration tests against the _master_ branch of the {project} GitHub repository with their respective ISOs.

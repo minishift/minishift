@@ -21,7 +21,7 @@ Eclipse Che provides a complete cloud IDE.
 <a name="using-the-eclipse-che-add-on"></a>
 ## Using the Eclipse Che Add-on
 
-The best way of using this add-on is via the [`minishift add-ons apply`](https://docs.openshift.org/latest/minishift/command-ref/minishift_addons_apply.html) command which is outlined in the following paragraphs.
+The best way of using this add-on is via the [`minishift add-ons apply`](https://docs.okd.io/latest/minishift/command-ref/minishift_addons_apply.html) command which is outlined in the following paragraphs.
 
 <a name="start-minishift"></a>
 ### Start Minishift

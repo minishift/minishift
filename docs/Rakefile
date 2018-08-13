@@ -133,7 +133,7 @@ desc 'Check links'
 task :link_check => :gen do
   # Limiting us here to check for 4xx errors which will cover broken links
   # Without this restriction we are getting errors for TLS certificate verification of
-  # docs.openshift.org. This can be prevented by custom installing missing certificates, but
+  # docs.okd.io. This can be prevented by custom installing missing certificates, but
   # for now that is not required (HF)
 
   # Don't need minishift-architecture.html file as it is unnecessary

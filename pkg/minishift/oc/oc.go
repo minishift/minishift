@@ -78,7 +78,7 @@ func (oc *OcRunner) RunAsUser(command string, stdOut io.Writer, stdErr io.Writer
 }
 
 // AddSudoerRoleForUser gives the specified user the sudoer role
-// See also https://docs.openshift.org/latest/architecture/additional_concepts/authentication.html#authentication-impersonation
+// See also https://docs.okd.io/latest/architecture/additional_concepts/authentication.html#authentication-impersonation
 func (oc *OcRunner) AddSudoerRoleForUser(user string) error {
 	cmd := fmt.Sprintf("adm policy add-cluster-role-to-user sudoer %s", user)
 	errorBuffer := new(bytes.Buffer)

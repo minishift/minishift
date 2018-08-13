@@ -266,8 +266,8 @@ The precedence for user-defined values is as follows:
 [[persistent-volumes]]
 == Persistent Volumes
 
-As part of the OpenShift cluster provisioning, 100 link:https://docs.openshift.org/latest/dev_guide/persistent_volumes.html[persistent volumes] are created for your OpenShift cluster.
-This allows applications to make link:https://docs.openshift.org/latest/dev_guide/persistent_volumes.html#persistent-volumes-claims-as-volumes-in-pods[persistent volumes claims].
+As part of the OpenShift cluster provisioning, 100 link:https://docs.okd.io/latest/dev_guide/persistent_volumes.html[persistent volumes] are created for your OpenShift cluster.
+This allows applications to make link:https://docs.okd.io/latest/dev_guide/persistent_volumes.html#persistent-volumes-claims-as-volumes-in-pods[persistent volumes claims].
 The location of the persistent data is determined in the `host-pv-dir` flag of the xref:../command-ref/minishift_start.adoc#[`minishift start`] command and defaults to *_/var/lib/minishift/openshift.local.pv_* on the {project} VM.
 
 [[http-s-proxies]]

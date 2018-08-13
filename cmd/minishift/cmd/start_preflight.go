@@ -55,8 +55,8 @@ func preflightChecksBeforeStartingHost() {
 	if shouldPreflightChecksBeSkipped() {
 		return
 	}
-	driverErrorMessage := "See the 'Setting Up the Virtualization Environment' topic (https://docs.openshift.org/latest/minishift/getting-started/setting-up-virtualization-environment.html) for more information"
-	prerequisiteErrorMessage := "See the 'Installing Prerequisites for Minishift' topic (https://docs.openshift.org/latest/minishift/getting-started/installing.html#install-prerequisites) for more information"
+	driverErrorMessage := "See the 'Setting Up the Virtualization Environment' topic (https://docs.okd.io/latest/minishift/getting-started/setting-up-virtualization-environment.html) for more information"
+	prerequisiteErrorMessage := "See the 'Installing Prerequisites for Minishift' topic (https://docs.okd.io/latest/minishift/getting-started/installing.html#install-prerequisites) for more information"
 
 	preflightCheckSucceedsOrFails(
 		configCmd.SkipDeprecationCheck.Name,
@@ -166,7 +166,7 @@ func preflightChecksBeforeStartingHost() {
 		checkIsoURL,
 		"Checking the ISO URL",
 		configCmd.WarnCheckIsoUrl.Name,
-		"See the 'Basic Usage' topic (https://docs.openshift.org/latest/minishift/using/basic-usage.html) for more information")
+		"See the 'Basic Usage' topic (https://docs.okd.io/latest/minishift/using/basic-usage.html) for more information")
 }
 
 // preflightChecksAfterStartingHost is executed after the startHost function.

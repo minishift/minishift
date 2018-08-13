@@ -90,7 +90,7 @@ func runUpdate(cmd *cobra.Command, args []string) {
 	}
 
 	if versionToUpdate.Major > currentVersion.Major {
-		fmt.Println("The latest version is not compatible with the current version. Follow the uninstallation procedure at https://docs.openshift.org/latest/minishift/getting-started/uninstalling.html#uninstall-instructions.")
+		fmt.Println("The latest version is not compatible with the current version. Follow the uninstallation procedure at https://docs.okd.io/latest/minishift/getting-started/uninstalling.html#uninstall-instructions.")
 	}
 
 	performUpdate(currentVersion, versionToUpdate)

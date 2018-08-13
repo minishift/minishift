@@ -2,7 +2,7 @@
 
 = htpasswd-identity-provider
 
-This add-on configures OpenShift to use HTPasswordIdentityProvider.  For more info on the Identity Providers refer to https://docs.openshift.org/3.9/install_config/configuring_authentication.html
+This add-on configures OpenShift to use HTPasswordIdentityProvider.  For more info on the Identity Providers refer to https://docs.okd.io/3.9/install_config/configuring_authentication.html
 
 == Add-on Variables
 

@@ -121,7 +121,7 @@ push_docs_container: build_docs_container ## Pushes the documentation build imag
 	cd docs && docker push $(DOCS_BUILDER_IMAGE)
 
 .PHONY: gen_adoc_tar
-gen_adoc_tar: clean_docs synopsis_docs ## Generates tarball of AsciiDoc sources for integration into docs.openshift.org
+gen_adoc_tar: clean_docs synopsis_docs ## Generates tarball of AsciiDoc sources for integration into docs.okd.io
 	cd docs && docker run -u $(DOCS_UID) $(DOC_VARIABLES) -tiv $(LOCAL_DOCS_DIR):$(CONTAINER_DOCS_DIR):Z $(DOCS_BUILDER_IMAGE) adoc_tar
 
 .PHONY: gen_docs

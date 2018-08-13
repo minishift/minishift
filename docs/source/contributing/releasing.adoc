@@ -82,7 +82,7 @@ $ export API_KEY=<api-key>
 $ curl -H "$(curl --user minishift:$API_KEY 'https://ci.centos.org//crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)')" -X POST https://ci.centos.org/job/minishift-docs/build --user "minishift:$API_KEY"
 ----
 
-This will build link:http://artifacts.ci.centos.org/minishift/minishift/docs/latest/[minishift-adoc.tar], which will be consumed by *docs.openshift.org* during the next nightly build.
+This will build link:http://artifacts.ci.centos.org/minishift/minishift/docs/latest/[minishift-adoc.tar], which will be consumed by *docs.okd.io* during the next nightly build.
 For more information, see xref:../contributing/writing-docs.adoc#[Writing and Publishing {project} Documentation].
 
 [[post-release-tasks]]

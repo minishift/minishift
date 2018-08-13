@@ -18,7 +18,7 @@ For details on the usage of {project}, see the xref:../using/basic-usage.adoc#[B
 The interaction with OpenShift is with the command line tool `oc` which is copied to your host.
 For more information on how {project} can assist you in interacting with and configuring your local OpenShift instance, see the xref:../openshift/openshift-client-binary.adoc#[OpenShift Client Binary] section.
 
-For more information about the OpenShift cluster architecture, see link:https://docs.openshift.org/latest/architecture/index.html[Architecture Overview] in the OpenShift documentation.
+For more information about the OpenShift cluster architecture, see link:https://docs.okd.io/latest/architecture/index.html[Architecture Overview] in the OpenShift documentation.
 
 The following steps describe how to get started with {project} on a Linux operating system with the KVM hypervisor driver.
 
@@ -106,4 +106,4 @@ Stopping local OpenShift cluster...
 Stopping "minishift"...
 ----
 
-For more information about creating applications in OpenShift, see link:https://docs.openshift.org/latest/dev_guide/application_lifecycle/new_app.html[Creating New Applications] in the OpenShift documentation.
+For more information about creating applications in OpenShift, see link:https://docs.okd.io/latest/dev_guide/application_lifecycle/new_app.html[Creating New Applications] in the OpenShift documentation.

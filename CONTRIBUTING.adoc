@@ -16,10 +16,10 @@ Thank you for your contributions! Please follow this process to submit a patch:
 . Create an issue describing your proposed change to the repository.
 . The repository owners will triage and respond to your issue promptly.
 . Fork the repository and create a topic branch.
-. Refer to the link:https://docs.openshift.org/latest/minishift/contributing/developing.html[developer documentation] for guidelines and tips on how to build and test Minishift.
+. Refer to the link:https://docs.okd.io/latest/minishift/contributing/developing.html[developer documentation] for guidelines and tips on how to build and test Minishift.
 . Submit a pull request with the proposed changes.
 .. The required format for the git commit message is 'Issue #<issue_no> message'.
-.. To make reviewing and integration as smooth as possible, please run the `make` targets link:https://docs.openshift.org/latest/minishift/contributing/developing.html#unit-tests[`test`], https://docs.openshift.org/latest/minishift/contributing/developing.html#format-source-code[`fmtcheck`] and https://docs.openshift.org/latest/minishift/contributing/developing.html#commit-messages[`validate_commits`] prior to submitting the pull request.
+.. To make reviewing and integration as smooth as possible, please run the `make` targets link:https://docs.okd.io/latest/minishift/contributing/developing.html#unit-tests[`test`], https://docs.okd.io/latest/minishift/contributing/developing.html#format-source-code[`fmtcheck`] and https://docs.okd.io/latest/minishift/contributing/developing.html#commit-messages[`validate_commits`] prior to submitting the pull request.
 
 [[questions]]
 == Questions?

@@ -85,7 +85,7 @@ func SetOcContext(profileName string) error {
 		return errors.New(fmt.Sprintf("Error getting the IP address: '%s'", err.Error()))
 	}
 
-	err, ocPath := GetOcPathForProfile(profileName)
+	err, ocPath := getOcPathForProfile()
 	if err != nil {
 		if glog.V(2) {
 			fmt.Println(fmt.Sprintf("%s", err.Error()))
@@ -126,8 +126,8 @@ func RemoveCurrentContext() error {
 	return nil
 }
 
-func GetOcPathForProfile(profileName string) (error, string) {
-	instanceConfigFile := filepath.Join(constants.GetProfileHomeDir(constants.ProfileName), "machines", profileName+".json")
+func getOcPathForProfile() (error, string) {
+	instanceConfigFile := minishiftConstants.GetInstanceStateConfigPath()
 	//Check if the file exists
 	_, err := os.Stat(instanceConfigFile)
 	if os.IsNotExist(err) {

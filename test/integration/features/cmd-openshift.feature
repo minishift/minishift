@@ -42,7 +42,7 @@ cluster in VM provided by Minishift.
        And stdout of command "minishift ssh -- "docker inspect --format={{.State.FinishedAt}} origin"" is not equal to "0001-01-01T00:00:00Z"
 
   Scenario: Pods docker-registry and router are ready after OpenShift restart
-     Given user waits "30" seconds
+     Given user waits "90" seconds
       When executing "oc get pods -n default --as system:admin" succeeds
       Then stdout should match "docker-registry-\d-\w{5}\s*1\/1\s*Running"
        And stdout should match "router-\d-\w{5}\s*1\/1\s*Running"
@@ -63,8 +63,6 @@ cluster in VM provided by Minishift.
       Then stdout should match
        """
        ^openshift v[0-9]+\.[0-9]+\.[0-9]+\+[0-9a-z]{7}(-[0-9]+)*
-       kubernetes v[0-9]+\.[0-9]+\.[0-9]+\+[0-9a-z]{10}
-       etcd [0-9]+\.[0-9]+\.[0-9]+
        """
 
   Scenario: Getting address of internal docker registry
@@ -131,6 +129,7 @@ cluster in VM provided by Minishift.
   Scenario: Setting configuration on OpenShift master
       When executing "minishift openshift config set --patch '{"assetConfig": {"logoutURL": "http://www.minishift.io"}}'" succeeds
       Then stdout should contain "Patching OpenShift configuration"
+       And user waits "30" seconds
       When executing "minishift openshift config view" succeeds
       Then stdout is YAML which contains key "assetConfig.logoutURL" with value matching "http://www\.minishift\.io"
 

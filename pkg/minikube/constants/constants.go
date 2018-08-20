@@ -29,7 +29,7 @@ const (
 	MiniShiftEnvPrefix               = "MINISHIFT"      // Prefix for the environmental variables
 	MiniShiftHomeEnv                 = "MINISHIFT_HOME" // Environment variable used to change the Minishift home directory
 	VersionPrefix                    = "v"
-	MinimumSupportedOpenShiftVersion = "v3.7.0"
+	MinimumSupportedOpenShiftVersion = "v3.9.0"
 	RefactoredOcVersion              = "v3.10.0-alpha.0" // From v3.10.0 oc binary is refactored and don't have lot of options by default.
 	DefaultMemory                    = "4GB"
 	DefaultCPUS                      = 2

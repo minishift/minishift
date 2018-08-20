@@ -282,7 +282,7 @@ func runStart(cmd *cobra.Command, args []string) {
 		if isRestart {
 			err = cmdUtil.SetOcContext(minishiftConfig.AllInstancesConfig.ActiveProfile)
 			if err != nil {
-				fmt.Println(fmt.Sprintf("Could not set oc CLI context for '%s' profile: %v", profileActions.GetActiveProfile(), err))
+				atexit.ExitWithMessage(1, fmt.Sprintf("Could not set oc CLI context for '%s' profile: %v", profileActions.GetActiveProfile(), err))
 			}
 		}
 	}

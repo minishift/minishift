@@ -31,7 +31,7 @@ const (
 	VersionPrefix                    = "v"
 	MinimumSupportedOpenShiftVersion = "v3.7.0"
 	RefactoredOcVersion              = "v3.10.0-alpha.0" // From v3.10.0 oc binary is refactored and don't have lot of options by default.
-	DefaultMemory                    = "2GB"
+	DefaultMemory                    = "4GB"
 	DefaultCPUS                      = 2
 	DefaultDiskSize                  = "20GB"
 	UpdateMarkerFileName             = "updated"

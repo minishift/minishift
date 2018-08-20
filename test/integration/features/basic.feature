@@ -36,9 +36,7 @@ Feature: Basic
     Given Minishift has state "Running"
      When "status code" of HTTP request to "/healthz" of OpenShift instance is equal to "200"
      Then "body" of HTTP request to "/healthz" of OpenShift instance contains "ok"
-      And "status code" of HTTP request to "/healthz/ready" of OpenShift instance is equal to "200"
-      And "body" of HTTP request to "/healthz/ready" of OpenShift instance contains "ok"
-      And "status code" of HTTP request to "/console" of OpenShift instance is equal to "200"
+      And with up to "10" retries with wait period of "500ms" the "status code" of HTTP request to "/console" of OpenShift instance is equal to "200"
       And "body" of HTTP request to "/console" of OpenShift instance contains "<title>OpenShift Web Console</title>"
 
   Scenario Outline: User can set, get, view and unset values in configuration file
@@ -118,7 +116,7 @@ Feature: Basic
      And exitcode should equal "0"
      And stdout should contain
      """
-     persistentvolumes/pv0001
+     persistentvolume/pv0001
      """
 
   Scenario: User is able to do ssh into Minishift VM
@@ -150,7 +148,7 @@ Feature: Basic
      And with up to "10" retries with wait period of "500ms" the "body" of HTTP request to "/" of service "ruby-ex" in namespace "ruby" contains "Welcome to your Ruby application on OpenShift"
 
     When executing "oc delete project ruby" succeeds
-    Then stdout should contain "project "ruby" deleted"
+    Then stdout should contain "project.project.openshift.io "ruby" deleted"
 
     When executing "oc logout" succeeds
     Then stdout should contain

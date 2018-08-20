@@ -46,12 +46,11 @@ Feature: With generic driver Minishift can provision remote unprovisioned VM
      Then Minishift should have state "Running"
 
   Scenario: OpenShift configuration is not present on remote VM
-  NOTE: Directory openshift.local.volumes will be left at the place due to permision problems.
+  NOTE: Directory openshift.local.volumes will be left at the place due to permission problems.
   This can be later removed once the issue is fixed. More information at:
   https://github.com/minishift/minishift/blob/a8c8b37a29119bad216524c1fd067a5a3a00b85f/cmd/minishift/cmd/delete.go#L141-L142
      When executing "minishift ssh -- ls -a /var/lib/minishift" succeeds
-     Then stdout should not contain "base"
-      And stdout should not contain "bin"
+     Then stdout should not contain "bin"
       And stdout should not contain "hostdata"
       And stdout should not contain "openshift.local.config"
       And stdout should not contain "openshift.local.pv"

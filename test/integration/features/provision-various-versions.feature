@@ -29,6 +29,4 @@ Feature: Provision all major OpenShift versions
 
   Examples:
     | serverVersion | ocVersion |
-    | v3.7.0        | v3.7.0    |
-    | v3.7.1        | v3.7.1    |
-    | v3.7.2        | v3.7.2    |
+    | v3.9.0        | v3.9.0    |

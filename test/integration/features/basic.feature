@@ -36,7 +36,7 @@ Feature: Basic
     Given Minishift has state "Running"
      When "status code" of HTTP request to "/healthz" of OpenShift instance is equal to "200"
      Then "body" of HTTP request to "/healthz" of OpenShift instance contains "ok"
-      And with up to "10" retries with wait period of "1s" the "status code" of HTTP request to "/console" of OpenShift instance is equal to "200"
+      And with up to "20" retries with wait period of "500ms" the "status code" of HTTP request to "/console" of OpenShift instance is equal to "200"
       And "body" of HTTP request to "/console" of OpenShift instance contains "<title>OpenShift Web Console</title>"
 
   Scenario Outline: User can set, get, view and unset values in configuration file

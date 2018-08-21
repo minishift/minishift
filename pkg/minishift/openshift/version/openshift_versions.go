@@ -74,10 +74,10 @@ func PrintDownStreamVersions(output io.Writer, minSupportedVersion string) error
 	return nil
 }
 
-// PrintUpStreamVersions prints the origin versions which satisfies the following conditions:
+// PrintUpstreamVersions prints the origin versions which satisfies the following conditions:
 // 	1. Major versions greater than or equal to the minimum supported and default version
 //	2. Pre-release versions greater than default version
-func PrintUpStreamVersions(output io.Writer, minSupportedVersion string, defaultVersion string) error {
+func PrintUpstreamVersions(output io.Writer, minSupportedVersion string, defaultVersion string) error {
 	tags, err := GetGithubReleases()
 	if err != nil {
 		return err

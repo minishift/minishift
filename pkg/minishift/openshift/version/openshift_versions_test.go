@@ -28,7 +28,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPrintUpStreamVersions(t *testing.T) {
+func TestPrintUpstreamVersions(t *testing.T) {
 	EnsureGitHubApiAccessTokenSet(t)
 	testDir, err := ioutil.TempDir("", "minishift-config-")
 	assert.NoError(t, err)
@@ -40,7 +40,7 @@ func TestPrintUpStreamVersions(t *testing.T) {
 
 	os.Stdout = f
 	defaultVersion := version.GetOpenShiftVersion()
-	err = PrintUpStreamVersions(f, constants.MinimumSupportedOpenShiftVersion, defaultVersion)
+	err = PrintUpstreamVersions(f, constants.MinimumSupportedOpenShiftVersion, defaultVersion)
 	assert.NoError(t, err)
 
 	_, err = f.Seek(0, 0)

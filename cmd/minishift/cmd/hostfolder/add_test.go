@@ -42,6 +42,21 @@ func Test_host_folder_name_required(t *testing.T) {
 	addHostFolder(nil, nil)
 }
 
+func Test_host_folder_name_not_empty(t *testing.T) {
+	var err error
+	tmpMinishiftHomeDir := cli.SetupTmpMinishiftHome(t)
+	config.InstanceConfig, err = config.NewInstanceConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
+	config.AllInstancesConfig, err = config.NewAllInstancesConfig(filepath.Join(tmpMinishiftHomeDir, "config"))
+	assert.NoError(t, err, "Unexpected error setting instance config")
+
+	tee := cli.CreateTee(t, true)
+	defer cli.TearDown(tmpMinishiftHomeDir, tee)
+	defer viper.Reset()
+
+	atexit.RegisterExitHandler(cli.VerifyExitCodeAndMessage(t, tee, 1, usage))
+	addHostFolder(nil, []string{" "})
+}
+
 func Test_source_required(t *testing.T) {
 	var err error
 	tmpMinishiftHomeDir := cli.SetupTmpMinishiftHome(t)

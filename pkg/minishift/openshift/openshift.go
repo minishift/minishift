@@ -49,6 +49,12 @@ func GetOpenShiftPatchTarget(target string) OpenShiftPatchTarget {
 			getContainerConfigFile("node"),
 			getLocalConfigFile("node"),
 		}
+	case "kube":
+		return OpenShiftPatchTarget{
+			"kube",
+			getContainerConfigFile("kube"),
+			getLocalConfigFile("kube"),
+		}
 	default:
 		return OpenShiftPatchTarget{
 			"unkown",
@@ -82,7 +88,15 @@ func RestartOpenShift(commander docker.DockerCommander) (bool, error) {
 	version := getOpenshiftVersion()
 	valid, _ := openshiftVersion.IsGreaterOrEqualToBaseVersion(version, constants.RefactoredOcVersion)
 	if valid {
-		containerID, err := commander.GetID(minishiftConstants.OpenshiftApiContainerName)
+		containerID, err := commander.GetID(minishiftConstants.OpenshiftApiContainerLabel)
+		if err != nil {
+			return false, err
+		}
+		ok, err = commander.Stop(containerID)
+		if err != nil {
+			return false, err
+		}
+		containerID, err = commander.GetID(minishiftConstants.KubernetesApiContainerLabel)
 		if err != nil {
 			return false, err
 		}
@@ -99,8 +113,8 @@ func RestartOpenShift(commander docker.DockerCommander) (bool, error) {
 	return ok, err
 }
 
-func Patch(target OpenShiftPatchTarget, patch string, commander docker.DockerCommander, openshiftVersion string) (bool, error) {
-	fmt.Println(fmt.Sprintf("Patching OpenShift configuration '%s' with '%s'", target.containerConfigFile, patch))
+func Patch(target OpenShiftPatchTarget, patch string, commander docker.DockerCommander) (bool, error) {
+	fmt.Println(fmt.Sprintf("Patching OpenShift configuration '%s' with '%s'", target.localConfigFile, patch))
 
 	patchId, err := backUpConfig(target, commander)
 	if err != nil {
@@ -119,7 +133,6 @@ func Patch(target OpenShiftPatchTarget, patch string, commander docker.DockerCom
 	if err != nil {
 		glog.Error("Creating patched configuration failed. Not applying the changes.", err)
 		return false, nil
-
 	}
 
 	// Tweak the result configuration, we need to escape single quotes
@@ -163,13 +176,13 @@ func ViewConfig(target OpenShiftPatchTarget, commander docker.DockerCommander) (
 	}
 	version := getOpenshiftVersion()
 	valid, _ := openshiftVersion.IsGreaterOrEqualToBaseVersion(version, constants.RefactoredOcVersion)
-	if !valid || target.target == "node" {
+	if !valid || target.target == "node" || target.target == "kube" {
 		result, err = commander.Exec("-t", minishiftConstants.OpenshiftContainerName, "cat", path)
 		if err != nil {
 			return "", err
 		}
 	} else {
-		containerID, err := commander.GetID(minishiftConstants.OpenshiftApiContainerName)
+		containerID, err := commander.GetID(minishiftConstants.OpenshiftApiContainerLabel)
 		if err != nil {
 			return "", err
 		}
@@ -269,6 +282,8 @@ func getLocalConfigFile(target string) string {
 			return "/var/lib/minishift/openshift.local.config/node-localhost/node-config.yaml"
 		}
 		return "/var/lib/minishift/base/node/node-config.yaml"
+	case "kube":
+		return "/var/lib/minishift/base/kube-apiserver/master-config.yaml"
 	}
 	return ""
 }
@@ -287,6 +302,8 @@ func getContainerConfigFile(target string) string {
 			return "/var/lib/origin/openshift.local.config/node-localhost/node-config.yaml"
 		}
 		return "/var/lib/origin/openshift.local.config/node/node-config.yaml"
+	case "kube":
+		return "/var/lib/origin/pod-manifests/apiserver.yaml"
 	}
 	return ""
 }

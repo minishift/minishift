@@ -27,7 +27,6 @@ import (
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
-	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 	"github.com/minishift/minishift/pkg/minishift/docker"
 	"github.com/minishift/minishift/pkg/minishift/openshift"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
@@ -37,7 +36,7 @@ const (
 	targetFlag = "target"
 	patchFlag  = "patch"
 
-	unknownPatchTargetError = "Unkown patch target. Only 'master' and 'node' are supported."
+	unknownPatchTargetError = "Unkown patch target. Only 'master', 'node' and 'kube' are supported."
 	emptyPatchError         = "You must specify a patch using the --patch flag."
 	invalidJSONError        = "The patch must be a valid JSON file."
 )
@@ -55,7 +54,7 @@ var setCmd = &cobra.Command{
 }
 
 func init() {
-	setCmd.Flags().StringVar(&target, targetFlag, "master", "Target configuration to patch. Options are 'master' or 'node'.")
+	setCmd.Flags().StringVar(&target, targetFlag, "master", "Target configuration to patch. Options are 'master', 'node' and 'kube'.")
 	setCmd.Flags().StringVar(&patch, patchFlag, "", "The patch to apply.")
 	configCmd.AddCommand(setCmd)
 }
@@ -78,9 +77,8 @@ func runPatch(cmd *cobra.Command, args []string) {
 
 	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
 	dockerCommander := docker.NewVmDockerCommander(sshCommander)
-	openshiftVersion := instanceState.InstanceStateConfig.OpenshiftVersion
 
-	_, err = openshift.Patch(patchTarget, patch, dockerCommander, openshiftVersion)
+	_, err = openshift.Patch(patchTarget, patch, dockerCommander)
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error patching the OpenShift configuration: %s", err.Error()))
 	}
@@ -92,6 +90,8 @@ func determineTarget(target string) openshift.OpenShiftPatchTarget {
 		return openshift.GetOpenShiftPatchTarget("master")
 	case "node":
 		return openshift.GetOpenShiftPatchTarget("node")
+	case "kube":
+		return openshift.GetOpenShiftPatchTarget("kube")
 	default:
 		return openshift.GetOpenShiftPatchTarget("unknown")
 	}

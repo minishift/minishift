@@ -118,7 +118,7 @@ To view the OpenShift master configuration file *_master-config.yaml_*, run the 
 $ minishift openshift config view
 ----
 
-To show the node configuration instead of the master configuration, specify the `target` flag.
+To show the node or kubeapi-server configuration instead of the master configuration, specify the `target` flag.
 
 For details about the `view` sub-command, see the xref:../command-ref/minishift_openshift_config_view.adoc#[minishift openshift config view] synopsis.
 

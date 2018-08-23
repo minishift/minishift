@@ -24,18 +24,19 @@ import (
 )
 
 const (
-	B2dIsoAlias               = "b2d"
-	CentOsIsoAlias            = "centos"
-	OpenshiftContainerName    = "origin"
-	OpenshiftApiContainerName = "k8s_apiserver_openshift-apiserver"
-	OpenshiftExec             = "/usr/bin/openshift"
-	OpenshiftOcExec           = "/usr/bin/oc"
-	DefaultProject            = "myproject"
-	DefaultUser               = "developer"
-	DefaultUserPassword       = "developer"
-	SkipVerifyInsecureTLS     = "insecure-skip-tls-verify=true"
-	BinaryName                = "minishift"
-	OcPathInsideVM            = "/var/lib/minishift/bin"
+	B2dIsoAlias                 = "b2d"
+	CentOsIsoAlias              = "centos"
+	OpenshiftContainerName      = "origin"
+	OpenshiftApiContainerLabel  = "io.kubernetes.container.name=apiserver"
+	KubernetesApiContainerLabel = "io.kubernetes.container.name=api"
+	OpenshiftExec               = "/usr/bin/openshift"
+	OpenshiftOcExec             = "/usr/bin/oc"
+	DefaultProject              = "myproject"
+	DefaultUser                 = "developer"
+	DefaultUserPassword         = "developer"
+	SkipVerifyInsecureTLS       = "insecure-skip-tls-verify=true"
+	BinaryName                  = "minishift"
+	OcPathInsideVM              = "/var/lib/minishift/bin"
 )
 
 var (

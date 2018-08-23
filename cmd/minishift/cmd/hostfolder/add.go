@@ -100,7 +100,10 @@ func addHostFolder(cmd *cobra.Command, args []string) {
 		if interactive {
 			name, shareType = readNameAndTypeInteractive()
 		} else {
-			name = args[0]
+			name = strings.TrimSpace(args[0])
+			if len(name) == 0 {
+				atexit.ExitWithMessage(1, usage)
+			}
 		}
 	}
 

@@ -202,22 +202,22 @@ clean_bindata:
 test: $(ADDON_ASSET_FILE)  ## Run unit tests
 	@go test -v -tags "$(BUILD_TAGS)" -ldflags="$(VERSION_VARIABLES)" $(shell $(PACKAGES))
 
-.PHONY: integration
-integration: GODOG_OPTS = --tags=basic ## Run integration tests
+.PHONY: integration ## Run integration tests (quick and minimal)
+integration: GODOG_OPTS = --tags=quick\&\&~disabled
 integration: $(MINISHIFT_BINARY)
 	mkdir -p $(INTEGRATION_TEST_DIR)
 	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) \
 	--run-before-feature="$(RUN_BEFORE_FEATURE)" --test-with-specified-shell="$(TEST_WITH_SPECIFIED_SHELL)" --copy-oc-from="$(COPY_OC_FROM)" $(GODOG_OPTS)
 
 .PHONY: integration_all ## Run all integration tests
-integration_all: GODOG_OPTS = --tags=~coolstore\&\&~proxy
+integration_all: GODOG_OPTS = --tags=~disabled
 integration_all: $(MINISHIFT_BINARY)
 	mkdir -p $(INTEGRATION_TEST_DIR)
 	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) \
 	--run-before-feature="$(RUN_BEFORE_FEATURE)" --test-with-specified-shell="$(TEST_WITH_SPECIFIED_SHELL)" --copy-oc-from="$(COPY_OC_FROM)" $(GODOG_OPTS)
 
-.PHONY: integration_pr ## Run integration tests for pull request
-integration_pr: GODOG_OPTS = --tags=~coolstore\&\&~addon-xpaas\&\&~proxy
+.PHONY: integration_pr ## Run integration tests for pull request (skip more specialized tests)
+integration_pr: GODOG_OPTS = --tags=core\&\&~disabled
 integration_pr: $(MINISHIFT_BINARY)
 	mkdir -p $(INTEGRATION_TEST_DIR)
 	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) \

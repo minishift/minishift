@@ -1,16 +1,17 @@
-@cmd-config @command
+@cmd-config @core
 Feature: Minishift config subcommands
 Commands `minishift config [sub-command]` are used for storing
 user defined options which changes default behaviour of Minishift.
 
-  @minishift-only
+  @minishift-only @quick
   Scenario: Config is empty
     Given Minishift has state "Does Not Exist"
      Then executing "minishift config view" succeeds
       And stdout should be empty
 
-  Scenario Outline: Setting values in bad range or format
-  Minishift config set should not set a value, if this value is of bad format or in bad range.
+  @quick
+  Scenario Outline: Setting values in wrong range or format
+  Minishift config set should not set a value, if this value is of wrong format or in wrong range.
      When executing "minishift config set <property> <value>" fails
      Then JSON config file ".minishift/config/config.json" does not contain key "<property>" with value matching "<value>"
       And stdout of command "minishift config get <property>" is equal to "<nil>"
@@ -70,6 +71,7 @@ user defined options which changes default behaviour of Minishift.
     | host-only-cidr  | 192.168.1.1                    |
     | host-only-cidr  | notacidr                       |
 
+  @quick
   Scenario Outline: Setting and unsetting with correct values
       When executing "minishift config set <property> "<value>"" succeeds
       Then JSON config file ".minishift/config/config.json" contains key "<property>" with value matching "<expected>"
@@ -158,7 +160,7 @@ user defined options which changes default behaviour of Minishift.
     | host-only-cidr  | 192.168.0.1/0                                                                                   | 192.168.0.1/0                                                                                   |
     | host-only-cidr  | 192.168.0.1/16                                                                                  | 192.168.0.1/16                                                                                  |
 
-  @minishift-only
+  @minishift-only @quick
   Scenario Outline: Setting and unsetting values for iso-url key
      When executing "minishift config set <property> "<value>"" succeeds
      Then JSON config file ".minishift/config/config.json" contains key "<property>" with value matching "<expected>"
@@ -176,14 +178,17 @@ user defined options which changes default behaviour of Minishift.
     | iso-url         | b2d                                                                                              | b2d                                                                                             |
     | iso-url         | centos                                                                                           | centos                                                                                          |
 
+  @quick
   Scenario: Unsetting non-existing key
      When executing "minishift config unset i-do-not-exist" succeeds
      Then exitcode should equal "0"
 
+  @quick
   Scenario: Getting non-existing key
      When executing "minishift config get does-not-exist"
      Then stdout should contain "<nil>"
 
+  @quick
   Scenario Outline: Setting values, getting values and keeping them
   Setting values, not unsetting them so they will be used on next Minishift start.
   Not every key possible is being tested only those which are less complicated,
@@ -198,7 +203,7 @@ user defined options which changes default behaviour of Minishift.
     | docker-env        | FOO=BAR,hello=hi   | [FOO=BAR hello=hi]   |
     | docker-opt        | dns=8.8.8.8        | [dns=8.8.8.8]        |
 
-
+  @quick
   Scenario Outline: Globally Setting values, getting values and keeping them
   Setting values, not unsetting them so they will be used on next Minishift start.
   Not every key possible is being tested only those which are less complicated,

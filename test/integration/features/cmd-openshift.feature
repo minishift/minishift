@@ -1,8 +1,9 @@
-@cmd-openshift @command @openshift
+@cmd-openshift @core
 Feature: Openshift commands
 Commands "minishift openshift [sub-command]" are used for interaction with Openshift
 cluster in VM provided by Minishift.
 
+  @quick
   Scenario: Trying service command when Minishift is not running
      Given Minishift has state "Does Not Exist"
       When executing "minishift openshift service list" succeeds

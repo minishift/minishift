@@ -1,8 +1,9 @@
-@flags
+@flags @core
 Feature: Flags
   As a user I can perform advanced operations
   such as starting Minishift with optional features
 
+  @quick
   Scenario: Set configuration options for Minishift
     Given Minishift has state "Does Not Exist"
      When executing "minishift config set docker-opt dns=8.8.8.8" succeeds

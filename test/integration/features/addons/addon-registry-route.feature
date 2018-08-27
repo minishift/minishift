@@ -1,4 +1,4 @@
-@addon-registry-route @addon
+@addon-registry-route
 Feature: registry-route add-on
 registry-route add-on exposes the route for the OpenShift integrated registry,
 so that user can able to push their container images directly to registry and deploy it.

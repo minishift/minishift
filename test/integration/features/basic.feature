@@ -1,4 +1,4 @@
-@basic
+@basic @core @quick
 Feature: Basic
   As a user I can perform basic operations of Minishift and OpenShift
 

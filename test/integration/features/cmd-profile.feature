@@ -1,7 +1,8 @@
-@cmd-profile @command
+@cmd-profile @core
 Feature: Profile commands
   As a user I can perform basic operations of Minishift with profile feature
 
+  @quick
   Scenario Outline: As user, I cannot create profile with blank profile name
      When executing "minishift profile set <profilename>" fails
      Then stderr should contain
@@ -14,7 +15,7 @@ Feature: Profile commands
     |             |
     | ''          |
 
-    
+  @quick
   Scenario Outline: As user, I cannot create profile with special character in profile name
      When executing "minishift profile set <profilename>" fails
      Then stderr should contain
@@ -42,6 +43,7 @@ Feature: Profile commands
     | 'foo_bar'   |
     | '_'         |
 
+  @quick
   Scenario Outline: As user, I can create profile with alphanumeric character including '_' and '-' in profile name
      When executing "minishift profile set <profilename>" succeeds
      Then profile <profilename> should have state "Does Not Exist"
@@ -59,6 +61,7 @@ Feature: Profile commands
     | 123profile  |
     | foo         |
 
+  @quick
   Scenario: As user, I can switch between existing profiles
      When executing "minishift profile set Test-123" succeeds
      Then profile "Test-123" should be the active profile

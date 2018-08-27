@@ -1,4 +1,4 @@
-@generic-driver
+@generic-driver @core
 Feature: With generic driver Minishift can provision remote unprovisioned VM 
 
   Scenario: User creates an unprovisioned VM

@@ -1,4 +1,4 @@
-@provision-various-versions @openshift
+@provision-various-versions @core
 Feature: Provision all major OpenShift versions
   As a user I can provision major versions of OpenShift
 

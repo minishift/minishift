@@ -3,6 +3,7 @@ Feature: Experimental Flags
   Experimental flag --extra-clusterup-flags will be enabled by setting MINISHIFT_ENABLE_EXPERIMENTAL environment variable,
   this flag will provide access to some of upcoming feature and experiments.
 
+  @quick
   Scenario: User cannot start minishift experimental feature directly
     Given Minishift has state "Does Not Exist"
      Then executing "minishift start --service-catalog" fails
@@ -11,6 +12,7 @@ Feature: Experimental Flags
       Error: unknown flag: --service-catalog
       """
 
+  @quick
   Scenario: User cannot use minishift flag --extra-clusterup-flag directly
     Given Minishift has state "Does Not Exist"
      Then executing "minishift start --extra-clusterup-flags" fails
@@ -19,6 +21,7 @@ Feature: Experimental Flags
       Error: unknown flag: --extra-clusterup-flags
       """
 
+  @quick
   Scenario: User can enable and disable minishift experimental flag --extra-clusterup-flags
     Given Minishift has state "Does Not Exist"
      When setting up environment variable "MINISHIFT_ENABLE_EXPERIMENTAL" with value "y" succeeds
@@ -34,6 +37,7 @@ Feature: Experimental Flags
       --extra-clusterup-flags string
       """
 
+  @quick
   Scenario: User cannot use minishift experimental flag --extra-clusterup-flag without experimental feature name
     Given Minishift has state "Does Not Exist"
      When setting up environment variable "MINISHIFT_ENABLE_EXPERIMENTAL" with value "y" succeeds

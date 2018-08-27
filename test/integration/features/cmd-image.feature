@@ -1,4 +1,4 @@
-@cmd-image @command
+@cmd-image @core
 Feature: Basic image caching test
   As a user I am able to import and export container images from a local OCI repository
   located in the $MINISHIFT_HOME/cache directory

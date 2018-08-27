@@ -1,4 +1,4 @@
-@cmd-docker-env @command
+@cmd-docker-env @core
 Feature: Command docker-env
 Command docker-env sets docker environment variables for supported shells.
 INFO: This feature runs against a shell instance. To use a non-default shell, please select

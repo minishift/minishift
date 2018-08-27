@@ -1,4 +1,4 @@
-@cmd-oc-env @command
+@cmd-oc-env @core
 Feature: Command oc-env
 Command oc-env sets the path to oc binary.
 INFO: This feature runs against a shell instance. To use a non-default shell, please select

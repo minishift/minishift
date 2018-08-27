@@ -1,7 +1,7 @@
-@cmd-addons @command
+@cmd-addons @core
 Feature: Addons command and its subcommands
 
-  @minishift-only
+  @minishift-only @quick
   Scenario: Default add-ons are installed but not enabled by default
      Note: default add-ons were installed during previous commands automatically.
      When executing "minishift addons list"
@@ -12,7 +12,7 @@ Feature: Addons command and its subcommands
       And stdout should match "che\s*: disabled\s*P\(0\)"
       And stdout should match "htpasswd-identity-provider\s*: disabled\s*P\(0\)"
 
-@minishift-only
+  @minishift-only @quick
   Scenario: Verbose listing of add-ons installed by default
      When executing "minishift addons list --verbose"
      Then stdout should match "Name\s*: admin-user"
@@ -40,11 +40,13 @@ Feature: Addons command and its subcommands
       And stdout should match "Url\s*:"
       And stdout should match "Openshift Version\s*:"
 
+  @quick
   Scenario: Uninstalling an add-on
      When executing "minishift addons uninstall anyuid" succeeds
      Then executing "minishift addons list" succeeds
       And stdout should not contain "anyuid"
 
+  @quick
   Scenario: Installing add-on from a folder
   Note: working directory when executing Minishift commands is: out/test-run.
      When file from "https://raw.githubusercontent.com/minishift/minishift/master/addons/anyuid/anyuid.addon" is downloaded into location "download/anyuid"
@@ -52,6 +54,7 @@ Feature: Addons command and its subcommands
      Then executing "minishift addons list" succeeds
       And stdout should contain "anyuid"
 
+  @quick
   Scenario: Applying add-on when Minishift is not running
     Given Minishift has state "Does Not Exist"
      When executing "minishift addons apply anyuid" succeeds
@@ -60,6 +63,7 @@ Feature: Addons command and its subcommands
       Running this command requires an existing 'minishift' VM, but no VM is defined.
       """
 
+  @quick
   Scenario: Removing add-on when Minishift is not running
   After issue no. 1377 is resolved, please change the expected stdout to:
   Minishift should return: "Running this command requires an existing 'minishift' VM, but no VM is defined."
@@ -70,6 +74,7 @@ Feature: Addons command and its subcommands
       Unable to remove addon 'anyuid'. No anyuid.addon.remove file is found.
       """
 
+  @quick
   Scenario: Installing default add-ons manually
      When executing "minishift addons install --defaults" succeeds
      Then stdout should contain
@@ -84,7 +89,7 @@ Feature: Addons command and its subcommands
      Then stdout should contain "che"
      Then stdout should contain "htpasswd-identity-provider"
 
-  @minishift-only
+  @minishift-only @quick
   Scenario: Default add-ons are not enabled by default during installation
      When executing "minishift addons list"
      Then stdout should match "admin-user\s*: disabled\s*P\(0\)"
@@ -94,6 +99,7 @@ Feature: Addons command and its subcommands
       And stdout should match "che\s*: disabled\s*P\(0\)"
       And stdout should match "htpasswd-identity-provider\s*: disabled\s*P\(0\)"
 
+  @quick
   Scenario: Enabling not installed add-on
      When executing "minishift addons enable absent-addon"
      Then stdout should contain
@@ -101,12 +107,14 @@ Feature: Addons command and its subcommands
       No add-on with the name 'absent-addon' is installed.
       """
 
+  @quick
   Scenario: Enabling installed add-on
      When executing "minishift addons enable xpaas" succeeds
      Then stdout should contain "Add-on 'xpaas' enabled"
       And executing "minishift addons list" succeeds
       And stdout should match "xpaas\s*: enabled\s*P\(0\)"
 
+  @quick
   Scenario: Enabling installed add-on with priority
      When executing "minishift addons enable anyuid --priority 5" succeeds
      Then stdout should contain "Add-on 'anyuid' enabled"

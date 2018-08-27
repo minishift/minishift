@@ -222,7 +222,7 @@ Features for {project} follow these basic concepts:
 
 User stories::
 Features which follow a happy path of user.
-For example, *basic.feature* or *coolstore.feature*.
+For example, the *coolstore.feature*.
 
 Feature and command coverage::
 Features which focuses on specific fields of {project} functionality or individual commands.
@@ -232,7 +232,7 @@ For example, *proxy.feature* or *cmd-version.feature*.
 ==== Running Integration Tests
 
 By default, tests are run against the binary created by `make build` (*_$GOPATH/bin/minishift_*).
-To run the basic test, use the following command:
+To run the quick test, use the following command:
 
 ----
 $ make integration
@@ -240,10 +240,11 @@ $ make integration
 
 [NOTE]
 ====
-`make integration` only runs tests which are tagged as `@basic` by default.
+By default, `make integration` only runs tests that are tagged as `@quick`.
+These tests contain multiple scenarios, but only start {project} once.
 ====
 
-To run all of the tests, use the following command:
+To run all of the tests (except those tagged as `@disabled`), use the following command:
 
 ----
 $ make integration_all
@@ -251,7 +252,9 @@ $ make integration_all
 
 [NOTE]
 ====
-There is also a `make integration_pr` target which is being run as part of pull request testing.
+There is also a `make integration_pr` target which is run as part of pull request testing.
+This target runs the test on all features tagged as `@core`, which covers the basic functionality of {project}.
+This target is a compromise between total run time and coverage.
 ====
 
 ===== Additional Parameters
@@ -321,11 +324,16 @@ Tags::
 Use `tags` to ensure that scenarios and features containing at least one of the selected tags are executed.
 To select particular feature, you can use its name as a tag.
 For example, the `cmd-config.feature` contains `@cmd-config` tag through which it can be selected and run with the following command: `make integration GODOG_OPTS=--tags=cmd-config`.
-There are also tags covering specific areas and usages of {project}:
+There are also a few special tags used to indicate specific subsets of integration tests.
+These are the following:
 
-- The `@command` tag indicates that the feature file tests commands, for example `cmd-addons.feature`.
-- The `@openshift` tag indicates that the feature file has tests related to OpenShift.
-- The `@addon` tag indicates that the feature file tests particular add-on functionality.
+- `@quick` includes `basic.feature` along with several other features and scenarios which do not require a start of {project}.
+Starting the tests with the `@quick` tag covers a variety of scenarios, but only starts {project} once.
+- `@core` includes feature files which cover all of the essential functionality of {project}.
+This tag is used to test pull requests to the {project} repository.
+- `@disabled` indicates broken feature files.
+Any failures on these features are expected.
+All features, scenarios, and steps tagged as `@disabled` will not be run as part of pull request testing or nightly build testing.
 
 Paths::
 Use `paths` to define paths to different feature files or folders containing feature files.
@@ -350,16 +358,16 @@ Passing any value via `GODOG_OPTS` overrides the default tag definition on each 
 Thus in this case `--tags` must be specified manually, otherwise all features will be run.
 ====
 
-For example, to run integration tests on two specific feature files using only `@basic` and `@openshift` tags and without ANSI colors, the following command can be used:
+For example, to run integration tests on two specific feature files using only the `@basic` and `@cmd-addons` tags and without ANSI colors, the following command can be used:
 
 ----
-$ make integration GODOG_OPTS="-paths ~/tests/custom.feature,~/my.feature -tags basic,openshift -no-colors true"
+$ make integration GODOG_OPTS="-paths ~/tests/custom.feature,~/my.feature -tags basic,cmd-addons -no-colors true"
 ----
 
 [NOTE]
 ====
 Multiple values for a `GODOG_OPTS` option must be separated by a comma without whitespace.
-For example, `-tags basic,openshift` will be parsed properly by `make`, whereas `-tags basic, openshift` will result in only `@basic` being used.
+For example, `-tags basic,cmd-openshift` will be parsed properly by `make`, whereas `-tags basic, cmd-openshift` will result in only `@basic` being used.
 ====
 
 [[viewing-results]]

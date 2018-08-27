@@ -1,4 +1,4 @@
-@addon-xpaas @addon
+@addon-xpaas
 Feature: xpaas add-on
 Xpaas add-on imports xPaaS templates and imagestreams,
 which are then available in OpenShift to the user.

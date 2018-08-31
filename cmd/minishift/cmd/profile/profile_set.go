@@ -48,28 +48,18 @@ func runProfile(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	if cmdUtil.IsValidProfile(profileName) {
-		err := profileActions.SetActiveProfile(profileName)
-		if err != nil {
-			atexit.ExitWithMessage(1, err.Error())
-		}
-		fmt.Printf("Profile '%s' set as active profile.\n", profileName)
-
-		err = cmdUtil.SetOcContext(profileName)
-		if err != nil {
-			if glog.V(2) {
-				fmt.Println(fmt.Sprintf("%s", err.Error()))
-				fmt.Println(fmt.Sprintf("oc testing.cli context could not changed for '%s'.", profileName))
-			}
-		}
-	} else {
-		err := profileActions.SetActiveProfile(profileName)
-		if err != nil {
-			atexit.ExitWithMessage(1, err.Error())
-		}
-		fmt.Printf("Profile '%s' set as active profile.\n", profileName)
+	err := profileActions.SetActiveProfile(profileName)
+	if err != nil {
+		atexit.ExitWithMessage(1, err.Error())
 	}
-
+	fmt.Printf("Profile '%s' set as active profile.\n", profileName)
+	err = cmdUtil.SetOcContext(profileName)
+	if err != nil {
+		if glog.V(2) {
+			fmt.Println(fmt.Sprintf("%s", err.Error()))
+			fmt.Println(fmt.Sprintf("oc testing.cli context could not changed for '%s'.", profileName))
+		}
+	}
 }
 
 func init() {

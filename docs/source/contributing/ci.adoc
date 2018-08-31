@@ -43,11 +43,11 @@ As part of master build, {project} documentation which is compiled from the _mas
 
 On top of building the master branch and pull requests, CentOS CI is also used to build the tar bundle used for xref:../contributing/writing-docs.adoc#integration-with-docs-okd-io[integration with docs.okd.io], as well as to build xref:../contributing/releasing.adoc#automated-release[releases].
 
-Nightly jobs(link:https://ci.centos.org/job/minishift-nightly-b2d/[b2d], link:https://ci.centos.org/job/minishift-nightly-centos/[centos], link:https://ci.centos.org/job/minishift-nightly-minikube/[minikube]) run daily at midnight.
+link:https://ci.centos.org/job/minishift-nightly-centos/[CentOS nightly job] run daily at midnight.
 These jobs execute all integration tests against the _master_ branch of the {project} GitHub repository with their respective ISOs.
 
 |link:https://ci.centos.org/job/minishift/[master], link:https://ci.centos.org/job/minishift-pr/[pull requests], link:https://ci.centos.org/job/minishift-docs/[docs],
-link:https://ci.centos.org/job/minishift-release/[release], link:https://ci.centos.org/job/minishift-nightly-b2d/[b2d-nightly], link:https://ci.centos.org/job/minishift-nightly-centos/[centos-nightly], link:https://ci.centos.org/job/minishift-nightly-minikube/[minikube-nightly]
+link:https://ci.centos.org/job/minishift-release/[release], link:https://ci.centos.org/job/minishift-nightly-centos/[centos-nightly]
 
 |link:https://github.com/minishift/minishift/blob/master/centos_ci.sh[centos_ci.sh]
 

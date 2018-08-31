@@ -25,13 +25,13 @@ import (
 
 	"strings"
 
+	"github.com/blang/semver"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/addon"
 	"github.com/minishift/minishift/pkg/minishift/addon/command"
 	"github.com/minishift/minishift/pkg/minishift/addon/config"
 	"github.com/minishift/minishift/pkg/minishift/addon/parser"
 	instanceState "github.com/minishift/minishift/pkg/minishift/config"
-	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/filehelper"
 	utilStrings "github.com/minishift/minishift/pkg/util/strings"
 	"github.com/minishift/minishift/pkg/version"
@@ -358,33 +358,60 @@ func setStateAndPriority(addOn addon.AddOn, configMap map[string]*config.AddOnCo
 
 func compareComponentVersions(currentVersion, requiredVersion string, componentName string, versionRange string) error {
 	if strings.HasPrefix(requiredVersion, ">=") {
-		// This will work for both upstream and downstream.
-		if util.VersionOrdinal(currentVersion) < util.VersionOrdinal(strings.TrimPrefix(requiredVersion, ">=")) {
+		currentVersion, err := semver.Make(currentVersion)
+		if err != nil {
+			return err
+		}
+		requiredVersion, err := semver.Make(strings.TrimPrefix(requiredVersion, ">="))
+		if err != nil {
+			return err
+		}
+		if currentVersion.GE(requiredVersion) != true {
 			return fmt.Errorf("\nAdd-on does not support %s version %s. "+
 				"You need to use a version %s", componentName, currentVersion, versionRange)
 		}
-		return nil
 	}
 	if strings.HasPrefix(requiredVersion, ">") {
-		if util.VersionOrdinal(currentVersion) <= util.VersionOrdinal(strings.TrimPrefix(requiredVersion, ">")) {
+		currentVersion, err := semver.Make(currentVersion)
+		if err != nil {
+			return err
+		}
+		requiredVersion, err := semver.Make(strings.TrimPrefix(requiredVersion, ">"))
+		if err != nil {
+			return err
+		}
+		if currentVersion.GT(requiredVersion) != true {
 			return fmt.Errorf("\nAdd-on does not support %s version %s. "+
 				"You need to use a version %s", componentName, currentVersion, versionRange)
 		}
-		return nil
 	}
 	if strings.HasPrefix(requiredVersion, "<=") {
-		if util.VersionOrdinal(currentVersion) > util.VersionOrdinal(strings.TrimPrefix(requiredVersion, "<=")) {
+		currentVersion, err := semver.Make(currentVersion)
+		if err != nil {
+			return err
+		}
+		requiredVersion, err := semver.Make(strings.TrimPrefix(requiredVersion, "<="))
+		if err != nil {
+			return err
+		}
+		if currentVersion.LE(requiredVersion) != true {
 			return fmt.Errorf("\nAdd-on does not support %s version %s. "+
 				"You need to use a version %s", componentName, currentVersion, versionRange)
 		}
-		return nil
 	}
 	if strings.HasPrefix(requiredVersion, "<") {
-		if util.VersionOrdinal(currentVersion) >= util.VersionOrdinal(strings.TrimPrefix(requiredVersion, "<")) {
+		currentVersion, err := semver.Make(currentVersion)
+		if err != nil {
+			return err
+		}
+		requiredVersion, err := semver.Make(strings.TrimPrefix(requiredVersion, "<"))
+		if err != nil {
+			return err
+		}
+		if currentVersion.LT(requiredVersion) != true {
 			return fmt.Errorf("\nAdd-on does not support %s version %s. "+
 				"You need to use a version %s", componentName, currentVersion, versionRange)
 		}
-		return nil
 	}
 	if currentVersion != requiredVersion {
 		return fmt.Errorf("\nAddon does not support %s version %s. "+

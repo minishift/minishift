@@ -59,28 +59,6 @@ func EnsureGitHubApiAccessTokenSet(t *testing.T) {
 	}
 }
 
-func TestPrintDownStreamVersions(t *testing.T) {
-	testDir, err := ioutil.TempDir("", "minishift-config-")
-	assert.NoError(t, err)
-	defer os.RemoveAll(testDir)
-
-	f, err := os.Create(testDir + "out.txt")
-	assert.NoError(t, err)
-	defer f.Close()
-
-	os.Stdout = f
-	err = PrintDownStreamVersions(f, "v3.4.1.10")
-	assert.NoError(t, err)
-	_, err = f.Seek(0, 0)
-	assert.NoError(t, err, "Error setting offset back")
-
-	data, err := ioutil.ReadAll(f)
-	assert.NoError(t, err, "Error reading file")
-
-	actualStdout := string(data)
-	assert.Contains(t, actualStdout, "v3.4.1.10")
-}
-
 func TestIsGreaterOrEqualToBaseVersion(t *testing.T) {
 	var versionTestData = []struct {
 		openshiftVersion     string

@@ -88,28 +88,6 @@ Error 2`
 	assert.NoError(t, err)
 }
 
-func TestVersionOrdinal(t *testing.T) {
-	var versionTestData = []struct {
-		OpenshiftVersion    string
-		MinOpenshiftVersion string
-		expectedResult      bool
-	}{
-		{"v3.6.0", "v3.7.0", true},
-		{"v3.4.1.10", "v3.4.1.2", false},
-		{"v3.6.0-alpha.1", "v3.6.0-alpha.2", true},
-		{"v3.7.1", "v3.7.1", true},
-		{"v3.5.5.31.24", "v3.4.2.1", false},
-		{"v3.6.173.0.21", "v3.5.5.31.24", false},
-		{"v3.6.0-rc1", "v3.6.0-alpha.1", false},
-		{"v3.6.0-alpha.1", "v3.6.0-beta.0", true},
-	}
-
-	for _, versionTest := range versionTestData {
-		actualResult := VersionOrdinal(versionTest.MinOpenshiftVersion) >= VersionOrdinal(versionTest.OpenshiftVersion)
-		assert.Equal(t, versionTest.expectedResult, actualResult, fmt.Sprintf("Expected: %s >= %s", versionTest.MinOpenshiftVersion, versionTest.OpenshiftVersion))
-	}
-}
-
 var durationTests = []struct {
 	in   time.Duration
 	want string

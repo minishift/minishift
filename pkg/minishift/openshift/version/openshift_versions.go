@@ -18,13 +18,11 @@ package version
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/blang/semver"
@@ -32,7 +30,6 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/minishift/docker"
-	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/github"
 	"github.com/minishift/minishift/pkg/version"
 )
@@ -40,38 +37,6 @@ import (
 func GetOpenshiftVersion(sshCommander provision.SSHCommander) (string, error) {
 	dockerCommander := docker.NewVmDockerCommander(sshCommander)
 	return dockerCommander.Exec(" ", minishiftConstants.OpenshiftContainerName, "openshift", "version")
-}
-
-func PrintDownStreamVersions(output io.Writer, minSupportedVersion string) error {
-	resp, err := getResponseBody("https://registry.access.redhat.com/v1/repositories/openshift3/ose/tags")
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	decoder := json.NewDecoder(resp.Body)
-	var data map[string]string
-	err = decoder.Decode(&data)
-	if err != nil {
-		return errors.New(fmt.Sprintf("%T\n%s\n%#v\n", err, err, err))
-	}
-	fmt.Fprint(output, "The following OpenShift versions are available: \n")
-	var tagsList []string
-	for version := range data {
-		if util.VersionOrdinal(version) >= util.VersionOrdinal(minSupportedVersion) {
-			if strings.Contains(version, "latest") {
-				continue
-			}
-			if strings.Contains(version, "-") {
-				continue
-			}
-			tagsList = append(tagsList, version)
-		}
-	}
-	sort.Strings(tagsList)
-	for _, tag := range tagsList {
-		fmt.Fprintf(output, "\t- %s\n", tag)
-	}
-	return nil
 }
 
 // PrintUpstreamVersions prints the origin versions which satisfies the following conditions:

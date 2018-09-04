@@ -103,7 +103,7 @@ $ systemctl enable virtlogd
 [[domain-minishift-already-exists]]
 === Domain 'minishift' already exists...
 
-If you try `minishift start` and the this error appears, ensure that you use `minishift delete` to delete the VMs that you created earlier.
+If you try `minishift start` and then this error appears, ensure that you use `minishift delete` to delete the VMs that you created earlier.
 However, if this fails and you want to completely clean up {project} and start fresh, do the following:
 
 . Check if any existing {project} VMs are running:

@@ -46,7 +46,7 @@ VERSION_VARIABLES := -X $(REPOPATH)/pkg/version.minishiftVersion=$(MINISHIFT_VER
 	-X $(REPOPATH)/pkg/version.commitSha=$(COMMIT_SHA)
 LDFLAGS := $(VERSION_VARIABLES) -s -w -extldflags '-static'
 # Build tags atm mainly required to compile containers/image from which we only need OCI and Docker daemon transport. See issue #952
-BUILD_TAGS=containers_image_openpgp containers_image_storage_stub containers_image_ostree_stub exclude_graphdriver_devicemapper exclude_graphdriver_devicemapper exclude_graphdriver_btrfs exclude_graphdriver_overlay
+BUILD_TAGS=containers_image_openpgp containers_image_storage_stub containers_image_ostree_stub exclude_graphdriver_devicemapper exclude_graphdriver_btrfs exclude_graphdriver_overlay
 
 # Setup for go-bindata to include binary assets
 ADDON_ASSETS = $(CURDIR)/addons

@@ -36,7 +36,7 @@ type Tee struct {
 }
 
 // NewTee splits os.Stdout and os.Stderr using a pipe. While the tee is not closed data
-// written to stdout or stderr will be copied into a buffer as well well as printed to the
+// written to stdout or stderr will be copied into a buffer as well as printed to the
 // original file handle, unless silent is true, in which case the original output streams are silenced.
 func NewTee(silent bool) (*Tee, error) {
 	origStdout := os.Stdout

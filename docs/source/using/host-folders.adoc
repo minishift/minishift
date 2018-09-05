@@ -90,7 +90,7 @@ The source of the host folder is the UNC path *_//192.168.99.1/MYSHARE_* which i
 The target or mount point is *_/mnt/sda1/myshare_* within the {project} VM.
 Using the `--options` flag host folder type specific options can be specified using a list of comma separated key/value pairs.
 In the case of a CIFS host folder the required options are the user name for the CIFS share as well as the password.
-Via the the `--options` flag the domain of the share can be specified as well.
+Via the `--options` flag the domain of the share can be specified as well.
 Often this can be left out, but for example on Windows, when your account is linked to a Microsoft account, you must use the Microsoft account email address as user name as well as your machine name as displayed by `$env:COMPUTERNAME` as a domain.
 
 [TIP]

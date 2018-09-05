@@ -67,7 +67,7 @@ gpgcheck=0
 EOF
   yum -y install golang
 
-  echo 'CICO: Golang installed installed'
+  echo 'CICO: Golang installed'
 }
 
 

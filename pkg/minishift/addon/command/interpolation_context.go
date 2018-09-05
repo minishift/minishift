@@ -24,7 +24,7 @@ import (
 
 // InterpolationContext allows to interpolate variables within commands
 type InterpolationContext interface {
-	// AddToContext adds the specified value under the the specified key for command interpolation
+	// AddToContext adds the specified value under the specified key for command interpolation
 	AddToContext(key string, value string) error
 
 	// RemoveFromContext removes the specified value from the context

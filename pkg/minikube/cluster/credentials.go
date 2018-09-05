@@ -23,7 +23,7 @@ import (
 )
 
 var (
-	// This is the internalIP the the API server and other components communicate on.
+	// This is the internalIP the API server and other components communicate on.
 	internalIP = net.ParseIP(DefaultServiceClusterIP)
 )
 

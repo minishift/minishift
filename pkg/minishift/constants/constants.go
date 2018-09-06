@@ -53,7 +53,10 @@ func ProfilePrivateKeyPath() string {
 	return filepath.Join(constants.Minipath, "certs", "id_rsa")
 }
 
-func GetOpenshiftImageName(openshiftVersion string) string {
+func GetOpenshiftImageToFetchOC(openshiftVersion string, isGreaterOrEqualToBaseVersion bool) string {
+	if isGreaterOrEqualToBaseVersion {
+		return fmt.Sprintf("openshift/origin-control-plane:%s", openshiftVersion)
+	}
 	return fmt.Sprintf("openshift/origin:%s", openshiftVersion)
 }
 

@@ -213,7 +213,7 @@ integration: $(MINISHIFT_BINARY)
 integration_all: GODOG_OPTS = --tags=~disabled
 integration_all: $(MINISHIFT_BINARY)
 	mkdir -p $(INTEGRATION_TEST_DIR)
-	go test -timeout $(TIMEOUT) $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) \
+	go test -timeout 18000s $(REPOPATH)/test/integration --tags=integration -v -args --test-dir $(INTEGRATION_TEST_DIR) --binary $(MINISHIFT_BINARY) \
 	--run-before-feature="$(RUN_BEFORE_FEATURE)" --test-with-specified-shell="$(TEST_WITH_SPECIFIED_SHELL)" --copy-oc-from="$(COPY_OC_FROM)" $(GODOG_OPTS)
 
 .PHONY: integration_pr ## Run integration tests for pull request (skip more specialized tests)

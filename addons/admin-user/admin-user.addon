@@ -1,5 +1,7 @@
 # Name: admin-user
 # Description: Create admin user and assign the cluster-admin role to it.
+# OpenShift-Version: >=3.7.0
+# Minishift-Version: >=1.11.0
 
 !oc create user admin --full-name=admin
 oc adm policy add-cluster-role-to-user cluster-admin admin

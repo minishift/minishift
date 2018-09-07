@@ -370,6 +370,7 @@ func compareComponentVersions(currentVersion, requiredVersion string, componentN
 			return fmt.Errorf("\nAdd-on does not support %s version %s. "+
 				"You need to use a version %s", componentName, currentVersion, versionRange)
 		}
+		return err
 	}
 	if strings.HasPrefix(requiredVersion, ">") {
 		currentVersion, err := semver.Make(currentVersion)
@@ -384,6 +385,7 @@ func compareComponentVersions(currentVersion, requiredVersion string, componentN
 			return fmt.Errorf("\nAdd-on does not support %s version %s. "+
 				"You need to use a version %s", componentName, currentVersion, versionRange)
 		}
+		return err
 	}
 	if strings.HasPrefix(requiredVersion, "<=") {
 		currentVersion, err := semver.Make(currentVersion)
@@ -398,6 +400,7 @@ func compareComponentVersions(currentVersion, requiredVersion string, componentN
 			return fmt.Errorf("\nAdd-on does not support %s version %s. "+
 				"You need to use a version %s", componentName, currentVersion, versionRange)
 		}
+		return err
 	}
 	if strings.HasPrefix(requiredVersion, "<") {
 		currentVersion, err := semver.Make(currentVersion)
@@ -412,6 +415,7 @@ func compareComponentVersions(currentVersion, requiredVersion string, componentN
 			return fmt.Errorf("\nAdd-on does not support %s version %s. "+
 				"You need to use a version %s", componentName, currentVersion, versionRange)
 		}
+		return err
 	}
 	if currentVersion != requiredVersion {
 		return fmt.Errorf("\nAddon does not support %s version %s. "+

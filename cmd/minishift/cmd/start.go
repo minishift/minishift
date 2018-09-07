@@ -120,7 +120,7 @@ var (
 	}
 
 	// Set the base dir for v3.10.0
-	baseDirectory = "/var/lib/minishift/base"
+	baseDirectory = minishiftConstants.BaseDirInsideInstance
 
 	// clusterUpFlagSet contains the command line switches which needs to be passed on to 'cluster up'
 	clusterUpFlagSet *flag.FlagSet

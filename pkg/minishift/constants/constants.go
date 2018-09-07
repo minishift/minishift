@@ -37,10 +37,12 @@ const (
 	SkipVerifyInsecureTLS       = "insecure-skip-tls-verify=true"
 	BinaryName                  = "minishift"
 	OcPathInsideVM              = "/var/lib/minishift/bin"
+	BaseDirInsideInstance       = "/var/lib/minishift/base"
 )
 
 var (
 	ValidIsoAliases = []string{B2dIsoAlias, CentOsIsoAlias}
+	ValidComponents = []string{"automation-service-broker", "service-catalog", "template-service-broker"}
 )
 
 // ProfileAuthorizedKeysPath returns the path of authorized_keys file in profile dir used for authentication purpose

@@ -134,6 +134,13 @@ cluster in VM provided by Minishift.
       When executing "minishift openshift config view" succeeds
       Then stdout is YAML which contains key "assetConfig.logoutURL" with value matching "http://www\.minishift\.io"
 
+  Scenario: Add a component to running openshift cluster
+      When executing "minishift openshift component add service-catalog" succeeds
+       And stdout should contain
+       """
+       Finished installing "openshift-service-catalog"
+       """
+
   Scenario: Deleting the Minishift instance
      Given Minishift has state "Running"
       When executing "minishift delete --force" succeeds

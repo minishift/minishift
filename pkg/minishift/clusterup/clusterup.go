@@ -110,6 +110,20 @@ func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string) (stri
 	return out, nil
 }
 
+// AddComponent add a component to running Openshift cluster
+func AddComponent(sshCommander provision.SSHCommander, ocBinaryPathInsideVM string, basedir string, componentName string) (string, error) {
+	cmdArgs := []string{"cluster", "add", fmt.Sprintf("--base-dir=%s", basedir), componentName}
+	if glog.V(2) {
+		fmt.Printf("-- Running 'oc' with: '%s'\n", strings.Join(cmdArgs, " "))
+	}
+	cmd := fmt.Sprintf("%s %s", ocBinaryPathInsideVM, strings.Join(cmdArgs, " "))
+	out, err := sshCommander.SSHCommand(cmd)
+	if err != nil {
+		return "", fmt.Errorf("Error adding the component: %v", err)
+	}
+	return out, nil
+}
+
 // PostClusterUp runs the Minishift specific provisioning after 'cluster up' has run
 func PostClusterUp(clusterUpConfig *ClusterUpConfig, sshCommander provision.SSHCommander, addOnManager *manager.AddOnManager, runner util.Runner) error {
 	err := kubeconfig.CacheSystemAdminEntries(clusterUpConfig.KubeConfigPath, clusterUpConfig.OcBinaryPathInsideVM, sshCommander)

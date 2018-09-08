@@ -41,6 +41,7 @@ import (
 
 	"github.com/minishift/minishift/pkg/util/archive"
 	minishiftos "github.com/minishift/minishift/pkg/util/os"
+	"github.com/minishift/minishift/pkg/util/progressdots"
 )
 
 type OpenShiftBinaryType string
@@ -148,12 +149,24 @@ func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minis
 		defer func() { _ = httpResp.Body.Close() }()
 
 		asset = httpResp.Body
+
 		if httpResp.ContentLength > 0 {
 			bar := pb.New64(httpResp.ContentLength).SetUnits(pb.U_BYTES)
 			bar.Start()
 			asset = bar.NewProxyReader(asset)
 			defer func() {
 				<-time.After(bar.RefreshRate)
+				fmt.Println()
+			}()
+		}
+
+		if httpResp.ContentLength < 0 {
+			fmt.Print("   Downloading ")
+			progressDots := progressdots.New()
+			progressDots.Start()
+			defer func() {
+				progressDots.Stop()
+				fmt.Print(" OK")
 				fmt.Println()
 			}()
 		}

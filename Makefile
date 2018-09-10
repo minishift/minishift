@@ -44,9 +44,12 @@ VERSION_VARIABLES := -X $(REPOPATH)/pkg/version.minishiftVersion=$(MINISHIFT_VER
 	-X $(REPOPATH)/pkg/version.centOsIsoVersion=$(CENTOS_ISO_VERSION) \
 	-X $(REPOPATH)/pkg/version.openshiftVersion=$(OPENSHIFT_VERSION) \
 	-X $(REPOPATH)/pkg/version.commitSha=$(COMMIT_SHA)
-LDFLAGS := $(VERSION_VARIABLES) -s -w -extldflags '-static'
+LDFLAGS_SYSTEMTRAY := $(VERSION_VARIABLES) -s -w 
+LDFLAGS := $(LDFLAGS_SYSTEMTRAY) -extldflags='-static'
 # Build tags atm mainly required to compile containers/image from which we only need OCI and Docker daemon transport. See issue #952
 BUILD_TAGS=containers_image_openpgp containers_image_storage_stub containers_image_ostree_stub exclude_graphdriver_devicemapper exclude_graphdriver_btrfs exclude_graphdriver_overlay
+# Systemtray build tag used to exclude the tray source files from building 
+BUILD_TAGS_SYSTEMTRAY=$(BUILD_TAGS) systemtray
 
 # Setup for go-bindata to include binary assets
 ADDON_ASSETS = $(CURDIR)/addons
@@ -81,7 +84,7 @@ __check_defined = \
 
 .PHONY: $(GOPATH)/bin/minishift$(IS_EXE)
 $(GOPATH)/bin/minishift$(IS_EXE): $(ADDON_ASSET_FILE) ## Builds the binary into $GOPATH/bin
-	go install -tags "$(BUILD_TAGS)" -pkgdir=$(ADDON_BINDATA_DIR) -ldflags="$(VERSION_VARIABLES)" ./cmd/minishift
+	go install -tags "$(BUILD_TAGS_SYSTEMTRAY)" -pkgdir=$(ADDON_BINDATA_DIR) -ldflags="$(VERSION_VARIABLES)" ./cmd/minishift
 
 .PHONY: vendor
 vendor:
@@ -94,14 +97,23 @@ $(ADDON_ASSET_FILE): $(GOPATH)/bin/go-bindata ## Compiles the built-in add-on in
 $(BUILD_DIR)/$(GOOS)-$(GOARCH):
 	mkdir -p $(BUILD_DIR)/$(GOOS)-$(GOARCH)
 
+$(BUILD_DIR)/$(GOOS)-$(GOARCH)/systemtray:
+	mkdir -p $(BUILD_DIR)/$(GOOS)-$(GOARCH)/systemtray
+
 $(BUILD_DIR)/darwin-amd64/minishift: $(ADDON_ASSET_FILE) $(BUILD_DIR)/$(GOOS)-$(GOARCH) ## Cross compiles the darwin executable and places it in $(BUILD_DIR)/darwin-amd64/minishift
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build -tags "$(BUILD_TAGS)" -pkgdir=$(ADDON_BINDATA_DIR) --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/darwin-amd64/minishift ./cmd/minishift
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build -tags "$(BUILD_TAGS_SYSTEMTRAY)" -pkgdir=$(ADDON_BINDATA_DIR) --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/darwin-amd64/minishift ./cmd/minishift
 
 $(BUILD_DIR)/linux-amd64/minishift: $(ADDON_ASSET_FILE) $(BUILD_DIR)/$(GOOS)-$(GOARCH) ## Cross compiles the linux executable and places it in $(BUILD_DIR)/linux-amd64/minishift
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build -tags "$(BUILD_TAGS)" -pkgdir=$(ADDON_BINDATA_DIR) --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/linux-amd64/minishift ./cmd/minishift
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags "$(BUILD_TAGS_SYSTEMTRAY)" -pkgdir=$(ADDON_BINDATA_DIR) --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/linux-amd64/minishift ./cmd/minishift
 
 $(BUILD_DIR)/windows-amd64/minishift.exe: $(ADDON_ASSET_FILE) $(BUILD_DIR)/$(GOOS)-$(GOARCH) ## Cross compiles the windows executable and places it in $(BUILD_DIR)/windows-amd64/minishift
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build -tags "$(BUILD_TAGS)" -pkgdir=$(ADDON_BINDATA_DIR) --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/windows-amd64/minishift.exe ./cmd/minishift
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build -tags "$(BUILD_TAGS_SYSTEMTRAY)" -pkgdir=$(ADDON_BINDATA_DIR) --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/windows-amd64/minishift.exe ./cmd/minishift
+
+$(BUILD_DIR)/darwin-amd64/systemtray/minishift: $(ADDON_ASSET_FILE) $(BUILD_DIR)/$(GOOS)-$(GOARCH)/systemtray ## Cross compiles the darwin executable with systemtray
+	CGO_ENABLED=1 GOARCH=amd64 GOOS=darwin go build -tags "$(BUILD_TAGS)" -pkgdir=$(ADDON_BINDATA_DIR) --installsuffix cgo -ldflags="$(LDFLAGS_SYSTEMTRAY)" -o $(BUILD_DIR)/darwin-amd64/systemtray/minishift ./cmd/minishift
+
+$(BUILD_DIR)/windows-amd64/systemtray/minishift.exe: $(ADDON_ASSET_FILE) $(BUILD_DIR)/$(GOOS)-$(GOARCH)/systemtray ## Cross compiles the windows executable with systemtray
+	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build -tags "$(BUILD_TAGS)" -pkgdir=$(ADDON_BINDATA_DIR) --installsuffix cgo -ldflags="$(LDFLAGS_SYSTEMTRAY)" -o $(BUILD_DIR)/windows-amd64/systemtray/minishift.exe ./cmd/minishift
 
 $(GOPATH)/bin/gh-release:
 	go get -u github.com/progrium/gh-release/...
@@ -142,7 +154,7 @@ link_check_docs: gen_docs ## Checks the documentation for broken links
 
 $(DOCS_SYNOPISIS_DIR)/*.md: $(ADDON_ASSET_FILE)
 	@# https://github.com/golang/go/issues/15038#issuecomment-207631885 ( CGO_ENABLED=0 )
-	DOCS_SYNOPISIS_DIR=$(DOCS_SYNOPISIS_DIR) CGO_ENABLED=0 go run -tags "$(BUILD_TAGS) gendocs" -ldflags="$(LDFLAGS)" gen_help_text.go
+	DOCS_SYNOPISIS_DIR=$(DOCS_SYNOPISIS_DIR) CGO_ENABLED=0 go run -tags "$(BUILD_TAGS_SYSTEMTRAY) gendocs" -ldflags="$(LDFLAGS)" gen_help_text.go
 
 .PHONY: synopsis_docs
 synopsis_docs: $(DOCS_SYNOPISIS_DIR)/*.md ## Builds the Markdown command synopsis
@@ -155,6 +167,13 @@ prerelease: clean fmtcheck test cross ## Pre-release target to verify tests pass
 		echo $(files); \
 		exit 1; \
 	fi
+
+.PHONY: systemtray
+systemtray: $(ADDON_ASSET_FILE)
+	go install -tags "$(BUILD_TAGS)" -pkgdir=$(ADDON_BINDATA_DIR) -ldflags="$(VERSION_VARIABLES)" ./cmd/minishift
+
+.PHONY: cross_systemtray
+cross_systemtray: clean $(BUILD_DIR)/darwin-amd64/systemtray/minishift $(BUILD_DIR)/windows-amd64/systemtray/minishift.exe
 
 .PHONY: release
 release: clean $(GOPATH)/bin/gh-release cross ## Create release and upload to GitHub
@@ -200,7 +219,7 @@ clean_bindata:
 
 .PHONY: test
 test: $(ADDON_ASSET_FILE)  ## Run unit tests
-	@go test -v -tags "$(BUILD_TAGS)" -ldflags="$(VERSION_VARIABLES)" $(shell $(PACKAGES))
+	@go test -v -tags "$(BUILD_TAGS_SYSTEMTRAY)" -ldflags="$(VERSION_VARIABLES)" $(shell $(PACKAGES))
 
 .PHONY: integration ## Run integration tests (quick and minimal)
 integration: GODOG_OPTS = --tags=quick\&\&~disabled

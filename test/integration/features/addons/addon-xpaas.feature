@@ -14,7 +14,7 @@ which are then available in OpenShift to the user.
      Then Minishift should have state "Running"
       And stdout should contain
       """
-      XPaaS OpenShift imagestream and templates installed
+      XPaaS imagestream and templates for OpenShift installed
       """
 
   Scenario Outline: User deploys, checks out and deletes several templates from XpaaS imagestream

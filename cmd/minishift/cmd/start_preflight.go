@@ -76,7 +76,8 @@ func preflightChecksBeforeStartingHost() {
 			checkOriginRelease,
 			fmt.Sprintf("Checking if requested OpenShift version '%s' is valid", requestedOpenShiftVersion),
 			configCmd.WarnCheckOpenShiftRelease.Name,
-			"",
+			fmt.Sprintf("To warn this test use 'minishift config set %s true'\nTo skip this test use 'minishift config set %s true'",
+				configCmd.WarnCheckOpenShiftRelease.Name, configCmd.SkipCheckOpenShiftRelease.Name),
 		)
 	} else {
 		fmt.Printf("FAIL\n")

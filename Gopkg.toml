@@ -158,7 +158,7 @@ ignored = ["github.com/Sirupsen/logrus"]
 
 [[constraint]]
   name = "golang.org/x/sys"
-  revision = "43e60d72a8e2bd92ee98319ba9a384a0e9837c08"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/opencontainers/go-digest"
@@ -180,6 +180,10 @@ ignored = ["github.com/Sirupsen/logrus"]
   name = "github.com/elazarl/goproxy"
   revision = "93c365f5468fdbc21f2d55a7e39cc4bced996971"
   source = "github.com/gbraad/goproxy"
+
+[[constraint]]
+  name = "github.com/anjannath/systray"
+  revision = "26ec25aa9aaa5a0142dfe61525a604914795e424"
 
 [prune]
   go-tests = true

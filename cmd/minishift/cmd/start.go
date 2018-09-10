@@ -51,6 +51,7 @@ import (
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
 	"github.com/minishift/minishift/pkg/minishift/remotehost"
+	"github.com/minishift/minishift/pkg/minishift/systemtray"
 	minishiftTLS "github.com/minishift/minishift/pkg/minishift/tls"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
@@ -253,6 +254,12 @@ func runStart(cmd *cobra.Command, args []string) {
 	}
 
 	autoMountHostFolders(hostVm.Driver)
+
+	// start the minishift system tray
+	err = startTray()
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	if !isNoProvision() {
 		if !isRestart {
@@ -888,4 +895,15 @@ func cacheMinishiftISO(config *cluster.MachineConfig) {
 // if skip-startup-checks set to true then return true and skip preflight checks
 func shouldPreflightChecksBeSkipped() bool {
 	return viper.GetBool(configCmd.SkipPreflightChecks.Name)
+}
+
+func startTray() error {
+	if runtime.GOOS != "linux" {
+		minishiftTray := systemtray.NewMinishiftTray(minishiftConfig.AllInstancesConfig)
+		err := minishiftTray.EnsureRunning()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

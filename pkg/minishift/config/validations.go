@@ -225,6 +225,13 @@ func IsValidPort(name string, p string) error {
 	return fmt.Errorf("Port %d is inaccessible please use a port in the range (1024-65536)", port)
 }
 
+func IsSystemTrayAvailable(_ string, _ string) error {
+	if runtime.GOOS == "linux" {
+		return fmt.Errorf("System tray is not available in linux.")
+	}
+	return nil
+}
+
 func numInRange(num int, start int, end int) bool {
 	if num >= start && num <= end {
 		return true

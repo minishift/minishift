@@ -10,5 +10,5 @@ oc apply -f v#{OPENSHIFT_VERSION}/xpaas-streams -n openshift
 # Templates
 oc apply -f v#{OPENSHIFT_VERSION}/xpaas-templates -n openshift
 
-echo XPaaS imagestream and templates for OpenShift #{OPENSHIFT_VERSION} installed
+echo XPaaS imagestream and templates for OpenShift installed
 echo See https://github.com/openshift/openshift-ansible/tree/release-#{OPENSHIFT_VERSION}/roles/openshift_examples/files/examples/v#{OPENSHIFT_VERSION}

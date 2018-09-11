@@ -177,3 +177,30 @@ $ minishift openshift config set --patch '{"routingConfig": {"subdomain": "<IP-A
 
 Make sure to replace `IP-ADDRESS` in the above example with the IP address of your {project} VM.
 You can retrieve the IP address by running the xref:../command-ref/minishift_ip.adoc#[`minishift ip`] command.
+
+[[add-component-to-openshift-cluster]]
+== Add component to OpenShift Cluster
+
+To add a component to a running OpenShift Cluster, use the following:
+
+----
+$ minishift openshift component add <component-name>
+----
+
+[[example-add-service-catalog-component]]
+=== Example: Add service-catalog component
+
+In this example, service-catalog component can be added as follows:
+
+----
+$ minishift openshift component add service-catalog
+----
+
+[[list-valid-components-to-add-to-openshift-cluster]]
+== List valid components to add to OpenShift cluster
+
+To list valid components which can be add to running OpenShift cluster, use the following:
+
+----
+$ minishift openshift component list
+----

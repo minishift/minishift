@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package hostfolder
+package services
 
 import (
 	"fmt"
@@ -35,14 +35,14 @@ import (
 )
 
 const (
-	serverPortFlag = "port"
+	sftpdServerPortFlag = "port"
 )
 
 var (
 	connectionCount uint64
-	serverPort      int
+	sftpdServerPort int
 
-	hostFolderSSHDCmd = &cobra.Command{
+	servicesSftpdCmd = &cobra.Command{
 		Use:    "sftpd",
 		Short:  "Starts sftp server on host for sshfs based host folders.",
 		Long:   `Starts sftp server on host for sshfs based host folders.`,
@@ -55,15 +55,15 @@ var (
 
 func init() {
 	authorizedKeysMap = make(map[string]bool)
-	hostFolderSSHDCmd.Flags().IntVarP(&serverPort, serverPortFlag, "p", 2022, "The server port.")
-	HostFolderCmd.AddCommand(hostFolderSSHDCmd)
+	servicesSftpdCmd.Flags().IntVarP(&sftpdServerPort, sftpdServerPortFlag, "p", 2022, "The server port.")
+	ServicesCmd.AddCommand(servicesSftpdCmd)
 }
 
 func runSftp(cmd *cobra.Command, args []string) {
 	serverConfig := serverConfig()
-	port := viper.GetInt(config.HostFoldersSftpPort.Name)
+	port := viper.GetInt(config.ServicesSftpPort.Name)
 	if port == 0 {
-		port = serverPort
+		port = sftpdServerPort
 	}
 
 	// Once a ServerConfig has been configured, connections can be accepted.

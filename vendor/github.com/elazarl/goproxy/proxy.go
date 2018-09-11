@@ -16,6 +16,8 @@ type ProxyHttpServer struct {
 	// session variable must be aligned in i386
 	// see http://golang.org/src/pkg/sync/atomic/doc.go#L41
 	sess int64
+	// KeepDestinationHeaders indicates the proxy should retain any headers present in the http.Response before proxying
+	KeepDestinationHeaders bool
 	// setting Verbose to true will log information on each request sent to the proxy
 	Verbose         bool
 	Logger          *log.Logger
@@ -27,13 +29,17 @@ type ProxyHttpServer struct {
 	// ConnectDial will be used to create TCP connections for CONNECT requests
 	// if nil Tr.Dial will be used
 	ConnectDial func(network string, addr string) (net.Conn, error)
+	// allow proxy headers to pass
+	KeepProxyHeaders bool
 }
 
 var hasPort = regexp.MustCompile(`:\d+$`)
 
-func copyHeaders(dst, src http.Header) {
-	for k, _ := range dst {
-		dst.Del(k)
+func copyHeaders(dst, src http.Header, keepDestHeaders bool) {
+	if !keepDestHeaders {
+		for k := range dst {
+			dst.Del(k)
+		}
 	}
 	for k, vs := range src {
 		for _, v := range vs {
@@ -108,7 +114,9 @@ func (proxy *ProxyHttpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		r, resp := proxy.filterRequest(r, ctx)
 
 		if resp == nil {
-			removeProxyHeaders(ctx, r)
+			if !proxy.KeepProxyHeaders {
+				removeProxyHeaders(ctx, r)
+			}
 			resp, err = ctx.RoundTrip(r)
 			if err != nil {
 				ctx.Error = err
@@ -134,7 +142,7 @@ func (proxy *ProxyHttpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		if origBody != resp.Body {
 			resp.Header.Del("Content-Length")
 		}
-		copyHeaders(w.Header(), resp.Header)
+		copyHeaders(w.Header(), resp.Header, proxy.KeepDestinationHeaders)
 		w.WriteHeader(resp.StatusCode)
 		nr, err := io.Copy(w, resp.Body)
 		if err := resp.Body.Close(); err != nil {
@@ -144,7 +152,7 @@ func (proxy *ProxyHttpServer) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-// New proxy server, logs to StdErr by default
+// NewProxyHttpServer creates and returns a proxy server, logging to stderr by default
 func NewProxyHttpServer() *ProxyHttpServer {
 	proxy := ProxyHttpServer{
 		Logger:        log.New(os.Stderr, "", log.LstdFlags),
@@ -154,9 +162,9 @@ func NewProxyHttpServer() *ProxyHttpServer {
 		NonproxyHandler: http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			http.Error(w, "This is a proxy server. Does not respond to non-proxy requests.", 500)
 		}),
-		Tr: &http.Transport{TLSClientConfig: tlsClientSkipVerify,
-			Proxy: http.ProxyFromEnvironment},
+		Tr: &http.Transport{TLSClientConfig: tlsClientSkipVerify, Proxy: http.ProxyFromEnvironment},
 	}
 	proxy.ConnectDial = dialerFromEnv(&proxy)
+
 	return &proxy
 }

@@ -216,7 +216,7 @@ func createSftpCommand() (*exec.Cmd, error) {
 	}
 
 	args := []string{
-		"hostfolder",
+		"services",
 		"sftpd"}
 	exportCmd := exec.Command(cmd, args...)
 	// don't inherit any file handles

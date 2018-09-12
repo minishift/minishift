@@ -111,8 +111,8 @@ func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string) (stri
 }
 
 // AddComponent add a component to running Openshift cluster
-func AddComponent(sshCommander provision.SSHCommander, ocBinaryPathInsideVM string, basedir string, componentName string) (string, error) {
-	cmdArgs := []string{"cluster", "add", fmt.Sprintf("--base-dir=%s", basedir), componentName}
+func AddComponent(sshCommander provision.SSHCommander, ocBinaryPathInsideVM string, basedir string, componentName string, imageToUse string) (string, error) {
+	cmdArgs := []string{"cluster", "add", fmt.Sprintf("--base-dir=%s", basedir), fmt.Sprintf("--image=%s", imageToUse), componentName}
 	if glog.V(2) {
 		fmt.Printf("-- Running 'oc' with: '%s'\n", strings.Join(cmdArgs, " "))
 	}

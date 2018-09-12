@@ -718,8 +718,13 @@ func initClusterUpFlags() *flag.FlagSet {
 	clusterUpFlagSet.String(configCmd.RoutingSuffix.Name, "", "Default suffix for the server routes.")
 	clusterUpFlagSet.Int(configCmd.ServerLogLevel.Name, 0, "Log level for the OpenShift server.")
 	clusterUpFlagSet.String(configCmd.NoProxyList.Name, "", "List of hosts or subnets for which no proxy should be used.")
+	clusterUpFlagSet.String(configCmd.ImageName.Name, "", "Specify the images to use for OpenShift")
 	clusterUpFlagSet.AddFlag(cmdUtil.HttpProxyFlag)
 	clusterUpFlagSet.AddFlag(cmdUtil.HttpsProxyFlag)
+	// This is hidden because we don't want our users to use this flag
+	// we are setting it to openshift/origin-${component}:<user_provided_version> as default
+	// It is used for testing purpose from CDK/minishift QE
+	clusterUpFlagSet.MarkHidden(configCmd.ImageName.Name)
 
 	if minishiftConfig.EnableExperimental {
 		clusterUpFlagSet.String(configCmd.ExtraClusterUpFlags.Name, "", "Specify optional flags for use with 'cluster up' (unsupported)")
@@ -774,6 +779,10 @@ func determineClusterUpParameters(config *clusterup.ClusterUpConfig) map[string]
 	if valid {
 		// Set default value for base config for 3.10
 		clusterUpParams["base-dir"] = baseDirectory
+		if viper.GetString(configCmd.ImageName.Name) == "" {
+			imagetag := fmt.Sprintf("'%s:%s'", minishiftConstants.ImageNameForClusterUpImageFlag, config.OpenShiftVersion)
+			viper.Set(configCmd.ImageName.Name, imagetag)
+		}
 	} else {
 		// This will only required to work with openshift < 3.10
 		for key, value := range dataDirectory {

@@ -38,9 +38,10 @@ Feature: Basic
     and OpenShift web console should be accessible.
 
     Given Minishift has state "Running"
-     When "status code" of HTTP request to "/healthz" of OpenShift instance is equal to "200"
-     Then "body" of HTTP request to "/healthz" of OpenShift instance contains "ok"
-      And with up to "20" retries with wait period of "500ms" the "status code" of HTTP request to "/console" of OpenShift instance is equal to "200"
+     Then with up to "20" retries with wait period of "3" seconds container name "k8s_webconsole_webconsole" should be "running"
+      And "status code" of HTTP request to "/healthz" of OpenShift instance is equal to "200"
+      And "body" of HTTP request to "/healthz" of OpenShift instance contains "ok"
+      And with up to "40" retries with wait period of "500ms" the "status code" of HTTP request to "/console" of OpenShift instance is equal to "200"
       And "body" of HTTP request to "/console" of OpenShift instance contains "<title>OpenShift Web Console</title>"
 
   Scenario Outline: User can set, get, view and unset values in configuration file

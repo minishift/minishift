@@ -44,13 +44,13 @@ cluster in VM provided by Minishift.
 
   Scenario: Pods docker-registry and router are ready after OpenShift restart
      Given user waits "90" seconds
-      When executing "oc get pods -n default --as system:admin" succeeds
+      When executing "oc get pods -n default --as system:admin" retrying 20 times with wait period of 3 seconds
       Then stdout should match "docker-registry-\d-\w{5}\s*1\/1\s*Running"
        And stdout should match "router-\d-\w{5}\s*1\/1\s*Running"
 
   Scenario: User deploys nodejs example application from OpenShift repository
      Given Minishift has state "Running"
-      When executing "oc new-app https://github.com/sclorg/nodejs-ex -l name=myapp" retrying 10 times with wait period of 2 seconds
+      When executing "oc new-app https://github.com/sclorg/nodejs-ex -l name=myapp" retrying 20 times with wait period of 3 seconds
       Then stdout should contain
        """
        Run 'oc status' to view your app.

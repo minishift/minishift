@@ -24,20 +24,21 @@ import (
 )
 
 const (
-	B2dIsoAlias                 = "b2d"
-	CentOsIsoAlias              = "centos"
-	OpenshiftContainerName      = "origin"
-	OpenshiftApiContainerLabel  = "io.kubernetes.container.name=apiserver"
-	KubernetesApiContainerLabel = "io.kubernetes.container.name=api"
-	OpenshiftExec               = "/usr/bin/openshift"
-	OpenshiftOcExec             = "/usr/bin/oc"
-	DefaultProject              = "myproject"
-	DefaultUser                 = "developer"
-	DefaultUserPassword         = "developer"
-	SkipVerifyInsecureTLS       = "insecure-skip-tls-verify=true"
-	BinaryName                  = "minishift"
-	OcPathInsideVM              = "/var/lib/minishift/bin"
-	BaseDirInsideInstance       = "/var/lib/minishift/base"
+	B2dIsoAlias                    = "b2d"
+	CentOsIsoAlias                 = "centos"
+	OpenshiftContainerName         = "origin"
+	OpenshiftApiContainerLabel     = "io.kubernetes.container.name=apiserver"
+	KubernetesApiContainerLabel    = "io.kubernetes.container.name=api"
+	OpenshiftExec                  = "/usr/bin/openshift"
+	OpenshiftOcExec                = "/usr/bin/oc"
+	DefaultProject                 = "myproject"
+	DefaultUser                    = "developer"
+	DefaultUserPassword            = "developer"
+	SkipVerifyInsecureTLS          = "insecure-skip-tls-verify=true"
+	BinaryName                     = "minishift"
+	OcPathInsideVM                 = "/var/lib/minishift/bin"
+	BaseDirInsideInstance          = "/var/lib/minishift/base"
+	ImageNameForClusterUpImageFlag = "openshift/origin-${component}"
 )
 
 var (

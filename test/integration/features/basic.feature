@@ -24,7 +24,11 @@ Feature: Basic
   Scenario: Starting Minishift
     Given Minishift has state "Does Not Exist"
       And image caching is disabled
-     When executing "minishift start" succeeds
+     When executing "minishift start --v=5" succeeds
+     Then stdout should contain
+      """
+      --image 'openshift/origin-${component}
+      """
      Then Minishift should have state "Running"
      When executing "minishift image list" succeeds
      Then stdout should be empty

@@ -42,6 +42,8 @@ var ipCmd = &cobra.Command{
 		api := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
 		defer api.Close()
 
+		cmdUtil.ExitIfUndefined(api, constants.MachineName)
+
 		if configureAsStatic && configureAsDynamic {
 			atexit.ExitWithMessage(1, "Invalid options specified")
 		}

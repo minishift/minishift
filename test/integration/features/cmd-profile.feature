@@ -164,7 +164,7 @@ Feature: Profile commands
      When executing "minishift delete --force" succeeds
      Then Minishift should have state "Does Not Exist"
      When executing "minishift ip"
-     Then exitcode should equal "1"
+     Then exitcode should equal "0"
 
   Scenario: As user, I cannot create profile when used along with profile <subcommand> --profile name
     Given Minishift has state "Does Not Exist"

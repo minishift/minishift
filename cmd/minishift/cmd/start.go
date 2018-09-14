@@ -193,7 +193,10 @@ func runStart(cmd *cobra.Command, args []string) {
 		preflightChecksBeforeStartingHost()
 	}
 
-	populateStartFlagsToViperConfig()
+	// Populate start flags to viper config if save-start-flags true in config file
+	if viper.GetBool(configCmd.SaveStartFlags.Name) {
+		populateStartFlagsToViperConfig()
+	}
 
 	// Cache OC binary before starting the VM and perform oc command option check
 	ocPath = cmdUtil.CacheOc(requestedOpenShiftVersion)

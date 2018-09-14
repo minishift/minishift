@@ -191,6 +191,11 @@ Persistent configuration can only be applied to the set of supported configurati
 This is different from environment variables, which can be used to replace any option of any command.
 ====
 
+[NOTE]
+====
+By Default minishift persist start flags to peristent configuration, to disable it, use `minishift config set save-start-flags false`.
+====
+
 [[setting-persistent-configuration-values]]
 ==== Setting Persistent Configuration Values
 

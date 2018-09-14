@@ -152,6 +152,9 @@ var (
 
 	// Hyper-V
 	HypervVirtualSwitch = createConfigSetting("hyperv-virtual-switch", SetString, []setFn{validations.IsValidHypervVirtualSwitch}, nil, true, nil)
+
+	// Save start flags to viper config
+	SaveStartFlags = createConfigSetting("save-start-flags", SetBool, nil, nil, true, true)
 )
 
 func createConfigSetting(name string, set func(validations.ViperConfig, string, string) error, validations []setFn, callbacks []setFn, isApply bool, defaultVal interface{}) *Setting {

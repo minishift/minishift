@@ -50,7 +50,7 @@ cluster in VM provided by Minishift.
 
   Scenario: User deploys nodejs example application from OpenShift repository
      Given Minishift has state "Running"
-      When executing "oc new-app https://github.com/openshift/nodejs-ex -l name=myapp" retrying 10 times with wait period of 2 seconds
+      When executing "oc new-app https://github.com/sclorg/nodejs-ex -l name=myapp" retrying 10 times with wait period of 2 seconds
       Then stdout should contain
        """
        Run 'oc status' to view your app.

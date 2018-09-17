@@ -139,7 +139,7 @@ Feature: Basic
    Given Minishift has state "Running"
     When executing "oc login --username=developer --password=developer" succeeds
      And executing "oc new-project ruby" succeeds
-     And executing "oc new-app centos/ruby-22-centos7~https://github.com/openshift/ruby-ex.git" succeeds
+     And executing "oc new-app centos/ruby-22-centos7~https://github.com/sclorg/ruby-ex.git" succeeds
      And executing "oc expose svc/ruby-ex" succeeds
      And executing "oc set probe dc/ruby-ex --readiness --get-url=http://:8080" succeeds
      And service "ruby-ex" rollout successfully within "1200" seconds

@@ -20,12 +20,10 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/user"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"strings"
 
 	"github.com/minishift/minishift/pkg/minikube/constants"
@@ -36,6 +34,8 @@ import (
 	"github.com/minishift/minishift/pkg/util/cmd"
 	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/pkg/errors"
+	"k8s.io/client-go/tools/clientcmd"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
 const (
@@ -91,10 +91,9 @@ func (oc *OcRunner) AddSudoerRoleForUser(user string) error {
 }
 
 // AddSystemAdminEntrytoKubeConfig adds the system:admin certs to ~/.kube/config
-// This function actually mimic the KUBECONFIG magical power of merging different kubeconfig file.
-// KUBECONFIG=~config1:config2 oc config view  --flatten
-// https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/#set-the-kubeconfig-environment-variable
 func (oc *OcRunner) AddSystemAdminEntryToKubeConfig(ocPath string) error {
+	var existingKubeConfig, newKubeConfig *clientcmdapi.Config
+
 	user, err := user.Current()
 	if err != nil {
 		return fmt.Errorf("unable to find current user: %v", err)
@@ -103,29 +102,26 @@ func (oc *OcRunner) AddSystemAdminEntryToKubeConfig(ocPath string) error {
 	minishiftKubeConfigPath := oc.KubeConfigPath
 	kubeConfigGlobalPath := filepath.Join(user.HomeDir, ".kube", "config")
 
-	// For Linux and Mac, the list is colon-delimited. For Windows, the list is semicolon-delimited for kubeconfig  env variable
-	// https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/#the-kubeconfig-environment-variable
-	kubeconfig := fmt.Sprintf("%s:%s", minishiftKubeConfigPath, kubeConfigGlobalPath)
-	if runtime.GOOS == "windows" {
-		kubeconfig = fmt.Sprintf("%s;%s", minishiftKubeConfigPath, kubeConfigGlobalPath)
-	}
-	realrunner := util.RealRunner{Env: []string{fmt.Sprintf("KUBECONFIG=%s", kubeconfig)}}
-
-	outBuffer := new(bytes.Buffer)
-	cmdArgs := []string{"config", "view", "--flatten"}
-	exitCode := realrunner.Run(outBuffer, nil, ocPath, cmdArgs...)
-	if exitCode != 0 {
-		return fmt.Errorf("unable to view kubeconfig file")
-	}
-
 	if err := os.MkdirAll(filepath.Join(user.HomeDir, ".kube"), 0755); err != nil {
 		return fmt.Errorf("unable to create kubeconfig dir ($HOME/.kube): %v", err)
 	}
 
-	if err := ioutil.WriteFile(kubeConfigGlobalPath, outBuffer.Bytes(), 0600); err != nil {
-		return fmt.Errorf("unable to write in kubeconfig file %s: %v", kubeConfigGlobalPath, err)
+	// Make sure .kube/config exist if not then this will create
+	os.OpenFile(kubeConfigGlobalPath, os.O_RDONLY|os.O_CREATE, 0600)
+
+	existingKubeConfig, err = clientcmd.LoadFromFile(kubeConfigGlobalPath)
+	if err != nil {
+		return fmt.Errorf("Not able to load %s: %s", kubeConfigGlobalPath, err)
 	}
-	return nil
+
+	newKubeConfig, err = clientcmd.LoadFromFile(minishiftKubeConfigPath)
+	if err != nil {
+		return fmt.Errorf("Not able to load %s: %s", minishiftKubeConfigPath, err)
+	}
+
+	merged := mergeKubeConfigs([]*clientcmdapi.Config{existingKubeConfig, newKubeConfig})
+
+	return clientcmd.WriteToFile(*merged, kubeConfigGlobalPath)
 }
 
 // AddCliContext adds a CLI context for the user and namespace for the current OpenShift cluster. See also
@@ -203,4 +199,30 @@ func flagExist(ocCommandOptions []string, flag string) bool {
 		}
 	}
 	return false
+}
+
+func mergeKubeConfigs(configs []*clientcmdapi.Config) *clientcmdapi.Config {
+	mergedConfig := clientcmdapi.NewConfig()
+	for _, config := range configs {
+		if config == nil {
+			continue
+		}
+		// merge clusters
+		for cName, c := range config.Clusters {
+			mergedConfig.Clusters[cName] = c
+		}
+		// merge authinfos
+		for aName, a := range config.AuthInfos {
+			mergedConfig.AuthInfos[aName] = a
+		}
+		// merge contexts
+		for ctxName, ctx := range config.Contexts {
+			mergedConfig.Contexts[ctxName] = ctx
+		}
+		// merge extensions
+		for extName, ext := range config.Extensions {
+			mergedConfig.Extensions[extName] = ext
+		}
+	}
+	return mergedConfig
 }

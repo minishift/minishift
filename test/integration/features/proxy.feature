@@ -40,7 +40,7 @@ Feature: Minishift can run behind proxy
 
   Scenario: User can deploy application ruby-ex to namespace ruby
    Given Minishift has state "Running"
-    When executing "oc new-app centos/ruby-22-centos7~https://github.com/openshift/ruby-ex.git" succeeds
+    When executing "oc new-app centos/ruby-22-centos7~https://github.com/sclorg/ruby-ex.git" succeeds
     Then stdout should contain
      """
      Success

@@ -77,7 +77,7 @@ The following steps describe how to deploy a sample Node.js application from the
 .  Create a Node.js example app:
 +
 ----
-$ oc new-app https://github.com/openshift/nodejs-ex -l name=myapp
+$ oc new-app https://github.com/sclorg/nodejs-ex -l name=myapp
 ----
 
 .  Track the build log until the app is built and deployed:

@@ -30,7 +30,8 @@ import (
 )
 
 const (
-	RHSMName = "   Red Hat Developers or Red Hat Subscription Management (RHSM)"
+	RHSMName       = "   Red Hat Developers or Red Hat Subscription Management (RHSM)"
+	RedHatRegistry = "registry.redhat.io"
 )
 
 func init() {
@@ -60,12 +61,10 @@ func (registrator *RedHatRegistrator) CompatibleWithDistribution(osReleaseInfo *
 	return true
 }
 
-// Register attempts to register the system with RHSM
+// Register attempts to register the system with RHSM and registry.redhat.io
 func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) error {
 	if isRegistered, err := registrator.IsRegistered(); !isRegistered && err == nil {
 		for i := 1; i < 4; i++ {
-			// Initialize progressDots channel
-			progressDots := progressdots.New()
 			// request username (disallow empty value)
 			if param.Username == "" {
 				// Check if Terminal tty supported or not
@@ -90,7 +89,28 @@ func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) er
 				param.Username,
 				minishiftStrings.EscapeSingleQuote(param.Password))
 
-			fmt.Print("   Registration in progress ")
+			// prepare docker login command for registry.redhat.io
+			dockerLoginCommand := fmt.Sprintf("docker login --username %s --password %s %s",
+				param.Username,
+				minishiftStrings.EscapeSingleQuote(param.Password),
+				RedHatRegistry)
+
+			fmt.Printf("   Login to %s in progress ", RedHatRegistry)
+			// Initialize progressDots channel
+			progressDots := progressdots.New()
+			progressDots.Start()
+			// Login to docker registry
+			_, err = registrator.SSHCommand(dockerLoginCommand)
+			progressDots.Stop()
+			if err == nil {
+				fmt.Println(" OK ")
+			} else {
+				fmt.Println(" FAIL ")
+			}
+
+			fmt.Printf("   Registration in progress ")
+			// Initialize progressDots channel again for registration
+			progressDots = progressdots.New()
 			progressDots.Start()
 			startTime := time.Now()
 			// start timed SSH command to register

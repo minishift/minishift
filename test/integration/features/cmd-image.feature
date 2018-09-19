@@ -17,7 +17,7 @@ Feature: Basic image caching test
       And image export completes with 3 images within 20 minutes
       And container image "openshift\/origin-haproxy-router:v[0-9]+\.[0-9]+\.[0-9]+" is cached
       And container image "openshift\/origin-docker-registry:v[0-9]+\.[0-9]+\.[0-9]+" is cached
-      And container image "openshift\/origin:v[0-9]+\.[0-9]+\.[0-9]+" is cached
+      And container image "openshift\/origin-control-plane:v[0-9]+\.[0-9]+\.[0-9]+" is cached
       And executing "minishift image export alpine:latest" succeeds
      Then stdout of command "minishift image list" contains "alpine:latest"
 
@@ -40,7 +40,7 @@ Feature: Basic image caching test
      """
 
      When executing "minishift start" succeeds
-     Then stdout should match "Importing 'openshift\/origin:v[0-9]+\.[0-9]+\.[0-9]+' [\.]+ OK"
+     Then stdout should match "Importing 'openshift\/origin-control-plane:v[0-9]+\.[0-9]+\.[0-9]+' [\.]+ OK"
       And stdout should match "Importing 'openshift\/origin-docker-registry:v[0-9]+\.[0-9]+\.[0-9]+' [\.]+ OK"
       And stdout should match "Importing 'openshift\/origin-haproxy-router:v[0-9]+\.[0-9]+\.[0-9]+' [\.]+ OK"
 

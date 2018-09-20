@@ -84,9 +84,17 @@ Use the following command on the host to run {project} against a remote machine:
 
 ----
 $ minishift start --vm-driver generic --remote-ipaddress <remote_IP_address> --remote-ssh-user <username> --remote-ssh-key <private_ssh_key>
+$ minishift addon apply htpasswd-identity-provider --addon-env USER_PASSWORD=<NEW_PASSWORD>
 ----
 
 [NOTE]
 ====
 The value of the `--remote-ssh-key` flag must be the location of a private SSH key on the host machine.
+====
+
+[NOTE]
+====
+To change the default username and password, you must apply the `htpasswd-identity-provider` add-on with the desired username and password after running the `minishift start` command.
+By default, {{project}} uses the `Allow All` identity provider.
+The `Allow All` identity provider allows any non-empty username and password to log in.
 ====

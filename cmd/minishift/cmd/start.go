@@ -66,6 +66,7 @@ const (
 	commandName             = "start"
 	defaultInsecureRegistry = "172.30.0.0/16"
 	genericDriver           = "generic"
+	dockerbridgeSubnetCmd   = `docker network inspect -f "{{range .IPAM.Config }}{{ .Subnet }}{{end}}" bridge`
 )
 
 var (
@@ -260,6 +261,10 @@ func runStart(cmd *cobra.Command, args []string) {
 
 		sshCommander := provision.GenericSSHCommander{Driver: hostVm.Driver}
 		dockerCommander := docker.NewVmDockerCommander(sshCommander)
+		dockerbridgeSubnet, err := sshCommander.SSHCommand(dockerbridgeSubnetCmd)
+		if err != nil {
+			atexit.ExitWithMessage(1, err.Error())
+		}
 
 		clusterUpConfig := &clusterup.ClusterUpConfig{
 			OpenShiftVersion:     requestedOpenShiftVersion,
@@ -278,11 +283,11 @@ func runStart(cmd *cobra.Command, args []string) {
 			SshUser:              sshCommander.Driver.GetSSHUsername(),
 		}
 
-		clusterUpParams := determineClusterUpParameters(clusterUpConfig)
+		clusterUpParams := determineClusterUpParameters(clusterUpConfig, strings.TrimSpace(dockerbridgeSubnet))
 		fmt.Println("-- OpenShift cluster will be configured with ...")
 		fmt.Println("   Version:", requestedOpenShiftVersion)
 
-		err := cmdUtil.PullOpenshiftImageAndCopyOcBinary(dockerCommander, requestedOpenShiftVersion)
+		err = cmdUtil.PullOpenshiftImageAndCopyOcBinary(dockerCommander, requestedOpenShiftVersion)
 		if err != nil {
 			atexit.ExitWithMessage(1, err.Error())
 		}
@@ -773,7 +778,7 @@ func populateStartFlagsToViperConfig() {
 }
 
 // determineClusterUpParameters returns a map of flag names and values for the cluster up call.
-func determineClusterUpParameters(config *clusterup.ClusterUpConfig) map[string]string {
+func determineClusterUpParameters(config *clusterup.ClusterUpConfig, DockerbridgeSubnet string) map[string]string {
 	clusterUpParams := make(map[string]string)
 	valid, _ := openshiftVersion.IsGreaterOrEqualToBaseVersion(config.OpenShiftVersion, constants.RefactoredOcVersion)
 	if valid {
@@ -782,6 +787,12 @@ func determineClusterUpParameters(config *clusterup.ClusterUpConfig) map[string]
 		if viper.GetString(configCmd.ImageName.Name) == "" {
 			imagetag := fmt.Sprintf("'%s:%s'", minishiftConstants.ImageNameForClusterUpImageFlag, config.OpenShiftVersion)
 			viper.Set(configCmd.ImageName.Name, imagetag)
+		}
+		// Add docker bridge subnet to no-proxy before passing to oc cluster up
+		// This will be removed once proxy issue fixed on upstream side for oc cluster up.
+		// https://github.com/openshift/origin/issues/20496
+		if viper.GetString(configCmd.NoProxyList.Name) != "" {
+			viper.Set(configCmd.NoProxyList.Name, fmt.Sprintf("%s,%s", DockerbridgeSubnet, viper.GetString(configCmd.NoProxyList.Name)))
 		}
 	} else {
 		// This will only required to work with openshift < 3.10

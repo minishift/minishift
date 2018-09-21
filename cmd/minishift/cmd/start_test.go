@@ -105,6 +105,7 @@ on the host.
       --version='': Specify the tag for OpenShift images
 
 Use "oc options" for a list of global command-line options (applies to all commands).`)
+	dockerSubnetForTest = "172.17.0.0/16"
 )
 
 type RecordingRunner struct {
@@ -145,7 +146,7 @@ func TestStartClusterUpNoFlags(t *testing.T) {
 	setUp(t)
 	defer tearDown()
 
-	clusterUpParams := determineClusterUpParameters(testConfig)
+	clusterUpParams := determineClusterUpParameters(testConfig, dockerSubnetForTest)
 	clusterup.ClusterUp(testConfig, clusterUpParams)
 
 	assert.Equal(t, testConfig.OcPath, testRunner.Cmd)
@@ -170,7 +171,7 @@ func TestStartClusterUpWithFlag(t *testing.T) {
 	viper.Set("public-hostname", "foobar")
 	viper.Set("skip-registry-check", "true")
 
-	clusterUpParams := determineClusterUpParameters(testConfig)
+	clusterUpParams := determineClusterUpParameters(testConfig, dockerSubnetForTest)
 	clusterup.ClusterUp(testConfig, clusterUpParams)
 
 	expectedArguments := []string{
@@ -195,7 +196,7 @@ func TestClusterUpWithProxyFlag(t *testing.T) {
 	viper.Set("https-proxy", "https://localhost:3128")
 	viper.Set("no-proxy", "10.0.0.1")
 
-	clusterUpParams := determineClusterUpParameters(testConfig)
+	clusterUpParams := determineClusterUpParameters(testConfig, dockerSubnetForTest)
 	clusterup.ClusterUp(testConfig, clusterUpParams)
 
 	expectedArguments := []string{

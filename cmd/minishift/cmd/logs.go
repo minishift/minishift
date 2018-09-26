@@ -29,6 +29,7 @@ import (
 
 var (
 	follow bool
+	tail   int64
 )
 
 // logsCmd represents the logs command
@@ -39,7 +40,7 @@ var logsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		api := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
 		defer api.Close()
-		s, err := cluster.GetHostLogs(api, follow)
+		s, err := cluster.GetHostLogs(api, follow, tail)
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error getting logs: %s", err.Error()))
 		}
@@ -48,6 +49,7 @@ var logsCmd = &cobra.Command{
 }
 
 func init() {
-	logsCmd.Flags().BoolVarP(&follow, "follow", "f", false, "Continously print the logs entries.")
+	logsCmd.Flags().BoolVarP(&follow, "follow", "f", false, "Continuously print the logs entries")
+	logsCmd.Flags().Int64VarP(&tail, "tail", "t", -1, "Number of lines to show from the end of the logs")
 	RootCmd.AddCommand(logsCmd)
 }

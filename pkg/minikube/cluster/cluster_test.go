@@ -60,7 +60,7 @@ func TestLocalBoot2DockerURL(t *testing.T) {
 	assert.Equal(t, localISOUrl, url)
 }
 
-func TestFollowLogsFlag(t *testing.T) {
+func TestFollowAndTailLogsFlag(t *testing.T) {
 	api := tests.NewMockAPI()
 
 	s, _ := tests.NewSSHServer()
@@ -79,21 +79,29 @@ func TestFollowLogsFlag(t *testing.T) {
 	testCases := []struct {
 		expectedCommand string
 		follow          bool
+		tail            int64
 	}{
 		{
 			expectedCommand: logsCmd,
 			follow:          false,
+			tail:            -1,
 		},
 		{
 			expectedCommand: logsCmdFollow,
 			follow:          true,
+			tail:            -1,
+		},
+		{
+			expectedCommand: logsCmdFollow,
+			follow:          true,
+			tail:            10,
 		},
 	}
 
 	for _, test := range testCases {
 		t.Run(test.expectedCommand, func(t *testing.T) {
-			_, err := GetHostLogs(api, test.follow)
-			assert.NoError(t, err, "Error gettinglogsof the running OpenShift cluster")
+			_, err := GetHostLogs(api, test.follow, test.tail)
+			assert.NoError(t, err, "Error getting logs of the running OpenShift cluster")
 			_, ok := s.Commands[test.expectedCommand]
 			assert.True(t, ok, "Expected command to run but did not")
 		})

@@ -49,6 +49,7 @@ import (
 var (
 	logsCmd             = "docker logs origin"
 	logsCmdFollow       = logsCmd + " -f"
+	logsCmdTail         = logsCmd + " --tail"
 	dockerAPIVersionCmd = "docker version --format '{{.Server.APIVersion}}'"
 )
 
@@ -413,19 +414,25 @@ func GetHostDockerEnv(api libmachine.API) (map[string]string, error) {
 
 // GetHostLogs gets the openshift logs of the host VM.
 // If follow is specified, it will tail the logs
-func GetHostLogs(api libmachine.API, follow bool) (string, error) {
+func GetHostLogs(api libmachine.API, follow bool, tail int64) (string, error) {
 	host, err := CheckIfApiExistsAndLoad(api)
 	if err != nil {
 		return "", err
 	}
 
-	if follow {
+	if follow || tail != -1 {
 		c, err := host.CreateSSHClient()
 		if err != nil {
 			return "", err
 		}
 
-		err = c.Shell(logsCmdFollow)
+		if follow && tail == -1 {
+			err = c.Shell(logsCmdFollow)
+		} else if !follow && tail != -1 {
+			err = c.Shell(fmt.Sprintf("%s %d", logsCmdTail, tail))
+		} else {
+			err = c.Shell(fmt.Sprintf("%s %d -f", logsCmdTail, tail))
+		}
 		if err != nil {
 			return "", errors.Wrap(err, "Error creating ssh client")
 		}

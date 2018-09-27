@@ -68,6 +68,9 @@ func NewAddOnParser() *AddOnParser {
 	echoHandler := &EchoCommandHandler{&defaultCommandHandler{}}
 	sshHandler.SetNext(echoHandler)
 
+	catHandler := &CatCommandHandler{&defaultCommandHandler{}}
+	echoHandler.SetNext(catHandler)
+
 	parser.handler = ocHandler
 
 	return &parser

@@ -267,7 +267,8 @@
 [[projects]]
   name = "github.com/elazarl/goproxy"
   packages = ["."]
-  revision = "aacba83f36a55ac31cbb71c06547a328c0cd1604"
+  revision = "93c365f5468fdbc21f2d55a7e39cc4bced996971"
+  source = "github.com/gbraad/goproxy"
 
 [[projects]]
   name = "github.com/fsnotify/fsnotify"
@@ -691,6 +692,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e0166cc66294639132751779d3945dbe47efdf4efcb2d04c6756b0e105a5b908"
+  inputs-digest = "eed127f39a507d16feb5c9ef867609215b1068f374ac6d824f688f54e64f2730"
   solver-name = "gps-cdcl"
   solver-version = 1

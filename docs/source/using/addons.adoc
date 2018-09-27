@@ -161,6 +161,11 @@ sleep::
 If the add-on command starts with `sleep`, it waits for the specified number of seconds.
 This can be useful in cases where you know that a command such as `oc` might take a few seconds before a certain resource can be queried.
 
+cat::
+If the add-on command starts with `cat`, the arguments following the `cat` command should be a valid file path.
+This will print the file content to the console for valid file otherwise displays error message about the non-existence of file.
+This can be useful in case you want to use a file content with other command.
+
 [NOTE]
 ====
 Trying to use an undefined command will cause an error when the add-on gets parsed.

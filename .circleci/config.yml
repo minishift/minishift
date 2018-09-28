@@ -22,7 +22,7 @@ jobs:
         command: echo 'export PATH=$GOPATH/bin:/usr/local/go/bin/:$PATH' >> $BASH_ENV
     - run:
         name: Prepare minishift
-        command: mkdir -p $GOPATH/src/github.com/minishift/minishift && cp -r ~/project/ $GOPATH/src/github.com/minishift/minishift
+        command: mkdir -p $GOPATH/src/github.com/minishift/minishift && cp -R ~/project/ $GOPATH/src/github.com/minishift/minishift
     - run:
         name: Cleanup GOROOT
         command: sudo rm -rf /usr/local/go
@@ -38,7 +38,7 @@ jobs:
     - run:
         name: Create GOPATH bin directory
         command: mkdir -p $GOPATH/bin
-    - run: 
+    - run:
         name: Download dep
         command: curl -sL "https://github.com/golang/dep/releases/download/${GODEP_TAG}/dep-$(go env GOHOSTOS)-$(go env GOHOSTARCH)" -o /tmp/dep
         environment:
@@ -49,7 +49,7 @@ jobs:
     - run:
         name: Make prerelease
         command: cd $GOPATH/src/github.com/minishift/minishift && make prerelease
-    - run: 
+    - run:
         name: Validate Commits
         command: cd $GOPATH/src/github.com/minishift/minishift && make validate_commits
 # Currently unable to use environment variables in the store_artifacts path in V2

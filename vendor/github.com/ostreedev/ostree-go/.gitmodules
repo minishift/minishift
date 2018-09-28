@@ -1,3 +1,0 @@
-[submodule "pkg/libglnx"]
-	path = pkg/libglnx
-	url = https://github.com/GNOME/libglnx

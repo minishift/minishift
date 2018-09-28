@@ -45,10 +45,6 @@ ignored = ["github.com/Sirupsen/logrus"]
   source = "github.com/machine-drivers/machine"
 
 [[constraint]]
-  name = "github.com/elazarl/goproxy"
-  revision = "aacba83f36a55ac31cbb71c06547a328c0cd1604"
-
-[[constraint]]
   name = "github.com/gbraad/go-hvkvp"
   version = "=0.3.0"
 

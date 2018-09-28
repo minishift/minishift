@@ -181,3 +181,7 @@ ignored = ["github.com/Sirupsen/logrus"]
   revision = "93c365f5468fdbc21f2d55a7e39cc4bced996971"
   source = "github.com/gbraad/goproxy"
 
+[prune]
+  go-tests = true
+  non-go = true
+  unused-packages = true

@@ -31,6 +31,7 @@ const (
 	sleepCommand     = "sleep"
 	sshCommand       = "ssh"
 	echoCommand      = "echo"
+	catCommand       = "cat"
 )
 
 type CommandHandler interface {
@@ -127,6 +128,17 @@ type EchoCommandHandler struct {
 func (c *EchoCommandHandler) Parse(s string, ignoreError bool, outputVariable string) command.Command {
 	if strings.HasPrefix(s, echoCommand) {
 		return command.NewEchoCommand(s, ignoreError)
+	}
+	return nil
+}
+
+type CatCommandHandler struct {
+	*defaultCommandHandler
+}
+
+func (c *CatCommandHandler) Parse(s string, ignoreError bool, outputVariable string) command.Command {
+	if strings.HasPrefix(s, catCommand) {
+		return command.NewCatCommand(s, ignoreError, outputVariable)
 	}
 	return nil
 }

@@ -163,6 +163,9 @@ var (
 
 	// Save start flags to viper config
 	SaveStartFlags = createConfigSetting("save-start-flags", SetBool, nil, nil, true, true)
+
+	// Systemtray
+	AutoStartTray = createConfigSetting("auto-start-tray", SetBool, []setFn{validations.IsSystemTrayAvailable}, nil, true, true)
 )
 
 func createConfigSetting(name string, set func(validations.ViperConfig, string, string) error, validations []setFn, callbacks []setFn, isApply bool, defaultVal interface{}) *Setting {

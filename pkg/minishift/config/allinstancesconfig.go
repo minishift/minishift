@@ -32,6 +32,7 @@ type GlobalConfigType struct {
 	ActiveProfile string
 	SftpdPID      int
 	ProxyPID      int
+	SystrayPID    int
 }
 
 // Create new object with data if file exists or

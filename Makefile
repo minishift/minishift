@@ -201,7 +201,7 @@ ci_release: ## Trigger a release via CentOS CI. Needs API_KEY and RELEASE_VERSIO
 
 	curl -s -H "$(shell curl -s --user 'minishift:$(API_KEY)' 'https://ci.centos.org//crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)')" \
 	-X POST https://ci.centos.org/job/minishift-release/build --user 'minishift:$(API_KEY)' \
-	--data-urlencode json='{"parameter": [{"name":"RELEASE_VERSION", "value":'"$(RELEASE_VERSION)"'}]}'
+	--data-urlencode json='{"parameter": [{"name":"RELEASE_VERSION", "value":'"$(RELEASE_VERSION)"'}, {"name":"SKIP_INTEGRATION_TEST", "value":"false"}]}'
 
 .PHONY: cross ## Cross compiles all binaries
 cross: $(BUILD_DIR)/darwin-amd64/minishift $(BUILD_DIR)/linux-amd64/minishift $(BUILD_DIR)/windows-amd64/minishift.exe

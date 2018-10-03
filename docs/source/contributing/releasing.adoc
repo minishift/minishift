@@ -45,6 +45,12 @@ The automated release performs:
 - xref:../contributing/releasing.adoc#trigger-docs-build[Triggering the Documentation Build]
 - xref:../contributing/releasing.adoc#post-release-tasks[Perform Post-Release Tasks]
 
+
+[NOTE]
+====
+If the CI release job is failing for a known reason then you can skip the integration tests by changing the `SKIP_INTEGRATION_TEST` value to `true` in Makefile.
+====
+
 [[manaul-release]]
 == Manual Release
 

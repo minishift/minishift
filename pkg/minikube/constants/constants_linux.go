@@ -22,6 +22,7 @@ var SupportedVMDrivers = [...]string{
 	"virtualbox",
 	"kvm",
 	"generic",
+	"vmware",
 }
 
 const DefaultVMDriver = "kvm"

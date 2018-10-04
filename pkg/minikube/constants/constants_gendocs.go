@@ -24,6 +24,7 @@ var SupportedVMDrivers = [...]string{
 	"kvm",
 	"xhyve",
 	"hyperv",
+	"vmware",
 }
 
 const DefaultVMDriver = "kvm"

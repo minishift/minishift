@@ -24,6 +24,7 @@ var SupportedVMDrivers = [...]string{
 	"xhyve",
 	"hyperkit",
 	"generic",
+	"vmware",
 }
 
 const DefaultVMDriver = "xhyve"

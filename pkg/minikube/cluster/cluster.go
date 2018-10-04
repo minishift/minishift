@@ -378,6 +378,8 @@ func getDriverOptions(config MachineConfig) interface{} {
 		driver = createHyperkitHost(config)
 	case "generic":
 		driver = createGenericDriverConfig(config)
+	case "vmware":
+		driver = createVmwareHost(config)
 	default:
 		atexit.ExitWithMessage(1, fmt.Sprintf("Unsupported driver: %s", config.VMDriver))
 	}

@@ -22,6 +22,7 @@ var SupportedVMDrivers = [...]string{
 	"virtualbox",
 	"hyperv",
 	"generic",
+	"vmware",
 }
 
 const DefaultVMDriver = "hyperv"

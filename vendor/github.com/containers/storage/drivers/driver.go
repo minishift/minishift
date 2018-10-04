@@ -66,8 +66,9 @@ type ProtoDriver interface {
 	Remove(id string) error
 	// Get returns the mountpoint for the layered filesystem referred
 	// to by this id. You can optionally specify a mountLabel or "".
+	// Optionally it gets the mappings used to create the layer.
 	// Returns the absolute path to the mounted layered filesystem.
-	Get(id, mountLabel string) (dir string, err error)
+	Get(id, mountLabel string, uidMaps, gidMaps []idtools.IDMap) (dir string, err error)
 	// Put releases the system resources for the specified id,
 	// e.g, unmounting layered filesystem.
 	Put(id string) error
@@ -92,25 +93,43 @@ type ProtoDriver interface {
 type DiffDriver interface {
 	// Diff produces an archive of the changes between the specified
 	// layer and its parent layer which may be "".
-	Diff(id, parent, mountLabel string) (io.ReadCloser, error)
+	Diff(id string, idMappings *idtools.IDMappings, parent string, parentIDMappings *idtools.IDMappings, mountLabel string) (io.ReadCloser, error)
 	// Changes produces a list of changes between the specified layer
 	// and its parent layer. If parent is "", then all changes will be ADD changes.
-	Changes(id, parent, mountLabel string) ([]archive.Change, error)
+	Changes(id string, idMappings *idtools.IDMappings, parent string, parentIDMappings *idtools.IDMappings, mountLabel string) ([]archive.Change, error)
 	// ApplyDiff extracts the changeset from the given diff into the
 	// layer with the specified id and parent, returning the size of the
 	// new layer in bytes.
 	// The io.Reader must be an uncompressed stream.
-	ApplyDiff(id, parent, mountLabel string, diff io.Reader) (size int64, err error)
+	ApplyDiff(id string, idMappings *idtools.IDMappings, parent string, mountLabel string, diff io.Reader) (size int64, err error)
 	// DiffSize calculates the changes between the specified id
 	// and its parent and returns the size in bytes of the changes
 	// relative to its base filesystem directory.
-	DiffSize(id, parent, mountLabel string) (size int64, err error)
+	DiffSize(id string, idMappings *idtools.IDMappings, parent string, parentIDMappings *idtools.IDMappings, mountLabel string) (size int64, err error)
+}
+
+// LayerIDMapUpdater is the interface that implements ID map changes for layers.
+type LayerIDMapUpdater interface {
+	// UpdateLayerIDMap walks the layer's filesystem tree, changing the ownership
+	// information using the toContainer and toHost mappings, using them to replace
+	// on-disk owner UIDs and GIDs which are "host" values in the first map with
+	// UIDs and GIDs for "host" values from the second map which correspond to the
+	// same "container" IDs.  This method should only be called after a layer is
+	// first created and populated, and before it is mounted, as other changes made
+	// relative to a parent layer, but before this method is called, may be discarded
+	// by Diff().
+	UpdateLayerIDMap(id string, toContainer, toHost *idtools.IDMappings, mountLabel string) error
+
+	// SupportsShifting tells whether the driver support shifting of the UIDs/GIDs in a
+	// image and it is not required to Chown the files when running in an user namespace.
+	SupportsShifting() bool
 }
 
 // Driver is the interface for layered/snapshot file system drivers.
 type Driver interface {
 	ProtoDriver
 	DiffDriver
+	LayerIDMapUpdater
 }
 
 // Capabilities defines a list of capabilities a driver may implement.

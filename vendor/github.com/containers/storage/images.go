@@ -40,6 +40,11 @@ type Image struct {
 	// same top layer.
 	TopLayer string `json:"layer,omitempty"`
 
+	// MappedTopLayers are the IDs of alternate versions of the top layer
+	// which have the same contents and parent, and which differ from
+	// TopLayer only in which ID mappings they use.
+	MappedTopLayers []string `json:"mapped-layers,omitempty"`
+
 	// Metadata is data we keep for the convenience of the caller.  It is not
 	// expected to be large, since it is kept in memory.
 	Metadata string `json:"metadata,omitempty"`
@@ -126,16 +131,17 @@ type imageStore struct {
 
 func copyImage(i *Image) *Image {
 	return &Image{
-		ID:             i.ID,
-		Digest:         i.Digest,
-		Names:          copyStringSlice(i.Names),
-		TopLayer:       i.TopLayer,
-		Metadata:       i.Metadata,
-		BigDataNames:   copyStringSlice(i.BigDataNames),
-		BigDataSizes:   copyStringInt64Map(i.BigDataSizes),
-		BigDataDigests: copyStringDigestMap(i.BigDataDigests),
-		Created:        i.Created,
-		Flags:          copyStringInterfaceMap(i.Flags),
+		ID:              i.ID,
+		Digest:          i.Digest,
+		Names:           copyStringSlice(i.Names),
+		TopLayer:        i.TopLayer,
+		MappedTopLayers: copyStringSlice(i.MappedTopLayers),
+		Metadata:        i.Metadata,
+		BigDataNames:    copyStringSlice(i.BigDataNames),
+		BigDataSizes:    copyStringInt64Map(i.BigDataSizes),
+		BigDataDigests:  copyStringDigestMap(i.BigDataDigests),
+		Created:         i.Created,
+		Flags:           copyStringInterfaceMap(i.Flags),
 	}
 }
 
@@ -212,6 +218,9 @@ func (r *imageStore) Load() error {
 func (r *imageStore) Save() error {
 	if !r.IsReadWrite() {
 		return errors.Wrapf(ErrStoreIsReadOnly, "not allowed to modify the image store at %q", r.imagespath())
+	}
+	if !r.Locked() {
+		return errors.New("image store is not locked")
 	}
 	rpath := r.imagespath()
 	if err := os.MkdirAll(filepath.Dir(rpath), 0700); err != nil {
@@ -357,8 +366,17 @@ func (r *imageStore) Create(id string, names []string, layer, metadata string, c
 			r.byname[name] = image
 		}
 		err = r.Save()
+		image = copyImage(image)
 	}
-	return copyImage(image), err
+	return image, err
+}
+
+func (r *imageStore) addMappedTopLayer(id, layer string) error {
+	if image, ok := r.lookup(id); ok {
+		image.MappedTopLayers = append(image.MappedTopLayers, layer)
+		return r.Save()
+	}
+	return ErrImageUnknown
 }
 
 func (r *imageStore) Metadata(id string) (string, error) {
@@ -685,4 +703,8 @@ func (r *imageStore) IsReadWrite() bool {
 
 func (r *imageStore) TouchedSince(when time.Time) bool {
 	return r.lockfile.TouchedSince(when)
+}
+
+func (r *imageStore) Locked() bool {
+	return r.lockfile.Locked()
 }

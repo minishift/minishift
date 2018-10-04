@@ -69,13 +69,13 @@ When you start {project}, it downloads a live ISO image that the hypervisor uses
 
 The following ISO images are available:
 
-- link:https://github.com/minishift/minishift-b2d-iso/releases[{project} Boot2Docker] (Default).
-This ISO image is based on link:https://github.com/boot2docker/boot2docker[Boot2Docker], which is a lightweight Linux distribution customized to run Docker containers.
-The image size is small and optimized for development but not for production.
-
-- link:https://github.com/minishift/minishift-centos-iso/releases[{project} CentOS].
+- link:https://github.com/minishift/minishift-centos-iso/releases[{project} CentOS] (Default).
 This ISO image is based on link:https://www.centos.org/[CentOS], which is an enterprise-ready Linux distribution that more closely resembles a production environment.
 The image size is larger than the Boot2Docker ISO image.
+
+- link:https://github.com/minishift/minishift-b2d-iso/releases[{project} Boot2Docker].
+This ISO image is based on link:https://github.com/boot2docker/boot2docker[Boot2Docker], which is a lightweight Linux distribution customized to run Docker containers.
+The image size is small and optimized for development but not for production.
 
 - link:https://github.com/kubernetes/minikube/tree/master/deploy/iso/minikube-iso[minikube ISO].
 This ISO image is provided by link:https://github.com/kubernetes/minikube/[Minikube project]. It is a customized Linux and based on link:https://www.kernel.org/[upstream kernel].

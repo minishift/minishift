@@ -54,7 +54,7 @@ func Init(home string, options []string, uidMaps, gidMaps []idtools.IDMap) (grap
 		locker:    locker.New(),
 	}
 
-	return graphdriver.NewNaiveDiffDriver(d, uidMaps, gidMaps), nil
+	return graphdriver.NewNaiveDiffDriver(d, graphdriver.NewNaiveLayerIDMapUpdater(d)), nil
 }
 
 func (d *Driver) String() string {
@@ -163,7 +163,7 @@ func (d *Driver) Remove(id string) error {
 }
 
 // Get mounts a device with given id into the root filesystem
-func (d *Driver) Get(id, mountLabel string) (string, error) {
+func (d *Driver) Get(id, mountLabel string, uidMaps, gidMaps []idtools.IDMap) (string, error) {
 	d.locker.Lock(id)
 	defer d.locker.Unlock(id)
 	mp := path.Join(d.home, "mnt", id)

@@ -2,11 +2,13 @@ package storage
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
 
+	"github.com/containers/storage/pkg/idtools"
 	"github.com/containers/storage/pkg/ioutils"
 	"github.com/containers/storage/pkg/stringid"
 	"github.com/containers/storage/pkg/truncindex"
@@ -56,6 +58,12 @@ type Container struct {
 	// is set before using it.
 	Created time.Time `json:"created,omitempty"`
 
+	// UIDMap and GIDMap are used for setting up a container's root
+	// filesystem for use inside of a user namespace where UID mapping is
+	// being used.
+	UIDMap []idtools.IDMap `json:"uidmap,omitempty"`
+	GIDMap []idtools.IDMap `json:"gidmap,omitempty"`
+
 	Flags map[string]interface{} `json:"flags,omitempty"`
 }
 
@@ -70,7 +78,9 @@ type ContainerStore interface {
 	// random one if an empty value is supplied) and optional names,
 	// based on the specified image, using the specified layer as its
 	// read-write layer.
-	Create(id string, names []string, image, layer, metadata string) (*Container, error)
+	// The maps in the container's options structure are recorded for the
+	// convenience of the caller, nothing more.
+	Create(id string, names []string, image, layer, metadata string, options *ContainerOptions) (*Container, error)
 
 	// SetNames updates the list of names associated with the container
 	// with the specified ID.
@@ -117,6 +127,8 @@ func copyContainer(c *Container) *Container {
 		BigDataSizes:   copyStringInt64Map(c.BigDataSizes),
 		BigDataDigests: copyStringDigestMap(c.BigDataDigests),
 		Created:        c.Created,
+		UIDMap:         copyIDMap(c.UIDMap),
+		GIDMap:         copyIDMap(c.GIDMap),
 		Flags:          copyStringInterfaceMap(c.Flags),
 	}
 }
@@ -180,6 +192,9 @@ func (r *containerStore) Load() error {
 }
 
 func (r *containerStore) Save() error {
+	if !r.Locked() {
+		return errors.New("container store is not locked")
+	}
 	rpath := r.containerspath()
 	if err := os.MkdirAll(filepath.Dir(rpath), 0700); err != nil {
 		return err
@@ -252,7 +267,7 @@ func (r *containerStore) SetFlag(id string, flag string, value interface{}) erro
 	return r.Save()
 }
 
-func (r *containerStore) Create(id string, names []string, image, layer, metadata string) (container *Container, err error) {
+func (r *containerStore) Create(id string, names []string, image, layer, metadata string, options *ContainerOptions) (container *Container, err error) {
 	if id == "" {
 		id = stringid.GenerateRandomID()
 		_, idInUse := r.byid[id]
@@ -267,7 +282,8 @@ func (r *containerStore) Create(id string, names []string, image, layer, metadat
 	names = dedupeNames(names)
 	for _, name := range names {
 		if _, nameInUse := r.byname[name]; nameInUse {
-			return nil, ErrDuplicateName
+			return nil, errors.Wrapf(ErrDuplicateName,
+				fmt.Sprintf("the container name \"%s\" is already in use by \"%s\". You have to remove that container to be able to reuse that name.", name, r.byname[name].ID))
 		}
 	}
 	if err == nil {
@@ -282,6 +298,8 @@ func (r *containerStore) Create(id string, names []string, image, layer, metadat
 			BigDataDigests: make(map[string]digest.Digest),
 			Created:        time.Now().UTC(),
 			Flags:          make(map[string]interface{}),
+			UIDMap:         copyIDMap(options.UIDMap),
+			GIDMap:         copyIDMap(options.GIDMap),
 		}
 		r.containers = append(r.containers, container)
 		r.byid[id] = container
@@ -291,8 +309,9 @@ func (r *containerStore) Create(id string, names []string, image, layer, metadat
 			r.byname[name] = container
 		}
 		err = r.Save()
+		container = copyContainer(container)
 	}
-	return copyContainer(container), err
+	return container, err
 }
 
 func (r *containerStore) Metadata(id string) (string, error) {
@@ -543,4 +562,8 @@ func (r *containerStore) IsReadWrite() bool {
 
 func (r *containerStore) TouchedSince(when time.Time) bool {
 	return r.lockfile.TouchedSince(when)
+}
+
+func (r *containerStore) Locked() bool {
+	return r.lockfile.Locked()
 }

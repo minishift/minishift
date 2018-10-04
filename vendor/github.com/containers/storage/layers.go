@@ -4,16 +4,21 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"reflect"
+	"sort"
 	"time"
 
 	drivers "github.com/containers/storage/drivers"
 	"github.com/containers/storage/pkg/archive"
+	"github.com/containers/storage/pkg/idtools"
 	"github.com/containers/storage/pkg/ioutils"
 	"github.com/containers/storage/pkg/stringid"
+	"github.com/containers/storage/pkg/system"
 	"github.com/containers/storage/pkg/truncindex"
 	digest "github.com/opencontainers/go-digest"
 	"github.com/pkg/errors"
@@ -93,6 +98,11 @@ type Layer struct {
 
 	// Flags is arbitrary data about the layer.
 	Flags map[string]interface{} `json:"flags,omitempty"`
+
+	// UIDMap and GIDMap are used for setting up a layer's contents
+	// for use inside of a user namespace where UID mapping is being used.
+	UIDMap []idtools.IDMap `json:"uidmap,omitempty"`
+	GIDMap []idtools.IDMap `json:"gidmap,omitempty"`
 }
 
 type layerMountPoint struct {
@@ -178,13 +188,13 @@ type LayerStore interface {
 	// underlying drivers can accept a "size" option.  At this time, most
 	// underlying drivers do not themselves distinguish between writeable
 	// and read-only layers.
-	Create(id, parent string, names []string, mountLabel string, options map[string]string, writeable bool) (*Layer, error)
+	Create(id string, parent *Layer, names []string, mountLabel string, options map[string]string, moreOptions *LayerOptions, writeable bool) (*Layer, error)
 
 	// CreateWithFlags combines the functions of Create and SetFlag.
-	CreateWithFlags(id, parent string, names []string, mountLabel string, options map[string]string, writeable bool, flags map[string]interface{}) (layer *Layer, err error)
+	CreateWithFlags(id string, parent *Layer, names []string, mountLabel string, options map[string]string, moreOptions *LayerOptions, writeable bool, flags map[string]interface{}) (layer *Layer, err error)
 
 	// Put combines the functions of CreateWithFlags and ApplyDiff.
-	Put(id, parent string, names []string, mountLabel string, options map[string]string, writeable bool, flags map[string]interface{}, diff io.Reader) (*Layer, int64, error)
+	Put(id string, parent *Layer, names []string, mountLabel string, options map[string]string, moreOptions *LayerOptions, writeable bool, flags map[string]interface{}, diff io.Reader) (*Layer, int64, error)
 
 	// SetNames replaces the list of names associated with a layer with the
 	// supplied values.
@@ -199,10 +209,18 @@ type LayerStore interface {
 	// Mount mounts a layer for use.  If the specified layer is the parent of other
 	// layers, it should not be written to.  An SELinux label to be applied to the
 	// mount can be specified to override the one configured for the layer.
-	Mount(id, mountLabel string) (string, error)
+	// The mappings used by the container can be specified.
+	Mount(id, mountLabel string, uidMaps, gidMaps []idtools.IDMap) (string, error)
 
 	// Unmount unmounts a layer when it is no longer in use.
-	Unmount(id string) error
+	Unmount(id string, force bool) (bool, error)
+
+	// Mounted returns number of times the layer has been mounted.
+	Mounted(id string) (int, error)
+
+	// ParentOwners returns the UIDs and GIDs of parents of the layer's mountpoint
+	// for which the layer's UID and GID maps don't contain corresponding entries.
+	ParentOwners(id string) (uids, gids []int, err error)
 
 	// ApplyDiff reads a tarstream which was created by a previous call to Diff and
 	// applies its changes to a specified layer.
@@ -221,6 +239,8 @@ type layerStore struct {
 	bymount           map[string]*Layer
 	bycompressedsum   map[digest.Digest][]string
 	byuncompressedsum map[digest.Digest][]string
+	uidMap            []idtools.IDMap
+	gidMap            []idtools.IDMap
 }
 
 func copyLayer(l *Layer) *Layer {
@@ -239,6 +259,8 @@ func copyLayer(l *Layer) *Layer {
 		UncompressedSize:   l.UncompressedSize,
 		CompressionType:    l.CompressionType,
 		Flags:              copyStringInterfaceMap(l.Flags),
+		UIDMap:             copyIDMap(l.UIDMap),
+		GIDMap:             copyIDMap(l.GIDMap),
 	}
 }
 
@@ -349,6 +371,9 @@ func (r *layerStore) Save() error {
 	if !r.IsReadWrite() {
 		return errors.Wrapf(ErrStoreIsReadOnly, "not allowed to modify the layer store at %q", r.layerspath())
 	}
+	if !r.Locked() {
+		return errors.New("layer store is not locked")
+	}
 	rpath := r.layerspath()
 	if err := os.MkdirAll(filepath.Dir(rpath), 0700); err != nil {
 		return err
@@ -382,7 +407,7 @@ func (r *layerStore) Save() error {
 	return ioutils.AtomicWriteFile(mpath, jmdata, 0600)
 }
 
-func newLayerStore(rundir string, layerdir string, driver drivers.Driver) (LayerStore, error) {
+func newLayerStore(rundir string, layerdir string, driver drivers.Driver, uidMap, gidMap []idtools.IDMap) (LayerStore, error) {
 	if err := os.MkdirAll(rundir, 0700); err != nil {
 		return nil, err
 	}
@@ -403,6 +428,8 @@ func newLayerStore(rundir string, layerdir string, driver drivers.Driver) (Layer
 		byid:     make(map[string]*Layer),
 		bymount:  make(map[string]*Layer),
 		byname:   make(map[string]*Layer),
+		uidMap:   copyIDMap(uidMap),
+		gidMap:   copyIDMap(gidMap),
 	}
 	if err := rlstore.Load(); err != nil {
 		return nil, err
@@ -489,7 +516,7 @@ func (r *layerStore) Status() ([][2]string, error) {
 	return r.driver.Status(), nil
 }
 
-func (r *layerStore) Put(id, parent string, names []string, mountLabel string, options map[string]string, writeable bool, flags map[string]interface{}, diff io.Reader) (layer *Layer, size int64, err error) {
+func (r *layerStore) Put(id string, parentLayer *Layer, names []string, mountLabel string, options map[string]string, moreOptions *LayerOptions, writeable bool, flags map[string]interface{}, diff io.Reader) (layer *Layer, size int64, err error) {
 	if !r.IsReadWrite() {
 		return nil, -1, errors.Wrapf(ErrStoreIsReadOnly, "not allowed to create new layers at %q", r.layerspath())
 	}
@@ -499,11 +526,6 @@ func (r *layerStore) Put(id, parent string, names []string, mountLabel string, o
 	}
 	if err := os.MkdirAll(r.layerdir, 0700); err != nil {
 		return nil, -1, err
-	}
-	if parent != "" {
-		if parentLayer, ok := r.lookup(parent); ok {
-			parent = parentLayer.ID
-		}
 	}
 	if id == "" {
 		id = stringid.GenerateRandomID()
@@ -522,14 +544,41 @@ func (r *layerStore) Put(id, parent string, names []string, mountLabel string, o
 			return nil, -1, ErrDuplicateName
 		}
 	}
+	parent := ""
+	var parentMappings *idtools.IDMappings
+	if parentLayer != nil {
+		parent = parentLayer.ID
+		parentMappings = idtools.NewIDMappingsFromMaps(parentLayer.UIDMap, parentLayer.GIDMap)
+	} else {
+		parentMappings = &idtools.IDMappings{}
+	}
+	idMappings := idtools.NewIDMappingsFromMaps(moreOptions.UIDMap, moreOptions.GIDMap)
 	opts := drivers.CreateOpts{
 		MountLabel: mountLabel,
 		StorageOpt: options,
 	}
 	if writeable {
-		err = r.driver.CreateReadWrite(id, parent, &opts)
+		if err = r.driver.CreateReadWrite(id, parent, &opts); err != nil {
+			if id != "" {
+				return nil, -1, errors.Wrapf(err, "error creating read-write layer with ID %q", id)
+			}
+			return nil, -1, errors.Wrapf(err, "error creating read-write layer")
+		}
 	} else {
-		err = r.driver.Create(id, parent, &opts)
+		if err = r.driver.Create(id, parent, &opts); err != nil {
+			if id != "" {
+				return nil, -1, errors.Wrapf(err, "error creating layer with ID %q", id)
+			}
+			return nil, -1, errors.Wrapf(err, "error creating layer")
+		}
+	}
+	if !reflect.DeepEqual(parentMappings.UIDs(), idMappings.UIDs()) || !reflect.DeepEqual(parentMappings.GIDs(), idMappings.GIDs()) {
+		if err = r.driver.UpdateLayerIDMap(id, parentMappings, idMappings, mountLabel); err != nil {
+			// We don't have a record of this layer, but at least
+			// try to clean it up underneath us.
+			r.driver.Remove(id)
+			return nil, -1, err
+		}
 	}
 	if err == nil {
 		layer = &Layer{
@@ -539,6 +588,8 @@ func (r *layerStore) Put(id, parent string, names []string, mountLabel string, o
 			MountLabel: mountLabel,
 			Created:    time.Now().UTC(),
 			Flags:      make(map[string]interface{}),
+			UIDMap:     copyIDMap(moreOptions.UIDMap),
+			GIDMap:     copyIDMap(moreOptions.GIDMap),
 		}
 		r.layers = append(r.layers, layer)
 		r.idindex.Add(id)
@@ -576,20 +627,29 @@ func (r *layerStore) Put(id, parent string, names []string, mountLabel string, o
 			r.driver.Remove(id)
 			return nil, -1, err
 		}
+		layer = copyLayer(layer)
 	}
-	return copyLayer(layer), size, err
+	return layer, size, err
 }
 
-func (r *layerStore) CreateWithFlags(id, parent string, names []string, mountLabel string, options map[string]string, writeable bool, flags map[string]interface{}) (layer *Layer, err error) {
-	layer, _, err = r.Put(id, parent, names, mountLabel, options, writeable, flags, nil)
+func (r *layerStore) CreateWithFlags(id string, parent *Layer, names []string, mountLabel string, options map[string]string, moreOptions *LayerOptions, writeable bool, flags map[string]interface{}) (layer *Layer, err error) {
+	layer, _, err = r.Put(id, parent, names, mountLabel, options, moreOptions, writeable, flags, nil)
 	return layer, err
 }
 
-func (r *layerStore) Create(id, parent string, names []string, mountLabel string, options map[string]string, writeable bool) (layer *Layer, err error) {
-	return r.CreateWithFlags(id, parent, names, mountLabel, options, writeable, nil)
+func (r *layerStore) Create(id string, parent *Layer, names []string, mountLabel string, options map[string]string, moreOptions *LayerOptions, writeable bool) (layer *Layer, err error) {
+	return r.CreateWithFlags(id, parent, names, mountLabel, options, moreOptions, writeable, nil)
 }
 
-func (r *layerStore) Mount(id, mountLabel string) (string, error) {
+func (r *layerStore) Mounted(id string) (int, error) {
+	layer, ok := r.lookup(id)
+	if !ok {
+		return 0, ErrLayerUnknown
+	}
+	return layer.MountCount, nil
+}
+
+func (r *layerStore) Mount(id, mountLabel string, uidMaps, gidMaps []idtools.IDMap) (string, error) {
 	if !r.IsReadWrite() {
 		return "", errors.Wrapf(ErrStoreIsReadOnly, "not allowed to update mount locations for layers at %q", r.mountspath())
 	}
@@ -604,7 +664,13 @@ func (r *layerStore) Mount(id, mountLabel string) (string, error) {
 	if mountLabel == "" {
 		mountLabel = layer.MountLabel
 	}
-	mountpoint, err := r.driver.Get(id, mountLabel)
+
+	if (uidMaps != nil || gidMaps != nil) && !r.driver.SupportsShifting() {
+		if !reflect.DeepEqual(uidMaps, layer.UIDMap) || !reflect.DeepEqual(gidMaps, layer.GIDMap) {
+			return "", fmt.Errorf("cannot mount layer %v: shifting not enabled", layer.ID)
+		}
+	}
+	mountpoint, err := r.driver.Get(id, mountLabel, uidMaps, gidMaps)
 	if mountpoint != "" && err == nil {
 		if layer.MountPoint != "" {
 			delete(r.bymount, layer.MountPoint)
@@ -617,21 +683,24 @@ func (r *layerStore) Mount(id, mountLabel string) (string, error) {
 	return mountpoint, err
 }
 
-func (r *layerStore) Unmount(id string) error {
+func (r *layerStore) Unmount(id string, force bool) (bool, error) {
 	if !r.IsReadWrite() {
-		return errors.Wrapf(ErrStoreIsReadOnly, "not allowed to update mount locations for layers at %q", r.mountspath())
+		return false, errors.Wrapf(ErrStoreIsReadOnly, "not allowed to update mount locations for layers at %q", r.mountspath())
 	}
 	layer, ok := r.lookup(id)
 	if !ok {
 		layerByMount, ok := r.bymount[filepath.Clean(id)]
 		if !ok {
-			return ErrLayerUnknown
+			return false, ErrLayerUnknown
 		}
 		layer = layerByMount
 	}
+	if force {
+		layer.MountCount = 1
+	}
 	if layer.MountCount > 1 {
 		layer.MountCount--
-		return r.Save()
+		return true, r.Save()
 	}
 	err := r.driver.Put(id)
 	if err == nil || os.IsNotExist(err) {
@@ -640,9 +709,70 @@ func (r *layerStore) Unmount(id string) error {
 		}
 		layer.MountCount--
 		layer.MountPoint = ""
-		err = r.Save()
+		return false, r.Save()
 	}
-	return err
+	return true, err
+}
+
+func (r *layerStore) ParentOwners(id string) (uids, gids []int, err error) {
+	layer, ok := r.lookup(id)
+	if !ok {
+		return nil, nil, ErrLayerUnknown
+	}
+	if len(layer.UIDMap) == 0 && len(layer.GIDMap) == 0 {
+		// We're not using any mappings, so there aren't any unmapped IDs on parent directories.
+		return nil, nil, nil
+	}
+	if layer.MountPoint == "" {
+		// We don't know which directories to examine.
+		return nil, nil, ErrLayerNotMounted
+	}
+	rootuid, rootgid, err := idtools.GetRootUIDGID(layer.UIDMap, layer.GIDMap)
+	if err != nil {
+		return nil, nil, errors.Wrapf(err, "error reading root ID values for layer %q", layer.ID)
+	}
+	m := idtools.NewIDMappingsFromMaps(layer.UIDMap, layer.GIDMap)
+	fsuids := make(map[int]struct{})
+	fsgids := make(map[int]struct{})
+	for dir := filepath.Dir(layer.MountPoint); dir != "" && dir != string(os.PathSeparator); dir = filepath.Dir(dir) {
+		st, err := system.Stat(dir)
+		if err != nil {
+			return nil, nil, errors.Wrapf(err, "error reading ownership of directory %q", dir)
+		}
+		lst, err := system.Lstat(dir)
+		if err != nil {
+			return nil, nil, errors.Wrapf(err, "error reading ownership of directory-in-case-it's-a-symlink %q", dir)
+		}
+		fsuid := int(st.UID())
+		fsgid := int(st.GID())
+		if _, _, err := m.ToContainer(idtools.IDPair{UID: fsuid, GID: rootgid}); err != nil {
+			fsuids[fsuid] = struct{}{}
+		}
+		if _, _, err := m.ToContainer(idtools.IDPair{UID: rootuid, GID: fsgid}); err != nil {
+			fsgids[fsgid] = struct{}{}
+		}
+		fsuid = int(lst.UID())
+		fsgid = int(lst.GID())
+		if _, _, err := m.ToContainer(idtools.IDPair{UID: fsuid, GID: rootgid}); err != nil {
+			fsuids[fsuid] = struct{}{}
+		}
+		if _, _, err := m.ToContainer(idtools.IDPair{UID: rootuid, GID: fsgid}); err != nil {
+			fsgids[fsgid] = struct{}{}
+		}
+	}
+	for uid := range fsuids {
+		uids = append(uids, uid)
+	}
+	for gid := range fsgids {
+		gids = append(gids, gid)
+	}
+	if len(uids) > 1 {
+		sort.Ints(uids)
+	}
+	if len(gids) > 1 {
+		sort.Ints(gids)
+	}
+	return uids, gids, nil
 }
 
 func (r *layerStore) removeName(layer *Layer, name string) {
@@ -701,10 +831,8 @@ func (r *layerStore) Delete(id string) error {
 		return ErrLayerUnknown
 	}
 	id = layer.ID
-	for layer.MountCount > 0 {
-		if err := r.Unmount(id); err != nil {
-			return err
-		}
+	if _, err := r.Unmount(id, true); err != nil {
+		return err
 	}
 	err := r.driver.Remove(id)
 	if err == nil {
@@ -771,12 +899,11 @@ func (r *layerStore) Wipe() error {
 	return nil
 }
 
-func (r *layerStore) findParentAndLayer(from, to string) (fromID string, toID string, toLayer *Layer, err error) {
+func (r *layerStore) findParentAndLayer(from, to string) (fromID string, toID string, fromLayer, toLayer *Layer, err error) {
 	var ok bool
-	var fromLayer *Layer
 	toLayer, ok = r.lookup(to)
 	if !ok {
-		return "", "", nil, ErrLayerUnknown
+		return "", "", nil, nil, ErrLayerUnknown
 	}
 	to = toLayer.ID
 	if from == "" {
@@ -793,15 +920,22 @@ func (r *layerStore) findParentAndLayer(from, to string) (fromID string, toID st
 			}
 		}
 	}
-	return from, to, toLayer, nil
+	return from, to, fromLayer, toLayer, nil
+}
+
+func (r *layerStore) layerMappings(layer *Layer) *idtools.IDMappings {
+	if layer == nil {
+		return &idtools.IDMappings{}
+	}
+	return idtools.NewIDMappingsFromMaps(layer.UIDMap, layer.GIDMap)
 }
 
 func (r *layerStore) Changes(from, to string) ([]archive.Change, error) {
-	from, to, toLayer, err := r.findParentAndLayer(from, to)
+	from, to, fromLayer, toLayer, err := r.findParentAndLayer(from, to)
 	if err != nil {
 		return nil, ErrLayerUnknown
 	}
-	return r.driver.Changes(to, from, toLayer.MountLabel)
+	return r.driver.Changes(to, r.layerMappings(toLayer), from, r.layerMappings(fromLayer), toLayer.MountLabel)
 }
 
 type simpleGetCloser struct {
@@ -815,14 +949,15 @@ func (s *simpleGetCloser) Get(path string) (io.ReadCloser, error) {
 }
 
 func (s *simpleGetCloser) Close() error {
-	return s.r.Unmount(s.id)
+	_, err := s.r.Unmount(s.id, false)
+	return err
 }
 
 func (r *layerStore) newFileGetter(id string) (drivers.FileGetCloser, error) {
 	if getter, ok := r.driver.(drivers.DiffGetterDriver); ok {
 		return getter.DiffGetter(id)
 	}
-	path, err := r.Mount(id, "")
+	path, err := r.Mount(id, "", nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -836,7 +971,7 @@ func (r *layerStore) newFileGetter(id string) (drivers.FileGetCloser, error) {
 func (r *layerStore) Diff(from, to string, options *DiffOptions) (io.ReadCloser, error) {
 	var metadata storage.Unpacker
 
-	from, to, toLayer, err := r.findParentAndLayer(from, to)
+	from, to, fromLayer, toLayer, err := r.findParentAndLayer(from, to)
 	if err != nil {
 		return nil, ErrLayerUnknown
 	}
@@ -874,7 +1009,7 @@ func (r *layerStore) Diff(from, to string, options *DiffOptions) (io.ReadCloser,
 	}
 
 	if from != toLayer.Parent {
-		diff, err := r.driver.Diff(to, from, toLayer.MountLabel)
+		diff, err := r.driver.Diff(to, r.layerMappings(toLayer), from, r.layerMappings(fromLayer), toLayer.MountLabel)
 		if err != nil {
 			return nil, err
 		}
@@ -886,7 +1021,7 @@ func (r *layerStore) Diff(from, to string, options *DiffOptions) (io.ReadCloser,
 		if !os.IsNotExist(err) {
 			return nil, err
 		}
-		diff, err := r.driver.Diff(to, from, toLayer.MountLabel)
+		diff, err := r.driver.Diff(to, r.layerMappings(toLayer), from, r.layerMappings(fromLayer), toLayer.MountLabel)
 		if err != nil {
 			return nil, err
 		}
@@ -925,12 +1060,12 @@ func (r *layerStore) Diff(from, to string, options *DiffOptions) (io.ReadCloser,
 }
 
 func (r *layerStore) DiffSize(from, to string) (size int64, err error) {
-	var toLayer *Layer
-	from, to, toLayer, err = r.findParentAndLayer(from, to)
+	var fromLayer, toLayer *Layer
+	from, to, fromLayer, toLayer, err = r.findParentAndLayer(from, to)
 	if err != nil {
 		return -1, ErrLayerUnknown
 	}
-	return r.driver.DiffSize(to, from, toLayer.MountLabel)
+	return r.driver.DiffSize(to, r.layerMappings(toLayer), from, r.layerMappings(fromLayer), toLayer.MountLabel)
 }
 
 func (r *layerStore) ApplyDiff(to string, diff io.Reader) (size int64, err error) {
@@ -970,7 +1105,7 @@ func (r *layerStore) ApplyDiff(to string, diff io.Reader) (size int64, err error
 	if err != nil {
 		return -1, err
 	}
-	size, err = r.driver.ApplyDiff(layer.ID, layer.Parent, layer.MountLabel, payload)
+	size, err = r.driver.ApplyDiff(layer.ID, r.layerMappings(layer), layer.Parent, layer.MountLabel, payload)
 	if err != nil {
 		return -1, err
 	}
@@ -1057,4 +1192,8 @@ func (r *layerStore) IsReadWrite() bool {
 
 func (r *layerStore) TouchedSince(when time.Time) bool {
 	return r.lockfile.TouchedSince(when)
+}
+
+func (r *layerStore) Locked() bool {
+	return r.lockfile.Locked()
 }

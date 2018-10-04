@@ -53,6 +53,13 @@
   version = "v0.6.8"
 
 [[projects]]
+  digest = "1:dab62c3861db5c130b9e9891f5bae684009ad9f728909809c2b576f3b10a957f"
+  name = "github.com/anjannath/systray"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "26ec25aa9aaa5a0142dfe61525a604914795e424"
+
+[[projects]]
   digest = "1:0b36b922ba3d5cb59ed26b3783c2d6cebd9b7aecbeb1ea81f6290740f1176d4b"
   name = "github.com/asaskevich/govalidator"
   packages = ["."]
@@ -77,7 +84,7 @@
   revision = "246e49050efdf45e8f17fbbcf1547ee376f9939e"
 
 [[projects]]
-  digest = "1:e6cfb98132a9fb4d40e6beb5b9e31abefbcec8122c6ae3f8bd442dd6be8b37b7"
+  digest = "1:26c2b231c2e4b2184711950fa47a23a9a63baeb8b1901dd023db0a5ac4b282de"
   name = "github.com/containers/image"
   packages = [
     "copy",
@@ -110,11 +117,10 @@
     "version",
   ]
   pruneopts = "NUT"
-  revision = "9c324204a4faf22ae8405fbd6a9faec55d8a1e47"
+  revision = "5cc7850824afe2b4fb016f8906666b358c50dc31"
 
 [[projects]]
-  branch = "master"
-  digest = "1:fd367557c0807f0e4dacb5f52b5b7b08315042a0280f82f509e71f98ba5473e2"
+  digest = "1:42fd648d391b0e4859d0148ef6e9d5eee1399647e5d6192b5c1e4a82f0ddddb5"
   name = "github.com/containers/storage"
   packages = [
     ".",
@@ -143,17 +149,19 @@
     "pkg/longpath",
     "pkg/loopback",
     "pkg/mount",
+    "pkg/ostree",
     "pkg/parsers",
     "pkg/parsers/kernel",
     "pkg/pools",
     "pkg/promise",
     "pkg/reexec",
     "pkg/stringid",
+    "pkg/stringutils",
     "pkg/system",
     "pkg/truncindex",
   ]
   pruneopts = "NUT"
-  revision = "f5dc7fe58d10b581aee6cbf400ab69d2f6b86ab6"
+  revision = "68332c059156eae970a03245cfcd4d717fb66ecd"
 
 [[projects]]
   digest = "1:7cb4fdca4c251b3ef8027c90ea35f70c7b661a593b9eeae34753c65499098bb1"
@@ -791,12 +799,33 @@
   version = "v1.2.0"
 
 [[projects]]
+  branch = "master"
+  digest = "1:e14e467ed00ab98665623c5060fa17e3d7079be560ffc33cabafd05d35894f05"
+  name = "github.com/syndtr/gocapability"
+  packages = ["capability"]
+  pruneopts = "NUT"
+  revision = "d98352740cb2c55f81556b63d4a1ec64c5a319c2"
+
+[[projects]]
   digest = "1:d9eb1d964a449cf51455fdac2ec3451c664af8e8b93c23d9c31d22b84ea82fde"
   name = "github.com/tchap/go-patricia"
   packages = ["patricia"]
   pruneopts = "NUT"
   revision = "666120de432aea38ab06bd5c818f04f4129882c9"
   version = "v2.2.6"
+
+[[projects]]
+  digest = "1:07e8742c479bab0066149ad02a710024154e76874fd0a2dba002d87702725825"
+  name = "github.com/ulikunitz/xz"
+  packages = [
+    ".",
+    "internal/hash",
+    "internal/xlog",
+    "lzma",
+  ]
+  pruneopts = "NUT"
+  revision = "0c6b41e72360850ca4f98dc341fd999726ea007f"
+  version = "v0.5.4"
 
 [[projects]]
   digest = "1:c50d03312be5e5914ccb213c500c92d0231c6364bd5f968bc6b756ba7d99f1b0"
@@ -857,7 +886,8 @@
   revision = "442624c9ec9243441e83b374a9e22ac549b5c51d"
 
 [[projects]]
-  digest = "1:6598d84ec2459388b3cc006ca8585de5810bd942c3285d4b415619636e76b3f3"
+  branch = "master"
+  digest = "1:3b319de92203c21c48942e19624d4017f876fc4693c5b71f84383d08e6ce58ca"
   name = "golang.org/x/sys"
   packages = [
     "unix",
@@ -865,7 +895,7 @@
     "windows/registry",
   ]
   pruneopts = "NUT"
-  revision = "43e60d72a8e2bd92ee98319ba9a384a0e9837c08"
+  revision = "af653ce8b74f808d092db8ca9741fbb63d2a469d"
 
 [[projects]]
   digest = "1:e7071ed636b5422cc51c0e3a6cebc229d6c9fffc528814b519a980641422d619"
@@ -1006,6 +1036,7 @@
   input-imports = [
     "github.com/DATA-DOG/godog",
     "github.com/DATA-DOG/godog/gherkin",
+    "github.com/anjannath/systray",
     "github.com/asaskevich/govalidator",
     "github.com/blang/semver",
     "github.com/containers/image/copy",

@@ -90,7 +90,7 @@ func Init(home string, options []string, uidMaps, gidMaps []idtools.IDMap) (grap
 		}
 	}
 
-	return graphdriver.NewNaiveDiffDriver(driver, uidMaps, gidMaps), nil
+	return graphdriver.NewNaiveDiffDriver(driver, graphdriver.NewNaiveLayerIDMapUpdater(driver)), nil
 }
 
 func parseOptions(opt []string) (btrfsOptions, bool, error) {
@@ -110,6 +110,8 @@ func parseOptions(opt []string) (btrfsOptions, bool, error) {
 			}
 			userDiskQuota = true
 			options.minSpace = uint64(minSpace)
+		case "btrfs.mountopt":
+			return options, userDiskQuota, fmt.Errorf("btrfs driver does not support mount options")
 		default:
 			return options, userDiskQuota, fmt.Errorf("Unknown option %s", key)
 		}
@@ -632,7 +634,7 @@ func (d *Driver) Remove(id string) error {
 }
 
 // Get the requested filesystem id.
-func (d *Driver) Get(id, mountLabel string) (string, error) {
+func (d *Driver) Get(id, mountLabel string, uidMaps, gidMaps []idtools.IDMap) (string, error) {
 	dir := d.subvolumesDirID(id)
 	st, err := os.Stat(dir)
 	if err != nil {

@@ -36,6 +36,7 @@ const (
 	UpdateMarkerFileName             = "updated"
 	DefaultMachineName               = "minishift"
 	DefaultProfileName               = "minishift"
+	DefaultTimeZone                  = "UTC" // This is what we have in our ISO kickstart template.
 )
 
 var (

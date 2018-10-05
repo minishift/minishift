@@ -34,6 +34,7 @@ type InstanceStateConfigType struct {
 	SupportsNetworkAssignment bool                      // minishift state
 	SupportsDnsmasqServer     bool                      // minishift state
 	OpenshiftVersion          string                    // minishift state
+	TimeZone                  string                    // minishift state
 	HostFolders               []config.HostFolderConfig // This is temporary and should be removed after 2-3 release.
 
 	VMDriver string // general config

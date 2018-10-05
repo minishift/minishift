@@ -58,6 +58,7 @@ var (
 	RemoteIPAddress       = createConfigSetting("remote-ipaddress", SetString, nil, nil, true, nil)
 	RemoteSSHUser         = createConfigSetting("remote-ssh-user", SetString, nil, nil, true, nil)
 	SSHKeyToConnectRemote = createConfigSetting("remote-ssh-key", SetString, nil, nil, true, nil)
+	TimeZone              = createConfigSetting("timezone", SetString, []setFn{validations.IsValidTimezone}, nil, true, nil)
 
 	// cluster up
 	SkipRegistryCheck = createConfigSetting("skip-registry-check", SetBool, nil, nil, true, nil)

@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/minishift/minishift/pkg/minishift/timezone"
 	"os"
 	"runtime"
 	"strings"
@@ -200,6 +201,11 @@ func runStart(cmd *cobra.Command, args []string) {
 	fmt.Print("-- Starting the OpenShift cluster")
 
 	hostVm := startHost(libMachineClient)
+	if !isRestart {
+		minishiftConfig.InstanceStateConfig.TimeZone = viper.GetString(configCmd.TimeZone.Name)
+		minishiftConfig.InstanceStateConfig.Write()
+	}
+	timezone.SetTimeZone(hostVm)
 	registrationUtil.RegisterHost(libMachineClient)
 
 	// Forcibly set nameservers when configured
@@ -686,6 +692,7 @@ func initStartFlags() *flag.FlagSet {
 	startFlagSet.String(configCmd.RemoteSSHUser.Name, "", "The username of the remote machine to provision OpenShift on")
 	startFlagSet.String(configCmd.SSHKeyToConnectRemote.Name, "", "SSH private key location on the host to connect remote machine")
 	startFlagSet.String(configCmd.ISOUrl.Name, minishiftConstants.CentOsIsoAlias, "Location of the minishift ISO. Can be a URL, file URI or one of the following short names: [centos b2d].")
+	startFlagSet.String(configCmd.TimeZone.Name, constants.DefaultTimeZone, "TimeZone for Minishift VM")
 
 	startFlagSet.AddFlag(dockerEnvFlag)
 	startFlagSet.AddFlag(dockerEngineOptFlag)

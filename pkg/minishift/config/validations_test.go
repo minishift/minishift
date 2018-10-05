@@ -289,3 +289,26 @@ func TestValidPort(t *testing.T) {
 	}
 	runValidations(t, tests, "hostfolders-sftp-port", IsValidPort)
 }
+
+func TestValidTimezone(t *testing.T) {
+
+	var tests = []validationTest{
+		{
+			value:     "Europe/Berli",
+			shouldErr: true,
+		},
+		{
+			value:     "APAC",
+			shouldErr: true,
+		},
+		{
+			value:     "Europe/Berlin",
+			shouldErr: false,
+		},
+		{
+			value:     "UTC",
+			shouldErr: false,
+		},
+	}
+	runValidations(t, tests, "timezone", IsValidTimezone)
+}

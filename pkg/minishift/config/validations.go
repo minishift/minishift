@@ -26,6 +26,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 
 	units "github.com/docker/go-units"
 	"github.com/minishift/minishift/pkg/util/filehelper"
@@ -228,6 +229,14 @@ func IsValidPort(name string, p string) error {
 func IsSystemTrayAvailable(_ string, _ string) error {
 	if runtime.GOOS == "linux" {
 		return fmt.Errorf("System tray is not available in linux.")
+	}
+	return nil
+}
+
+func IsValidTimezone(_ string, timezone string) error {
+	_, err := time.LoadLocation(timezone)
+	if err != nil {
+		return fmt.Errorf("%s is not a vaild timezone: %s", timezone, err.Error())
 	}
 	return nil
 }

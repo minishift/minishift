@@ -324,3 +324,23 @@ the following command:
 $ minishift config set auto-start-tray false
 ----
 
+[[timezone]]
+== Timezone Setup
+
+If you want to set a different timezone from the default one, use the following command:
+
+----
+$ minishift timezone --set <Valid_Timezome>
+----
+
+To check the available timezone, use the following command:
+
+----
+$ minishift timezone --list
+----
+
+To check current timezone of {project} instance, use the following command:
+
+----
+$ minishift timezone
+----

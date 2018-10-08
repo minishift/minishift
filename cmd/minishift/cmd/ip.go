@@ -57,7 +57,11 @@ var ipCmd = &cobra.Command{
 		if configureAsDynamic {
 			minishiftNetwork.ConfigureDynamicAssignment(host.Driver)
 		} else if configureAsStatic {
-			minishiftNetwork.ConfigureStaticAssignment(host.Driver)
+			msg, err := minishiftNetwork.ConfigureStaticAssignment(host.Driver)
+			if err != nil {
+				atexit.ExitWithMessage(1, err.Error())
+			}
+			fmt.Println(msg)
 		} else {
 			ip, err := minishiftNetwork.GetIP(host.Driver)
 			if err != nil {

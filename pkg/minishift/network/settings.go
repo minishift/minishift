@@ -19,6 +19,7 @@ package network
 import (
 	"bytes"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -33,7 +34,7 @@ const (
 	configureIPAddressMessage                   = "-- Set the following network settings to VM ..."
 	configureRestartNeededMessage               = "Network settings get applied to the instance on restart"
 	configureIPAddressFailure                   = "Not supported on this platform or hypervisor"
-	configureIPAddressAlreadySetFailure         = "Static IP address has already been assigned"
+	configureIPAddressFailureForHyperV          = "Not supported for Default switch on HyperV"
 	configureNetworkNotSupportedMessage         = "The Minishift VM does not support network assignment"
 	configureNetworkScriptStaticAddressTemplate = `DEVICE={{.Device}}
 IPADDR={{.IPAddress}}
@@ -98,15 +99,23 @@ func ConfigureDynamicAssignment(driver drivers.Driver) {
 // ConfigureStaticAssignment will collect NetworkSettings from the current running
 // instance and write this the values as configuration files, which will be used
 // by minishift-set-ipaddress on start of the instance.
-func ConfigureStaticAssignment(driver drivers.Driver) {
+func ConfigureStaticAssignment(driver drivers.Driver) (string, error) {
+	var msgString string
 	// Not supported for KVM
 	if minishiftConfig.IsKVM() {
-		atexit.ExitWithMessage(1, configureIPAddressFailure)
+		return msgString, errors.New(configureIPAddressFailure)
 		// related to issues with the driver (ip is retrieved from the lease)
 	}
 
+	// Not support for HyperV default switch
+	if minishiftConfig.IsHyperV() {
+		if IsUsingDefaultSwitch() {
+			return msgString, errors.New(configureIPAddressFailureForHyperV)
+		}
+	}
+
 	if checkSupportForAddressAssignment() {
-		fmt.Println("Writing current configuration for static assignment of IP address")
+		msgString += "Writing current configuration for static assignment of IP address\n"
 	}
 
 	// populate the network settings struct with known values
@@ -136,23 +145,25 @@ func ConfigureStaticAssignment(driver drivers.Driver) {
 		WriteNetworkSettingsToInstance(driver, disabledNetworkSettings)
 	}
 
-	printNetworkSettings(networkSettings)
+	msgString += printNetworkSettings(networkSettings)
 
-	fmt.Println(configureRestartNeededMessage)
+	msgString += configureRestartNeededMessage
+	return msgString, nil
 }
 
 // printNetworkSettings will print to stdout the values from the struct
 // NetworkSettings.
-func printNetworkSettings(networkSettings NetworkSettings) {
-	fmt.Println(configureIPAddressMessage)
-	fmt.Println("   Device:     ", networkSettings.Device)
-	fmt.Println("   IP Address: ", fmt.Sprintf("%s/%s", networkSettings.IPAddress, networkSettings.Netmask))
+func printNetworkSettings(networkSettings NetworkSettings) string {
+	msg := fmt.Sprintln(configureIPAddressMessage)
+	msg += fmt.Sprintln("   Device:     ", networkSettings.Device)
+	msg += fmt.Sprintln("   IP Address: ", fmt.Sprintf("%s/%s", networkSettings.IPAddress, networkSettings.Netmask))
 	if networkSettings.Gateway != "" {
-		fmt.Println("   Gateway:    ", networkSettings.Gateway)
+		msg += fmt.Sprintln("   Gateway:    ", networkSettings.Gateway)
 	}
 	if networkSettings.DNS1 != "" || networkSettings.DNS2 != "" {
-		fmt.Println("   Nameservers:", fmt.Sprintf("%s %s", networkSettings.DNS1, networkSettings.DNS2))
+		msg += fmt.Sprintln("   Nameservers:", fmt.Sprintf("%s %s", networkSettings.DNS1, networkSettings.DNS2))
 	}
+	return msg
 }
 
 // fillNetworkSettings will populate the network configuration file for use

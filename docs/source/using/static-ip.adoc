@@ -23,8 +23,6 @@ However, it will not work on all of the driver plug-ins at the moment due to the
 ====
 - Assigning a static IP address to the {project} VM is only officially supported for Hyper-V.
 - The {project} VM cannot be assigned a static IP address when using the KVM driver plug-in.
-- An experimental `--set-static` flag is available for the `minishift ip` command for other hypervisors.
-See xref:../using/experimental-features.adoc#set-fixed-ip[Set Fixed IP Address] for more information.
 ====
 
 [[static-ip-hyperv]]
@@ -73,4 +71,29 @@ PS> minishift.exe start `
 ====
 Be sure to specify a valid gateway and nameserver.
 Failing to do so will result in connectivity issues.
+====
+
+[[set-fixed-ip]]
+== Set Fixed IP Address
+
+[IMPORTANT]
+====
+This only works with the CentOS or RHEL xref:../using/basic-usage.adoc#choosing-iso-image[ISO] and is currently not supported on KVM as the driver plug-in relies on the DHCP offer to determine the IP address.
+====
+
+The following command will set the IP address that was assigned as fixed:
+
+----
+$ minishift ip --set-static
+----
+
+If you prefer to use dynamic assignment, you can use:
+
+----
+$ minishift ip --set-dhcp
+----
+
+[NOTE]
+====
+Use `minishift config set static-ip false` to stop assign the static ip automatically for supported hypervsiors.
 ====

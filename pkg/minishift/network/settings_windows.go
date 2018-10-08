@@ -131,7 +131,8 @@ func ConfigureNetworking(machineName string, networkSettings NetworkSettings) {
 
 	}
 
-	printNetworkSettings(networkSettings)
+	msg := printNetworkSettings(networkSettings)
+	fmt.Println(msg)
 
 	networkScript := fillNetworkSettingsScript(networkSettings)
 	record := hvkvp.NewMachineKVPRecord(machineName,

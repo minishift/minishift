@@ -235,9 +235,12 @@ func runStart(cmd *cobra.Command, args []string) {
 		proxyConfig.ApplyToEnvironment()
 	}
 
-	// preflight checks (after start)
+	// preflight checks and set static-ip (after start)
 	if viper.GetString(configCmd.VmDriver.Name) != genericDriver {
 		preflightChecksAfterStartingHost(hostVm.Driver)
+		if viper.GetBool(configCmd.StaticIPAutoSet.Name) {
+			setStaticIP(hostVm)
+		}
 	}
 
 	// Adding active profile information to all instance config
@@ -891,4 +894,17 @@ func startTray() error {
 		}
 	}
 	return nil
+}
+
+func setStaticIP(hostVm *host.Host) {
+	fmt.Print("-- Writing current configuration for static assignment of IP address ... ")
+	_, err := minishiftNetwork.ConfigureStaticAssignment(hostVm.Driver)
+	if err != nil {
+		fmt.Println("WARN")
+		if glog.V(2) {
+			fmt.Println(err)
+		}
+	} else {
+		fmt.Println("OK")
+	}
 }

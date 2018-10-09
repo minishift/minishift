@@ -32,18 +32,12 @@ import (
 )
 
 var commandOutputs []CommandOutput
-var commandVariables []CommandVariable
 
 type CommandOutput struct {
 	Command  string
 	StdOut   string
 	StdErr   string
 	ExitCode int
-}
-
-type CommandVariable struct {
-	Name  string
-	Value string
 }
 
 type Minishift struct {
@@ -167,37 +161,12 @@ func (m *Minishift) executingRetryingTimesWithWaitPeriodOfSeconds(command string
 	return nil
 }
 
-func (m *Minishift) GetVariableByName(name string) *CommandVariable {
-	if len(commandVariables) == 0 {
-		return nil
-	}
-
-	for i := range commandVariables {
-
-		variable := commandVariables[i]
-
-		if variable.Name == name {
-			return &variable
-		}
-	}
-
-	return nil
-}
-
 func (m *Minishift) setVariableExecutingOcCommand(name string, command string) error {
 	return m.setVariableFromExecution(name, MinishiftInstance.ExecutingOcCommand, command)
 }
 
 func (m *Minishift) setVariableExecutingMinishiftCommand(name string, command string) error {
 	return m.setVariableFromExecution(name, MinishiftInstance.ExecutingMinishiftCommand, command)
-}
-
-func (m *Minishift) SetVariable(name string, value string) {
-	commandVariables = append(commandVariables,
-		CommandVariable{
-			name,
-			value,
-		})
 }
 
 func (m *Minishift) setVariableFromExecution(name string, execute commandRunner, command string) error {
@@ -217,16 +186,9 @@ func (m *Minishift) setVariableFromExecution(name string, execute commandRunner,
 			lastCommandOutput.StdErr)
 	}
 
-	m.SetVariable(name, strings.TrimSpace(lastCommandOutput.StdOut))
+	util.SetVariable(name, strings.TrimSpace(lastCommandOutput.StdOut))
 
 	return nil
-}
-
-func (m *Minishift) processVariables(command string) string {
-	for _, v := range commandVariables {
-		command = strings.Replace(command, fmt.Sprintf("$(%s)", v.Name), v.Value, -1)
-	}
-	return command
 }
 
 func (m *Minishift) ExecutingOcCommand(command string) error {
@@ -236,7 +198,7 @@ func (m *Minishift) ExecutingOcCommand(command string) error {
 		return errors.New("Minishift is not Running")
 	}
 
-	command = m.processVariables(command)
+	command = util.ProcessVariables(command)
 	cmdOut, cmdErr, cmdExit := ocRunner.RunCommand(command)
 	commandOutputs = append(commandOutputs,
 		CommandOutput{
@@ -250,7 +212,7 @@ func (m *Minishift) ExecutingOcCommand(command string) error {
 }
 
 func (m *Minishift) ExecutingMinishiftCommand(command string) error {
-	command = m.processVariables(command)
+	command = util.ProcessVariables(command)
 	cmdOut, cmdErr, cmdExit := m.runner.RunCommand(command)
 	commandOutputs = append(commandOutputs,
 		CommandOutput{

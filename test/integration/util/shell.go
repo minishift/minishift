@@ -205,10 +205,10 @@ func CloseHostShellInstance() error {
 }
 
 func ExecuteInHostShell(command string) error {
-	var err error
+	command = ProcessVariables(command)
 
 	if shell.instance == nil {
-		return errors.New("Shell instance is started.")
+		return errors.New("Shell instance is not started.")
 	}
 
 	shell.outbuf.Reset()
@@ -217,7 +217,7 @@ func ExecuteInHostShell(command string) error {
 
 	LogMessage(shell.name, command)
 
-	_, err = io.WriteString(shell.inPipe, command+"\n")
+	_, err := io.WriteString(shell.inPipe, command+"\n")
 	if err != nil {
 		return err
 	}

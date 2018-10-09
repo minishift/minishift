@@ -19,14 +19,14 @@ one from: bash, cmd, powershell, tcsh, zsh with TEST_WITH_SPECIFIED_SHELL parame
 
   Scenario: Setting Docker client using docker-env command
      When executing "minishift docker-env" in host shell succeeds
-      And evaluating stdout of the previous command in host shell
+      And evaluating stdout of the previous command in host shell succeeds
      Then executing "docker info" in host shell succeeds
       And stdout of host shell should contain "OSType: linux"
       And stdout of host shell should contain "Name: minishift"
 
   Scenario: Unsetting Docker client using --unset flag of docker-env command
      When executing "minishift docker-env --unset" in host shell succeeds
-      And evaluating stdout of the previous command in host shell
+      And evaluating stdout of the previous command in host shell succeeds
      Then executing "docker info" in host shell
       And stdout of host shell should not contain "Name: minishift"
 

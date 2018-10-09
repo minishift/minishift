@@ -160,7 +160,7 @@ func FeatureContext(s *godog.Suite) {
 		util.HostShellCommandReturnShouldEqual)
 	s.Step(`^(stdout|stderr) of host shell (?:should equal|equals)$`,
 		util.HostShellCommandReturnShouldEqualContent)
-	s.Step(`^evaluating stdout of the previous command in host shell$`,
+	s.Step(`^evaluating stdout of the previous command in host shell succeeds$`,
 		util.ExecuteInHostShellLineByLine)
 
 	// Scenario variables
@@ -616,7 +616,7 @@ func commandReturnShouldNotBeEmpty(commandField string) error {
 }
 
 func variableShouldNotBeEmpty(variableName string) error {
-	return util.CompareExpectedWithActualNotEquals("", MinishiftInstance.GetVariableByName(variableName).Value)
+	return util.CompareExpectedWithActualNotEquals("", util.GetVariableByName(variableName))
 }
 
 func commandReturnShouldMatchRegex(commandField string, expected string) error {

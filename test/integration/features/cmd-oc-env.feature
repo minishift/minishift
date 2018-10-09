@@ -17,7 +17,7 @@ one from: bash, cmd, powershell, tcsh, zsh with TEST_WITH_SPECIFIED_SHELL parame
 
   Scenario: Setting oc binary to PATH with oc-env command
      When executing "minishift oc-env" in host shell succeeds
-      And evaluating stdout of the previous command in host shell
+      And evaluating stdout of the previous command in host shell succeeds
      Then executing "oc status" in host shell succeeds
       And stdout of host shell contains "In project My Project (myproject)"
 

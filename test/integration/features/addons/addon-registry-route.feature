@@ -61,14 +61,29 @@ so that user can able to push their container images directly to registry and de
     Given Minishift has state "Running"
      When executing "minishift stop" succeeds
      Then executing "minishift start" succeeds
+      And Minishift should have state "Running"
 
-  Scenario: User can login to OpenShift integrated docker registry after restart minishift
+  Scenario: User can login to OpenShift integrated docker registry after Minishift restart
+    Given Minishift has state "Running"
+      And with up to "20" retries with wait period of "3" seconds container name "registry_docker-registry" should be "running"
+      And with up to "60" retries with wait period of "1000ms" the "status code" of HTTP request to "/" of service "docker-registry" in namespace "default" is equal to "200"
+     When executing "docker login -u developer -p $(oc_token) docker-registry-default.$(minishift_ip).nip.io" in host shell succeeds
+     Then stdout of host shell should contain "Login Succeeded"
+
+  Scenario: User can reapply registry-route addon
     Given Minishift has state "Running"
      When executing "minishift addon apply registry-route" succeeds
-     Then with up to "60" retries with wait period of "3" seconds container name "registry_docker-registry" should be "running"
+     Then stdout should contain
+      """
+      Add-on 'registry-route' created docker-registry route.
+      """
+
+  Scenario: User can login to OpenShift integrated docker registry after reapplying registry-route addon
+    Given Minishift has state "Running"
+      And with up to "20" retries with wait period of "3" seconds container name "registry_docker-registry" should be "running"
       And with up to "60" retries with wait period of "1000ms" the "status code" of HTTP request to "/" of service "docker-registry" in namespace "default" is equal to "200"
-      And executing "docker login -u developer -p $(oc_token) docker-registry-default.$(minishift_ip).nip.io" in host shell succeeds
-      And stdout of host shell should contain "Login Succeeded"
+     When executing "docker login -u developer -p $(oc_token) docker-registry-default.$(minishift_ip).nip.io" in host shell succeeds
+     Then stdout of host shell should contain "Login Succeeded"
 
   Scenario: User deletes Minishift
     Given Minishift has state "Running"

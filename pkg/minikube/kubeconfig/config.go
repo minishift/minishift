@@ -17,47 +17,10 @@ limitations under the License.
 package kubeconfig
 
 import (
-	"io/ioutil"
-	"os"
-	"path/filepath"
-
 	"fmt"
 	"github.com/docker/machine/libmachine/provision"
-	"github.com/minishift/minishift/pkg/util"
-	"gopkg.in/yaml.v2"
+	"io/ioutil"
 )
-
-// kubeconfig Data types
-type ClusterType struct {
-	Cluster map[string]string `yaml:"cluster"`
-	Name    string            `yaml:"name"`
-}
-
-type ContextType struct {
-	Context map[string]string `yaml:"context"`
-	Name    string            `yaml:"name"`
-}
-
-type UserType struct {
-	User map[string]string `yaml:"user"`
-	Name string            `yaml:"name"`
-}
-
-type SystemKubeConfig struct {
-	ApiVersion     string        `yaml:"apiVersion"`
-	Clusters       []ClusterType `yaml:"clusters"`
-	Contexts       []ContextType `yaml:"contexts"`
-	CurrentContext string        `yaml:"current-context"`
-	Users          []UserType    `yaml:"users"`
-}
-
-func GetConfigPath() string {
-	var configPath = filepath.Join(util.HomeDir(), ".kube", "config")
-	if os.Getenv("KUBECONFIG") != "" {
-		configPath = os.Getenv("KUBECONFIG")
-	}
-	return configPath
-}
 
 // Cache system admin entries to be used to run oc commands
 func CacheSystemAdminEntries(systemEntriesConfigPath string, ocPath string, sshCommander provision.SSHCommander) error {
@@ -84,15 +47,4 @@ func CacheSystemAdminEntries(systemEntriesConfigPath string, ocPath string, sshC
 	}
 
 	return nil
-}
-
-func Read(configPath string) (SystemKubeConfig, error) {
-	config := SystemKubeConfig{}
-	data, _ := ioutil.ReadFile(configPath)
-	err := yaml.Unmarshal([]byte(data), &config)
-	if err != nil {
-		return config, err
-	}
-
-	return config, nil
 }

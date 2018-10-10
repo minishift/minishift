@@ -21,9 +21,12 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"os/user"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"runtime"
 )
 
 var (
@@ -128,6 +131,44 @@ func TestFlagExist(t *testing.T) {
 	assert.False(t, flagExist(expectedOptions, "proxy"))
 }
 
+func Test_get_kubeconfig_global_path(t *testing.T) {
+	type testdata struct {
+		KubeConfig string
+		Expected   string
+	}
+	var tests []testdata
+
+	if runtime.GOOS == "windows" {
+		tests = []testdata{{KubeConfig: "/tmp/john/config", Expected: "/tmp/john/config"},
+			{KubeConfig: "/tmp/john/config;/tmp/foo/config", Expected: "/tmp/foo/config"},
+			{KubeConfig: "/tmp/john/config;/tmp/foo/config;/tmp/bar/config", Expected: "/tmp/bar/config"},
+			{KubeConfig: ";;", Expected: getUserKubeConfigLocation()},
+			{KubeConfig: ";/tmp/foo/config;", Expected: "/tmp/foo/config"},
+			{KubeConfig: ";/tmp/foo/config:s", Expected: "/tmp/foo/config:s"},
+			{KubeConfig: ";/tmp/foo/config", Expected: "/tmp/foo/config"},
+			{KubeConfig: ":/tmp/foo/config", Expected: ":/tmp/foo/config"},
+			{KubeConfig: "", Expected: getUserKubeConfigLocation()},
+		}
+	} else {
+		tests = []testdata{{KubeConfig: "/tmp/john/config", Expected: "/tmp/john/config"},
+			{KubeConfig: "/tmp/john/config:/tmp/foo/config", Expected: "/tmp/foo/config"},
+			{KubeConfig: "/tmp/john/config;/tmp/foo/config:/tmp/bar/config", Expected: "/tmp/bar/config"},
+			{KubeConfig: "::", Expected: getUserKubeConfigLocation()},
+			{KubeConfig: ":/tmp/foo/config:", Expected: "/tmp/foo/config"},
+			{KubeConfig: ":/tmp/foo/config;s", Expected: "/tmp/foo/config;s"},
+			{KubeConfig: ":/tmp/foo/config:", Expected: "/tmp/foo/config"},
+			{KubeConfig: ";/tmp/foo/config", Expected: ";/tmp/foo/config"},
+			{KubeConfig: "", Expected: getUserKubeConfigLocation()},
+		}
+	}
+	for _, data := range tests {
+		os.Setenv("KUBECONFIG", data.KubeConfig)
+		expected, err := getGlobalKubeConfigPath()
+		assert.NoError(t, err)
+		assert.Equal(t, expected, data.Expected)
+	}
+}
+
 type FakeRunner struct {
 	cmd  string
 	args []string
@@ -141,4 +182,9 @@ func (r *FakeRunner) Run(stdOut io.Writer, stdErr io.Writer, commandPath string,
 	r.cmd = commandPath
 	r.args = args
 	return 0
+}
+
+func getUserKubeConfigLocation() string {
+	usr, _ := user.Current()
+	return filepath.Join(usr.HomeDir, ".kube", "config")
 }

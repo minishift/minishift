@@ -26,6 +26,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/golang/glog"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/util"
@@ -34,6 +35,7 @@ import (
 	"github.com/pkg/errors"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
+	"runtime"
 )
 
 const (
@@ -92,24 +94,25 @@ func (oc *OcRunner) AddSudoerRoleForUser(user string) error {
 func (oc *OcRunner) AddSystemAdminEntryToKubeConfig(ocPath string) error {
 	var existingKubeConfig, newKubeConfig *clientcmdapi.Config
 
-	user, err := user.Current()
-	if err != nil {
-		return fmt.Errorf("unable to find current user: %v", err)
-	}
-
 	minishiftKubeConfigPath := oc.KubeConfigPath
-	kubeConfigGlobalPath := filepath.Join(user.HomeDir, ".kube", "config")
-
-	if err := os.MkdirAll(filepath.Join(user.HomeDir, ".kube"), 0755); err != nil {
-		return fmt.Errorf("unable to create kubeconfig dir ($HOME/.kube): %v", err)
+	globalKubeConfigPath, err := getGlobalKubeConfigPath()
+	if err != nil {
+		return err
+	}
+	if glog.V(2) {
+		fmt.Println("Using Kubeconfig Path: ", globalKubeConfigPath)
+	}
+	dir, _ := filepath.Split(globalKubeConfigPath)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return fmt.Errorf("unable to create kubeconfig dir %s: %v", dir, err)
 	}
 
 	// Make sure .kube/config exist if not then this will create
-	os.OpenFile(kubeConfigGlobalPath, os.O_RDONLY|os.O_CREATE, 0600)
+	os.OpenFile(globalKubeConfigPath, os.O_RDONLY|os.O_CREATE, 0600)
 
-	existingKubeConfig, err = clientcmd.LoadFromFile(kubeConfigGlobalPath)
+	existingKubeConfig, err = clientcmd.LoadFromFile(globalKubeConfigPath)
 	if err != nil {
-		return fmt.Errorf("Not able to load %s: %s", kubeConfigGlobalPath, err)
+		return fmt.Errorf("Not able to load %s: %s", globalKubeConfigPath, err)
 	}
 
 	newKubeConfig, err = clientcmd.LoadFromFile(minishiftKubeConfigPath)
@@ -119,7 +122,7 @@ func (oc *OcRunner) AddSystemAdminEntryToKubeConfig(ocPath string) error {
 
 	merged := mergeKubeConfigs([]*clientcmdapi.Config{existingKubeConfig, newKubeConfig})
 
-	return clientcmd.WriteToFile(*merged, kubeConfigGlobalPath)
+	return clientcmd.WriteToFile(*merged, globalKubeConfigPath)
 }
 
 // AddCliContext adds a CLI context for the user and namespace for the current OpenShift cluster. See also
@@ -215,4 +218,30 @@ func mergeKubeConfigs(configs []*clientcmdapi.Config) *clientcmdapi.Config {
 		}
 	}
 	return mergedConfig
+}
+
+// getGlobalKubeConfigPath returns the path to the first entry in KUBECONFIG environment variable
+// or if KUBECONFIG not set then $HOME/.kube/config
+func getGlobalKubeConfigPath() (string, error) {
+	globalKubeConfigPath := os.Getenv("KUBECONFIG")
+	globalKubeConfigPathList := strings.FieldsFunc(globalKubeConfigPath, splitKubeConfig)
+	if len(globalKubeConfigPathList) > 0 {
+		// Tools should write to last entry in the KUBECONFIG file instead first one.
+		// oc cluster up also follow same.
+		globalKubeConfigPath = strings.FieldsFunc(globalKubeConfigPath, splitKubeConfig)[len(globalKubeConfigPathList)-1]
+	} else {
+		usr, err := user.Current()
+		if err != nil {
+			return "", fmt.Errorf("unable to find current user: %v", err)
+		}
+		globalKubeConfigPath = filepath.Join(usr.HomeDir, ".kube", "config")
+	}
+	return globalKubeConfigPath, nil
+}
+
+func splitKubeConfig(r rune) bool {
+	if runtime.GOOS == "windows" {
+		return r == ';'
+	}
+	return r == ':'
 }

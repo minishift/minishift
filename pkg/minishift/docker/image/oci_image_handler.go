@@ -55,8 +55,11 @@ type dockerClientConfig struct {
 }
 
 type Index struct {
-	Manifests Manifests `json:"manifests"`
+	Manifests     Manifests     `json:"manifests"`
+	SchemaVersion SchemaVersion `json:"schemaVersion"`
 }
+
+type SchemaVersion int
 
 type Manifests []Manifest
 
@@ -216,7 +219,7 @@ func (handler *OciImageHandler) AreImagesCached(config *ImageCacheConfig) bool {
 func (handler *OciImageHandler) GetCachedImages(config *ImageCacheConfig) map[string]bool {
 	cachedImages := make(map[string]bool)
 
-	index, err := handler.getIndex(config)
+	index, err := handler.getIndex(config.HostCacheDir)
 	if index == nil || err != nil {
 		return cachedImages
 	}
@@ -274,8 +277,8 @@ func (handler *OciImageHandler) pullImage(image string, out io.Writer) error {
 	return nil
 }
 
-func (handler *OciImageHandler) getIndex(config *ImageCacheConfig) (*Index, error) {
-	indexPath := filepath.Join(config.HostCacheDir, "index.json")
+func (handler *OciImageHandler) getIndex(cacheDir string) (*Index, error) {
+	indexPath := filepath.Join(cacheDir, "index.json")
 	if !filehelper.Exists(indexPath) {
 		return nil, nil
 	}
@@ -305,7 +308,7 @@ func (handler *OciImageHandler) importImage(image string, config *ImageCacheConf
 		return fmt.Errorf("Invalid image source '%s': %v", image, err)
 	}
 
-	err = handler.copyImage(srcRef, destRef, policyContext)
+	err = handler.copyImage(srcRef, destRef, policyContext, config.HostCacheDir)
 	if err != nil {
 		return err
 	}
@@ -331,13 +334,50 @@ func (handler *OciImageHandler) exportImage(image string, config *ImageCacheConf
 		return fmt.Errorf("Invalid image source '%s': %v", image, err)
 	}
 
-	destRef, err := layout.NewReference(config.HostCacheDir, image)
+	// ImageIndexLocation should be a directory location which will be atomic for each image.
+	// for an image "openshift/origin-control-plane:v3.10.0"
+	// it will be $HOME/.minishift/cache/image/openshift-origin-control-plane-v3.10.0
+	r := strings.NewReplacer(":", "-", "/", "-")
+	ImageIndexLocation := filepath.Join(config.HostCacheDir, r.Replace(image))
+
+	if _, err := os.Stat(ImageIndexLocation); !os.IsNotExist(err) {
+		return fmt.Errorf("Importing %s is already in progress", image)
+	}
+
+	destRef, err := layout.NewReference(ImageIndexLocation, image)
 	if err != nil {
 		return fmt.Errorf("Invalid image destination '%v': %v", destRef, err)
 	}
 
-	err = handler.copyImage(srcRef, destRef, policyContext)
+	err = handler.copyImage(srcRef, destRef, policyContext, config.HostCacheDir)
 	if err != nil {
+		return err
+	}
+
+	// Get index of current export image
+	pulledImageIndex, err := handler.getIndex(ImageIndexLocation)
+	if err != nil {
+		return err
+	}
+
+	// Remove tmpImageIndexLocation
+	if err := os.RemoveAll(ImageIndexLocation); err != nil {
+		return err
+	}
+
+	// Get index of already available image
+	availableImageIndex, err := handler.getIndex(config.HostCacheDir)
+	if err != nil {
+		return err
+	}
+
+	if availableImageIndex == nil {
+		availableImageIndex = &Index{Manifests: Manifests{}, SchemaVersion: 2}
+	}
+
+	availableImageIndex.Manifests = append(availableImageIndex.Manifests, pulledImageIndex.Manifests...)
+
+	if err := handler.updateIndex(config.HostCacheDir, availableImageIndex); err != nil {
 		return err
 	}
 
@@ -345,7 +385,7 @@ func (handler *OciImageHandler) exportImage(image string, config *ImageCacheConf
 }
 
 func (handler *OciImageHandler) pruneImage(image string, config *ImageCacheConfig) error {
-	index, err := handler.getIndex(config)
+	index, err := handler.getIndex(config.HostCacheDir)
 	if index == nil || err != nil {
 		return err
 	}
@@ -356,7 +396,7 @@ func (handler *OciImageHandler) pruneImage(image string, config *ImageCacheConfi
 				return err
 			}
 			index.Manifests = append(index.Manifests[:i], index.Manifests[i+1:]...)
-			if err := handler.updateIndex(config, index); err != nil {
+			if err := handler.updateIndex(config.HostCacheDir, index); err != nil {
 				return err
 			}
 		}
@@ -364,14 +404,14 @@ func (handler *OciImageHandler) pruneImage(image string, config *ImageCacheConfi
 	return nil
 }
 
-func (handler *OciImageHandler) copyImage(srcRef types.ImageReference, destRef types.ImageReference, policyContext *signature.PolicyContext) error {
+func (handler *OciImageHandler) copyImage(srcRef types.ImageReference, destRef types.ImageReference, policyContext *signature.PolicyContext, cacheDir string) error {
 	ctx := context.TODO()
 	err := copy.Image(ctx, policyContext, destRef, srcRef, &copy.Options{
 		RemoveSignatures: false,
 		SignBy:           "",
 		ReportWriter:     nil,
-		SourceCtx:        handler.getSystemContext(),
-		DestinationCtx:   handler.getSystemContext(),
+		SourceCtx:        handler.getSystemContext(cacheDir),
+		DestinationCtx:   handler.getSystemContext(cacheDir),
 	})
 	if err != nil {
 		return err
@@ -390,7 +430,7 @@ func (handler *OciImageHandler) getOutputWriter(config *ImageCacheConfig) io.Wri
 	return w
 }
 
-func (handler *OciImageHandler) getSystemContext() *types.SystemContext {
+func (handler *OciImageHandler) getSystemContext(cacheDir string) *types.SystemContext {
 	return &types.SystemContext{
 		DockerDaemonHost:                  handler.dockerClientSettings.DockerHost,
 		DockerDaemonCertPath:              handler.dockerClientSettings.DockerCertPath,
@@ -398,6 +438,7 @@ func (handler *OciImageHandler) getSystemContext() *types.SystemContext {
 		OSChoice:                    "linux",
 		ArchitectureChoice:          "amd64",
 		OCIAcceptUncompressedLayers: true,
+		OCISharedBlobDirPath:        filepath.Join(cacheDir, "blobs"),
 	}
 }
 
@@ -466,8 +507,8 @@ func (handler *OciImageHandler) progressStatusForError(err error) ProgressStatus
 	return OK
 }
 
-func (handler *OciImageHandler) updateIndex(config *ImageCacheConfig, index *Index) error {
-	indexPath := filepath.Join(config.HostCacheDir, "index.json")
+func (handler *OciImageHandler) updateIndex(cacheDir string, index *Index) error {
+	indexPath := filepath.Join(cacheDir, "index.json")
 	jsonData, err := json.MarshalIndent(index, "", "\t")
 	if err != nil {
 		return err

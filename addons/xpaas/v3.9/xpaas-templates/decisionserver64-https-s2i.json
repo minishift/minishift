@@ -6,7 +6,7 @@
             "description": "Application template for Red Hat JBoss BRMS 6.4 decision server HTTPS applications built using S2I.",
             "iconClass": "icon-decisionserver",
             "tags": "decisionserver,jboss",
-            "version": "1.4.12",
+            "version": "1.4.14",
             "openshift.io/display-name": "JBoss BRMS 6.4 decision server (with https)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example BRMS decision server application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
@@ -18,7 +18,7 @@
     },
     "labels": {
         "template": "decisionserver64-https-s2i",
-        "xpaas": "1.4.12"
+        "xpaas": "1.4.14"
     },
     "message": "A new BRMS application with SSL support has been created in your project. The username/password for accessing the KIE Server REST or JMS interface is ${KIE_SERVER_USER}/${KIE_SERVER_PASSWORD}. Please be sure to create the secret named \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content.",
     "parameters": [

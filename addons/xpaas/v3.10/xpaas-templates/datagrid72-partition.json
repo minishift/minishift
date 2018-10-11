@@ -5,19 +5,18 @@
         "annotations": {
             "iconClass": "icon-datagrid",
             "tags": "datagrid,jboss,hidden",
-            "version": "1.4.12",
+            "version": "1.1",
             "openshift.io/display-name": "Red Hat JBoss Data Grid 7.2 (Ephemeral, no https)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
-            "description": "An exampleRed Hat JBoss Data Grid application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
-            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat JBoss Data Grid 7.2 based application, including a deployment configuration, using using ephemeral (temporary) storage and communication using http.",
+            "description": "An example Red Hat JBoss Data Grid application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
+            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat JBoss Data Grid 7.2 based applications, including a deployment configuration, using ephemeral (temporary) storage and communication using http.",
             "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-data-grid/",
             "template.openshift.io/support-url": "https://access.redhat.com"
         },
         "name": "datagrid72-partition"
     },
     "labels": {
-        "template": "datagrid72-partition",
-        "xpaas": "1.4.12"
+        "template": "datagrid72-partition"
     },
     "message": "A new data grid service has been created in your project. It supports connector type(s) \"${INFINISPAN_CONNECTORS}\".",
     "parameters": [
@@ -85,17 +84,10 @@
             "required": false
         },
         {
-            "displayName": "Encryption Requires SSL Client Authentication?",
-            "description": "",
-            "name": "ENCRYPTION_REQUIRE_SSL_CLIENT_AUTH",
-            "value": "",
-            "required": false
-        },
-        {
             "displayName": "Memcached Cache Name",
-            "description": "The name of the cache to expose through this memcached connector (defaults to 'default')",
+            "description": "The name of the cache to expose through this memcached connector",
             "name": "MEMCACHED_CACHE",
-            "value": "default",
+            "value": "default_memcached",
             "required": false
         },
         {
@@ -329,7 +321,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "jboss-datagrid72-openshift:1.0"
+                                "name": "jboss-datagrid72-openshift:1.1"
                             }
                         }
                     },
@@ -459,10 +451,6 @@
                                     {
                                         "name": "CACHE_TYPE_DEFAULT",
                                         "value": "${CACHE_TYPE_DEFAULT}"
-                                    },
-                                    {
-                                        "name": "ENCRYPTION_REQUIRE_SSL_CLIENT_AUTH",
-                                        "value": "${ENCRYPTION_REQUIRE_SSL_CLIENT_AUTH}"
                                     },
                                     {
                                         "name": "HOTROD_SERVICE_NAME",

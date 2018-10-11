@@ -5,7 +5,7 @@
         "annotations": {
             "iconClass": "icon-amq",
             "tags": "messaging,amq,jboss",
-            "version": "1.4.12",
+            "version": "1.4.14",
             "openshift.io/display-name": "JBoss A-MQ 6.3 (no SSL)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example JBoss A-MQ application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "amq63-persistent",
-        "xpaas": "1.4.12"
+        "xpaas": "1.4.14"
     },
     "message": "A new persistent messaging service has been created in your project. It will handle the protocol(s) \"${MQ_PROTOCOL}\". The username/password for accessing the service is ${MQ_USERNAME}/${MQ_PASSWORD}.",
     "parameters": [

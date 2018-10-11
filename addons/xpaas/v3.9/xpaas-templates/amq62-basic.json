@@ -7,14 +7,14 @@
             "iconClass": "icon-amq",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "tags": "messaging,amq,jboss,hidden",
-            "version": "1.4.12",
+            "version": "1.4.14",
             "openshift.io/display-name": "JBoss A-MQ 6.2 (Ephemeral, no SSL)"
         },
         "name": "amq62-basic"
     },
     "labels": {
         "template": "amq62-basic",
-        "xpaas": "1.4.12"
+        "xpaas": "1.4.14"
     },
     "message": "A new messaging service has been created in your project. It will handle the protocol(s) \"${MQ_PROTOCOL}\". The username/password for accessing the service is ${MQ_USERNAME}/${MQ_PASSWORD}.",
     "parameters": [

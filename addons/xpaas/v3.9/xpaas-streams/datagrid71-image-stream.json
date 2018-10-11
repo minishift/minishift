@@ -17,11 +17,11 @@
                 "annotations": {
                     "openshift.io/display-name": "Red Hat JBoss Data Grid 7.1",
                     "openshift.io/provider-display-name": "Red Hat, Inc.",
-                    "version": "1.4.12"
+                    "version": "1.4.14"
                 }
             },
             "labels": {
-                "xpaas": "1.4.12"
+                "xpaas": "1.4.14"
             },
             "spec": {
                 "tags": [
@@ -96,11 +96,11 @@
                 "annotations": {
                     "openshift.io/display-name": "Red Hat JBoss Data Grid 7.1 Client Modules for EAP",
                     "openshift.io/provider-display-name": "Red Hat, Inc.",
-                    "version": "1.4.12"
+                    "version": "1.4.14"
                 }
             },
             "labels": {
-                "xpaas": "1.4.12"
+                "xpaas": "1.4.14"
             },
             "spec": {
                 "tags": [

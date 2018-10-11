@@ -6,7 +6,7 @@
             "iconClass": "icon-datagrid",
             "description": "Application template for JDG 6.5 and PostgreSQL applications built using.",
             "tags": "datagrid,jboss,hidden",
-            "version": "1.4.12",
+            "version": "1.4.14",
             "openshift.io/display-name": "JBoss Data Grid 6.5 + PostgreSQL (Ephemeral with https)",
             "openshift.io/provider-display-name": "Red Hat, Inc."
         },
@@ -14,7 +14,7 @@
     },
     "labels": {
         "template": "datagrid65-postgresql",
-        "xpaas": "1.4.12"
+        "xpaas": "1.4.14"
     },
     "message": "A new data grid service (using PostgreSQL) has been created in your project. It supports connector type(s) \"${INFINISPAN_CONNECTORS}\". The username/password for accessing the MySQL database \"${DB_DATABASE}\" is ${DB_USERNAME}/${DB_PASSWORD}. Please be sure to create the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications.",
     "parameters": [

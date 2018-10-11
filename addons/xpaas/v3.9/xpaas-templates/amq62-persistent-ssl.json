@@ -5,7 +5,7 @@
         "annotations": {
             "iconClass": "icon-amq",
             "tags": "messaging,amq,jboss,hidden",
-            "version": "1.4.12",
+            "version": "1.4.14",
             "openshift.io/display-name": "JBoss A-MQ 6.2 (with SSL)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example JBoss A-MQ application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
@@ -18,7 +18,7 @@
     },
     "labels": {
         "template": "amq62-persistent-ssl",
-        "xpaas": "1.4.12"
+        "xpaas": "1.4.14"
     },
     "message": "A new persistent messaging service with SSL support has been created in your project. It will handle the protocol(s) \"${MQ_PROTOCOL}\". The username/password for accessing the service is ${MQ_USERNAME}/${MQ_PASSWORD}. Please be sure to create a secret named \"${AMQ_SECRET}\" containing the trust store and key store files (\"${AMQ_TRUSTSTORE}\" and \"${AMQ_KEYSTORE}\") used for serving secure content.",
     "parameters": [

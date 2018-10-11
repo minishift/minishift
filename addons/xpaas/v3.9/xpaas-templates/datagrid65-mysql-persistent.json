@@ -5,7 +5,7 @@
         "annotations": {
             "iconClass": "icon-datagrid",
             "tags": "datagrid,jboss",
-            "version": "1.4.12",
+            "version": "1.4.14",
             "openshift.io/display-name": "JBoss Data Grid 6.5 + MySQL (with https)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example JBoss Data Grid application with a MySQL database. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "datagrid65-mysql-persistent",
-        "xpaas": "1.4.12"
+        "xpaas": "1.4.14"
     },
     "message": "A new data grid service (using MySQL with persistent storage) has been created in your project. It supports connector type(s) \"${INFINISPAN_CONNECTORS}\". The username/password for accessing the MySQL database \"${DB_DATABASE}\" is ${DB_USERNAME}/${DB_PASSWORD}. Please be sure to create the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications.",
     "parameters": [

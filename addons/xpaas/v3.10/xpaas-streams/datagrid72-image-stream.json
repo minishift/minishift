@@ -16,7 +16,8 @@
                 "name": "jboss-datagrid72-openshift",
                 "annotations": {
                     "openshift.io/display-name": "Red Hat JBoss Data Grid 7.2",
-                    "openshift.io/provider-display-name": "Red Hat, Inc."
+                    "openshift.io/provider-display-name": "Red Hat, Inc.",
+                    "version": "1.1"
                 }
             },
             "spec": {
@@ -31,9 +32,30 @@
                             "version": "1.0",
                             "openshift.io/display-name": "Red Hat JBoss Data Grid 7.2"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "DockerImage",
-                            "name": "registry.access.redhat.com/jboss-datagrid-7/datagrid72-openshift:1.0"
+                            "name": "registry.redhat.io/jboss-datagrid-7/datagrid72-openshift:1.0"
+                        }
+                    },
+                    {
+                        "name": "1.1",
+                        "annotations": {
+                            "description": "Red Hat JBoss Data Grid 7.2 S2I images.",
+                            "iconClass": "icon-datagrid",
+                            "tags": "datagrid,jboss,hidden",
+                            "supports": "datagrid:7.2",
+                            "version": "1.1",
+                            "openshift.io/display-name": "Red Hat JBoss Data Grid 7.2"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.redhat.io/jboss-datagrid-7/datagrid72-openshift:1.1"
                         }
                     }
                 ]

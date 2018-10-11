@@ -6,7 +6,7 @@
             "description": "Application template for JBoss A-MQ brokers. These can be deployed as standalone and use persistent storage for saving messages, including message migration when the number of pods are reduced. This template doesn't feature SSL support.",
             "iconClass": "icon-amq",
             "tags": "messaging,amq,jboss,hidden",
-            "version": "1.4.12",
+            "version": "1.4.14",
             "openshift.io/display-name": "JBoss A-MQ 6.2 (no SSL)",
             "openshift.io/provider-display-name": "Red Hat, Inc."
         },
@@ -14,7 +14,7 @@
     },
     "labels": {
         "template": "amq62-persistent",
-        "xpaas": "1.4.12"
+        "xpaas": "1.4.14"
     },
     "message": "A new persistent messaging service has been created in your project. It will handle the protocol(s) \"${MQ_PROTOCOL}\". The username/password for accessing the service is ${MQ_USERNAME}/${MQ_PASSWORD}.",
     "parameters": [

@@ -5,19 +5,18 @@
         "annotations": {
             "iconClass": "icon-datagrid",
             "tags": "datagrid,jboss,hidden",
-            "version": "1.4.12",
+            "version": "1.1",
             "openshift.io/display-name": "Red Hat JBoss Data Grid 7.2 + MySQL (Ephemeral with https)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
-            "description": "An exampleRed Hat JBoss Data Grid application with a MySQL database. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
-            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat JBoss Data Grid 7.2 based application, including a deployment configuration, using MySQL databased using ephemeral (temporary) storage and secure communication using https.",
+            "description": "An example Red Hat JBoss Data Grid application with a MySQL database. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
+            "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat JBoss Data Grid 7.2 based applications, including a deployment configuration, using MySQL database with ephemeral (temporary) storage and secure communication using https.",
             "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-data-grid/",
             "template.openshift.io/support-url": "https://access.redhat.com"
         },
         "name": "datagrid72-mysql"
     },
     "labels": {
-        "template": "datagrid72-mysql",
-        "xpaas": "1.4.12"
+        "template": "datagrid72-mysql"
     },
     "message": "A new data grid service (using MySQL) has been created in your project. It supports connector type(s) \"${INFINISPAN_CONNECTORS}\". The username/password for accessing the MySQL database \"${DB_DATABASE}\" is ${DB_USERNAME}/${DB_PASSWORD}. Please be sure to create the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications.",
     "parameters": [
@@ -227,16 +226,16 @@
         },
         {
             "displayName": "Encryption Requires SSL Client Authentication?",
-            "description": "",
+            "description": "Whether to require client certificate authentication. Defaults to false",
             "name": "ENCRYPTION_REQUIRE_SSL_CLIENT_AUTH",
             "value": "",
             "required": false
         },
         {
             "displayName": "Memcached Cache Name",
-            "description": "The name of the cache to expose through this memcached connector (defaults to 'default')",
+            "description": "The name of the cache to expose through this memcached connector",
             "name": "MEMCACHED_CACHE",
-            "value": "default",
+            "value": "default_memcached",
             "required": false
         },
         {
@@ -514,7 +513,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "jboss-datagrid72-openshift:1.0"
+                                "name": "jboss-datagrid72-openshift:1.1"
                             }
                         }
                     },

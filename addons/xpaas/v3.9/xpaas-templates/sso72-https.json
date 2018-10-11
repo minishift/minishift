@@ -5,7 +5,7 @@
         "annotations": {
             "iconClass" : "icon-sso",
             "tags" : "sso,keycloak,jboss,hidden",
-            "version": "1.4.12",
+            "version": "1.4.14",
             "openshift.io/display-name": "Red Hat Single Sign-On 7.2 (Ephemeral with passthrough TLS)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example RH-SSO 7 application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "sso72-https",
-        "xpaas": "1.4.12"
+        "xpaas": "1.4.14"
     },
     "message": "A new RH-SSO service has been created in your project. The admin username/password for accessing the master realm via the RH-SSO console is ${SSO_ADMIN_USERNAME}/${SSO_ADMIN_PASSWORD}. Please be sure to create the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications; \"${SSO_TRUSTSTORE_SECRET}\" containing the ${SSO_TRUSTSTORE} file used for securing RH-SSO requests.",
     "parameters": [
@@ -346,7 +346,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                                "name": "redhat-sso72-openshift:1.1"
+                                "name": "redhat-sso72-openshift:1.2"
                             }
                         }
                     },

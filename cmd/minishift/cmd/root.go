@@ -88,7 +88,7 @@ var RootCmd = &cobra.Command{
 		constants.Minipath = constants.GetProfileHomeDir(constants.ProfileName)
 
 		// Initialize the instance directory structure
-		state.InstanceDirs = state.NewMinishiftDirs(constants.Minipath)
+		state.InstanceDirs = state.GetMinishiftDirsStructure(constants.Minipath)
 
 		constants.KubeConfigPath = filepath.Join(state.InstanceDirs.Machines, constants.MachineName+"_kubeconfig")
 

@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"fmt"
+
 	"github.com/minishift/minishift/cmd/minishift/state"
 	pkgTesting "github.com/minishift/minishift/pkg/testing"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
@@ -38,7 +39,7 @@ func SetupTmpMinishiftHome(t *testing.T) string {
 		t.Fatal(err)
 	}
 	os.Setenv("MINISHIFT_HOME", tmpDir)
-	state.InstanceDirs = state.NewMinishiftDirs(tmpDir)
+	state.InstanceDirs = state.GetMinishiftDirsStructure(tmpDir)
 
 	return tmpDir
 }

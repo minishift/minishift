@@ -80,17 +80,6 @@ func GetActiveProfile() string {
 	return ""
 }
 
-// Placeholder function to change variables related to a VM instance
-// This needs a better solution than this as these variables should not be
-// changed outside of cmd/root.go. However cluster.GetHostStatus(api) uses
-// constants.MachineName inside the function.
-// This is a temporary fix and we will findout a better way to do it.
-func UpdateProfileConstants(profileName string) {
-	constants.ProfileName = profileName
-	constants.MachineName = constants.ProfileName
-	constants.Minipath = constants.GetProfileHomeDir(constants.ProfileName)
-}
-
 func SetDefaultProfileActive() error {
 	err := SetActiveProfile(constants.DefaultProfileName)
 	if err != nil {

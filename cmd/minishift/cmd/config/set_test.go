@@ -35,7 +35,7 @@ func TestNotFound(t *testing.T) {
 func TestModifyData(t *testing.T) {
 	testDir, err := ioutil.TempDir("", "minishift-config-")
 	assert.NoError(t, err, "Error creating temp directory")
-	state.InstanceDirs = state.NewMinishiftDirs(testDir)
+	state.InstanceDirs = state.GetMinishiftDirsStructure(testDir)
 
 	constants.ConfigFile = filepath.Join(testDir, "config.json")
 	defer os.RemoveAll(testDir)

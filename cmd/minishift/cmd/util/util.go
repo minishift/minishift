@@ -77,7 +77,7 @@ func ExitIfNotRunning(driver drivers.Driver, machineName string) {
 
 func GetVMStatus(profileName string) string {
 	var status string
-	profileDirs := cmdState.NewMinishiftDirs(constants.GetProfileHomeDir(profileName))
+	profileDirs := cmdState.GetMinishiftDirsStructure(constants.GetProfileHomeDir(profileName))
 
 	api := libmachine.NewClient(profileDirs.Home, profileDirs.Certs)
 	defer api.Close()

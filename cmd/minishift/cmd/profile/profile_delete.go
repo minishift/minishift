@@ -24,6 +24,7 @@ import (
 	"github.com/golang/glog"
 	registrationUtil "github.com/minishift/minishift/cmd/minishift/cmd/registration"
 	cmdUtil "github.com/minishift/minishift/cmd/minishift/cmd/util"
+	cmdState "github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
@@ -50,9 +51,6 @@ func runProfileDelete(cmd *cobra.Command, args []string) {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error: '%s' is not a valid profile", profileName))
 	}
 
-	profileActions.UpdateProfileConstants(profileName)
-	profileBaseDir := constants.Minipath
-
 	if profileName == constants.DefaultProfileName {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Default profile '%s' can not be deleted", profileName))
 	}
@@ -69,7 +67,8 @@ func runProfileDelete(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	api := libmachine.NewClient(profileBaseDir, constants.MakeMiniPath("certs"))
+	profileDirs := cmdState.GetMinishiftDirsStructure(constants.GetProfileHomeDir(profileName))
+	api := libmachine.NewClient(profileDirs.Home, profileDirs.Certs)
 	defer api.Close()
 
 	if cmdUtil.VMExists(api, constants.MachineName) {
@@ -85,13 +84,13 @@ func runProfileDelete(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	err := os.RemoveAll(profileBaseDir)
+	err := os.RemoveAll(profileDirs.Home)
 	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting '%s': %v", profileBaseDir, err.Error()))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Error deleting '%s': %v", profileDirs.Home, err.Error()))
 	}
 
 	if glog.V(2) {
-		fmt.Println(fmt.Sprintf("Deleted: '%s'", profileBaseDir))
+		fmt.Println(fmt.Sprintf("Deleted: '%s'", profileDirs.Home))
 	}
 
 	fmt.Println(fmt.Sprintf("Profile '%s' deleted successfully.", profileName))

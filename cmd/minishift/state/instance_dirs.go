@@ -40,7 +40,7 @@ type MinishiftDirs struct {
 var InstanceDirs *MinishiftDirs
 
 // Constructor for MinishiftDirs
-func NewMinishiftDirs(baseDir string) *MinishiftDirs {
+func GetMinishiftDirsStructure(baseDir string) *MinishiftDirs {
 	minishiftHomeDir := constants.GetMinishiftHomeDir()
 	// We use a global cache, sharing the cache directory of the default 'minishift' instance
 	cacheDir := filepath.Join(minishiftHomeDir, "cache")

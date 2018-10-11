@@ -28,6 +28,7 @@ import (
 	"github.com/docker/machine/libmachine"
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/cmd/minishift/state"
+	cmdState "github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/cache"
 	"github.com/minishift/minishift/pkg/minishift/clusterup"
@@ -35,7 +36,6 @@ import (
 	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/minishift/docker"
 	"github.com/minishift/minishift/pkg/minishift/oc"
-	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	utils "github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/minishift/minishift/pkg/util/progressdots"
@@ -62,12 +62,11 @@ func CacheOc(openShiftVersion string) string {
 }
 
 func SetOcContext(profileName string) error {
-	profileActions.UpdateProfileConstants(profileName)
-
 	// Need to create the kube config path for the profile for ocrunner to use it.
-	kubeConfigPath := filepath.Join(constants.Minipath, "machines", constants.MachineName+"_kubeconfig")
+	kubeConfigPath := filepath.Join(constants.Minipath, "machines", profileName+"_kubeconfig")
 
-	api := libmachine.NewClient(constants.Minipath, constants.MakeMiniPath("certs"))
+	profileDirs := cmdState.GetMinishiftDirsStructure(constants.GetProfileHomeDir(profileName))
+	api := libmachine.NewClient(profileDirs.Home, profileDirs.Certs)
 	defer api.Close()
 
 	host, err := api.Load(profileName)

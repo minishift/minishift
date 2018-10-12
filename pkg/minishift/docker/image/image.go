@@ -18,8 +18,6 @@ package image
 
 import (
 	"fmt"
-	"github.com/minishift/minishift/pkg/minikube/constants"
-	openshiftVersion "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	"github.com/minishift/minishift/pkg/util/os"
 	"github.com/minishift/minishift/pkg/util/os/process"
 	"io"
@@ -42,13 +40,8 @@ type ImageCacheConfig struct {
 
 // GetOpenShiftImageNames returns the full images names for the images requires for a fully functioning OpenShift instance
 func GetOpenShiftImageNames(version string) []string {
-	valid, _ := openshiftVersion.IsGreaterOrEqualToBaseVersion(version, constants.RefactoredOcVersion)
-	imageName := fmt.Sprintf("openshift/origin:%s", version)
-	if valid {
-		imageName = fmt.Sprintf("openshift/origin-control-plane:%s", version)
-	}
 	return []string{
-		imageName,
+		fmt.Sprintf("openshift/origin-control-plane:%s", version),
 		fmt.Sprintf("openshift/origin-docker-registry:%s", version),
 		fmt.Sprintf("openshift/origin-haproxy-router:%s", version),
 	}

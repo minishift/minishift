@@ -21,11 +21,8 @@ import (
 	"strings"
 
 	"github.com/golang/glog"
-	"github.com/minishift/minishift/pkg/minikube/constants"
-	instanceState "github.com/minishift/minishift/pkg/minishift/config"
 	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/minishift/docker"
-	openshiftVersion "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	"github.com/pborman/uuid"
 )
 
@@ -77,31 +74,26 @@ func RestartOpenShift(commander docker.DockerCommander) (bool, error) {
 		ok  bool
 		err error
 	)
-	version := getOpenshiftVersion()
-	valid, _ := openshiftVersion.IsGreaterOrEqualToBaseVersion(version, constants.RefactoredOcVersion)
-	if valid {
-		containerID, err := commander.GetID(minishiftConstants.OpenshiftApiContainerLabel)
-		if err != nil {
-			return false, err
-		}
-		ok, err = commander.Stop(containerID)
-		if err != nil {
-			return false, err
-		}
-		containerID, err = commander.GetID(minishiftConstants.KubernetesApiContainerLabel)
-		if err != nil {
-			return false, err
-		}
-		ok, err = commander.Stop(containerID)
-		if err != nil {
-			return false, err
-		}
+	containerID, err := commander.GetID(minishiftConstants.OpenshiftApiContainerLabel)
+	if err != nil {
+		return false, err
+	}
+	ok, err = commander.Stop(containerID)
+	if err != nil {
+		return false, err
+	}
+	containerID, err = commander.GetID(minishiftConstants.KubernetesApiContainerLabel)
+	if err != nil {
+		return false, err
+	}
+	ok, err = commander.Stop(containerID)
+	if err != nil {
+		return false, err
 	}
 	ok, err = commander.Restart(minishiftConstants.OpenshiftContainerName)
 	if err != nil {
 		return false, err
 	}
-
 	return ok, err
 }
 
@@ -156,9 +148,7 @@ func IsRunning(commander docker.DockerCommander) bool {
 
 func ViewConfig(target OpenShiftPatchTarget, commander docker.DockerCommander) (string, error) {
 	path := target.containerConfigFilePath()
-	version := getOpenshiftVersion()
-	valid, _ := openshiftVersion.IsGreaterOrEqualToBaseVersion(version, constants.RefactoredOcVersion)
-	if !valid || target.target == "node" {
+	if target.target == "node" {
 		result, err := commander.Exec("-t", minishiftConstants.OpenshiftContainerName, "cat", path)
 		if err != nil {
 			return "", err
@@ -249,18 +239,10 @@ func deleteBackup(target OpenShiftPatchTarget, id string, commander docker.Docke
 }
 
 func getLocalConfigFile(target string) string {
-	version := getOpenshiftVersion()
-	valid, _ := openshiftVersion.IsGreaterOrEqualToBaseVersion(version, constants.RefactoredOcVersion)
 	switch target {
 	case "master":
-		if !valid {
-			return "/var/lib/minishift/openshift.local.config/master/master-config.yaml"
-		}
 		return "/var/lib/minishift/base/openshift-apiserver/master-config.yaml"
 	case "node":
-		if !valid {
-			return "/var/lib/minishift/openshift.local.config/node-localhost/node-config.yaml"
-		}
 		return "/var/lib/minishift/base/node/node-config.yaml"
 	case "kube":
 		return "/var/lib/minishift/base/kube-apiserver/master-config.yaml"
@@ -269,32 +251,13 @@ func getLocalConfigFile(target string) string {
 }
 
 func getContainerConfigFile(target string) string {
-	version := getOpenshiftVersion()
-	valid, _ := openshiftVersion.IsGreaterOrEqualToBaseVersion(version, constants.RefactoredOcVersion)
 	switch target {
 	case "master":
-		if !valid {
-			return "/var/lib/origin/openshift.local.config/master/master-config.yaml"
-		}
 		return "/etc/origin/master/master-config.yaml"
 	case "node":
-		if !valid {
-			return "/var/lib/origin/openshift.local.config/node-localhost/node-config.yaml"
-		}
 		return "/var/lib/origin/openshift.local.config/node/node-config.yaml"
 	case "kube":
 		return "/etc/origin/master/master-config.yaml"
 	}
 	return ""
-}
-
-func getOpenshiftVersion() string {
-	var openshiftVersion string
-
-	instanceState.InstanceStateConfig, _ = instanceState.NewInstanceStateConfig(minishiftConstants.GetInstanceStateConfigPath())
-
-	if instanceState.InstanceStateConfig != nil {
-		openshiftVersion = instanceState.InstanceStateConfig.OpenshiftVersion
-	}
-	return openshiftVersion
 }

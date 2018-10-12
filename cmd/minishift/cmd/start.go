@@ -47,7 +47,6 @@ import (
 	minishiftNetwork "github.com/minishift/minishift/pkg/minishift/network"
 	minishiftProxy "github.com/minishift/minishift/pkg/minishift/network/proxy"
 	"github.com/minishift/minishift/pkg/minishift/openshift"
-	openshiftVersion "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/minishift/provisioner"
 	"github.com/minishift/minishift/pkg/minishift/remotehost"
@@ -114,15 +113,6 @@ var (
 	}
 
 	startCmd *cobra.Command
-
-	// Set default value for host data and config dir
-	dataDirectory = map[string]string{
-		"host-config-dir":  "/var/lib/minishift/openshift.local.config",
-		"host-data-dir":    "/var/lib/minishift/hostdata",
-		"host-volumes-dir": "/var/lib/minishift/openshift.local.volumes",
-		"host-pv-dir":      "/var/lib/minishift/openshift.local.pv",
-	}
-
 	// Set the base dir for v3.10.0
 	baseDirectory = minishiftConstants.BaseDirInsideInstance
 
@@ -346,9 +336,6 @@ func postClusterUp(hostVm *host.Host, clusterUpConfig *clusterup.ClusterUpConfig
 // getRequiredHostDirectories returns a list of directories we need to ensure exist on the VM.
 func getRequiredHostDirectories() []string {
 	var requiredDirectories []string
-	for _, value := range dataDirectory {
-		requiredDirectories = append(requiredDirectories, value)
-	}
 	requiredDirectories = append(requiredDirectories, baseDirectory)
 	requiredDirectories = append(requiredDirectories, minishiftConstants.OcPathInsideVM)
 	return requiredDirectories
@@ -787,25 +774,15 @@ func populateStartFlagsToViperConfig() {
 // determineClusterUpParameters returns a map of flag names and values for the cluster up call.
 func determineClusterUpParameters(config *clusterup.ClusterUpConfig, DockerbridgeSubnet string) map[string]string {
 	clusterUpParams := make(map[string]string)
-	valid, _ := openshiftVersion.IsGreaterOrEqualToBaseVersion(config.OpenShiftVersion, constants.RefactoredOcVersion)
-	if valid {
-		// Set default value for base config for 3.10
-		clusterUpParams["base-dir"] = baseDirectory
-		if viper.GetString(configCmd.ImageName.Name) == "" {
-			imagetag := fmt.Sprintf("'%s:%s'", minishiftConstants.ImageNameForClusterUpImageFlag, config.OpenShiftVersion)
-			viper.Set(configCmd.ImageName.Name, imagetag)
-		}
-		// Add docker bridge subnet to no-proxy before passing to oc cluster up
-		// This will be removed once proxy issue fixed on upstream side for oc cluster up.
-		// https://github.com/openshift/origin/issues/20496
-		if viper.GetString(configCmd.NoProxyList.Name) != "" {
-			viper.Set(configCmd.NoProxyList.Name, fmt.Sprintf("%s,%s", DockerbridgeSubnet, viper.GetString(configCmd.NoProxyList.Name)))
-		}
-	} else {
-		// This will only required to work with openshift < 3.10
-		for key, value := range dataDirectory {
-			clusterUpParams[key] = value
-		}
+	// Set default value for base config for 3.10
+	clusterUpParams["base-dir"] = baseDirectory
+	if viper.GetString(configCmd.ImageName.Name) == "" {
+		imagetag := fmt.Sprintf("'%s:%s'", minishiftConstants.ImageNameForClusterUpImageFlag, config.OpenShiftVersion)
+		viper.Set(configCmd.ImageName.Name, imagetag)
+	}
+	// Add docker bridge subnet to no-proxy before passing to oc cluster up
+	if viper.GetString(configCmd.NoProxyList.Name) != "" {
+		viper.Set(configCmd.NoProxyList.Name, fmt.Sprintf("%s,%s", DockerbridgeSubnet, viper.GetString(configCmd.NoProxyList.Name)))
 	}
 
 	viper.Set(configCmd.RoutingSuffix.Name, config.RoutingSuffix)

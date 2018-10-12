@@ -23,8 +23,6 @@ import (
 	"github.com/docker/machine/libmachine/host"
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/golang/glog"
-	"github.com/minishift/minishift/pkg/minikube/constants"
-
 	"os"
 	"strings"
 
@@ -35,8 +33,6 @@ import (
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/minishift/minishift/pkg/minishift/oc"
-	openshiftVersion "github.com/minishift/minishift/pkg/minishift/openshift/version"
-
 	"regexp"
 
 	"github.com/minishift/minishift/pkg/minishift/docker"
@@ -71,10 +67,6 @@ type ClusterUpConfig struct {
 // ClusterUp execute oc binary in order to run 'cluster up'
 func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string) (string, error) {
 	cmdArgs := []string{"cluster", "up"}
-	valid, _ := openshiftVersion.IsGreaterOrEqualToBaseVersion(config.OpenShiftVersion, constants.RefactoredOcVersion)
-	if !valid {
-		cmdArgs = []string{"cluster", "up", "--use-existing-config"}
-	}
 	// Deal with extra flags (remove from cluster up params)
 	var extraFlags string
 	if val, ok := clusterUpParams[configCmd.ExtraClusterUpFlags.Name]; ok {

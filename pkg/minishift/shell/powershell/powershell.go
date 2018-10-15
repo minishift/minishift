@@ -18,8 +18,27 @@ package powershell
 
 import (
 	"bytes"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"os/exec"
+)
+
+var (
+	runAsCmds = []string{
+		`$myWindowsID = [System.Security.Principal.WindowsIdentity]::GetCurrent();`,
+		`$myWindowsPrincipal = New-Object System.Security.Principal.WindowsPrincipal($myWindowsID);`,
+		`$adminRole = [System.Security.Principal.WindowsBuiltInRole]::Administrator;`,
+		`if (-Not ($myWindowsPrincipal.IsInRole($adminRole))) {`,
+		`$newProcess = New-Object System.Diagnostics.ProcessStartInfo "PowerShell";`,
+		`$newProcess.Arguments = "& '" + $script:MyInvocation.MyCommand.Path + "'"`,
+		`$newProcess.Verb = "runas";`,
+		`[System.Diagnostics.Process]::Start($newProcess);`,
+		`Exit;`,
+		`}`,
+	}
 )
 
 type PowerShell struct {
@@ -45,4 +64,19 @@ func (p *PowerShell) Execute(args ...string) (stdOut string, stdErr string, err 
 	err = cmd.Run()
 	stdOut, stdErr = stdout.String(), stderr.String()
 	return
+}
+
+func (p *PowerShell) ExecuteAsAdmin(cmd string) (stdOut string, stdErr string, err error) {
+	scriptContent := strings.Join(append(runAsCmds, cmd), "\n")
+
+	tempDir, _ := ioutil.TempDir("", "psScripts")
+	psFile, err := os.Create(filepath.Join(tempDir, "runAsAdmin.ps1"))
+	if err != nil {
+		return "", "", err
+	}
+
+	psFile.WriteString(scriptContent)
+	psFile.Close()
+
+	return p.Execute(psFile.Name())
 }

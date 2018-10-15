@@ -13,7 +13,7 @@ Topics:
       - Name: Preparing to Install Minishift
         File: preparing-to-install
       - Name: Setting Up the Virtualization Environment
-        File: setting-up-virtualization-environment
+        File: setting-up-hypervisor-environment
       - Name: Installing Minishift
         File: installing
       - Name: Minishift Quickstart

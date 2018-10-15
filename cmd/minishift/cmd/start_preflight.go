@@ -55,7 +55,7 @@ func preflightChecksBeforeStartingHost() {
 	if shouldPreflightChecksBeSkipped() {
 		return
 	}
-	driverErrorMessage := "See the 'Setting Up the Virtualization Environment' topic (https://docs.okd.io/latest/minishift/getting-started/setting-up-virtualization-environment.html) for more information"
+	driverErrorMessage := "See the 'Setting Up the Virtualization Environment' topic (https://docs.okd.io/latest/minishift/getting-started/setting-up-hypervisor-environment.html) for more information"
 	prerequisiteErrorMessage := "See the 'Installing Prerequisites for Minishift' topic (https://docs.okd.io/latest/minishift/getting-started/installing.html#install-prerequisites) for more information"
 
 	preflightCheckSucceedsOrFails(

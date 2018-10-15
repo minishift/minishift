@@ -17,6 +17,7 @@ limitations under the License.
 package filehelper
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -99,4 +100,31 @@ func Test_existing_nonempty_directory(t *testing.T) {
 
 	empty := IsEmptyDir(testDir)
 	assert.False(t, empty, "Expected %s to be nonempty.", testDir)
+}
+
+func Test_folder_contains_filenames(t *testing.T) {
+	testFiles := []string{"foo.exe", "bar.exe"}
+	testDir, _ := ioutil.TempDir("", "minishift-folder-containstest-")
+	tmpFile, err := os.Create(filepath.Join(testDir, testFiles[0]))
+	assert.NoError(t, err)
+	tmpFile, err = os.Create(filepath.Join(testDir, testFiles[1]))
+	assert.NoError(t, err)
+	defer os.RemoveAll(testDir)
+
+	fmt.Println("tmpFile: ", tmpFile.Name())
+	assert.Truef(t, FolderContains(testDir, testFiles),
+		fmt.Sprintf("Folder '%s' should contain every files of '%v'", testDir, testFiles))
+}
+
+func Test_folder_contains_invalid_filenames(t *testing.T) {
+	testFiles := []string{"foo.exe", "bar.exe"}
+	testDir, _ := ioutil.TempDir("", "minishift-folder-containstest-")
+	_, err := os.Create(filepath.Join(testDir, testFiles[0]))
+	assert.NoError(t, err)
+	_, err = os.Create(filepath.Join(testDir, testFiles[1]))
+	assert.NoError(t, err)
+	defer os.RemoveAll(testDir)
+
+	assert.Falsef(t, FolderContains(testDir, []string{testFiles[0], "oooo.exe"}),
+		fmt.Sprintf("Folder '%s' should contain every files of '%v'", testDir, testFiles))
 }

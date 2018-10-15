@@ -96,7 +96,7 @@ cluster in VM provided by Minishift.
      When executing "oc expose svc/nodejs-ex" succeeds
      Then stdout should contain
       """
-      route "nodejs-ex" exposed
+      route.route.openshift.io/nodejs-ex exposed
       """
 
   Scenario: Getting existing service with route

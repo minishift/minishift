@@ -1,4 +1,4 @@
-@proxy @core
+@proxy @core @disabled
 Feature: Minishift can run behind proxy
   As a user I can use Minishift behind a proxy.
   INFO: Code behind this feature will start a proxy server in background

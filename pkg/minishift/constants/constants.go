@@ -56,11 +56,8 @@ func ProfilePrivateKeyPath() string {
 	return filepath.Join(constants.Minipath, "certs", "id_rsa")
 }
 
-func GetOpenshiftImageToFetchOC(openshiftVersion string, isGreaterOrEqualToBaseVersion bool) string {
-	if isGreaterOrEqualToBaseVersion {
-		return fmt.Sprintf("openshift/origin-control-plane:%s", openshiftVersion)
-	}
-	return fmt.Sprintf("openshift/origin:%s", openshiftVersion)
+func GetOpenshiftImageToFetchOC(openshiftVersion string) string {
+	return fmt.Sprintf("openshift/origin-control-plane:%s", openshiftVersion)
 }
 
 // GetInstanceStateConfigPath return the path of instance config json file

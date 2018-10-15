@@ -24,11 +24,9 @@ import (
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
-	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/clusterup"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
 	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
-	openshiftVersion "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	minishiftStrings "github.com/minishift/minishift/pkg/util/strings"
 	"github.com/spf13/cobra"
@@ -78,14 +76,6 @@ func runComponentAdd(cmd *cobra.Command, args []string) {
 	}
 
 	requestedOpenShiftVersion := minishiftConfig.InstanceStateConfig.OpenshiftVersion
-	valid, err := openshiftVersion.IsGreaterOrEqualToBaseVersion(requestedOpenShiftVersion, constants.RefactoredOcVersion)
-	if err != nil {
-		atexit.ExitWithMessage(1, err.Error())
-	}
-	if !valid {
-		atexit.ExitWithMessage(1, fmt.Sprintf("You are using %s but this feature only available for OpenShift >= 3.10.x", requestedOpenShiftVersion))
-	}
-
 	imageToUse := fmt.Sprintf("'%s:%s'", minishiftConstants.ImageNameForClusterUpImageFlag, requestedOpenShiftVersion)
 
 	baseDirectory := minishiftConstants.BaseDirInsideInstance

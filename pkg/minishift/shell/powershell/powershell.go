@@ -18,8 +18,31 @@ package powershell
 
 import (
 	"bytes"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"os/exec"
+)
+
+var (
+	runAsCmds = []string{
+		`$myWindowsID = [System.Security.Principal.WindowsIdentity]::GetCurrent();`,
+		`$myWindowsPrincipal = New-Object System.Security.Principal.WindowsPrincipal($myWindowsID);`,
+		`$adminRole = [System.Security.Principal.WindowsBuiltInRole]::Administrator;`,
+		`if (-Not ($myWindowsPrincipal.IsInRole($adminRole))) {`,
+		`$newProcess = New-Object System.Diagnostics.ProcessStartInfo "PowerShell";`,
+		`$newProcess.Arguments = "& '" + $script:MyInvocation.MyCommand.Path + "'"`,
+		`$newProcess.Verb = "runas";`,
+		`[System.Diagnostics.Process]::Start($newProcess);`,
+		`Exit;`,
+		`}`,
+	}
+	isAdminCmds = []string{
+		"$currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())",
+		"$currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)",
+	}
 )
 
 type PowerShell struct {
@@ -33,8 +56,22 @@ func New() *PowerShell {
 	}
 }
 
+func IsAdmin() bool {
+	ps := New()
+	cmd := strings.Join(isAdminCmds, ";")
+	stdOut, _, err := ps.Execute(cmd)
+	if err != nil {
+		return false
+	}
+	if strings.TrimSpace(stdOut) == "False" {
+		return false
+	}
+
+	return true
+}
+
 func (p *PowerShell) Execute(args ...string) (stdOut string, stdErr string, err error) {
-	args = append([]string{"-NoProfile", "-NonInteractive"}, args...)
+	args = append([]string{"-NoProfile", "-NonInteractive", "-ExecutionPolicy", "RemoteSigned", "-Command"}, args...)
 	cmd := exec.Command(p.powerShell, args...)
 
 	var stdout bytes.Buffer
@@ -45,4 +82,18 @@ func (p *PowerShell) Execute(args ...string) (stdOut string, stdErr string, err 
 	err = cmd.Run()
 	stdOut, stdErr = stdout.String(), stderr.String()
 	return
+}
+
+func (p *PowerShell) ExecuteAsAdmin(cmd string) (stdOut string, stdErr string, err error) {
+	scriptContent := strings.Join(append(runAsCmds, cmd), "\n")
+
+	tempDir, _ := ioutil.TempDir("", "psScripts")
+	psFile, err := os.Create(filepath.Join(tempDir, "runAsAdmin.ps1"))
+	if err != nil {
+		return "", "", err
+	}
+
+	psFile.WriteString(scriptContent)
+	psFile.Close()
+	return p.Execute(psFile.Name())
 }

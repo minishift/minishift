@@ -19,6 +19,7 @@ package remotehost
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/minishift/minishift/pkg/minikube/sshutil"
 	"golang.org/x/crypto/ssh"
@@ -76,7 +77,7 @@ func prepareRHELVariant(s *ssh.Client) error {
 	}
 
 	firewallCommandsToExecute := []string{
-		"sudo firewall-cmd --permanent --add-port 2376/tcp --add-port 8443/tcp --add-port 80/tcp",
+		"sudo firewall-cmd --permanent --add-port 2376/tcp --add-port 8443/tcp --add-port 80/tcp --add-port 443/tcp --add-port 4001/tcp",
 		"sudo firewall-cmd --info-zone minishift || sudo firewall-cmd --permanent --new-zone minishift",
 		"sudo firewall-cmd --permanent --zone minishift --add-source 172.17.0.0/16",
 		"sudo firewall-cmd --permanent --zone minishift --add-port 53/udp --add-port 8053/udp",

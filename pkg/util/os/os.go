@@ -18,7 +18,9 @@ package os
 
 import (
 	"github.com/kardianos/osext"
+	"os/user"
 	"runtime"
+	"strings"
 )
 
 type OS string
@@ -51,4 +53,14 @@ func CurrentExecutable() (string, error) {
 		return "", err
 	}
 	return currentExec, nil
+}
+
+func CurrentUser() (string, error) {
+	user, err := user.Current()
+	if err != nil {
+		return "", err
+	}
+
+	tokens := strings.Split(user.Username, `\`) // user.Name returns Domain\Username
+	return tokens[1], nil
 }

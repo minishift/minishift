@@ -18,8 +18,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/minishift/minishift/pkg/minishift/timezone"
 	"time"
+
+	"github.com/minishift/minishift/pkg/minishift/timezone"
 
 	"github.com/docker/machine/libmachine"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
@@ -77,10 +78,7 @@ func runTimezone(cmd *cobra.Command, args []string) {
 	}
 
 	fmt.Printf("Setting timezone for Instance ... ")
-	if err := timezone.UpdateTimeZoneInConfig(set); err != nil {
-		atexit.ExitWithMessage(1, err.Error())
-	}
-	if err := timezone.SetTimeZone(hostVm); err != nil {
+	if err := timezone.UpdateTimeZone(hostVm, set); err != nil {
 		atexit.ExitWithMessage(1, err.Error())
 	}
 	fmt.Println("OK")

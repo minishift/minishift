@@ -18,6 +18,7 @@ package timezone
 
 import (
 	"fmt"
+
 	"github.com/docker/machine/libmachine/host"
 	"github.com/docker/machine/libmachine/provision"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
@@ -41,6 +42,16 @@ func UpdateTimeZoneInConfig(timezone string) error {
 	}
 	minishiftConfig.InstanceStateConfig.TimeZone = timezone
 	return minishiftConfig.InstanceStateConfig.Write()
+}
+
+func UpdateTimeZone(host *host.Host, timezone string) error {
+	if err := UpdateTimeZoneInConfig(timezone); err != nil {
+		return err
+	}
+	if err := SetTimeZone(host); err != nil {
+		return err
+	}
+	return nil
 }
 
 func GetTimeZone(host *host.Host) (string, error) {

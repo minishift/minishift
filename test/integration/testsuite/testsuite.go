@@ -77,7 +77,7 @@ func FeatureContext(s *godog.Suite) {
 		MinishiftInstance.shouldHaveState)
 	s.Step(`^profile (.*) (?:has|should have) state "(Does Not Exist|Running|Stopped)"$`,
 		MinishiftInstance.profileShouldHaveState)
-	s.Step(`profile (.*) (?:is the|should be the) active profile$`,
+	s.Step(`profile (.*) (?:is|should be) the active profile$`,
 		MinishiftInstance.isTheActiveProfile)
 
 	// Execution of `minishift` commands
@@ -92,7 +92,7 @@ func FeatureContext(s *godog.Suite) {
 
 	// Execution of `oc` commands
 	// will use default version of oc binary at stored at .minishift/cache/oc
-	s.Step(`^executing "oc (.*)" retrying (\d+) times with wait period of (\d+) seconds$`,
+	s.Step(`^executing "oc (.*)" retrying (\d+) times with wait period of (\d+) seconds?$`,
 		MinishiftInstance.executingRetryingTimesWithWaitPeriodOfSeconds)
 	s.Step(`^executing "oc (.*)"$`,
 		MinishiftInstance.ExecutingOcCommand)
@@ -102,31 +102,31 @@ func FeatureContext(s *godog.Suite) {
 	// Command output verification
 	// steps to verify `stdout`, `stderr` and `exitcode` of last executed command,
 	// supports simple string verification and also regular expressions.
-	s.Step(`^(stdout|stderr|exitcode) should contain "(.*)"$`,
+	s.Step(`^(stdout|stderr|exitcode) (?:should contain|contains) "(.*)"$`,
 		commandReturnShouldContain)
-	s.Step(`^(stdout|stderr|exitcode) should not contain "(.*)"$`,
+	s.Step(`^(stdout|stderr|exitcode) (?:should|does) not contain "(.*)"$`,
 		commandReturnShouldNotContain)
-	s.Step(`^(stdout|stderr|exitcode) should contain$`,
+	s.Step(`^(stdout|stderr|exitcode) (?:should contain|contains)$`,
 		commandReturnShouldContainContent)
-	s.Step(`^(stdout|stderr|exitcode) should not contain$`,
+	s.Step(`^(stdout|stderr|exitcode) (?:should|does) not contain$`,
 		commandReturnShouldNotContainContent)
-	s.Step(`^(stdout|stderr|exitcode) should equal "(.*)"$`,
+	s.Step(`^(stdout|stderr|exitcode) (?:should equal|equals) "(.*)"$`,
 		commandReturnShouldEqual)
-	s.Step(`^(stdout|stderr|exitcode) should equal$`,
+	s.Step(`^(stdout|stderr|exitcode) (?:should equal|equals)$`,
 		commandReturnShouldEqualContent)
-	s.Step(`^(stdout|stderr|exitcode) should be empty$`,
+	s.Step(`^(stdout|stderr|exitcode) (?:should be|is) empty$`,
 		commandReturnShouldBeEmpty)
-	s.Step(`^(stdout|stderr|exitcode) should not be empty$`,
+	s.Step(`^(stdout|stderr|exitcode) (?:should not be|is not) empty$`,
 		commandReturnShouldNotBeEmpty)
-	s.Step(`^(stdout|stderr|exitcode) should be valid (.*)$`,
+	s.Step(`^(stdout|stderr|exitcode) (?:should be|is) valid (.*)$`,
 		shouldBeInValidFormat)
-	s.Step(`^(stdout|stderr|exitcode) should match "(.*)"$`,
+	s.Step(`^(stdout|stderr|exitcode) (?:should match|matches) "(.*)"$`,
 		commandReturnShouldMatchRegex)
-	s.Step(`^(stdout|stderr|exitcode) should not match "(.*)"$`,
+	s.Step(`^(stdout|stderr|exitcode) (?:should|does) not match "(.*)"$`,
 		commandReturnShouldNotMatchRegex)
-	s.Step(`^(stdout|stderr|exitcode) should match$`,
+	s.Step(`^(stdout|stderr|exitcode) (?:should match|matches)$`,
 		commandReturnShouldMatchRegexContent)
-	s.Step(`^(stdout|stderr|exitcode) should not match$`,
+	s.Step(`^(stdout|stderr|exitcode) (?:should|does) not match$`,
 		commandReturnShouldNotMatchRegexContent)
 
 	// Executing commands in shells
@@ -146,15 +146,15 @@ func FeatureContext(s *godog.Suite) {
 		util.ExecuteInHostShellSucceedsOrFails)
 
 	// Shell output verification
-	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)" (?:second|seconds) command "(.*)" output (?:should contain|contains) "(.*)"$`,
+	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)" seconds? command "(.*)" output (?:should contain|contains) "(.*)"$`,
 		util.ExecuteCommandInHostShellWithRetry)
 	s.Step(`^(stdout|stderr) of host shell (?:should contain|contains) "(.*)"$`,
 		util.HostShellCommandReturnShouldContain)
-	s.Step(`^(stdout|stderr) of host shell (?:should not contain|does not contain) "(.*)"$`,
+	s.Step(`^(stdout|stderr) of host shell (?:should|does) not contain "(.*)"$`,
 		util.HostShellCommandReturnShouldNotContain)
 	s.Step(`^(stdout|stderr) of host shell (?:should contain|contains)$`,
 		util.HostShellCommandReturnShouldContainContent)
-	s.Step(`^(stdout|stderr) of host shell (?:should not contain|does not contain)$`,
+	s.Step(`^(stdout|stderr) of host shell (?:should|does not) contain$`,
 		util.HostShellCommandReturnShouldNotContainContent)
 	s.Step(`^(stdout|stderr) of host shell (?:should equal|equals) "(.*)"$`,
 		util.HostShellCommandReturnShouldEqual)
@@ -191,7 +191,7 @@ func FeatureContext(s *godog.Suite) {
 	// to wait until service is deployed and ready before followin steps are started
 	s.Step(`^services? "([^"]*)" rollout successfully$`,
 		MinishiftInstance.rolloutServicesSuccessfully)
-	s.Step(`^services? "([^"]*)" rollout successfully within "(\d+)" seconds$`,
+	s.Step(`^services? "([^"]*)" rollout successfully within "(\d+)" seconds?$`,
 		MinishiftInstance.rolloutServicesSuccessfullyBeforeTimeout)
 
 	// Proxy testing
@@ -231,7 +231,7 @@ func FeatureContext(s *godog.Suite) {
 		stdoutContainsKey)
 
 	// Container status
-	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)" (?:second|seconds) container name "(.*)" should be "(running|exited)"$`,
+	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)" seconds? container name "(.*)" should be "(running|exited)"$`,
 		MinishiftInstance.containerStatus)
 
 	// Resource and config checks inside the running VM

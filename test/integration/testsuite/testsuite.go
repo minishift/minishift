@@ -689,12 +689,12 @@ func verifyRequestToServiceWithRetry(retryCount int, retryWaitPeriod int, partOf
 }
 
 func verifyRequestToOpenShift(partOfResponse string, urlSuffix string, assertion string, expected string) error {
-	url := MinishiftInstance.getOpenShiftUrl() + urlSuffix
+	url := MinishiftInstance.getOpenShiftInstanceUrl() + urlSuffix
 	return verifyHTTPResponse(partOfResponse, url, assertion, expected)
 }
 
 func verifyRequestToOpenShiftWithRetry(retryCount int, retryWaitPeriod int, partOfResponse string, urlSuffix string, assertion string, expected string) error {
-	url := MinishiftInstance.getOpenShiftUrl() + urlSuffix
+	url := MinishiftInstance.getOpenShiftInstanceUrl() + urlSuffix
 	return verifyHTTPResponseWithRetry(partOfResponse, url, assertion, expected, retryCount, retryWaitPeriod)
 }
 

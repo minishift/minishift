@@ -21,13 +21,12 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/minishift/minishift/pkg/util"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestDefaultMinishiftHome(t *testing.T) {
 	os.Unsetenv("MINISHIFT_HOME")
-	expectedMiniPath := filepath.Join(util.HomeDir(), ".minishift")
+	expectedMiniPath := filepath.Join(GetHomeDir(), ".minishift")
 	actualMiniPath := GetMinishiftHomeDir()
 	assert.Equal(t, expectedMiniPath, actualMiniPath)
 }

@@ -29,18 +29,18 @@ const (
 	OpenshiftContainerName         = "origin"
 	OpenshiftApiContainerLabel     = "io.kubernetes.container.name=apiserver"
 	KubernetesApiContainerLabel    = "io.kubernetes.container.name=api"
-	OpenshiftExec                  = "/usr/bin/openshift"
 	OpenshiftOcExec                = "/usr/bin/oc"
 	DefaultProject                 = "myproject"
 	DefaultUser                    = "developer"
 	DefaultUserPassword            = "developer"
-	SkipVerifyInsecureTLS          = "insecure-skip-tls-verify=true"
 	BinaryName                     = "minishift"
 	OcPathInsideVM                 = "/var/lib/minishift/bin"
 	BaseDirInsideInstance          = "/var/lib/minishift/base"
 	ImageNameForClusterUpImageFlag = "openshift/origin-${component}"
 	HypervDefaultVirtualSwitchId   = "c08cb7b8-9b3c-408e-8e30-5e16a3aeb444"
 	HypervDefaultVirtualSwitchName = "Default Switch"
+	DockerbridgeSubnetCmd          = `docker network inspect -f "{{range .IPAM.Config }}{{ .Subnet }}{{end}}" bridge`
+	MinishiftEnableExperimental    = "MINISHIFT_ENABLE_EXPERIMENTAL"
 )
 
 var (

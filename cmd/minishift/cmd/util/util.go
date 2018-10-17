@@ -27,6 +27,7 @@ import (
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/docker/machine/libmachine/state"
 	"github.com/minishift/minishift/pkg/minikube/cluster"
+	"github.com/minishift/minishift/pkg/minishift/clusterup"
 	profileActions "github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 
@@ -38,6 +39,7 @@ import (
 	openshiftVersion "github.com/minishift/minishift/pkg/minishift/openshift/version"
 	"github.com/minishift/minishift/pkg/util/shell"
 	"github.com/minishift/minishift/pkg/version"
+	flag "github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
 
@@ -163,6 +165,7 @@ func OcClusterDown(hostVm *host.Host) error {
 	_, err := sshCommander.SSHCommand(cmd)
 	return err
 }
+
 func GetOpenShiftReleaseVersion() (string, error) {
 	tag := viper.GetString(configCmd.OpenshiftVersion.Name)
 	// tag is in the form of vMajor.minor.patch e.g v3.9.0
@@ -181,4 +184,31 @@ func GetOpenShiftReleaseVersion() (string, error) {
 	}
 
 	return tag, nil
+}
+
+// determineClusterUpParameters returns a map of flag names and values for the cluster up call.
+func DetermineClusterUpParameters(config *clusterup.ClusterUpConfig, DockerbridgeSubnet string, clusterUpFlagSet *flag.FlagSet) map[string]string {
+	clusterUpParams := make(map[string]string)
+	// Set default value for base config for 3.10
+	clusterUpParams["base-dir"] = minishiftConstants.BaseDirInsideInstance
+	if viper.GetString(configCmd.ImageName.Name) == "" {
+		imagetag := fmt.Sprintf("'%s:%s'", minishiftConstants.ImageNameForClusterUpImageFlag, config.OpenShiftVersion)
+		viper.Set(configCmd.ImageName.Name, imagetag)
+	}
+	// Add docker bridge subnet to no-proxy before passing to oc cluster up
+	if viper.GetString(configCmd.NoProxyList.Name) != "" {
+		viper.Set(configCmd.NoProxyList.Name, fmt.Sprintf("%s,%s", DockerbridgeSubnet, viper.GetString(configCmd.NoProxyList.Name)))
+	}
+
+	viper.Set(configCmd.RoutingSuffix.Name, config.RoutingSuffix)
+	viper.Set(configCmd.PublicHostname.Name, config.PublicHostname)
+	clusterUpFlagSet.VisitAll(func(flag *flag.Flag) {
+		if viper.IsSet(flag.Name) {
+			value := viper.GetString(flag.Name)
+			key := flag.Name
+			clusterUpParams[key] = value
+		}
+	})
+
+	return clusterUpParams
 }

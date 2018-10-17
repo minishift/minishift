@@ -189,6 +189,10 @@ ignored = ["github.com/Sirupsen/logrus"]
   name = "github.com/anjannath/systray"
   revision = "26ec25aa9aaa5a0142dfe61525a604914795e424"
 
+[[constraint]]
+  name = "github.com/zalando/go-keyring"
+  revision = "6d81c293b3fbc8a9b1bcf4bc9c167c2e1d1f52cf"
+
 [prune]
   go-tests = true
   non-go = true

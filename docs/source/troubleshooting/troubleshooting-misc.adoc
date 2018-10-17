@@ -93,3 +93,36 @@ Workaround: Delete the existing {project} VM and start again.
 $ minishift delete --force
 $ minishift start
 ----
+
+[[Remove-password-from-keychain]]
+== Removing subscription password from OS native keychain
+
+These steps only applies if you are using a subscription capable ISO image like Red Hat Enterprise Linux with {project}
+which needs registration using username and password.
+
+=== Windows
+
+On Windows, the password is stored using *Credential Manager*.
+Run the following command in Command Prompt to delete the stored password:
+
+----
+CMD> cmdkey /delete:minishift:<username>
+----
+
+=== Linux
+
+On Linux, the feature needs to store the password using *D-Bus Secret Service API*, which is provided by *GNOME libsecret*.
+Run the following command to delete the stored password:
+
+----
+$ secret-tool clear service minishift username <username>
+----
+
+=== macOS
+
+On macOS, the password is stored using *Keychain Access*.
+Run the following command to delete the stored password:
+
+----
+$ security delete-generic-password -s minishift
+----

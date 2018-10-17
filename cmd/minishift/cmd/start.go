@@ -841,6 +841,8 @@ func setSubscriptionManagerParameters() {
 	minishiftCluster.RegistrationParameters.IsTtySupported = util.IsTtySupported()
 	minishiftCluster.RegistrationParameters.GetUsernameInteractive = getUsernameInteractive
 	minishiftCluster.RegistrationParameters.GetPasswordInteractive = getPasswordInteractive
+	minishiftCluster.RegistrationParameters.GetPasswordKeyring = util.GetPasswordKeyring
+	minishiftCluster.RegistrationParameters.SetPasswordKeyring = util.SetPasswordKeyring
 }
 
 func getUsernameInteractive(message string) string {

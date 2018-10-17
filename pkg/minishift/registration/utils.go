@@ -30,6 +30,8 @@ type RegistrationParameters struct {
 	IsTtySupported         bool
 	GetUsernameInteractive func(message string) string
 	GetPasswordInteractive func(message string) string
+	GetPasswordKeyring     func(username string) (string, error)
+	SetPasswordKeyring     func(username, password string) error
 }
 
 // Detect supported Registrator

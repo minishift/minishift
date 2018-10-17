@@ -19,9 +19,11 @@ package util
 import (
 	"fmt"
 	"strings"
-
-	"golang.org/x/crypto/ssh/terminal"
 	"syscall"
+
+	"github.com/minishift/minishift/pkg/minishift/constants"
+	"github.com/zalando/go-keyring"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 func ReadInputFromStdin(fieldlabel string) string {
@@ -51,4 +53,22 @@ func AskForConfirmation(message string) bool {
 	userConfirmation := ReadInputFromStdin(message +
 		" Do you want to continue [y/N]?")
 	return strings.ToUpper(userConfirmation) == "Y"
+}
+
+// Retrive password from OS native credential provider/keychain
+func GetPasswordKeyring(username string) (string, error) {
+	password, err := keyring.Get(constants.BinaryName, username)
+	if err == keyring.ErrNotFound {
+		return password, err
+	}
+	return password, nil
+}
+
+// Store the registration password in OS native keychain
+func SetPasswordKeyring(username, password string) error {
+	err := keyring.Set(constants.BinaryName, username, password)
+	if err != nil {
+		return err
+	}
+	return nil
 }

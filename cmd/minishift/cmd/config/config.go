@@ -66,6 +66,7 @@ var (
 	RoutingSuffix     = createConfigSetting("routing-suffix", SetString, nil, nil, true, nil)
 	ServerLogLevel    = createConfigSetting("server-loglevel", SetInt, []setFn{validations.IsPositive}, nil, true, nil)
 	ImageName         = createConfigSetting("image", SetString, nil, nil, false, nil)
+	WriteConfig       = createConfigSetting("write-config", SetBool, nil, nil, true, nil)
 
 	// future enabled flags
 	ExtraClusterUpFlags = createConfigSetting("extra-clusterup-flags", SetString, nil, nil, true, nil)

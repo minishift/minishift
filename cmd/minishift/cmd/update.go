@@ -24,6 +24,7 @@ import (
 
 	"encoding/json"
 	"github.com/blang/semver"
+	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
 	cmdutil "github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/util"
@@ -65,7 +66,7 @@ var (
 )
 
 func runUpdate(cmd *cobra.Command, args []string) {
-	proxyConfig, err := util.NewProxyConfig(viper.GetString(cmdutil.HttpProxy), viper.GetString(cmdutil.HttpsProxy), "")
+	proxyConfig, err := util.NewProxyConfig(viper.GetString(configCmd.HttpProxy.Name), viper.GetString(configCmd.HttpsProxy.Name), "")
 	if err != nil {
 		atexit.ExitWithMessage(1, err.Error())
 	}

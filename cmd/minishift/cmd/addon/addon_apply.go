@@ -21,6 +21,7 @@ import (
 
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/provision"
+	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
 	"github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/constants"
@@ -87,7 +88,7 @@ func runApplyAddon(cmd *cobra.Command, args []string) {
 	for i := range args {
 		addonName := args[i]
 		addon := addOnManager.Get(addonName)
-		addonContext, err := clusterup.GetExecutionContext(ip, routingSuffix, sshUser, viper.GetStringSlice(util.AddOnEnv), ocRunner, sshCommander)
+		addonContext, err := clusterup.GetExecutionContext(ip, routingSuffix, sshUser, viper.GetStringSlice(configCmd.AddonEnv.Name), ocRunner, sshCommander)
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprint("Error applying the add-on: ", err))
 		}

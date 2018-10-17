@@ -67,7 +67,6 @@ const (
 	commandName             = "start"
 	defaultInsecureRegistry = "172.30.0.0/16"
 	genericDriver           = "generic"
-	dockerbridgeSubnetCmd   = `docker network inspect -f "{{range .IPAM.Config }}{{ .Subnet }}{{end}}" bridge`
 )
 
 var (
@@ -140,7 +139,7 @@ For the latter see 'minishift config -h'.`,
 		Run: runStart,
 	}
 
-	clusterUpFlagSet = initClusterUpFlags()
+	clusterUpFlagSet = cmdUtil.InitClusterUpFlags(commandName)
 	startCmd.Flags().AddFlagSet(clusterUpFlagSet)
 	startFlagSet = initStartFlags()
 	startCmd.Flags().AddFlagSet(startFlagSet)
@@ -268,7 +267,7 @@ func runStart(cmd *cobra.Command, args []string) {
 
 		sshCommander := provision.GenericSSHCommander{Driver: hostVm.Driver}
 		dockerCommander := docker.NewVmDockerCommander(sshCommander)
-		dockerbridgeSubnet, err := sshCommander.SSHCommand(dockerbridgeSubnetCmd)
+		dockerbridgeSubnet, err := sshCommander.SSHCommand(minishiftConstants.DockerbridgeSubnetCmd)
 		if err != nil {
 			atexit.ExitWithMessage(1, err.Error())
 		}
@@ -283,14 +282,14 @@ func runStart(cmd *cobra.Command, args []string) {
 			Project:              minishiftConstants.DefaultProject,
 			KubeConfigPath:       constants.KubeConfigPath,
 			OcPath:               ocPath,
-			AddonEnv:             viper.GetStringSlice(cmdUtil.AddOnEnv),
+			AddonEnv:             viper.GetStringSlice(configCmd.AddonEnv.Name),
 			PublicHostname:       configCmd.GetDefaultPublicHostName(ip),
 			SSHCommander:         sshCommander,
 			OcBinaryPathInsideVM: fmt.Sprintf("%s/oc", minishiftConstants.OcPathInsideVM),
 			SshUser:              sshCommander.Driver.GetSSHUsername(),
 		}
 
-		clusterUpParams := determineClusterUpParameters(clusterUpConfig, strings.TrimSpace(dockerbridgeSubnet))
+		clusterUpParams := cmdUtil.DetermineClusterUpParameters(clusterUpConfig, strings.TrimSpace(dockerbridgeSubnet), clusterUpFlagSet)
 		fmt.Println("-- OpenShift cluster will be configured with ...")
 		fmt.Println("   Version:", requestedOpenShiftVersion)
 
@@ -316,12 +315,14 @@ func runStart(cmd *cobra.Command, args []string) {
 		progressDots.Stop()
 		fmt.Printf("\n%s\n", out)
 
-		if !IsOpenShiftRunning(hostVm.Driver) {
+		if !IsOpenShiftRunning(hostVm.Driver) && !viper.GetBool(configCmd.WriteConfig.Name) {
 			atexit.ExitWithMessage(1, "OpenShift provisioning failed. origin container failed to start.")
 		}
 
 		if !isRestart {
-			postClusterUp(hostVm, clusterUpConfig)
+			if !viper.GetBool(configCmd.WriteConfig.Name) {
+				postClusterUp(hostVm, clusterUpConfig)
+			}
 			exportContainerImages(hostVm.Driver, libMachineClient, requestedOpenShiftVersion)
 		}
 		if isRestart {
@@ -352,8 +353,8 @@ func getRequiredHostDirectories() []string {
 }
 
 func handleProxyConfig() *util.ProxyConfig {
-	httpProxy := viper.GetString(cmdUtil.HttpProxy)
-	httpsProxy := viper.GetString(cmdUtil.HttpsProxy)
+	httpProxy := viper.GetString(configCmd.HttpProxy.Name)
+	httpsProxy := viper.GetString(configCmd.HttpsProxy.Name)
 	noProxy := viper.GetString(configCmd.NoProxyList.Name)
 
 	localProxy := viper.GetBool(configCmd.LocalProxy.Name)
@@ -386,7 +387,7 @@ func handleProxyConfig() *util.ProxyConfig {
 		// proxy settings are properly passed to cluster up we need to explicitly set the values.
 		if proxyConfig.HttpProxy() != "" && !localProxy {
 			// workaround - as these should never be persisted here
-			viper.Set(cmdUtil.HttpProxy, proxyConfig.HttpProxy())
+			viper.Set(configCmd.HttpProxy.Name, proxyConfig.HttpProxy())
 			if glog.V(5) {
 				fmt.Println(fmt.Sprintf("\tUsing http proxy: %s", proxyConfig.HttpProxy()))
 			}
@@ -394,7 +395,7 @@ func handleProxyConfig() *util.ProxyConfig {
 
 		if proxyConfig.HttpsProxy() != "" && !localProxy {
 			// workaround - as these should never be persisted here
-			viper.Set(cmdUtil.HttpsProxy, proxyConfig.HttpsProxy())
+			viper.Set(configCmd.HttpsProxy.Name, proxyConfig.HttpsProxy())
 			if glog.V(5) {
 				fmt.Println(fmt.Sprintf("\tUsing https proxy: %s", proxyConfig.HttpsProxy()))
 			}
@@ -719,30 +720,6 @@ func initStartFlags() *flag.FlagSet {
 	return startFlagSet
 }
 
-// initClusterUpFlags creates the CLI flags which needs to be passed on to 'oc cluster up'
-func initClusterUpFlags() *flag.FlagSet {
-	clusterUpFlagSet := flag.NewFlagSet(commandName, flag.ContinueOnError)
-
-	clusterUpFlagSet.Bool(configCmd.SkipRegistryCheck.Name, false, "Skip the Docker daemon registry check.")
-	clusterUpFlagSet.String(configCmd.PublicHostname.Name, "", "Public hostname of the OpenShift cluster.")
-	clusterUpFlagSet.String(configCmd.RoutingSuffix.Name, "", "Default suffix for the server routes.")
-	clusterUpFlagSet.Int(configCmd.ServerLogLevel.Name, 0, "Log level for the OpenShift server.")
-	clusterUpFlagSet.String(configCmd.NoProxyList.Name, "", "List of hosts or subnets for which no proxy should be used.")
-	clusterUpFlagSet.String(configCmd.ImageName.Name, "", "Specify the images to use for OpenShift")
-	clusterUpFlagSet.AddFlag(cmdUtil.HttpProxyFlag)
-	clusterUpFlagSet.AddFlag(cmdUtil.HttpsProxyFlag)
-	// This is hidden because we don't want our users to use this flag
-	// we are setting it to openshift/origin-${component}:<user_provided_version> as default
-	// It is used for testing purpose from CDK/minishift QE
-	clusterUpFlagSet.MarkHidden(configCmd.ImageName.Name)
-
-	if minishiftConfig.EnableExperimental {
-		clusterUpFlagSet.String(configCmd.ExtraClusterUpFlags.Name, "", "Specify optional flags for use with 'cluster up' (unsupported)")
-	}
-
-	return clusterUpFlagSet
-}
-
 // initSubscriptionManagerFlags create the CLI flags which are needed for VM registration
 func initSubscriptionManagerFlags() *flag.FlagSet {
 	subscriptionManagerFlagSet := flag.NewFlagSet(commandName, flag.ContinueOnError)
@@ -780,33 +757,6 @@ func populateStartFlagsToViperConfig() {
 			}
 		}
 	})
-}
-
-// determineClusterUpParameters returns a map of flag names and values for the cluster up call.
-func determineClusterUpParameters(config *clusterup.ClusterUpConfig, DockerbridgeSubnet string) map[string]string {
-	clusterUpParams := make(map[string]string)
-	// Set default value for base config for 3.10
-	clusterUpParams["base-dir"] = baseDirectory
-	if viper.GetString(configCmd.ImageName.Name) == "" {
-		imagetag := fmt.Sprintf("'%s:%s'", minishiftConstants.ImageNameForClusterUpImageFlag, config.OpenShiftVersion)
-		viper.Set(configCmd.ImageName.Name, imagetag)
-	}
-	// Add docker bridge subnet to no-proxy before passing to oc cluster up
-	if viper.GetString(configCmd.NoProxyList.Name) != "" {
-		viper.Set(configCmd.NoProxyList.Name, fmt.Sprintf("%s,%s", DockerbridgeSubnet, viper.GetString(configCmd.NoProxyList.Name)))
-	}
-
-	viper.Set(configCmd.RoutingSuffix.Name, config.RoutingSuffix)
-	viper.Set(configCmd.PublicHostname.Name, config.PublicHostname)
-	clusterUpFlagSet.VisitAll(func(flag *flag.Flag) {
-		if viper.IsSet(flag.Name) {
-			value := viper.GetString(flag.Name)
-			key := flag.Name
-			clusterUpParams[key] = value
-		}
-	})
-
-	return clusterUpParams
 }
 
 func ensureNotRunning(client *libmachine.Client, machineName string) {

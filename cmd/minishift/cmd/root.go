@@ -54,12 +54,11 @@ import (
 )
 
 const (
-	showLibmachineLogs    = "show-libmachine-logs"
-	profileCmd            = "profile"
-	profileFlag           = "profile"
-	profileSetCmd         = "set"
-	enableExperimentalEnv = "MINISHIFT_ENABLE_EXPERIMENTAL"
-	invalidProfileName    = "Profile names must consist of alphanumeric characters only."
+	showLibmachineLogs = "show-libmachine-logs"
+	profileCmd         = "profile"
+	profileFlag        = "profile"
+	profileSetCmd      = "set"
+	invalidProfileName = "Profile names must consist of alphanumeric characters only."
 )
 
 var viperWhiteList = []string{
@@ -239,7 +238,7 @@ func setFlagsUsingViper() {
 }
 
 func processEnvVariables() {
-	enableExperimental, err := cmdUtil.GetBoolEnv(enableExperimentalEnv)
+	enableExperimental, err := cmdUtil.GetBoolEnv(minishiftConstants.MinishiftEnableExperimental)
 	if err == cmdUtil.BooleanFormatError {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error enabling experimental features: %s", err))
 	}

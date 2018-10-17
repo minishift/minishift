@@ -33,6 +33,7 @@ import (
 
 	"bytes"
 
+	cmdUtil "github.com/minishift/minishift/cmd/minishift/cmd/util"
 	"github.com/minishift/minishift/cmd/testing/cli"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minikube/tests"
@@ -122,7 +123,7 @@ func TestStartClusterUpNoFlags(t *testing.T) {
 	setUp(t)
 	defer tearDown()
 
-	clusterUpParams := determineClusterUpParameters(testConfig, dockerSubnetForTest)
+	clusterUpParams := cmdUtil.DetermineClusterUpParameters(testConfig, dockerSubnetForTest, clusterUpFlagSet)
 	clusterup.ClusterUp(testConfig, clusterUpParams)
 
 	assert.Equal(t, testConfig.OcPath, testRunner.Cmd)
@@ -143,7 +144,7 @@ func TestStartClusterUpWithFlag(t *testing.T) {
 	viper.Set("public-hostname", "foobar")
 	viper.Set("skip-registry-check", "true")
 
-	clusterUpParams := determineClusterUpParameters(testConfig, dockerSubnetForTest)
+	clusterUpParams := cmdUtil.DetermineClusterUpParameters(testConfig, dockerSubnetForTest, clusterUpFlagSet)
 	clusterup.ClusterUp(testConfig, clusterUpParams)
 
 	expectedArguments := []string{
@@ -164,7 +165,7 @@ func TestClusterUpWithProxyFlag(t *testing.T) {
 	viper.Set("https-proxy", "https://localhost:3128")
 	viper.Set("no-proxy", "10.0.0.1")
 
-	clusterUpParams := determineClusterUpParameters(testConfig, dockerSubnetForTest)
+	clusterUpParams := cmdUtil.DetermineClusterUpParameters(testConfig, dockerSubnetForTest, clusterUpFlagSet)
 	clusterup.ClusterUp(testConfig, clusterUpParams)
 
 	expectedArguments := []string{

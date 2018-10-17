@@ -17,14 +17,10 @@ limitations under the License.
 package util
 
 import (
+	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
+	"github.com/minishift/minishift/pkg/minishift/constants"
 	flag "github.com/spf13/pflag"
 	"strings"
-)
-
-const (
-	HttpProxy  = "http-proxy"
-	HttpsProxy = "https-proxy"
-	AddOnEnv   = "addon-env"
 )
 
 type stringValue string
@@ -32,9 +28,10 @@ type stringSliceValue struct {
 	value   *[]string
 	changed bool
 }
+type boolValue bool
 
 var HttpProxyFlag = &flag.Flag{
-	Name:      HttpProxy,
+	Name:      configCmd.HttpProxy.Name,
 	Shorthand: "",
 	Usage:     "HTTP proxy in the format http://<username>:<password>@<proxy_host>:<proxy_port>. Overrides potential HTTP_PROXY setting in the environment.",
 	Value:     NewStringValue("", new(string)),
@@ -42,7 +39,7 @@ var HttpProxyFlag = &flag.Flag{
 }
 
 var HttpsProxyFlag = &flag.Flag{
-	Name:      HttpsProxy,
+	Name:      configCmd.HttpsProxy.Name,
 	Shorthand: "",
 	Usage:     "HTTPS proxy in the format https://<username>:<password>@<proxy_host>:<proxy_port>. Overrides potential HTTPS_PROXY setting in the environment.",
 	Value:     NewStringValue("", new(string)),
@@ -50,7 +47,7 @@ var HttpsProxyFlag = &flag.Flag{
 }
 
 var AddOnEnvFlag = &flag.Flag{
-	Name:      AddOnEnv,
+	Name:      configCmd.AddonEnv.Name,
 	Shorthand: "a",
 	Usage:     "Specify key-value pairs to be added to the add-on interpolation context.",
 	Value:     NewStringSliceValue([]string{}, &[]string{}),
@@ -106,4 +103,29 @@ func writeSliceAsString(values []string) (string, error) {
 	}
 
 	return strings.TrimPrefix(singleVal, " "), nil
+}
+
+// initClusterUpFlags creates the CLI flags which needs to be passed on to 'oc cluster up'
+func InitClusterUpFlags(commandName string) *flag.FlagSet {
+	clusterUpFlagSet := flag.NewFlagSet(commandName, flag.ContinueOnError)
+
+	clusterUpFlagSet.Bool(configCmd.SkipRegistryCheck.Name, false, "Skip the Docker daemon registry check.")
+	clusterUpFlagSet.String(configCmd.PublicHostname.Name, "", "Public hostname of the OpenShift cluster.")
+	clusterUpFlagSet.String(configCmd.RoutingSuffix.Name, "", "Default suffix for the server routes.")
+	clusterUpFlagSet.Int(configCmd.ServerLogLevel.Name, 0, "Log level for the OpenShift server.")
+	clusterUpFlagSet.String(configCmd.NoProxyList.Name, "", "List of hosts or subnets for which no proxy should be used.")
+	clusterUpFlagSet.String(configCmd.ImageName.Name, "", "Specify the images to use for OpenShift")
+	clusterUpFlagSet.AddFlag(HttpProxyFlag)
+	clusterUpFlagSet.AddFlag(HttpsProxyFlag)
+	// This is hidden because we don't want our users to use this flag
+	// we are setting it to openshift/origin-${component}:<user_provided_version> as default
+	// It is used for testing purpose from CDK/minishift QE
+	clusterUpFlagSet.MarkHidden(configCmd.ImageName.Name)
+
+	if enableExperimental, _ := GetBoolEnv(constants.MinishiftEnableExperimental); enableExperimental {
+		clusterUpFlagSet.String(configCmd.ExtraClusterUpFlags.Name, "", "Specify optional flags for use with 'cluster up' (unsupported)")
+		clusterUpFlagSet.Bool(configCmd.WriteConfig.Name, false, "Write the configuration files into host config dir")
+	}
+
+	return clusterUpFlagSet
 }

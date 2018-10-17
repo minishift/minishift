@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/docker/machine/libmachine/provision"
+	"github.com/golang/glog"
 	"github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/progressdots"
 	minishiftStrings "github.com/minishift/minishift/pkg/util/strings"
@@ -63,6 +64,7 @@ func (registrator *RedHatRegistrator) CompatibleWithDistribution(osReleaseInfo *
 
 // Register attempts to register the system with RHSM and registry.redhat.io
 func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) error {
+	keyringDocsLink := "https://docs.okd.io/latest/minishift/troubleshooting/troubleshooting-misc.html#Remove-password-from-keychain"
 	if isRegistered, err := registrator.IsRegistered(); !isRegistered && err == nil {
 		for i := 1; i < 4; i++ {
 			// request username (disallow empty value)
@@ -77,8 +79,28 @@ func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) er
 			}
 			// request password (disallow empty value)
 			if param.Password == "" {
+				if i == 1 {
+					fmt.Printf("   Retriving password from keychain ...")
+					param.Password, err = param.GetPasswordKeyring(param.Username)
+					if err != nil {
+						fmt.Println(" FAIL ")
+					} else {
+						fmt.Println(" OK ")
+					}
+				}
+
 				for param.Password == "" {
 					param.Password = param.GetPasswordInteractive(RHSMName + " password")
+					fmt.Printf("   Storing password in keychain ...")
+					err := param.SetPasswordKeyring(param.Username, param.Password)
+					if err != nil {
+						fmt.Println(" FAIL ")
+					} else {
+						fmt.Println(" OK ")
+					}
+					if glog.V(3) {
+						fmt.Println(err)
+					}
 				}
 			}
 
@@ -129,7 +151,7 @@ func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) er
 
 			// general error when registration fails
 			if strings.Contains(err.Error(), "Invalid username or password") {
-				fmt.Println("   Invalid username or password. Retry:", i)
+				fmt.Printf("   Invalid username or password. To delete stored password refer to %s. Retry: %d\n", keyringDocsLink, i)
 			} else {
 				return errors.New(redactPassword(err.Error()))
 			}

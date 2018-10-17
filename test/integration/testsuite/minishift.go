@@ -266,9 +266,11 @@ func (m *Minishift) imageShouldHaveCached(image string) error {
 	return util.CompareExpectedWithActualMatchesRegex(image, strings.TrimRight(cmdOut, "\n"))
 }
 
-func (m *Minishift) getOpenShiftUrl() string {
-	cmdOut, _, _ := m.runner.RunCommand("console --url")
-	return strings.TrimRight(cmdOut, "\n")
+func (m *Minishift) getOpenShiftInstanceUrl() string {
+	cmdOut, _, _ := m.runner.RunCommand("ip")
+	ip := strings.TrimRight(cmdOut, "\n")
+	url := "https://" + ip + ":8443"
+	return url
 }
 
 func (m *Minishift) getRoute(serviceName, nameSpace string) string {

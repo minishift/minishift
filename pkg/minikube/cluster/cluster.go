@@ -502,8 +502,7 @@ func GetConsoleURL(api libmachine.API) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
-	return fmt.Sprintf("https://%s:%d", ip, constants.APIServerPort), nil
+	return fmt.Sprintf("https://%s:%d/console", ip, constants.APIServerPort), nil
 }
 
 func GetHostIP(api libmachine.API) (string, error) {

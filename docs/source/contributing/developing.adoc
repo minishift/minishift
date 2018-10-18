@@ -185,6 +185,14 @@ For more {project} commands and flags, see the xref:../command-ref/minishift.ado
 === Unit Tests
 
 Unit tests run on *Travis* before the code is merged.
+Unit test coverage is then reported to *Codecov* which provides coverage information on the pull requests.
+Locally you can generate a HTML code coverage report by following steps:
+
+----
+$ make coverage
+$ go tool cover -html=out/coverage.txt -o out/coverage.html
+----
+
 To run tests during the development cycle:
 
 ----

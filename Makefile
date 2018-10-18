@@ -221,6 +221,11 @@ clean_bindata:
 test: $(ADDON_ASSET_FILE)  ## Run unit tests
 	@go test -v -tags "$(BUILD_TAGS_SYSTEMTRAY)" -ldflags="$(VERSION_VARIABLES)" $(shell $(PACKAGES))
 
+.PHONY: coverage
+coverage: $(ADDON_ASSET_FILE)
+	rm -f out/coverage.txt
+	@go test -v -tags "$(BUILD_TAGS_SYSTEMTRAY)" -ldflags="$(VERSION_VARIABLES)" -coverprofile=out/coverage.txt -covermode=atomic $(shell $(PACKAGES))
+
 .PHONY: integration ## Run integration tests (quick and minimal)
 integration: GODOG_OPTS = --tags=quick\&\&~disabled
 integration: $(MINISHIFT_BINARY)

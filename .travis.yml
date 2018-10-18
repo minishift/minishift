@@ -18,8 +18,13 @@ install:
 - chmod +x /tmp/godep/dep
 - export PATH=$PATH:/tmp/godep/
 
-script:
-- make prerelease
+script: |
+  make prerelease
+  make coverage
+
+after_success: |
+  cd out
+  bash <(curl -s https://codecov.io/bash)
 
 notifications:
   webhooks: http://minibot.19cf262c.svc.dockerapp.io:9009/hubot/travis-ci

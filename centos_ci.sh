@@ -113,7 +113,7 @@ function prepare_ci_user() {
 
 ####### Below functions are executed by minishift_ci user
 function setup_kvm_docker_machine_driver() {
-  curl -L https://github.com/dhiltgen/docker-machine-kvm/releases/download/v0.7.0/docker-machine-driver-kvm > docker-machine-driver-kvm && \
+  curl -L https://github.com/dhiltgen/docker-machine-kvm/releases/download/v0.10.0/docker-machine-driver-kvm-centos7 > docker-machine-driver-kvm && \
   chmod +x docker-machine-driver-kvm && sudo mv docker-machine-driver-kvm /usr/local/bin/docker-machine-driver-kvm
   echo 'CICO: Setup KVM docker-machine driver setup successfully'
 }

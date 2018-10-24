@@ -23,13 +23,16 @@ See xref:setting-up-virtualbox-driver[Setting Up {project} to Use VirtualBox] fo
 
 See the appropriate section for your hypervisor and operating system:
 
-- For Linux, xref:setting-up-kvm-driver[set up the KVM driver]
-- For macOS, xref:setting-up-xhyve-driver[set up the xhyve driver] or xref:setting-up-hyperkit-driver[set up the hyperkit driver]
-- For Windows, xref:setting-up-hyper-v-driver[set up the Hyper-V driver]
+- For xref:for-linux[Linux], xref:setting-up-kvm-driver[set up the KVM driver]
+- For xref:for-macos[macOS], xref:setting-up-xhyve-driver[set up the xhyve driver] or xref:setting-up-hyperkit-driver[set up the hyperkit driver]
+- For xref:for-windows[Windows], xref:setting-up-hyper-v-driver[set up the Hyper-V driver]
 - For VirtualBox, xref:setting-up-virtualbox-driver[set up {project} to use VirtualBox]
 
+[[for-linux]]
+== Linux
+
 [[setting-up-kvm-driver]]
-== Setting Up the KVM Driver
+=== Setting Up the KVM Driver
 
 {project} is currently tested against `docker-machine-driver-kvm` version 0.7.0.
 
@@ -39,6 +42,8 @@ See the appropriate section for your hypervisor and operating system:
 # curl -L https://github.com/dhiltgen/docker-machine-kvm/releases/download/v0.7.0/docker-machine-driver-kvm -o /usr/local/bin/docker-machine-driver-kvm
 # chmod +x /usr/local/bin/docker-machine-driver-kvm
 ----
+
+Proceed to the instructions for your Linux distribution after you have set up the `docker-machine-driver-kvm` binary.
 
 For more information, see the GitHub documentation of the link:https://github.com/dhiltgen/docker-machine-kvm#quick-start-instructions[Docker Machine KVM driver].
 
@@ -111,21 +116,6 @@ $ sudo sed -ri 's/.?group\s?=\s?".+"/group = "kvm"/1' /etc/libvirt/qemu.conf
 $ newgrp libvirt
 ----
 
-[[kvm-driver-libvirtd-service]]
-=== Start libvirtd service
-
-. Check the status of **libvirtd**:
-
-----
-$ systemctl is-active libvirtd
-----
-
-. If **libvirtd** is not active, start the **libvirtd** service:
-
-----
-$ sudo systemctl start libvirtd
-----
-
 [[kvm-driver-networking]]
 === Configure libvirt networking
 
@@ -158,13 +148,16 @@ $ sudo virsh net-autostart default
 
 {next-steps}
 
+[[for-macos]]
+== macOS
+
 [[setting-up-xhyve-driver]]
-== Setting Up the xhyve Driver
+=== Setting Up the xhyve Driver
 
 {project} is currently tested against `docker-machine-driver-xhyve` version 0.3.3.
 
 [[xhyve-homebrew-install]]
-=== Homebrew Install
+==== Homebrew Install
 
 Use the following command to install the latest version of the driver with Homebrew:
 
@@ -199,7 +192,7 @@ From: https://github.com/Homebrew/homebrew-core/blob/master/Formula/docker-machi
 For more information, see the GitHub documentation for the link:https://github.com/zchee/docker-machine-driver-xhyve#install[xhyve driver].
 
 [[xhyve-manual-install]]
-=== Manual Install
+==== Manual Install
 
 To manually install the xhyve driver, you need to download and install the `docker-machine-driver-xhyve` binary and place it in a directory which is on your `PATH` environment variable.
 The directory *_/usr/local/bin_* is recommended, as it is the default installation directory for Docker Machine binaries.
@@ -245,14 +238,14 @@ $ sudo chmod u+s /usr/local/bin/docker-machine-driver-xhyve
 For more information, see the link:https://github.com/zchee/docker-machine-driver-xhyve#install[xhyve driver] documentation on GitHub.
 ====
 
-=== Next Steps
+==== Next Steps
 
 {next-steps}
 
 On macOS, you may also xref:../getting-started/installing.adoc#installing-with-homebrew[install {project} via Homebrew].
 
 [[setting-up-hyperkit-driver]]
-== Setting Up the hyperkit Driver
+=== Setting Up the hyperkit Driver
 
 {project} is currently tested against *docker-machine-driver-hyperkit* version 1.0.0.
 
@@ -297,14 +290,17 @@ $ make build
 For more information, see the link: https://github.com/machine-drivers/docker-machine-driver-hyperkit/blob/master/README.md[hyperkit driver] documentation on GitHub.
 ====
 
-=== Next Steps
+==== Next Steps
 
 {next-steps}
 
 On macOS, you may also xref:../getting-started/installing.adoc#installing-with-homebrew[install {project} via Homebrew].
 
+[[for-windows]]
+== Windows
+
 [[setting-up-hyper-v-driver]]
-== Setting Up the Hyper-V Driver
+=== Setting Up the Hyper-V Driver
 To use {project} with Hyper-V:
 
 . Install link:https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v[Hyper-V].
@@ -340,7 +336,7 @@ PS> minishift start --hyperv-virtual-switch "External (Wireless)"
 - The use of the environment variable `HYPERV_VIRTUAL_SWITCH` has been deprecated. Instead `MINISHIFT_HYPERV_VIRTUAL_SWITCH` can be used as a configuration option, although this is not recommended as environment variables on Windows do not support non-ASCII characters.
 ====
 
-=== Next Steps
+==== Next Steps
 
 {next-steps}
 

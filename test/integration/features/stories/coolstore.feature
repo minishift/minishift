@@ -25,7 +25,7 @@ Feature: Cool Store
     When executing "oc create -f ../../test/integration/templates/coolstore.yaml" succeeds
     Then stdout should contain
      """
-     template.template.openshift.io "coolstore" created
+     template.template.openshift.io/coolstore created
      """
 
   Scenario: User deploys new app from Coolstore template successfully

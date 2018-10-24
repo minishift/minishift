@@ -34,21 +34,14 @@ See the appropriate section for your hypervisor and operating system:
 [[setting-up-kvm-driver]]
 === Setting Up the KVM Driver
 
-{project} is currently tested against `docker-machine-driver-kvm` version 0.7.0.
-
-. As root, install the KVM binary and make it executable as follows:
-+
-----
-# curl -L https://github.com/dhiltgen/docker-machine-kvm/releases/download/v0.7.0/docker-machine-driver-kvm -o /usr/local/bin/docker-machine-driver-kvm
-# chmod +x /usr/local/bin/docker-machine-driver-kvm
-----
+{project} is currently tested against `docker-machine-driver-kvm` version 0.10.0.
 
 Proceed to the instructions for your Linux distribution after you have set up the `docker-machine-driver-kvm` binary.
 
 For more information, see the GitHub documentation of the link:https://github.com/dhiltgen/docker-machine-kvm#quick-start-instructions[Docker Machine KVM driver].
 
-[[kvm-driver-debian]]
-=== On Debian/Ubuntu
+[[kvm-driver-ubuntu]]
+=== On Ubuntu
 
 .  Install *libvirt* and *qemu-kvm* on your system:
 +
@@ -66,6 +59,21 @@ $ sudo usermod -a -G libvirtd <username>
 +
 ----
 $ newgrp libvirtd
+----
+
+. As root, install the KVM driver binary and make it executable as follows:
+- For Ubuntu-16.04 and higher
++
+----
+# curl -L https://github.com/dhiltgen/docker-machine-kvm/releases/download/v0.10.0/docker-machine-driver-kvm-ubuntu16.04 -o /usr/local/bin/docker-machine-driver-kvm
+# chmod +x /usr/local/bin/docker-machine-driver-kvm
+----
+
+- For Ubuntu-14.04
++
+----
+# curl -L https://github.com/dhiltgen/docker-machine-kvm/releases/download/v0.10.0/docker-machine-driver-kvm-ubuntu14.04 -o /usr/local/bin/docker-machine-driver-kvm
+# chmod +x /usr/local/bin/docker-machine-driver-kvm
 ----
 
 [[kvm-driver-fedora]]
@@ -87,6 +95,13 @@ $ sudo usermod -a -G libvirt <username>
 +
 ----
 $ newgrp libvirt
+----
+
+. As root, install the KVM driver binary and make it executable as follows:
++
+----
+# curl -L https://github.com/dhiltgen/docker-machine-kvm/releases/download/v0.10.0/docker-machine-driver-kvm-centos7 -o /usr/local/bin/docker-machine-driver-kvm
+# chmod +x /usr/local/bin/docker-machine-driver-kvm
 ----
 
 [[kvm-driver-arch-linux]]
@@ -114,6 +129,28 @@ $ sudo sed -ri 's/.?group\s?=\s?".+"/group = "kvm"/1' /etc/libvirt/qemu.conf
 +
 ----
 $ newgrp libvirt
+----
+
+. As root, install the KVM driver binary and make it executable as follows:
++
+----
+# curl -L https://github.com/dhiltgen/docker-machine-kvm/releases/download/v0.10.0/docker-machine-driver-kvm-centos7 -o /usr/local/bin/docker-machine-driver-kvm
+# chmod +x /usr/local/bin/docker-machine-driver-kvm
+----
+
+[[kvm-driver-libvirtd-service]]
+=== Start libvirtd service
+
+. Check the status of **libvirtd**:
+
+----
+$ systemctl is-active libvirtd
+----
+
+. If **libvirtd** is not active, start the **libvirtd** service:
+
+----
+$ sudo systemctl start libvirtd
 ----
 
 [[kvm-driver-networking]]

@@ -19,6 +19,7 @@ package tls
 import (
 	"encoding/base64"
 	"fmt"
+	"io/ioutil"
 
 	"github.com/docker/machine/libmachine/drivers"
 )
@@ -111,8 +112,8 @@ zN+ePTan80kxLhX4qrYaZu6F1sEqVYpwByArzA7mfLhWEr5iNWw0Vc6iPw==
 -----END RSA PRIVATE KEY-----`)
 )
 
-func SetCACertificate(driver drivers.Driver) bool {
-	encodedCertificate := base64.StdEncoding.EncodeToString(CACert)
+func SetCACertificate(driver drivers.Driver, certificate []byte) bool {
+	encodedCertificate := base64.StdEncoding.EncodeToString(certificate)
 
 	cmd := fmt.Sprintf(
 		"echo %s | base64 --decode | sudo tee -a /etc/pki/tls/certs/ca-bundle.crt > /dev/null",
@@ -123,4 +124,24 @@ func SetCACertificate(driver drivers.Driver) bool {
 	}
 
 	return true
+}
+
+func SetCACertificateFromWatcher(driver drivers.Driver, certificate []byte) bool {
+	encodedCertificate := base64.StdEncoding.EncodeToString(certificate)
+
+	// for some reason filtering does not work here
+	watchCmd := fmt.Sprintf("dockerwatch exec -- bash -c 'echo %s | base64 --decode | tee -a /etc/pki/tls/certs/ca-bundle.crt' &", encodedCertificate)
+	go drivers.RunSSHCommandFromDriver(driver, watchCmd) // to allow the command happen in the background (need callback to ensure watchdog behaviour)
+
+	return true
+}
+
+func LoadCertificate(filepath string) ([]byte, error) {
+
+	output, err := ioutil.ReadFile(filepath)
+	if err != nil {
+		return nil, err
+	}
+
+	return output, nil
 }

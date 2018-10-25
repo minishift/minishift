@@ -257,3 +257,13 @@ func isPortAccessible(port int) bool {
 	listener.Close()
 	return true
 }
+
+func IsValidCertificate(name string, cert string) error {
+	// suggested to check the actual format of the certificate
+
+	if !filehelper.Exists(cert) {
+		return fmt.Errorf("%s is not a vaild certificate for %s", cert, name)
+	}
+
+	return nil
+}

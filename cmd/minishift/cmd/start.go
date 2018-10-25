@@ -209,8 +209,6 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	// Forcibly set nameservers when configured
 	minishiftNetwork.AddNameserversToInstance(hostVm.Driver, getSlice(configCmd.NameServers.Name))
-	// to support intermediate proxy
-	minishiftTLS.SetCACertificate(hostVm.Driver)
 
 	ip, _ := hostVm.Driver.GetIP()
 	localProxy := viper.GetBool(configCmd.LocalProxy.Name)
@@ -224,9 +222,23 @@ func runStart(cmd *cobra.Command, args []string) {
 
 		if localProxy {
 			minishiftNetwork.AddHostEntryToInstance(hostVm.Driver, "localproxy", hostip)
-			localProxyAddr := fmt.Sprintf("%s:%s", hostip, "3128")
+			localProxyAddr := fmt.Sprintf("%s:%s", "localproxy", "3128")
 			proxyConfig.OverrideHttpProxy(localProxyAddr)
 			proxyConfig.OverrideHttpsProxy(localProxyAddr)
+
+			watchCmd := fmt.Sprintf("dockerwatch exec -f \"label=io.openshift.tags=openshift\" -- bash -c 'echo \"%s localproxy\" >> /etc/hosts' &", hostip)
+			go hostVm.RunSSHCommand(watchCmd) // to allow the command happen in the background (need callback to ensure watchdog behaviour)
+			// to support intermediate proxy
+			minishiftTLS.SetCACertificate(hostVm.Driver, minishiftTLS.CACert)
+			minishiftTLS.SetCACertificateFromWatcher(hostVm.Driver, minishiftTLS.CACert)
+		}
+
+		customCA := viper.GetString(configCmd.CustomCACertificate.Name)
+		if customCA != "" {
+			customCACert, _ := minishiftTLS.LoadCertificate(customCA)
+			// to support custom CA certificates
+			minishiftTLS.SetCACertificate(hostVm.Driver, customCACert)
+			minishiftTLS.SetCACertificateFromWatcher(hostVm.Driver, customCACert)
 		}
 
 		proxyConfig.AddNoProxy(ip)
@@ -712,6 +724,7 @@ func initStartFlags() *flag.FlagSet {
 		startFlagSet.String(configCmd.HypervVirtualSwitch.Name, "Default Switch", "Specify which Virtual Switch to use for the instance (Hyper-V only)")
 	}
 	startFlagSet.AddFlag(nameServersFlag)
+	startFlagSet.String(configCmd.CustomCACertificate.Name, "", "File to load custom CA certificate from")
 
 	if minishiftConfig.EnableExperimental {
 		startFlagSet.Bool(configCmd.NoProvision.Name, false, "Do not provision the VM with OpenShift (experimental)")

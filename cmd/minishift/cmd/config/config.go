@@ -171,6 +171,9 @@ var (
 
 	// Static-IP
 	StaticIPAutoSet = createConfigSetting("static-ip", SetBool, nil, nil, true, true)
+
+	// Custom CA certificate
+	CustomCACertificate = createConfigSetting("custom-ca-certificate", SetString, []setFn{validations.IsValidCertificate}, nil, true, nil)
 )
 
 func createConfigSetting(name string, set func(validations.ViperConfig, string, string) error, validations []setFn, callbacks []setFn, isApply bool, defaultVal interface{}) *Setting {

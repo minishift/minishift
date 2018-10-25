@@ -29,11 +29,7 @@ import (
 	"time"
 
 	"github.com/anjannath/systray"
-	"github.com/docker/machine/libmachine"
-	libmachineState "github.com/docker/machine/libmachine/state"
 	"github.com/golang/glog"
-	"github.com/minishift/minishift/cmd/minishift/state"
-	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/minishift/shell/powershell"
 	"github.com/minishift/minishift/pkg/minishift/systemtray/icon"
@@ -106,21 +102,20 @@ func OnExit() {
 }
 
 func getStatus(profileName string) int {
-	api := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
-	defer api.Close()
+	cmd, _ := os.CurrentExecutable()
+	args := []string{"status", "--profile", profileName}
+	command := exec.Command(cmd, args...)
+	out, _ := command.Output()
+	stdOut := fmt.Sprintf("%s", out)
 
-	vmStatus, err := cluster.GetHostStatus(api, profileName)
-	if err != nil {
-		return DOES_NOT_EXIST
-	}
-
-	if vmStatus == libmachineState.Running.String() {
+	if strings.Contains(stdOut, "Running") {
 		return RUNNING
 	}
-	if vmStatus == libmachineState.Stopped.String() {
+
+	if strings.Contains(stdOut, "Stopped") {
 		return STOPPED
 	}
-	return 0
+	return DOES_NOT_EXIST
 }
 
 // Add newly created profiles to the tray
@@ -196,9 +191,8 @@ func stopProfile(profileName string) error {
 
 		posh := powershell.New()
 		command := fmt.Sprintf("`Start-Process -FilePath %s", stopFilePath)
-		_, stdErr, err := posh.Execute(command)
-		fmt.Println(stdErr, err)
-		return fmt.Errorf("%s: %v", stdErr, err)
+		_, _, err = posh.Execute(command)
+		return err
 	}
 
 	if runtime.GOOS == "darwin" {
@@ -250,9 +244,8 @@ func startProfile(profileName string) error {
 
 		posh := powershell.New()
 		command := fmt.Sprintf("Start-Process -FilePath %s", startFilePath)
-		_, stdErr, err := posh.Execute(command)
-		fmt.Println(stdErr, err)
-		return fmt.Errorf("%s: %v", stdErr, err)
+		_, _, err = posh.Execute(command)
+		return err
 	}
 	if runtime.GOOS == "darwin" {
 		var startCommandString = fmt.Sprintf(minishiftBinary + " start --profile " + profileName)

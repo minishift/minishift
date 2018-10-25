@@ -3,45 +3,52 @@ Feature: Basic
   As a user I can perform basic operations of Minishift and OpenShift
 
   Scenario: User can install default add-ons
-    When executing "minishift addons install --defaults" succeeds
-    Then stdout should contain
-     """
-     Default add-ons 'anyuid, admin-user, xpaas, registry-route, che, htpasswd-identity-provider' installed
-     """
+     When executing "minishift addons install --defaults" succeeds
+     Then stdout should contain
+      """
+      Default add-ons 'anyuid, admin-user, xpaas, registry-route, che, htpasswd-identity-provider' installed
+      """
 
   Scenario: User can enable the anyuid add-on
-    When executing "minishift addons enable anyuid" succeeds
-    Then stdout should contain
-     """
-     Add-on 'anyuid' enabled
-     """
+     When executing "minishift addons enable anyuid" succeeds
+     Then stdout should contain
+      """
+      Add-on 'anyuid' enabled
+      """
 
   @minishift-only
   Scenario: User can list enabled add-ons
-    When executing "minishift addons list" succeeds
-    Then stdout should match "anyuid\s*: enabled\s*P\(0\)"
+     When executing "minishift addons list" succeeds
+     Then stdout should match "anyuid\s*: enabled\s*P\(0\)"
 
   Scenario: Starting Minishift
     Given Minishift has state "Does Not Exist"
       And image caching is disabled
-     When executing "minishift start --v=5 --timezone Asia/Kolkata" succeeds
-     Then stdout should contain
+     When executing "minishift start --v=5" succeeds
+     Then Minishift should have state "Running"
+      And stdout should contain
       """
       --image 'openshift/origin-${component}
       """
-     Then Minishift should have state "Running"
+
+  Scenario: User can verify empty image list
+    Given Minishift has state "Running"
      When executing "minishift image list" succeeds
      Then stdout should be empty
+
+  Scenario: User can verify the default timezone of Minishift VM
+    Given Minishift has state "Running"
      When executing "minishift timezone" succeeds
      Then stdout should contain
-     """
-     Asia/Kolkata
-     """
+      """
+      Time zone: UTC
+      """
+     When executing "minishift ssh -- date" succeeds
+     Then stdout should contain "UTC"
 
   Scenario: OpenShift is ready after startup
     After startup of Minishift OpenShift instance should respond correctly on its html endpoints
     and OpenShift web console should be accessible.
-
     Given Minishift has state "Running"
      Then with up to "20" retries with wait period of "3" seconds container name "k8s_webconsole_webconsole" should be "running"
       And "status code" of HTTP request to "/healthz" of OpenShift instance is equal to "200"
@@ -52,13 +59,11 @@ Feature: Basic
   Scenario Outline: User can set, get, view and unset values in configuration file
     User is able to setup persistent configuration of Minishift using "config" command
     and its subcommands, changing values stored in ".minishift/config/config.json".
-
     Given Minishift has state "Running"
      When executing "minishift config set <property> <value>" succeeds
      Then JSON config file ".minishift/config/config.json" contains key "<property>" with value matching "<value>"
       And stdout of command "minishift config get <property>" is equal to "<value>"
       And stdout of command "minishift config view --format {{.ConfigKey}}:{{.ConfigValue}}" contains "<property>:<value>"
-
      When executing "minishift config unset <property>" succeeds
      Then stdout of command "minishift config get <property>" is equal to "<nil>"
       And JSON config file ".minishift/config/config.json" does not have key "<property>"
@@ -71,7 +76,6 @@ Feature: Basic
 
   Scenario: User can get IP of provided virtual machine
     User is able to get IP of Minishift VM with command "minishift ip".
-
     Given Minishift has state "Running"
      When executing "minishift ip" succeeds
      Then stdout should be valid IP
@@ -86,27 +90,25 @@ Feature: Basic
 
   Scenario: OpenShift developer has sudo permissions
      The 'developer' user should be configured with the sudoer role after starting Minishift
-
     Given Minishift has state "Running"
      When executing "oc --as system:admin get clusterrolebindings" succeeds
      Then stdout should contain
-     """
-     sudoer
-     """
+      """
+      sudoer
+      """
 
   Scenario: Sudo permissions are required for specific oc tasks
-   Given Minishift has state "Running"
-    Then executing "oc get clusterrolebindings" fails
+    Given Minishift has state "Running"
+     Then executing "oc get clusterrolebindings" fails
 
   Scenario: A 'minishift' context is created for 'oc' usage
     After a successful Minishift start the user's current context is 'minishift'
-
-   Given Minishift has state "Running"
-    When executing "oc config current-context" succeeds
-    Then stdout should contain
-    """
-    minishift
-    """
+    Given Minishift has state "Running"
+     When executing "oc config current-context" succeeds
+     Then stdout should contain
+      """
+      minishift
+      """
 
   Scenario: User can switch the current 'oc' context and return to 'minishift' context
     Given executing "oc config set-context dummy" succeeds
@@ -121,13 +123,13 @@ Feature: Basic
       """
 
   Scenario: User has a pre-configured set of persistent volumes
-    When executing "oc --as system:admin get pv -o=name"
-    Then stderr should be empty
-     And exitcode should equal "0"
-     And stdout should contain
-     """
-     persistentvolume/pv0001
-     """
+     When executing "oc --as system:admin get pv -o=name"
+     Then stderr should be empty
+      And exitcode should equal "0"
+      And stdout should contain
+      """
+      persistentvolume/pv0001
+      """
 
   Scenario: User is able to do ssh into Minishift VM
     Given Minishift has state "Running"
@@ -146,29 +148,25 @@ Feature: Basic
       """
 
   Scenario: User can deploy a Ruby example application
-   Given Minishift has state "Running"
-    When executing "oc login --username=developer --password=developer" succeeds
-     And executing "oc new-project ruby" succeeds
-     And executing "oc new-app centos/ruby-22-centos7~https://github.com/sclorg/ruby-ex.git" succeeds
-     And executing "oc expose svc/ruby-ex" succeeds
-     And executing "oc set probe dc/ruby-ex --readiness --get-url=http://:8080" succeeds
-     And service "ruby-ex" rollout successfully within "1200" seconds
-
-    Then with up to "10" retries with wait period of "500ms" the "status code" of HTTP request to "/" of service "ruby-ex" in namespace "ruby" is equal to "200"
-     And with up to "10" retries with wait period of "500ms" the "body" of HTTP request to "/" of service "ruby-ex" in namespace "ruby" contains "Welcome to your Ruby application on OpenShift"
-
-    When executing "oc delete project ruby" succeeds
-    Then stdout should contain "project.project.openshift.io "ruby" deleted"
-
-    When executing "oc logout" succeeds
-    Then stdout should contain
-     """
-     Logged "developer" out
-     """
+    Given Minishift has state "Running"
+     When executing "oc login --username=developer --password=developer" succeeds
+      And executing "oc new-project ruby" succeeds
+      And executing "oc new-app centos/ruby-22-centos7~https://github.com/sclorg/ruby-ex.git" succeeds
+      And executing "oc expose svc/ruby-ex" succeeds
+      And executing "oc set probe dc/ruby-ex --readiness --get-url=http://:8080" succeeds
+      And service "ruby-ex" rollout successfully within "1200" seconds
+     Then with up to "10" retries with wait period of "500ms" the "status code" of HTTP request to "/" of service "ruby-ex" in namespace "ruby" is equal to "200"
+      And with up to "10" retries with wait period of "500ms" the "body" of HTTP request to "/" of service "ruby-ex" in namespace "ruby" contains "Welcome to your Ruby application on OpenShift"
+     When executing "oc delete project ruby" succeeds
+     Then stdout should contain "project.project.openshift.io "ruby" deleted"
+     When executing "oc logout" succeeds
+     Then stdout should contain
+      """
+      Logged "developer" out
+      """
 
   Scenario: As a user I am able to export a container image from a running Minshift instance
     Note: Just a sanity check for image caching. For more extensive tests see cmd-image.feature
-
     When executing "minishift image export alpine:latest" succeeds
     Then stdout of command "minishift image list" contains "alpine:latest"
 
@@ -176,7 +174,6 @@ Feature: Basic
     Given Minishift has state "Running"
      When executing "minishift stop" succeeds
      Then Minishift should have state "Stopped"
-
      When executing "minishift stop"
      Then Minishift should have state "Stopped"
       And stdout should contain

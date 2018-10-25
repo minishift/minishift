@@ -42,7 +42,7 @@ $ MINISHIFT_ENABLE_EXPERIMENTAL=y minishift start --extra-clusterup-flags "--ser
 For OKD 3.10.0 or later the command is:
 
 ----
-$ MINISHIFT_ENABLE_EXPERIMENTAL=y minishift start --extra-clusterup-flags "--enable=*,service-catalog'"
+$ MINISHIFT_ENABLE_EXPERIMENTAL=y minishift start --extra-clusterup-flags "--enable=*,service-catalog"
 ----
 
 [[local-proxy-server]]

@@ -94,6 +94,6 @@ After that user checks the application and several other functions again and del
      And Minishift has state "Stopped"
 
   Scenario: User deletes Minishift
-    Given Minishift has state "Running"
+    Given Minishift has state "Stopped"
      When executing "minishift delete --force" succeeds
      Then Minishift should have state "Does Not Exist"

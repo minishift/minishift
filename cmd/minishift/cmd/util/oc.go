@@ -152,12 +152,12 @@ func PullOpenshiftImageAndCopyOcBinary(dockerCommander docker.DockerCommander, r
 	// We need to make sure if images are already exist from the cache then don't pull it again.
 	imageExist, err := dockerCommander.IsImageExist(minishiftConstants.GetOpenshiftImageToFetchOC(requestedOpenShiftVersion))
 	if !imageExist {
-		fmt.Printf("-- Pulling the Openshift Container Image ")
+		fmt.Printf("-- Pulling the OpenShift Container Image ")
 		progressDots := progressdots.New()
 		progressDots.Start()
 		_, err = dockerCommander.Pull(minishiftConstants.GetOpenshiftImageToFetchOC(requestedOpenShiftVersion))
 		if err != nil {
-			return fmt.Errorf("Error pulling the openshift container image: %v", err)
+			return fmt.Errorf("Error pulling the OpenShift container image: %v", err)
 		}
 		progressDots.Stop()
 		fmt.Println(" OK")

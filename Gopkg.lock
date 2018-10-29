@@ -172,6 +172,14 @@
   version = "v1.0.8"
 
 [[projects]]
+  digest = "1:eac398d6bff1290677e66402e97a01c2f13cc963a6e4a77c17b52577732c5aef"
+  name = "github.com/danieljoos/wincred"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "412b574fb496839b312a75fba146bd32a89001cf"
+  version = "v1.0.1"
+
+[[projects]]
   digest = "1:a2c1d0e43bd3baaa071d1b9ed72c27d78169b2b269f71c105ac4ba34b1be4a39"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -267,7 +275,7 @@
   revision = "aabc10ec26b754e797f9028f4589c5b7bd90dc20"
 
 [[projects]]
-  digest = "1:a022010f1978d7d96923acb8cb5da4cfeb69c5e0a74b3710c9f83c7dc0cf1314"
+  digest = "1:cf07650bf05986f41b0634cfe612191e28104f74a64a3248be1225a12621132c"
   name = "github.com/docker/machine"
   packages = [
     "commands/mcndirs",
@@ -307,7 +315,7 @@
     "version",
   ]
   pruneopts = "NUT"
-  revision = "19035310d4ba1b58056aae427ea669d1db5fc618"
+  revision = "6f34be407f21920decfd3c031f64e500e66979da"
   source = "github.com/machine-drivers/machine"
 
 [[projects]]
@@ -341,6 +349,14 @@
   pruneopts = "NUT"
   revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
   version = "v1.0.0"
+
+[[projects]]
+  digest = "1:ca3369c0fc8d471d8698f85a37a4f8c98a847402681a31431fb87a84fa2e5373"
+  name = "github.com/godbus/dbus"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "a389bdde4dd695d414e47b755e95e72b7826432c"
+  version = "v4.1.0"
 
 [[projects]]
   digest = "1:1b3dd24f14a5280710fc7a3aa2480b6e4d20fdfc905841de9a3aa2aa2f1d4ee9"
@@ -840,6 +856,16 @@
   version = "v0.10.2"
 
 [[projects]]
+  digest = "1:190bb620545d7372b2ede5a3532285723153a2813e0fe995507bfa4d80b4daa1"
+  name = "github.com/zalando/go-keyring"
+  packages = [
+    ".",
+    "secret_service",
+  ]
+  pruneopts = "NUT"
+  revision = "6d81c293b3fbc8a9b1bcf4bc9c167c2e1d1f52cf"
+
+[[projects]]
   digest = "1:07c9c0fa314f5cce3014c50f1e175f84c797a259e2e2816dad10e7cd81e50798"
   name = "golang.org/x/crypto"
   packages = [
@@ -1087,6 +1113,7 @@
     "github.com/spf13/pflag",
     "github.com/spf13/viper",
     "github.com/stretchr/testify/assert",
+    "github.com/zalando/go-keyring",
     "golang.org/x/crypto/ssh",
     "golang.org/x/crypto/ssh/terminal",
     "golang.org/x/oauth2",

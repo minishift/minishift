@@ -41,7 +41,7 @@ ignored = ["github.com/Sirupsen/logrus"]
 
 [[constraint]]
   name = "github.com/docker/machine"
-  revision = "19035310d4ba1b58056aae427ea669d1db5fc618"
+  revision = "6f34be407f21920decfd3c031f64e500e66979da"
   source = "github.com/machine-drivers/machine"
 
 [[constraint]]

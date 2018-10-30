@@ -54,7 +54,7 @@ Feature: Che add-on in combination with anyuid addon.
     | Eclipse Vert.x        | https://github.com/openshiftio-vertx-boosters/vertx-http-booster         |
 #   | Java CentOS           | https://github.com/che-samples/console-java-simple.git                   | ignored due to issue #2824
     | Spring Boot           | https://github.com/snowdrop/spring-boot-http-booster                     |
-    | CentOS WildFly Swarm  | https://github.com/wildfly-swarm-openshiftio-boosters/wfswarm-rest-http  |
+#   | CentOS WildFly Swarm  | https://github.com/wildfly-swarm-openshiftio-boosters/wfswarm-rest-http  | Keep disabled until #2824 is fixed
     | Python                | https://github.com/che-samples/console-python3-simple.git                |
     | PHP                   | https://github.com/che-samples/web-php-simple.git                        |
     | C++                   | https://github.com/che-samples/console-cpp-simple.git                    |

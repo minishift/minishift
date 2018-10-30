@@ -47,7 +47,7 @@ Feature: Che add-on
     Examples:
     | stack                 | sample                                                                   |
     | Eclipse Vert.x        | https://github.com/openshiftio-vertx-boosters/vertx-http-booster         |
-    | Java CentOS           | https://github.com/che-samples/console-java-simple.git                   |
+#   | Java CentOS           | https://github.com/che-samples/console-java-simple.git                   | Keep disabled until #2824 is fixed
     | Spring Boot           | https://github.com/snowdrop/spring-boot-http-booster                     |
     | CentOS WildFly Swarm  | https://github.com/wildfly-swarm-openshiftio-boosters/wfswarm-rest-http  |
     | Python                | https://github.com/che-samples/console-python3-simple.git                |

@@ -18,7 +18,7 @@ This add-on configures OpenShift to use only a single identity provider
 
   Scenario: User can login to openshift instance only with default username "developer" and password "developer"
     Given Minishift has state "Running"
-     When executing "oc login -u developer -p developer" retrying 30 times with wait period of 1 seconds
+     When executing "oc login -u developer -p developer" retrying 30 times with wait period of "1s"
      Then stdout should contain
       """
       Login successful.
@@ -37,7 +37,7 @@ This add-on configures OpenShift to use only a single identity provider
   Scenario: User can update login password for default user "developer"
     Given Minishift has state "Running"
      When executing "minishift addons apply htpasswd-identity-provider --addon-env USERNAME=developer --addon-env USER_PASSWORD=password" succeeds
-     Then executing "oc login -u developer -p password" retrying 30 times with wait period of 1 seconds
+     Then executing "oc login -u developer -p password" retrying 30 times with wait period of "1s"
       And stdout should contain
       """
       Login successful.
@@ -63,7 +63,7 @@ This add-on configures OpenShift to use only a single identity provider
 
   Scenario: User can login using new credentials
     Given Minishift has state "Running"
-     When executing "oc login -u openshift-user -p openshift-password" retrying 30 times with wait period of 1 seconds
+     When executing "oc login -u openshift-user -p openshift-password" retrying 30 times with wait period of "1s"
      Then stdout should contain
      """
      Login successful.
@@ -90,7 +90,7 @@ This add-on configures OpenShift to use only a single identity provider
   Scenario: User can use any password for default user "developer" after removing addon htpasswd-identity-provider
     Given Minishift has state "Running"
      When executing "minishift addons remove htpasswd-identity-provider" succeeds
-     Then executing "oc login -u developer -p anything" retrying 30 times with wait period of 1 seconds
+     Then executing "oc login -u developer -p anything" retrying 30 times with wait period of "1s"
       And stdout should contain
       """
       Login successful.

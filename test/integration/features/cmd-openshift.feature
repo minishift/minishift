@@ -26,7 +26,7 @@ cluster in VM provided by Minishift.
       And stdout should contain "router"
 
   Scenario: Pods docker-registry and router are ready before OpenShift restart
-    Given user waits "30" seconds
+    Given user waits for "30s"
      When executing "oc get pods -n default --as system:admin" succeeds
      Then stdout should match "docker-registry-\d-\w{5}\s*1\/1\s*Running"
       And stdout should match "router-\d-\w{5}\s*1\/1\s*Running"
@@ -42,14 +42,13 @@ cluster in VM provided by Minishift.
       And stdout of command "minishift ssh -- "docker inspect --format={{.State.FinishedAt}} origin"" is not equal to "0001-01-01T00:00:00Z"
 
   Scenario: Pods docker-registry and router are ready after OpenShift restart
-    Given user waits "90" seconds
-     When executing "oc get pods -n default --as system:admin" retrying 20 times with wait period of 3 seconds
+     When executing "oc get pods -n default --as system:admin" retrying 20 times with wait period of "15s"
      Then stdout should match "docker-registry-\d-\w{5}\s*1\/1\s*Running"
       And stdout should match "router-\d-\w{5}\s*1\/1\s*Running"
 
   Scenario: User deploys nodejs example application from OpenShift repository
     Given Minishift has state "Running"
-     When executing "oc new-app https://github.com/sclorg/nodejs-ex -l name=myapp" retrying 20 times with wait period of 3 seconds
+     When executing "oc new-app https://github.com/sclorg/nodejs-ex -l name=myapp" succeeds
      Then stdout should contain
       """
       Run 'oc status' to view your app.
@@ -112,9 +111,9 @@ cluster in VM provided by Minishift.
      Then stdout should be valid URL
 
   Scenario: Deployed Node.js application is available
-     When service "nodejs-ex" rollout successfully within "1200" seconds
-     Then with up to "30" retries with wait period of "1000ms" the "body" of HTTP request to "/" of service "nodejs-ex" in namespace "myproject" contains "Welcome to your Node.js application on OpenShift"
-      And with up to "30" retries with wait period of "1000ms" the "status code" of HTTP request to "/" of service "nodejs-ex" in namespace "myproject" is equal to "200"
+     When service "nodejs-ex" rollout successfully within "20m"
+     Then with up to "10" retries with wait period of "3s" the "body" of HTTP request to "/" of service "nodejs-ex" in namespace "myproject" contains "Welcome to your Node.js application on OpenShift"
+      And with up to "10" retries with wait period of "3s" the "status code" of HTTP request to "/" of service "nodejs-ex" in namespace "myproject" is equal to "200"
 
   Scenario: Seeing configuration of OpenShift master
   Minishift openshift config view prints YAML configuration of OpenShift cluster.
@@ -131,7 +130,7 @@ cluster in VM provided by Minishift.
      Then stdout should contain "Patching OpenShift configuration"
 
   Scenario: Verifying configuration on OpenShift master
-    Given user waits "30" seconds
+    Given user waits for "30s"
      When executing "minishift openshift config view" succeeds
      Then stdout is YAML which contains key "assetConfig.logoutURL" with value matching "http://www\.minishift\.io"
 

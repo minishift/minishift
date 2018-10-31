@@ -19,8 +19,8 @@ so that user can able to push their container images directly to registry and de
       """
 
   Scenario: User waits until registry is fully started and accessible
-     Then with up to "20" retries with wait period of "3" seconds container name "registry_docker-registry" should be "running"
-      And with up to "60" retries with wait period of "1000ms" the "status code" of HTTP request to "/" of service "docker-registry" in namespace "default" is equal to "200"
+     Then with up to "20" retries with wait period of "3s" container name "registry_docker-registry" should be "running"
+      And with up to "60" retries with wait period of "1s" the "status code" of HTTP request to "/" of service "docker-registry" in namespace "default" is equal to "200"
 
   Scenario: User sets docker environment variables
      When executing "minishift docker-env" in host shell succeeds
@@ -53,9 +53,9 @@ so that user can able to push their container images directly to registry and de
      When executing "oc new-app --image-stream=nginx --name=nginx" in host shell succeeds
       And executing "oc expose svc nginx" in host shell succeeds
       And executing "oc set probe dc/nginx --readiness --get-url=http://:8080" in host shell succeeds
-      And service "nginx" rollout successfully within "1200" seconds
-     Then with up to "10" retries with wait period of "500ms" the "status code" of HTTP request to "/" of service "nginx" in namespace "myproject" is equal to "200"
-      And with up to "10" retries with wait period of "500ms" the "body" of HTTP request to "/" of service "nginx" in namespace "myproject" contains "Welcome to nginx!"
+      And service "nginx" rollout successfully within "20m"
+     Then with up to "5" retries with wait period of "1s" the "status code" of HTTP request to "/" of service "nginx" in namespace "myproject" is equal to "200"
+      And with up to "5" retries with wait period of "1s" the "body" of HTTP request to "/" of service "nginx" in namespace "myproject" contains "Welcome to nginx!"
 
   Scenario: User restarts Minishift
     Given Minishift has state "Running"
@@ -65,25 +65,18 @@ so that user can able to push their container images directly to registry and de
 
   Scenario: User can login to OpenShift integrated docker registry after Minishift restart
     Given Minishift has state "Running"
-      And with up to "20" retries with wait period of "3" seconds container name "registry_docker-registry" should be "running"
-      And with up to "60" retries with wait period of "1000ms" the "status code" of HTTP request to "/" of service "docker-registry" in namespace "default" is equal to "200"
+      And with up to "10" retries with wait period of "6s" container name "registry_docker-registry" should be "running"
+      And with up to "10" retries with wait period of "6s" the "status code" of HTTP request to "/" of service "docker-registry" in namespace "default" is equal to "200"
      When executing "docker login -u developer -p $(oc_token) docker-registry-default.$(minishift_ip).nip.io" in host shell succeeds
      Then stdout of host shell should contain "Login Succeeded"
 
   Scenario: User can reapply registry-route addon
     Given Minishift has state "Running"
      When executing "minishift addon apply registry-route" succeeds
-     Then stdout should contain
-      """
-      Add-on 'registry-route' created docker-registry route.
-      """
-
-  Scenario: User can login to OpenShift integrated docker registry after reapplying registry-route addon
-    Given Minishift has state "Running"
-      And with up to "20" retries with wait period of "3" seconds container name "registry_docker-registry" should be "running"
-      And with up to "60" retries with wait period of "1000ms" the "status code" of HTTP request to "/" of service "docker-registry" in namespace "default" is equal to "200"
-     When executing "docker login -u developer -p $(oc_token) docker-registry-default.$(minishift_ip).nip.io" in host shell succeeds
-     Then stdout of host shell should contain "Login Succeeded"
+     Then with up to "10" retries with wait period of "6s" container name "registry_docker-registry" should be "running"
+      And with up to "10" retries with wait period of "6s" the "status code" of HTTP request to "/" of service "docker-registry" in namespace "default" is equal to "200"
+      And executing "docker login -u developer -p $(oc_token) docker-registry-default.$(minishift_ip).nip.io" in host shell succeeds
+      And stdout of host shell should contain "Login Succeeded"
 
   Scenario: User deletes Minishift
     Given Minishift has state "Running"

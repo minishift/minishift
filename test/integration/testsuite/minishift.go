@@ -46,9 +46,10 @@ type Minishift struct {
 }
 
 type rolloutMessage struct {
-	passed bool
-	stdOut string
-	stdErr string
+	stdOut   string
+	stdErr   string
+	exitCode int
+	err      error
 }
 
 func (m *Minishift) shouldHaveState(expected string) error {
@@ -118,47 +119,67 @@ func (m *Minishift) isTheActiveProfile(profileName string) error {
 
 // containerStatus take the formatted name of container and check the status as per expectation.
 // Return if any error
-func (m *Minishift) containerStatus(retryCount int, retryWaitPeriod int, containerName string, expected string) error {
+func (m *Minishift) containerStatus(retryCount int, waitTime string, containerName string, expected string) error {
 	var containerState string
-	for i := 0; i < retryCount; i++ {
-		runningContainers, err := m.runner.GetOpenshiftContainers(containerName)
-		if err != nil {
-			return err
-		}
-		individualContainerRows := strings.Split(runningContainers, "\n")
-		for _, individualContainer := range individualContainerRows {
-			if strings.Contains(individualContainer, containerName) {
-				containerId := strings.Split(individualContainer, " ")[0]
-				containerState, err = m.runner.GetContainerStatusUsingImageId(containerId)
-				if err != nil {
-					return err
-				}
-				if !strings.Contains(containerState, expected) {
-					return fmt.Errorf("Container state did not match. Expected: %s, Actual: %s", expected, containerState)
-				}
-				return nil
-			}
-		}
-		time.Sleep(time.Second * time.Duration(retryWaitPeriod))
+	var err error
+	waitDuration, err := time.ParseDuration(waitTime)
+	if err != nil {
+		return err
 	}
-	return fmt.Errorf("Container state did not match expected state within time limit of %d seconds. Expected: %s, Actual: %s", retryCount*retryWaitPeriod, expected, containerState)
+
+	for i := 0; i < retryCount; i++ {
+		var err error
+		containerID, err := m.runner.GetContainerID(containerName)
+		if err != nil {
+			fmt.Printf("error getting containers information: '%v', retrying in %v...\n", err, waitTime)
+			time.Sleep(waitDuration)
+			continue
+		}
+
+		containerState, err = m.runner.GetContainerStatusUsingImageID(containerID)
+		if err != nil {
+			fmt.Printf("error getting state of container '%v' with ID '%v' - error: '%v', retrying in %v...\n", containerName, containerID, err, waitTime)
+			time.Sleep(waitDuration)
+			continue
+		}
+
+		if !strings.Contains(containerState, expected) {
+			fmt.Printf("container state does not match, expected: '%v', actual: '%v', retrying in %v...\n", expected, containerState, waitTime)
+			time.Sleep(waitDuration)
+			continue
+		}
+
+		return nil
+	}
+
+	return fmt.Errorf("Container state did not match expected state within time limit. Expected: %s, Actual: %s", expected, containerState)
 }
 
-func (m *Minishift) executingRetryingTimesWithWaitPeriodOfSeconds(command string, retry, sleep int) error {
-	for i := 0; i < retry; i++ {
+func (m *Minishift) executingRetryingTimesWithWaitPeriodOfTime(command string, retryCount int, retryTime string) error {
+	retryDuration, err := time.ParseDuration(retryTime)
+	if err != nil {
+		return err
+	}
+
+	for count := 0; count < retryCount; count++ {
 		err := m.ExecutingOcCommand(command)
 		if err != nil {
 			return err
 		}
 		lastCommandOutput := GetLastCommandOutput()
 		if lastCommandOutput.ExitCode == 0 {
-			break
+			return nil
 		}
-		fmt.Printf("Command returned non-zero exit code: '%v', stdErr: '%v', stdOut: '%v', retrying...", lastCommandOutput.ExitCode, lastCommandOutput.StdErr, lastCommandOutput.StdOut)
-		time.Sleep(time.Duration(sleep) * time.Second)
+		fmt.Printf("execution (%v) failed, exit code: '%v', stdErr: '%v', stdOut: '%v', retrying in %v...\n",
+			count+1,
+			lastCommandOutput.ExitCode,
+			lastCommandOutput.StdErr,
+			lastCommandOutput.StdOut,
+			retryTime)
+		time.Sleep(retryDuration)
 	}
 
-	return nil
+	return fmt.Errorf("command did not run successfully within %v retries", retryCount)
 }
 
 func (m *Minishift) setVariableExecutingOcCommand(name string, command string) error {
@@ -194,12 +215,16 @@ func (m *Minishift) setVariableFromExecution(name string, execute commandRunner,
 func (m *Minishift) ExecutingOcCommand(command string) error {
 	ocRunner := m.runner.GetOcRunner()
 	if ocRunner == nil {
-		util.LogMessage("warning", "OC binary can't be detected, minishift is not Running")
-		return errors.New("Minishift is not Running")
+		util.LogMessage("warning", "oc binary can't be used, Minishift is not Running")
+		return errors.New("oc binary can't be used, Minishift is not Running")
 	}
 
 	command = util.ProcessVariables(command)
-	cmdOut, cmdErr, cmdExit := ocRunner.RunCommand(command)
+	cmdOut, cmdErr, cmdExit, err := ocRunner.RunCommand(command)
+	if err != nil {
+		return err
+	}
+
 	commandOutputs = append(commandOutputs,
 		CommandOutput{
 			command,
@@ -213,7 +238,11 @@ func (m *Minishift) ExecutingOcCommand(command string) error {
 
 func (m *Minishift) ExecutingMinishiftCommand(command string) error {
 	command = util.ProcessVariables(command)
-	cmdOut, cmdErr, cmdExit := m.runner.RunCommand(command)
+	cmdOut, cmdErr, cmdExit, err := m.runner.RunCommand(command)
+	if err != nil {
+		return err
+	}
+
 	commandOutputs = append(commandOutputs,
 		CommandOutput{
 			command,
@@ -234,9 +263,14 @@ func (m *Minishift) setImageCaching(operation string) error {
 	return m.ExecutingMinishiftCommand(fmt.Sprintf("config set image-caching %s", enabled))
 }
 
-func (m *Minishift) imageExportShouldComplete(noOfImages, maximumTime int) error {
+func (m *Minishift) imageExportShouldComplete(noOfImages int, maximumTime string) error {
 	// poll till the output of the `minishift image list` shows number of cached images
-	timeout := time.NewTimer(time.Duration(maximumTime) * time.Minute)
+	maxDuration, err := time.ParseDuration(maximumTime)
+	if err != nil {
+		return err
+	}
+
+	timeout := time.NewTimer(maxDuration)
 
 outerPollActive:
 	for {
@@ -244,7 +278,10 @@ outerPollActive:
 		case <-timeout.C:
 			return errors.New("Timed out in getting the number of default cached images")
 		default:
-			cmdOut, _, _ := m.runner.RunCommand("image list")
+			cmdOut, _, _, err := m.runner.RunCommand("image list")
+			if err != nil {
+				return err
+			}
 			cmdOut = strings.TrimRight(cmdOut, "\n")
 			numOfLines := len(strings.Split(cmdOut, "\n"))
 			if numOfLines == noOfImages {
@@ -262,41 +299,47 @@ outerPollActive:
 }
 
 func (m *Minishift) imageShouldHaveCached(image string) error {
-	cmdOut, _, _ := m.runner.RunCommand("image list")
+	cmdOut, _, _, err := m.runner.RunCommand("image list")
+	if err != nil {
+		return err
+	}
+
 	return util.CompareExpectedWithActualMatchesRegex(image, strings.TrimRight(cmdOut, "\n"))
 }
 
 func (m *Minishift) getOpenShiftInstanceUrl() string {
-	cmdOut, _, _ := m.runner.RunCommand("ip")
+	cmdOut, _, _, _ := m.runner.RunCommand("ip")
 	ip := strings.TrimRight(cmdOut, "\n")
 	url := "https://" + ip + ":8443"
 	return url
 }
 
 func (m *Minishift) getRoute(serviceName, nameSpace string) string {
-	cmdOut, _, _ := m.runner.RunCommand("openshift service " + serviceName + " -n" + nameSpace + " --url")
+	cmdOut, _, _, _ := m.runner.RunCommand("openshift service " + serviceName + " -n" + nameSpace + " --url")
 	return strings.TrimRight(cmdOut, "\n")
 }
 
-func (m *Minishift) checkServiceRolloutForSuccess(service string, timeout int, done chan rolloutMessage) {
+func (m *Minishift) checkServiceRolloutForSuccess(service string, maxTime string, done chan rolloutMessage) {
 	command := fmt.Sprintf("rollout status deploymentconfig %s --watch", service)
-
 	ocRunner := m.runner.GetOcRunner()
-	cmdOut, cmdErr, cmdExit := ocRunner.RunCommandWithTimeout(command, timeout)
+	cmdOut, cmdErr, cmdExitCode, err := ocRunner.RunCommandWithTimeout(command, maxTime)
+	if err != nil {
+		done <- rolloutMessage{stdOut: cmdOut, stdErr: cmdErr, exitCode: cmdExitCode, err: err}
+	}
 	m.mutex.Lock()
 	commandOutputs = append(commandOutputs,
 		CommandOutput{
 			command,
 			cmdOut,
 			cmdErr,
-			cmdExit,
+			cmdExitCode,
 		})
 	m.mutex.Unlock()
 
 	expected := "successfully rolled out"
 	// if - else construct needed, else false is returned on the second time called
 	if strings.Contains(cmdOut, expected) {
-		done <- rolloutMessage{passed: true, stdErr: cmdErr, stdOut: cmdOut}
+		done <- rolloutMessage{stdOut: cmdOut, stdErr: cmdErr, exitCode: cmdExitCode, err: nil}
 	} else {
 		// get application's build logs if rollout fails
 		command = fmt.Sprintf("logs bc/%s", service)
@@ -306,19 +349,21 @@ func (m *Minishift) checkServiceRolloutForSuccess(service string, timeout int, d
 
 		cmdOut += fmt.Sprintf("\n Service build output logs: %s\n", lastCmdResult.StdOut)
 		cmdErr += fmt.Sprintf("\n Service build error logs: %s\n", lastCmdResult.StdErr)
-
-		done <- rolloutMessage{passed: false, stdErr: cmdErr, stdOut: cmdOut}
+		err = fmt.Errorf("Service %v was not rolled out successfully", service)
+		done <- rolloutMessage{stdOut: cmdOut, stdErr: cmdErr, exitCode: cmdExitCode, err: err}
 	}
 }
 
 func (m *Minishift) rolloutServicesSuccessfully(servicesToCheck string) error {
-	return m.rolloutServicesSuccessfullyBeforeTimeout(servicesToCheck, 0)
+	return m.rolloutServicesSuccessfullyBeforeTimeout(servicesToCheck, "0s")
 }
 
-func (m *Minishift) rolloutServicesSuccessfullyBeforeTimeout(servicesToCheck string, timeout int) error {
-	success := true
+func (m *Minishift) rolloutServicesSuccessfullyBeforeTimeout(servicesToCheck string, timeout string) error {
 	var stdErrs []string
 	var stdOuts []string
+	var exitCodes []int
+	var errs []error
+
 	servicesStr := strings.Replace(servicesToCheck, ", ", " ", -1)
 	servicesStr = strings.Replace(servicesStr, ",", " ", -1)
 	services := strings.Split(servicesStr, " ")
@@ -329,17 +374,25 @@ func (m *Minishift) rolloutServicesSuccessfullyBeforeTimeout(servicesToCheck str
 		go m.checkServiceRolloutForSuccess(services[i], timeout, done)
 	}
 
+	success := true
 	for i := 0; i < total; i++ {
-		m := <-done
-		stdErrs = append(stdErrs, m.stdErr)
-		stdOuts = append(stdOuts, m.stdOut)
-		success = success && m.passed
+		message := <-done
+		stdOuts = append(stdOuts, message.stdOut)
+		stdErrs = append(stdErrs, message.stdErr)
+		exitCodes = append(exitCodes, message.exitCode)
+		errs = append(errs, message.err)
+		if message.err != nil {
+			success = false
+		}
+		if message.exitCode != 0 {
+			success = false
+		}
 	}
 
-	if !success {
-		errorMessage := "Not all successfully rolled out:\n"
+	if success != true {
+		errorMessage := "Not all services successfully rolled out:\n"
 		for i := 0; i < total; i++ {
-			errorMessage += fmt.Sprintf("Service: '%v'\n-StdOut: %v-StdErr: %v\n", services[i], stdOuts[i], stdErrs[i])
+			errorMessage += fmt.Sprintf("Service: '%v'\n-StdOut: %v-StdErr: %v\n-exitCode: %v\nerror:%v", services[i], stdOuts[i], stdErrs[i], exitCodes[i], errs[i])
 		}
 		return fmt.Errorf("Not all services successfully rolled out:\n%v", errorMessage)
 	}
@@ -366,9 +419,9 @@ func (m *Minishift) hostFolderMountStatus(shareName string, partern string) erro
 func (m *Minishift) addHostFolder(shareType string, source string, target string, shareName string) error {
 	testDir, _ := setupTestDirectory()
 	sourcePath := filepath.Join(testDir, source)
-	_, cmdErr, _ := m.runner.RunCommand("hostfolder add -t " + shareType + " --source " + sourcePath + " --target " + target + " " + shareName)
+	_, cmdErr, _, err := m.runner.RunCommand("hostfolder add -t " + shareType + " --source " + sourcePath + " --target " + target + " " + shareName)
 	if cmdErr != "" {
 		return errors.New(cmdErr)
 	}
-	return nil
+	return err
 }

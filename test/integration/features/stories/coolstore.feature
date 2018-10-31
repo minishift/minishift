@@ -30,7 +30,7 @@ Feature: Cool Store
 
   Scenario: User deploys new app from Coolstore template successfully
     When executing "oc new-app --template=coolstore" succeeds
-     And services "web-ui, inventory, catalog, cart, coolstore-gw" rollout successfully within "1200" seconds
+     And services "web-ui, inventory, catalog, cart, coolstore-gw" rollout successfully within "20m"
     Then executing "oc status --suggest" succeeds
      And stdout should not contain "has failed"
 

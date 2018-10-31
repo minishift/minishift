@@ -92,8 +92,8 @@ func FeatureContext(s *godog.Suite) {
 
 	// Execution of `oc` commands
 	// will use default version of oc binary at stored at .minishift/cache/oc
-	s.Step(`^executing "oc (.*)" retrying (\d+) times with wait period of (\d+) seconds?$`,
-		MinishiftInstance.executingRetryingTimesWithWaitPeriodOfSeconds)
+	s.Step(`^executing "oc (.*)" retrying (\d+) times with wait period of "(\d+(?:ms|s|m))"$`,
+		MinishiftInstance.executingRetryingTimesWithWaitPeriodOfTime)
 	s.Step(`^executing "oc (.*)"$`,
 		MinishiftInstance.ExecutingOcCommand)
 	s.Step(`^executing "oc (.*)" (succeeds|fails)$`,
@@ -146,7 +146,7 @@ func FeatureContext(s *godog.Suite) {
 		util.ExecuteInHostShellSucceedsOrFails)
 
 	// Shell output verification
-	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)" seconds? command "(.*)" output (?:should contain|contains) "(.*)"$`,
+	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*(?:ms|s|m))" command "(.*)" output (?:should contain|contains) "(.*)"$`,
 		util.ExecuteCommandInHostShellWithRetry)
 	s.Step(`^(stdout|stderr) of host shell (?:should contain|contains) "(.*)"$`,
 		util.HostShellCommandReturnShouldContain)
@@ -182,7 +182,7 @@ func FeatureContext(s *godog.Suite) {
 	// Image caching operations
 	s.Step(`^image caching is (disabled|enabled)$`,
 		MinishiftInstance.setImageCaching)
-	s.Step(`^image export completes with (\d+) images within (\d+) minutes$`,
+	s.Step(`^image export completes with (\d+) images within "(\d+(?:ms|s|m))"$`,
 		MinishiftInstance.imageExportShouldComplete)
 	s.Step(`^container image "(.*)" is cached$`,
 		MinishiftInstance.imageShouldHaveCached)
@@ -191,7 +191,7 @@ func FeatureContext(s *godog.Suite) {
 	// to wait until service is deployed and ready before followin steps are started
 	s.Step(`^services? "([^"]*)" rollout successfully$`,
 		MinishiftInstance.rolloutServicesSuccessfully)
-	s.Step(`^services? "([^"]*)" rollout successfully within "(\d+)" seconds?$`,
+	s.Step(`^services? "([^"]*)" rollout successfully within "(\d+(?:ms|s|m))"$`,
 		MinishiftInstance.rolloutServicesSuccessfullyBeforeTimeout)
 
 	// Proxy testing
@@ -209,15 +209,15 @@ func FeatureContext(s *godog.Suite) {
 	// to check OpenShift console and HTTP endpoint of deployed applications
 	s.Step(`^"(body|status code)" of HTTP request to "([^"]*)" (contains|is equal to) "(.*)"$`,
 		verifyRequestToURL)
-	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)ms" the "(body|status code)" of HTTP request to "([^"]*)" (contains|is equal to) "(.*)"$`,
+	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*(?:ms|s|m))" the "(body|status code)" of HTTP request to "([^"]*)" (contains|is equal to) "(.*)"$`,
 		verifyRequestToURLWithRetry)
 	s.Step(`^"(body|status code)" of HTTP request to "([^"]*)" of OpenShift instance (contains|is equal to) "(.*)"$`,
 		verifyRequestToOpenShift)
-	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)ms" the "(body|status code)" of HTTP request to "([^"]*)" of OpenShift instance (contains|is equal to) "(.*)"$`,
+	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*(?:ms|s|m))" the "(body|status code)" of HTTP request to "([^"]*)" of OpenShift instance (contains|is equal to) "(.*)"$`,
 		verifyRequestToOpenShiftWithRetry)
 	s.Step(`^"(body|status code)" of HTTP request to "([^"]*)" of service "([^"]*)" in namespace "([^"]*)" (contains|is equal to) "(.*)"$`,
 		verifyRequestToService)
-	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)ms" the "(body|status code)" of HTTP request to "([^"]*)" of service "([^"]*)" in namespace "([^"]*)" (contains|is equal to) "(.*)"$`,
+	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*(?:ms|s|m))" the "(body|status code)" of HTTP request to "([^"]*)" of service "([^"]*)" in namespace "([^"]*)" (contains|is equal to) "(.*)"$`,
 		verifyRequestToServiceWithRetry)
 
 	// Config file content, JSON and YAML
@@ -231,7 +231,7 @@ func FeatureContext(s *godog.Suite) {
 		stdoutContainsKey)
 
 	// Container status
-	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*)" seconds? container name "(.*)" should be "(running|exited)"$`,
+	s.Step(`^with up to "(\d*)" retries with wait period of "(\d*(?:ms|s|m))" container name "(.*)" should be "(running|exited)"$`,
 		MinishiftInstance.containerStatus)
 
 	// Resource and config checks inside the running VM
@@ -266,9 +266,14 @@ func FeatureContext(s *godog.Suite) {
 		readFileForTextMatchSucceeds)
 	// Prototyping and debugging
 	// please do not use in production
-	s.Step(`^user (?:waits|waited) "(\d+)" seconds?$`,
-		func(seconds int) error {
-			time.Sleep(time.Duration(seconds) * time.Second)
+	s.Step(`^user (?:waits|waited) for "(\d+(?:ms|s|m))"$`,
+		func(duration string) error {
+			timeDuration, err := time.ParseDuration(duration)
+			if err != nil {
+				return err
+			}
+
+			time.Sleep(timeDuration)
 			return nil
 		})
 
@@ -674,8 +679,8 @@ func verifyRequestToURL(partOfResponse string, url string, assertion string, exp
 	return verifyHTTPResponse(partOfResponse, url, assertion, expected)
 }
 
-func verifyRequestToURLWithRetry(retryCount int, retryWaitPeriod int, partOfResponse string, url string, assertion string, expected string) error {
-	return verifyHTTPResponseWithRetry(partOfResponse, url, assertion, expected, retryCount, retryWaitPeriod)
+func verifyRequestToURLWithRetry(retryCount int, retryTime string, partOfResponse string, url string, assertion string, expected string) error {
+	return verifyHTTPResponseWithRetry(partOfResponse, url, assertion, expected, retryCount, retryTime)
 }
 
 func verifyRequestToService(partOfResponse string, urlSuffix string, serviceName string, nameSpace string, assertion string, expected string) error {
@@ -683,9 +688,9 @@ func verifyRequestToService(partOfResponse string, urlSuffix string, serviceName
 	return verifyHTTPResponse(partOfResponse, url, assertion, expected)
 }
 
-func verifyRequestToServiceWithRetry(retryCount int, retryWaitPeriod int, partOfResponse string, urlSuffix string, serviceName string, nameSpace string, assertion string, expected string) error {
+func verifyRequestToServiceWithRetry(retryCount int, retryTime string, partOfResponse string, urlSuffix string, serviceName string, nameSpace string, assertion string, expected string) error {
 	url := MinishiftInstance.getRoute(serviceName, nameSpace) + urlSuffix
-	return verifyHTTPResponseWithRetry(partOfResponse, url, assertion, expected, retryCount, retryWaitPeriod)
+	return verifyHTTPResponseWithRetry(partOfResponse, url, assertion, expected, retryCount, retryTime)
 }
 
 func verifyRequestToOpenShift(partOfResponse string, urlSuffix string, assertion string, expected string) error {
@@ -693,13 +698,16 @@ func verifyRequestToOpenShift(partOfResponse string, urlSuffix string, assertion
 	return verifyHTTPResponse(partOfResponse, url, assertion, expected)
 }
 
-func verifyRequestToOpenShiftWithRetry(retryCount int, retryWaitPeriod int, partOfResponse string, urlSuffix string, assertion string, expected string) error {
+func verifyRequestToOpenShiftWithRetry(retryCount int, retryTime string, partOfResponse string, urlSuffix string, assertion string, expected string) error {
 	url := MinishiftInstance.getOpenShiftInstanceUrl() + urlSuffix
-	return verifyHTTPResponseWithRetry(partOfResponse, url, assertion, expected, retryCount, retryWaitPeriod)
+	return verifyHTTPResponseWithRetry(partOfResponse, url, assertion, expected, retryCount, retryTime)
 }
 
-func verifyHTTPResponseWithRetry(partOfResponse string, url string, assertion string, expected string, retryCount int, retryWaitPeriod int) error {
-	var err error
+func verifyHTTPResponseWithRetry(partOfResponse string, url string, assertion string, expected string, retryCount int, retryTime string) error {
+	retryDuration, err := time.ParseDuration(retryTime)
+	if err != nil {
+		return nil
+	}
 
 	for i := 0; i <= retryCount; i++ {
 		err = verifyHTTPResponse(partOfResponse, url, assertion, expected)
@@ -711,8 +719,8 @@ func verifyHTTPResponseWithRetry(partOfResponse string, url string, assertion st
 			break
 		}
 
-		fmt.Printf("HTTP check (%v) has failed, trying again in %v ms. Error: %v\n", i+1, retryWaitPeriod, err)
-		time.Sleep(time.Millisecond * time.Duration(retryWaitPeriod))
+		fmt.Printf("HTTP check (%v) has failed, trying again in %v. Error: %v\n", i+1, retryTime, err)
+		time.Sleep(retryDuration)
 	}
 
 	return err

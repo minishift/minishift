@@ -174,10 +174,17 @@ user defined options which changes default behaviour of Minishift.
     | property        | value                                                                                            | expected                                                                                        |
     | iso-url         | https://github.com/minishift/minishift-b2d-iso/releases/download/v1.1.0/minishift-b2d.iso        | https://github.com/minishift/minishift-b2d-iso/releases/download/v1.1.0/minishift-b2d.iso       |
     | iso-url         | http://github.com/minishift/minishift-centos-iso/releases/download/v1.1.0/minishift-centos7.iso  | http://github.com/minishift/minishift-centos-iso/releases/download/v1.1.0/minishift-centos7.iso |
-    | iso-url         | file:///home/me/Downloads/my_handmade_b2d.iso                                                    | file:///home/me/Downloads/my_handmade_b2d.iso                                                   |
     | iso-url         | b2d                                                                                              | b2d                                                                                             |
     | iso-url         | centos                                                                                           | centos                                                                                          |
-
+       
+  @quick
+  Scenario: Setting iso-url key to a non existing path
+     When executing "minishift config set iso-url file:///home/Downloads/my_handmade_centos.iso" fails
+     Then stderr should contain
+      """
+      'file:///home/Downloads/my_handmade_centos.iso' file is not present
+      """
+	
   @quick
   Scenario: Unsetting non-existing key
      When executing "minishift config unset i-do-not-exist" succeeds

@@ -47,7 +47,7 @@ Feature: Minishift can run behind proxy
      """
      Success
      """
-    When service "ruby-ex" rollout successfully within "1200" seconds
+    When service "ruby-ex" rollout successfully within "20m"
     Then proxy log should contain "Accepting CONNECT to registry-1.docker.io:443"
      And proxy log should contain "Accepting CONNECT to bundler.rubygems.org:443"
      And proxy log should contain "Accepting CONNECT to rubygems.org:443"

@@ -50,10 +50,10 @@ Feature: Basic
     After startup of Minishift OpenShift instance should respond correctly on its html endpoints
     and OpenShift web console should be accessible.
     Given Minishift has state "Running"
-     Then with up to "20" retries with wait period of "3" seconds container name "k8s_webconsole_webconsole" should be "running"
+     Then with up to "10" retries with wait period of "6s" container name "k8s_webconsole_webconsole" should be "running"
       And "status code" of HTTP request to "/healthz" of OpenShift instance is equal to "200"
       And "body" of HTTP request to "/healthz" of OpenShift instance contains "ok"
-      And with up to "40" retries with wait period of "500ms" the "status code" of HTTP request to "/console" of OpenShift instance is equal to "200"
+      And with up to "10" retries with wait period of "2s" the "status code" of HTTP request to "/console" of OpenShift instance is equal to "200"
       And "body" of HTTP request to "/console" of OpenShift instance contains "<title>OpenShift Web Console</title>"
 
   Scenario Outline: User can set, get, view and unset values in configuration file
@@ -154,11 +154,15 @@ Feature: Basic
       And executing "oc new-app centos/ruby-22-centos7~https://github.com/sclorg/ruby-ex.git" succeeds
       And executing "oc expose svc/ruby-ex" succeeds
       And executing "oc set probe dc/ruby-ex --readiness --get-url=http://:8080" succeeds
-      And service "ruby-ex" rollout successfully within "1200" seconds
-     Then with up to "10" retries with wait period of "500ms" the "status code" of HTTP request to "/" of service "ruby-ex" in namespace "ruby" is equal to "200"
-      And with up to "10" retries with wait period of "500ms" the "body" of HTTP request to "/" of service "ruby-ex" in namespace "ruby" contains "Welcome to your Ruby application on OpenShift"
+      And service "ruby-ex" rollout successfully within "20m"
+     Then with up to "5" retries with wait period of "1s" the "status code" of HTTP request to "/" of service "ruby-ex" in namespace "ruby" is equal to "200"
+      And with up to "5" retries with wait period of "1s" the "body" of HTTP request to "/" of service "ruby-ex" in namespace "ruby" contains "Welcome to your Ruby application on OpenShift"
+
+  Scenario: User deletes project ruby
      When executing "oc delete project ruby" succeeds
      Then stdout should contain "project.project.openshift.io "ruby" deleted"
+
+  Scenario: User logs out of oc
      When executing "oc logout" succeeds
      Then stdout should contain
       """
@@ -166,9 +170,9 @@ Feature: Basic
       """
 
   Scenario: As a user I am able to export a container image from a running Minshift instance
-    Note: Just a sanity check for image caching. For more extensive tests see cmd-image.feature
-    When executing "minishift image export alpine:latest" succeeds
-    Then stdout of command "minishift image list" contains "alpine:latest"
+     Note: Just a sanity check for image caching. For more extensive tests see cmd-image.feature
+     When executing "minishift image export alpine:latest" succeeds
+     Then stdout of command "minishift image list" contains "alpine:latest"
 
   Scenario: Stopping Minishift
     Given Minishift has state "Running"

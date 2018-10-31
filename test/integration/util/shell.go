@@ -251,15 +251,20 @@ func ExecuteInHostShellSucceedsOrFails(command string, expectedResult string) er
 	return err
 }
 
-func CommandOutputInHostShellWithRetry(retryCount int, retryWaitPeriod int, command string, expected string) error {
+func CommandOutputInHostShellWithRetry(retryCount int, retryTime string, command string, expected string) error {
 	var exitCode, stdout string
+	retryDuration, err := time.ParseDuration(retryTime)
+	if err != nil {
+		return err
+	}
+
 	for i := 0; i < retryCount; i++ {
 		err := ExecuteInHostShell(command)
 		exitCode, stdout := shell.excbuf.String(), shell.outbuf.String()
 		if err == nil && exitCode == "0" && strings.Contains(stdout, expected) {
 			return nil
 		}
-		time.Sleep(time.Second * time.Duration(retryWaitPeriod))
+		time.Sleep(retryDuration)
 	}
 
 	return fmt.Errorf("Command '%s', Expected: exitCode 0, stdout %s, Actual: exitCode %s, stdout %s", command, expected, exitCode, stdout)
@@ -288,8 +293,8 @@ func ExecuteMinishiftInHostShellSucceedsOrFails(commandField string, expected st
 	return ExecuteInHostShellSucceedsOrFails(command, expected)
 }
 
-func ExecuteCommandInHostShellWithRetry(retryCount int, retryWaitPeriod int, command string, expected string) error {
-	return CommandOutputInHostShellWithRetry(retryCount, retryWaitPeriod, command, expected)
+func ExecuteCommandInHostShellWithRetry(retryCount int, retryTime string, command string, expected string) error {
+	return CommandOutputInHostShellWithRetry(retryCount, retryTime, command, expected)
 }
 
 func HostShellCommandReturnShouldContain(commandField string, expected string) error {

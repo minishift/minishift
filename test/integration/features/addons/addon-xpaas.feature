@@ -22,9 +22,9 @@ which are then available in OpenShift to the user.
     When executing "oc new-project <project-name>" succeeds
      And executing "oc new-app <template-name>" succeeds
      And executing "oc set probe dc/<service-name> --readiness --get-url=http://:8080<http-endpoint>" succeeds
-     And service "<service-name>" rollout successfully within "1200" seconds
-    Then with up to "10" retries with wait period of "500ms" the "body" of HTTP request to "<http-endpoint>" of service "<service-name>" in namespace "<project-name>" contains "<expected-hello>"
-     And with up to "10" retries with wait period of "500ms" the "status code" of HTTP request to "<http-endpoint>" of service "<service-name>" in namespace "<project-name>" is equal to "200"
+     And service "<service-name>" rollout successfully within "20m"
+    Then with up to "5" retries with wait period of "1s" the "body" of HTTP request to "<http-endpoint>" of service "<service-name>" in namespace "<project-name>" contains "<expected-hello>"
+     And with up to "5" retries with wait period of "1s" the "status code" of HTTP request to "<http-endpoint>" of service "<service-name>" in namespace "<project-name>" is equal to "200"
      And executing "oc delete project <project-name>" succeeds
 
   Examples: Required information to test the templates

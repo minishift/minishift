@@ -18,7 +18,7 @@ Feature: Che add-on
   Scenario: Che is ready
     Given Minishift has state "Running"
      When executing "oc project mini-che" succeeds
-     Then service "che" rollout successfully within "300" seconds
+     Then service "che" rollout successfully within "5m"
 
   Scenario: Che API is accessible
      When user tries to get the che api endpoint

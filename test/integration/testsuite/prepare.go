@@ -152,7 +152,10 @@ func runCommandsBeforeFeature(commands string, runner *util.MinishiftRunner) err
 	fmt.Println("Going to run commands:", commands)
 
 	for i := range splittedCommands {
-		_, stdErr, exitCode := runner.RunCommand(splittedCommands[i])
+		_, stdErr, exitCode, err := runner.RunCommand(splittedCommands[i])
+		if err != nil {
+			return err
+		}
 		if exitCode != 0 {
 			errorMessage += fmt.Sprintf("Error executing command 'minishift %v'.\nExit code: '%v',\nStderr: '%v'\n", splittedCommands[i], exitCode, stdErr)
 		}

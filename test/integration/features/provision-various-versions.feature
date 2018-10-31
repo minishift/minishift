@@ -20,7 +20,7 @@ Feature: Provision all major OpenShift versions
       """
       And "status code" of HTTP request to "/healthz" of OpenShift instance is equal to "200"
       And "body" of HTTP request to "/healthz" of OpenShift instance contains "ok"
-      And with up to "40" retries with wait period of "500ms" the "status code" of HTTP request to "/console" of OpenShift instance is equal to "200"
+      And with up to "10" retries with wait period of "2s" the "status code" of HTTP request to "/console" of OpenShift instance is equal to "200"
       And "body" of HTTP request to "/console" of OpenShift instance contains "<title>OpenShift Web Console</title>"
      When executing "minishift delete --force" succeeds
      Then Minishift should have state "Does Not Exist"

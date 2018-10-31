@@ -10,10 +10,10 @@ After that user checks the application and several other functions again and del
     Then Minishift should have state "Running"
 
   Scenario: User access OpenShift console
-   Given with up to "20" retries with wait period of "3" seconds container name "k8s_webconsole_webconsole" should be "running"
+   Given with up to "10" retries with wait period of "6s" container name "k8s_webconsole_webconsole" should be "running"
     When executing "minishift console --url" succeeds
      And stdout is valid URL
-    Then with up to "40" retries with wait period of "500ms" the "status code" of HTTP request to "/console" of OpenShift instance is equal to "200"
+    Then with up to "10" retries with wait period of "2s" the "status code" of HTTP request to "/console" of OpenShift instance is equal to "200"
 
   Scenario: User tries oc
     When executing "oc status" succeeds
@@ -21,9 +21,9 @@ After that user checks the application and several other functions again and del
 
   Scenario: User deploys example Django application
     When executing "oc new-app https://github.com/sclorg/django-ex" succeeds
-     And service "django-ex" rollout successfully within "1200" seconds
+     And service "django-ex" rollout successfully within "20m"
      And executing "oc expose svc django-ex" succeeds
-    Then with up to "5" retries with wait period of "1000ms" the "status code" of HTTP request to "/" of service "django-ex" in namespace "myproject" is equal to "200"
+    Then with up to "5" retries with wait period of "1s" the "status code" of HTTP request to "/" of service "django-ex" in namespace "myproject" is equal to "200"
 
   Scenario: User scales the application
     When executing "oc scale --replicas=5 dc django-ex" succeeds
@@ -51,10 +51,10 @@ After that user checks the application and several other functions again and del
     Then Minishift should have state "Running"
 
   Scenario: User access OpenShift console again
-   Given with up to "20" retries with wait period of "3" seconds container name "k8s_webconsole_webconsole" should be "running"
+   Given with up to "10" retries with wait period of "6s" container name "k8s_webconsole_webconsole" should be "running"
     When executing "minishift console --url" succeeds
      And stdout is valid URL
-    Then with up to "40" retries with wait period of "500ms" the "status code" of HTTP request to "/console" of OpenShift instance is equal to "200"
+    Then with up to "10" retries with wait period of "2s" the "status code" of HTTP request to "/console" of OpenShift instance is equal to "200"
 
   Scenario: User tries oc again
     When executing "oc status" succeeds
@@ -62,7 +62,7 @@ After that user checks the application and several other functions again and del
 
   Scenario: Django application is still accessible
     When Minishift has state "Running"
-    Then with up to "5" retries with wait period of "1000ms" the "status code" of HTTP request to "/" of service "django-ex" in namespace "myproject" is equal to "200"
+    Then with up to "5" retries with wait period of "1s" the "status code" of HTTP request to "/" of service "django-ex" in namespace "myproject" is equal to "200"
 
   Scenario: User looks at OpenShift logs again
     When executing "minishift logs" succeeds

@@ -46,22 +46,28 @@ type OcRunner struct {
 	CommandPath string
 }
 
-func runCommand(command string, commandPath string) (stdOut string, stdErr string, exitCode int) {
-	return runCommandWithTimeout(command, commandPath, 0)
+//runCommand runs oc command with default timeout of 1 hour
+func runCommand(command string, commandPath string) (stdOut string, stdErr string, exitCode int, err error) {
+	return runCommandWithTimeout(command, commandPath, "1h")
 }
 
-func runCommandWithTimeout(command string, commandPath string, timeout int) (stdOut string, stdErr string, exitCode int) {
+func runCommandWithTimeout(command string, commandPath string, maxTime string) (stdOut string, stdErr string, exitCode int, err error) {
+	maxDuration, err := time.ParseDuration(maxTime)
+	if err != nil {
+		return
+	}
+
 	var ctx context.Context
 	var cancel context.CancelFunc
 
 	commandArr := utilCmd.SplitCmdString(command)
-	path, _ := filepath.Abs(commandPath)
-
-	if timeout > 0 {
-		ctx, cancel = context.WithTimeout(context.Background(), time.Second*time.Duration(timeout))
-	} else {
-		ctx, cancel = context.WithCancel(context.Background())
+	path, err := filepath.Abs(commandPath)
+	if err != nil {
+		return
 	}
+
+	ctx, cancel = context.WithTimeout(context.Background(), maxDuration)
+
 	defer cancel()
 
 	var outbuf, errbuf bytes.Buffer
@@ -70,48 +76,43 @@ func runCommandWithTimeout(command string, commandPath string, timeout int) (std
 	cmd.Stderr = &errbuf
 
 	LogMessage("command", fmt.Sprintf("%s %s", commandPath, command))
-	err := cmd.Run()
-
-	if ctx.Err() == context.DeadlineExceeded {
-		errorMessage := fmt.Sprintf("Command exceeded the timeout of %v seconds.\n", timeout)
-		if err != nil {
-			err = fmt.Errorf(errorMessage)
-		}
-	}
-
+	cmdErr := cmd.Run()
 	stdOut = outbuf.String()
 	stdErr = errbuf.String()
+	LogMessage("stdout", stdOut)
+	LogMessage("stderr", stdErr)
 
-	if err != nil {
-		if exitError, ok := err.(*exec.ExitError); ok {
-			ws := exitError.Sys().(syscall.WaitStatus)
-			exitCode = ws.ExitStatus()
-		} else {
-			if stdErr == "" {
-				stdErr = err.Error()
-			}
-			exitCode = 1 // unable to get error code
-		}
-	} else {
+	// case 1: command timed out
+	if ctx.Err() == context.DeadlineExceeded {
+		err = fmt.Errorf("Command exceeded the timeout of %v.\n", maxTime)
+		return
+	}
+
+	// case 2: command executed successfully
+	if cmdErr == nil {
 		ws := cmd.ProcessState.Sys().(syscall.WaitStatus)
 		exitCode = ws.ExitStatus()
+		return
 	}
 
-	LogMessage("stdout", stdOut)
-	if stdErr != "" {
-		LogMessage("stderr", stdErr)
+	// case 3: cmd.Run() returned error - try to get exitCode
+	if exitError, ok := cmdErr.(*exec.ExitError); ok {
+		ws := exitError.Sys().(syscall.WaitStatus)
+		exitCode = ws.ExitStatus()
+	} else {
+		exitCode = 1
 	}
 
 	return
 }
 
-func (m *MinishiftRunner) RunCommand(command string) (stdOut string, stdErr string, exitCode int) {
-	stdOut, stdErr, exitCode = runCommand(command, m.CommandPath)
+func (m *MinishiftRunner) RunCommand(command string) (stdOut string, stdErr string, exitCode int, err error) {
+	stdOut, stdErr, exitCode, err = runCommand(command, m.CommandPath)
 	return
 }
 
-func (m *MinishiftRunner) RunCommandAndPrintError(command string) (stdOut string, stdErr string, exitCode int) {
-	stdOut, stdErr, exitCode = runCommand(command, m.CommandPath)
+func (m *MinishiftRunner) RunCommandAndPrintError(command string) (stdOut string, stdErr string, exitCode int, err error) {
+	stdOut, stdErr, exitCode, err = runCommand(command, m.CommandPath)
 	if exitCode != 0 {
 		fmt.Printf("Command 'minishift %v' returned non-zero exit code: %v, StdOut: %v, StdErr: %v", command, exitCode, stdOut, stdErr)
 	}
@@ -132,7 +133,7 @@ func (m *MinishiftRunner) CDKSetup() {
 }
 
 func (m *MinishiftRunner) IsCDK() bool {
-	cmdOut, _, _ := m.RunCommand("setup-cdk -h")
+	cmdOut, _, _, _ := m.RunCommand("setup-cdk -h")
 	return strings.Contains(cmdOut, "minishift setup-cdk [flags]")
 }
 
@@ -176,7 +177,7 @@ func (m *MinishiftRunner) EnsureAllMinishiftHomesDeleted(testDir string) {
 
 //EnsureAllProfilesDeleted retrieves all available profiles and deletes all running VMs on them
 func (m *MinishiftRunner) EnsureAllProfilesDeleted() {
-	stdOut, _, _ := m.RunCommandAndPrintError("profile list")
+	stdOut, _, _, _ := m.RunCommandAndPrintError("profile list")
 	lines := strings.Split(stdOut, "\n")
 
 	for _, line := range lines {
@@ -229,7 +230,7 @@ func (m *MinishiftRunner) SetEnvFromEnvCmdOutput(dockerEnvVars string) error {
 }
 
 func (m *MinishiftRunner) GetStatus() string {
-	cmdOut, _, _ := m.RunCommand("status")
+	cmdOut, _, _, _ := m.RunCommand("status")
 	return strings.Trim(cmdOut, " \n")
 }
 
@@ -238,33 +239,48 @@ func (m *MinishiftRunner) CheckStatus(desired string) bool {
 }
 
 func (m *MinishiftRunner) GetProfileStatus(profileName string) string {
-	cmdOut, _, _ := m.RunCommand("--profile " + profileName + " status")
+	cmdOut, _, _, _ := m.RunCommand("--profile " + profileName + " status")
 	return strings.Trim(cmdOut, " \n")
 }
 
 func (m *MinishiftRunner) GetProfileList() string {
-	cmdOut, _, _ := m.RunCommand("profile list")
+	cmdOut, _, _, _ := m.RunCommand("profile list")
 	return strings.Trim(cmdOut, " \n")
 }
 
-func (m *MinishiftRunner) GetOpenshiftContainers(containerName string) (string, error) {
-	cmdOut, cmdErr, _ := m.RunCommand(fmt.Sprintf(`ssh -- docker ps -f "name=%s"`, containerName))
-	if cmdErr != "" {
-		return strings.Trim(cmdOut, " \n"), fmt.Errorf(cmdErr)
+func (m *MinishiftRunner) GetContainerID(containerName string) (string, error) {
+	cmd := fmt.Sprintf(`ssh -- docker ps -a -f "name=%v" --format {{.ID}}`, containerName)
+	cmdOut, cmdErr, _, err := m.RunCommand(cmd)
+	if err != nil {
+		return "", err
 	}
-	return strings.Trim(cmdOut, " \n"), nil
+	if cmdErr != "" {
+		return "", fmt.Errorf(cmdErr)
+	}
+
+	ID := strings.Trim(cmdOut, "\n")
+	if ID == "" {
+		cmdOut, _, _, _ = m.RunCommand("ssh -- docker ps -a")
+		fmt.Errorf("unable to get ID of container %v, command '%v' gave an empty result. Containers running:'%v'", containerName, cmd, cmdOut)
+	}
+
+	return ID, nil
 }
 
-func (m *MinishiftRunner) GetContainerStatusUsingImageId(imageId string) (string, error) {
-	cmdOut, cmdErr, _ := m.RunCommand("ssh -- docker inspect -f '{{.State.Status}}'" + " " + imageId)
+func (m *MinishiftRunner) GetContainerStatusUsingImageID(imageID string) (string, error) {
+	cmdOut, cmdErr, _, err := m.RunCommand("ssh -- docker inspect -f '{{.State.Status}}' " + imageID)
+	if err != nil {
+		return "", err
+	}
 	if cmdErr != "" {
 		return strings.Trim(cmdOut, " \n"), fmt.Errorf(cmdErr)
 	}
+
 	return strings.Trim(cmdOut, " \n"), nil
 }
 
 func (m *MinishiftRunner) CpuInfo() (string, error) {
-	cmdOut, cmdErr, _ := m.RunCommand("ssh -- cat /proc/cpuinfo")
+	cmdOut, cmdErr, _, _ := m.RunCommand("ssh -- cat /proc/cpuinfo")
 	if cmdErr != "" {
 		return strings.Trim(cmdOut, " \n"), fmt.Errorf(cmdErr)
 	}
@@ -272,7 +288,7 @@ func (m *MinishiftRunner) CpuInfo() (string, error) {
 }
 
 func (m *MinishiftRunner) DiskInfo() (string, error) {
-	cmdOut, cmdErr, _ := m.RunCommand("ssh -- sudo fdisk -l | grep Disk")
+	cmdOut, cmdErr, _, _ := m.RunCommand("ssh -- sudo fdisk -l | grep Disk")
 	if cmdErr != "" {
 		return strings.Trim(cmdOut, " \n"), fmt.Errorf(cmdErr)
 	}
@@ -287,18 +303,18 @@ func NewOcRunner() *OcRunner {
 }
 
 // RunCommand executes oc command with default timeout of 3600s and returns standard output, error and exitcode.
-func (k *OcRunner) RunCommand(command string) (stdOut string, stdErr string, exitCode int) {
-	stdOut, stdErr, exitCode = runCommand(command, k.CommandPath)
+func (k *OcRunner) RunCommand(command string) (stdOut string, stdErr string, exitCode int, err error) {
+	stdOut, stdErr, exitCode, err = runCommand(command, k.CommandPath)
 	return
 }
 
 // RunCommandWithTimeout executes oc command with timeout specified in seconds and returns standard output, error and exitcode.
-func (k *OcRunner) RunCommandWithTimeout(command string, timeout int) (stdOut string, stdErr string, exitCode int) {
-	stdOut, stdErr, exitCode = runCommandWithTimeout(command, k.CommandPath, timeout)
+func (k *OcRunner) RunCommandWithTimeout(command string, timeout string) (stdOut string, stdErr string, exitCode int, err error) {
+	stdOut, stdErr, exitCode, err = runCommandWithTimeout(command, k.CommandPath, timeout)
 	return
 }
 
 func (m *MinishiftRunner) GetHostfolderList() string {
-	cmdOut, _, _ := m.RunCommand("hostfolder list")
+	cmdOut, _, _, _ := m.RunCommand("hostfolder list")
 	return strings.Trim(cmdOut, " \n")
 }

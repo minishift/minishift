@@ -90,13 +90,13 @@ func (c *CheRunner) theStacksShouldNotBeEmpty() error {
 	return nil
 }
 
-func (c *CheRunner) startingWorkspaceWithStackSucceeds(stackName string) error {
+func (c *CheRunner) startingWorkspaceWithStackSucceeds(stackName string, timeout string) error {
 	stackStartEnvironment, present := c.runner.GetStackConfigMap()[stackName]
 	if present == false {
 		return fmt.Errorf("Could not retrieve '%s' stack information.", stackName)
 	}
 
-	workspace, err := c.runner.StartWorkspace(stackStartEnvironment.Config.EnvironmentConfig, stackStartEnvironment.ID)
+	workspace, err := c.runner.StartWorkspace(stackStartEnvironment.Config.EnvironmentConfig, stackStartEnvironment.ID, timeout)
 	if err != nil {
 		return err
 	}
@@ -175,8 +175,8 @@ func (c *CheRunner) exitCodeShouldBe(code int) error {
 	return nil
 }
 
-func (c *CheRunner) stoppingWorkspaceSucceeds() error {
-	return c.runner.StopWorkspace(c.runner.WorkspaceID)
+func (c *CheRunner) stoppingWorkspaceSucceeds(timeout string) error {
+	return c.runner.StopWorkspace(c.runner.WorkspaceID, timeout)
 }
 
 func (c *CheRunner) workspaceIsRemoved() error {

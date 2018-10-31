@@ -153,16 +153,16 @@ func IsValidISOUrl(_ string, isoURL string) error {
 		if !match {
 			return fmt.Errorf("'%s' url is not valid", isoURL)
 		}
-		if filehelper.Exists(strings.Replace(strings.TrimPrefix(isoURL, "file://"), "/", "\\", -1)) {
-			return nil
+		if !filehelper.Exists(strings.Replace(strings.TrimPrefix(isoURL, "file://"), "/", "\\", -1)) {
+			return fmt.Errorf("'%s' file is not present", isoURL)
 		}
 	} else {
 		match, _ := regexp.MatchString("^file:///.+", isoURL)
 		if !match {
 			return fmt.Errorf("'%s' url is not valid", isoURL)
 		}
-		if filehelper.Exists(strings.TrimPrefix(isoURL, "file://")) {
-			return nil
+		if !filehelper.Exists(strings.TrimPrefix(isoURL, "file://")) {
+			return fmt.Errorf("'%s' file is not present", isoURL)
 		}
 	}
 

@@ -29,7 +29,7 @@ Feature: Che add-on
      Then the stacks should not be empty
 
   Scenario Outline: User starts workspace, imports projects, checks run commands
-     When starting a workspace with stack "<stack>" succeeds
+     When starting a workspace with stack "<stack>" succeeds within "15m"
      Then workspace should have state "RUNNING"
 
      When importing the sample project "<sample>" succeeds
@@ -38,7 +38,7 @@ Feature: Che add-on
      When user runs command on sample "<sample>"
      Then exit code should be 0
 
-     When stopping a workspace succeeds
+     When stopping a workspace succeeds within "3m" 
      Then workspace should have state "STOPPED"
 
      When workspace is removed

@@ -34,7 +34,7 @@ Feature: Che add-on in combination with anyuid addon.
      Then the stacks should not be empty
 
   Scenario Outline: User starts workspace, imports projects, checks run commands
-     When starting a workspace with stack "<stack>" succeeds
+     When starting a workspace with stack "<stack>" succeeds within "15m"
      Then workspace should have state "RUNNING"
 
      When importing the sample project "<sample>" succeeds
@@ -43,7 +43,7 @@ Feature: Che add-on in combination with anyuid addon.
      When user runs command on sample "<sample>"
      Then exit code should be 0
 
-     When stopping a workspace succeeds
+     When stopping a workspace succeeds within "3m"
      Then workspace should have state "STOPPED"
 
      When workspace is removed
@@ -52,7 +52,7 @@ Feature: Che add-on in combination with anyuid addon.
     Examples:
     | stack                 | sample                                                                   |
     | Eclipse Vert.x        | https://github.com/openshiftio-vertx-boosters/vertx-http-booster         |
-#   | Java CentOS           | https://github.com/che-samples/console-java-simple.git                   | ignored due to issue #2824
+#   | Java CentOS           | https://github.com/che-samples/console-java-simple.git                   | Keep disabled until #2824 is fixed
     | Spring Boot           | https://github.com/snowdrop/spring-boot-http-booster                     |
 #   | CentOS WildFly Swarm  | https://github.com/wildfly-swarm-openshiftio-boosters/wfswarm-rest-http  | Keep disabled until #2824 is fixed
     | Python                | https://github.com/che-samples/console-python3-simple.git                |

@@ -341,22 +341,30 @@ func (c *CheAPI) GetNumberOfProjects() (int, error) {
 	return len(data), nil
 }
 
-//BlockWorkspace blocks the given workspaceID until it has started
-func (c *CheAPI) BlockWorkspace(workspaceID, untilStatus string) error {
+//BlockWorkspace blocks the given workspaceID until it has given status
+func (c *CheAPI) BlockWorkspace(workspaceID string, expectedStatus string, timeout string) error {
+	maxDuration, err := time.ParseDuration(timeout)
+	if err != nil {
+		return err
+	}
+
+	startTime := time.Now()
 	for {
 		workspaceStatus, err := c.GetWorkspaceStatusByID(workspaceID)
 		if err != nil {
 			return err
 		}
 
-		if workspaceStatus.WorkspaceStatus == untilStatus {
-			break
+		if workspaceStatus.WorkspaceStatus == expectedStatus {
+			return nil
+		}
+
+		if time.Since(startTime) > maxDuration {
+			return fmt.Errorf("time limit (%v) exceeded: workspace did not get into state '%v', current state: '%v'", timeout, expectedStatus, workspaceStatus)
 		}
 
 		time.Sleep(5 * time.Second)
 	}
-
-	return nil
 }
 
 //GetHTTPAgents gets the Exec Agent and WSAgent from a Che5 or Che6 workspace
@@ -405,7 +413,7 @@ func (c *CheAPI) GetHTTPAgents(workspaceID string) (Agent, error) {
 }
 
 //StartWorkspace POSTs a Workspace configuration to the workspace endpoint, creating a new workspace
-func (c *CheAPI) StartWorkspace(workspaceConfiguration interface{}, stackID string) (Workspace2, error) {
+func (c *CheAPI) StartWorkspace(workspaceConfiguration interface{}, stackID string, timeout string) (Workspace2, error) {
 	a := Post{Environments: workspaceConfiguration, Namespace: "che", Name: stackID + "-stack-test", DefaultEnv: "default"}
 	marshalled, err := json.MarshalIndent(a, "", "    ")
 	if err != nil {
@@ -427,9 +435,9 @@ func (c *CheAPI) StartWorkspace(workspaceConfiguration interface{}, stackID stri
 		return Workspace2{}, err
 	}
 
-	c.BlockWorkspace(WorkspaceResponse.ID, "RUNNING")
+	err = c.BlockWorkspace(WorkspaceResponse.ID, "RUNNING", timeout)
 
-	return WorkspaceResponse, nil
+	return WorkspaceResponse, err
 }
 
 //GetWorkspaceStatusByID gets the workspace status of the given workspaceID
@@ -460,15 +468,13 @@ func (c *CheAPI) CheckWorkspaceDeletion(workspaceID string) error {
 }
 
 //StopWorkspace stops the workspace with workspaceID
-func (c *CheAPI) StopWorkspace(workspaceID string) error {
+func (c *CheAPI) StopWorkspace(workspaceID string, timeout string) error {
 	_, _, err := doRequest(http.MethodDelete, c.CheAPIEndpoint+"/workspace/"+workspaceID+"/runtime", "")
 	if err != nil {
 		return err
 	}
 
-	c.BlockWorkspace(workspaceID, "STOPPED")
-
-	return nil
+	return c.BlockWorkspace(workspaceID, "STOPPED", timeout)
 }
 
 //RemoveWorkspace removes the workspace with workspaceID

@@ -44,18 +44,36 @@ For more information, see the GitHub documentation of the link:https://github.co
 === On Ubuntu
 
 .  Install *libvirt* and *qemu-kvm* on your system:
+- For Ubuntu-18.10
++
+----
+$ sudo apt install qemu-kvm libvirt-daemon libvirt-daemon-system
+----
+- For older Ubuntu versions
 +
 ----
 $ sudo apt install libvirt-bin qemu-kvm
 ----
 
-.  Add yourself to the *libvirtd* group:
+.  Add yourself to the *libvirt(d)* group:
+- For Ubuntu-18.10
++
+----
+$ sudo usermod -a -G libvirt <username>
+----
+- For older Ubuntu versions
 +
 ----
 $ sudo usermod -a -G libvirtd <username>
 ----
 
 .  Update your current session to apply the group change:
+- For Ubuntu-18.10
++
+----
+$ newgrp libvirt
+----
+- For older Ubuntu versions
 +
 ----
 $ newgrp libvirtd

@@ -118,6 +118,9 @@ $(BUILD_DIR)/windows-amd64/systemtray/minishift.exe: $(ADDON_ASSET_FILE) $(BUILD
 $(GOPATH)/bin/gh-release:
 	go get -u github.com/progrium/gh-release/...
 
+$(GOPATH)/bin/github-release:
+	go get -u github.com/aktau/github-release/...
+
 $(GOPATH)/bin/go-bindata:
 	go get -u github.com/jteeuwen/go-bindata/...
 
@@ -194,6 +197,32 @@ release: clean $(GOPATH)/bin/gh-release cross ## Create release and upload to Gi
 	gh-release checksums sha256
 	gh-release create minishift/minishift $(MINISHIFT_VERSION) master v$(MINISHIFT_VERSION)
 
+.PHONY: release_systemtray## Works only in mac environment, export GITHUB_USER, GITHUB_TOKEN
+release_systemtray: clean $(GOPATH)/bin/github-release $(GOPATH)/bin/gh-release cross_systemtray ## Upload systemtray binaries to Github release
+	$(call check_defined, GITHUB_USER, "To upload systemtray bits to release you need to specify Github user.")
+	$(call check_defined, GITHUB_TOKEN, "To upload systemtray bits you need to specify Github api token")
+	mkdir -p release
+
+	@mkdir -p $(BUILD_DIR)/minishift-systemtray-$(MINISHIFT_VERSION)-darwin-amd64
+	@cp LICENSE README.adoc $(BUILD_DIR)/darwin-amd64/systemtray/minishift $(BUILD_DIR)/minishift-systemtray-$(MINISHIFT_VERSION)-darwin-amd64
+	tar -zcf release/minishift-systemtray-$(MINISHIFT_VERSION)-darwin-amd64.tgz -C $(BUILD_DIR) minishift-systemtray-$(MINISHIFT_VERSION)-darwin-amd64/
+
+	@mkdir -p $(BUILD_DIR)/minishift-systemtray-$(MINISHIFT_VERSION)-windows-amd64
+	@cp LICENSE README.adoc $(BUILD_DIR)/windows-amd64/systemtray/minishift.exe $(BUILD_DIR)/minishift-systemtray-$(MINISHIFT_VERSION)-windows-amd64
+	cd $(BUILD_DIR) && zip -r $(CURDIR)/release/minishift-systemtray-$(MINISHIFT_VERSION)-windows-amd64.zip minishift-systemtray-$(MINISHIFT_VERSION)-windows-amd64
+
+	gh-release checksums sha256
+
+	github-release upload --repo minishift --tag v$(MINISHIFT_VERSION) --name minishift-systemtray-$(MINISHIFT_VERSION)-darwin-amd64.tgz \
+		--file release/minishift-systemtray-$(MINISHIFT_VERSION)-darwin-amd64.tgz
+	github-release upload --repo minishift --tag v$(MINISHIFT_VERSION) --name minishift-systemtray-$(MINISHIFT_VERSION)-darwin-amd64.tgz.sha256 \
+		--file release/minishift-systemtray-$(MINISHIFT_VERSION)-darwin-amd64.tgz.sha256
+
+	github-release upload --repo minishift --tag v$(MINISHIFT_VERSION) --name minishift-systemtray-$(MINISHIFT_VERSION)-windows-amd64.zip \
+		--file release/minishift-systemtray-$(MINISHIFT_VERSION)-windows-amd64.zip
+	github-release upload --repo minishift --tag v$(MINISHIFT_VERSION) --name minishift-systemtray-$(MINISHIFT_VERSION)-windows-amd64.zip.sha256 \
+		--file release/minishift-systemtray-$(MINISHIFT_VERSION)-windows-amd64.zip.sha256
+
 .PHONY: ci_release
 ci_release: ## Trigger a release via CentOS CI. Needs API_KEY and RELEASE_VERSION
 	$(call check_defined, API_KEY, "To trigger the CentOS CI release build you need to specify the CentOS CI API key.")
@@ -202,6 +231,14 @@ ci_release: ## Trigger a release via CentOS CI. Needs API_KEY and RELEASE_VERSIO
 	curl -s -H "$(shell curl -s --user 'minishift:$(API_KEY)' 'https://ci.centos.org//crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)')" \
 	-X POST https://ci.centos.org/job/minishift-release/build --user 'minishift:$(API_KEY)' \
 	--data-urlencode json='{"parameter": [{"name":"RELEASE_VERSION", "value":'"$(RELEASE_VERSION)"'}, {"name":"SKIP_INTEGRATION_TEST", "value":"false"}]}'
+
+.PHONY: ci_release_systemtray
+ci_release_systemtray: ## Trigger upload of systemtray binaries from circle CI. Needs CIRCLECI_API_KEY and RELEASE_VERSION
+	$(call check_defined, CIRCLECI_API_KEY, "To trigger the Circle CI release build you need to specify the Circle CI API key.")
+	$(call check_defined, RELEASE_VERSION, "You need to specify the version you want to release.")
+	
+	curl -s -u '$(CIRCLECI_API_KEY):' -d 'build_parameters[CIRCLE_JOB]=release' -d 'build_parameters[RELEASE_VERSION]=$(RELEASE_VERSION)' \
+		https:/circleci.com/api/v1.1/project/github/minishift/minishift/tree/master
 
 .PHONY: cross ## Cross compiles all binaries
 cross: $(BUILD_DIR)/darwin-amd64/minishift $(BUILD_DIR)/linux-amd64/minishift $(BUILD_DIR)/windows-amd64/minishift.exe

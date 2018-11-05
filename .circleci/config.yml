@@ -59,6 +59,118 @@ jobs:
     - store_artifacts:
         path: "../go/src/github.com/minishift/minishift/out"
         destination: ms
+ 
+  release:
+    macos:
+      xcode: "9.0"
+    environment:
+        GOVERSION: 1.10.2
+        XCODE_SCHEME: symbolicator
+        XCODE_WORKSPACE: symbolicator
+
+## Build minishift
+    steps:
+    - checkout
+    - run:
+        name: Configure GOPATH
+        command: echo 'export GOPATH=$HOME/go' >> $BASH_ENV
+    - run:
+        name: Configure Path
+        command: echo 'export PATH=$GOPATH/bin:/usr/local/go/bin/:$PATH' >> $BASH_ENV
+    - run:
+        name: Prepare minishift
+        command: mkdir -p $GOPATH/src/github.com/minishift/minishift && cp -R ~/project/ $GOPATH/src/github.com/minishift/minishift
+    - run:
+        name: Cleanup GOROOT
+        command: sudo rm -rf /usr/local/go
+    - run:
+        name: Install go
+        command: curl https://storage.googleapis.com/golang/go${GOVERSION}.darwin-amd64.tar.gz | sudo tar -C /usr/local -xz
+    - run:
+        name: List go version
+        command: go version
+    - run:
+        name: List go environment
+        command: go env
+    - run:
+        name: Create GOPATH bin directory
+        command: mkdir -p $GOPATH/bin
+    - run:
+        name: Download dep
+        command: curl -sL "https://github.com/golang/dep/releases/download/${GODEP_TAG}/dep-$(go env GOHOSTOS)-$(go env GOHOSTARCH)" -o /tmp/dep
+        environment:
+            GODEP_TAG: v0.4.1
+    - run:
+        name: Configure dep
+        command: mv /tmp/dep $GOPATH/bin/dep && chmod +x $GOPATH/bin/dep
+    - run:
+        name: Download github-release
+        command: |
+                curl -sL "https://github.com/aktau/github-release/releases/download/${GH_RELEASE_TAG}/$(go env GOHOSTOS)-$(go env GOHOSTARCH)-github-release.tar.bz2" \
+                -o /tmp/github-release.tar.bz2
+        environment:
+            GH_RELEASE_TAG: v0.7.2
+    - run:
+        name: Extract github-release
+        command: mkdir /tmp/github-release && tar -C /tmp/github-release/ -xj -f /tmp/github-release.tar.bz2
+    - run:
+        name: Configure github-release
+        command: mv /tmp/github-release/bin/$(go env GOHOSTOS)/$(go env GOHOSTARCH)/github-release $GOPATH/bin/github-release && chmod +x $GOPATH/bin/github-release
+    - run:
+        name: Install gh-release
+        command: go get -u github.com/progrium/gh-release/...
+    - run:
+        name: Make prerelease
+        command: cd $GOPATH/src/github.com/minishift/minishift && make prerelease
+    - run:
+        name: Make systemtray
+        command: cd $GOPATH/src/github.com/minishift/minishift && make cross_systemtray
+    - run:
+        name: Validate Commits
+        command: cd $GOPATH/src/github.com/minishift/minishift && make validate_commits
+    - run:
+        name: Make archives
+        command: |
+                mkdir -p $SOURCE_DIR/release
+
+                mkdir -p $BUILD_DIR/minishift-systemtray-$RELEASE_VERSION-darwin-amd64
+                cp $SOURCE_DIR/LICENSE $SOURCE_DIR/README.adoc $BUILD_DIR/darwin-amd64/systemtray/minishift $BUILD_DIR/minishift-systemtray-$RELEASE_VERSION-darwin-amd64
+                tar -zcf $SOURCE_DIR/release/minishift-systemtray-$RELEASE_VERSION-darwin-amd64.tgz -C $BUILD_DIR minishift-systemtray-$RELEASE_VERSION-darwin-amd64/
+
+                mkdir -p $BUILD_DIR/minishift-systemtray-$RELEASE_VERSION-windows-amd64
+                cp $SOURCE_DIR/LICENSE $SOURCE_DIR/README.adoc $BUILD_DIR/windows-amd64/systemtray/minishift.exe $BUILD_DIR/minishift-systemtray-$RELEASE_VERSION-windows-amd64
+                zip -r $SOURCE_DIR/release/minishift-systemtray-$RELEASE_VERSION-windows-amd64.zip $BUILD_DIR/minishift-systemtray-$RELEASE_VERSION-windows-amd64
+        environment:
+            BUILD_DIR: ../go/src/github.com/minishift/minishift/out
+            SOURCE_DIR: ../go/src/github.com/minishift/minishift
+    - run:
+        name: Generate sha256 checksum
+        command: cd $GOPATH/src/github.com/minishift/minishift && gh-release checksums sha256
+    - run:
+        name: Upload darwin bits
+        command: |
+                cd $GOPATH/src/github.com/minishift/minishift/release
+                github-release upload --user anjannath --repo minishift --tag v$RELEASE_VERSION --name minishift-systemtray-$RELEASE_VERSION-darwin-amd64.tgz \
+                --file minishift-systemtray-$RELEASE_VERSION-darwin-amd64.tgz
+    - run:
+        name: Upload checksum for darwin bits
+        command: |
+                cd $GOPATH/src/github.com/minishift/minishift/release
+                github-release upload --user anjannath --repo minishift --tag v$RELEASE_VERSION --name minishift-systemtray-$RELEASE_VERSION-darwin-amd64.tgz.sha256 \
+                --file minishift-systemtray-$RELEASE_VERSION-darwin-amd64.tgz.sha256
+
+    - run:
+        name: Upload windows bits
+        command: |
+                cd $GOPATH/src/github.com/minishift/minishift/release
+                github-release upload --user anjannath --repo minishift --tag v$RELEASE_VERSION --name minishift-systemtray-$RELEASE_VERSION-windows-amd64.zip \
+                --file minishift-systemtray-$RELEASE_VERSION-windows-amd64.zip
+    - run:
+        name: Upload checksum for windows bits
+        command: |
+                cd $GOPATH/src/github.com/minishift/minishift/release
+                github-release upload --user anjannath --repo minishift --tag v$RELEASE_VERSION --name minishift-systemtray-$RELEASE_VERSION-windows-amd64.zip.sha256 \
+                --file minishift-systemtray-$RELEASE_VERSION-windows-amd64.zip.sha256
 
 ## Notifications
 notify:

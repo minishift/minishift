@@ -51,6 +51,17 @@ The automated release performs:
 If the CI release job is failing for a known reason then you can skip the integration tests by changing the `SKIP_INTEGRATION_TEST` value to `true` in Makefile.
 ====
 
+The systemtray bits needs to uploaded separately, which can be performed by triggering CI job as:
+
+----
+$ make ci_release_systemtray CIRCLECI_API_KEY=<api-key> RELEASE_VERSION=<version>
+----
+
+where
+
+  - `api-key` : {project} Circle CI API key
+  - `version` : The expected release version (without 'v'). For example, 1.0.0.
+
 [[manaul-release]]
 == Manual Release
 
@@ -58,6 +69,8 @@ If the CI release job is failing for a known reason then you can skip the integr
 === Prerequisites
 
 - You must have a https://help.github.com/articles/creating-an-access-token-for-command-line-use[GitHub personal access token] defined in your environment as `GITHUB_ACCESS_TOKEN`.
+- You must set environment variable `GITHUB_USER` as _minishift_.
+- To create the systemtray binaries, link:https://developer.apple.com/xcode[`Xcode`] must be installed.
 
 [[cut-release]]
 === Cutting the Release
@@ -93,6 +106,14 @@ For more information, see xref:../contributing/writing-docs.adoc#[Writing and Pu
 
 [[post-release-tasks]]
 === Post-Release Tasks
+
+The systemtray bits also needs to be uploaded to the release in Github.
+Create {project} binaries with systemtray and upload them to Github. 
+The following command works only in macOS, please refer the xref:../contributing/releasing.adoc#release-prereqs[Prerequisites] for more information.
+
+----
+$ make release_systemtray
+----
 
 As part of the release process we also send a release announcement and edit the GitHub release page.
 

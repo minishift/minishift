@@ -183,15 +183,17 @@ func doRequest(requestType, url, data string) ([]byte, int, error) {
 	}
 
 	req, err := http.NewRequest(requestType, url, bytes.NewBufferString(data))
-	req.Header.Set("Content-Type", "application/json")
 	if err != nil {
 		return []byte{}, -1, err
 	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Close = true
 
 	res, err := client.Do(req)
 	if err != nil {
 		return nil, res.StatusCode, err
 	}
+	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {

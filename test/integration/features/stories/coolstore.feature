@@ -1,4 +1,4 @@
-@coolstore
+@coolstore @disabled
 Feature: Cool Store
   In order to test Minishift under load user starts it with 4G of memory,
   imports xpaas image streams and finally deploys the Cool Store demo.

@@ -184,6 +184,10 @@ user defined options which changes default behaviour of Minishift.
       """
       'file:///home/Downloads/my_handmade_centos.iso' file is not present
       """
+
+  Scenario: Setting iso-url key to an existing path
+     When creating file "test.iso" in directory "/tmp/minishift" succeeds
+      And executing "minishift config set iso-url file:///tmp/minishift/test.iso" succeeds
 	
   @quick
   Scenario: Unsetting non-existing key

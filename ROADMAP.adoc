@@ -89,7 +89,7 @@ version name of a given release.
 [[minishift-190]]
 === Minishift 1.9.0
 - [x] Provide notation for default value for addon-envs https://github.com/minishift/minishift/issues/1135[#1135]
-- [ ] Ability to use you own certificates for the cluster https://github.com/minishift/minishift/issues/391[#391]
+- [ ] Ability to use your own certificates for the cluster https://github.com/minishift/minishift/issues/391[#391]
 - [ ] Global cache which can be shared among profiles https://github.com/minishift/minishift/issues/1408[#1408]
 
 [[minishift-1100]]

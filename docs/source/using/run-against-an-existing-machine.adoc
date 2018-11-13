@@ -95,6 +95,6 @@ The value of the `--remote-ssh-key` flag must be the location of a private SSH k
 [NOTE]
 ====
 To change the default username and password, you must apply the `htpasswd-identity-provider` add-on with the desired username and password after running the `minishift start` command.
-By default, {{project}} uses the `Allow All` identity provider.
+By default, {project} uses the `Allow All` identity provider.
 The `Allow All` identity provider allows any non-empty username and password to log in.
 ====

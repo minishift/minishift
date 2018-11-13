@@ -150,26 +150,26 @@ jobs:
         name: Upload darwin bits
         command: |
                 cd $GOPATH/src/github.com/minishift/minishift/release
-                github-release upload --user anjannath --repo minishift --tag v$RELEASE_VERSION --name minishift-systemtray-$RELEASE_VERSION-darwin-amd64.tgz \
+                github-release upload --user minishift --repo minishift --tag v$RELEASE_VERSION --name minishift-systemtray-$RELEASE_VERSION-darwin-amd64.tgz \
                 --file minishift-systemtray-$RELEASE_VERSION-darwin-amd64.tgz
     - run:
         name: Upload checksum for darwin bits
         command: |
                 cd $GOPATH/src/github.com/minishift/minishift/release
-                github-release upload --user anjannath --repo minishift --tag v$RELEASE_VERSION --name minishift-systemtray-$RELEASE_VERSION-darwin-amd64.tgz.sha256 \
+                github-release upload --user minishift --repo minishift --tag v$RELEASE_VERSION --name minishift-systemtray-$RELEASE_VERSION-darwin-amd64.tgz.sha256 \
                 --file minishift-systemtray-$RELEASE_VERSION-darwin-amd64.tgz.sha256
 
     - run:
         name: Upload windows bits
         command: |
                 cd $GOPATH/src/github.com/minishift/minishift/release
-                github-release upload --user anjannath --repo minishift --tag v$RELEASE_VERSION --name minishift-systemtray-$RELEASE_VERSION-windows-amd64.zip \
+                github-release upload --user minishift --repo minishift --tag v$RELEASE_VERSION --name minishift-systemtray-$RELEASE_VERSION-windows-amd64.zip \
                 --file minishift-systemtray-$RELEASE_VERSION-windows-amd64.zip
     - run:
         name: Upload checksum for windows bits
         command: |
                 cd $GOPATH/src/github.com/minishift/minishift/release
-                github-release upload --user anjannath --repo minishift --tag v$RELEASE_VERSION --name minishift-systemtray-$RELEASE_VERSION-windows-amd64.zip.sha256 \
+                github-release upload --user minishift --repo minishift --tag v$RELEASE_VERSION --name minishift-systemtray-$RELEASE_VERSION-windows-amd64.zip.sha256 \
                 --file minishift-systemtray-$RELEASE_VERSION-windows-amd64.zip.sha256
 
 ## Notifications

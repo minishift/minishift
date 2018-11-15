@@ -33,17 +33,16 @@ You can set the `MINISHIFT_ENABLE_EXPERIMENTAL` environment variable to enable t
 `extra-clusterup-flags`::
 Enables passing flags directly to `oc cluster up` that are not directly exposed in the {project} CLI.
 
-Using the experimental flag, to enable the Service Catalog in OKD 3.9, the command is:
-
-----
-$ MINISHIFT_ENABLE_EXPERIMENTAL=y minishift start --extra-clusterup-flags "--service-catalog"
-----
-
-For OKD 3.10.0 or later the command is:
+Using the experimental flag, to enable the Service Catalog in OKD 3.10 or in later versions, the command is:
 
 ----
 $ MINISHIFT_ENABLE_EXPERIMENTAL=y minishift start --extra-clusterup-flags "--enable=*,service-catalog"
 ----
+
+[NOTE]
+====
+The recommended way to enable service catalog is xref:../command-ref/minishift_openshift_component_add.adoc#[`minishift openshift component add`] command.
+====
 
 [[local-proxy-server]]
 == Local Proxy Server

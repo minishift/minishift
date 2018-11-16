@@ -26,7 +26,7 @@ To share your feedback on these features, you are welcome to link:https://github
 [[enabling-experimental-oc-flags]]
 == Enabling Experimental `oc cluster up` Flags
 
-By default, {project} does not expose all link:https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md[`oc cluster up`] flags in the {project} CLI.
+By default, {project} does not expose all link:https://github.com/openshift/origin/blob/release-3.11/docs/cluster_up_down.md[`oc cluster up`] flags in the {project} CLI.
 
 You can set the `MINISHIFT_ENABLE_EXPERIMENTAL` environment variable to enable the following options for the xref:../command-ref/minishift_start.adoc#[`minishift start`] command:
 

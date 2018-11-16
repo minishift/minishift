@@ -25,18 +25,6 @@ import (
 	"github.com/minishift/minishift/test/integration/testsuite"
 )
 
-func applyingCheWithOpenshiftTokenSucceeds() error {
-	err := testsuite.MinishiftInstance.ExecutingOcCommand("whoami -t")
-	if err != nil {
-		return err
-	}
-
-	token := testsuite.GetLastCommandOutput().StdOut
-	err = testsuite.MinishiftInstance.ExecutingMinishiftCommand("addons apply --addon-env OPENSHIFT_TOKEN=" + token + " che")
-
-	return err
-}
-
 func (c *CheRunner) weTryToGetTheCheApiEndpoint() error {
 	err := testsuite.MinishiftInstance.ExecutingOcCommand("get routes -n mini-che --template='{{range .items}}{{.spec.host}}{{end}}'")
 	if err != nil {

@@ -11,7 +11,7 @@ toc::[]
 [[openshift-client-binary-overview]]
 == Overview
 
-The `minishift start` command creates an OpenShift cluster using the link:https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md[cluster up] approach.
+The `minishift start` command creates an OpenShift cluster using the link:https://github.com/openshift/origin/blob/release-3.11/docs/cluster_up_down.md[cluster up] approach.
 For this purpose it copies the `oc` binary onto your host.
 
 The `oc` binary is located in the  *_~/.minishift/cache/oc/{openshift-version}_* directory, assuming that you use {project}'s default version of OpenShift.

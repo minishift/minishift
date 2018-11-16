@@ -12,7 +12,7 @@ Feature: Che add-on
      Then Minishift should have state "Running"
 
   Scenario: User applies Che add-on
-     When applying che addon with openshift token succeeds
+     When executing "minishift addons apply che" succeeds
      Then stdout should contain "Please wait while the pods all startup!"
 
   Scenario: Che is ready
@@ -47,7 +47,7 @@ Feature: Che add-on
     Examples:
     | stack                 | sample                                                                   |
     | Eclipse Vert.x        | https://github.com/openshiftio-vertx-boosters/vertx-http-booster         |
-#   | Java CentOS           | https://github.com/che-samples/console-java-simple.git                   | Keep disabled until #2824 is fixed
+    | Java CentOS           | https://github.com/che-samples/console-java-simple.git                   |
     | Spring Boot           | https://github.com/snowdrop/spring-boot-http-booster                     |
     | CentOS WildFly Swarm  | https://github.com/wildfly-swarm-openshiftio-boosters/wfswarm-rest-http  |
     | Python                | https://github.com/che-samples/console-python3-simple.git                |

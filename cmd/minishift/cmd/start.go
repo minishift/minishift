@@ -206,6 +206,11 @@ func runStart(cmd *cobra.Command, args []string) {
 		minishiftConfig.InstanceStateConfig.Write()
 	}
 	timezone.SetTimeZone(hostVm)
+	if viper.GetBool(configCmd.RegistryLogin.Name) {
+		if err = minishiftCluster.LoginToRegistry(libMachineClient); err != nil {
+			atexit.ExitWithMessage(1, err.Error())
+		}
+	}
 	registrationUtil.RegisterHost(libMachineClient)
 
 	// Forcibly set nameservers when configured
@@ -696,6 +701,7 @@ func initStartFlags() *flag.FlagSet {
 	startFlagSet.String(configCmd.SSHKeyToConnectRemote.Name, "", "SSH private key location on the host to connect remote machine")
 	startFlagSet.String(configCmd.ISOUrl.Name, minishiftConstants.CentOsIsoAlias, "Location of the minishift ISO. Can be a URL, file URI or one of the following short names: [centos b2d].")
 	startFlagSet.String(configCmd.TimeZone.Name, constants.DefaultTimeZone, "TimeZone for Minishift VM")
+	startFlagSet.Bool(configCmd.RegistryLogin.Name, false, "Login to registry.redhat.io")
 
 	startFlagSet.AddFlag(dockerEnvFlag)
 	startFlagSet.AddFlag(dockerEngineOptFlag)

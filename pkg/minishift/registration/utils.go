@@ -17,11 +17,19 @@ limitations under the License.
 package registration
 
 import (
+	"errors"
 	"fmt"
+	"github.com/golang/glog"
+	"github.com/minishift/minishift/pkg/util"
+	"github.com/minishift/minishift/pkg/util/progressdots"
+	"regexp"
+	"strings"
+	"time"
 
 	"github.com/docker/machine/libmachine/host"
 	"github.com/docker/machine/libmachine/log"
 	"github.com/docker/machine/libmachine/provision"
+	minishiftStrings "github.com/minishift/minishift/pkg/util/strings"
 )
 
 type RegistrationParameters struct {
@@ -99,4 +107,112 @@ func UnregisterHostVM(host *host.Host, param *RegistrationParameters) (bool, err
 		"Unregistering machine",
 		registrator.Unregister,
 		param)
+}
+
+func RSHMRegisterAndLoginToRedhatRegistry(sshCommander provision.SSHCommander, param *RegistrationParameters, isRHEL bool) error {
+	var err error
+	keyringDocsLink := "https://docs.okd.io/latest/minishift/troubleshooting/troubleshooting-misc.html#Remove-password-from-keychain"
+	for i := 1; i < 4; i++ {
+		// request username (disallow empty value)
+		if param.Username == "" {
+			// Check if Terminal tty supported or not
+			if !param.IsTtySupported {
+				return fmt.Errorf(("Not a tty supported terminal, Retries are disabled"))
+			}
+			for param.Username == "" {
+				param.Username = param.GetUsernameInteractive(RHSMName + " username")
+			}
+		}
+		// request password (disallow empty value)
+		if param.Password == "" {
+			if i == 1 {
+				fmt.Printf("   Retriving password from keychain ...")
+				param.Password, err = param.GetPasswordKeyring(param.Username)
+				if err != nil {
+					fmt.Println(" FAIL ")
+				} else {
+					fmt.Println(" OK ")
+				}
+			}
+
+			for param.Password == "" {
+				param.Password = param.GetPasswordInteractive(RHSMName + " password")
+				fmt.Printf("   Storing password in keychain ...")
+				err := param.SetPasswordKeyring(param.Username, param.Password)
+				if err != nil {
+					fmt.Println(" FAIL ")
+				} else {
+					fmt.Println(" OK ")
+				}
+				if glog.V(3) {
+					fmt.Println(err)
+				}
+			}
+		}
+
+		// prepare subscription command
+		subscriptionCommand := fmt.Sprintf("sudo -E subscription-manager register --auto-attach "+
+			"--username %s "+
+			"--password '%s' ",
+			param.Username,
+			minishiftStrings.EscapeSingleQuote(param.Password))
+
+		// prepare docker login command for registry.redhat.io
+		dockerLoginCommand := fmt.Sprintf("docker login --username %s --password %s %s",
+			param.Username,
+			minishiftStrings.EscapeSingleQuote(param.Password),
+			RedHatRegistry)
+
+		fmt.Printf("   Login to %s in progress ", RedHatRegistry)
+		// Initialize progressDots channel
+		progressDots := progressdots.New()
+		progressDots.Start()
+		// Login to docker registry
+		_, err = sshCommander.SSHCommand(dockerLoginCommand)
+		progressDots.Stop()
+		if err == nil {
+			fmt.Println(" OK ")
+		} else {
+			fmt.Println(" FAIL ")
+		}
+
+		if isRHEL {
+			fmt.Printf("   Registration in progress ")
+			// Initialize progressDots channel again for registration
+			progressDots = progressdots.New()
+			progressDots.Start()
+			startTime := time.Now()
+			// start timed SSH command to register
+			_, err = sshCommander.SSHCommand(subscriptionCommand)
+			progressDots.Stop()
+			if err == nil {
+				fmt.Print(" OK ")
+			} else {
+				fmt.Print(" FAIL ")
+			}
+			fmt.Printf("[%s]\n", util.TimeElapsed(startTime, true))
+		}
+
+		if err == nil {
+			return nil
+		}
+
+		// general error when registration fails
+		if strings.Contains(err.Error(), "Invalid username or password") {
+			fmt.Printf("   Invalid username or password. To delete stored password refer to %s. Retry: %d\n", keyringDocsLink, i)
+		} else {
+			return errors.New(redactPassword(err.Error()))
+		}
+
+		// always reset credentials
+		param.Username = ""
+		param.Password = ""
+	}
+	return nil
+}
+
+func redactPassword(msg string) string {
+	pattern := regexp.MustCompile(`--password .*`)
+	msgWithRedactedPass := pattern.ReplaceAllString(msg, "--password ********")
+	return msgWithRedactedPass
 }

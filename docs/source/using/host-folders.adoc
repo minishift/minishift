@@ -26,12 +26,6 @@ You can use the `hostfolder` command to mount multiple shared folders onto custo
 Currently link:https://en.wikipedia.org/wiki/Server_Message_Block[CIFS] and link:https://en.wikipedia.org/wiki/SSHFS[SSHFS] based host folders are supported.
 ====
 
-[NOTE]
-====
-SSHFS based host folders are not working with the xref:../using/basic-usage#choosing-iso-image[minikube ISO] for now, because it is missing the sshfs dependency.
-This will be addressed in a future release of the minikube ISO.
-====
-
 [[host-folder-prerequisite]]
 === Prerequisites
 

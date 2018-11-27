@@ -16,11 +16,11 @@
                 "name": "jboss-decisionserver62-openshift",
                 "annotations": {
                     "openshift.io/display-name": "Red Hat JBoss BRMS 6.2 decision server",
-                    "version": "1.4.12"
+                    "version": "1.4.14"
                 }
             },
             "labels": {
-                "xpaas": "1.4.12"
+                "xpaas": "1.4.14"
             },
             "spec": {
                 "tags": [

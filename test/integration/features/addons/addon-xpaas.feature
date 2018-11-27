@@ -21,7 +21,6 @@ which are then available in OpenShift to the user.
    Given Minishift has state "Running"
     When executing "oc new-project <project-name>" succeeds
      And executing "oc new-app <template-name>" succeeds
-     And executing "oc set probe dc/<service-name> --readiness --get-url=http://:8080<http-endpoint>" succeeds
      And service "<service-name>" rollout successfully within "20m"
     Then with up to "5" retries with wait period of "1s" the "body" of HTTP request to "<http-endpoint>" of service "<service-name>" in namespace "<project-name>" contains "<expected-hello>"
      And with up to "5" retries with wait period of "1s" the "status code" of HTTP request to "<http-endpoint>" of service "<service-name>" in namespace "<project-name>" is equal to "200"
@@ -29,9 +28,9 @@ which are then available in OpenShift to the user.
 
   Examples: Required information to test the templates
     | project-name  | template-name           | service-name   | http-endpoint | expected-hello                        |
-    | datagrid65    | datagrid65-basic        | datagrid-app   | /             | Welcome to the JBoss Data Grid Server |
-    | eap70         | eap70-basic-s2i         | eap-app        | /index.jsf    | Welcome to JBoss!                     |
-    | eap71         | eap71-tx-recovery-s2i   | eap-app        | /             | Welcome to JBoss EAP 7                |
+    | eap71-basic   | eap71-basic-s2i         | eap-app        | /             | Welcome to JBoss EAP 7                |
+    | eap71-tx      | eap71-tx-recovery-s2i   | eap-app        | /             | Welcome to JBoss EAP 7                |
+    | datagrid72    | datagrid72-basic        | datagrid-app   | /rest         | Welcome to the Infinispan REST Server |
 
   Scenario: User deletes Minishift
      When executing "minishift delete --force" succeeds

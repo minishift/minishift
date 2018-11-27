@@ -217,6 +217,186 @@
                     }
                 ]
             }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "fuse7-java-openshift",
+                "annotations": {
+                    "openshift.io/display-name": "Red Hat Fuse 7 Java",
+                    "openshift.io/provider-display-name": "Red Hat, Inc."
+                }
+            },
+            "spec": {
+                "tags": [
+                    {
+                        "name": "1.0",
+                        "annotations": {
+                            "description": "Red Hat Fuse 7.0 Java S2I images.",
+                            "openshift.io/display-name": "Red Hat Fuse 7.0 Java",
+                            "iconClass": "icon-rh-integration",
+                            "tags": "builder,jboss-fuse,java,xpaas,hidden",
+                            "supports":"jboss-fuse:7.0.0,java:8,xpaas:1.2",
+                            "version": "1.0"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.access.redhat.com/fuse7/fuse-java-openshift:1.0"
+                        }
+                    },
+                    {
+                        "name": "1.1",
+                        "annotations": {
+                            "description": "Red Hat Fuse 7.1 Java S2I images.",
+                            "openshift.io/display-name": "Red Hat Fuse 7.1 Java",
+                            "iconClass": "icon-rh-integration",
+                            "tags": "builder,jboss-fuse,java,xpaas,hidden",
+                            "supports":"jboss-fuse:7.1.0,java:8,xpaas:1.2",
+                            "version": "1.1"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.access.redhat.com/fuse7/fuse-java-openshift:1.1"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "fuse7-karaf-openshift",
+                "annotations": {
+                    "openshift.io/display-name": "Red Hat Fuse 7 Karaf",
+                    "openshift.io/provider-display-name": "Red Hat, Inc."
+                }
+            },
+            "spec": {
+                "tags": [
+                    {
+                        "name": "1.0",
+                        "annotations": {
+                            "description": "Red Hat Fuse 7.0 Karaf S2I images.",
+                            "openshift.io/display-name": "Red Hat Fuse 7.0 Karaf",
+                            "iconClass": "icon-rh-integration",
+                            "tags": "builder,jboss-fuse,java,karaf,xpaas,hidden",
+                            "supports":"jboss-fuse:7.0.0,java:8,xpaas:1.2",
+                            "version": "1.0"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.access.redhat.com/fuse7/fuse-karaf-openshift:1.0"
+                        }
+                    },
+                    {
+                        "name": "1.1",
+                        "annotations": {
+                            "description": "Red Hat Fuse 7.1 Karaf S2I images.",
+                            "openshift.io/display-name": "Red Hat Fuse 7.1 Karaf",
+                            "iconClass": "icon-rh-integration",
+                            "tags": "builder,jboss-fuse,java,karaf,xpaas,hidden",
+                            "supports":"jboss-fuse:7.1.0,java:8,xpaas:1.2",
+                            "version": "1.1"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.access.redhat.com/fuse7/fuse-karaf-openshift:1.1"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "fuse7-eap-openshift",
+                "annotations": {
+                    "openshift.io/display-name": "Red Hat Fuse 7 EAP",
+                    "openshift.io/provider-display-name": "Red Hat, Inc."
+                }
+            },
+            "spec": {
+                "tags": [
+                    {
+                        "name": "1.0",
+                        "annotations": {
+                            "description": "Red Hat Fuse 7.0 EAP S2I images.",
+                            "openshift.io/display-name": "Red Hat Fuse 7.0 EAP",
+                            "iconClass": "icon-rh-integration",
+                            "tags": "builder,jboss-fuse,java,eap,xpaas,hidden",
+                            "supports":"jboss-fuse:7.0.0,java:8,xpaas:1.2",
+                            "version": "1.0"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.access.redhat.com/fuse7/fuse-eap-openshift:1.0"
+                        }
+                    },
+                    {
+                        "name": "1.1",
+                        "annotations": {
+                            "description": "Red Hat Fuse 7.1 EAP S2I images.",
+                            "openshift.io/display-name": "Red Hat Fuse 7.1 EAP",
+                            "iconClass": "icon-rh-integration",
+                            "tags": "builder,jboss-fuse,java,eap,xpaas,hidden",
+                            "supports":"jboss-fuse:7.1.0,java:8,xpaas:1.2",
+                            "version": "1.1"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.access.redhat.com/fuse7/fuse-eap-openshift:1.1"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "fuse7-console",
+                "annotations": {
+                    "openshift.io/display-name": "Red Hat Fuse 7 Console",
+                    "openshift.io/provider-display-name": "Red Hat, Inc."
+                }
+            },
+            "spec": {
+                "tags": [
+                    {
+                        "name": "1.0",
+                        "annotations": {
+                            "description": "Red Hat Fuse 7.0 Console image.",
+                            "openshift.io/display-name": "Red Hat Fuse 7.0 Console",
+                            "iconClass": "icon-rh-integration",
+                            "tags": "jboss-fuse,hawtio,java,xpaas,hidden",
+                            "supports":"jboss-fuse:7.0.0,java:8,xpaas:1.2",
+                            "version": "1.0"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.access.redhat.com/fuse7/fuse-console:1.0"
+                        }
+                    },
+                    {
+                        "name": "1.1",
+                        "annotations": {
+                            "description": "Red Hat Fuse 7.1 Console image.",
+                            "openshift.io/display-name": "Red Hat Fuse 7.1 Console",
+                            "iconClass": "icon-rh-integration",
+                            "tags": "jboss-fuse,hawtio,java,xpaas,hidden",
+                            "supports":"jboss-fuse:7.1.0,java:8,xpaas:1.2",
+                            "version": "1.1"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.access.redhat.com/fuse7/fuse-console:1.1"
+                        }
+                    }
+                ]
+            }
         }
     ]
 }

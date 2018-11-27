@@ -1,8 +1,8 @@
 # Name: xpaas
 # Description: Imports xPaaS templates
-# Url: https://github.com/openshift/openshift-ansible/tree/release-3.10/roles/openshift_examples/files/examples/v3.10
+# Url: https://github.com/openshift/openshift-ansible/tree/release-3.11/roles/openshift_examples/files/examples/latest
 # Required-Vars: OPENSHIFT_VERSION
-# Var-Defaults: OPENSHIFT_VERSION=3.10
+# Var-Defaults: OPENSHIFT_VERSION=3.11
 
 # Image Streams
 oc apply -f v#{OPENSHIFT_VERSION}/xpaas-streams -n openshift
@@ -11,4 +11,4 @@ oc apply -f v#{OPENSHIFT_VERSION}/xpaas-streams -n openshift
 oc apply -f v#{OPENSHIFT_VERSION}/xpaas-templates -n openshift
 
 echo XPaaS imagestream and templates for OpenShift installed
-echo See https://github.com/openshift/openshift-ansible/tree/release-#{OPENSHIFT_VERSION}/roles/openshift_examples/files/examples/v#{OPENSHIFT_VERSION}
+echo See https://github.com/openshift/openshift-ansible/tree/release-#{OPENSHIFT_VERSION}/roles/openshift_examples/files/examples

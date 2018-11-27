@@ -3,22 +3,24 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "description": "Spring Boot and Camel using ConfigMaps and Secrets. This quickstart demonstrates how to configure a Spring-Boot application using OpenShift ConfigMaps and Secrets. This example requires that a ConfigMap named camel-config and a Secret named camel-config are present in the namespace before the application is deployed, instruction about how to manually create them can be found here: https://github.com/fabric8-quickstarts/spring-boot-camel-config/blob/fis-2.0.x.redhat/README.redhat.md ",
+      "openshift.io/display-name": "Red Hat Fuse 7.1 Camel + ConfigMap with Spring Boot",
+      "openshift.io/provider-display-name": "Red Hat, Inc.",
+      "description": "Spring Boot and Camel using ConfigMaps and Secrets. This quickstart demonstrates how to configure a Spring Boot application using OpenShift ConfigMaps and Secrets. This example requires that a ConfigMap named camel-config and a Secret named camel-config are present in the namespace before the application is deployed, instruction about how to manually create them can be found here: https://github.com/fabric8-quickstarts/spring-boot-camel-config/blob/spring-boot-camel-config-1.0.0.fuse-710017-redhat-00002/README.md ",
       "tags": "quickstart,java,springboot,fis,jboss-fuse",
-      "iconClass": "icon-jboss",
-      "version": "2.0"
+      "iconClass": "icon-rh-integration",
+      "version": "1.1"
     },
-    "name": "s2i-spring-boot-camel-config"
+    "name": "s2i-fuse71-spring-boot-camel-config"
   },
   "labels": {
-    "template": "s2i-spring-boot-camel-config"
+    "template": "s2i-fuse71-spring-boot-camel-config"
   },
   "parameters": [
     {
       "name": "APP_NAME",
       "displayName": "Application Name",
       "required": true,
-      "value": "s2i-spring-boot-camel-config",
+      "value": "s2i-fuse71-spring-boot-camel-config",
       "description": "The name assigned to the application."
     },
     {
@@ -31,7 +33,7 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "spring-boot-camel-config-1.0.0.redhat-000017",
+      "value": "spring-boot-camel-config-1.0.0.fuse-710017-redhat-00002",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
@@ -39,32 +41,32 @@
       "displayName": "Service Account",
       "value": "qs-camel-config",
       "required": true,
-      "description": "The Service Account that will be used to run the container. It must be already present in Openshift and have the view role."
+      "description": "The Service Account that will be used to run the container. It must be already present in OpenShift and have the view role."
     },
     {
       "name": "SECRET_NAME",
       "displayName": "Secret Name",
       "value": "camel-config",
       "required": true,
-      "description": "The name of the Openshift Secret that will be used to configure the application. It must be already present in Openshift."
+      "description": "The name of the OpenShift Secret that will be used to configure the application. It must be already present in OpenShift."
     },
     {
       "name": "CONFIGMAP_NAME",
       "displayName": "ConfigMap Name",
       "value": "camel-config",
       "required": true,
-      "description": "The name of the Openshift ConfigMap that will be used to configure the application. It must be already present in Openshift."
+      "description": "The name of the OpenShift ConfigMap that will be used to configure the application. It must be already present in OpenShift."
     },
     {
       "name": "BUILDER_VERSION",
       "displayName": "Builder version",
-      "value": "2.0",
+      "value": "1.1",
       "description": "The version of the FIS S2I builder image to use."
     },
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.redhat-000017",
+      "value": "1.0.0.fuse-710017-redhat-00002",
       "description": "The application version."
     },
     {
@@ -96,6 +98,48 @@
       "generate": "expression",
       "description": "The secret needed to trigger a build.",
       "from": "[a-zA-Z0-9]{40}"
+    },
+    {
+      "name": "CPU_REQUEST",
+      "displayName": "CPU request",
+      "value": "0.2",
+      "required": true,
+      "description": "The amount of CPU to request."
+    },
+    {
+      "name": "MEMORY_REQUEST",
+      "displayName": "Memory request",
+      "value": "256Mi",
+      "required": true,
+      "description": "The amount of memory required for the container to run."
+    },
+    {
+      "name": "CPU_LIMIT",
+      "displayName": "CPU limit",
+      "value": "1.0",
+      "required": true,
+      "description": "The amount of CPU the container is limited to use."
+    },
+    {
+      "name": "MEMORY_LIMIT",
+      "displayName": "Memory limit",
+      "value": "256Mi",
+      "required": true,
+      "description": "The amount of memory the container is limited to use."
+    },
+    {
+      "name": "BUILD_MEMORY_REQUEST",
+      "displayName": "Build Memory request",
+      "value": "0.7G",
+      "required": true,
+      "description": "The amount of memory to request for builds."
+    },
+    {
+      "name": "BUILD_MEMORY_LIMIT",
+      "displayName": "Build Memory limit",
+      "value": "0.8G",
+      "required": true,
+      "description": "The amount of memory the build container is limited to use."
     }
   ],
   "objects": [
@@ -108,7 +152,7 @@
         "labels": {
           "component": "${APP_NAME}",
           "group": "quickstarts",
-          "project": "${APP_NAME}",
+          "app": "${APP_NAME}",
           "provider": "s2i",
           "version": "${APP_VERSION}"
         }
@@ -127,7 +171,7 @@
         "labels": {
           "component": "${APP_NAME}",
           "group": "quickstarts",
-          "project": "${APP_NAME}",
+          "app": "${APP_NAME}",
           "provider": "s2i",
           "version": "${APP_VERSION}"
         }
@@ -167,7 +211,7 @@
             "from": {
               "kind": "ImageStreamTag",
               "namespace": "${IMAGE_STREAM_NAMESPACE}",
-              "name": "fis-java-openshift:${BUILDER_VERSION}"
+              "name": "fuse7-java-openshift:${BUILDER_VERSION}"
             },
             "forcePull": true,
             "incremental": true,
@@ -197,7 +241,14 @@
             "name": "${APP_NAME}:latest"
           }
         },
-        "resources": {}
+        "resources": {
+          "requests": {
+            "memory": "${BUILD_MEMORY_REQUEST}"
+          },
+          "limits": {
+            "memory": "${BUILD_MEMORY_LIMIT}"
+          }
+        }
       },
       "status": {
         "lastVersion": 0
@@ -212,15 +263,12 @@
         "labels": {
           "component": "${APP_NAME}",
           "group": "quickstarts",
-          "project": "${APP_NAME}",
+          "app": "${APP_NAME}",
           "provider": "s2i",
           "version": "${APP_VERSION}"
         }
       },
       "spec": {
-        "strategy": {
-          "resources": {}
-        },
         "triggers": [
           {
             "type": "ConfigChange"
@@ -244,7 +292,7 @@
           "component": "${APP_NAME}",
           "deploymentconfig": "${APP_NAME}",
           "group": "quickstarts",
-          "project": "${APP_NAME}",
+          "app": "${APP_NAME}",
           "provider": "s2i",
           "version": "${APP_VERSION}"
         },
@@ -255,7 +303,7 @@
               "component": "${APP_NAME}",
               "deploymentconfig": "${APP_NAME}",
               "group": "quickstarts",
-              "project": "${APP_NAME}",
+              "app": "${APP_NAME}",
               "provider": "s2i",
               "version": "${APP_VERSION}"
             }
@@ -308,7 +356,16 @@
                   "name": "SPRING_CLOUD_KUBERNETES_CONFIG_NAME",
                   "value": "${CONFIGMAP_NAME}"
                 } ],
-                "resources": {},
+                "resources": {
+                  "requests": {
+                    "cpu": "${CPU_REQUEST}",
+                    "memory": "${MEMORY_REQUEST}"
+                  },
+                  "limits": {
+                    "cpu": "${CPU_LIMIT}",
+                    "memory": "${MEMORY_LIMIT}"
+                  }
+                },
                 "volumeMounts": [
                   {
                     "name": "camel-config",

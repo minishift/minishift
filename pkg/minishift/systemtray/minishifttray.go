@@ -55,6 +55,7 @@ func minishiftTrayCommand() (*exec.Cmd, error) {
 	exportCmd.Stdout = nil
 	exportCmd.SysProcAttr = process.SysProcForBackgroundProcess()
 	exportCmd.Env = process.EnvForBackgroundProcess()
+	exportCmd.Env = append(exportCmd.Env, fmt.Sprintf("VBOX_MSI_INSTALL_PATH=%s", goos.Getenv("VBOX_MSI_INSTALL_PATH")))
 	return exportCmd, nil
 }
 

@@ -17,7 +17,7 @@ single-node OpenShift cluster on your local host. Either for evaluation
 purposes or for ongoing development.
 
 Due to the fact that Minishift builds on OpenShift
-https://github.com/openshift/origin/blob/master/docs/cluster_up_down.md[cluster up],
+https://github.com/openshift/origin/blob/release-3.11/docs/cluster_up_down.md[cluster up],
 Minishift's focus lies on providing more value to the basic
 _cluster up_ provisioning. This includes virtual machine creation and
 management, making it easier to configure OpenShift in precisely the way

@@ -78,6 +78,8 @@ func runPatch(cmd *cobra.Command, args []string) {
 	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
 	dockerCommander := docker.NewVmDockerCommander(sshCommander)
 
+	fmt.Println(fmt.Sprintf("Patching OpenShift configuration '%s' with '%s'", patchTarget.LocalConfigFile, patch))
+
 	_, err = openshift.Patch(patchTarget, patch, dockerCommander)
 	if err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error patching the OpenShift configuration: %s", err.Error()))

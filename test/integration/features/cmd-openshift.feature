@@ -32,11 +32,6 @@ cluster in VM provided by Minishift.
       And stdout should match "router-\d-\w{5}\s*1\/1\s*Running"
 
   Scenario: Restarting the OpenShift cluster
-  Note: This step is based on observation and might be unstable in some environments. It checks for the time when container
-        finished last time. When container is new and had never finished then this time value is set to 0001-01-01T00:00:00Z.
-        On restart of OpenShift cluster containers are terminated, which sets FinishedAt to actual time. This value persist
-        after next start of container.
-    Given stdout of command "minishift ssh -- "docker inspect --format={{.State.FinishedAt}} origin"" is equal to "0001-01-01T00:00:00Z"
      When executing "minishift openshift restart" succeeds
      Then stdout should contain "OpenShift restarted successfully"
       And stdout of command "minishift ssh -- "docker inspect --format={{.State.FinishedAt}} origin"" is not equal to "0001-01-01T00:00:00Z"
@@ -123,6 +118,10 @@ cluster in VM provided by Minishift.
 
   Scenario: Seeing configuration of OpenShift node
      When executing "minishift openshift config view --target node" succeeds
+     Then stdout should be valid YAML
+
+  Scenario: Seeing configuration of Kube
+     When executing "minishift openshift config view --target kube" succeeds
      Then stdout should be valid YAML
 
   Scenario: Setting configuration on OpenShift master

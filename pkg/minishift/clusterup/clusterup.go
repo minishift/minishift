@@ -19,10 +19,15 @@ package clusterup
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"time"
 
+	"crypto/tls"
+	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/host"
 	"github.com/docker/machine/libmachine/provision"
 	"github.com/golang/glog"
+	"net/http"
 	"os"
 	"strings"
 
@@ -35,8 +40,12 @@ import (
 	"github.com/minishift/minishift/pkg/minishift/oc"
 	"regexp"
 
+	"github.com/minishift/minishift/cmd/minishift/state"
+	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minishift/docker"
+	"github.com/minishift/minishift/pkg/minishift/openshift"
 	"github.com/minishift/minishift/pkg/util"
+	"github.com/minishift/minishift/pkg/util/os/atexit"
 	minishiftStrings "github.com/minishift/minishift/pkg/util/strings"
 )
 
@@ -46,6 +55,27 @@ const (
 	user             = "user"
 	envPrefix        = "env."
 )
+
+const patchToEnableValidatingAndMutationWebhooks = `{
+    "admissionConfig": {
+        "pluginConfig": {
+            "ValidatingAdmissionWebhook": {
+                "configuration": {
+                    "apiVersion": "apiserver.config.k8s.io/v1alpha1",
+                    "kind": "WebhookAdmission",
+                    "kubeConfigFile": "/dev/null"
+                }
+            },
+            "MutatingAdmissionWebhook": {
+                "configuration": {
+                    "apiVersion": "apiserver.config.k8s.io/v1alpha1",
+                    "kind": "WebhookAdmission",
+                    "kubeConfigFile": "/dev/null"
+                }
+            }
+        }
+    }
+}`
 
 type ClusterUpConfig struct {
 	OpenShiftVersion     string
@@ -148,6 +178,11 @@ func PostClusterUp(clusterUpConfig *ClusterUpConfig, sshCommander provision.SSHC
 		return err
 	}
 
+	err = patchKubeMasterConfig(patchToEnableValidatingAndMutationWebhooks)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -227,4 +262,101 @@ func applyAddOns(addOnManager *manager.AddOnManager, ip string, routingSuffix st
 	}
 
 	return nil
+}
+
+// patch kube-apiserver master-config.yaml
+func patchKubeMasterConfig(patch string) error {
+	target := openshift.GetOpenShiftPatchTarget("kube")
+	api := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
+	defer api.Close()
+
+	host, err := cluster.CheckIfApiExistsAndLoad(api)
+	if err != nil {
+		atexit.ExitWithMessage(1, fmt.Sprintf("%s", err.Error()))
+	}
+
+	sshCommander := provision.GenericSSHCommander{Driver: host.Driver}
+	dockerCommander := docker.NewVmDockerCommander(sshCommander)
+	//fmt.Println("Patching kube config")
+	_, err = openshift.Patch(target, patch, dockerCommander)
+
+	// wait for origin and k8s api-server to be running before returning error
+	startTime := time.Now()
+	waitTime := 2 * time.Minute
+	for {
+		if openshift.IsRunning(dockerCommander) && isKubeApiServerRunning(dockerCommander) {
+			break
+		}
+		//fmt.Println("sleeping")
+		time.Sleep(10 * time.Second)
+		if time.Since(startTime) > waitTime {
+			break
+		}
+	}
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+	for {
+		ip, _ := host.Driver.GetIP()
+		res, err := client.Get(fmt.Sprintf("https://%s:8443/healthz", ip))
+		if err != nil {
+			fmt.Println(err)
+		}
+		body, _ := ioutil.ReadAll(res.Body)
+		response := fmt.Sprintf("%s", body)
+		//fmt.Println(response)
+		res.Body.Close()
+		if strings.Contains(response, "ok") {
+			//fmt.Println("Getting outta here after waiting 25s")
+			time.Sleep(1 * time.Minute)
+			break
+		}
+		//fmt.Println("sleeping http")
+		time.Sleep(10 * time.Second)
+	}
+	return err
+}
+
+// check if kube api-server container is up and running
+func isKubeApiServerRunning(commander docker.DockerCommander) bool {
+	k8sId, err := commander.GetID(minishiftConstants.KubernetesApiContainerLabel)
+	if err != nil {
+		if glog.V(3) {
+			fmt.Println("Failed to get kube-apiserver container ID")
+		}
+	}
+	k8sStatus, err := commander.Status(k8sId)
+	if err != nil {
+		fmt.Println("Error getting status")
+	}
+	//fmt.Println("k8s status:", k8sStatus)
+	k8sControllerId, err := commander.GetID("io.kubernetes.container.name=c")
+	if err != nil {
+		if glog.V(3) {
+			fmt.Println("Failed to get kube-apiserver container ID")
+		}
+	}
+	k8sControllerStatus, err := commander.Status(k8sControllerId)
+	if err != nil {
+		fmt.Println("Error getting status")
+	}
+	//fmt.Println("k8sController status:", k8sControllerStatus)
+
+	k8sLocalApiId, err := commander.GetID("io.kubernetes.pod.name=master-api-localhost")
+	if err != nil {
+		if glog.V(3) {
+			fmt.Println("Failed to get kube-apiserver container ID")
+		}
+	}
+	k8sLocalApiStatus, err := commander.Status(k8sLocalApiId)
+	if err != nil {
+		fmt.Println("Error getting status")
+	}
+	//fmt.Println("k8sLocalApi status:", k8sLocalApiStatus)
+
+	if k8sStatus == "running" && k8sControllerStatus == "running" && k8sLocalApiStatus == "running" {
+		return true
+	}
+	return false
 }

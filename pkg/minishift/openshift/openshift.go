@@ -29,7 +29,7 @@ import (
 type OpenShiftPatchTarget struct {
 	target              string
 	containerConfigFile string
-	localConfigFile     string
+	LocalConfigFile     string
 }
 
 func GetOpenShiftPatchTarget(target string) OpenShiftPatchTarget {
@@ -66,7 +66,7 @@ func (t *OpenShiftPatchTarget) containerConfigFilePath() string {
 }
 
 func (t *OpenShiftPatchTarget) localConfigFilePath() string {
-	return t.localConfigFile
+	return t.LocalConfigFile
 }
 
 func RestartOpenShift(commander docker.DockerCommander) (bool, error) {
@@ -98,8 +98,6 @@ func RestartOpenShift(commander docker.DockerCommander) (bool, error) {
 }
 
 func Patch(target OpenShiftPatchTarget, patch string, commander docker.DockerCommander) (bool, error) {
-	fmt.Println(fmt.Sprintf("Patching OpenShift configuration '%s' with '%s'", target.localConfigFile, patch))
-
 	patchId, err := backUpConfig(target, commander)
 	if err != nil {
 		return false, err

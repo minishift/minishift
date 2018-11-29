@@ -256,9 +256,11 @@ func runStart(cmd *cobra.Command, args []string) {
 	autoMountHostFolders(hostVm.Driver)
 
 	// start the minishift system tray
-	err = startTray()
-	if err != nil {
-		fmt.Println(err)
+	if viper.GetBool(configCmd.AutoStartTray.Name) {
+		err = startTray()
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 
 	if !isNoProvision() {

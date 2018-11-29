@@ -10,10 +10,17 @@ jobs:
         GOVERSION: 1.10.2
         XCODE_SCHEME: symbolicator
         XCODE_WORKSPACE: symbolicator
+        MINISHIFT_GITHUB_API_TOKEN_A: $MINISHIFT_GITHUB_API_TOKEN
 
 ## Build minishift
     steps:
     - checkout
+    - run:
+        name: TOKEN CHECK
+        command: echo $MINISHIFT_GITHUB_API_TOKEN
+    - run:
+        name: TOKEN CHECK
+        command: echo $MINISHIFT_GITHUB_API_TOKEN_A
     - run:
         name: Configure GOPATH
         command: echo 'export GOPATH=$HOME/go' >> $BASH_ENV

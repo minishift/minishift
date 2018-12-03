@@ -150,6 +150,12 @@ If you see any Dep errors during `make vendor`, you can remove local cached dire
 [[build-minishift-binary]]
 === Building the minishift Binary
 
+Before running build, you need to run
+
+----
+$ go get -u github.com/go-bindata/go-bindata/...
+----
+
 Run the following command to create a platform-specific binary and copy it to *_$GOPATH/bin_*.
 
 ----

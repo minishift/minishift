@@ -341,7 +341,9 @@ By default, this is not allowed in OpenShift.
 | registry-route
 | Creates an edge terminated route for the OpenShift registry.
 | htpasswd-identity-provider
-| User can change and add default login username and password for the OpenShift instance
+| User can change and add default login username and password for the OpenShift instance.
+| admissions-webhook
+| Enables validating and mutating admission webhooks.
 
 | xpaas
 | Imports xPaaS templates.

@@ -1,0 +1,22 @@
+# Name: admissions-webhook
+# Description: Enables admissions and mutating webhook
+# Url: https://github.com/knative/docs/blob/master/install/Knative-with-Minishift.md#enable-admission-controller-webhook
+# OpenShift-Version: >=3.10.0
+# Var-Defaults: MINISHIFT_DATA_HOME=/var/lib/minishift,CONFIG_LOCATION_KUBERNETES_API=base/kube-apiserver,MASTER_CONFIG_FILE=master-config.yaml
+
+ssh sudo cp -fp #{MINISHIFT_DATA_HOME}/#{CONFIG_LOCATION_KUBERNETES_API}/#{MASTER_CONFIG_FILE} #{MINISHIFT_DATA_HOME}/#{CONFIG_LOCATION_KUBERNETES_API}/master-config-tmp.yaml
+
+PATCH := cat patch.json
+# Patch the kube apiserver configuration to enable admission and mutating webhooks
+ssh sudo grep "MutatingAdmissionWebhook" #{MINISHIFT_DATA_HOME}/#{CONFIG_LOCATION_KUBERNETES_API}/#{MASTER_CONFIG_FILE} > /dev/null || sudo #{MINISHIFT_DATA_HOME}/bin/oc ex config patch #{MINISHIFT_DATA_HOME}/#{CONFIG_LOCATION_KUBERNETES_API}/master-config-tmp.yaml --patch='#{PATCH}' > #{MINISHIFT_DATA_HOME}/#{CONFIG_LOCATION_KUBERNETES_API}/#{MASTER_CONFIG_FILE}
+
+echo -- Restarting Openshift API server ..
+docker stop $(docker ps -l -q --filter "label=io.kubernetes.container.name=apiserver")
+echo -- Restarting Kube API server ..
+docker stop $(docker ps -l -q --filter "label=io.kubernetes.container.name=api")
+
+# Remove the temporary file
+ssh sudo rm #{MINISHIFT_DATA_HOME}/#{CONFIG_LOCATION_KUBERNETES_API}/master-config-tmp.yaml
+
+ssh until curl -f -k https://#{ip}:8443/healthz;do sleep 1;done
+echo -- Successfully installed addon admission-webhook ... OK

@@ -668,9 +668,7 @@ func determineIsoUrl(iso string) string {
 	isoNotSpecified := ""
 
 	switch strings.ToLower(iso) {
-	case minishiftConstants.B2dIsoAlias, isoNotSpecified:
-		iso = constants.DefaultB2dIsoUrl
-	case minishiftConstants.CentOsIsoAlias:
+	case minishiftConstants.CentOsIsoAlias, isoNotSpecified:
 		iso = constants.DefaultCentOsIsoUrl
 	default:
 		if !(govalidator.IsURL(iso) || strings.HasPrefix(iso, "file:")) {
@@ -697,7 +695,7 @@ func initStartFlags() *flag.FlagSet {
 	startFlagSet.String(configCmd.RemoteIPAddress.Name, "", "IP address of the remote machine to provision OpenShift on")
 	startFlagSet.String(configCmd.RemoteSSHUser.Name, "", "The username of the remote machine to provision OpenShift on")
 	startFlagSet.String(configCmd.SSHKeyToConnectRemote.Name, "", "SSH private key location on the host to connect remote machine")
-	startFlagSet.String(configCmd.ISOUrl.Name, minishiftConstants.CentOsIsoAlias, "Location of the minishift ISO. Can be a URL, file URI or one of the following short names: [centos b2d].")
+	startFlagSet.String(configCmd.ISOUrl.Name, minishiftConstants.CentOsIsoAlias, "Location of the minishift ISO. Can be a URL, file URI or one of the following short names: [centos].")
 	startFlagSet.String(configCmd.TimeZone.Name, constants.DefaultTimeZone, "TimeZone for Minishift VM")
 
 	startFlagSet.AddFlag(dockerEnvFlag)

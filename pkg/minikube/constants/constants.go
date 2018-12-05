@@ -50,7 +50,6 @@ var (
 	GlobalConfigFile      = filepath.Join(Minipath, "config", "global.json")
 	AllInstanceConfigPath = filepath.Join(Minipath, "config", "allinstances.json")
 
-	DefaultB2dIsoUrl    = "https://github.com/minishift/minishift-b2d-iso/releases/download/" + version.GetB2dIsoVersion() + "/" + "minishift-b2d.iso"
 	DefaultCentOsIsoUrl = "https://github.com/minishift/minishift-centos-iso/releases/download/" + version.GetCentOsIsoVersion() + "/" + "minishift-centos7.iso"
 )
 

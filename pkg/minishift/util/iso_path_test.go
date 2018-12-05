@@ -28,8 +28,6 @@ func TestGetIsoPath(t *testing.T) {
 		provided string
 		expected string
 	}{
-		{"https://github.com/minishift/minishift-b2d-iso/releases/download/v1.1.0/minishift-b2d.iso", filepath.Join("b2d", "v1.1.0")},
-		{"https://github.com/minishift/minishift-b2d-iso/releases/download/v1.2.0/minishift-b2d.iso", filepath.Join("b2d", "v1.2.0")},
 		{"https://github.com/minishift/minishift-centos-iso/releases/download/v1.1.0/minishift-centos7.iso", filepath.Join("centos", "v1.1.0")},
 		{"https://github.com/minishift/minishift-centos-iso/releases/download/v1.3.0/minishift-centos7.iso", filepath.Join("centos", "v1.3.0")},
 		{"https://foo/v1.2.0/minishift-foo.iso", "unnamed"},
@@ -47,8 +45,6 @@ func Test_getMinikubeIsoVersion(t *testing.T) {
 		expected string
 	}{
 		{"minishift-v0.22.iso", "v0.22."},
-		{"minishift-b2d.iso", ""},
-		{"minishift-b2d-iso/releases/download/v1.2.0/minishift-b2d.iso", "v1.2.0"},
 		{"minishift-centos-iso/releases/download/v1.1.0/minishift-centos7.iso", "v1.1.0"},
 	}
 

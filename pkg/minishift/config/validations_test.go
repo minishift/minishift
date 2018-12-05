@@ -124,7 +124,7 @@ func TestValidURL(t *testing.T) {
 		},
 		{
 			value:     "b2d",
-			shouldErr: false,
+			shouldErr: true,
 		},
 		{
 			value:     "random",

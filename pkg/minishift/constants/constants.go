@@ -24,7 +24,6 @@ import (
 )
 
 const (
-	B2dIsoAlias                    = "b2d"
 	CentOsIsoAlias                 = "centos"
 	OpenshiftContainerName         = "origin"
 	OpenshiftApiContainerLabel     = "io.kubernetes.container.name=apiserver"
@@ -44,7 +43,7 @@ const (
 )
 
 var (
-	ValidIsoAliases = []string{B2dIsoAlias, CentOsIsoAlias}
+	ValidIsoAliases = []string{CentOsIsoAlias}
 	ValidComponents = []string{"automation-service-broker", "service-catalog", "template-service-broker"}
 )
 

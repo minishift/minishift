@@ -773,8 +773,6 @@ func proxyLogShouldContainContent(expected *gherkin.DocString) error {
 func catDockerConfigFile() error {
 	var err error
 	switch isoName {
-	case "b2d":
-		err = ExecutingMinishiftCommandSucceedsOrFails("ssh -- cat /var/lib/boot2docker/profile", "succeeds")
 	case "centos", "rhel":
 		err = ExecutingMinishiftCommandSucceedsOrFails("ssh -- cat /etc/systemd/system/docker.service.d/10-machine.conf", "succeeds")
 	default:

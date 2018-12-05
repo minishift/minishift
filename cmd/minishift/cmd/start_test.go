@@ -221,9 +221,6 @@ func TestDetermineIsoUrl(t *testing.T) {
 		in  string
 		out string
 	}{
-		{"", constants.DefaultB2dIsoUrl},
-		{"b2d", constants.DefaultB2dIsoUrl},
-		{"B2D", constants.DefaultB2dIsoUrl},
 		{"centos", constants.DefaultCentOsIsoUrl},
 		{"CentOs", constants.DefaultCentOsIsoUrl},
 		{"http://my.custom.url/myiso.iso", "http://my.custom.url/myiso.iso"},

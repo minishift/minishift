@@ -40,7 +40,6 @@ TEST_WITH_SPECIFIED_SHELL ?=
 
 # Linker flags
 VERSION_VARIABLES := -X $(REPOPATH)/pkg/version.minishiftVersion=$(MINISHIFT_VERSION) \
-	-X $(REPOPATH)/pkg/version.b2dIsoVersion=$(B2D_ISO_VERSION) \
 	-X $(REPOPATH)/pkg/version.centOsIsoVersion=$(CENTOS_ISO_VERSION) \
 	-X $(REPOPATH)/pkg/version.openshiftVersion=$(OPENSHIFT_VERSION) \
 	-X $(REPOPATH)/pkg/version.commitSha=$(COMMIT_SHA)

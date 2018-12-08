@@ -59,12 +59,12 @@ $ sudo apt install libvirt-bin qemu-kvm
 - For Ubuntu-18.10
 +
 ----
-$ sudo usermod -a -G libvirt <username>
+$ sudo usermod -a -G libvirt $(whoami)
 ----
 - For older Ubuntu versions
 +
 ----
-$ sudo usermod -a -G libvirtd <username>
+$ sudo usermod -a -G libvirtd $(whoami)
 ----
 
 .  Update your current session to apply the group change:
@@ -106,7 +106,7 @@ $ sudo dnf install libvirt qemu-kvm
 .  Add yourself to the *libvirt* group:
 +
 ----
-$ sudo usermod -a -G libvirt <username>
+$ sudo usermod -a -G libvirt $(whoami)
 ----
 
 .  Update your current session to apply the group change:
@@ -134,7 +134,7 @@ $ sudo pacman -S libvirt qemu dnsmasq ebtables
 . Add yourself to the *kvm* and *libvirt* groups:
 +
 ----
-$ sudo usermod -a -G kvm,libvirt <username>
+$ sudo usermod -a -G kvm,libvirt $(whoami)
 ----
 
 . Update the *libvirt* configuration in *_/etc/libvirt/qemu.conf_* as follows:

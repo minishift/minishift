@@ -62,7 +62,7 @@ func GenerateSelfSignedCert(certPath, keyPath string, ips []net.IP, alternateDNS
 		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth, x509.ExtKeyUsageClientAuth},
 		BasicConstraintsValid: true,
-		IsCA: true,
+		IsCA:                  true,
 	}
 
 	template.IPAddresses = append(template.IPAddresses, ips...)

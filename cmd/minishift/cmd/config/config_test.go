@@ -50,11 +50,11 @@ var configTestCases = []configTestCase{
     "vm-driver": "kvm"
 }`,
 		config: map[string]interface{}{
-			"iso-url":   "http://foo.bar/minishift-centos.iso",
-			"vm-driver": "kvm",
-			"cpus":      4,
-			"disk-size": "20g",
-			"v":         5,
+			"iso-url":                   "http://foo.bar/minishift-centos.iso",
+			"vm-driver":                 "kvm",
+			"cpus":                      4,
+			"disk-size":                 "20g",
+			"v":                         5,
 			"show-libmachine-logs":      true,
 			"log_dir":                   "/etc/hosts",
 			"ReminderWaitPeriodInHours": 99,

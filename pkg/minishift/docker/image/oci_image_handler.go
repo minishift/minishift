@@ -435,10 +435,10 @@ func (handler *OciImageHandler) getSystemContext(cacheDir string) *types.SystemC
 		DockerDaemonHost:                  handler.dockerClientSettings.DockerHost,
 		DockerDaemonCertPath:              handler.dockerClientSettings.DockerCertPath,
 		DockerDaemonInsecureSkipTLSVerify: !handler.dockerClientSettings.DockerTLSVerify,
-		OSChoice:                    "linux",
-		ArchitectureChoice:          "amd64",
-		OCIAcceptUncompressedLayers: true,
-		OCISharedBlobDirPath:        filepath.Join(cacheDir, "blobs"),
+		OSChoice:                          "linux",
+		ArchitectureChoice:                "amd64",
+		OCIAcceptUncompressedLayers:       true,
+		OCISharedBlobDirPath:              filepath.Join(cacheDir, "blobs"),
 	}
 }
 

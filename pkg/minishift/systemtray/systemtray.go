@@ -31,18 +31,23 @@ import (
 	"github.com/fsnotify/fsnotify"
 
 	"github.com/anjannath/systray"
+	"github.com/docker/machine/libmachine"
 	"github.com/golang/glog"
+	cmdUtil "github.com/minishift/minishift/cmd/minishift/cmd/util"
+	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/minishift/shell/powershell"
 	"github.com/minishift/minishift/pkg/minishift/systemtray/icon"
 	"github.com/minishift/minishift/pkg/util/os"
+	"github.com/pkg/browser"
 )
 
 const (
-	START string = "Start"
-	STOP  string = "Stop"
-	EXIT  string = "Exit"
+	WEB_CONSOLE string = "Web Console"
+	START       string = "Start"
+	STOP        string = "Stop"
+	EXIT        string = "Exit"
 )
 
 const (
@@ -65,8 +70,9 @@ var (
 )
 
 type MenuAction struct {
-	start *systray.MenuItem
-	stop  *systray.MenuItem
+	start   *systray.MenuItem
+	stop    *systray.MenuItem
+	console *systray.MenuItem
 }
 
 func OnReady() {
@@ -78,8 +84,9 @@ func OnReady() {
 		submenu := systray.AddSubMenu(strings.Title(profile))
 		startMenu := submenu.AddSubMenuItem(START, "", 0)
 		stopMenu := submenu.AddSubMenuItem(STOP, "", 0)
+		consoleMenu := submenu.AddSubMenuItem(WEB_CONSOLE, "", 0)
 		submenus[profile] = submenu
-		submenusToMenuItems[profile] = MenuAction{start: startMenu, stop: stopMenu}
+		submenusToMenuItems[profile] = MenuAction{start: startMenu, stop: stopMenu, console: consoleMenu}
 	}
 
 	go func() {
@@ -90,6 +97,7 @@ func OnReady() {
 	for k, v := range submenusToMenuItems {
 		go startStopHandler(icon.Running, k, v.start, START_PROFILE)
 		go startStopHandler(icon.Stopped, k, v.stop, STOP_PROFILE)
+		go webConsoleHandler(k, v.console)
 	}
 
 	go updateTrayMenu()
@@ -107,15 +115,13 @@ func getStatus(profileName string) int {
 	command := exec.Command(cmd, args...)
 	out, _ := command.Output()
 	stdOut := fmt.Sprintf("%s", out)
+	fmt.Println(stdOut)
 
 	if strings.Contains(stdOut, "Running") {
 		return RUNNING
-	}
-
-	if strings.Contains(stdOut, "Stopped") {
+	} else {
 		return STOPPED
 	}
-	return DOES_NOT_EXIST
 }
 
 // Add newly created profiles and remove deleted profiles from tray
@@ -155,14 +161,17 @@ func updateTrayMenu() {
 			submenusLock.Unlock()
 			startMenu := submenu.AddSubMenuItem(START, "", 0)
 			stopMenu := submenu.AddSubMenuItem(STOP, "", 0)
+			consoleMenu := submenu.AddSubMenuItem(WEB_CONSOLE, "", 0)
 			submenusToMenuItemsLock.Lock()
-			ma := MenuAction{start: startMenu, stop: stopMenu}
+			ma := MenuAction{start: startMenu, stop: stopMenu, console: consoleMenu}
 			submenusToMenuItems[profile] = ma
 			submenusToMenuItemsLock.Unlock()
 
 			go startStopHandler(icon.Running, profile, ma.start, START_PROFILE)
 
 			go startStopHandler(icon.Stopped, profile, ma.stop, STOP_PROFILE)
+
+			go webConsoleHandler(profile, ma.console)
 		}
 
 	}
@@ -310,5 +319,21 @@ func startStopHandler(iconData []byte, submenu string, m *systray.MenuItem, acti
 			submenus[submenu].AddBitmap(iconData)
 			submenusLock.Unlock()
 		}
+	}
+}
+
+func webConsoleHandler(profile string, m *systray.MenuItem) {
+	for {
+		<-m.OnClickCh()
+		api := libmachine.NewClient(state.InstanceDirs.Home, state.InstanceDirs.Certs)
+		host, _ := api.Load(profile)
+		if cmdUtil.VMExists(api, profile) && cmdUtil.IsHostRunning(host.Driver) {
+			ip, _ := host.Driver.GetIP()
+			url := fmt.Sprintf("https://%s:%d/console", ip, constants.APIServerPort)
+			browser.OpenURL(url)
+		} else {
+			continue
+		}
+		api.Close()
 	}
 }

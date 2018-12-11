@@ -149,6 +149,7 @@ Feature: Basic
 
   Scenario: User can deploy a Ruby example application
     Given Minishift has state "Running"
+      And executing "oc status" retrying 20 times with wait period of "3s"
      When executing "oc login --username=developer --password=developer" succeeds
       And executing "oc new-project ruby" succeeds
       And executing "oc new-app centos/ruby-22-centos7~https://github.com/sclorg/ruby-ex.git" succeeds

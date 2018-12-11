@@ -48,6 +48,7 @@ cluster in VM provided by Minishift.
 
   Scenario: User deploys nodejs example application from OpenShift repository
     Given Minishift has state "Running"
+      And executing "oc status" retrying 20 times with wait period of "3s"
      When executing "oc new-app https://github.com/sclorg/nodejs-ex -l name=myapp" succeeds
      Then stdout should contain
       """

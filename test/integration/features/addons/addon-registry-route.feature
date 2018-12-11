@@ -50,6 +50,7 @@ so that user can able to push their container images directly to registry and de
       And stdout of host shell contains "nginx"
 
   Scenario: User can deploy application from integrated docker registry
+    Given executing "oc status" retrying 20 times with wait period of "3s"
      When executing "oc new-app --image-stream=nginx --name=nginx" in host shell succeeds
       And executing "oc expose svc nginx" in host shell succeeds
       And executing "oc set probe dc/nginx --readiness --get-url=http://:8080" in host shell succeeds

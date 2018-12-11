@@ -19,6 +19,7 @@ which are then available in OpenShift to the user.
 
   Scenario Outline: User deploys, checks out and deletes several templates from XpaaS imagestream
    Given Minishift has state "Running"
+     And executing "oc status" retrying 20 times with wait period of "3s"
     When executing "oc new-project <project-name>" succeeds
      And executing "oc new-app <template-name>" succeeds
      And executing "oc set probe dc/<service-name> --readiness --get-url=http://:8080<http-endpoint>" succeeds

@@ -42,6 +42,7 @@ Feature: Minishift can run behind proxy
 
   Scenario: User can deploy application ruby-ex to namespace ruby
    Given Minishift has state "Running"
+     And executing "oc status" retrying 20 times with wait period of "3s"
     When executing "oc new-app centos/ruby-22-centos7~https://github.com/sclorg/ruby-ex.git" succeeds
     Then stdout should contain
      """

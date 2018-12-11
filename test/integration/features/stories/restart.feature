@@ -16,7 +16,7 @@ After that user checks the application and several other functions again and del
     Then with up to "10" retries with wait period of "2s" the "status code" of HTTP request to "/console" of OpenShift instance is equal to "200"
 
   Scenario: User tries oc
-    When executing "oc status" succeeds
+    When executing "oc status" retrying 20 times with wait period of "3s"
     Then exitcode should equal "0"
 
   Scenario: User deploys example Django application
@@ -57,7 +57,7 @@ After that user checks the application and several other functions again and del
     Then with up to "10" retries with wait period of "2s" the "status code" of HTTP request to "/console" of OpenShift instance is equal to "200"
 
   Scenario: User tries oc again
-    When executing "oc status" succeeds
+    When executing "oc status" retrying 20 times with wait period of "3s"
     Then exitcode should equal "0"
 
   Scenario: Django application is still accessible

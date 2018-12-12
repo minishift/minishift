@@ -47,7 +47,8 @@ func init() {
 }
 
 func runSetup(cmd *cobra.Command, args []string) {
-	if os.CurrentOS() == "windows" {
+	switch os.CurrentOS() {
+	case "windows":
 		if !powershell.IsAdmin() {
 			atexit.ExitWithMessage(1, "Run 'minishift setup' as an administrator.")
 		}
@@ -62,7 +63,15 @@ func runSetup(cmd *cobra.Command, args []string) {
 		fmt.Println("Pre-requisites are ready.\nRun following commands to start your minishift instance:\n" +
 			" minishift config set hyperv-virtual-switch minishift-external\n minishift start\n" +
 			"Note: Above two commands doesn't need to be run in Administrator mode.")
-	} else {
+	case "darwin":
+		// Check if driver is already present and configured, if not
+		// Download docker-machine-driver-xhyve from github/machine-drivers
+		// Move it to path, add to proper group and set permissions
+		if err := hypervisor.CheckAndConfigureHypervisor(); err != nil {
+			atexit.ExitWithMessage(1, err.Error())
+		}
+
+	default:
 		fmt.Println("The implementation of this command is not available for this operating system.\n" +
 			"Please continue with setting pre-requisites through manual process.")
 	}

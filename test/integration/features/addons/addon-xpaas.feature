@@ -4,6 +4,10 @@ Xpaas add-on imports xPaaS templates and imagestreams,
 which are then available in OpenShift to the user.
 
   Scenario: User enables the xpaas add-on
+     When executing "minishift addons enable xpaas-imagestreamsecret" succeeds
+     Then stdout should contain "Add-on 'xpaas-imagestreamsecret' enabled"
+	
+  Scenario: User enables the xpaas add-on
      When executing "minishift addons enable xpaas" succeeds
      Then stdout should contain "Add-on 'xpaas' enabled"
 

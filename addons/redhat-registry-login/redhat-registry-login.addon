@@ -1,0 +1,8 @@
+# Name: redhat-registry-login
+# Description: Creates an image stream secret for registry.redhat.io
+# Url: registry.redhat.io
+# OpenShift-Version: >=3.10.0
+# Required-Vars: REGISTRY_USERNAME, REGISTRY_PASSWORD
+
+
+oc create secret docker-registry imagestreamsecret --docker-username=#{REGISTRY_USERNAME} --docker-password=#{REGISTRY_PASSWORD} --docker-server=registry.redhat.io -n openshift --as system:admin

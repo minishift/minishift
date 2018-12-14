@@ -1,0 +1,7 @@
+# Name: redhat-registry-login
+# Description: Remove image stream secret for registry.redhat.io
+# Url: registry.redhat.io
+# OpenShift-Version: >=3.10.0
+
+
+oc delete secret imagestreamsecret -n openshift --as system:admin

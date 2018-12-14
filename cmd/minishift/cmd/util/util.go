@@ -44,7 +44,16 @@ import (
 )
 
 var (
-	DefaultAssets = []string{"anyuid", "admin-user", "xpaas", "registry-route", "che", "htpasswd-identity-provider", "admissions-webhook"}
+	DefaultAssets = []string{
+		"anyuid",
+		"admin-user",
+		"xpaas",
+		"registry-route",
+		"che",
+		"htpasswd-identity-provider",
+		"admissions-webhook",
+		"redhat-registry-login",
+	}
 )
 
 func VMExists(client *libmachine.Client, machineName string) bool {

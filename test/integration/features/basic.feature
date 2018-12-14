@@ -6,7 +6,7 @@ Feature: Basic
      When executing "minishift addons install --defaults" succeeds
      Then stdout should contain
       """
-      Default add-ons 'anyuid, admin-user, xpaas, registry-route, che, htpasswd-identity-provider, admissions-webhook' installed
+      Default add-ons 'anyuid, admin-user, xpaas, registry-route, che, htpasswd-identity-provider, admissions-webhook, redhat-registry-login' installed
       """
 
   Scenario: User can enable the anyuid add-on

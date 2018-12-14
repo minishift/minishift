@@ -20,7 +20,9 @@ install:
 
 script: |
   make prerelease
-  make coverage
+  #token allows to use increased GH API limit, has no other rights
+  #to replace create new GH user and generate token with no extra privileges
+  MINISHIFT_GITHUB_API_TOKEN=f62950fc041df6f8788a7d23157a39936a0af440 make coverage
 
 after_success: |
   cd out

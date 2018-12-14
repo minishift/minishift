@@ -63,7 +63,10 @@ It is the only CI system which validates the xref:../contributing/developing.ado
 |link:https://github.com/minishift/minishift/blob/master/appveyor.yml[appveyor.yml]
 
 |link:https://travis-ci.org/[*Travis CI*]
-|This server is used for compilation and unit testing on Linux (Ubuntu).
+|This server is used for compilation, unit testing and coverage reports on Linux (Ubuntu).
+
+To provide full coverage reports it exposes MINISHIFT_GITHUB_API_TOKEN which allows for testing of {project} interaction with GitHub.
+This token only allows to use increased API limit of GitHub and has no other privileges which could be misused in any way.
 |link:https://travis-ci.org/minishift/minishift/branches[master], link:https://travis-ci.org/minishift/minishift/pull_requests[pull requests]
 |link:https://github.com/minishift/minishift/blob/master/.travis.yml[.travis.yml]
 |===

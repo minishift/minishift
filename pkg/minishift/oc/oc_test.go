@@ -163,7 +163,7 @@ func Test_get_kubeconfig_global_path(t *testing.T) {
 	}
 	for _, data := range tests {
 		os.Setenv("KUBECONFIG", data.KubeConfig)
-		expected, err := getGlobalKubeConfigPath()
+		expected, err := GetGlobalKubeConfigPath()
 		assert.NoError(t, err)
 		assert.Equal(t, expected, data.Expected)
 	}

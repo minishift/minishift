@@ -347,6 +347,8 @@ By default, this is not allowed in OpenShift.
 
 | xpaas
 | Imports xPaaS templates.
+| redhat-registry-login
+| Creates secret to access images on registry.redhat.io.
 | che
 | Deploy che on the {project}.
 |===

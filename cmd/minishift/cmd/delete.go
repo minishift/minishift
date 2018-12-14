@@ -19,6 +19,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/docker/machine/libmachine"
 	"github.com/docker/machine/libmachine/host"
@@ -29,10 +30,13 @@ import (
 	"github.com/minishift/minishift/pkg/minikube/cluster"
 	"github.com/minishift/minishift/pkg/minikube/constants"
 	minishiftConfig "github.com/minishift/minishift/pkg/minishift/config"
+	"github.com/minishift/minishift/pkg/minishift/oc"
 	pkgUtil "github.com/minishift/minishift/pkg/util"
 	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
 	"github.com/spf13/cobra"
+	"k8s.io/client-go/tools/clientcmd"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
 var (
@@ -82,6 +86,12 @@ func runDelete(cmd *cobra.Command, args []string) {
 			atexit.ExitWithMessage(1, err.Error())
 		}
 	}
+	// Remove entries from global kube config
+	clusterIP, _ := cluster.GetHostIP(api)
+	err = clearKubeConfig(clusterIP)
+	if err != nil {
+		fmt.Println("Unable to delete entries from kube config:", err)
+	}
 
 	// Unregistration, do not allow to be skipped
 	registrationUtil.UnregisterHost(api, false, forceFlag)
@@ -109,6 +119,59 @@ func clearCache() {
 	} else {
 		fmt.Printf("Removed cache content at: '%s'\n", cachePath)
 	}
+}
+
+// Remove the current cluster's entries from global kubeconfig file
+func clearKubeConfig(clusterIP string) error {
+	kubeConfigPath, err := oc.GetGlobalKubeConfigPath()
+	if err != nil {
+		return err
+	}
+	kubeConfig, err := clientcmd.LoadFromFile(kubeConfigPath)
+	if err != nil {
+		return err
+	}
+	cleanKubeConfig, err := removeEntriesForCluster(clusterIP, kubeConfig)
+	if err != nil {
+		return err
+	}
+	return clientcmd.WriteToFile(*cleanKubeConfig, kubeConfigPath)
+}
+
+func removeEntriesForCluster(clusterIP string, kubeConfig *clientcmdapi.Config) (*clientcmdapi.Config, error) {
+	if kubeConfig == nil {
+		return nil, fmt.Errorf("Empty kubeconfig.")
+	}
+	clusterName := fmt.Sprintf("%s:%s", strings.Replace(clusterIP, ".", "-", -1), "8443")
+	cleanKubeConfig := clientcmdapi.NewConfig()
+
+	fmt.Printf("Removing entries from kubeconfig for cluster: %s\n", clusterName)
+	for cName, c := range kubeConfig.Clusters {
+		if cName == clusterName {
+			continue
+		}
+		cleanKubeConfig.Clusters[cName] = c
+	}
+	for ctxName, ctx := range kubeConfig.Contexts {
+		if ctx.Cluster == clusterName {
+			continue
+		}
+		cleanKubeConfig.Contexts[ctxName] = ctx
+	}
+	for aName, a := range kubeConfig.AuthInfos {
+		if strings.Contains(aName, clusterName) {
+			continue
+		}
+		cleanKubeConfig.AuthInfos[aName] = a
+	}
+	// restore stuff that minishift doesnot touch
+	cleanKubeConfig.APIVersion = kubeConfig.APIVersion
+	cleanKubeConfig.Kind = kubeConfig.Kind
+	cleanKubeConfig.Preferences = kubeConfig.Preferences
+	cleanKubeConfig.Extensions = kubeConfig.Extensions
+	cleanKubeConfig.CurrentContext = kubeConfig.CurrentContext
+
+	return cleanKubeConfig, nil
 }
 
 func handleFailedHostDeletion(err error) {

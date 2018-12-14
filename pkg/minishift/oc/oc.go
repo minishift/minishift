@@ -95,7 +95,7 @@ func (oc *OcRunner) AddSystemAdminEntryToKubeConfig(ocPath string) error {
 	var existingKubeConfig, newKubeConfig *clientcmdapi.Config
 
 	minishiftKubeConfigPath := oc.KubeConfigPath
-	globalKubeConfigPath, err := getGlobalKubeConfigPath()
+	globalKubeConfigPath, err := GetGlobalKubeConfigPath()
 	if err != nil {
 		return err
 	}
@@ -220,9 +220,9 @@ func mergeKubeConfigs(configs []*clientcmdapi.Config) *clientcmdapi.Config {
 	return mergedConfig
 }
 
-// getGlobalKubeConfigPath returns the path to the first entry in KUBECONFIG environment variable
+// GetGlobalKubeConfigPath returns the path to the first entry in KUBECONFIG environment variable
 // or if KUBECONFIG not set then $HOME/.kube/config
-func getGlobalKubeConfigPath() (string, error) {
+func GetGlobalKubeConfigPath() (string, error) {
 	globalKubeConfigPath := os.Getenv("KUBECONFIG")
 	globalKubeConfigPathList := strings.FieldsFunc(globalKubeConfigPath, splitKubeConfig)
 	if len(globalKubeConfigPathList) > 0 {

@@ -19,6 +19,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/minishift/minishift/cmd/testing/cli"
@@ -28,6 +29,7 @@ import (
 	"github.com/minishift/minishift/cmd/minishift/state"
 	"github.com/minishift/minishift/pkg/util/filehelper"
 	"github.com/minishift/minishift/pkg/util/os/atexit"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 func Test_clear_cache_user_confirms(t *testing.T) {
@@ -69,6 +71,35 @@ func Test_clear_cache_forced(t *testing.T) {
 	clearCache()
 
 	assert.False(t, filehelper.Exists(state.InstanceDirs.Cache), "Expected cache dir '%s' to be deleted", state.InstanceDirs.Cache)
+}
+
+func Test_remove_entries_for_cluster(t *testing.T) {
+	kubeConfigPath := filepath.Join("..", "..", "..", "test", "testdata", "kubeconfig")
+
+	dirtyKubeConfigPath := filepath.Join("..", "..", "..", "test", "testdata", "kubeconfig_dirty")
+	cleanKubeConfigPath := filepath.Join("..", "..", "..", "test", "testdata", "kubeconfig_clean")
+
+	dirtyKubeConfig, err := clientcmd.LoadFromFile(kubeConfigPath)
+	assert.NoError(t, err, "Error loading dirty kubeconfig file")
+
+	os.Rename(kubeConfigPath, dirtyKubeConfigPath)
+	os.Rename(cleanKubeConfigPath, kubeConfigPath)
+
+	cleanKubeConfig, err := clientcmd.LoadFromFile(kubeConfigPath)
+	assert.NoError(t, err, "Error loading clean kubeconfig file")
+
+	os.Rename(kubeConfigPath, cleanKubeConfigPath)
+	os.Rename(dirtyKubeConfigPath, kubeConfigPath)
+
+	// Cluster present in kubeconfig
+	actualKubeConfig, err := removeEntriesForCluster("192.168.42.28", dirtyKubeConfig)
+	assert.NoError(t, err, "Error removing entries from kubeconfig.")
+	assert.Equal(t, cleanKubeConfig, actualKubeConfig, "Existing cluster test.")
+
+	// Non existent cluster
+	actualKubeConfig, err = removeEntriesForCluster("192.168.102.88", dirtyKubeConfig)
+	assert.NoError(t, err, "Error removing entries from kubeconfig.")
+	assert.Equal(t, dirtyKubeConfig, actualKubeConfig, "Non Existent cluster test")
 }
 
 func Test_delete_succeeds_for_non_existing_vm(t *testing.T) {

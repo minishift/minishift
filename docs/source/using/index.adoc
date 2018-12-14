@@ -13,6 +13,7 @@ It covers the basic commands as well as advanced features like profiles, image c
 - xref:../using/host-folders.adoc#[Host Folders]
 - xref:../using/static-ip.adoc#[Assign Static IP Address]
 - xref:../using/docker-daemon.adoc#[{project} Docker Daemon]
+- xref:../using/choosing-iso-image.adoc#[Choosing the ISO Image]
 - xref:../using/experimental-features.adoc#[Experimental Features]
 - xref:../using/run-against-an-existing-machine.adoc#[Run Against An Existing Machine]
 

@@ -41,6 +41,8 @@ Topics:
         File: static-ip
       - Name: Minishift Docker Daemon
         File: docker-daemon
+      - Name: Choosing the ISO Image
+        File: choosing-iso-image
       - Name: Experimental Features
         File: experimental-features
       - Name: Run Against An Existing Machine

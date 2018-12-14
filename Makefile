@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Various versions - Minishift, default OpenShift, default B2D ISO
+# Various versions - Minishift, default OpenShift, default CentOS ISO
 MINISHIFT_VERSION = 1.28.0
 OPENSHIFT_VERSION = v3.11.0
-B2D_ISO_VERSION = v1.3.0
 CENTOS_ISO_VERSION = v1.13.0
 COMMIT_SHA=$(shell git rev-parse --short HEAD)
 
@@ -61,7 +60,7 @@ LOCAL_DOCS_DIR ?= $(CURDIR)/docs
 CONTAINER_DOCS_DIR = /minishift-docs
 DOCS_SYNOPISIS_DIR = docs/source/_tmp
 DOCS_UID ?= $(shell docker run -tiv $(LOCAL_DOCS_DIR):$(CONTAINER_DOCS_DIR) $(DOCS_BUILDER_IMAGE) id)
-DOC_VARIABLES = -e OPENSHIFT_VERSION=$(OPENSHIFT_VERSION) -e MINISHIFT_VERSION=$(MINISHIFT_VERSION) -e CENTOS_ISO_VERSION=$(CENTOS_ISO_VERSION) -e B2D_ISO_VERSION=$(B2D_ISO_VERSION)
+DOC_VARIABLES = -e OPENSHIFT_VERSION=$(OPENSHIFT_VERSION) -e MINISHIFT_VERSION=$(MINISHIFT_VERSION) -e CENTOS_ISO_VERSION=$(CENTOS_ISO_VERSION)
 
 # MISC
 START_COMMIT_MESSAGE_VALIDATION = 83af4780db01d9a4607925af83297e32b38a1603
@@ -299,4 +298,3 @@ validate_commits: $(GOPATH)/bin/git-validation ## Validates commit messages matc
 .PHONY: help
 help: ## Prints this help
 	@grep -E '^[^.]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-40s\033[0m %s\n", $$1, $$2}'
-

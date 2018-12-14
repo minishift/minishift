@@ -1,0 +1,57 @@
+include::variables.adoc[]
+
+= Choosing the ISO Image
+:icons:
+:toc: macro
+:toc-title:
+:toclevels: 1
+
+toc::[]
+
+[[choosing-iso-image-overview]]
+== Overview
+
+When you start {project}, it downloads a live ISO image that the hypervisor uses to provision the {project} VM.
+
+By default, {project} uses the link:https://github.com/minishift/minishift-centos-iso/releases[{project} CentOS ISO image].
+This ISO image is based on link:https://www.centos.org/[CentOS], an enterprise-ready Linux distribution that resembles a production environment.
+
+[NOTE]
+====
+You cannot run the same {project} instance with different ISO images concurrently.
+To switch between ISO images, delete the {project} instance and start a new instance with the ISO image that you want to use.
+====
+
+[[choosing-iso-image-using-remote-image]]
+== Using a Remote ISO Image
+
+To use a remotely available ISO image, specify the URL of the {project} ISO image during `minishift start` using the `--iso-url` flag:
+
+[subs="+attributes"]
+----
+$ minishift start --iso-url https://github.com/minishift/minishift-centos-iso/releases/download/{centos-iso-version}/minishift-centos7.iso
+----
+
+[[choosing-iso-image-using-local-image]]
+== Using a Local ISO Image
+
+To use a locally available ISO image, follow these steps:
+
+. Manually download the {project} CentOS ISO image from the link:https://github.com/minishift/minishift-centos-iso/releases[Minishift CentOS ISO releases page].
+. Specify the file URI to the image during `minishift start` using the `--iso-url` flag.
+
+The path given for a file URI must be an absolute path.
+
+On Linux or macOS, the path must begin with *_/_*.
+For example:
+
+----
+$ minishift start --iso-url file:///path/to/image.iso
+----
+
+On Windows, the path must begin with a drive letter such as *_C:_*.
+For example:
+
+----
+C:\> minishift.exe start --iso-url file://d:/path/to/image.iso
+----

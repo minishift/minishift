@@ -93,11 +93,6 @@ On Windows hosts, the `minishift hostfolder add` command also provides a `users-
 When this option is specified, no UNC path needs to be specified and *_C:\Users_* is assumed.
 ====
 
-[WARNING]
-====
-When you use the Boot2Docker ISO with the VirtualBox driver, VirtualBox guest additions are automatically enabled and occupy the *_/Users_* mount point.
-====
-
 ==== SSHFS
 
 [[adding-sshfs-hostfolder]]

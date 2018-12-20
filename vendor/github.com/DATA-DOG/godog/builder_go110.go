@@ -4,6 +4,7 @@ package godog
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"go/build"
 	"go/parser"
@@ -19,22 +20,29 @@ import (
 	"unicode"
 )
 
-var tooldir = findToolDir()
-var compiler = filepath.Join(tooldir, "compile")
-var linker = filepath.Join(tooldir, "link")
-var gopaths = filepath.SplitList(build.Default.GOPATH)
-var goarch = build.Default.GOARCH
-var goroot = build.Default.GOROOT
-var goos = build.Default.GOOS
+var (
+	tooldir         = findToolDir()
+	compiler        = filepath.Join(tooldir, "compile")
+	linker          = filepath.Join(tooldir, "link")
+	gopaths         = filepath.SplitList(build.Default.GOPATH)
+	godogImportPath = "github.com/DATA-DOG/godog"
 
-var godogImportPath = "github.com/DATA-DOG/godog"
-var runnerTemplate = template.Must(template.New("testmain").Parse(`package main
+	// godep
+	runnerTemplate = template.Must(template.New("testmain").Parse(`package main
 
 import (
 	"github.com/DATA-DOG/godog"
 	{{if .Contexts}}_test "{{.ImportPath}}"{{end}}
+	{{if .XContexts}}_xtest "{{.ImportPath}}_test"{{end}}
+	{{if .XContexts}}"testing/internal/testdeps"{{end}}
 	"os"
 )
+
+{{if .XContexts}}
+func init() {
+	testdeps.ImportPath = "{{.ImportPath}}"
+}
+{{end}}
 
 func main() {
 	status := godog.Run("{{ .Name }}", func (suite *godog.Suite) {
@@ -42,9 +50,32 @@ func main() {
 		{{range .Contexts}}
 			_test.{{ . }}(suite)
 		{{end}}
+		{{range .XContexts}}
+			_xtest.{{ . }}(suite)
+		{{end}}
 	})
 	os.Exit(status)
 }`))
+)
+
+type module struct {
+	Path, Dir string
+}
+
+func (mod *module) match(name string) *build.Package {
+	if strings.Index(name, mod.Path) == -1 {
+		return nil
+	}
+
+	suffix := strings.Replace(name, mod.Path, "", 1)
+	add := strings.Replace(suffix, "/", string(filepath.Separator), -1)
+	pkg, err := build.ImportDir(mod.Dir+add, 0)
+	if err != nil {
+		return nil
+	}
+
+	return pkg
+}
 
 // Build creates a test package like go test command at given target path.
 // If there are no go files in tested directory, then
@@ -78,30 +109,44 @@ func Build(bin string) error {
 	// if none of test files exist, or there are no contexts found
 	// we will skip test package compilation, since it is useless
 	if anyContexts {
-		// first of all compile test package dependencies
-		// that will save us many compilations for dependencies
-		// go does it better
-		out, err := exec.Command("go", "test", "-i").CombinedOutput()
-		if err != nil {
-			return fmt.Errorf("failed to compile package: %s, reason: %v, output: %s", pkg.Name, err, string(out))
-		}
-
-		// builds and compile the tested package.
+		// build and compile the tested package.
 		// generated test executable will be removed
 		// since we do not need it for godog suite.
 		// we also print back the temp WORK directory
 		// go has built. We will reuse it for our suite workdir.
-		out, err = exec.Command("go", "test", "-c", "-work", "-o", "/dev/null").CombinedOutput()
+		temp := fmt.Sprintf(filepath.Join("%s", "temp-%d.test"), os.TempDir(), time.Now().UnixNano())
+		out, err := exec.Command("go", "test", "-c", "-work", "-o", temp).CombinedOutput()
 		if err != nil {
 			return fmt.Errorf("failed to compile tested package: %s, reason: %v, output: %s", pkg.Name, err, string(out))
 		}
+		defer os.Remove(temp)
 
 		// extract go-build temporary directory as our workdir
-		workdir = strings.TrimSpace(string(out))
-		if !strings.HasPrefix(workdir, "WORK=") {
-			return fmt.Errorf("expected WORK dir path, but got: %s", workdir)
+		lines := strings.Split(strings.TrimSpace(string(out)), "\n")
+		// it may have some compilation warnings, in the output, but these are not
+		// considered to be errors, since command exit status is 0
+		for _, ln := range lines {
+			if !strings.HasPrefix(ln, "WORK=") {
+				continue
+			}
+			workdir = strings.Replace(ln, "WORK=", "", 1)
+			break
 		}
-		workdir = strings.Replace(workdir, "WORK=", "", 1)
+
+		// may not locate it in output
+		if workdir == testdir {
+			return fmt.Errorf("expected WORK dir path to be present in output: %s", string(out))
+		}
+
+		// check whether workdir exists
+		stats, err := os.Stat(workdir)
+		if os.IsNotExist(err) {
+			return fmt.Errorf("expected WORK dir: %s to be available", workdir)
+		}
+
+		if !stats.IsDir() {
+			return fmt.Errorf("expected WORK dir: %s to be directory", workdir)
+		}
 		testdir = filepath.Join(workdir, "b001")
 	} else {
 		// still need to create temporary workdir
@@ -118,22 +163,23 @@ func Build(bin string) error {
 		return err
 	}
 
-	// godog library may not be imported in tested package
-	// but we need it for our testmain package.
-	// So we look it up in available source paths
+	mods := readModules()
+	// if it was not located as module
+	// we look it up in available source paths
 	// including vendor directory, supported since 1.5.
-	godogPkg, err := locatePackage(godogImportPath)
+	godogPkg, err := locatePackage(godogImportPath, mods)
 	if err != nil {
 		return err
 	}
 
-	// make sure godog package archive is installed, gherkin
-	// will be installed as dependency of godog
-	cmd := exec.Command("go", "install", "-i", godogPkg.ImportPath)
-	cmd.Env = os.Environ()
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("failed to install godog package: %s, reason: %v", string(out), err)
+	if !isModule(godogImportPath, mods) {
+		// must make sure that package is installed
+		// modules are installed on download
+		cmd := exec.Command("go", "install", "-i", godogPkg.ImportPath)
+		cmd.Env = os.Environ()
+		if out, err := cmd.CombinedOutput(); err != nil {
+			return fmt.Errorf("failed to install godog package: %s, reason: %v", string(out), err)
+		}
 	}
 
 	// compile godog testmain package archive
@@ -157,7 +203,7 @@ func Build(bin string) error {
 		fmt.Fprintln(in, "# import config")
 
 		deps := make(map[string]string)
-		if err := dependencies(godogPkg, deps, false); err != nil {
+		if err := dependencies(godogPkg, mods, deps, false); err != nil {
 			in.Close()
 			return err
 		}
@@ -177,11 +223,11 @@ func Build(bin string) error {
 			return err
 		}
 		deps := make(map[string]string)
-		if err := dependencies(pkg, deps, true); err != nil {
+		if err := dependencies(pkg, mods, deps, true); err != nil {
 			in.Close()
 			return err
 		}
-		if err := dependencies(godogPkg, deps, false); err != nil {
+		if err := dependencies(godogPkg, mods, deps, false); err != nil {
 			in.Close()
 			return err
 		}
@@ -195,9 +241,9 @@ func Build(bin string) error {
 	}
 
 	args = append(args, "-pack", testmain)
-	cmd = exec.Command(compiler, args...)
+	cmd := exec.Command(compiler, args...)
 	cmd.Env = os.Environ()
-	out, err = cmd.CombinedOutput()
+	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("failed to compile testmain package: %v - output: %s", err, string(out))
 	}
@@ -241,11 +287,20 @@ func Build(bin string) error {
 	return nil
 }
 
-func locatePackage(name string) (*build.Package, error) {
+func locatePackage(name string, mods []*module) (*build.Package, error) {
 	// search vendor paths first since that takes priority
 	dir, err := filepath.Abs(".")
 	if err != nil {
 		return nil, err
+	}
+
+	// first of all check modules
+	if mods != nil {
+		for _, mod := range mods {
+			if pkg := mod.match(name); pkg != nil {
+				return pkg, nil
+			}
+		}
 	}
 
 	for _, gopath := range gopaths {
@@ -299,48 +354,82 @@ func makeImportValid(r rune) rune {
 	return r
 }
 
-func uniqStringList(strs []string) (unique []string) {
-	uniq := make(map[string]void, len(strs))
-	for _, s := range strs {
-		if _, ok := uniq[s]; !ok {
-			uniq[s] = void{}
-			unique = append(unique, s)
-		}
-	}
-	return
-}
-
 // buildTestMain if given package is valid
 // it scans test files for contexts
 // and produces a testmain source code.
 func buildTestMain(pkg *build.Package) ([]byte, bool, error) {
-	var contexts []string
-	var importPath string
-	name := "main"
+	var (
+		contexts         []string
+		xcontexts        []string
+		err              error
+		name, importPath string
+	)
 	if nil != pkg {
-		ctxs, err := processPackageTestFiles(
-			pkg.TestGoFiles,
-			pkg.XTestGoFiles,
-		)
+		contexts, err = processPackageTestFiles(pkg.TestGoFiles)
 		if err != nil {
 			return nil, false, err
 		}
-		contexts = ctxs
-		importPath = pkg.ImportPath
+		xcontexts, err = processPackageTestFiles(pkg.XTestGoFiles)
+		if err != nil {
+			return nil, false, err
+		}
+		importPath = parseImport(pkg.ImportPath, pkg.Root)
 		name = pkg.Name
+	} else {
+		name = "main"
 	}
-
 	data := struct {
 		Name       string
 		Contexts   []string
+		XContexts  []string
 		ImportPath string
-	}{name, contexts, importPath}
-
-	var buf bytes.Buffer
-	if err := runnerTemplate.Execute(&buf, data); err != nil {
-		return nil, len(contexts) > 0, err
+	}{
+		Name:       name,
+		Contexts:   contexts,
+		XContexts:  xcontexts,
+		ImportPath: importPath,
 	}
-	return buf.Bytes(), len(contexts) > 0, nil
+
+	hasContext := len(contexts) > 0 || len(xcontexts) > 0
+	var buf bytes.Buffer
+	if err = runnerTemplate.Execute(&buf, data); err != nil {
+		return nil, hasContext, err
+	}
+	return buf.Bytes(), hasContext, nil
+}
+
+// parseImport parses the import path to deal with go module.
+func parseImport(rawPath, rootPath string) string {
+	// with go > 1.11 and go module enabled out of the GOPATH,
+	// the import path begins with an underscore and the GOPATH is unknown on build.
+	if rootPath != "" {
+		// go < 1.11 or it's a module inside the GOPATH
+		return rawPath
+	}
+	// for module support, query the module import path
+	cmd := exec.Command("go", "list", "-m", "-json")
+	out, err := cmd.StdoutPipe()
+	if err != nil {
+		// Unable to read stdout
+		return rawPath
+	}
+	if cmd.Start() != nil {
+		// Does not using modules
+		return rawPath
+	}
+	var mod struct {
+		Dir  string `json:"Dir"`
+		Path string `json:"Path"`
+	}
+	if json.NewDecoder(out).Decode(&mod) != nil {
+		// Unexpected result
+		return rawPath
+	}
+	if cmd.Wait() != nil {
+		return rawPath
+	}
+	// Concatenates the module path with the current sub-folders if needed
+	return mod.Path + filepath.ToSlash(strings.TrimPrefix(strings.TrimPrefix(rawPath, "_"), mod.Dir))
 }
 
 // processPackageTestFiles runs through ast of each test
@@ -380,7 +469,7 @@ func findToolDir() string {
 	return filepath.Clean(build.ToolDir)
 }
 
-func dependencies(pkg *build.Package, visited map[string]string, vendor bool) error {
+func dependencies(pkg *build.Package, mods []*module, visited map[string]string, vendor bool) error {
 	visited[pkg.ImportPath] = pkg.PkgObj
 	imports := pkg.Imports
 	if vendor {
@@ -390,20 +479,53 @@ func dependencies(pkg *build.Package, visited map[string]string, vendor bool) er
 		if i := strings.LastIndex(name, "vendor/"); vendor && i == -1 {
 			continue // only interested in vendor packages
 		}
-
 		if _, ok := visited[name]; ok {
 			continue
 		}
 
-		next, err := locatePackage(name)
+		next, err := locatePackage(name, mods)
 		if err != nil {
 			return err
 		}
 
 		visited[name] = pkg.PkgObj
-		if err := dependencies(next, visited, vendor); err != nil {
+		if err := dependencies(next, mods, visited, vendor); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func readModules() []*module {
+	// for module support, query the module import path
+	out, err := exec.Command("go", "mod", "download", "-json").Output()
+	if err != nil {
+		// Unable to read stdout
+		return nil
+	}
+
+	var mods []*module
+	reader := json.NewDecoder(bytes.NewReader(out))
+	for {
+		var mod *module
+		if err := reader.Decode(&mod); err != nil {
+			break // might be also EOF
+		}
+		mods = append(mods, mod)
+	}
+	return mods
+}
+
+func isModule(name string, mods []*module) bool {
+	if mods == nil {
+		return false
+	}
+
+	for _, mod := range mods {
+		if pkg := mod.match(name); pkg != nil {
+			return true
+		}
+	}
+
+	return false
 }

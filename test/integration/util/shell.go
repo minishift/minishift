@@ -205,8 +205,6 @@ func CloseHostShellInstance() error {
 }
 
 func ExecuteInHostShell(command string) error {
-	command = ProcessVariables(command)
-
 	if shell.instance == nil {
 		return errors.New("Shell instance is not started.")
 	}

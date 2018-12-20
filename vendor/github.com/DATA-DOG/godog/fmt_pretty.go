@@ -58,7 +58,7 @@ func (f *pretty) Feature(ft *gherkin.Feature, p string, c []byte) {
 		fmt.Fprintln(f.out, "")
 	}
 	f.features = append(f.features, &feature{Path: p, Feature: ft})
-	fmt.Fprintln(f.out, whiteb(ft.Keyword+": ")+ft.Name)
+	fmt.Fprintln(f.out, keywordAndName(ft.Keyword, ft.Name))
 	if strings.TrimSpace(ft.Description) != "" {
 		for _, line := range strings.Split(ft.Description, "\n") {
 			fmt.Fprintln(f.out, s(f.indent)+strings.TrimSpace(line))
@@ -97,25 +97,55 @@ func (f *pretty) Node(node interface{}) {
 		f.scenario = nil
 		f.outlineNumExample = -1
 		f.scenarioKeyword = false
+		if isEmptyScenario(t) {
+			f.printUndefinedScenario(t)
+		}
 	case *gherkin.TableRow:
 		f.steps = len(f.outline.Steps) + f.totalBgSteps
 		f.outlineSteps = []*stepResult{}
 	}
 }
 
-func (f *pretty) printUndefinedScenario(sc *gherkin.Scenario) {
-	if f.bgSteps > 0 {
-		f.commentPos = f.longestStep(f.feature.Background.Steps, f.length(f.feature.Background))
-		fmt.Fprintln(f.out, "\n"+s(f.indent)+whiteb(f.feature.Background.Keyword+": "+f.feature.Background.Name))
+func keywordAndName(keyword, name string) string {
+	title := whiteb(keyword + ":")
+	if len(name) > 0 {
+		title += " " + name
+	}
+	return title
+}
 
-		for _, step := range f.feature.Background.Steps {
+func (f *pretty) printUndefinedScenario(sc interface{}) {
+	if f.bgSteps > 0 {
+		bg := f.feature.Background
+		f.commentPos = f.longestStep(bg.Steps, f.length(bg))
+		fmt.Fprintln(f.out, "\n"+s(f.indent)+keywordAndName(bg.Keyword, bg.Name))
+
+		for _, step := range bg.Steps {
 			f.bgSteps--
 			f.printStep(step, nil, colors.Cyan)
 		}
 	}
-	text := s(f.indent) + whiteb(f.scenario.Keyword+": ") + sc.Name
-	text += s(f.commentPos-f.length(f.scenario)+1) + f.line(sc.Location)
-	fmt.Fprintln(f.out, "\n"+text)
+
+	switch t := sc.(type) {
+	case *gherkin.Scenario:
+		f.commentPos = f.longestStep(t.Steps, f.length(sc))
+		text := s(f.indent) + keywordAndName(t.Keyword, t.Name)
+		text += s(f.commentPos-f.length(t)+1) + f.line(t.Location)
+		fmt.Fprintln(f.out, "\n"+text)
+	case *gherkin.ScenarioOutline:
+		f.commentPos = f.longestStep(t.Steps, f.length(sc))
+		text := s(f.indent) + keywordAndName(t.Keyword, t.Name)
+		text += s(f.commentPos-f.length(t)+1) + f.line(t.Location)
+		fmt.Fprintln(f.out, "\n"+text)
+
+		for _, example := range t.Examples {
+			max := longest(example, cyan)
+			f.printExampleHeader(example, max)
+			for _, row := range example.TableBody {
+				f.printExampleRow(row, max, cyan)
+			}
+		}
+	}
 }
 
 // Summary sumarize the feature formatter output
@@ -202,34 +232,45 @@ func (f *pretty) printOutlineExample(outline *gherkin.ScenarioOutline) {
 	if clr == nil {
 		clr = green
 	}
-	cells := make([]string, len(example.TableHeader.Cells))
+
 	max := longest(example, clr, cyan)
 	// an example table header
 	if firstExample {
-		fmt.Fprintln(f.out, "")
-		fmt.Fprintln(f.out, s(f.indent*2)+whiteb(example.Keyword+": ")+example.Name)
-
-		for i, cell := range example.TableHeader.Cells {
-			val := cyan(cell.Value)
-			ln := utf8.RuneCountInString(val)
-			cells[i] = val + s(max[i]-ln)
-		}
-		fmt.Fprintln(f.out, s(f.indent*3)+"| "+strings.Join(cells, " | ")+" |")
+		f.printExampleHeader(example, max)
 	}
 
 	// an example table row
 	row := example.TableBody[len(example.TableBody)-f.outlineNumExamples]
+	f.printExampleRow(row, max, clr)
+
+	// if there is an error
+	if msg != "" {
+		fmt.Fprintln(f.out, s(f.indent*4)+redb(msg))
+	}
+}
+
+func (f *pretty) printExampleRow(row *gherkin.TableRow, max []int, clr colors.ColorFunc) {
+	cells := make([]string, len(row.Cells))
 	for i, cell := range row.Cells {
 		val := clr(cell.Value)
 		ln := utf8.RuneCountInString(val)
 		cells[i] = val + s(max[i]-ln)
 	}
 	fmt.Fprintln(f.out, s(f.indent*3)+"| "+strings.Join(cells, " | ")+" |")
+}
 
-	// if there is an error
-	if msg != "" {
-		fmt.Fprintln(f.out, s(f.indent*4)+redb(msg))
+func (f *pretty) printExampleHeader(example *gherkin.Examples, max []int) {
+	cells := make([]string, len(example.TableHeader.Cells))
+	// an example table header
+	fmt.Fprintln(f.out, "")
+	fmt.Fprintln(f.out, s(f.indent*2)+keywordAndName(example.Keyword, example.Name))
+
+	for i, cell := range example.TableHeader.Cells {
+		val := cyan(cell.Value)
+		ln := utf8.RuneCountInString(val)
+		cells[i] = val + s(max[i]-ln)
 	}
+	fmt.Fprintln(f.out, s(f.indent*3)+"| "+strings.Join(cells, " | ")+" |")
 }
 
 func (f *pretty) printStep(step *gherkin.Step, def *StepDef, c colors.ColorFunc) {
@@ -281,13 +322,14 @@ func (f *pretty) printStepKind(res *stepResult) {
 		f.outlineSteps = append(f.outlineSteps, res)
 	}
 	var bgStep bool
+	bg := f.feature.Background
 
 	// if has not printed background yet
 	switch {
 	// first background step
-	case f.bgSteps > 0 && f.bgSteps == len(f.feature.Background.Steps):
-		f.commentPos = f.longestStep(f.feature.Background.Steps, f.length(f.feature.Background))
-		fmt.Fprintln(f.out, "\n"+s(f.indent)+whiteb(f.feature.Background.Keyword+": "+f.feature.Background.Name))
+	case f.bgSteps > 0 && f.bgSteps == len(bg.Steps):
+		f.commentPos = f.longestStep(bg.Steps, f.length(bg))
+		fmt.Fprintln(f.out, "\n"+s(f.indent)+keywordAndName(bg.Keyword, bg.Name))
 		f.bgSteps--
 		bgStep = true
 	// subsequent background steps
@@ -299,12 +341,12 @@ func (f *pretty) printStepKind(res *stepResult) {
 		// print scenario keyword and value if first example
 		if !f.scenarioKeyword {
 			f.commentPos = f.longestStep(f.scenario.Steps, f.length(f.scenario))
-			if f.feature.Background != nil {
-				if bgLen := f.longestStep(f.feature.Background.Steps, f.length(f.feature.Background)); bgLen > f.commentPos {
+			if bg != nil {
+				if bgLen := f.longestStep(bg.Steps, f.length(bg)); bgLen > f.commentPos {
 					f.commentPos = bgLen
 				}
 			}
-			text := s(f.indent) + whiteb(f.scenario.Keyword+": ") + f.scenario.Name
+			text := s(f.indent) + keywordAndName(f.scenario.Keyword, f.scenario.Name)
 			text += s(f.commentPos-f.length(f.scenario)+1) + f.line(f.scenario.Location)
 			fmt.Fprintln(f.out, "\n"+text)
 			f.scenarioKeyword = true
@@ -314,12 +356,12 @@ func (f *pretty) printStepKind(res *stepResult) {
 		// print scenario keyword and value if first example
 		if !f.scenarioKeyword {
 			f.commentPos = f.longestStep(f.outline.Steps, f.length(f.outline))
-			if f.feature.Background != nil {
-				if bgLen := f.longestStep(f.feature.Background.Steps, f.length(f.feature.Background)); bgLen > f.commentPos {
+			if bg != nil {
+				if bgLen := f.longestStep(bg.Steps, f.length(bg)); bgLen > f.commentPos {
 					f.commentPos = bgLen
 				}
 			}
-			text := s(f.indent) + whiteb(f.outline.Keyword+": ") + f.outline.Name
+			text := s(f.indent) + keywordAndName(f.outline.Keyword, f.outline.Name)
 			text += s(f.commentPos-f.length(f.outline)+1) + f.line(f.outline.Location)
 			fmt.Fprintln(f.out, "\n"+text)
 			f.scenarioKeyword = true

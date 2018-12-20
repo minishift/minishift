@@ -219,7 +219,6 @@ func (m *Minishift) ExecutingOcCommand(command string) error {
 		return errors.New("oc binary can't be used, Minishift is not Running")
 	}
 
-	command = util.ProcessVariables(command)
 	cmdOut, cmdErr, cmdExit, err := ocRunner.RunCommand(command)
 	if err != nil {
 		return err
@@ -237,7 +236,6 @@ func (m *Minishift) ExecutingOcCommand(command string) error {
 }
 
 func (m *Minishift) ExecutingMinishiftCommand(command string) error {
-	command = util.ProcessVariables(command)
 	cmdOut, cmdErr, cmdExit, err := m.runner.RunCommand(command)
 	if err != nil {
 		return err

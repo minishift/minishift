@@ -39,6 +39,7 @@ func SuiteContext(s *Suite, additionalContextInitializers ...func(suite *Suite))
 	s.Step(`^I parse features$`, c.parseFeatures)
 	s.Step(`^I'm listening to suite events$`, c.iAmListeningToSuiteEvents)
 	s.Step(`^I run feature suite$`, c.iRunFeatureSuite)
+	s.Step(`^I run feature suite with tags "([^"]*)"$`, c.iRunFeatureSuiteWithTags)
 	s.Step(`^I run feature suite with formatter "([^"]*)"$`, c.iRunFeatureSuiteWithFormatter)
 	s.Step(`^(?:a )?feature "([^"]*)"(?: file)?:$`, c.aFeatureFile)
 	s.Step(`^the suite should have (passed|failed)$`, c.theSuiteShouldHave)
@@ -114,8 +115,21 @@ func (s *suiteContext) ResetBeforeEachScenario(interface{}) {
 	s.events = []*firedEvent{}
 }
 
+func (s *suiteContext) iRunFeatureSuiteWithTags(tags string) error {
+	if err := s.parseFeatures(); err != nil {
+		return err
+	}
+	for _, feat := range s.testedSuite.features {
+		applyTagFilter(tags, feat.Feature)
+	}
+	s.testedSuite.fmt = testFormatterFunc("godog", &s.out)
+	s.testedSuite.run()
+	s.testedSuite.fmt.Summary()
+	return nil
+}
+
 func (s *suiteContext) iRunFeatureSuiteWithFormatter(name string) error {
-	f := findFmt(name)
+	f := FindFmt(name)
 	if f == nil {
 		return fmt.Errorf(`formatter "%s" is not available`, name)
 	}

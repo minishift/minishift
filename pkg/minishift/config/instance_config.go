@@ -18,6 +18,7 @@ package config
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"os"
 
@@ -80,6 +81,10 @@ func (cfg *InstanceConfigType) read() error {
 	raw, err := ioutil.ReadFile(cfg.FilePath)
 	if err != nil {
 		return err
+	}
+
+	if !json.Valid(raw) {
+		return errors.New("Invalid JSON")
 	}
 
 	json.Unmarshal(raw, &cfg)

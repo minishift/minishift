@@ -178,12 +178,12 @@ user defined options which changes default behaviour of Minishift.
        
   @quick
   Scenario: Setting iso-url key to a non existing path
-     When executing "minishift config set iso-url file:///home/Downloads/my_handmade_centos.iso" fails
+     When executing "minishift config set iso-url $(TEST_DIR)/non-existing.iso" fails
      Then stderr should contain
-      """
-      'file:///home/Downloads/my_handmade_centos.iso' file is not present
-      """
-	
+     """
+     '$(TEST_DIR)/non-existing.iso' file is not present
+     """
+
   @quick
   Scenario: Unsetting non-existing key
      When executing "minishift config unset i-do-not-exist" succeeds

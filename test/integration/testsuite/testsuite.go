@@ -300,15 +300,6 @@ func FeatureContext(s *godog.Suite) {
 		fmt.Println("Using binary:", minishiftBinary)
 	})
 
-	s.AfterSuite(func() {
-		util.LogMessage("info", "----- Cleaning Up -----")
-		MinishiftInstance.runner.EnsureAllMinishiftHomesDeleted(testDir)
-		err := util.CloseLog()
-		if err != nil {
-			fmt.Println("Error closing the log:", err)
-		}
-	})
-
 	s.BeforeFeature(func(this *gherkin.Feature) {
 		util.LogMessage("info", "----- Preparing for feature -----")
 		if runner.IsCDK() {
@@ -334,14 +325,11 @@ func FeatureContext(s *godog.Suite) {
 			}
 		}
 
+		setDefaultScenarioVariables()
+
 		util.LogMessage("info", fmt.Sprintf("----- Feature: %s -----", this.Name))
 
 		os.Chdir(testDir)
-	})
-
-	s.AfterFeature(func(this *gherkin.Feature) {
-		util.LogMessage("info", "----- Cleaning after feature -----")
-		cleanTestDefaultHomeConfiguration()
 	})
 
 	s.BeforeScenario(func(this interface{}) {
@@ -355,10 +343,31 @@ func FeatureContext(s *godog.Suite) {
 		}
 	})
 
+	s.BeforeStep(func(this *gherkin.Step) {
+		this.Text = util.ProcessVariables(this.Text)
+		switch v := this.Argument.(type) {
+		case *gherkin.DocString:
+			v.Content = util.ProcessVariables(v.Content)
+		}
+	})
+
 	s.AfterScenario(func(interface{}, error) {
 		testProxy.ResetLog(false)
 	})
 
+	s.AfterFeature(func(this *gherkin.Feature) {
+		util.LogMessage("info", "----- Cleaning after feature -----")
+		cleanTestDefaultHomeConfiguration()
+	})
+
+	s.AfterSuite(func() {
+		util.LogMessage("info", "----- Cleaning Up -----")
+		MinishiftInstance.runner.EnsureAllMinishiftHomesDeleted(testDir)
+		err := util.CloseLog()
+		if err != nil {
+			fmt.Println("Error closing the log:", err)
+		}
+	})
 }
 
 //  To get values of nested keys, use following dot formating in Scenarios: key.nestedKey

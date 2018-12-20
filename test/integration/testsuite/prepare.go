@@ -111,6 +111,10 @@ func SetMinishiftHomeEnv(path string) {
 	}
 }
 
+func setDefaultScenarioVariables() {
+	util.SetVariable("TEST_DIR", "file://"+testDir)
+}
+
 func ensureTestDirEmpty() {
 	files, err := ioutil.ReadDir(testDir)
 	if err != nil {

@@ -25,7 +25,7 @@ ignored = ["github.com/Sirupsen/logrus"]
 
 [[constraint]]
   name = "github.com/DATA-DOG/godog"
-  version = "=0.7.6"
+  revision = "75562b12d67aa758aba65b0072c763bccf7e9b00"
 
 [[constraint]]
   name = "github.com/asaskevich/govalidator"

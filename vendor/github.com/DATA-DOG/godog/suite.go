@@ -238,6 +238,11 @@ func (s *Suite) matchStep(step *gherkin.Step) *StepDef {
 }
 
 func (s *Suite) runStep(step *gherkin.Step, prevStepErr error) (err error) {
+	// run before step handlers
+	for _, f := range s.beforeStepHandlers {
+		f(step)
+	}
+
 	match := s.matchStep(step)
 	s.fmt.Defined(step, match)
 
@@ -293,11 +298,6 @@ func (s *Suite) runStep(step *gherkin.Step, prevStepErr error) (err error) {
 	if prevStepErr != nil {
 		s.fmt.Skipped(step, match)
 		return nil
-	}
-
-	// run before step handlers
-	for _, f := range s.beforeStepHandlers {
-		f(step)
 	}
 
 	err = s.maybeSubSteps(match.run())
@@ -400,12 +400,6 @@ func (s *Suite) runSteps(steps []*gherkin.Step) (err error) {
 		}
 	}
 	return
-}
-
-func (s *Suite) skipSteps(steps []*gherkin.Step) {
-	for _, step := range steps {
-		s.fmt.Skipped(step, s.matchStep(step))
-	}
 }
 
 func (s *Suite) runOutline(outline *gherkin.ScenarioOutline, b *gherkin.Background) (failErr error) {
@@ -716,7 +710,6 @@ func filterFeatures(tags string, collected map[string]*feature) (features []*fea
 		}
 		ft.ScenarioDefinitions = scenarios
 		applyTagFilter(tags, ft.Feature)
-
 		features = append(features, ft)
 	}
 
@@ -732,8 +725,22 @@ func applyTagFilter(tags string, ft *gherkin.Feature) {
 
 	var scenarios []interface{}
 	for _, scenario := range ft.ScenarioDefinitions {
-		if matchesTags(tags, allTags(ft, scenario)) {
-			scenarios = append(scenarios, scenario)
+		switch t := scenario.(type) {
+		case *gherkin.ScenarioOutline:
+			var allExamples []*gherkin.Examples
+			for _, examples := range t.Examples {
+				if matchesTags(tags, allTags(ft, t, examples)) {
+					allExamples = append(allExamples, examples)
+				}
+			}
+			t.Examples = allExamples
+			if len(t.Examples) > 0 {
+				scenarios = append(scenarios, scenario)
+			}
+		case *gherkin.Scenario:
+			if matchesTags(tags, allTags(ft, t)) {
+				scenarios = append(scenarios, scenario)
+			}
 		}
 	}
 	ft.ScenarioDefinitions = scenarios
@@ -798,7 +805,7 @@ func matchesTags(filter string, tags []string) (ok bool) {
 				okComma = hasTag(tags, tag) || okComma
 			}
 		}
-		ok = (false != okComma && ok && okComma) || false
+		ok = ok && okComma
 	}
 	return
 }

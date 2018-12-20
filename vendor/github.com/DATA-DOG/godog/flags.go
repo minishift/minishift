@@ -34,7 +34,17 @@ var descRandomOption = "Randomly shuffle the scenario execution order.\n" +
 	s(4) + `e.g. ` + colors.Yellow(`--random`) + " or " + colors.Yellow(`--random=5738`)
 
 // FlagSet allows to manage flags by external suite runner
+// builds flag.FlagSet with godog flags binded
 func FlagSet(opt *Options) *flag.FlagSet {
+	set := flag.NewFlagSet("godog", flag.ExitOnError)
+	BindFlags("", set, opt)
+	set.Usage = usage(set, opt.Output)
+	return set
+}
+
+// BindFlags binds godog flags to given flag set prefixed
+// by given prefix, without overriding usage
+func BindFlags(prefix string, set *flag.FlagSet, opt *Options) {
 	descFormatOption := "How to format tests output. Built-in formats:\n"
 	// @TODO: sort by name
 	for name, desc := range AvailableFormatters() {
@@ -42,21 +52,48 @@ func FlagSet(opt *Options) *flag.FlagSet {
 	}
 	descFormatOption = strings.TrimSpace(descFormatOption)
 
-	set := flag.NewFlagSet("godog", flag.ExitOnError)
-	set.StringVar(&opt.Format, "format", "pretty", descFormatOption)
-	set.StringVar(&opt.Format, "f", "pretty", descFormatOption)
-	set.StringVar(&opt.Tags, "tags", "", descTagsOption)
-	set.StringVar(&opt.Tags, "t", "", descTagsOption)
-	set.IntVar(&opt.Concurrency, "concurrency", 1, descConcurrencyOption)
-	set.IntVar(&opt.Concurrency, "c", 1, descConcurrencyOption)
-	set.BoolVar(&opt.ShowStepDefinitions, "definitions", false, "Print all available step definitions.")
-	set.BoolVar(&opt.ShowStepDefinitions, "d", false, "Print all available step definitions.")
-	set.BoolVar(&opt.StopOnFailure, "stop-on-failure", false, "Stop processing on first failed scenario.")
-	set.BoolVar(&opt.Strict, "strict", false, "Fail suite when there are pending or undefined steps.")
-	set.BoolVar(&opt.NoColors, "no-colors", false, "Disable ansi colors.")
-	set.Var(&randomSeed{&opt.Randomize}, "random", descRandomOption)
-	set.Usage = usage(set, opt.Output)
-	return set
+	// override flag defaults if any corresponding properties were supplied on the incoming `opt`
+	defFormatOption := "pretty"
+	if opt.Format != "" {
+		defFormatOption = opt.Format
+	}
+	defTagsOption := ""
+	if opt.Tags != "" {
+		defTagsOption = opt.Tags
+	}
+	defConcurrencyOption := 1
+	if opt.Concurrency != 0 {
+		defConcurrencyOption = opt.Concurrency
+	}
+	defShowStepDefinitions := false
+	if opt.ShowStepDefinitions {
+		defShowStepDefinitions = opt.ShowStepDefinitions
+	}
+	defStopOnFailure := false
+	if opt.StopOnFailure {
+		defStopOnFailure = opt.StopOnFailure
+	}
+	defStrict := false
+	if opt.Strict {
+		defStrict = opt.Strict
+	}
+	defNoColors := false
+	if opt.NoColors {
+		defNoColors = opt.NoColors
+	}
+
+	set.StringVar(&opt.Format, prefix+"format", defFormatOption, descFormatOption)
+	set.StringVar(&opt.Format, prefix+"f", defFormatOption, descFormatOption)
+	set.StringVar(&opt.Tags, prefix+"tags", defTagsOption, descTagsOption)
+	set.StringVar(&opt.Tags, prefix+"t", defTagsOption, descTagsOption)
+	set.IntVar(&opt.Concurrency, prefix+"concurrency", defConcurrencyOption, descConcurrencyOption)
+	set.IntVar(&opt.Concurrency, prefix+"c", defConcurrencyOption, descConcurrencyOption)
+	set.BoolVar(&opt.ShowStepDefinitions, prefix+"definitions", defShowStepDefinitions, "Print all available step definitions.")
+	set.BoolVar(&opt.ShowStepDefinitions, prefix+"d", defShowStepDefinitions, "Print all available step definitions.")
+	set.BoolVar(&opt.StopOnFailure, prefix+"stop-on-failure", defStopOnFailure, "Stop processing on first failed scenario.")
+	set.BoolVar(&opt.Strict, prefix+"strict", defStrict, "Fail suite when there are pending or undefined steps.")
+	set.BoolVar(&opt.NoColors, prefix+"no-colors", defNoColors, "Disable ansi colors.")
+	set.Var(&randomSeed{&opt.Randomize}, prefix+"random", descRandomOption)
 }
 
 type flagged struct {
@@ -159,14 +196,13 @@ type randomSeed struct {
 
 // Choose randomly assigns a convenient pseudo-random seed value.
 // The resulting seed will be between `1-99999` for later ease of specification.
-func (rs *randomSeed) choose() {
-	r := rand.New(rand.NewSource(time.Now().UTC().UnixNano()))
-	*rs.ref = r.Int63n(99998) + 1
+func makeRandomSeed() int64 {
+	return rand.New(rand.NewSource(time.Now().UTC().UnixNano())).Int63n(99998) + 1
 }
 
 func (rs *randomSeed) Set(s string) error {
 	if s == "true" {
-		rs.choose()
+		*rs.ref = makeRandomSeed()
 		return nil
 	}
 
@@ -180,7 +216,10 @@ func (rs *randomSeed) Set(s string) error {
 	return err
 }
 
-func (rs randomSeed) String() string {
+func (rs *randomSeed) String() string {
+	if rs.ref == nil {
+		return "0"
+	}
 	return strconv.FormatInt(*rs.ref, 10)
 }
 

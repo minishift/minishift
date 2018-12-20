@@ -18,6 +18,7 @@ package config
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/minishift/minishift/pkg/minishift/hostfolder/config"
 	"io/ioutil"
 	"os"
@@ -81,6 +82,10 @@ func (cfg *GlobalConfigType) read() error {
 	raw, err := ioutil.ReadFile(cfg.FilePath)
 	if err != nil {
 		return err
+	}
+
+	if !json.Valid(raw) {
+		return errors.New("Invalid JSON")
 	}
 
 	json.Unmarshal(raw, &cfg)

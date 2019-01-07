@@ -1,0 +1,274 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: apicurito
+  labels:
+    app: apicurito
+  annotations:
+    openshift.io/display-name: "Red Hat Fuse Apicurito"
+    openshift.io/provider-display-name: "Red Hat, Inc."
+    description: "Design beautiful, functional APIs with zero coding, using a visual designer for OpenAPI documents."
+    tags: "fuse,apicurio,openapi,swagger,api"
+    iconClass: "icon-rh-integration"
+    version: "1.0"
+message: |-
+  Apicurito is now deployed to https://${ROUTE_HOSTNAME}.
+parameters:
+- name: APP_VERSION
+  displayName: Application Version
+  required: true
+  value: "1.2"
+  description: The application version.
+- name: IMAGE_STREAM_NAMESPACE
+  displayName: Image Stream Namespace
+  value: openshift
+  required: true
+  description: Namespace in which the Fuse image streams are installed. These image streams
+    are normally installed in the 'openshift' namespace. You should only need to modify
+    this if you've installed the image streams in a different namespace/project.
+- name: ROUTE_HOSTNAME
+  description: The The external hostname to access Apicurito
+  required: true
+- name: CPU_REQUEST
+  displayName: CPU request
+  value: '0.2'
+  required: true
+  description: The amount of CPU to request for each container.
+- name: MEMORY_REQUEST
+  displayName: Memory request
+  value: 64Mi
+  required: true
+  description: The amount of memory required for each container to run.
+- name: CPU_LIMIT
+  displayName: CPU limit
+  value: '1.0'
+  required: true
+  description: The amount of CPU each container is limited to use.
+- name: MEMORY_LIMIT
+  displayName: Memory limit
+  value: 256Mi
+  required: true
+  description: The amount of memory each container is limited to use.
+objects:
+#
+# OpenShift resources need to run the apicurito-ui pod
+#
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: apicurito-ui-config
+    labels:
+      app: apicurito
+  data:
+    config.js: |
+      var ApicuritoConfig = {
+          "generators": [
+              {
+                  "name":"Fuse 7.1 Camel Project",
+                  "url":"/api/v1/generate/camel-project.zip"
+              }
+          ]
+      }
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    name: apicurito-ui
+    labels:
+      app: apicurito
+      component: apicurito-ui
+  spec:
+    replicas: 1
+    selector:
+      app: apicurito
+      component: apicurito-ui
+    strategy:
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: apicurito
+          component: apicurito-ui
+      spec:
+        containers:
+        - name: apicurito-ui
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: "/"
+              port: 8080
+            initialDelaySeconds: 30
+          readinessProbe:
+            httpGet:
+              path: "/"
+              port: 8080
+            initialDelaySeconds: 1
+          ports:
+          - containerPort: 8080
+          volumeMounts:
+          - mountPath: /html/config
+            name: config-volume
+          resources:
+            limits:
+              cpu: ${CPU_LIMIT}
+              memory: ${MEMORY_LIMIT}
+            requests:
+              cpu: ${CPU_REQUEST}
+              memory: ${MEMORY_REQUEST}
+        volumes:
+        - name: config-volume
+          configMap:
+            name: apicurito-ui-config
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - apicurito-ui
+        from:
+          kind: ImageStreamTag
+          name: apicurito-ui:${APP_VERSION}
+          namespace: ${IMAGE_STREAM_NAMESPACE}
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: apicurito-ui
+    labels:
+      app: apicurito
+  spec:
+    ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: apicurito
+      component: apicurito-ui
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    labels:
+      app: apicurito
+    annotations:
+      console.alpha.openshift.io/overview-app-route: "true"
+    name: apicurito
+  spec:
+    host: ${ROUTE_HOSTNAME}
+    tls:
+      termination: edge
+    to:
+      kind: Service
+      name: apicurito-ui
+#
+# OpenShift resources need to run the fuse-apicurito-generator pod
+#
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    name: fuse-apicurito-generator
+    labels:
+      app: apicurito
+      component: fuse-apicurito-generator
+  spec:
+    replicas: 1
+    selector:
+      app: apicurito
+      component: fuse-apicurito-generator
+    strategy:
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: apicurito
+          component: fuse-apicurito-generator
+      spec:
+        containers:
+        - name: fuse-apicurito-generator
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8181
+              scheme: HTTP
+            initialDelaySeconds: 180
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8181
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          ports:
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+          - containerPort: 9779
+            name: prometheus
+            protocol: TCP
+          - containerPort: 8778
+            name: jolokia
+            protocol: TCP
+          resources:
+            limits:
+              cpu: ${CPU_LIMIT}
+              memory: ${MEMORY_LIMIT}
+            requests:
+              cpu: ${CPU_REQUEST}
+              memory: ${MEMORY_REQUEST}
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - fuse-apicurito-generator
+        from:
+          kind: ImageStreamTag
+          name: fuse-apicurito-generator:${APP_VERSION}
+          namespace: ${IMAGE_STREAM_NAMESPACE}
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: fuse-apicurito-generator
+    labels:
+      app: apicurito
+  spec:
+    ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: apicurito
+      component: fuse-apicurito-generator
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    labels:
+      app: apicurito
+    name: fuse-apicurito-generator
+  spec:
+    host: ${ROUTE_HOSTNAME}
+    path: /api/v1
+    tls:
+      termination: edge
+    to:
+      kind: Service
+      name: fuse-apicurito-generator

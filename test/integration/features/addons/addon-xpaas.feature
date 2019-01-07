@@ -1,10 +1,26 @@
 @addon-xpaas
 Feature: xpaas add-on
-Xpaas add-on imports xPaaS templates and imagestreams,
-which are then available in OpenShift to the user.
+Xpaas add-on imports xPaaS templates and imagestreams, which are then available in OpenShift to the user.
+NOTE: This feature requires valid username and password into "registry.redhat.io" to be set as RH_REGISTRY_USERNAME
+and RH_REGISTRY_PASSWORD environment variables in order to run successfully.
 
+  @quick
+  Scenario: User enables redhat-registry-login addon
+     When executing "minishift addons enable redhat-registry-login" succeeds
+     Then exitcode should equal "0"
+
+  @quick
+  Scenario: User sets registry username and password
+     When executing "minishift config set addon-env REGISTRY_USERNAME=env.RH_REGISTRY_USERNAME,REGISTRY_PASSWORD=env.RH_REGISTRY_PASSWORD" succeeds
+     Then executing "minishift config view" succeeds
+      And stdout should match
+      """
+      - addon-env\s+: \[REGISTRY_USERNAME=env\.RH_REGISTRY_USERNAME REGISTRY_PASSWORD=env\.RH_REGISTRY_PASSWORD\]
+      """
+
+  @quick
   Scenario: User enables the xpaas add-on
-     When executing "minishift addons enable xpaas" succeeds
+     When executing "minishift addons enable xpaas --priority 10" succeeds
      Then stdout should contain "Add-on 'xpaas' enabled"
 
   Scenario: User starts Minishift
@@ -19,10 +35,10 @@ which are then available in OpenShift to the user.
 
   Scenario Outline: User deploys, checks out and deletes several templates from XpaaS imagestream
    Given Minishift has state "Running"
+     And executing "oc project myproject" retrying 20 times with wait period of "3s"
      And executing "oc status" retrying 20 times with wait period of "3s"
     When executing "oc new-project <project-name>" succeeds
      And executing "oc new-app <template-name>" succeeds
-     And executing "oc set probe dc/<service-name> --readiness --get-url=http://:8080<http-endpoint>" succeeds
      And service "<service-name>" rollout successfully within "20m"
     Then with up to "5" retries with wait period of "1s" the "body" of HTTP request to "<http-endpoint>" of service "<service-name>" in namespace "<project-name>" contains "<expected-hello>"
      And with up to "5" retries with wait period of "1s" the "status code" of HTTP request to "<http-endpoint>" of service "<service-name>" in namespace "<project-name>" is equal to "200"
@@ -30,9 +46,9 @@ which are then available in OpenShift to the user.
 
   Examples: Required information to test the templates
     | project-name  | template-name           | service-name   | http-endpoint | expected-hello                        |
-    | datagrid65    | datagrid65-basic        | datagrid-app   | /             | Welcome to the JBoss Data Grid Server |
-    | eap70         | eap70-basic-s2i         | eap-app        | /index.jsf    | Welcome to JBoss!                     |
-    | eap71         | eap71-tx-recovery-s2i   | eap-app        | /             | Welcome to JBoss EAP 7                |
+    | eap71-basic   | eap71-basic-s2i         | eap-app        | /             | Welcome to JBoss EAP 7                |
+    | eap71-tx      | eap71-tx-recovery-s2i   | eap-app        | /             | Welcome to JBoss EAP 7                |
+    | datagrid72    | datagrid72-basic        | datagrid-app   | /rest         | Welcome to the Infinispan REST Server |
 
   Scenario: User deletes Minishift
      When executing "minishift delete --force" succeeds

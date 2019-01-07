@@ -115,7 +115,7 @@ func Test_successful_parsing_of_addon_dir_without_remove_addon_file(t *testing.T
 
 	assert.Empty(t, addOn.RemoveCommands())
 
-	_, ok := addOn.Commands()[0].(*command.OcCommand)
+	_, ok := addOn.Commands()[1].(*command.OcCommand)
 	assert.True(t, ok)
 }
 

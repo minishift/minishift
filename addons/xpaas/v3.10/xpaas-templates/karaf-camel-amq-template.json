@@ -3,24 +3,24 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "openshift.io/display-name": "Red Hat Fuse 7.0 Camel A-MQ with Karaf",
+      "openshift.io/display-name": "Red Hat Fuse 7.2 Camel A-MQ with Karaf",
       "openshift.io/provider-display-name": "Red Hat, Inc.",
-      "description": "Camel route using ActiveMQ in Karaf container. This quickstart shows how to use Camel in a Karaf Container using Blueprint to connect to the A-MQ xPaaS message broker on OpenShift that should already be installed, one simple way to run a A-MQ service is following the documentation of the A-MQ xPaaS image for OpenShift related to the amq62-basic template.",
+      "description": "Camel route using AMQ in Karaf container. This quickstart demonstrates how to use Camel in a Karaf Container using Blueprint to connect to EnMasse (MaaS) and use JMS messaging between two Camel routes. It requires EnMasse to have been deployed and running first.",
       "tags": "quickstart,java,karaf,fis,jboss-fuse",
       "iconClass": "icon-rh-integration",
-      "version": "2.0"
+      "version": "1.2"
     },
-    "name": "s2i-fuse70-karaf-camel-amq"
+    "name": "s2i-fuse72-karaf-camel-amq"
   },
   "labels": {
-    "template": "s2i-fuse70-karaf-camel-amq"
+    "template": "s2i-fuse72-karaf-camel-amq"
   },
   "parameters": [
     {
       "name": "APP_NAME",
       "displayName": "Application Name",
       "required": true,
-      "value": "s2i-fuse70-karaf-camel-amq",
+      "value": "s2i-fuse72-karaf-camel-amq",
       "description": "The name assigned to the application."
     },
     {
@@ -33,25 +33,19 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "karaf-camel-amq-1.0.0.fuse-000031-redhat-2",
+      "value": "karaf-camel-amq-1.0.0.fuse-720019-redhat-00001",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
-    },
-    {
-      "name": "SERVICE_NAME",
-      "displayName": "Service Name",
-      "value": "s2i-fuse70-karaf-camel-amq",
-      "description": "Exposed Service name."
     },
     {
       "name": "BUILDER_VERSION",
       "displayName": "Builder version",
-      "value": "1.0",
+      "value": "1.2",
       "description": "The version of the FIS S2I builder image to use."
     },
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.fuse-000031-redhat-2",
+      "value": "1.0.0.fuse-720019-redhat-00001",
       "description": "The application version."
     },
     {
@@ -85,21 +79,26 @@
       "from": "[a-zA-Z0-9]{40}"
     },
     {
-      "name": "ACTIVEMQ_SERVICE_NAME",
-      "displayName": "ActiveMQ Broker Service",
+      "name": "AMQP_SERVICE_NAME",
+      "displayName": "EnMasse Service",
       "required": true,
-      "value": "broker-amq-tcp",
-      "description": "Set this to the name of the TCP service of the ActiveMQ broker. You may need to create a broker first."
+      "description": "Set this to the route host name attached to the TCP service of the external 'messaging' route exposed by EnMasse. E.g messaging-enmasse.192.168.64.1.nip.io."
     },
     {
-      "name": "ACTIVEMQ_USERNAME",
-      "displayName": "ActiveMQ Broker Username",
-      "description": "The username used to authenticate with the ActiveMQ broker. Leave it empty if authentication is disabled."
+      "name": "AMQP_USERNAME",
+      "displayName": "EnMasse Username",
+      "description": "The username used to authenticate with EnMasse."
     },
     {
-      "name": "ACTIVEMQ_PASSWORD",
-      "displayName": "ActiveMQ Broker Password",
-      "description": "The password used to authenticate with the ActiveMQ broker. Leave it empty if authentication is disabled."
+      "name": "AMQP_PASSWORD",
+      "displayName": "EnMasse Password",
+      "description": "The password used to authenticate with EnMasse."
+    },
+    {
+      "name": "AMQP_PARAMETERS",
+      "displayName": "EnMasse Parameters",
+      "description": "The parameters passed to EnMasse.",
+      "value": "transport.trustAll=true&transport.verifyHost=false&amqp.idleTimeout=120000"
     },
     {
       "name": "CPU_REQUEST",
@@ -215,7 +214,7 @@
             "from": {
               "kind": "ImageStreamTag",
               "namespace": "${IMAGE_STREAM_NAMESPACE}",
-              "name": "jboss-fuse70-karaf-openshift:${BUILDER_VERSION}"
+              "name": "fuse7-karaf-openshift:${BUILDER_VERSION}"
             },
             "forcePull": true,
             "incremental": true,
@@ -352,14 +351,17 @@
                     }
                   }
                 }, {
-                  "name": "ACTIVEMQ_SERVICE_NAME",
-                  "value": "${ACTIVEMQ_SERVICE_NAME}"
+                  "name": "AMQP_SERVICE_NAME",
+                  "value": "${AMQP_SERVICE_NAME}"
                 }, {
-                  "name": "ACTIVEMQ_USERNAME",
-                  "value": "${ACTIVEMQ_USERNAME}"
+                  "name": "AMQP_USERNAME",
+                  "value": "${AMQP_USERNAME}"
                 }, {
-                  "name": "ACTIVEMQ_PASSWORD",
-                  "value": "${ACTIVEMQ_PASSWORD}"
+                  "name": "AMQP_PASSWORD",
+                  "value": "${AMQP_PASSWORD}"
+                }, {
+                  "name": "AMQP_PARAMETERS",
+                  "value": "${AMQP_PARAMETERS}"
                 } ],
                 "resources": {
                   "requests": {
@@ -375,8 +377,7 @@
             ]
           }
         }
-      },
-      "status": {}
+      }
     }
   ]
 }

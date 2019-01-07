@@ -5,7 +5,7 @@
         "annotations": {
             "iconClass": "icon-eap",
             "tags": "eap,javaee,java,jboss",
-            "version": "1.4.12",
+            "version": "1.4.14",
             "openshift.io/display-name": "JBoss EAP 7.0 + MySQL (with https)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example EAP 7 application with a MySQL database. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "eap70-mysql-persistent-s2i",
-        "xpaas": "1.4.12"
+        "xpaas": "1.4.14"
     },
     "message": "A new EAP 7 and MySQL persistent based application with SSL support has been created in your project. The username/password for accessing the MySQL database \"${DB_DATABASE}\" is ${DB_USERNAME}/${DB_PASSWORD}. Please be sure to create the following secrets: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content; \"${JGROUPS_ENCRYPT_SECRET}\" containing the ${JGROUPS_ENCRYPT_KEYSTORE} file used for securing JGroups communications.",
     "parameters": [

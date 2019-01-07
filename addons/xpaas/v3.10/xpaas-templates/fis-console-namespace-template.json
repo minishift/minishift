@@ -3,30 +3,31 @@
     "kind": "Template",
     "metadata": {
       "annotations": {
-        "openshift.io/display-name": "Red Hat Fuse 7.0 Console",
+        "openshift.io/display-name": "Red Hat Fuse 7.2 Console",
         "openshift.io/provider-display-name": "Red Hat, Inc.",
-        "description": "The Red Hat Fuse Console eases the discovery and management of FIS applications deployed on OpenShift.",
+        "description": "The Red Hat Fuse Console eases the discovery and management of Fuse applications deployed on OpenShift.",
         "tags": "hawtio,java,fis,jboss-fuse",
         "iconClass": "icon-rh-integration",
-        "version": "1.0"
+        "version": "1.2"
       },
-      "name": "fuse70-console"
-    },
-    "labels": {
-      "template": "fuse70-console"
+      "labels": {
+        "template": "fuse-console"
+      },
+      "name": "fuse72-console"
     },
     "parameters": [
       {
         "name": "APP_NAME",
         "displayName": "Application Name",
         "required": true,
-        "value": "fuse70-console",
+        "value": "fuse72-console",
         "description": "The name assigned to the application."
       },
       {
         "name": "APP_VERSION",
         "displayName": "Application Version",
-        "value": "1.0",
+        "required": true,
+        "value": "1.2",
         "description": "The application version."
       },
       {
@@ -64,12 +65,22 @@
       {
         "name": "MEMORY_LIMIT",
         "displayName": "Memory limit",
-        "value": "100Mi",
+        "value": "32Mi",
         "required": true,
         "description": "The amount of memory the container is limited to use."
       }
     ],
     "objects": [
+      {
+        "apiVersion": "v1",
+        "kind": "ConfigMap",
+        "metadata": {
+          "name": "${APP_NAME}-config"
+        },
+        "data": {
+          "hawtconfig.json": "{\n  \"about\": {\n    \"title\": \"Red Hat Fuse Console\",\n    \"productInfo\": [],\n    \"additionalInfo\": \"The Red Hat Fuse Console eases the discovery and management of Fuse applications deployed on OpenShift.\",\n    \"copyright\": \"\"\n  },\n  \"branding\": {\n    \"appName\": \"Fuse Console\",\n    \"appLogoUrl\": \"../online/img/fuse-logo.svg\"\n  },\n  \"disabledRoutes\": []\n}\n"
+        }
+      },
       {
         "kind": "Route",
         "apiVersion": "v1",
@@ -90,7 +101,7 @@
           },
           "tls": {
             "insecureEdgeTerminationPolicy": "Redirect",
-            "termination": "edge"
+            "termination": "reencrypt"
           }
         }
       },
@@ -104,12 +115,15 @@
             "group": "console",
             "app": "${APP_NAME}",
             "version": "${APP_VERSION}"
+          },
+          "annotations": {
+            "service.alpha.openshift.io/serving-cert-secret-name": "${APP_NAME}-tls"
           }
         },
         "spec": {
           "ports": [
             {
-            "port": 80,
+            "port": 443,
             "protocol": "TCP",
             "targetPort": "nginx"
             }
@@ -166,7 +180,7 @@
                 "from": {
                   "kind": "ImageStreamTag",
                   "namespace": "${IMAGE_STREAM_NAMESPACE}",
-                  "name": "jboss-fuse70-console:${APP_VERSION}"
+                  "name": "fuse7-console:${APP_VERSION}"
                 }
               }
             }
@@ -194,25 +208,27 @@
               "containers": [
                 {
                   "name": "${APP_NAME}",
-                  "image": "jboss-fuse70-console:${APP_VERSION}",
+                  "image": "fuse7-console:${APP_VERSION}",
                   "readinessProbe" : {
                     "httpGet" : {
                       "path" : "/online",
-                      "port" : "nginx"
+                      "port" : "nginx",
+                      "scheme": "HTTPS"
                     },
                     "initialDelaySeconds" : 5
                   },
                   "livenessProbe" : {
                     "httpGet" : {
                       "path" : "/online",
-                      "port" : "nginx"
+                      "port" : "nginx",
+                      "scheme": "HTTPS"
                     },
                     "initialDelaySeconds" : 10,
                     "periodSeconds": 10
                   },
                   "ports": [
                     {
-                      "containerPort": 8080,
+                      "containerPort": 8443,
                       "name": "nginx"
                     }
                   ],
@@ -234,6 +250,22 @@
                       "value": "${APP_NAME}-service-account"
                     }
                   ],
+                  "volumeMounts": [
+                    {
+                      "name": "${APP_NAME}-config",
+                      "mountPath": "/opt/app-root/src/online/online/hawtconfig.json",
+                      "subPath": "hawtconfig.json"
+                    },
+                    {
+                      "name": "${APP_NAME}-config",
+                      "mountPath": "/opt/app-root/src/integration/hawtconfig.json",
+                      "subPath": "hawtconfig.json"
+                    },
+                    {
+                      "mountPath": "/etc/tls/private",
+                      "name": "${APP_NAME}-tls"
+                    }
+                  ],
                   "resources": {
                     "requests": {
                       "cpu": "${CPU_REQUEST}",
@@ -245,11 +277,24 @@
                     }
                   }
                 }
+              ],
+              "volumes": [
+                {
+                  "name": "${APP_NAME}-config",
+                  "configMap": {
+                    "name": "${APP_NAME}-config"
+                  }
+                },
+                {
+                  "name": "${APP_NAME}-tls",
+                  "secret": {
+                    "secretName": "${APP_NAME}-tls"
+                  }
+                }
               ]
             }
           }
-        },
-        "status": {}
+        }
       }
     ]
   }

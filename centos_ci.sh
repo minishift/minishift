@@ -153,6 +153,7 @@ function prepare_repo() {
 function install_docs_prerequisite_packages() {
   # https://devops.profitbricks.com/tutorials/install-ruby-214-with-rvm-on-centos/
   # Prerequisite packages
+  set +e # Temporary fix for rvm installation https://github.com/rvm/rvm/issues/4465
   sudo yum install -y libyaml-devel \
                      readline-devel \
                      zlib-devel \
@@ -165,7 +166,6 @@ function install_docs_prerequisite_packages() {
   gpg2 --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
   curl -L get.rvm.io | bash -s stable
   source ~/.profile
-
   # Install Ruby
   rvm install ruby-2.2.5
   echo "CICO: RVM and Ruby Installed"
@@ -345,14 +345,14 @@ function perform_release() {
 }
 
 function perform_pr() {
-  make prerelease synopsis_docs link_check_docs
+  make prerelease synopsis_docs #link_check_docs
   MINISHIFT_VM_DRIVER=kvm make integration_pr
   perform_artifacts_upload $1;
 }
 
 function perform_master() {
   make prerelease synopsis_docs #link_check_docs
-  #MINISHIFT_VM_DRIVER=kvm make integration_pr
+  MINISHIFT_VM_DRIVER=kvm make integration_pr
   perform_docs_publish "minishift" "master" "minishift/docs/master";
   perform_artifacts_upload $1;
 }

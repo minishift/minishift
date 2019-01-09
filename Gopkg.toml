@@ -192,6 +192,9 @@ ignored = ["github.com/Sirupsen/logrus"]
 [[constraint]]
   name = "github.com/zalando/go-keyring"
   revision = "6d81c293b3fbc8a9b1bcf4bc9c167c2e1d1f52cf"
+[[constraint]]
+  name = "github.com/fsnotify/fsnotify"
+  revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
 
 [prune]
   go-tests = true

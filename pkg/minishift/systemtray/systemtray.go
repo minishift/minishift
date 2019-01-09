@@ -28,13 +28,15 @@ import (
 	"sync"
 	"time"
 
+	"github.com/fsnotify/fsnotify"
+
 	"github.com/anjannath/systray"
 	"github.com/golang/glog"
+	"github.com/minishift/minishift/pkg/minikube/constants"
 	"github.com/minishift/minishift/pkg/minishift/profile"
 	"github.com/minishift/minishift/pkg/minishift/shell/powershell"
 	"github.com/minishift/minishift/pkg/minishift/systemtray/icon"
 	"github.com/minishift/minishift/pkg/util/os"
-	"github.com/minishift/minishift/pkg/util/slice"
 )
 
 const (
@@ -90,9 +92,7 @@ func OnReady() {
 		go startStopHandler(icon.Stopped, k, v.stop, STOP_PROFILE)
 	}
 
-	go addNewProfilesToTray()
-
-	go removeDeletedProfilesFromTray()
+	go updateTrayMenu()
 
 	go updateProfileStatus()
 }
@@ -118,57 +118,53 @@ func getStatus(profileName string) int {
 	return DOES_NOT_EXIST
 }
 
-// Add newly created profiles to the tray
-func addNewProfilesToTray() {
-	for {
-		time.Sleep(40 * time.Second)
-
-		newProfilesList := profile.GetProfileList()
-		for _, profile := range newProfilesList {
-			submenusLock.Lock()
-			if _, ok := submenus[profile]; ok {
-				submenusLock.Unlock()
-				continue
-			} else {
-				submenu := systray.AddSubMenu(strings.Title(profile))
-				submenus[profile] = submenu
-				submenusLock.Unlock()
-				startMenu := submenu.AddSubMenuItem(START, "", 0)
-				stopMenu := submenu.AddSubMenuItem(STOP, "", 0)
-				submenusToMenuItemsLock.Lock()
-				ma := MenuAction{start: startMenu, stop: stopMenu}
-				submenusToMenuItems[profile] = ma
-				submenusToMenuItemsLock.Unlock()
-
-				go startStopHandler(icon.Running, profile, ma.start, START_PROFILE)
-
-				go startStopHandler(icon.Stopped, profile, ma.stop, STOP_PROFILE)
-			}
-		}
+// Add newly created profiles and remove deleted profiles from tray
+func updateTrayMenu() {
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		fmt.Println("Failed to create watcher:", err)
 	}
-}
+	profilesBaseDir := constants.GetMinishiftProfilesDir()
+	err = watcher.Add(profilesBaseDir)
+	if err != nil {
+		fmt.Println("Failed to watch profiles directory:", err)
+	}
 
-// Remove deleted profiles from tray
-func removeDeletedProfilesFromTray() {
 	for {
-		time.Sleep(30 * time.Second)
-		newProfileList := profile.GetProfileList()
-		for k := range submenus {
-			submenusLock.Lock()
-			if exists, _ := slice.ItemExists(newProfileList, k); exists {
+		event, _ := <-watcher.Events
+		if event.Op&fsnotify.Remove == fsnotify.Remove {
+			profile := filepath.Base(event.Name)
+			if _, ok := submenus[profile]; ok {
+				submenus[profile].Hide()
+				submenusLock.Lock()
+				delete(submenus, profile)
 				submenusLock.Unlock()
-				continue
-			} else {
-				submenus[k].Hide()
-				delete(submenus, k)
-				submenusLock.Unlock()
-				if _, ok := submenusToMenuItems[k]; ok {
+				if _, ok := submenusToMenuItems[profile]; ok {
 					submenusToMenuItemsLock.Lock()
-					delete(submenusToMenuItems, k)
+					delete(submenusToMenuItems, profile)
 					submenusToMenuItemsLock.Unlock()
 				}
 			}
 		}
+
+		if event.Op&fsnotify.Create == fsnotify.Create {
+			profile := filepath.Base(event.Name)
+			submenu := systray.AddSubMenu(strings.Title(profile))
+			submenusLock.Lock()
+			submenus[profile] = submenu
+			submenusLock.Unlock()
+			startMenu := submenu.AddSubMenuItem(START, "", 0)
+			stopMenu := submenu.AddSubMenuItem(STOP, "", 0)
+			submenusToMenuItemsLock.Lock()
+			ma := MenuAction{start: startMenu, stop: stopMenu}
+			submenusToMenuItems[profile] = ma
+			submenusToMenuItemsLock.Unlock()
+
+			go startStopHandler(icon.Running, profile, ma.start, START_PROFILE)
+
+			go startStopHandler(icon.Stopped, profile, ma.stop, STOP_PROFILE)
+		}
+
 	}
 }
 
@@ -282,7 +278,7 @@ func startProfile(profileName string) error {
 // machine, green: running, red: stoppped, grey: does not exist
 func updateProfileStatus() {
 	for {
-		time.Sleep(20 * time.Second)
+		time.Sleep(5 * time.Second)
 		submenusLock.Lock()
 		for k, v := range submenus {
 			status := getStatus(k)

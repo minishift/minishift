@@ -98,6 +98,9 @@ var RootCmd = &cobra.Command{
 		// creating all directories for minishift run
 		createMinishiftDirs(state.InstanceDirs)
 
+		// Ensure profiles directory exists in minishift home
+		ensureProfilesDirExists()
+
 		// Ensure the global viper config file exists.
 		ensureConfigFileExists(constants.GlobalConfigFile)
 
@@ -428,6 +431,16 @@ func createMinishiftDirs(dirs *state.MinishiftDirs) {
 		path := dirPaths.Field(i).Interface().(string)
 		if err := os.MkdirAll(path, 0777); err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error creating directory: %s", path))
+		}
+	}
+}
+
+func ensureProfilesDirExists() {
+	profilesDir := constants.GetMinishiftProfilesDir()
+	if !filehelper.Exists(profilesDir) {
+		err := os.Mkdir(profilesDir, 0777)
+		if err != nil {
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error creating directory: %s", profilesDir))
 		}
 	}
 }

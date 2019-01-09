@@ -331,7 +331,6 @@
   packages = ["."]
   pruneopts = "NUT"
   revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
-  version = "v1.4.7"
 
 [[projects]]
   digest = "1:e985357b252a3b4e50f6f1d967e8c13f6b2d02681cc627315e8d0c40f323f7c9"
@@ -1096,6 +1095,7 @@
     "github.com/docker/machine/libmachine/state",
     "github.com/docker/machine/libmachine/swarm",
     "github.com/elazarl/goproxy",
+    "github.com/fsnotify/fsnotify",
     "github.com/gbraad/go-hvkvp",
     "github.com/golang/glog",
     "github.com/google/go-github/github",

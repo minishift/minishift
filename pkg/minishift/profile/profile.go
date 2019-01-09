@@ -31,7 +31,7 @@ import (
 func GetProfileList() []string {
 	var profileList []string
 	baseDir := constants.GetMinishiftHomeDir()
-	profileBaseDir := filepath.Join(baseDir, "profiles")
+	profileBaseDir := constants.GetMinishiftProfilesDir()
 
 	if !filehelper.IsDirectory(baseDir) {
 		return profileList

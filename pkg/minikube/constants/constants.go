@@ -84,6 +84,12 @@ func GetMinishiftHomeDir() string {
 	}
 }
 
+// GetMinishiftProfilesDir returns the path MINISHIFT_HOME/profiles
+func GetMinishiftProfilesDir() string {
+	minishiftHomeDir := GetMinishiftHomeDir()
+	return filepath.Join(minishiftHomeDir, "profiles")
+}
+
 // GetHomeDir returns the home directory for the current user
 func GetHomeDir() string {
 	if runtime.GOOS == "windows" {

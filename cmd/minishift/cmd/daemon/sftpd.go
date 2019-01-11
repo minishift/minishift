@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package services
+package daemon
 
 import (
 	"fmt"
@@ -42,7 +42,7 @@ var (
 	connectionCount uint64
 	sftpdServerPort int
 
-	servicesSftpdCmd = &cobra.Command{
+	daemonSftpdCmd = &cobra.Command{
 		Use:    "sftpd",
 		Short:  "Starts sftp server on host for sshfs based host folders.",
 		Long:   `Starts sftp server on host for sshfs based host folders.`,
@@ -55,8 +55,8 @@ var (
 
 func init() {
 	authorizedKeysMap = make(map[string]bool)
-	servicesSftpdCmd.Flags().IntVarP(&sftpdServerPort, sftpdServerPortFlag, "p", 2022, "The server port.")
-	ServicesCmd.AddCommand(servicesSftpdCmd)
+	daemonSftpdCmd.Flags().IntVarP(&sftpdServerPort, sftpdServerPortFlag, "p", 2022, "The server port.")
+	DaemonCmd.AddCommand(daemonSftpdCmd)
 }
 
 func runSftp(cmd *cobra.Command, args []string) {

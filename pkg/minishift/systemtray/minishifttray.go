@@ -45,7 +45,7 @@ func minishiftTrayCommand() (*exec.Cmd, error) {
 		return nil, err
 	}
 	args := []string{
-		"services",
+		"daemon",
 		"systemtray",
 	}
 	exportCmd := exec.Command(cmd, args...)
@@ -104,4 +104,11 @@ func (s *MinishiftTray) isRunning() bool {
 	} else {
 		return false
 	}
+}
+
+func (s *MinishiftTray) GetPID() int {
+	if s.isRunning() {
+		return s.globalConfig.SystrayPID
+	}
+	return 0
 }

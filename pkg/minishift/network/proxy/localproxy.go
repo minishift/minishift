@@ -168,7 +168,7 @@ func createProxyCommand() (*exec.Cmd, error) {
 	}
 
 	args := []string{
-		"services",
+		"daemon",
 		"proxy"}
 	exportCmd := exec.Command(cmd, args...)
 	// don't inherit any file handles
@@ -179,4 +179,11 @@ func createProxyCommand() (*exec.Cmd, error) {
 	exportCmd.Env = process.EnvForBackgroundProcess()
 
 	return exportCmd, nil
+}
+
+func GetPID() int {
+	if isRunning() {
+		return config.AllInstancesConfig.ProxyPID
+	}
+	return 0
 }

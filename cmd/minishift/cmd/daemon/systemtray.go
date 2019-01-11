@@ -1,3 +1,5 @@
+// +build !systemtray
+
 /*
 Copyright (C) 2018 Red Hat, Inc.
 
@@ -14,18 +16,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package services
+package daemon
 
 import (
+	"runtime"
+
+	"github.com/anjannath/systray"
+	"github.com/minishift/minishift/pkg/minishift/systemtray"
 	"github.com/spf13/cobra"
 )
 
-var ServicesCmd = &cobra.Command{
-	Use:     "services SUBCOMMAND [flags]",
-	Aliases: []string{"service"},
-	Short:   "Manage Minishift services",
-	Long:    `Manage Minishift services.`,
+// systemtrayServiceCmd represents the systemtray command
+var systemtrayDaemonCmd = &cobra.Command{
+	Use:   "systemtray",
+	Short: "Run minishift systemtray.",
+	Long:  "Run a systemtray in the notification area of top bar/start menu.",
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		systray.Run(systemtray.OnReady, systemtray.OnExit)
 	},
+	Hidden: true,
+}
+
+func init() {
+	if runtime.GOOS != "linux" {
+		DaemonCmd.AddCommand(systemtrayDaemonCmd)
+	}
 }

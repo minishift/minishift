@@ -276,23 +276,29 @@ search_order 1
 ----
 
 [[systemtray]]
-== Minishift Systemtray
+== Minishift System tray
 
 To help the users of {project} on macOS and Windows perform simple tasks like starting and stoppping a profile from the GUI, the binaries for these platforms
 can be compiled to include an experimental systemtray. Follow the xref:../contributing/developing.adoc#[Developing Minishift] guide to setup your development
 environment.
 
-To build {project} with systemtray use the following command:
+To build {project} with system tray use the following command:
 
 ----
 $ make systemtray
 ----
 
-By default systemtray is automatically started on running xref:../command-ref/minishift_start.adoc#[`minishift start`]. To disable the auto start behaviour use
+By default system tray is automatically started on running xref:../command-ref/minishift_start.adoc#[`minishift start`]. To disable the auto start behaviour use
 the following command:
 
 ----
 $ minishift config set auto-start-tray false
+----
+
+To start the system tray:
+
+----
+$ minishift service start systemtray
 ----
 
 [[timezone]]

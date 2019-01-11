@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package services
+package daemon
 
 import (
 	"github.com/minishift/minishift/cmd/minishift/cmd/config"
@@ -33,7 +33,7 @@ var (
 	proxyUpstreamAddrFromFlag string
 	proxyReEncryptFlag        bool
 
-	servicesProxyCmd = &cobra.Command{
+	daemonProxyCmd = &cobra.Command{
 		Use:    "proxy",
 		Short:  "Starts a proxy server on host",
 		Long:   `Starts a proxy server on host`,
@@ -43,10 +43,10 @@ var (
 )
 
 func init() {
-	servicesProxyCmd.Flags().IntVarP(&proxyServerPortFromFlag, proxyServerPortFlag, "p", 3128, "The server port.")
-	servicesProxyCmd.Flags().StringVarP(&proxyUpstreamAddrFromFlag, proxyUpstreamFlag, "u", "", "The upstream proxy address.")
-	servicesProxyCmd.Flags().BoolVarP(&proxyReEncryptFlag, "reencrypt", "r", false, "Re-encrypt traffic")
-	ServicesCmd.AddCommand(servicesProxyCmd)
+	daemonProxyCmd.Flags().IntVarP(&proxyServerPortFromFlag, proxyServerPortFlag, "p", 3128, "The server port.")
+	daemonProxyCmd.Flags().StringVarP(&proxyUpstreamAddrFromFlag, proxyUpstreamFlag, "u", "", "The upstream proxy address.")
+	daemonProxyCmd.Flags().BoolVarP(&proxyReEncryptFlag, "reencrypt", "r", false, "Re-encrypt traffic")
+	DaemonCmd.AddCommand(daemonProxyCmd)
 }
 
 func runProxy(cmd *cobra.Command, args []string) {

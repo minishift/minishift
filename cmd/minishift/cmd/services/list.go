@@ -1,5 +1,3 @@
-// +build !systemtray
-
 /*
 Copyright (C) 2018 Red Hat, Inc.
 
@@ -19,26 +17,27 @@ limitations under the License.
 package services
 
 import (
-	"runtime"
+	"fmt"
 
-	"github.com/anjannath/systray"
-	"github.com/minishift/minishift/pkg/minishift/systemtray"
+	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/spf13/cobra"
 )
 
-// systemtrayCmd represents the systemtray command
-var systemtrayServiceCmd = &cobra.Command{
-	Use:   "systemtray",
-	Short: "Run minishift systemtray",
-	Long:  "Run a systemtray in the notification area of top bar/start menu",
-	Run: func(cmd *cobra.Command, args []string) {
-		systray.Run(systemtray.OnReady, systemtray.OnExit)
-	},
-	Hidden: true,
+// serviceListCmd represents the list command
+var serviceListCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List the available Minishift services.",
+	Long:  "List the available Minishift services.",
+	Run:   runServiceList,
 }
 
 func init() {
-	if runtime.GOOS != "linux" {
-		ServicesCmd.AddCommand(systemtrayServiceCmd)
+	ServicesCmd.AddCommand(serviceListCmd)
+}
+
+func runServiceList(cmd *cobra.Command, args []string) {
+	fmt.Printf("The following Minishift services are available: \n")
+	for _, component := range minishiftConstants.ValidServices {
+		fmt.Printf("\t- %s\n", component)
 	}
 }

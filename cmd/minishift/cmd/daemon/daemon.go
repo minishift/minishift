@@ -14,18 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package services
+package daemon
 
 import (
 	"github.com/spf13/cobra"
 )
 
-var ServicesCmd = &cobra.Command{
-	Use:     "services SUBCOMMAND [flags]",
-	Aliases: []string{"service"},
-	Short:   "Manage Minishift services",
-	Long:    `Manage Minishift services.`,
+var DaemonCmd = &cobra.Command{
+	Use:   "daemon",
+	Short: "Starts a minishift service daemon.",
+	Long:  `Starts a minishift service daemon. This command is for internal use of Minishift source code`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
+	Hidden: true,
 }

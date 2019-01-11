@@ -295,6 +295,12 @@ the following command:
 $ minishift config set auto-start-tray false
 ----
 
+To start the tray as a daemon process without starting the cluster:
+
+----
+$ minishift service start systemtray
+----
+
 [[timezone]]
 == Timezone Setup
 

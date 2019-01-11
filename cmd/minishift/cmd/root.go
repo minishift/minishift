@@ -31,6 +31,7 @@ import (
 	"github.com/minishift/minishift/cmd/minishift/cmd/addon"
 	cmdAddon "github.com/minishift/minishift/cmd/minishift/cmd/addon"
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
+	daemonCmd "github.com/minishift/minishift/cmd/minishift/cmd/daemon"
 	"github.com/minishift/minishift/cmd/minishift/cmd/dns"
 	hostfolderCmd "github.com/minishift/minishift/cmd/minishift/cmd/hostfolder"
 	"github.com/minishift/minishift/cmd/minishift/cmd/image"
@@ -257,6 +258,7 @@ func init() {
 	RootCmd.AddCommand(cmdOpenshift.OpenShiftCmd)
 	RootCmd.AddCommand(hostfolderCmd.HostFolderCmd)
 	RootCmd.AddCommand(servicesCmd.ServicesCmd)
+	RootCmd.AddCommand(daemonCmd.DaemonCmd)
 	RootCmd.AddCommand(addon.AddonsCmd)
 	RootCmd.AddCommand(image.ImageCmd)
 	RootCmd.AddCommand(cmdProfile.ProfileCmd)

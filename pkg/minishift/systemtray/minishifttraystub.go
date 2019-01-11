@@ -33,3 +33,7 @@ func NewMinishiftTray(globalConfig *minishiftConfig.GlobalConfigType) *Minishift
 func (s *MinishiftTray) EnsureRunning() error {
 	return nil
 }
+
+func (s *MinishiftTray) GetPID() int {
+	return 0
+}

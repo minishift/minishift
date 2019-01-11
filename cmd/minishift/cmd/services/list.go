@@ -17,15 +17,27 @@ limitations under the License.
 package services
 
 import (
+	"fmt"
+
+	minishiftConstants "github.com/minishift/minishift/pkg/minishift/constants"
 	"github.com/spf13/cobra"
 )
 
-var ServicesCmd = &cobra.Command{
-	Use:     "services SUBCOMMAND [flags]",
-	Aliases: []string{"service"},
-	Short:   "Manage Minishift services",
-	Long:    `Manage Minishift services.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
-	},
+// serviceListCmd represents the list command
+var serviceListCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List the available Minishift services.",
+	Long:  "List the available Minishift services.",
+	Run:   runServiceList,
+}
+
+func init() {
+	ServicesCmd.AddCommand(serviceListCmd)
+}
+
+func runServiceList(cmd *cobra.Command, args []string) {
+	fmt.Printf("The following Minishift services are available: \n")
+	for _, component := range minishiftConstants.ValidServices {
+		fmt.Printf("\t- %s\n", component)
+	}
 }

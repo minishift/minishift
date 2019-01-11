@@ -40,11 +40,15 @@ const (
 	HypervDefaultVirtualSwitchName = "Default Switch"
 	DockerbridgeSubnetCmd          = `docker network inspect -f "{{range .IPAM.Config }}{{ .Subnet }}{{end}}" bridge`
 	MinishiftEnableExperimental    = "MINISHIFT_ENABLE_EXPERIMENTAL"
+	SystemtrayDaemon               = "systemtray"
+	SftpdDaemon                    = "sftpd"
+	ProxyDaemon                    = "proxy"
 )
 
 var (
 	ValidIsoAliases = []string{CentOsIsoAlias}
 	ValidComponents = []string{"automation-service-broker", "service-catalog", "template-service-broker"}
+	ValidServices   = []string{SystemtrayDaemon, SftpdDaemon, ProxyDaemon}
 )
 
 // ProfileAuthorizedKeysPath returns the path of authorized_keys file in profile dir used for authentication purpose

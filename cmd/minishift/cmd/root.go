@@ -23,7 +23,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"reflect"
 	"strings"
 
 	"github.com/docker/machine/libmachine/log"
@@ -97,16 +96,16 @@ var RootCmd = &cobra.Command{
 		}
 
 		// creating all directories for minishift run
-		createMinishiftDirs(state.InstanceDirs)
+		cmdUtil.CreateMinishiftDirs(state.InstanceDirs)
 
 		// Ensure profiles directory exists in minishift home
 		ensureProfilesDirExists()
 
 		// Ensure the global viper config file exists.
-		ensureConfigFileExists(constants.GlobalConfigFile)
+		cmdUtil.EnsureConfigFileExists(constants.GlobalConfigFile)
 
 		// Ensure the viper config file exists.
-		ensureConfigFileExists(constants.ConfigFile)
+		cmdUtil.EnsureConfigFileExists(constants.ConfigFile)
 
 		// Read the config file and get the details about existing image cache.
 		// This should be removed after 2-3 release of minishift.
@@ -376,21 +375,6 @@ func setupViper() {
 	setFlagsUsingViper()
 }
 
-func ensureConfigFileExists(configPath string) {
-	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		jsonRoot := []byte("{}")
-		f, err := os.Create(configPath)
-		if err != nil {
-			glog.Exitf("Cannot create file '%s': %s", configPath, err)
-		}
-		defer f.Close()
-		_, err = f.Write(jsonRoot)
-		if err != nil {
-			glog.Exitf("Cannot encode config '%s': %s", configPath, err)
-		}
-	}
-}
-
 // performPostUpdateExecution executes the post update actions like unpacking the default addons
 // if user chose to update addons during `minishift update` command.
 // It also remove the marker file created by update command to avoid repeating the post update execution process
@@ -423,17 +407,6 @@ func ensureAllInstanceConfigPath(configPath string) {
 	configDir := filepath.Dir(configPath)
 	if err := os.MkdirAll(configDir, 0777); err != nil {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error creating directory: %s", configDir))
-	}
-}
-
-func createMinishiftDirs(dirs *state.MinishiftDirs) {
-	dirPaths := reflect.ValueOf(*dirs)
-
-	for i := 0; i < dirPaths.NumField(); i++ {
-		path := dirPaths.Field(i).Interface().(string)
-		if err := os.MkdirAll(path, 0777); err != nil {
-			atexit.ExitWithMessage(1, fmt.Sprintf("Error creating directory: %s", path))
-		}
 	}
 }
 

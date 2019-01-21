@@ -113,6 +113,14 @@ Feature: Profile commands
      When executing "minishift --profile minishift status" succeeds
      Then stdout should match "Minishift:\s*Stopped\nProfile:\s*minishift\nOpenShift:\s*Stopped"
 
+  Scenario: User should be able to copy config from one profile to another profile
+    Given executing "minishift profile copy foo bar" succeeds
+     Then executing "minishift --profile bar addons list" succeeds
+      And stdout should match "registry-route\s*: enabled\s*P\(0\)"
+    Given executing "minishift profile copy minishift foobar" succeeds
+     When executing "minishift --profile foobar config get cpus" succeeds
+      And stdout should match "4"
+
   Scenario Outline: As user, I can delete all created profiles
      When executing "minishift profile delete <profilename> --force" succeeds
      Then stdout should contain
@@ -131,6 +139,8 @@ Feature: Profile commands
     | test-Pro-01 |
     | 123profile  |
     | foo         |
+    | bar         |
+    | foobar      |
 
   Scenario: As user, I cannot run delete command on non existing profile
      When executing "minishift profile delete XYZ --force"

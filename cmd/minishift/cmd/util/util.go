@@ -18,6 +18,8 @@ package util
 
 import (
 	"fmt"
+	"os"
+	"reflect"
 	"regexp"
 	"strings"
 
@@ -220,4 +222,30 @@ func DetermineClusterUpParameters(config *clusterup.ClusterUpConfig, Dockerbridg
 	})
 
 	return clusterUpParams
+}
+
+func EnsureConfigFileExists(configPath string) {
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		jsonRoot := []byte("{}")
+		f, err := os.Create(configPath)
+		if err != nil {
+			atexit.ExitWithMessage(1, fmt.Sprintf("Cannot create file '%s': %s", configPath, err))
+		}
+		defer f.Close()
+		_, err = f.Write(jsonRoot)
+		if err != nil {
+			atexit.ExitWithMessage(1, fmt.Sprintf("Cannot encode config '%s': %s", configPath, err))
+		}
+	}
+}
+
+func CreateMinishiftDirs(dirs *cmdState.MinishiftDirs) {
+	dirPaths := reflect.ValueOf(*dirs)
+
+	for i := 0; i < dirPaths.NumField(); i++ {
+		path := dirPaths.Field(i).Interface().(string)
+		if err := os.MkdirAll(path, 0777); err != nil {
+			atexit.ExitWithMessage(1, fmt.Sprintf("Error creating directory: %s", path))
+		}
+	}
 }

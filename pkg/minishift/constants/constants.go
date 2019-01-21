@@ -79,3 +79,8 @@ func GetInstanceStateConfigOldPath() string {
 func GetInstanceConfigPath() string {
 	return filepath.Join(constants.Minipath, "config", constants.MachineName+".json")
 }
+
+// GetProfileInstanceConfigPath return the path of instance config json file for a profile
+func GetProfileInstanceConfigPath(profileName string) string {
+	return filepath.Join(constants.GetProfileHomeDir(profileName), "config", profileName+".json")
+}

@@ -72,6 +72,10 @@ func GetProfileHomeDir(profile string) string {
 	return GetMinishiftHomeDir()
 }
 
+func GetProfileConfigFile(profile string) string {
+	return filepath.Join(GetProfileHomeDir(profile), "config", "config.json")
+}
+
 // getMinishiftHomeDir determines the Minishift home directory where all state information is kept.
 // The default directory is .minishift in the users HOME directory which can be overwritten by the MINISHIFT_HOME
 // environment variable

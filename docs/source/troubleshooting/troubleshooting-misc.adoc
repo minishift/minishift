@@ -34,6 +34,22 @@ Depending on your operating system and shell environment, certain special charac
 
 Workaround: When creating and entering passwords, wrap the string with single quotes in the following format: `'<password>'`
 
+[[cannot-access-web-console-microsoft-edge]]
+== Cannot access web console with Microsoft Edge
+
+Attempting to access the OpenShift web console using Microsoft Edge can result in the following error:
+
+----
+Site not reachable.
+----
+
+Alternatively, the OpenShift web console may be rendered as a blank page.
+
+Cause: This is an inconsistent error caused by Microsoft Edge.
+
+Workaround: Use an alternative web browser to access the OpenShift web console.
+link:https://www.mozilla.org/en-US/firefox/new/[Mozilla Firefox] and link:https://www.google.com/chrome/[Google Chrome] both work as expected.
+
 [[invalid-x509-certificate]]
 == X.509 certificate is valid for 10.0.2.15, 127.0.0.1, 172.17.0.1, 172.30.0.1, 192.168.99.100, not 192.168.99.101
 

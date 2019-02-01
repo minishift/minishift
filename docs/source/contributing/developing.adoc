@@ -17,6 +17,7 @@ The following sections describe how to build and test {project}.
 == Prerequisites
 
 - Git
+- Make
 - A recent Go distribution (>=1.8)
 
 [NOTE]

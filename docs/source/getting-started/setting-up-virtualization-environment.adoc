@@ -312,7 +312,7 @@ $ brew install hyperkit
 
 [NOTE]
 ====
-You do not need to install `hyperkit` explicitly, If you have link:https://docs.docker.com/docker-for-mac/[Docker Desktop for macOS] installed in your macOS.
+You do not need to install `hyperkit` explicitly, if you have link:https://docs.docker.com/docker-for-mac/[Docker Desktop for macOS] installed in your macOS.
 ====
 
 To install the hyperkit driver, you need to download and install the *docker-machine-driver-hyperkit* binary and place it in a directory which is on your `PATH` environment variable.

@@ -40,7 +40,7 @@ function load_jenkins_vars() {
 
 function install_core_deps() {
   # Install EPEL repo
-  yum -y install epel-release
+  #yum -y install epel-release
   # Get all the deps in
   # We are installing golang from offical repository to make sure our downstream builds works as expected.
   # CDK side golang always comes from the offical RHEL repository.
@@ -346,7 +346,7 @@ function perform_release() {
 
 function perform_pr() {
   make prerelease synopsis_docs link_check_docs
-  MINISHIFT_VM_DRIVER=kvm make integration_pr
+  #MINISHIFT_VM_DRIVER=kvm make integration_pr
   perform_artifacts_upload $1;
 }
 

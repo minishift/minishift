@@ -22,8 +22,7 @@ The following sections describe how to build and test {project}.
 
 [NOTE]
 ====
-You should be able to develop {project} on Linux, macOS or Windows.
-The Windows operating system might require additional steps or have some limitations.
+You should be able to develop {project} on Linux or macOS.
 ====
 
 [[set-up-dev-env]]
@@ -58,15 +57,6 @@ $ export GOPATH=$HOME/work
 ----
 $ export PATH=$PATH:$GOPATH/bin
 ----
-
-[NOTE]
-====
-On Windows operating systems, you use the UI or a shell-specific approach to set environment variables.
-
-For Command Prompt, see link:https://technet.microsoft.com/en-us/library/cc754250.aspx[`set`] and link:https://technet.microsoft.com/en-us/library/cc755104.aspx[`setx`].
-
-For PowerShell, see link:https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_environment_variables[About Environment Variables].
-====
 
 [[cloning-repository]]
 === Cloning the Repository

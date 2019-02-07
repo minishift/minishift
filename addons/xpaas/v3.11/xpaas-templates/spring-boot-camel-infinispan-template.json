@@ -3,24 +3,24 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "openshift.io/display-name": "Red Hat Fuse 7.1 Camel + JDG with Spring Boot",
+      "openshift.io/display-name": "Red Hat Fuse 7.2 Camel + JDG with Spring Boot",
       "openshift.io/provider-display-name": "Red Hat, Inc.",
       "description": "Spring Boot, Camel and JBoss Data Grid QuickStart. This quickstart demonstrates how to connect a Spring Boot application to a JBoss Data Grid (or Infinispan) server using the Hot Rod protocol. It requires that the data grid server (or cluster) has been deployed first, one simple way to run a JDG service is following the documentation of the JDG xPaaS image for OpenShift related to the datagrid65-basic template.",
       "tags": "quickstart,java,springboot,fis,jboss-fuse",
       "iconClass": "icon-rh-integration",
-      "version": "1.1"
+      "version": "1.2"
     },
-    "name": "s2i-fuse71-spring-boot-camel-infinispan"
+    "name": "s2i-fuse72-spring-boot-camel-infinispan"
   },
   "labels": {
-    "template": "s2i-fuse71-spring-boot-camel-infinispan"
+    "template": "s2i-fuse72-spring-boot-camel-infinispan"
   },
   "parameters": [
     {
       "name": "APP_NAME",
       "displayName": "Application Name",
       "required": true,
-      "value": "s2i-fuse71-spring-boot-camel-infinispan",
+      "value": "s2i-fuse72-spring-boot-camel-infinispan",
       "description": "The name assigned to the application."
     },
     {
@@ -33,7 +33,7 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "spring-boot-camel-infinispan-1.0.0.fuse-710017-redhat-00002",
+      "value": "spring-boot-camel-infinispan-1.0.0.fuse-720019-redhat-00001",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
@@ -46,13 +46,13 @@
     {
       "name": "BUILDER_VERSION",
       "displayName": "Builder version",
-      "value": "1.1",
+      "value": "1.2",
       "description": "The version of the FIS S2I builder image to use."
     },
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.fuse-710017-redhat-00002",
+      "value": "1.0.0.fuse-720019-redhat-00001",
       "description": "The application version."
     },
     {
@@ -344,8 +344,7 @@
             ]
           }
         }
-      },
-      "status": {}
+      }
     }
   ]
 }

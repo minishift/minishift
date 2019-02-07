@@ -3,31 +3,31 @@
   "apiVersion": "v1",
   "metadata": {
     "annotations": {
-      "openshift.io/display-name": "Red Hat Fuse 7.1 Camel JPA + MySQL (Ephemeral) with EAP",
+      "openshift.io/display-name": "Red Hat Fuse 7.2 Camel JPA + MySQL (Ephemeral) with EAP",
       "openshift.io/provider-display-name": "Red Hat, Inc.",
       "description": "Red Hat Fuse on EAP Camel JPA quickstart. This example demonstrates how to connect a Camel application with Red Hat Fuse on EAP to a MySQL database and expose a REST API. This example creates two containers, one container to run as a MySQL server, and another running the Camel application which acts as as a client to the database.",
       "tags": "quickstart,javaee,java,jboss-fuse,fis",
       "iconClass": "icon-rh-integration",
-      "version": "1.1"
+      "version": "1.2"
     },
-    "name": "s2i-fuse71-eap-camel-jpa"
+    "name": "s2i-fuse72-eap-camel-jpa"
   },
   "labels": {
-    "template": "s2i-fuse71-eap-camel-jpa"
+    "template": "s2i-fuse72-eap-camel-jpa"
   },
   "parameters": [
     {
       "displayName": "Application Name",
       "description": "The name for the application.",
       "name": "APP_NAME",
-      "value": "s2i-fuse71-eap-camel-jpa",
+      "value": "s2i-fuse72-eap-camel-jpa",
       "required": true
     },
     {
       "displayName": "Application Version",
       "description": "The application version.",
       "name": "APP_VERSION",
-      "value": "5.2.0.fuse-710018-redhat-00001",
+      "value": "5.2.0.fuse-720021-redhat-00001",
       "required": true
     },
     {
@@ -48,7 +48,7 @@
       "displayName": "Git Reference",
       "description": "Git branch/tag reference",
       "name": "GIT_REF",
-      "value": "wildfly-camel-examples-5.2.0.fuse-710018-redhat-00001",
+      "value": "wildfly-camel-examples-5.2.0.fuse-720021-redhat-00001",
       "required": false
     },
     {
@@ -62,7 +62,7 @@
       "displayName": "Builder version",
       "description": "The version of the FIS S2I builder image to use.",
       "name": "BUILDER_VERSION",
-      "value": "1.1"
+      "value": "1.2"
     },
     {
       "displayName": "Database JNDI Name",

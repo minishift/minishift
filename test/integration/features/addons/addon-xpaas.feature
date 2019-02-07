@@ -47,7 +47,7 @@ and RH_REGISTRY_PASSWORD environment variables in order to run successfully.
   Examples: Required information to test the templates
     | project-name  | template-name           | service-name   | http-endpoint | expected-hello                        |
     | eap71-basic   | eap71-basic-s2i         | eap-app        | /             | Welcome to JBoss EAP 7                |
-    | eap71-tx      | eap71-tx-recovery-s2i   | eap-app        | /             | Welcome to JBoss EAP 7                |
+    | eap72-basic   | eap72-basic-s2i         | eap-app        | /index.jsf    | Welcome to JBoss!                     |
     | datagrid72    | datagrid72-basic        | datagrid-app   | /rest         | Welcome to the Infinispan REST Server |
 
   Scenario: User deletes Minishift

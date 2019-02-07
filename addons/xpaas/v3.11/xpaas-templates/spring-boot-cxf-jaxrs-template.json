@@ -3,24 +3,24 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "openshift.io/display-name": "Red Hat Fuse 7.1 CXF JAX-RS with Spring Boot",
+      "openshift.io/display-name": "Red Hat Fuse 7.2 CXF JAX-RS with Spring Boot",
       "openshift.io/provider-display-name": "Red Hat, Inc.",
       "description": "Spring Boot and CXF JAX-RS QuickStart. This example demonstrates how you can use Apache CXF JAX-RS with Spring Boot on OpenShift. The quickstart uses Spring Boot to configure a CXF application which includes a JAX-RS endpoint with Swagger enabled.",
       "tags": "quickstart,java,springboot,fis,jboss-fuse",
       "iconClass": "icon-rh-integration",
-      "version": "1.1"
+      "version": "1.2"
     },
-    "name": "s2i-fuse71-spring-boot-cxf-jaxrs"
+    "name": "s2i-fuse72-spring-boot-cxf-jaxrs"
   },
   "labels": {
-    "template": "s2i-fuse71-spring-boot-cxf-jaxrs"
+    "template": "s2i-fuse72-spring-boot-cxf-jaxrs"
   },
   "parameters": [
     {
       "name": "APP_NAME",
       "displayName": "Application Name",
       "required": true,
-      "value": "s2i-fuse71-spring-boot-cxf-jaxrs",
+      "value": "s2i-fuse72-spring-boot-cxf-jaxrs",
       "description": "The name assigned to the application."
     },
     {
@@ -33,7 +33,7 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "spring-boot-cxf-jaxrs-1.0.0.fuse-710017-redhat-00002",
+      "value": "spring-boot-cxf-jaxrs-1.0.0.fuse-720019-redhat-00001",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
@@ -45,13 +45,13 @@
     {
       "name": "BUILDER_VERSION",
       "displayName": "Builder version",
-      "value": "1.1",
+      "value": "1.2",
       "description": "The version of the FIS S2I builder image to use."
     },
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.fuse-710017-redhat-00002",
+      "value": "1.0.0.fuse-720019-redhat-00001",
       "description": "The application version."
     },
     {
@@ -393,8 +393,7 @@
             ]
           }
         }
-      },
-      "status": {}
+      }
     }
   ]
 }

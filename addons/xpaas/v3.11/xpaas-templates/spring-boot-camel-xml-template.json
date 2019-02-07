@@ -3,24 +3,24 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "openshift.io/display-name": "Red Hat Fuse 7.1 Camel XML DSL with Spring Boot",
+      "openshift.io/display-name": "Red Hat Fuse 7.2 Camel XML DSL with Spring Boot",
       "openshift.io/provider-display-name": "Red Hat, Inc.",
       "description": "Spring Boot and Camel Xml QuickStart. This example demonstrates how you can use Apache Camel with Spring Boot on OpenShift. The quickstart uses Spring Boot to configure an application which includes a Camel route (in Spring xml) that triggers a message every 5th second, and routes the message to a log.",
       "tags": "quickstart,java,springboot,fis,jboss-fuse",
       "iconClass": "icon-rh-integration",
-      "version": "1.1"
+      "version": "1.2"
     },
-    "name": "s2i-fuse71-spring-boot-camel-xml"
+    "name": "s2i-fuse72-spring-boot-camel-xml"
   },
   "labels": {
-    "template": "s2i-fuse71-spring-boot-camel-xml"
+    "template": "s2i-fuse72-spring-boot-camel-xml"
   },
   "parameters": [
     {
       "name": "APP_NAME",
       "displayName": "Application Name",
       "required": true,
-      "value": "s2i-fuse71-spring-boot-camel-xml",
+      "value": "s2i-fuse72-spring-boot-camel-xml",
       "description": "The name assigned to the application."
     },
     {
@@ -33,19 +33,19 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "spring-boot-camel-xml-1.0.0.fuse-710017-redhat-00002",
+      "value": "spring-boot-camel-xml-1.0.0.fuse-720019-redhat-00001",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
       "name": "BUILDER_VERSION",
       "displayName": "Builder version",
-      "value": "1.1",
+      "value": "1.2",
       "description": "The version of the FIS S2I builder image to use."
     },
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.fuse-710017-redhat-00002",
+      "value": "1.0.0.fuse-720019-redhat-00001",
       "description": "The application version."
     },
     {
@@ -334,8 +334,7 @@
             ]
           }
         }
-      },
-      "status": {}
+      }
     }
   ]
 }

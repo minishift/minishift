@@ -3,24 +3,24 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "openshift.io/display-name": "Red Hat Fuse 7.1 Camel log with Karaf",
+      "openshift.io/display-name": "Red Hat Fuse 7.2 Camel log with Karaf",
       "openshift.io/provider-display-name": "Red Hat, Inc.",
       "description": "A simple Camel route in Karaf container. This quickstart shows a simple Apache Camel application that logs a message to the server log every 5th second.",
       "tags": "quickstart,java,karaf,fis,jboss-fuse",
       "iconClass": "icon-rh-integration",
-      "version": "1.1"
+      "version": "1.2"
     },
-    "name": "s2i-fuse71-karaf-camel-log"
+    "name": "s2i-fuse72-karaf-camel-log"
   },
   "labels": {
-    "template": "s2i-fuse71-karaf-camel-log"
+    "template": "s2i-fuse72-karaf-camel-log"
   },
   "parameters": [
     {
       "name": "APP_NAME",
       "displayName": "Application Name",
       "required": true,
-      "value": "s2i-fuse71-karaf-camel-log",
+      "value": "s2i-fuse72-karaf-camel-log",
       "description": "The name assigned to the application."
     },
     {
@@ -33,25 +33,19 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "karaf-camel-log-1.0.0.fuse-710018-redhat-00002",
+      "value": "karaf-camel-log-1.0.0.fuse-720019-redhat-00001",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
-    },
-    {
-      "name": "SERVICE_NAME",
-      "displayName": "Service Name",
-      "value": "s2i-fuse70-karaf-camel-log",
-      "description": "Exposed Service name."
     },
     {
       "name": "BUILDER_VERSION",
       "displayName": "Builder version",
-      "value": "1.1",
+      "value": "1.2",
       "description": "The version of the FIS S2I builder image to use."
     },
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.fuse-710018-redhat-00002",
+      "value": "1.0.0.fuse-720019-redhat-00001",
       "description": "The application version."
     },
     {
@@ -349,8 +343,7 @@
             ]
           }
         }
-      },
-      "status": {}
+      }
     }
   ]
 }

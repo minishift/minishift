@@ -3,31 +3,31 @@
     "kind": "Template",
     "metadata": {
       "annotations": {
-        "openshift.io/display-name": "Red Hat Fuse 7.1 Console (cluster)",
+        "openshift.io/display-name": "Red Hat Fuse 7.2 Console (cluster)",
         "openshift.io/provider-display-name": "Red Hat, Inc.",
         "description": "The Red Hat Fuse Console eases the discovery and management of Fuse applications deployed on OpenShift.",
         "tags": "hawtio,java,fis,jboss-fuse",
         "iconClass": "icon-rh-integration",
-        "version": "1.1"
+        "version": "1.2"
       },
       "labels": {
         "template": "fuse-console"
       },
-      "name": "fuse71-console-cluster"
+      "name": "fuse72-console-cluster"
     },
     "parameters": [
       {
         "name": "APP_NAME",
         "displayName": "Application Name",
         "required": true,
-        "value": "fuse71-console",
+        "value": "fuse72-console",
         "description": "The name assigned to the application."
       },
       {
         "name": "APP_VERSION",
         "displayName": "Application Version",
         "required": true,
-        "value": "1.1",
+        "value": "1.2",
         "description": "The application version."
       },
       {
@@ -72,6 +72,16 @@
       }
     ],
     "objects": [
+      {
+        "apiVersion": "v1",
+        "kind": "ConfigMap",
+        "metadata": {
+          "name": "${APP_NAME}-config"
+        },
+        "data": {
+          "hawtconfig.json": "{\n  \"about\": {\n    \"title\": \"Red Hat Fuse Console\",\n    \"productInfo\": [],\n    \"additionalInfo\": \"The Red Hat Fuse Console eases the discovery and management of Fuse applications deployed on OpenShift.\",\n    \"copyright\": \"\"\n  },\n  \"branding\": {\n    \"appName\": \"Fuse Console\",\n    \"appLogoUrl\": \"../online/img/fuse-logo.svg\"\n  },\n  \"disabledRoutes\": []\n}\n"
+        }
+      },
       {
         "kind": "Route",
         "apiVersion": "v1",
@@ -228,6 +238,16 @@
                   ],
                   "volumeMounts": [
                     {
+                      "name": "${APP_NAME}-config",
+                      "mountPath": "/opt/app-root/src/online/online/hawtconfig.json",
+                      "subPath": "hawtconfig.json"
+                    },
+                    {
+                      "name": "${APP_NAME}-config",
+                      "mountPath": "/opt/app-root/src/integration/hawtconfig.json",
+                      "subPath": "hawtconfig.json"
+                    },
+                    {
                       "mountPath": "/etc/tls/private",
                       "name": "${APP_NAME}-tls"
                     }
@@ -246,6 +266,12 @@
               ],
               "volumes": [
                 {
+                  "name": "${APP_NAME}-config",
+                  "configMap": {
+                    "name": "${APP_NAME}-config"
+                  }
+                },
+                {
                   "name": "${APP_NAME}-tls",
                   "secret": {
                     "secretName": "${APP_NAME}-tls"
@@ -254,8 +280,7 @@
               ]
             }
           }
-        },
-        "status": {}
+        }
       }
     ]
   }

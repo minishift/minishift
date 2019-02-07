@@ -3,24 +3,24 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "openshift.io/display-name": "Red Hat Fuse 7.1 Camel REST SQL with Karaf",
+      "openshift.io/display-name": "Red Hat Fuse 7.2 Camel REST SQL with Karaf",
       "openshift.io/provider-display-name": "Red Hat, Inc.",
       "description": "Camel example using Rest DSL with SQL Database in Karaf container.  This example demonstrates how to use SQL via JDBC along with Camel's REST DSL to expose a RESTful API. The OpenShift MySQL container image should already be installed and running on your OpenShift installation, one simple way to run a MySQL service is following the documentation of the OpenShift MySQL container image related to the mysql-ephemeral template..",
       "tags": "quickstart,java,karaf,fis,jboss-fuse",
       "iconClass": "icon-rh-integration",
-      "version": "1.1"
+      "version": "1.2"
     },
-    "name": "s2i-fuse71-karaf-camel-rest-sql"
+    "name": "s2i-fuse72-karaf-camel-rest-sql"
   },
   "labels": {
-    "template": "s2i-fuse71-karaf-camel-rest-sql"
+    "template": "s2i-fuse72-karaf-camel-rest-sql"
   },
   "parameters": [
     {
       "name": "APP_NAME",
       "displayName": "Application Name",
       "required": true,
-      "value": "s2i-fuse71-karaf-camel-rest-sql",
+      "value": "s2i-fuse72-karaf-camel-rest-sql",
       "description": "The name assigned to the application."
     },
     {
@@ -33,7 +33,7 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "karaf-camel-rest-sql-1.0.0.fuse-710018-redhat-00002",
+      "value": "karaf-camel-rest-sql-1.0.0.fuse-720019-redhat-00001",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
@@ -69,13 +69,13 @@
     {
       "name": "BUILDER_VERSION",
       "displayName": "Builder version",
-      "value": "1.1",
+      "value": "1.2",
       "description": "The version of the FIS S2I builder image to use."
     },
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.fuse-710018-redhat-00002",
+      "value": "1.0.0.fuse-720019-redhat-00001",
       "description": "The application version."
     },
     {
@@ -434,8 +434,7 @@
             ]
           }
         }
-      },
-      "status": {}
+      }
     }
   ]
 }

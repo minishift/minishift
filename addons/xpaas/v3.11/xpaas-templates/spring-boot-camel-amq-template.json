@@ -3,24 +3,24 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "openshift.io/display-name": "Red Hat Fuse 7.1 Camel A-MQ with Spring Boot",
+      "openshift.io/display-name": "Red Hat Fuse 7.2 Camel A-MQ with Spring Boot",
       "openshift.io/provider-display-name": "Red Hat, Inc.",
       "description": "Spring Boot, Camel and ActiveMQ QuickStart. This quickstart demonstrates how to connect a Spring Boot application to an ActiveMQ broker and use JMS messaging between two Camel routes using OpenShift. In this example we will use two containers, one container to run as a ActiveMQ broker, and another as a client to the broker, where the Camel routes are running. This quickstart requires the ActiveMQ broker has been deployed and running first, one simple way to run a A-MQ service is following the documentation of the A-MQ xPaaS image for OpenShift related to the amq63-basic template",
       "tags": "quickstart,java,springboot,fis,jboss-fuse",
       "iconClass": "icon-rh-integration",
-      "version": "1.1"
+      "version": "1.2"
     },
-    "name": "s2i-fuse71-spring-boot-camel-amq"
+    "name": "s2i-fuse72-spring-boot-camel-amq"
   },
   "labels": {
-    "template": "s2i-fuse71-spring-boot-camel-amq"
+    "template": "s2i-fuse72-spring-boot-camel-amq"
   },
   "parameters": [
     {
       "name": "APP_NAME",
       "displayName": "Application Name",
       "required": true,
-      "value": "s2i-fuse71-spring-boot-camel-amq",
+      "value": "s2i-fuse72-spring-boot-camel-amq",
       "description": "The name assigned to the application."
     },
     {
@@ -33,7 +33,7 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "spring-boot-camel-amq-1.0.0.fuse-710017-redhat-00002",
+      "value": "spring-boot-camel-amq-1.0.0.fuse-720019-redhat-00001",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
@@ -56,13 +56,13 @@
     {
       "name": "BUILDER_VERSION",
       "displayName": "Builder version",
-      "value": "1.1",
+      "value": "1.2",
       "description": "The version of the FIS S2I builder image to use."
     },
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.fuse-710017-redhat-00002",
+      "value": "1.0.0.fuse-720019-redhat-00001",
       "description": "The application version."
     },
     {
@@ -360,8 +360,7 @@
             ]
           }
         }
-      },
-      "status": {}
+      }
     }
   ]
 }

@@ -3,24 +3,24 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "openshift.io/display-name": "Red Hat Fuse 7.1 Camel + Drools with Spring Boot",
+      "openshift.io/display-name": "Red Hat Fuse 7.2 Camel + Drools with Spring Boot",
       "openshift.io/provider-display-name": "Red Hat, Inc.",
-      "description": "Spring Boot, Camel and JBoss BRMS QuickStart. This example demonstrates how you can use Apache Camel and JBoss BRMS with Spring Boot on OpenShift. Camel routes, defined via Spring, are used to pass (insert) the Body of the message as a POJO to a Drools engine for execution. A Kie Server should be deployed and configured before running the application, more information about how to configure it can be found at https://github.com/fabric8-quickstarts/spring-boot-camel-drools/blob/spring-boot-camel-drools-1.0.0.fuse-710017-redhat-00002/README.md",
+      "description": "Spring Boot, Camel and JBoss BRMS QuickStart. This example demonstrates how you can use Apache Camel and JBoss BRMS with Spring Boot on OpenShift. Camel routes, defined via Spring, are used to pass (insert) the Body of the message as a POJO to a Drools engine for execution. A Kie Server should be deployed and configured before running the application, more information about how to configure it can be found at https://github.com/fabric8-quickstarts/spring-boot-camel-drools/blob/spring-boot-camel-drools-1.0.0.fuse-720019/README.md",
       "tags": "quickstart,java,springboot,fis,jboss-fuse",
       "iconClass": "icon-rh-integration",
-      "version": "1.1"
+      "version": "1.2"
     },
-    "name": "s2i-fuse71-spring-boot-camel-drools"
+    "name": "s2i-fuse72-spring-boot-camel-drools"
   },
   "labels": {
-    "template": "s2i-fuse71-spring-boot-camel-drools"
+    "template": "s2i-fuse72-spring-boot-camel-drools"
   },
   "parameters": [
     {
       "name": "APP_NAME",
       "displayName": "Application Name",
       "required": true,
-      "value": "s2i-fuse71-spring-boot-camel-drools",
+      "value": "s2i-fuse72-spring-boot-camel-drools",
       "description": "The name assigned to the application."
     },
     {
@@ -33,7 +33,7 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "spring-boot-camel-drools-1.0.0.fuse-710017-redhat-00002",
+      "value": "spring-boot-camel-drools-1.0.0.fuse-720019-redhat-00001",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
@@ -59,13 +59,13 @@
     {
       "name": "BUILDER_VERSION",
       "displayName": "Builder version",
-      "value": "1.1",
+      "value": "1.2",
       "description": "The version of the FIS S2I builder image to use."
     },
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.fuse-710017-redhat-00002",
+      "value": "1.0.0.fuse-720019-redhat-00001",
       "description": "The application version."
     },
     {
@@ -363,8 +363,7 @@
             ]
           }
         }
-      },
-      "status": {}
+      }
     }
   ]
 }

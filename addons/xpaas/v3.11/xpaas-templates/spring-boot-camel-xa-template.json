@@ -3,24 +3,24 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "openshift.io/display-name": "Red Hat Fuse 7.1 Camel on Spring Boot with XA Transactions",
+      "openshift.io/display-name": "Red Hat Fuse 7.2 Camel on Spring Boot with XA Transactions",
       "openshift.io/provider-display-name": "Red Hat, Inc.",
       "description": "Spring Boot, Camel and XA Transactions. This example demonstrates how to run a Camel Service on Spring-Boot that supports XA transactions on two external transactional resources: a JMS resource (A-MQ) and a database (PostgreSQL). This quickstart requires the PostgreSQL database and the A-MQ broker have been deployed and running first, one simple way to run them is to use the templates provided in the Openshift service catalog",
       "tags": "quickstart,java,springboot,fis,jboss-fuse",
       "iconClass": "icon-rh-integration",
-      "version": "1.1"
+      "version": "1.2"
     },
-    "name": "s2i-fuse71-spring-boot-camel-xa"
+    "name": "s2i-fuse72-spring-boot-camel-xa"
   },
   "labels": {
-    "template": "s2i-fuse71-spring-boot-camel-xa"
+    "template": "s2i-fuse72-spring-boot-camel-xa"
   },
   "parameters": [
     {
       "name": "APP_NAME",
       "displayName": "Application Name",
       "required": true,
-      "value": "s2i-fuse71-xa",
+      "value": "s2i-fuse72-xa",
       "description": "The name assigned to the application (max 20 characters)."
     },
     {
@@ -33,7 +33,7 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "spring-boot-camel-xa-1.0.0.fuse-710006-redhat-00003",
+      "value": "spring-boot-camel-xa-1.0.0.fuse-720016-redhat-00001",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
@@ -84,13 +84,13 @@
     {
       "name": "BUILDER_VERSION",
       "displayName": "Builder version",
-      "value": "1.1",
+      "value": "1.2",
       "description": "The version of the Fuse S2I builder image to use."
     },
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.fuse-710006-redhat-00003",
+      "value": "1.0.0.fuse-720016-redhat-00001",
       "description": "The application version."
     },
     {

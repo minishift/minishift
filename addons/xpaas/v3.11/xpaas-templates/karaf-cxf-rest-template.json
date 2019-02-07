@@ -3,24 +3,24 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "openshift.io/display-name": "Red Hat Fuse 7.1 Camel CXF REST with Karaf",
+      "openshift.io/display-name": "Red Hat Fuse 7.2 Camel CXF REST with Karaf",
       "openshift.io/provider-display-name": "Red Hat, Inc.",
       "description": "REST example using CXF in Karaf container. This quickstart demonstrates how to create a RESTful (JAX-RS) web service using CXF and expose it through the OSGi HTTP Service",
       "tags": "quickstart,java,karaf,fis,jboss-fuse",
       "iconClass": "icon-rh-integration",
-      "version": "1.1"
+      "version": "1.2"
     },
-    "name": "s2i-fuse71-karaf-cxf-rest"
+    "name": "s2i-fuse72-karaf-cxf-rest"
   },
   "labels": {
-    "template": "s2i-fuse71-karaf-cxf-rest"
+    "template": "s2i-fuse72-karaf-cxf-rest"
   },
   "parameters": [
     {
       "name": "APP_NAME",
       "displayName": "Application Name",
       "required": true,
-      "value": "s2i-fuse71-karaf-cxf-rest",
+      "value": "s2i-fuse72-karaf-cxf-rest",
       "description": "The name assigned to the application."
     },
     {
@@ -33,25 +33,25 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "karaf-cxf-rest-1.0.0.fuse-710018-redhat-00003",
+      "value": "karaf-cxf-rest-1.0.0.fuse-720019-redhat-00001",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
       "name": "SERVICE_NAME",
       "displayName": "Service Name",
-      "value": "s2i-fuse70-karaf-cxf-rest",
+      "value": "s2i-fuse72-karaf-cxf-rest",
       "description": "Exposed Service name."
     },
     {
       "name": "BUILDER_VERSION",
       "displayName": "Builder version",
-      "value": "1.1",
+      "value": "1.2",
       "description": "The version of the FIS S2I builder image to use."
     },
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.fuse-710018-redhat-00002",
+      "value": "1.0.0.fuse-720019-redhat-00001",
       "description": "The application version."
     },
     {
@@ -398,8 +398,7 @@
             ]
           }
         }
-      },
-      "status": {}
+      }
     }
   ]
 }

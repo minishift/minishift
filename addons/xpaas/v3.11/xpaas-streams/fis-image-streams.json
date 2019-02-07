@@ -27,8 +27,11 @@
                             "openshift.io/display-name": "Red Hat Fuse 6.2.1 Java",
                             "iconClass": "icon-rh-integration",
                             "tags": "builder,jboss-fuse,java,xpaas,hidden",
-                            "supports":"jboss-fuse:6.2.1,java:8,xpaas:1.2",
+                            "supports": "jboss-fuse:6.2.1,java:8,xpaas:1.2",
                             "version": "1.0"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
                         },
                         "from": {
                             "kind": "DockerImage",
@@ -42,8 +45,11 @@
                             "openshift.io/display-name": "Red Hat Fuse 6.3 Java",
                             "iconClass": "icon-rh-integration",
                             "tags": "builder,jboss-fuse,java,xpaas,hidden",
-                            "supports":"jboss-fuse:6.3.0,java:8,xpaas:1.2",
+                            "supports": "jboss-fuse:6.3.0,java:8,xpaas:1.2",
                             "version": "2.0"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
                         },
                         "from": {
                             "kind": "DockerImage",
@@ -72,8 +78,11 @@
                             "openshift.io/display-name": "Red Hat Fuse 7.0 Java",
                             "iconClass": "icon-rh-integration",
                             "tags": "builder,jboss-fuse,java,xpaas,hidden",
-                            "supports":"jboss-fuse:7.0.0,java:8,xpaas:1.2",
+                            "supports": "jboss-fuse:7.0.0,java:8,xpaas:1.2",
                             "version": "1.0"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
                         },
                         "from": {
                             "kind": "DockerImage",
@@ -102,8 +111,11 @@
                             "openshift.io/display-name": "Red Hat Fuse 6.2.1 Karaf",
                             "iconClass": "icon-rh-integration",
                             "tags": "builder,jboss-fuse,java,karaf,xpaas,hidden",
-                            "supports":"jboss-fuse:6.2.1,java:8,xpaas:1.2",
+                            "supports": "jboss-fuse:6.2.1,java:8,xpaas:1.2",
                             "version": "1.0"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
                         },
                         "from": {
                             "kind": "DockerImage",
@@ -117,8 +129,11 @@
                             "openshift.io/display-name": "Red Hat Fuse 6.3 Karaf",
                             "iconClass": "icon-rh-integration",
                             "tags": "builder,jboss-fuse,java,karaf,xpaas,hidden",
-                            "supports":"jboss-fuse:6.3.0,java:8,xpaas:1.2",
+                            "supports": "jboss-fuse:6.3.0,java:8,xpaas:1.2",
                             "version": "2.0"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
                         },
                         "from": {
                             "kind": "DockerImage",
@@ -147,8 +162,11 @@
                             "openshift.io/display-name": "Red Hat Fuse 7.0 Karaf",
                             "iconClass": "icon-rh-integration",
                             "tags": "builder,jboss-fuse,java,karaf,xpaas,hidden",
-                            "supports":"jboss-fuse:7.0.0,java:8,xpaas:1.2",
+                            "supports": "jboss-fuse:7.0.0,java:8,xpaas:1.2",
                             "version": "1.0"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
                         },
                         "from": {
                             "kind": "DockerImage",
@@ -177,8 +195,11 @@
                             "openshift.io/display-name": "Red Hat Fuse 7.0 EAP",
                             "iconClass": "icon-rh-integration",
                             "tags": "builder,jboss-fuse,java,eap,xpaas,hidden",
-                            "supports":"jboss-fuse:7.0.0,java:8,xpaas:1.2",
+                            "supports": "jboss-fuse:7.0.0,java:8,xpaas:1.2",
                             "version": "1.0"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
                         },
                         "from": {
                             "kind": "DockerImage",
@@ -207,8 +228,11 @@
                             "openshift.io/display-name": "Red Hat Fuse 7.0 Console",
                             "iconClass": "icon-rh-integration",
                             "tags": "jboss-fuse,hawtio,java,xpaas,hidden",
-                            "supports":"jboss-fuse:7.0.0,java:8,xpaas:1.2",
+                            "supports": "jboss-fuse:7.0.0,java:8,xpaas:1.2",
                             "version": "1.0"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
                         },
                         "from": {
                             "kind": "DockerImage",
@@ -240,6 +264,9 @@
                             "supports":"jboss-fuse:7.0.0,java:8,xpaas:1.2",
                             "version": "1.0"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "DockerImage",
                             "name": "registry.redhat.io/fuse7/fuse-java-openshift:1.0"
@@ -255,9 +282,30 @@
                             "supports":"jboss-fuse:7.1.0,java:8,xpaas:1.2",
                             "version": "1.1"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "DockerImage",
                             "name": "registry.redhat.io/fuse7/fuse-java-openshift:1.1"
+                        }
+                    },
+                    {
+                        "name": "1.2",
+                        "annotations": {
+                            "description": "Red Hat Fuse 7.2 Java S2I images.",
+                            "openshift.io/display-name": "Red Hat Fuse 7.2 Java",
+                            "iconClass": "icon-rh-integration",
+                            "tags": "builder,jboss-fuse,java,xpaas,hidden",
+                            "supports":"jboss-fuse:7.2.0,java:8,xpaas:1.2",
+                            "version": "1.2"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.redhat.io/fuse7/fuse-java-openshift:1.2"
                         }
                     }
                 ]
@@ -285,6 +333,9 @@
                             "supports":"jboss-fuse:7.0.0,java:8,xpaas:1.2",
                             "version": "1.0"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "DockerImage",
                             "name": "registry.redhat.io/fuse7/fuse-karaf-openshift:1.0"
@@ -300,9 +351,30 @@
                             "supports":"jboss-fuse:7.1.0,java:8,xpaas:1.2",
                             "version": "1.1"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "DockerImage",
                             "name": "registry.redhat.io/fuse7/fuse-karaf-openshift:1.1"
+                        }
+                    },
+                    {
+                        "name": "1.2",
+                        "annotations": {
+                            "description": "Red Hat Fuse 7.2 Karaf S2I images.",
+                            "openshift.io/display-name": "Red Hat Fuse 7.2 Karaf",
+                            "iconClass": "icon-rh-integration",
+                            "tags": "builder,jboss-fuse,java,karaf,xpaas,hidden",
+                            "supports":"jboss-fuse:7.2.0,java:8,xpaas:1.2",
+                            "version": "1.2"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.redhat.io/fuse7/fuse-karaf-openshift:1.2"
                         }
                     }
                 ]
@@ -330,6 +402,9 @@
                             "supports":"jboss-fuse:7.0.0,java:8,xpaas:1.2",
                             "version": "1.0"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "DockerImage",
                             "name": "registry.redhat.io/fuse7/fuse-eap-openshift:1.0"
@@ -345,9 +420,30 @@
                             "supports":"jboss-fuse:7.1.0,java:8,xpaas:1.2",
                             "version": "1.1"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "DockerImage",
                             "name": "registry.redhat.io/fuse7/fuse-eap-openshift:1.1"
+                        }
+                    },
+                    {
+                        "name": "1.2",
+                        "annotations": {
+                            "description": "Red Hat Fuse 7.2 EAP S2I images.",
+                            "openshift.io/display-name": "Red Hat Fuse 7.2 EAP",
+                            "iconClass": "icon-rh-integration",
+                            "tags": "builder,jboss-fuse,java,eap,xpaas,hidden",
+                            "supports":"jboss-fuse:7.2.0,java:8,xpaas:1.2",
+                            "version": "1.2"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.redhat.io/fuse7/fuse-eap-openshift:1.2"
                         }
                     }
                 ]
@@ -375,6 +471,9 @@
                             "supports":"jboss-fuse:7.0.0,java:8,xpaas:1.2",
                             "version": "1.0"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "DockerImage",
                             "name": "registry.redhat.io/fuse7/fuse-console:1.0"
@@ -390,9 +489,90 @@
                             "supports":"jboss-fuse:7.1.0,java:8,xpaas:1.2",
                             "version": "1.1"
                         },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
                         "from": {
                             "kind": "DockerImage",
                             "name": "registry.redhat.io/fuse7/fuse-console:1.1"
+                        }
+                    },
+                    {
+                        "name": "1.2",
+                        "annotations": {
+                            "description": "Red Hat Fuse 7.2 Console image.",
+                            "openshift.io/display-name": "Red Hat Fuse 7.2 Console",
+                            "iconClass": "icon-rh-integration",
+                            "tags": "jboss-fuse,hawtio,java,xpaas,hidden",
+                            "supports":"jboss-fuse:7.2.0,java:8,xpaas:1.2",
+                            "version": "1.2"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.redhat.io/fuse7/fuse-console:1.2"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "apicurito-ui",
+                "annotations": {
+                    "openshift.io/display-name": "Red Hat Apicurito UI",
+                    "openshift.io/provider-display-name": "Red Hat, Inc."
+                }
+            },
+            "spec": {
+                "tags": [
+                    {
+                        "name": "1.2",
+                        "annotations": {
+                            "description": "Red Hat Apicurito UI image.",
+                            "openshift.io/display-name": "Red Hat Apicurito UI",
+                            "tags": "apicurio,hidden"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.redhat.io/fuse7/fuse-apicurito:1.2"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "fuse-apicurito-generator",
+                "annotations": {
+                    "openshift.io/display-name": "Red Hat Fuse Apicurito Generator",
+                    "openshift.io/provider-display-name": "Red Hat, Inc."
+                }
+            },
+            "spec": {
+                "tags": [
+                    {
+                        "name": "1.2",
+                        "annotations": {
+                            "description": "Red Hat Apicurito Generator image.",
+                            "openshift.io/display-name": "Red Hat Apicurito Generator",
+                            "tags": "apicurio,fuse,hidden"
+                        },
+                        "referencePolicy": {
+                            "type": "Local"
+                        },
+                        "from": {
+                            "kind": "DockerImage",
+                            "name": "registry.redhat.io/fuse7/fuse-apicurito-generator:1.2"
                         }
                     }
                 ]

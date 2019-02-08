@@ -50,9 +50,6 @@ jobs:
         name: Make prerelease
         command: cd $GOPATH/src/github.com/minishift/minishift && make prerelease
     - run:
-        name: Make systemtray 
-        command: cd $GOPATH/src/github.com/minishift/minishift && make cross_systemtray
-    - run:
         name: Validate Commits
         command: cd $GOPATH/src/github.com/minishift/minishift && make validate_commits
 ## Currently unable to use environment variables in the store_artifacts path in V2

@@ -78,11 +78,15 @@ __check_defined = \
     $(if $(value $1),, \
       $(error Undefined $1$(if $2, ($2))))
 
+ifeq ($(GOOS), linux)
+	NO_SYSTEMTRAY:=systemtray
+endif
+
 # Start of the actual build targets
 
 .PHONY: $(GOPATH)/bin/minishift$(IS_EXE)
 $(GOPATH)/bin/minishift$(IS_EXE): $(ADDON_ASSET_FILE) ## Builds the binary into $GOPATH/bin
-	go install -tags "$(BUILD_TAGS_SYSTEMTRAY)" -pkgdir=$(ADDON_BINDATA_DIR) -ldflags="$(VERSION_VARIABLES)" ./cmd/minishift
+	go install -tags "$(BUILD_TAGS) $(NO_SYSTEMTRAY)" -pkgdir=$(ADDON_BINDATA_DIR) -ldflags="$(VERSION_VARIABLES)" ./cmd/minishift
 
 .PHONY: vendor
 vendor:
@@ -95,22 +99,16 @@ $(ADDON_ASSET_FILE): $(GOPATH)/bin/go-bindata ## Compiles the built-in add-on in
 $(BUILD_DIR)/$(GOOS)-$(GOARCH):
 	mkdir -p $(BUILD_DIR)/$(GOOS)-$(GOARCH)
 
-$(BUILD_DIR)/$(GOOS)-$(GOARCH)/systemtray:
-	mkdir -p $(BUILD_DIR)/$(GOOS)-$(GOARCH)/systemtray
-
 $(BUILD_DIR)/darwin-amd64/minishift: $(ADDON_ASSET_FILE) $(BUILD_DIR)/$(GOOS)-$(GOARCH) ## Cross compiles the darwin executable and places it in $(BUILD_DIR)/darwin-amd64/minishift
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build -tags "$(BUILD_TAGS_SYSTEMTRAY)" -pkgdir=$(ADDON_BINDATA_DIR) --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/darwin-amd64/minishift ./cmd/minishift
-
+ifeq ($(GOOS), darwin)
+	CGO_ENABLED=1 GOARCH=amd64 GOOS=darwin go build -tags "$(BUILD_TAGS)" -pkgdir=$(ADDON_BINDATA_DIR) --installsuffix cgo -ldflags="$(LDFLAGS_SYSTEMTRAY)" -o $(BUILD_DIR)/darwin-amd64/systemtray/minishift ./cmd/minishift
+else
+	@echo -e "\ndarwin binaries can only be built on macOS due to dependency on cocoa library"
+endif
 $(BUILD_DIR)/linux-amd64/minishift: $(ADDON_ASSET_FILE) $(BUILD_DIR)/$(GOOS)-$(GOARCH) ## Cross compiles the linux executable and places it in $(BUILD_DIR)/linux-amd64/minishift
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags "$(BUILD_TAGS_SYSTEMTRAY)" -pkgdir=$(ADDON_BINDATA_DIR) --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/linux-amd64/minishift ./cmd/minishift
 
 $(BUILD_DIR)/windows-amd64/minishift.exe: $(ADDON_ASSET_FILE) $(BUILD_DIR)/$(GOOS)-$(GOARCH) ## Cross compiles the windows executable and places it in $(BUILD_DIR)/windows-amd64/minishift
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build -tags "$(BUILD_TAGS_SYSTEMTRAY)" -pkgdir=$(ADDON_BINDATA_DIR) --installsuffix cgo -ldflags="$(LDFLAGS)" -o $(BUILD_DIR)/windows-amd64/minishift.exe ./cmd/minishift
-
-$(BUILD_DIR)/darwin-amd64/systemtray/minishift: $(ADDON_ASSET_FILE) $(BUILD_DIR)/$(GOOS)-$(GOARCH)/systemtray ## Cross compiles the darwin executable with systemtray
-	CGO_ENABLED=1 GOARCH=amd64 GOOS=darwin go build -tags "$(BUILD_TAGS)" -pkgdir=$(ADDON_BINDATA_DIR) --installsuffix cgo -ldflags="$(LDFLAGS_SYSTEMTRAY)" -o $(BUILD_DIR)/darwin-amd64/systemtray/minishift ./cmd/minishift
-
-$(BUILD_DIR)/windows-amd64/systemtray/minishift.exe: $(ADDON_ASSET_FILE) $(BUILD_DIR)/$(GOOS)-$(GOARCH)/systemtray ## Cross compiles the windows executable with systemtray
 	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build -tags "$(BUILD_TAGS)" -pkgdir=$(ADDON_BINDATA_DIR) --installsuffix cgo -ldflags="$(LDFLAGS_SYSTEMTRAY)" -o $(BUILD_DIR)/windows-amd64/systemtray/minishift.exe ./cmd/minishift
 
 $(GOPATH)/bin/gh-release:
@@ -168,13 +166,6 @@ prerelease: clean fmtcheck test cross ## Pre-release target to verify tests pass
 		echo $(files); \
 		exit 1; \
 	fi
-
-.PHONY: systemtray
-systemtray: $(ADDON_ASSET_FILE)
-	go install -tags "$(BUILD_TAGS)" -pkgdir=$(ADDON_BINDATA_DIR) -ldflags="$(VERSION_VARIABLES)" ./cmd/minishift
-
-.PHONY: cross_systemtray
-cross_systemtray: clean $(BUILD_DIR)/darwin-amd64/systemtray/minishift $(BUILD_DIR)/windows-amd64/systemtray/minishift.exe
 
 .PHONY: release
 release: clean $(GOPATH)/bin/gh-release cross ## Create release and upload to GitHub
@@ -239,7 +230,7 @@ ci_release_systemtray: ## Trigger upload of systemtray binaries from circle CI. 
 		https:/circleci.com/api/v1.1/project/github/minishift/minishift/tree/master
 
 .PHONY: cross ## Cross compiles all binaries
-cross: $(BUILD_DIR)/darwin-amd64/minishift $(BUILD_DIR)/linux-amd64/minishift $(BUILD_DIR)/windows-amd64/minishift.exe
+cross: $(BUILD_DIR)/linux-amd64/minishift $(BUILD_DIR)/windows-amd64/minishift.exe $(BUILD_DIR)/darwin-amd64/minishift
 
 .PHONY: clean ## Remove all build artifacts
 clean:
@@ -254,7 +245,7 @@ clean_bindata:
 
 .PHONY: test
 test: $(ADDON_ASSET_FILE)  ## Run unit tests
-	@go test -v -tags "$(BUILD_TAGS_SYSTEMTRAY)" -ldflags="$(VERSION_VARIABLES)" $(shell $(PACKAGES))
+	@go test -v -tags "$(BUILD_TAGS) $(NO_SYSTEMTRAY)" -ldflags="$(VERSION_VARIABLES)" $(shell $(PACKAGES))
 
 .PHONY: coverage
 coverage: $(ADDON_ASSET_FILE)

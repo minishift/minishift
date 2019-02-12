@@ -29,13 +29,13 @@ func CacheSystemAdminEntries(systemEntriesConfigPath string, ocPath string, sshC
 	// oc config view --minify --raw=true
 	// We need to login as system:admin because then only config view will have client-certificate-data
 	// and client-key-data which is associated with admin and all the operation we do as oc runner.
-	cmd := fmt.Sprintf("%s login -u system:admin", ocPath)
+	cmd := fmt.Sprintf("sudo %s login -u system:admin", ocPath)
 	_, err := sshCommander.SSHCommand(cmd)
 	if err != nil {
 		return err
 	}
 
-	cmd = fmt.Sprintf("%s config view --minify --raw=true", ocPath)
+	cmd = fmt.Sprintf("sudo %s config view --minify --raw=true", ocPath)
 	out, err := sshCommander.SSHCommand(cmd)
 	if err != nil {
 		return err

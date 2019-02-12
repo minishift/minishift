@@ -112,7 +112,7 @@ func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) er
 				minishiftStrings.EscapeSingleQuote(param.Password))
 
 			// prepare docker login command for registry.redhat.io
-			dockerLoginCommand := fmt.Sprintf("docker login --username %s --password %s %s",
+			dockerLoginCommand := fmt.Sprintf("sudo docker login --username %s --password %s %s",
 				param.Username,
 				minishiftStrings.EscapeSingleQuote(param.Password),
 				RedHatRegistry)

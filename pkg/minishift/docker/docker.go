@@ -106,14 +106,14 @@ func NewVmDockerCommander(sshCommander provision.SSHCommander) *VmDockerCommande
 }
 
 func (c VmDockerCommander) Ps() (string, error) {
-	cmd := "docker ps"
+	cmd := "sudo docker ps"
 	c.logCommand(cmd)
 	out, err := c.commander.SSHCommand(cmd)
 	return out, err
 }
 
 func (c VmDockerCommander) Start(container string) (bool, error) {
-	cmd := fmt.Sprintf("docker start %s", container)
+	cmd := fmt.Sprintf("sudo docker start %s", container)
 	c.logCommand(cmd)
 	_, err := c.commander.SSHCommand(cmd)
 	if err != nil {
@@ -123,7 +123,7 @@ func (c VmDockerCommander) Start(container string) (bool, error) {
 }
 
 func (c VmDockerCommander) Stop(container string) (bool, error) {
-	cmd := fmt.Sprintf("docker stop %s", container)
+	cmd := fmt.Sprintf("sudo docker stop %s", container)
 	c.logCommand(cmd)
 	_, err := c.commander.SSHCommand(cmd)
 	if err != nil {
@@ -168,21 +168,21 @@ func (c VmDockerCommander) Restart(container string) (bool, error) {
 }
 
 func (c VmDockerCommander) Cp(source string, container string, target string) error {
-	cmd := fmt.Sprintf("docker cp %s:%s %s", container, source, target)
+	cmd := fmt.Sprintf("sudo docker cp %s:%s %s", container, source, target)
 	c.logCommand(cmd)
 	_, err := c.commander.SSHCommand(cmd)
 	return err
 }
 
 func (c VmDockerCommander) CpToContainer(source string, container string, target string) error {
-	cmd := fmt.Sprintf("docker cp %s %s:%s", source, container, target)
+	cmd := fmt.Sprintf("sudo docker cp %s %s:%s", source, container, target)
 	c.logCommand(cmd)
 	_, err := c.commander.SSHCommand(cmd)
 	return err
 }
 
 func (c VmDockerCommander) Exec(options string, container string, command string, args string) (string, error) {
-	cmd := fmt.Sprintf("docker exec %s %s %s %s", options, container, command, args)
+	cmd := fmt.Sprintf("sudo docker exec %s %s %s %s", options, container, command, args)
 	c.logCommand(cmd)
 	return c.commander.SSHCommand(cmd)
 }
@@ -194,7 +194,7 @@ func (c VmDockerCommander) LocalExec(cmd string) (string, error) {
 }
 
 func (c VmDockerCommander) Status(container string) (string, error) {
-	cmd := fmt.Sprintf("docker inspect --format='{{.State.Status}}' %s", container)
+	cmd := fmt.Sprintf("sudo docker inspect --format='{{.State.Status}}' %s", container)
 	c.logCommand(cmd)
 	out, err := c.commander.SSHCommand(cmd)
 	out = strings.TrimSpace(out)
@@ -206,7 +206,7 @@ func (c VmDockerCommander) logCommand(cmd string) {
 }
 
 func (c VmDockerCommander) Run(options string, container string) (bool, error) {
-	cmd := fmt.Sprintf("docker run %s %s", options, container)
+	cmd := fmt.Sprintf("sudo docker run %s %s", options, container)
 	c.logCommand(cmd)
 	_, err := c.commander.SSHCommand(cmd)
 	if err != nil {
@@ -216,7 +216,7 @@ func (c VmDockerCommander) Run(options string, container string) (bool, error) {
 }
 
 func (c VmDockerCommander) Create(options string, image string) (string, error) {
-	cmd := fmt.Sprintf("docker create %s %s", options, image)
+	cmd := fmt.Sprintf("sudo docker create %s %s", options, image)
 	c.logCommand(cmd)
 	out, err := c.commander.SSHCommand(cmd)
 	if err != nil {
@@ -226,7 +226,7 @@ func (c VmDockerCommander) Create(options string, image string) (string, error) 
 }
 
 func (c VmDockerCommander) Rm(container string) error {
-	cmd := fmt.Sprintf("docker rm %s", container)
+	cmd := fmt.Sprintf("sudo docker rm %s", container)
 	c.logCommand(cmd)
 	_, err := c.commander.SSHCommand(cmd)
 	if err != nil {
@@ -236,7 +236,7 @@ func (c VmDockerCommander) Rm(container string) error {
 }
 
 func (c VmDockerCommander) GetID(label string) (string, error) {
-	cmd := fmt.Sprintf(`docker ps -l -qf "label="%s""`, label)
+	cmd := fmt.Sprintf(`sudo docker ps -l -qf "label="%s""`, label)
 	c.logCommand(cmd)
 	out, err := c.commander.SSHCommand(cmd)
 	out = strings.TrimSpace(out)
@@ -244,7 +244,7 @@ func (c VmDockerCommander) GetID(label string) (string, error) {
 }
 
 func (c VmDockerCommander) Pull(image string) (string, error) {
-	cmd := fmt.Sprintf("docker pull %s", image)
+	cmd := fmt.Sprintf("sudo docker pull %s", image)
 	c.logCommand(cmd)
 	out, err := c.commander.SSHCommand(cmd)
 	out = strings.TrimSpace(out)
@@ -252,7 +252,7 @@ func (c VmDockerCommander) Pull(image string) (string, error) {
 }
 
 func (c VmDockerCommander) IsImageExist(image string) (bool, error) {
-	cmd := fmt.Sprintf("docker images -q %s", image)
+	cmd := fmt.Sprintf("sudo docker images -q %s", image)
 	var exist bool
 	c.logCommand(cmd)
 	out, err := c.commander.SSHCommand(cmd)

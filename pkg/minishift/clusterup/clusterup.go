@@ -94,7 +94,7 @@ func ClusterUp(config *ClusterUpConfig, clusterUpParams map[string]string) (stri
 	if glog.V(2) {
 		fmt.Printf("-- Running 'oc' with: '%s'\n", strings.Join(cmdArgs, " "))
 	}
-	cmd := fmt.Sprintf("%s %s", config.OcBinaryPathInsideVM, strings.Join(cmdArgs, " "))
+	cmd := fmt.Sprintf("sudo %s %s", config.OcBinaryPathInsideVM, strings.Join(cmdArgs, " "))
 	out, err := config.SSHCommander.SSHCommand(cmd)
 	if err != nil {
 		return "", fmt.Errorf("Error starting the cluster. %v", err)
@@ -108,7 +108,7 @@ func AddComponent(sshCommander provision.SSHCommander, ocBinaryPathInsideVM stri
 	if glog.V(2) {
 		fmt.Printf("-- Running 'oc' with: '%s'\n", strings.Join(cmdArgs, " "))
 	}
-	cmd := fmt.Sprintf("%s %s", ocBinaryPathInsideVM, strings.Join(cmdArgs, " "))
+	cmd := fmt.Sprintf("sudo %s %s", ocBinaryPathInsideVM, strings.Join(cmdArgs, " "))
 	out, err := sshCommander.SSHCommand(cmd)
 	if err != nil {
 		return "", fmt.Errorf("Error adding the component: %v", err)

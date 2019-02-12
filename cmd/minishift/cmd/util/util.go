@@ -170,7 +170,7 @@ func ValidateGenericDriverFlags(remoteIPAddress, remoteSSHUser, sshKeyToConnectR
 // OcClusterDown stop Openshift cluster using oc binary inside the remote machine
 func OcClusterDown(hostVm *host.Host) error {
 	sshCommander := provision.GenericSSHCommander{Driver: hostVm.Driver}
-	cmd := fmt.Sprintf("%s/oc cluster down", minishiftConstants.OcPathInsideVM)
+	cmd := fmt.Sprintf("sudo %s/oc cluster down", minishiftConstants.OcPathInsideVM)
 	_, err := sshCommander.SSHCommand(cmd)
 	return err
 }

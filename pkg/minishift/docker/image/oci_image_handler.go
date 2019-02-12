@@ -244,7 +244,7 @@ func (handler *OciImageHandler) GetDockerImages() (map[string]bool, error) {
 	// Also in case there is no image in docker daemon then exit code should be 0 instead 1
 	// and `|| true` is used.
 	// which refer to dangling image for docker.
-	cmd := "docker images --format '{{.Repository}}:{{.Tag}}' | grep -vw '<none>' || true"
+	cmd := "sudo docker images --format '{{.Repository}}:{{.Tag}}' | grep -vw '<none>' || true"
 	var buffer bytes.Buffer
 	session.Stdout = &buffer
 	err = session.Run(cmd)
@@ -268,7 +268,7 @@ func (handler *OciImageHandler) pullImage(image string, out io.Writer) error {
 	}
 	defer session.Close()
 
-	cmd := fmt.Sprintf("docker pull %s", image)
+	cmd := fmt.Sprintf("sudo docker pull %s", image)
 	cmdOut, err := session.CombinedOutput(cmd)
 	if err != nil {
 		return fmt.Errorf("Error running command '%s': %v \n%s", cmd, err, string(cmdOut[:]))

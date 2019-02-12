@@ -7,10 +7,10 @@ ssh sudo mkdir -p /var/lib/minishift/secrets
 ssh sudo chown #{user} /var/lib/minishift/secrets
 
 echo  -- Creating server cert
-!ssh /var/lib/minishift/bin/oc adm ca create-server-cert --signer-cert=/var/lib/minishift/base/openshift-apiserver/ca.crt --signer-key=/var/lib/minishift/base/openshift-apiserver/ca.key --signer-serial=/var/lib/minishift/base/openshift-apiserver/ca.serial.txt --hostnames='docker-registry-default.#{routing-suffix},docker-registry-default.#{routing-suffix}:443,docker-registry.default.svc.cluster.local,172.30.1.1' --cert=/var/lib/minishift/secrets/registry.crt --key=/var/lib/minishift/secrets/registry.key
+!ssh sudo /var/lib/minishift/bin/oc adm ca create-server-cert --signer-cert=/var/lib/minishift/base/openshift-apiserver/ca.crt --signer-key=/var/lib/minishift/base/openshift-apiserver/ca.key --signer-serial=/var/lib/minishift/base/openshift-apiserver/ca.serial.txt --hostnames='docker-registry-default.#{routing-suffix},docker-registry-default.#{routing-suffix}:443,docker-registry.default.svc.cluster.local,172.30.1.1' --cert=/var/lib/minishift/secrets/registry.crt --key=/var/lib/minishift/secrets/registry.key
 
 echo  -- Creating the secret for the registry certificates
-!ssh /var/lib/minishift/bin/oc create secret generic registry-certificates --from-file=/var/lib/minishift/secrets/registry.crt --from-file=/var/lib/minishift/secrets/registry.key -n default
+!ssh sudo /var/lib/minishift/bin/oc create secret generic registry-certificates --from-file=/var/lib/minishift/secrets/registry.crt --from-file=/var/lib/minishift/secrets/registry.key -n default
 
 echo  -- Adding the secret to the registry pod’s service accounts (including the default service account)
 !oc secrets link registry registry-certificates -n default --as system:admin

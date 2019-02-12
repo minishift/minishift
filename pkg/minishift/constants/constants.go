@@ -38,7 +38,7 @@ const (
 	ImageNameForClusterUpImageFlag = "openshift/origin-${component}"
 	HypervDefaultVirtualSwitchId   = "c08cb7b8-9b3c-408e-8e30-5e16a3aeb444"
 	HypervDefaultVirtualSwitchName = "Default Switch"
-	DockerbridgeSubnetCmd          = `docker network inspect -f "{{range .IPAM.Config }}{{ .Subnet }}{{end}}" bridge`
+	DockerbridgeSubnetCmd          = `sudo docker network inspect -f "{{range .IPAM.Config }}{{ .Subnet }}{{end}}" bridge`
 	MinishiftEnableExperimental    = "MINISHIFT_ENABLE_EXPERIMENTAL"
 	SystemtrayDaemon               = "systemtray"
 	SftpdDaemon                    = "sftpd"

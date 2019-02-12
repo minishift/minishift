@@ -47,10 +47,10 @@ import (
 )
 
 var (
-	logsCmd             = "docker logs origin"
+	logsCmd             = "sudo docker logs origin"
 	logsCmdFollow       = logsCmd + " -f"
 	logsCmdTail         = logsCmd + " --tail"
-	dockerAPIVersionCmd = "docker version --format '{{.Server.APIVersion}}'"
+	dockerAPIVersionCmd = "sudo docker version --format '{{.Server.APIVersion}}'"
 )
 
 const (

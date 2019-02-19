@@ -189,10 +189,6 @@ Feature: Addons command and its subcommands
      Then stdout should contain "Removing addon 'admin-user'"
       And stdout should contain "admin user deleted"
 
-  Scenario: Applying already applied add-on
-  The result would differ from add-on to add-on, but will probably fail.
-  Thus this case is not being tested.
-
   Scenario: Stopping Minishift
     Given Minishift has state "Running"
      When executing "minishift stop" succeeds

@@ -264,18 +264,12 @@ func FeatureContext(s *godog.Suite) {
 		writeToFileInTestDirSucceeds)
 	s.Step(`^file "([^"]*)" should match text "([^"]*)" succeeds$`,
 		readFileForTextMatchSucceeds)
-	// Prototyping and debugging
-	// please do not use in production
+	// Prototyping and debugging steps
+	// do not use in production extensively
 	s.Step(`^user (?:waits|waited) for "(\d+(?:ms|s|m))"$`,
-		func(duration string) error {
-			timeDuration, err := time.ParseDuration(duration)
-			if err != nil {
-				return err
-			}
-
-			time.Sleep(timeDuration)
-			return nil
-		})
+		waitForDuration)
+	s.Step(`^echo (stdout|stderr|exitcode)$`,
+		echoLastCommandOutput)
 
 	s.BeforeSuite(func() {
 		testDir, testDefaultHome = setupTestDirectory()
@@ -657,6 +651,21 @@ func ExecutingOcCommandSucceedsOrFails(command string, expectedResult string) er
 
 func ExecutingMinishiftCommandSucceedsOrFails(command string, expectedResult string) error {
 	return succeedsOrFails(MinishiftInstance.ExecutingMinishiftCommand, command, expectedResult)
+}
+
+func waitForDuration(duration string) error {
+	timeDuration, err := time.ParseDuration(duration)
+	if err != nil {
+		return err
+	}
+
+	time.Sleep(timeDuration)
+	return nil
+}
+
+func echoLastCommandOutput(commandField string) error {
+	fmt.Println(selectFieldFromLastOutput(commandField))
+	return nil
 }
 
 func succeedsOrFails(execute commandRunner, command string, expectedResult string) error {

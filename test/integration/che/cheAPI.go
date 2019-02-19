@@ -451,8 +451,11 @@ func (c *CheAPI) GetWorkspaceStatusByID(workspaceID string) (WorkspaceStatus, er
 
 	var workspaceStatusObj WorkspaceStatus
 	err = json.Unmarshal(workspaceDataJSON, &workspaceStatusObj)
+	if err != nil {
+		return workspaceStatusObj, fmt.Errorf("error unmarshaling JSON: '%s' into '%v', error: %v", workspaceDataJSON, workspaceStatusObj, err)
+	}
 
-	return workspaceStatusObj, err
+	return workspaceStatusObj, nil
 }
 
 //CheckWorkspaceDeletion checks if the workspace at workspaceID is deleted

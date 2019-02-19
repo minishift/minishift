@@ -23,7 +23,7 @@ Feature: Che add-on in combination with anyuid addon.
   Scenario: Che is ready
     Given Minishift has state "Running"
      When executing "oc project mini-che" succeeds
-     Then service "che" rollout successfully within "5m"
+     Then service "che" rollout successfully within "10m"
 
   Scenario: Che API is accessible
      When user tries to get the che api endpoint
@@ -34,6 +34,10 @@ Feature: Che add-on in combination with anyuid addon.
      Then the stacks should not be empty
 
   Scenario Outline: User starts workspace, imports projects, checks run commands
+    # workaround for https://github.com/eclipse/che/issues/12569
+    Given executing "oc delete all -l che.workspace_id" retrying 10 times with wait period of "10s"
+      And executing "oc delete pvc -l che.workspace_id" retrying 10 times with wait period of "10s"
+
      When starting a workspace with stack "<stack>" succeeds within "15m"
      Then workspace should have state "RUNNING"
 

@@ -53,9 +53,6 @@ The xref:../command-ref/minishift_stop.adoc#[`minishift stop`] command stops you
 Starting {project} again will restore the OpenShift cluster, allowing you to continue working from the last session.
 However, you must enter the same parameters that you used in the original start command.
 
-Efforts to further refine this experience are in progress.
-For details, see the GitHub issue link:https://github.com/minishift/minishift/issues/179[#179].
-
 [[minishift-delete-overview]]
 === {project} delete Command
 

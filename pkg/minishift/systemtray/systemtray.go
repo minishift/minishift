@@ -51,10 +51,7 @@ const (
 )
 
 const (
-	DOES_NOT_EXIST int = iota
-	RUNNING
-	STOPPED
-	START_PROFILE
+	START_PROFILE int = iota
 	STOP_PROFILE
 )
 
@@ -107,21 +104,6 @@ func OnReady() {
 
 func OnExit() {
 	return
-}
-
-func getStatus(profileName string) int {
-	cmd, _ := os.CurrentExecutable()
-	args := []string{"status", "--profile", profileName}
-	command := exec.Command(cmd, args...)
-	out, _ := command.Output()
-	stdOut := fmt.Sprintf("%s", out)
-	fmt.Println(stdOut)
-
-	if strings.Contains(stdOut, "Running") {
-		return RUNNING
-	} else {
-		return STOPPED
-	}
 }
 
 // Add newly created profiles and remove deleted profiles from tray
@@ -290,14 +272,14 @@ func updateProfileStatus() {
 		time.Sleep(5 * time.Second)
 		submenusLock.Lock()
 		for k, v := range submenus {
-			status := getStatus(k)
-			if status == DOES_NOT_EXIST {
+			status := cmdUtil.GetVMStatus(k)
+			if status == "Does Not Exist" {
 				v.AddBitmap(icon.DoesNotExist)
 			}
-			if status == RUNNING {
+			if status == "Running" {
 				v.AddBitmap(icon.Running)
 			}
-			if status == STOPPED {
+			if status == "Stopped" {
 				v.AddBitmap(icon.Stopped)
 			}
 		}

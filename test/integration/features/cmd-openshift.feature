@@ -36,10 +36,10 @@ cluster in VM provided by Minishift.
         finished last time. When container is new and had never finished then this time value is set to 0001-01-01T00:00:00Z.
         On restart of OpenShift cluster containers are terminated, which sets FinishedAt to actual time. This value persist
         after next start of container.
-    Given stdout of command "minishift ssh -- "docker inspect --format={{.State.FinishedAt}} origin"" is equal to "0001-01-01T00:00:00Z"
+    Given stdout of command "minishift ssh -- 'docker inspect --format={{.State.FinishedAt}} origin'" is equal to "0001-01-01T00:00:00Z"
      When executing "minishift openshift restart" succeeds
      Then stdout should contain "OpenShift restarted successfully"
-      And stdout of command "minishift ssh -- "docker inspect --format={{.State.FinishedAt}} origin"" is not equal to "0001-01-01T00:00:00Z"
+      And stdout of command "minishift ssh -- 'docker inspect --format={{.State.FinishedAt}} origin'" is not equal to "0001-01-01T00:00:00Z"
 
   Scenario: Pods docker-registry and router are ready after OpenShift restart
      When executing "oc get pods -n default --as system:admin" retrying 20 times with wait period of "15s"

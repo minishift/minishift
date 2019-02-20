@@ -249,7 +249,7 @@ func (m *MinishiftRunner) GetProfileList() string {
 }
 
 func (m *MinishiftRunner) GetContainerID(containerName string) (string, error) {
-	cmd := fmt.Sprintf(`ssh -- docker ps -a -f "name=%v" --format {{.ID}}`, containerName)
+	cmd := fmt.Sprintf(`ssh -- 'docker ps -a -f name=%v --format {{.ID}}'`, containerName)
 	cmdOut, cmdErr, _, err := m.RunCommand(cmd)
 	if err != nil {
 		return "", err
@@ -268,7 +268,8 @@ func (m *MinishiftRunner) GetContainerID(containerName string) (string, error) {
 }
 
 func (m *MinishiftRunner) GetContainerStatusUsingImageID(imageID string) (string, error) {
-	cmdOut, cmdErr, _, err := m.RunCommand("ssh -- docker inspect -f '{{.State.Status}}' " + imageID)
+	cmd := fmt.Sprintf(`ssh -- 'docker inspect -f {{.State.Status}} %v'`, imageID)
+	cmdOut, cmdErr, _, err := m.RunCommand(cmd)
 	if err != nil {
 		return "", err
 	}

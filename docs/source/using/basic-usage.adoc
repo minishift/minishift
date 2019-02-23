@@ -112,7 +112,7 @@ Global configuration is applicable to all profiles.
 
 {project} maintains a configuration file in *_$MINISHIFT_HOME/config/config.json_*.
 This file can be used to set commonly-used command line flags persistently for individual profiles.
-{The global configuration file is maintained at *_$MINISHIFT_HOME/config/global.json_*.
+The global configuration file is maintained at *_$MINISHIFT_HOME/config/global.json_*.
 
 
 [NOTE]
@@ -123,7 +123,7 @@ This is different from environment variables, which can be used to replace any o
 
 [NOTE]
 ====
-By Default minishift persist start flags to peristent configuration, to disable it, use `minishift config set save-start-flags false`.
+By Default minishift persist start flags to persistent configuration, to disable it, use `minishift config set save-start-flags false`.
 ====
 
 [[setting-persistent-configuration-values]]

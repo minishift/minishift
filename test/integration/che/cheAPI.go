@@ -228,15 +228,20 @@ func (c *CheAPI) isLongLivedProcess(Pid int) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	fmt.Println("commandExitCode:", commandExitCode)
 
 	equalsLastLogCount := 0
-	time.Sleep(15 * time.Second)
+	time.Sleep(1 * time.Second)
 
 	for equalsLastLogCount != 3 && commandExitCode.ExitCode == -1 {
 		newLastLogData, err := c.GetLastLog(Pid)
 		if err != nil {
 			return false, err
 		}
+
+		fmt.Println("newLastLogData.Text:", newLastLogData.Text)
+		fmt.Println("newLastLogData.Kind:", newLastLogData.Kind)
+		fmt.Println("newLastLogData.Time:", newLastLogData.Time)
 
 		if newLastLogData.Kind == lastLogData.Kind && newLastLogData.Text == lastLogData.Text && newLastLogData.Time == lastLogData.Time {
 			equalsLastLogCount++
@@ -246,7 +251,7 @@ func (c *CheAPI) isLongLivedProcess(Pid int) (bool, error) {
 
 		lastLogData = newLastLogData
 
-		time.Sleep(15 * time.Second)
+		time.Sleep(1 * time.Second)
 	}
 
 	if equalsLastLogCount == 3 {
@@ -290,6 +295,7 @@ func (c *CheAPI) PostCommandToWorkspace(sampleCommand Command) (int, error) {
 		return -1, err
 	}
 
+	fmt.Println("sampleCommandMarshalled:", sampleCommandMarshalled)
 	processJSON, _, err := doRequest(http.MethodPost, c.ExecAgentURL, string(sampleCommandMarshalled))
 	if err != nil {
 		return -1, err
@@ -300,11 +306,21 @@ func (c *CheAPI) PostCommandToWorkspace(sampleCommand Command) (int, error) {
 	if err != nil {
 		return -1, err
 	}
+	fmt.Println("processData:", processData)
+	fmt.Println("exitCode:", processData.ExitCode)
+	fmt.Println("alive:", processData.Alive)
+	fmt.Println("commandLine:", processData.CommandLine)
+	fmt.Println("name:", processData.Name)
+	fmt.Println("nativePID:", processData.NativePid)
+	fmt.Println("PID:", processData.Pid)
+	fmt.Println("Type:", processData.Type)
 
 	longLived, err := c.isLongLivedProcess(processData.Pid)
 	if err != nil {
 		return -1, err
 	}
+
+	fmt.Println("is longLived:", longLived)
 
 	if longLived {
 		return 0, nil

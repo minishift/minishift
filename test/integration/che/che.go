@@ -141,13 +141,23 @@ func (c *CheRunner) userRunsCommandOnSample(projectURL string) error {
 		commandInfo.CommandLine = strings.Replace(commandInfo.CommandLine, "${current.project.path}", "/projects"+sampleConfigMap.Path, -1)
 		commandInfo.CommandLine = strings.Replace(commandInfo.CommandLine, "${GAE}", "/home/user/google_appengine", -1)
 		commandInfo.CommandLine = strings.Replace(commandInfo.CommandLine, "$TOMCAT_HOME", "/home/user/tomcat8", -1)
-		c.runner.PID, _ = c.runner.PostCommandToWorkspace(commandInfo)
+		var err error
+		c.runner.PID, err = c.runner.PostCommandToWorkspace(commandInfo)
+		if err != nil {
+			fmt.Println("error posting command to workspace:", err)
+		}
+		fmt.Println("sampleConfig:", commandInfo)
 	} else if len(stackConfigMap.Command) > 0 {
 		commandInfo := stackConfigMap.Command[0]
 		commandInfo.CommandLine = strings.Replace(commandInfo.CommandLine, "${current.project.path}", "/projects"+sampleConfigMap.Path, -1)
 		commandInfo.CommandLine = strings.Replace(commandInfo.CommandLine, "${GAE}", "/home/user/google_appengine", -1)
 		commandInfo.CommandLine = strings.Replace(commandInfo.CommandLine, "$TOMCAT_HOME", "/home/user/tomcat8", -1)
-		c.runner.PID, _ = c.runner.PostCommandToWorkspace(commandInfo)
+		var err error
+		c.runner.PID, err = c.runner.PostCommandToWorkspace(commandInfo)
+		if err != nil {
+			fmt.Println("error posting command to workspace:", err)
+		}
+		fmt.Println("stackConfig:", commandInfo)
 	} else {
 		return fmt.Errorf("There are no sample commands give by the stack or the sample")
 	}
@@ -157,7 +167,7 @@ func (c *CheRunner) userRunsCommandOnSample(projectURL string) error {
 
 func (c *CheRunner) exitCodeShouldBe(code int) error {
 	if c.runner.PID != code {
-		return fmt.Errorf("return command was not 0")
+		return fmt.Errorf("return command was not %v", code)
 	}
 
 	return nil

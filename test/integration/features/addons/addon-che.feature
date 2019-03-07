@@ -55,7 +55,6 @@ Feature: Che add-on
     | Spring Boot           | https://github.com/snowdrop/spring-boot-http-booster                     |
     | CentOS WildFly Swarm  | https://github.com/wildfly-swarm-openshiftio-boosters/wfswarm-rest-http  |
     | Python                | https://github.com/che-samples/console-python3-simple.git                |
-    | PHP                   | https://github.com/che-samples/web-php-simple.git                        |
     | C++                   | https://github.com/che-samples/console-cpp-simple.git                    |
 
   Scenario: Removal of Che addon

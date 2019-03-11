@@ -64,7 +64,7 @@ objects:
       var ApicuritoConfig = {
           "generators": [
               {
-                  "name":"Fuse 7.1 Camel Project",
+                  "name":"Fuse Camel Project",
                   "url":"/api/v1/generate/camel-project.zip"
               }
           ]

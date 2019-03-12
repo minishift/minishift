@@ -122,6 +122,8 @@ var (
 	SkipCheckOpenShiftVersion = createConfigSetting("skip-check-openshift-version", SetBool, nil, nil, true, nil)
 	WarnCheckOpenShiftVersion = createConfigSetting("warn-check-openshift-version", SetBool, nil, nil, true, false)
 	SkipCheckOpenShiftRelease = createConfigSetting("skip-check-openshift-release", SetBool, nil, nil, true, nil)
+	SkipCheckPowerShell       = createConfigSetting("skip-check-powershell", SetBool, nil, nil, true, nil)
+	WarnCheckPowerShell       = createConfigSetting("warn-check-powershell", SetBool, nil, nil, true, nil)
 	WarnCheckOpenShiftRelease = createConfigSetting("warn-check-openshift-release", SetBool, nil, nil, true, false)
 	SkipPreflightChecks       = createConfigSetting("skip-startup-checks", SetBool, nil, nil, true, nil)
 

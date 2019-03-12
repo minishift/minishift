@@ -136,6 +136,12 @@ func preflightChecksBeforeStartingHost() {
 			driverErrorMessage)
 	case "hyperv":
 		preflightCheckSucceedsOrFails(
+			configCmd.SkipCheckPowerShell.Name,
+			checkPoshOnPath,
+			"Checking if Powershell is available",
+			configCmd.WarnCheckPowerShell.Name,
+			driverErrorMessage)
+		preflightCheckSucceedsOrFails(
 			configCmd.SkipCheckHyperVDriver.Name,
 			checkHypervDriverInstalled,
 			"Checking if Hyper-V driver is installed",
@@ -433,19 +439,19 @@ func checkHypervDriverSwitch() bool {
 
 // checkHypervDriverInstalled returns true if Hyper-V driver is installed
 func checkHypervDriverInstalled() bool {
-	// Check if Hyper-V's Virtual Machine Management Service is installed
-	_, err := exec.LookPath("vmms.exe")
-	if err != nil {
+	posh := powershell.New()
+
+	// check to see if a hypervisor is present. if hyper-v is installed and enabled,
+	checkHypervisorPresent := `@(Get-Wmiobject Win32_ComputerSystem).HypervisorPresent`
+	stdOut, _, _ := posh.Execute(checkHypervisorPresent)
+	if !strings.Contains(stdOut, "True") {
 		return false
 	}
 
-	// check to see if a hypervisor is present. if hyper-v is installed and enabled,
-	posh := powershell.New()
-
-	checkHypervisorPresent := `@(Get-Wmiobject Win32_ComputerSystem).HypervisorPresent`
-
-	stdOut, _, _ := posh.Execute(checkHypervisorPresent)
-	if !strings.Contains(stdOut, "True") {
+	// Check if Hyper-V's Virtual Machine Management Service is running
+	checkVmmsRunning := `@(Get-Service vmms).Status`
+	stdOut, _, _ = posh.Execute(checkVmmsRunning)
+	if strings.TrimSpace(stdOut) != "Running" {
 		return false
 	}
 
@@ -612,6 +618,16 @@ func checkOriginRelease() bool {
 
 	if err != nil {
 		fmt.Printf("%s is not a valid OpenShift version", requestedOpenShiftVersion)
+		return false
+	}
+	return true
+}
+
+// checkPoshOnPath returns true if PowerShell is present on path and usable
+func checkPoshOnPath() bool {
+	posh := powershell.New()
+	stdOut, _, _ := posh.Execute(`echo "alive"`)
+	if strings.TrimSpace(stdOut) != "alive" {
 		return false
 	}
 	return true

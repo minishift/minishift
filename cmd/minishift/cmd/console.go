@@ -55,7 +55,7 @@ var consoleCmd = &cobra.Command{
 			displayConsoleInMachineReadable(getHostIp(api), getHostUrl(api))
 		} else if requestOauthToken {
 			fmt.Fprintln(os.Stdout, "Opening requested token URI in the default browser...")
-			browser.OpenURL(getHostUrl(api) + "/oauth/token/request")
+			browser.OpenURL(getTokenRequestUrl(api))
 		} else {
 			fmt.Fprintln(os.Stdout, "Opening the OpenShift Web console in the default browser...")
 			browser.OpenURL(getHostUrl(api))
@@ -80,6 +80,12 @@ func getHostUrl(api *libmachine.Client) string {
 		atexit.ExitWithMessage(1, fmt.Sprintf("Cannot access the OpenShift console. Verify that Minishift is running. Error: %s", err.Error()))
 	}
 	return url
+}
+
+func getTokenRequestUrl(api *libmachine.Client) string {
+	hostIP := getHostIp(api)
+	tokenUrl := fmt.Sprintf("https://%s:%d/%s", hostIP, constants.APIServerPort, "oauth/token/request")
+	return tokenUrl
 }
 
 func getHostIp(api *libmachine.Client) string {

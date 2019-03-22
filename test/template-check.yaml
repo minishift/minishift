@@ -1,0 +1,23 @@
+# Checks up-to-dateness of addon templates with the help of Goard tool.
+directories:
+- dir: # check xpaas addon
+  - addons/xpaas/v3.11/xpaas-templates
+  - https://raw.githubusercontent.com/openshift/openshift-ansible/release-3.11/roles/openshift_examples/files/examples/x86_64/xpaas-templates
+- dir:
+  - addons/xpaas/v3.11/xpaas-streams
+  - https://raw.githubusercontent.com/openshift/openshift-ansible/release-3.11/roles/openshift_examples/files/examples/x86_64/xpaas-streams
+- dir:
+  - addons/xpaas/v3.10/xpaas-templates
+  - https://raw.githubusercontent.com/openshift/openshift-ansible/release-3.10/roles/openshift_examples/files/examples/v3.10/xpaas-templates
+- dir:
+  - addons/xpaas/v3.10/xpaas-streams
+  - https://raw.githubusercontent.com/openshift/openshift-ansible/release-3.10/roles/openshift_examples/files/examples/v3.10/xpaas-streams
+- dir:
+  - addons/xpaas/v3.9/xpaas-templates
+  - https://raw.githubusercontent.com/openshift/openshift-ansible/release-3.9/roles/openshift_examples/files/examples/v3.9/xpaas-templates
+- dir:
+  - addons/xpaas/v3.9/xpaas-streams
+  - https://raw.githubusercontent.com/openshift/openshift-ansible/release-3.9/roles/openshift_examples/files/examples/v3.9/xpaas-streams
+- dir: # check Che addon
+  - addons/che/templates
+  - https://raw.githubusercontent.com/eclipse/che/master/deploy/openshift/templates

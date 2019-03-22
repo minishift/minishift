@@ -308,6 +308,11 @@ function prepare_for_proxy() {
   firewall-cmd --zone=public --add-port=$INTEGRATION_DEFAULT_SSHFS_PORT/tcp;
 }
 
+function run_templates_check() {
+  sudo curl https://github.com/agajdosi/goard/releases/download/v0.1.0/goard -Lo /usr/bin/goard && sudo chmod 755 /usr/bin/goard
+  goard --config-path test/template-check.yaml || echo "WARNING: Templates check has failed!"
+}
+
 function perform_release() {
   # Test everything before bumping the version
   make prerelease
@@ -345,6 +350,7 @@ function perform_release() {
 }
 
 function perform_pr() {
+  run_templates_check
   make prerelease synopsis_docs link_check_docs
   MINISHIFT_VM_DRIVER=kvm make integration_pr
   perform_artifacts_upload $1;

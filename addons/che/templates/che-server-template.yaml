@@ -38,6 +38,10 @@ objects:
       port: 8080
       protocol: TCP
       targetPort: 8080
+    - name: metrics
+      port: 8087
+      protocol: TCP
+      targetPort: 8087
     selector:
       app: che
 - apiVersion: v1
@@ -48,6 +52,8 @@ objects:
     to:
       kind: Service
       name: che-host
+    port:
+      targetPort: http
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
@@ -90,14 +96,16 @@ objects:
             value: "${PROTOCOL}://che-${NAMESPACE}.${ROUTING_SUFFIX}/api"
           - name: CHE_WEBSOCKET_ENDPOINT
             value: "${WS_PROTOCOL}://che-${NAMESPACE}.${ROUTING_SUFFIX}/api/websocket"
+          - name: CHE_WEBSOCKET_ENDPOINT__MINOR
+            value: "${WS_PROTOCOL}://che-${NAMESPACE}.${ROUTING_SUFFIX}/api/websocket-minor"
           - name: CHE_DEBUG_SERVER
-            value: "false"
+            value: "${CHE_DEBUG_SERVER}"
           - name: CHE_INFRASTRUCTURE_ACTIVE
             value: "openshift"
           - name: CHE_INFRA_KUBERNETES_BOOTSTRAPPER_BINARY__URL
             value: "${PROTOCOL}://che-${NAMESPACE}.${ROUTING_SUFFIX}/agent-binaries/linux_amd64/bootstrapper/bootstrapper"
-          - name: CHE_INFRA_KUBERNETES_WORKSPACE__START__TIMEOUT__MIN
-            value: "10"
+          - name: CHE_INFRA_KUBERNETES_MACHINE__START__TIMEOUT__MIN
+            value: "5"
           - name: CHE_INFRA_KUBERNETES_MASTER__URL
             value: "${CHE_INFRA_KUBERNETES_MASTER__URL}"
           - name: CHE_INFRA_OPENSHIFT_PROJECT
@@ -118,8 +126,12 @@ objects:
             value: "/data/logs"
           - name: CHE_LOG_LEVEL
             value: "INFO"
+          - name: CHE_KEYCLOAK_REALM
+            value: "${CHE_KEYCLOAK_REALM}"
           - name: CHE_KEYCLOAK_AUTH__SERVER__URL
             value: "${CHE_KEYCLOAK_AUTH__SERVER__URL}"
+          - name: CHE_KEYCLOAK_CLIENT__ID
+            value: "${CHE_KEYCLOAK_CLIENT__ID}"
           - name: CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER
             value: "${CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER}"
           - name: CHE_OAUTH_GITHUB_CLIENTID
@@ -132,7 +144,7 @@ objects:
             value: "-XX:MaxRAMFraction=2 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10
               -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90
               -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Dsun.zip.disableMemoryMapping=true
-              -Xms20m "
+              -Xms20m -Djava.security.egd=file:/dev/./urandom"
           - name: CHE_WORKSPACE_AUTO_START
             value: "false"
           - name: CHE_INFRA_KUBERNETES_PVC_QUANTITY
@@ -143,16 +155,30 @@ objects:
             value: "${CHE_WORKSPACE_SIDECAR_DEFAULT__MEMORY__LIMIT__MB}"
           - name: ROUTING_SUFFIX
             value: "${ROUTING_SUFFIX}"
-          - name: OPENSHIFT_IDENTITY_PROVIDER_CERTIFICATE
+          - name: CHE_SELF__SIGNED__CERT
             valueFrom:
               secretKeyRef:
                 key: ca.crt
-                name: openshift-identity-provider
+                name: self-signed-certificate
                 optional: true
           - name: CHE_WORKSPACE_PLUGIN__REGISTRY__URL
             value: "${CHE_WORKSPACE_PLUGIN__REGISTRY__URL}"
           - name: CHE_TRACING_ENABLED
             value: "${CHE_TRACING_ENABLED}"
+          - name: CHE_METRICS_ENABLED
+            value: "${CHE_METRICS_ENABLED}"
+          - name: CHE_CORS_ENABLED
+            value: "${CHE_CORS_ENABLED}"
+          - name: CHE_CORS_ALLOW__CREDENTIALS
+            value: "${CHE_CORS_ALLOW__CREDENTIALS}"
+          - name: CHE_CORS_ALLOWED__ORIGINS
+            value: "${CHE_CORS_ALLOWED__ORIGINS}"
+          - name: CHE_WSAGENT_CORS_ENABLED
+            value: "${CHE_WSAGENT_CORS_ENABLED}"
+          - name: CHE_WSAGENT_CORS_ALLOWED__ORIGINS
+            value: "${CHE_WSAGENT_CORS_ALLOWED__ORIGINS}"
+          - name: CHE_WSAGENT_CORS_ALLOW__CREDENTIALS
+            value: "${CHE_WSAGENT_CORS_ALLOW__CREDENTIALS}"
           image: ${IMAGE_CHE}:${CHE_VERSION}
           imagePullPolicy: "${PULL_POLICY}"
           livenessProbe:
@@ -175,6 +201,9 @@ objects:
           ports:
           - containerPort: 8080
             name: http
+            protocol: TCP
+          - containerPort: 8087
+            name: metrics
             protocol: TCP
           - containerPort: 8000
             name: http-debug
@@ -254,6 +283,14 @@ parameters:
   displayName: Admin password update
   description: Force an admin to update password after 1st login. True by default
   value: 'true'
+- name: CHE_KEYCLOAK_REALM
+  displayName: Identity provider Realm
+  description: Identity provider Realm. Defaults to che
+  value: 'che'
+- name: CHE_KEYCLOAK_CLIENT__ID
+  displayName: Identity provider Client ID
+  description: Identity provider Client ID. Defaults to che-public
+  value: 'che-public'
 - name: CHE_KEYCLOAK_AUTH__SERVER__URL
   displayName: Identity provider URL
   description: URL of a remote identity provider. Defaults to Keycloak bundled with Che multi user
@@ -277,7 +314,7 @@ parameters:
 - name: CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS
   displayName: Pre-create subpaths in PV
   description: Applied only if a common strategy is used. Required for Kubernetes versions before 1.6
-  value: 'false'
+  value: 'true'
 - name: CHE_OAUTH_GITHUB_CLIENTID
   displayName: GitHub Client ID
   description: GitHub oAuth app client ID. Applicable to Che single user only!
@@ -298,6 +335,38 @@ parameters:
   displayName: Eclipse Che tracing
   description: Enable or disable tracing in Eclipse Che
   value: 'false'
+- name: CHE_METRICS_ENABLED
+  displayName: Eclipse Che metrics collection
+  description: Enable or disable metrics collection in Eclipse Che
+  value: 'false'
+- name: CHE_DEBUG_SERVER
+  displayName: Deploy Che in a debug mode
+  description: Enable or disable java debug mode on Eclipse Che server
+  value: 'false'
+- name: CHE_CORS_ENABLED
+  displayName: CORS filter for WS Master
+  description: Enable or disable CORS filter for Eclipse Che WS Master
+  value: 'true'
+- name: CHE_CORS_ALLOW__CREDENTIALS
+  displayName: CORS credentials support for WS Master
+  description: Allow requests with credentials for CORS filter
+  value: 'false'
+- name: CHE_CORS_ALLOWED__ORIGINS
+  displayName: CORS allowed origins for WS Master
+  description: defines allowed origins in requests for CORS filter
+  value: '*'
+- name: CHE_WSAGENT_CORS_ENABLED
+  displayName: CORS filter for WS Agent
+  description: Enable or disable CORS filter for Eclipse Che WS Agent
+  value: 'true'
+- name: CHE_WSAGENT_CORS_ALLOWED__ORIGINS
+  displayName: CORS allowed origins for WS Agent
+  description: defines allowed origins in requests for CORS filter, that will be propagated as corresponding env variable on WS Agent. Only if its value is not null or empty
+  value: 'NULL'
+- name: CHE_WSAGENT_CORS_ALLOW__CREDENTIALS
+  displayName: CORS credentials support for WS Agent
+  description: Allow requests with credentials for CORS filter on WS Agent.
+  value: 'true'
 labels:
   app: che
   template: che

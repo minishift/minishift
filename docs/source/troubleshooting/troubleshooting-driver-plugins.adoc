@@ -219,8 +219,6 @@ You can also use the GUI to add yourself to the Hyper-V Administrators group as 
 
 Now you can run the Hyper-V commands as a normal user.
 
-For more options for Hyper-V see link:https://blogs.msdn.microsoft.com/virtual_pc_guy/2010/09/28/creating-a-hyper-v-administrators-local-group-through-powershell[creating Hyper-V administrators local group].
-
 [[hyperv-fails-openvpn]]
 === {project} running with Hyper-V fails when connected to OpenVPN
 

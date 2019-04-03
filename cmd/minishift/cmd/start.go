@@ -18,10 +18,11 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/minishift/minishift/pkg/minishift/timezone"
 	"os"
 	"runtime"
 	"strings"
+
+	"github.com/minishift/minishift/pkg/minishift/timezone"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/docker/go-units"
@@ -160,6 +161,7 @@ func runStart(cmd *cobra.Command, args []string) {
 
 	if viper.GetString(configCmd.VmDriver.Name) == genericDriver {
 		cmdUtil.ValidateGenericDriverFlags(viper.GetString(configCmd.RemoteIPAddress.Name),
+			viper.GetString(configCmd.RemoteIPPort.Name),
 			viper.GetString(configCmd.RemoteSSHUser.Name),
 			viper.GetString(configCmd.SSHKeyToConnectRemote.Name))
 	}
@@ -445,6 +447,7 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 		HypervVirtualSwitch:   viper.GetString(configCmd.HypervVirtualSwitch.Name),
 		ShellProxyEnv:         shellProxyEnv,
 		RemoteIPAddress:       viper.GetString(configCmd.RemoteIPAddress.Name),
+		RemoteIPPort:          viper.GetString(configCmd.RemoteIPPort.Name),
 		RemoteSSHUser:         viper.GetString(configCmd.RemoteSSHUser.Name),
 		SSHKeyToConnectRemote: viper.GetString(configCmd.SSHKeyToConnectRemote.Name),
 		UsingLocalProxy:       viper.GetBool(configCmd.LocalProxy.Name),
@@ -471,7 +474,7 @@ func startHost(libMachineClient *libmachine.Client) *host.Host {
 
 		fmt.Print("-- Starting Minishift VM ...")
 	} else {
-		s, err := sshutil.NewRawSSHClient(machineConfig.RemoteIPAddress, machineConfig.SSHKeyToConnectRemote, machineConfig.RemoteSSHUser)
+		s, err := sshutil.NewRawSSHClient(machineConfig.RemoteIPAddress, machineConfig.RemoteIPPort, machineConfig.SSHKeyToConnectRemote, machineConfig.RemoteSSHUser)
 		if err != nil {
 			atexit.ExitWithMessage(1, fmt.Sprintf("Error creating ssh client: %v", err))
 		}
@@ -693,6 +696,7 @@ func initStartFlags() *flag.FlagSet {
 	startFlagSet.String(configCmd.OpenshiftVersion.Name, version.GetOpenShiftVersion(), fmt.Sprintf("The OpenShift version to run, eg. latest or %s", version.GetOpenShiftVersion()))
 
 	startFlagSet.String(configCmd.RemoteIPAddress.Name, "", "IP address of the remote machine to provision OpenShift on")
+	startFlagSet.String(configCmd.RemoteIPPort.Name, "", "IP port of the remote machine to provision OpenShift on")
 	startFlagSet.String(configCmd.RemoteSSHUser.Name, "", "The username of the remote machine to provision OpenShift on")
 	startFlagSet.String(configCmd.SSHKeyToConnectRemote.Name, "", "SSH private key location on the host to connect remote machine")
 	startFlagSet.String(configCmd.ISOUrl.Name, minishiftConstants.CentOsIsoAlias, "Location of the minishift ISO. Can be a URL, file URI or one of the following short names: [centos].")

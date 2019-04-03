@@ -25,6 +25,7 @@ import (
 
 type genericDriverOptions struct {
 	remoteIP              string
+	remotePort            string
 	remoteSSHUser         string
 	sshKeyToConnectRemote string
 }
@@ -33,6 +34,7 @@ func (g genericDriverOptions) String(key string) string {
 	genericStringOptions := make(map[string]string)
 	genericStringOptions["generic-ssh-user"] = g.remoteSSHUser
 	genericStringOptions["generic-ip-address"] = g.remoteIP
+	genericStringOptions["generic-ssh-port"] = g.remotePort
 	genericStringOptions["generic-ssh-key"] = g.sshKeyToConnectRemote
 	return genericStringOptions[key]
 }
@@ -56,6 +58,7 @@ func createGenericDriverConfig(config MachineConfig) drivers.Driver {
 	d := generic.NewDriver(constants.MachineName, constants.Minipath)
 	remoteOptions := genericDriverOptions{
 		remoteIP:              config.RemoteIPAddress,
+		remotePort:            config.RemoteIPPort,
 		remoteSSHUser:         config.RemoteSSHUser,
 		sshKeyToConnectRemote: config.SSHKeyToConnectRemote,
 	}

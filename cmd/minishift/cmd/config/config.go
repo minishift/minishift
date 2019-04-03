@@ -56,6 +56,7 @@ var (
 	RegistryMirror        = createConfigSetting("registry-mirror", SetSlice, nil, nil, true, nil)
 	AddonEnv              = createConfigSetting("addon-env", SetSlice, nil, nil, true, nil)
 	RemoteIPAddress       = createConfigSetting("remote-ipaddress", SetString, nil, nil, true, nil)
+	RemoteIPPort          = createConfigSetting("remote-ipport", SetString, nil, nil, true, "22")
 	RemoteSSHUser         = createConfigSetting("remote-ssh-user", SetString, nil, nil, true, nil)
 	SSHKeyToConnectRemote = createConfigSetting("remote-ssh-key", SetString, nil, nil, true, nil)
 	TimeZone              = createConfigSetting("timezone", SetString, []setFn{validations.IsValidTimezone}, nil, true, nil)

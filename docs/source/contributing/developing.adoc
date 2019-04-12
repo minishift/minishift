@@ -230,7 +230,7 @@ For example, *proxy.feature* or *cmd-version.feature*.
 [[running-integration-tests]]
 ==== Running Integration Tests
 
-By default, tests are run against the binary created by `make build` (*_$GOPATH/bin/minishift_*).
+By default, tests are run against the binary created by `make` (*_$GOPATH/bin/minishift_*).
 To run the quick test, use the following command:
 
 ----

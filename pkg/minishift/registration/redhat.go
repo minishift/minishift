@@ -80,7 +80,7 @@ func (registrator *RedHatRegistrator) Register(param *RegistrationParameters) er
 			// request password (disallow empty value)
 			if param.Password == "" {
 				if i == 1 {
-					fmt.Printf("   Retriving password from keychain ...")
+					fmt.Printf("   Retrieving password from keychain ...")
 					param.Password, err = param.GetPasswordKeyring(param.Username)
 					if err != nil {
 						fmt.Println(" FAIL ")

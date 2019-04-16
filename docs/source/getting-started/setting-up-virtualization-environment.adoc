@@ -304,19 +304,26 @@ On macOS, you may also xref:../getting-started/installing.adoc#installing-with-h
 
 {project} is currently tested against *docker-machine-driver-hyperkit* version 1.0.0.
 
-Use the following command to install the latest version of `hyperkit` with Homebrew:
+Using hyperkit requires having both the `hyperkit` driver and `docker-machine-driver-hyperkit` installed
+
+==== Installing hyperkit
+
+* If you have link:https://docs.docker.com/docker-for-mac/[Docker Desktop for macOS] installed, `hyperkit` is already installed. 
+* If you use link:https://brew.sh[Homebrew] you can install the latest version of `hyperkit`:
 
 ----
 $ brew install hyperkit
 ----
 
-[NOTE]
-====
-You do not need to install `hyperkit` explicitly, if you have link:https://docs.docker.com/docker-for-mac/[Docker Desktop for macOS] installed in your macOS.
-====
+==== Installing docker-machine-driver-hyperkit
 
-To install the hyperkit driver, you need to download and install the *docker-machine-driver-hyperkit* binary and place it in a directory which is on your `PATH` environment variable.
-The directory *_/usr/local/bin_* is a good choice, since it is the default installation directory for Docker Machine binaries.
+* If you use link:https://brew.sh[Homebrew] you can install the latest version of `docker-machine-driver-hyperkit`:
+
+----
+$ brew install docker-machine-driver-hyperkit
+----
+
+* Alternatively, you can download and install the *docker-machine-driver-hyperkit* binary and place it in a directory which is on your `PATH` environment variable. The directory *_/usr/local/bin_* is a good choice, since it is the default installation directory for Docker Machine binaries.
 
 The following steps explain the installation of the *docker-machine-driver-hyperkit* binary to the *_/usr/local/bin/_* directory:
 

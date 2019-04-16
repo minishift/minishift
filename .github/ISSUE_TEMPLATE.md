@@ -2,7 +2,7 @@
 
   * Minishift version: 
   * OS: Linux / macOS / Windows
-  * Hypervisor: KVM / xhyve / Hyper-V / VirtualBox
+  * Hypervisor: KVM / xhyve / Hyper-V / VirtualBox / hyperkit
 
 
 ### Steps to reproduce

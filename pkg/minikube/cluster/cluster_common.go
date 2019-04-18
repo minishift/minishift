@@ -25,7 +25,7 @@ import (
 
 type genericDriverOptions struct {
 	remoteIP              string
-	remotePort            string
+	remotePort            int
 	remoteSSHUser         string
 	sshKeyToConnectRemote string
 }
@@ -34,7 +34,6 @@ func (g genericDriverOptions) String(key string) string {
 	genericStringOptions := make(map[string]string)
 	genericStringOptions["generic-ssh-user"] = g.remoteSSHUser
 	genericStringOptions["generic-ip-address"] = g.remoteIP
-	genericStringOptions["generic-ssh-port"] = g.remotePort
 	genericStringOptions["generic-ssh-key"] = g.sshKeyToConnectRemote
 	return genericStringOptions[key]
 }
@@ -46,7 +45,7 @@ func (g genericDriverOptions) StringSlice(key string) []string {
 func (g genericDriverOptions) Int(key string) int {
 	genericIntOptions := make(map[string]int)
 	genericIntOptions["generic-engine-port"] = 2376
-	genericIntOptions["generic-ssh-port"] = 22
+	genericIntOptions["generic-ssh-port"] = g.remotePort
 	return genericIntOptions[key]
 }
 

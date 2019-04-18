@@ -176,7 +176,7 @@ type MachineConfig struct {
 	ShellProxyEnv         util.ProxyConfig // Only used for proxy purpose
 	HypervVirtualSwitch   string
 	RemoteIPAddress       string // Only used for generic driver purpose to connect remote machine
-	RemoteIPPort          string // Only used for generic driver purpose to connect remote machine
+	RemoteIPPort          int    // Only used for generic driver purpose to connect remote machine
 	RemoteSSHUser         string // Only used for generic driver purpose to specify ssh user
 	SSHKeyToConnectRemote string // Only used for generic driver purpose to specify ssh key path
 	UsingLocalProxy       bool

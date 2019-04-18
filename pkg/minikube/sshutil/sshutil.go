@@ -63,11 +63,10 @@ func NewSSHClient(d drivers.Driver) (*ssh.Client, error) {
 	return client, nil
 }
 
-func NewRawSSHClient(ip, port, sshKeyPath, username string) (*ssh.Client, error) {
-	p, _ := strconv.Atoi(port)
+func NewRawSSHClient(ip string, port int, sshKeyPath, username string) (*ssh.Client, error) {
 	h := &sshHost{
 		IP:         ip,
-		Port:       p,
+		Port:       port,
 		SSHKeyPath: sshKeyPath,
 		Username:   username,
 	}

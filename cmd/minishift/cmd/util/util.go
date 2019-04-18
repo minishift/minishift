@@ -21,7 +21,6 @@ import (
 	"os"
 	"reflect"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/docker/machine/libmachine"
@@ -161,16 +160,12 @@ func GetNoProxyConfig(api libmachine.API) (string, string, error) {
 	return noProxyVar, noProxyValue, nil
 }
 
-func ValidateGenericDriverFlags(remoteIPAddress, remoteIPPort, remoteSSHUser, sshKeyToConnectRemote string) {
+func ValidateGenericDriverFlags(remoteIPAddress, remoteSSHUser, sshKeyToConnectRemote string) {
 	if remoteIPAddress == "" || remoteSSHUser == "" || sshKeyToConnectRemote == "" {
 		msg := fmt.Sprintf("Generic driver require additional information i.e. IP address of remote machine, path to ssh key and ssh username of the remote host.\n"+
 			"Provide following flags to use generic driver:\n"+
 			"--%s string\n--%s string\n--%s string\n", configCmd.RemoteIPAddress.Name, configCmd.RemoteSSHUser.Name, configCmd.SSHKeyToConnectRemote.Name)
 		atexit.ExitWithMessage(1, fmt.Sprintf("Error: %s", msg))
-	}
-	_, err := strconv.Atoi(remoteIPPort)
-	if err != nil {
-		atexit.ExitWithMessage(1, fmt.Sprintf("The provided SSH Port %s is not valid.", remoteIPPort))
 	}
 }
 

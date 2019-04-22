@@ -63,7 +63,7 @@ DOCS_UID ?= $(shell docker run -tiv $(LOCAL_DOCS_DIR):$(CONTAINER_DOCS_DIR) $(DO
 DOC_VARIABLES = -e OPENSHIFT_VERSION=$(OPENSHIFT_VERSION) -e MINISHIFT_VERSION=$(MINISHIFT_VERSION) -e CENTOS_ISO_VERSION=$(CENTOS_ISO_VERSION)
 
 # MISC
-START_COMMIT_MESSAGE_VALIDATION = 83af4780db01d9a4607925af83297e32b38a1603
+START_COMMIT_MESSAGE_VALIDATION = 80f5d01133f4e662f0d84100836fad07d29ea329
 
 # Check that given variables are set and all have non-empty values,
 # die with an error otherwise.
@@ -293,7 +293,7 @@ fmtcheck: ## Checks for style violation using gofmt
 .PHONY: validate_commits
 validate_commits: $(GOPATH)/bin/git-validation ## Validates commit messages match pattern ^(Issue #[0-9]+ .*|cut v[0-9]+\.[0-9]+\.[0-9]+)
 	@# Need to add $$ to avoid shell interpretation/evaluation
-	git-validation -q -run short-subject,message_regexp='^(Issue #[0-9]+ .*|cut v[0-9]+\.[0-9]+\.[0-9]+)$$' -range $(START_COMMIT_MESSAGE_VALIDATION)...
+	git-validation -q -run short-subject,message_regexp='^(Issue #[0-9]+[\s]*.*|cut v[0-9]+\.[0-9]+\.[0-9]+)$$' -range $(START_COMMIT_MESSAGE_VALIDATION)...
 
 .PHONY: help
 help: ## Prints this help

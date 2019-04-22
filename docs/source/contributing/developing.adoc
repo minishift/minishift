@@ -401,7 +401,7 @@ Then executing "minishift config set memory 3gb" succeeds
 
 [NOTE]
 ====
-See the link:https://docs.cucumber.io/gherkin/reference[Gherkin Reference] for more general information about the structure of Gherkin, its features, scenarios, and steps.
+See the link:https://cucumber.io/docs/gherkin/reference[Gherkin Reference] for more general information about the structure of Gherkin, its features, scenarios, and steps.
 ====
 
 [[integration-tests-as-package]]

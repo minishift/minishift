@@ -235,13 +235,13 @@ $ sudo chmod u+s $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/docker-mac
 You can verify the existing version of the xhyve driver on your system using `brew info` as follows:
 
 ----
-$ brew info --installed docker-machine-driver-xhyve
+$ brew info $(brew ls) | grep docker-machine-driver-xhyve
 docker-machine-driver-xhyve: stable 0.3.3 (bottled), HEAD
-Docker Machine driver for xhyve
-https://github.com/zchee/docker-machine-driver-xhyve
-/usr/local/Cellar/docker-machine-driver-xhyve/0.3.3 (3 files, 10.3MB) *
-  Poured from bottle on 2017-08-18 at 14:46:20
+https://github.com/machine-drivers/docker-machine-driver-xhyve
+/usr/local/Cellar/docker-machine-driver-xhyve/0.3.3_1 (7 files, 9MB) *
 From: https://github.com/Homebrew/homebrew-core/blob/master/Formula/docker-machine-driver-xhyve.rb
+    sudo chown root:wheel /usr/local/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
+    sudo chmod u+s /usr/local/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
 ----
 
 For more information, see the GitHub documentation for the link:https://github.com/zchee/docker-machine-driver-xhyve#install[xhyve driver].
@@ -308,7 +308,7 @@ Using hyperkit requires having both the `hyperkit` driver and `docker-machine-dr
 
 ==== Installing hyperkit
 
-* If you have link:https://docs.docker.com/docker-for-mac/[Docker Desktop for macOS] installed, `hyperkit` is already installed. 
+* If you have link:https://docs.docker.com/docker-for-mac/[Docker Desktop for macOS] installed, `hyperkit` is already installed.
 * If you use link:https://brew.sh[Homebrew] you can install the latest version of `hyperkit`:
 
 ----
@@ -450,4 +450,3 @@ If you have already run `minishift start`, ensure that you run `minishift delete
 === Next Steps
 
 {next-steps}
-

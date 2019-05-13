@@ -55,6 +55,18 @@ objects:
     port:
       targetPort: http
 - apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      app: che
+    name: che-data-volume
+  spec:
+   accessModes:
+   - ReadWriteOnce
+   resources:
+     requests:
+       storage: 1Gi
+- apiVersion: v1
   kind: DeploymentConfig
   metadata:
     name: che
@@ -217,12 +229,18 @@ objects:
               memory: 256Mi
           terminationMessagePath: "/dev/termination-log"
           terminationMessagePolicy: File
+          volumeMounts:
+          - name: che-data-volume
+            mountPath: /data
+        volumes:
+        - name: che-data-volume
+          persistentVolumeClaim:
+            claimName: che-data-volume
         restartPolicy: Always
         serviceAccountName: che
         terminationGracePeriodSeconds: 360
     triggers:
     - type: ConfigChange
-
 parameters:
 - name: CHE_WORKSPACE_HTTP__PROXY
   displayName: http_proxy for workspace containers

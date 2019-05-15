@@ -612,7 +612,7 @@ func checkOriginRelease() bool {
 	requestedOpenShiftVersion, _ := cmdUtil.GetOpenShiftReleaseVersion()
 	_, _, err := client.Repositories.GetReleaseByTag(ctx, "openshift", "origin", requestedOpenShiftVersion)
 	if err != nil && github.IsRateLimitError(err) {
-		fmt.Println("\n   Hit github rate limit:", err)
+		fmt.Println(github.WrapRateError(err))
 		return false
 	}
 

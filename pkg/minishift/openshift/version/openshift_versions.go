@@ -103,7 +103,7 @@ func GetGithubReleases() ([]string, error) {
 	releases, _, err := client.Repositories.ListReleases(ctx, "openshift", "origin", listOptions)
 	if err != nil {
 		if github.IsRateLimitError(err) {
-			return nil, fmt.Errorf("Hit github rate limit: %v", err)
+			return nil, github.WrapRateError(err)
 		}
 		return nil, err
 	}

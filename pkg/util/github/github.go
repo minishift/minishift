@@ -102,6 +102,11 @@ func IsRateLimitError(err error) bool {
 	return false
 }
 
+func WrapRateError(err error) error {
+	helpfulError := fmt.Errorf("%v\nYou can specify your GitHub Token through any of the envVars: %s", err, strings.Join(tokenEnvVars[:], ", "))
+	return errors.Wrap(helpfulError, "Hit GitHub rate limit")
+}
+
 func DownloadOpenShiftReleaseBinary(binaryType OpenShiftBinaryType, osType minishiftos.OS, version, outputPath string) error {
 	client := Client()
 	ctx := context.Background()

@@ -2,7 +2,7 @@
 # Description: Setup and Configure Eclipse Che Template and Image Streams
 # Url: https://www.eclipse.org/che/docs/openshift-single-user.html
 # Required-Vars: NAMESPACE, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
-# Var-Defaults: NAMESPACE=mini-che, CHE_IMAGE_REPO=eclipse/che-server, CHE_IMAGE_TAG=latest, GITHUB_CLIENT_ID=changeme, GITHUB_CLIENT_SECRET=changeme, IMAGE_PULL_POLICY=IfNotPresent, UPDATE_STRATEGY=Recreate, CHE_MULTIUSER=false, HTTP_PROTOCOL=http, WS_PROTOCOL=ws, CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER=NULL, TLS=false, PLUGIN__REGISTRY__URL=https://che-plugin-registry.openshift.io/v2, WORKSPACE_SERVICE_ACCOUNT_NAME=che-workspace, CHE_TRACING_ENABLED=false
+# Var-Defaults: NAMESPACE=mini-che, CHE_IMAGE_REPO=eclipse/che-server, CHE_IMAGE_TAG=latest, GITHUB_CLIENT_ID=changeme, GITHUB_CLIENT_SECRET=changeme, IMAGE_PULL_POLICY=IfNotPresent, UPDATE_STRATEGY=Recreate, CHE_MULTIUSER=false, HTTP_PROTOCOL=http, WS_PROTOCOL=ws, CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER=NULL, TLS=false, PLUGIN__REGISTRY__URL=https://che-plugin-registry.openshift.io/v3, WORKSPACE_SERVICE_ACCOUNT_NAME=che-workspace, CHE_TRACING_ENABLED=false
 # OpenShift-Version: >=3.5.0
 
 echo [CHE] Create the Che server Template

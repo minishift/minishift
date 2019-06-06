@@ -27,8 +27,8 @@ import (
 // version command represent current running openshift version and available one.
 var componentListCmd = &cobra.Command{
 	Use:   "list [component-name]",
-	Short: "Add component to an OpenShift cluster (Works only with OpenShift version >= 3.10.x)",
-	Long:  "Add component to an OpenShift cluster (Works only with OpenShift version >= 3.10.x)",
+	Short: "List valid components that can be added to an OpenShift cluster (Works only with OpenShift version >= 3.10.x)",
+	Long:  "List valid components that can be added to an OpenShift cluster (Works only with OpenShift version >= 3.10.x)",
 	Run:   runComponentList,
 }
 

@@ -14,6 +14,11 @@ Minishift is a tool that helps you run OpenShift locally by running a
 single-node OpenShift cluster inside a VM. You can try out OpenShift or
 develop with it, day-to-day, on your local host.
 
+[NOTE]
+====
+Minishift runs OpenShift 3.x clusters. Due to different installation methods, OpenShift 4.x clusters are not supported. To run OpenShift 4.x locally, use https://github.com/code-ready/crc[CodeReady Containers].
+====
+
 Minishift uses https://github.com/docker/machine/tree/master/libmachine[libmachine] for
 provisioning VMs, and https://github.com/openshift/origin[OpenShift Origin] for running the cluster. The code base is forked from the https://github.com/kubernetes/minikube[Minikube] project.
 

@@ -185,13 +185,23 @@ Feature: Basic
       """
       The 'minishift' VM is already stopped.
       """
-     When executing "minishift console" succeeds
-     Then stdout should contain
+     When executing "minishift console" fails
+     Then stderr should contain
       """
       Running this command requires a running 'minishift' VM, but no VM is running.
       """
-     When executing "minishift ip" succeeds
-     Then stdout should contain
+     When executing "minishift ip" fails
+     Then stderr should contain
+      """
+      Running this command requires a running 'minishift' VM, but no VM is running.
+      """
+     When executing "minishift oc-env" fails
+     Then stderr should contain
+      """
+      Running this command requires a running 'minishift' VM, but no VM is running.
+      """
+     When executing "minishift docker-env" fails
+     Then stderr should contain
       """
       Running this command requires a running 'minishift' VM, but no VM is running.
       """

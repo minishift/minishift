@@ -84,7 +84,7 @@ func IsHostStopped(driver drivers.Driver) bool {
 func ExitIfNotRunning(driver drivers.Driver, machineName string) {
 	running := IsHostRunning(driver)
 	if !running {
-		atexit.ExitWithMessage(0, fmt.Sprintf("Running this command requires a running '%s' VM, but no VM is running.", machineName))
+		atexit.ExitWithMessage(1, fmt.Sprintf("Running this command requires a running '%s' VM, but no VM is running.", machineName))
 	}
 }
 

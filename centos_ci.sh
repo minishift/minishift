@@ -345,9 +345,11 @@ function perform_release() {
 }
 
 function perform_pr() {
-  make prerelease synopsis_docs link_check_docs
-  MINISHIFT_VM_DRIVER=kvm make integration_pr
-  perform_artifacts_upload $1;
+  #make prerelease synopsis_docs link_check_docs
+  #MINISHIFT_VM_DRIVER=kvm make integration_pr
+  #perform_artifacts_upload $1;
+  make gen_adoc_tar
+  docs_tar_upload $1
 }
 
 function perform_master() {

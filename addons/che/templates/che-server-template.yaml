@@ -65,16 +65,17 @@ objects:
    resources:
      requests:
        storage: 1Gi
-- apiVersion: v1
-  kind: DeploymentConfig
+- apiVersion: extensions/v1beta1
+  kind: Deployment
   metadata:
     name: che
   spec:
     replicas: 1
     revisionHistoryLimit: 2
     selector:
-      app: che
-      component: che
+      matchLabels:
+        app: che
+        component: che
     strategy:
       type: ${STRATEGY}
     template:
@@ -242,8 +243,6 @@ objects:
         restartPolicy: Always
         serviceAccountName: che
         terminationGracePeriodSeconds: 360
-    triggers:
-    - type: ConfigChange
 parameters:
 - name: CHE_WORKSPACE_HTTP__PROXY
   displayName: http_proxy for workspace containers

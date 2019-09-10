@@ -1,0 +1,478 @@
+---
+kind: Template
+apiVersion: v1
+metadata:
+  annotations:
+    iconClass: icon-jboss
+    tags: rhdm,decisionserver,jboss,optaweb,employee-rostering,postgresql
+    version: "1.1"
+    openshift.io/display-name: Red Hat Decision Manager 7.4 Business Optimizer Employee Rostering with a PostgreSQL database
+    openshift.io/provider-display-name: Red Hat, Inc.
+    description: Application template for a Optaweb Employee Rostering with a PostgreSQL database, for Red Hat Decision Manager 7.4
+    template.openshift.io/long-description: This web application assists the operations department to assign shifts to employees, for example in hospitals, factories, guard firms or call centers. It automatically finds the best employee for each shift, taking into account labor regulations, skill requirements, employee preferences and other constraints.
+    template.openshift.io/documentation-url: https://access.redhat.com/documentation/en-us/red_hat_decision_manager/7.4/html/deploying_the_employee_roster_starter_application_for_red_hat_business_optimizer_on_red_hat_openshift_container_platform/
+    template.openshift.io/support-url: https://access.redhat.com
+    template.openshift.io/bindable: "false"
+  name: rhdm74-optaweb-employee-rostering
+labels:
+  template: rhdm74-optaweb-employee-rostering
+  rhdm: "1.1"
+message: |-
+          A new Decision Manager Optaweb employee rostering application have been created in your project.
+
+          Please be sure to create the secret named "${OPTAWEB_HTTPS_SECRET}" containing the ${OPTAWEB_HTTPS_KEYSTORE} file used for serving secure content.
+parameters:
+- displayName: Application Name
+  description: The name for the application.
+  name: APPLICATION_NAME
+  value: myapp
+  required: true
+- displayName: OptaWeb Admin User
+  description: OptaWeb administrator username
+  name: OPTAWEB_ADMIN_USER
+  value: adminUser
+  required: false
+- displayName: OptaWeb Admin Password
+  description: OptaWeb administrator password
+  name: OPTAWEB_ADMIN_PWD
+  from: "[a-zA-Z]{6}[0-9]{1}!"
+  generate: expression
+  required: false
+- displayName: ImageStream Namespace
+  description: Namespace in which the ImageStreams for Red Hat Middleware images are
+    installed. These ImageStreams are normally installed in the openshift namespace.
+    You should only need to modify this if you installed the ImageStreams in a
+    different namespace/project.
+  name: IMAGE_STREAM_NAMESPACE
+  value: openshift
+  required: true
+- displayName: Optaweb Employee Rostering ImageStream Name
+  description: The name of the image stream to use for Optaweb employee rostering. Default is "rhdm74-optaweb-employee-rostering-openshift".
+  name: OPTAWEB_IMAGE_STREAM_NAME
+  value: "rhdm74-optaweb-employee-rostering-openshift"
+  required: true
+- displayName: ImageStream Tag
+  description: A named pointer to an image in an image stream. Default is "1.1".
+  name: IMAGE_STREAM_TAG
+  value: "1.1"
+  required: true
+- displayName: Optaweb Employee Rostering Persistence Datasource
+  description: Optaweb employee rostering persistence datasource (Sets the org.optaweb.employeerostering.persistence.datasource system property)
+  name: OPTAWEB_PERSISTENCE_DS
+  value: java:/jboss/datasources/optaweb
+  required: true
+- displayName: Optaweb Employee Rostering Persistence HBM2DDL Auto
+  description: Optaweb employee rostering persistence hbm2ddl auto (Sets the org.optaweb.employeerostering.persistence.hbm2ddl.auto system property)
+  name: OPTAWEB_PERSISTENCE_HBM2DDL_AUTO
+  example: update
+  required: false
+## PostgreSQL database parameters BEGIN
+- displayName: Optaweb Employee Rostering PostgreSQL Database User
+  description: Optaweb employee rostering PostgreSQL database username
+  name: OPTAWEB_POSTGRESQL_USER
+  value: optaweb
+  required: false
+- displayName: Optaweb Employee Rostering PostgreSQL Database Password
+  description: Optaweb employee rostering PostgreSQL database password
+  name: OPTAWEB_POSTGRESQL_PWD
+  from: "[a-zA-Z]{6}[0-9]{1}!"
+  generate: expression
+  required: false
+- displayName: Optaweb Employee Rostering PostgreSQL Database Name
+  description: Optaweb employee rostering PostgreSQL database name
+  name: OPTAWEB_POSTGRESQL_DB
+  value: optaweb
+  required: false
+- displayName: PostgreSQL ImageStream Namespace
+  description: Namespace in which the ImageStream for the PostgreSQL image is
+    installed. The ImageStream is already installed in the openshift namespace.
+    You should only need to modify this if you installed the ImageStream in a
+    different namespace/project. Default is "openshift".
+  name: POSTGRESQL_IMAGE_STREAM_NAMESPACE
+  value: "openshift"
+  required: false
+- displayName: PostgreSQL ImageStream Tag
+  description: The PostgreSQL image version, which is intended to correspond to the PostgreSQL version. Default is "10".
+  name: POSTGRESQL_IMAGE_STREAM_TAG
+  value: "10"
+  required: false
+- displayName: PostgreSQL Database max prepared connections
+  description: Allows the PostgreSQL to handle XA transactions.
+  name: POSTGRESQL_MAX_PREPARED_TRANSACTIONS
+  value: '100'
+  required: true
+- displayName: Database Volume Capacity
+  description: Size of persistent storage for database volume.
+  name: DB_VOLUME_CAPACITY
+  value: 1Gi
+  required: true
+## PostgreSQL database parameters END
+- displayName: Optaweb Employee Rostering Custom http Route Hostname
+  description: 'Custom hostname for http service route, if set will also configure the OPTAWEB_HOST. Leave blank for default hostname,
+    e.g.: <application-name>-optaweb-employee-rostering-<project>.<default-domain-suffix>'
+  name: OPTAWEB_HOSTNAME_HTTP
+  value: ''
+  required: false
+- displayName: Optaweb Employee Rostering Custom https Route Hostname
+  description: 'Custom hostname for https service route.  Leave blank for default
+    hostname, e.g.: secure-<application-name>-optaweb-employee-rostering-<project>.<default-domain-suffix>'
+  name: OPTAWEB_HOSTNAME_HTTPS
+  value: ''
+  required: false
+- displayName: Optaweb Employee Rostering Keystore Secret Name
+  description: The name of the secret containing the keystore file
+  name: OPTAWEB_HTTPS_SECRET
+  example: optaweb-employee-rostering-app-secret
+  required: true
+- displayName: Optaweb Employee Rostering Keystore Filename
+  description: The name of the keystore file within the secret
+  name: OPTAWEB_HTTPS_KEYSTORE
+  value: keystore.jks
+  required: false
+- displayName: Optaweb Employee Rostering Certificate Name
+  description: The name associated with the server certificate
+  name: OPTAWEB_HTTPS_NAME
+  value: jboss
+  required: false
+- displayName: Optaweb Employee Rostering Keystore Password
+  description: The password for the keystore and certificate
+  name: OPTAWEB_HTTPS_PASSWORD
+  value: mykeystorepass
+  required: false
+- displayName: Optaweb Employee Rostering Container Memory Limit
+  description: Optaweb employee rostering Container memory limit
+  name: OPTAWEB_MEMORY_LIMIT
+  value: 1Gi
+  required: false
+- displayName: Optaweb Employee Rostering Generator Zone ID
+  description: The timezone id used by the OptaWeb Generator (Sets the optaweb.generator.zoneId system property; defaults to local timezone)
+  name: OPTAWEB_GENERATOR_ZONE_ID
+  value: ''
+  required: false
+objects:
+- kind: ServiceAccount
+  apiVersion: v1
+  metadata:
+    name: "${APPLICATION_NAME}-optaweb-employee-rostering"
+    labels:
+      application: "${APPLICATION_NAME}"
+- kind: RoleBinding
+  apiVersion: v1
+  metadata:
+     name: "${APPLICATION_NAME}-optaweb-employee-rostering-view"
+     labels:
+       application: "${APPLICATION_NAME}"
+  subjects:
+  - kind: ServiceAccount
+    name: "${APPLICATION_NAME}-optaweb-employee-rostering"
+  roleRef:
+    name: view
+- kind: Service
+  apiVersion: v1
+  spec:
+    ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+    - name: https
+      port: 8443
+      targetPort: 8443
+    selector:
+      deploymentConfig: "${APPLICATION_NAME}-optaweb-employee-rostering"
+  metadata:
+    name: "${APPLICATION_NAME}-optaweb-employee-rostering"
+    labels:
+      application: "${APPLICATION_NAME}"
+      service: "${APPLICATION_NAME}-optaweb-employee-rostering"
+    annotations:
+      description: All the Optaweb employee rostering web server's ports.
+- kind: Service
+  apiVersion: v1
+  spec:
+    clusterIP: "None"
+    ports:
+    - name: "ping"
+      port: 8888
+      targetPort: 8888
+    selector:
+      deploymentConfig: "${APPLICATION_NAME}-optaweb-employee-rostering"
+  metadata:
+    name: "${APPLICATION_NAME}-optaweb-employee-rostering-ping"
+    labels:
+      application: "${APPLICATION_NAME}"
+      service: "${APPLICATION_NAME}-optaweb-employee-rostering"
+    annotations:
+      service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+      description: "The JGroups ping port for clustering."
+## PostgreSQL service BEGIN
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: The database server's port.
+    labels:
+      application: ${APPLICATION_NAME}
+      service: "${APPLICATION_NAME}-postgresql"
+    name: ${APPLICATION_NAME}-postgresql
+  spec:
+    ports:
+    - port: 5432
+      targetPort: 5432
+    selector:
+      deploymentConfig: ${APPLICATION_NAME}-postgresql
+## PostgreSQL service END
+- kind: Route
+  apiVersion: v1
+  id: "${APPLICATION_NAME}-optaweb-employee-rostering-http"
+  metadata:
+    name: "${APPLICATION_NAME}-optaweb-employee-rostering"
+    labels:
+      application: "${APPLICATION_NAME}"
+      service: "${APPLICATION_NAME}-optaweb-employee-rostering"
+    annotations:
+      description: Route for Optaweb employee rostering's http service.
+  spec:
+    host: "${OPTAWEB_HOSTNAME_HTTP}"
+    to:
+      name: "${APPLICATION_NAME}-optaweb-employee-rostering"
+    port:
+      targetPort: http
+- kind: Route
+  apiVersion: v1
+  id: "${APPLICATION_NAME}-optaweb-employee-rostering-https"
+  metadata:
+    name: "secure-${APPLICATION_NAME}-optaweb-employee-rostering"
+    labels:
+      application: "${APPLICATION_NAME}"
+      service: "${APPLICATION_NAME}-optaweb-employee-rostering"
+    annotations:
+      description: Route for Optaweb employee rostering's https service.
+  spec:
+    host: "${OPTAWEB_HOSTNAME_HTTPS}"
+    to:
+      name: "${APPLICATION_NAME}-optaweb-employee-rostering"
+    port:
+      targetPort: https
+    tls:
+      termination: passthrough
+- kind: DeploymentConfig
+  apiVersion: v1
+  metadata:
+    name: "${APPLICATION_NAME}-optaweb-employee-rostering"
+    labels:
+      application: "${APPLICATION_NAME}"
+      service: "${APPLICATION_NAME}-optaweb-employee-rostering"
+    annotations:
+      template.alpha.openshift.io/wait-for-ready: "true"
+  spec:
+    strategy:
+      type: Recreate
+    triggers:
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+        - "${APPLICATION_NAME}-optaweb-employee-rostering"
+        from:
+          kind: ImageStreamTag
+          namespace: "${IMAGE_STREAM_NAMESPACE}"
+          name: "${OPTAWEB_IMAGE_STREAM_NAME}:${IMAGE_STREAM_TAG}"
+    - type: ConfigChange
+    replicas: 1
+    selector:
+      deploymentConfig: "${APPLICATION_NAME}-optaweb-employee-rostering"
+    template:
+      metadata:
+        name: "${APPLICATION_NAME}-optaweb-employee-rostering"
+        labels:
+          deploymentConfig: "${APPLICATION_NAME}-optaweb-employee-rostering"
+          application: "${APPLICATION_NAME}"
+          service: "${APPLICATION_NAME}-optaweb-employee-rostering"
+      spec:
+        serviceAccountName: "${APPLICATION_NAME}-optaweb-employee-rostering"
+        terminationGracePeriodSeconds: 60
+        containers:
+        - name: "${APPLICATION_NAME}-optaweb-employee-rostering"
+          image: "${OPTAWEB_IMAGE_STREAM_NAME}"
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: "${OPTAWEB_MEMORY_LIMIT}"
+          volumeMounts:
+          - name: optaweb-employee-rostering-keystore-volume
+            mountPath: "/etc/optaweb-employee-rostering-secret-volume"
+            readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /swagger/index.html
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 180
+            timeoutSeconds: 2
+            periodSeconds: 15
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /swagger/index.html
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            timeoutSeconds: 2
+            periodSeconds: 30
+            failureThreshold: 6
+          ports:
+          - name: jolokia
+            containerPort: 8778
+            protocol: TCP
+          - name: http
+            containerPort: 8080
+            protocol: TCP
+          - name: https
+            containerPort: 8443
+            protocol: TCP
+          - name: ping
+            containerPort: 8888
+            protocol: TCP
+          env:
+          - name: KIE_ADMIN_USER
+            value: "${OPTAWEB_ADMIN_USER}"
+          - name: KIE_ADMIN_PWD
+            value: "${OPTAWEB_ADMIN_PWD}"
+          - name: DATASOURCES
+            value: "RHDM"
+          - name: RHDM_JNDI
+            value: "${OPTAWEB_PERSISTENCE_DS}"
+## PostgreSQL driver settings BEGIN
+          - name: RHDM_PERSISTENCE_DIALECT
+            value: "org.hibernate.dialect.PostgreSQLDialect"
+          - name: RHDM_XA_CONNECTION_PROPERTY_DatabaseName
+            value: "${OPTAWEB_POSTGRESQL_DB}"
+          - name: RHDM_DRIVER
+            value: "postgresql"
+          - name: RHDM_USERNAME
+            value: "${OPTAWEB_POSTGRESQL_USER}"
+          - name: RHDM_PASSWORD
+            value: "${OPTAWEB_POSTGRESQL_PWD}"
+          - name: RHDM_XA_CONNECTION_PROPERTY_ServerName
+            value: "${APPLICATION_NAME}-postgresql"
+          - name: RHDM_XA_CONNECTION_PROPERTY_PortNumber
+            value: "5432"
+## PostgreSQL driver settings END
+## OptaWeb employee rostering settings BEGIN
+          - name: OPTAWEB_EMPLOYEE_ROSTERING_PERSISTENCE_DATASOURCE
+            value: "${OPTAWEB_PERSISTENCE_DS}"
+          - name: OPTAWEB_EMPLOYEE_ROSTERING_PERSISTENCE_DIALECT
+            value: "org.hibernate.dialect.PostgreSQLDialect"
+          - name: OPTAWEB_EMPLOYEE_ROSTERING_PERSISTENCE_HBM2DDL_AUTO
+            value: "${OPTAWEB_PERSISTENCE_HBM2DDL_AUTO}"
+          - name: OPTAWEB_GENERATOR_ZONE_ID
+            value: "${OPTAWEB_GENERATOR_ZONE_ID}"
+## OptaWeb employee rostering settings END
+          - name: RHDM_JTA
+            value: "true"
+          - name: HTTPS_KEYSTORE_DIR
+            value: "/etc/optaweb-employee-rostering-secret-volume"
+          - name: HTTPS_KEYSTORE
+            value: "${OPTAWEB_HTTPS_KEYSTORE}"
+          - name: HTTPS_NAME
+            value: "${OPTAWEB_HTTPS_NAME}"
+          - name: HTTPS_PASSWORD
+            value: "${OPTAWEB_HTTPS_PASSWORD}"
+          - name: JGROUPS_PING_PROTOCOL
+            value: "openshift.DNS_PING"
+          - name: OPENSHIFT_DNS_PING_SERVICE_NAME
+            value: "${APPLICATION_NAME}-optaweb-employee-rostering-ping"
+          - name: OPENSHIFT_DNS_PING_SERVICE_PORT
+            value: "8888"
+        volumes:
+        - name: optaweb-employee-rostering-keystore-volume
+          secret:
+            secretName: "${OPTAWEB_HTTPS_SECRET}"
+## PostgreSQL deployment config BEGIN
+- kind: DeploymentConfig
+  apiVersion: v1
+  metadata:
+    name: "${APPLICATION_NAME}-postgresql"
+    labels:
+      application: "${APPLICATION_NAME}"
+      service: "${APPLICATION_NAME}-postgresql"
+    annotations:
+      template.alpha.openshift.io/wait-for-ready: "true"
+  spec:
+    strategy:
+      type: Recreate
+    triggers:
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+        - "${APPLICATION_NAME}-postgresql"
+        from:
+          kind: ImageStreamTag
+          namespace: "${POSTGRESQL_IMAGE_STREAM_NAMESPACE}"
+          name: "postgresql:${POSTGRESQL_IMAGE_STREAM_TAG}"
+    - type: ConfigChange
+    replicas: 1
+    selector:
+      deploymentConfig: "${APPLICATION_NAME}-postgresql"
+    template:
+      metadata:
+        name: "${APPLICATION_NAME}-postgresql"
+        labels:
+          deploymentConfig: "${APPLICATION_NAME}-postgresql"
+          application: "${APPLICATION_NAME}"
+          service: "${APPLICATION_NAME}-postgresql"
+      spec:
+        terminationGracePeriodSeconds: 60
+        containers:
+        - name: "${APPLICATION_NAME}-postgresql"
+          image: postgresql
+          imagePullPolicy: Always
+          livenessProbe:
+            exec:
+              command:
+              - "/usr/libexec/check-container"
+              - "--live"
+            initialDelaySeconds: 120
+            timeoutSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+              - "/usr/libexec/check-container"
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+          ports:
+          - containerPort: 5432
+            protocol: TCP
+          volumeMounts:
+          - mountPath: "/var/lib/pgsql/data"
+            name: "${APPLICATION_NAME}-postgresql-pvol"
+          env:
+          - name: POSTGRESQL_USER
+            value: "${OPTAWEB_POSTGRESQL_USER}"
+          - name: POSTGRESQL_PASSWORD
+            value: "${OPTAWEB_POSTGRESQL_PWD}"
+          - name: POSTGRESQL_DATABASE
+            value: "${OPTAWEB_POSTGRESQL_DB}"
+          - name: POSTGRESQL_MAX_PREPARED_TRANSACTIONS
+            value: "${POSTGRESQL_MAX_PREPARED_TRANSACTIONS}"
+        volumes:
+        - name: "${APPLICATION_NAME}-postgresql-pvol"
+          persistentVolumeClaim:
+            claimName: "${APPLICATION_NAME}-postgresql-claim"
+## PostgreSQL deployment config END
+## PostgreSQL persistent volume claim BEGIN
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: "${APPLICATION_NAME}-postgresql-claim"
+    labels:
+      application: "${APPLICATION_NAME}"
+      service: "${APPLICATION_NAME}-postgresql"
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: "${DB_VOLUME_CAPACITY}"
+## PostgreSQL persistent volume claim END

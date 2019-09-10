@@ -5,7 +5,7 @@
         "annotations": {
             "iconClass": "icon-eap",
             "tags": "eap,javaee,java,jboss",
-            "version": "1.4.14",
+            "version": "1.4.17",
             "openshift.io/display-name": "JBoss EAP 7.1 (no https)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example EAP 7 application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "eap71-basic-s2i",
-        "xpaas": "1.4.14"
+        "xpaas": "1.4.17"
     },
     "message": "A new EAP 7 based application has been created in your project.",
     "parameters": [

@@ -43,6 +43,7 @@ objects:
       targetPort: 8087
     selector:
       app: che
+      component: che
 - apiVersion: v1
   kind: Route
   metadata:

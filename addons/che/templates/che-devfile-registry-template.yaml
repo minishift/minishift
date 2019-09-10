@@ -12,35 +12,31 @@ kind: Template
 metadata:
   name: che-devfile-registry
 objects:
-- apiVersion: v1
-  kind: DeploymentConfig
+- apiVersion: extensions/v1beta1
+  kind: Deployment
   metadata:
     labels:
-      app: che-devfile-registry
-    name: che-devfile-registry
+      app: che
+      component: devfile-registry
+    name: devfile-registry
   spec:
     replicas: 1
     selector:
-      app: che-devfile-registry
-      deploymentconfig: che-devfile-registry
+      matchLabels:
+        app: che
+        component: devfile-registry
     strategy:
-      rollingParams:
-        intervalSeconds: 1
-        maxSurge: 25%
-        maxUnavailable: 25%
-        timeoutSeconds: 600
-        updatePeriodSeconds: 1
-      type: Rolling
+      type: RollingUpdate
     template:
       metadata:
         labels:
-          app: che-devfile-registry
-          deploymentconfig: che-devfile-registry
+          app: che
+          component: devfile-registry
       spec:
         containers:
         - image: ${IMAGE}:${IMAGE_TAG}
           imagePullPolicy: "${PULL_POLICY}"
-          name: che-devfile-registry
+          name: devfile-registry
           ports:
           - containerPort: 8080
           livenessProbe:
@@ -65,14 +61,15 @@ objects:
 - apiVersion: v1
   kind: Service
   metadata:
-    name: che-devfile-registry
+    name: devfile-registry
   spec:
     ports:
       - protocol: TCP
         port: 80
         targetPort: 8080
     selector:
-      deploymentconfig: che-devfile-registry
+      app: che
+      component: devfile-registry
 - apiVersion: v1
   kind: Route
   metadata:
@@ -80,7 +77,7 @@ objects:
   spec:
     to:
       kind: Service
-      name: che-devfile-registry
+      name: devfile-registry
 parameters:
 - name: IMAGE
   value: quay.io/eclipse/che-devfile-registry
@@ -98,3 +95,7 @@ parameters:
   value: Always
   displayName: Eclipse Che devfile registry image pull policy
   description: Always pull by default. Can be IfNotPresent
+labels:
+  app: che
+  component: plugin-registry
+  template: che-devfile-registry

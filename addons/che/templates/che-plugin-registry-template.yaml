@@ -12,35 +12,31 @@ kind: Template
 metadata:
   name: che-plugin-registry
 objects:
-- apiVersion: v1
-  kind: DeploymentConfig
+- apiVersion: extensions/v1beta1
+  kind: Deployment
   metadata:
     labels:
-      app: che-plugin-registry
-    name: che-plugin-registry
+      app: che
+      component: plugin-registry
+    name: plugin-registry
   spec:
     replicas: 1
     selector:
-      app: che-plugin-registry
-      deploymentconfig: che-plugin-registry
+      matchLabels:
+        app: che
+        component: plugin-registry
     strategy:
-      rollingParams:
-        intervalSeconds: 1
-        maxSurge: 25%
-        maxUnavailable: 25%
-        timeoutSeconds: 600
-        updatePeriodSeconds: 1
-      type: Rolling
+      type: RollingUpdate
     template:
       metadata:
         labels:
-          app: che-plugin-registry
-          deploymentconfig: che-plugin-registry
+          app: che
+          component: plugin-registry
       spec:
         containers:
         - image: ${IMAGE}:${IMAGE_TAG}
           imagePullPolicy: "${PULL_POLICY}"
-          name: che-plugin-registry
+          name: plugin-registry
           ports:
           - containerPort: 8080
           livenessProbe:
@@ -65,14 +61,15 @@ objects:
 - apiVersion: v1
   kind: Service
   metadata:
-    name: che-plugin-registry
+    name: plugin-registry
   spec:
     ports:
       - protocol: TCP
         port: 80
         targetPort: 8080
     selector:
-      deploymentconfig: che-plugin-registry
+      app: che
+      component: plugin-registry
 - apiVersion: v1
   kind: Route
   metadata:
@@ -80,7 +77,7 @@ objects:
   spec:
     to:
       kind: Service
-      name: che-plugin-registry
+      name: plugin-registry
 parameters:
 - name: IMAGE
   value: quay.io/eclipse/che-plugin-registry
@@ -98,3 +95,7 @@ parameters:
   value: Always
   displayName: Eclipse Che plugin registry image pull policy
   description: Always pull by default. Can be IfNotPresent
+labels:
+  app: che
+  component: plugin-registry
+  template: che-plugin-registry

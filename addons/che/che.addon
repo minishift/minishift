@@ -2,8 +2,14 @@
 # Description: Setup and Configure Eclipse Che Template and Image Streams
 # Url: https://www.eclipse.org/che/docs/openshift-single-user.html
 # Required-Vars: NAMESPACE, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
-# Var-Defaults: NAMESPACE=mini-che, CHE_IMAGE_REPO=eclipse/che-server, CHE_IMAGE_TAG=7.0.0, GITHUB_CLIENT_ID=changeme, GITHUB_CLIENT_SECRET=changeme, IMAGE_PULL_POLICY=IfNotPresent, UPDATE_STRATEGY=Recreate, CHE_MULTIUSER=false, HTTP_PROTOCOL=http, WS_PROTOCOL=ws, CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER=NULL, TLS=false, PLUGIN__REGISTRY__URL=https://che-plugin-registry.openshift.io/v3, DEVFILE__REGISTRY__URL=https://che-devfile-registry.openshift.io/, WORKSPACE_SERVICE_ACCOUNT_NAME=che-workspace, CHE_TRACING_ENABLED=false
+# Var-Defaults: NAMESPACE=mini-che, CHE_IMAGE_REPO=eclipse/che-server, CHE_IMAGE_TAG=7.1.0, DEVFILE_REGISTRY_REPO=quay.io/eclipse/che-devfile-registry, DEVFILE_REGISTRY_TAG=7.1.0, PLUGIN_REGISTRY_REPO=quay.io/eclipse/che-plugin-registry, PLUGIN_REGISTRY_TAG=7.1.0, GITHUB_CLIENT_ID=changeme, GITHUB_CLIENT_SECRET=changeme, IMAGE_PULL_POLICY=IfNotPresent, UPDATE_STRATEGY=Recreate, CHE_MULTIUSER=false, HTTP_PROTOCOL=http, WS_PROTOCOL=ws, CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER=NULL, TLS=false, WORKSPACE_SERVICE_ACCOUNT_NAME=che-workspace, CHE_TRACING_ENABLED=false
 # OpenShift-Version: >=3.5.0
+
+echo [CHE] Create the Che Devfile Registry Template
+oc apply -f templates/che-devfile-registry-template.yaml -n openshift
+
+echo [CHE] Create the Che Plugin Registry Template
+oc apply -f templates/che-plugin-registry-template.yaml -n openshift
 
 echo [CHE] Create the Che server Template
 oc apply -f templates/che-server-template.yaml -n openshift
@@ -18,8 +24,14 @@ oc adm policy add-role-to-user admin developer -n #{NAMESPACE}
 echo [CHE] Creating che-workspace Service Account
 oc new-app --param SERVICE_ACCOUNT_NAME=#{WORKSPACE_SERVICE_ACCOUNT_NAME} --param SERVICE_ACCOUNT_NAMESPACE=#{NAMESPACE} che-workspace-service-account -n #{NAMESPACE}
 
+echo [CHE] Deploying Che Plugin Registry on minishift
+oc new-app --param IMAGE=#{PLUGIN_REGISTRY_REPO} --param IMAGE_TAG=#{PLUGIN_REGISTRY_TAG} --param PULL_POLICY=#{IMAGE_PULL_POLICY} che-plugin-registry -n #{NAMESPACE}
+
+echo [CHE] Deploying Che Devfile Registry on minishift
+oc new-app --param IMAGE=#{DEVFILE_REGISTRY_REPO} --param IMAGE_TAG=#{DEVFILE_REGISTRY_TAG} --param PULL_POLICY=#{IMAGE_PULL_POLICY} che-devfile-registry -n #{NAMESPACE}
+
 echo [CHE] Deploying Che on minishift
-oc new-app --param CHE_OAUTH_GITHUB_CLIENTID=#{GITHUB_CLIENT_ID} --param CHE_OAUTH_GITHUB_CLIENTSECRET=#{GITHUB_CLIENT_SECRET} --param ROUTING_SUFFIX=#{ip}.nip.io --param IMAGE_CHE=#{CHE_IMAGE_REPO} --param CHE_VERSION=#{CHE_IMAGE_TAG} --param PULL_POLICY=#{IMAGE_PULL_POLICY} --param STRATEGY=#{UPDATE_STRATEGY} --param CHE_MULTIUSER=#{CHE_MULTIUSER} --param PROTOCOL=#{HTTP_PROTOCOL} --param WS_PROTOCOL=#{WS_PROTOCOL} --param CHE_INFRA_OPENSHIFT_PROJECT=#{NAMESPACE} --param CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER=#{CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER} --param TLS=#{TLS} --param CHE_WORKSPACE_PLUGIN__REGISTRY__URL=#{PLUGIN__REGISTRY__URL} --param CHE_WORKSPACE_DEVFILE__REGISTRY__URL=#{DEVFILE__REGISTRY__URL} --param CHE_INFRA_KUBERNETES_SERVICE__ACCOUNT__NAME=#{WORKSPACE_SERVICE_ACCOUNT_NAME} --param CHE_TRACING_ENABLED=#{CHE_TRACING_ENABLED} che -n #{NAMESPACE}
+oc new-app --param CHE_OAUTH_GITHUB_CLIENTID=#{GITHUB_CLIENT_ID} --param CHE_OAUTH_GITHUB_CLIENTSECRET=#{GITHUB_CLIENT_SECRET} --param ROUTING_SUFFIX=#{ip}.nip.io --param IMAGE_CHE=#{CHE_IMAGE_REPO} --param CHE_VERSION=#{CHE_IMAGE_TAG} --param PULL_POLICY=#{IMAGE_PULL_POLICY} --param STRATEGY=#{UPDATE_STRATEGY} --param CHE_MULTIUSER=#{CHE_MULTIUSER} --param PROTOCOL=#{HTTP_PROTOCOL} --param WS_PROTOCOL=#{WS_PROTOCOL} --param CHE_INFRA_OPENSHIFT_PROJECT=#{NAMESPACE} --param CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER=#{CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER} --param TLS=#{TLS} --param CHE_WORKSPACE_PLUGIN__REGISTRY__URL=http://plugin-registry-#{NAMESPACE}.#{ip}.nip.io/v3 --param CHE_WORKSPACE_DEVFILE__REGISTRY__URL=http://devfile-registry-#{NAMESPACE}.#{ip}.nip.io --param CHE_INFRA_KUBERNETES_SERVICE__ACCOUNT__NAME=#{WORKSPACE_SERVICE_ACCOUNT_NAME} --param CHE_TRACING_ENABLED=#{CHE_TRACING_ENABLED} che -n #{NAMESPACE}
 
 echo Please wait while the pods all startup!
 echo You can watch in the OpenShift console via:

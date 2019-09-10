@@ -202,7 +202,7 @@
         },
         {
             "displayName": "SSO Username",
-            "description": "The username used to access the SSO service.  This is used to create the appliction client(s) within the specified SSO realm. This should match the SSO_SERVICE_USERNAME specified through one of the sso70-* templates.",
+            "description": "The username used to access the SSO service.  This is used to create the application client(s) within the specified SSO realm. This should match the SSO_SERVICE_USERNAME specified through one of the sso70-* templates.",
             "name": "SSO_USERNAME",
             "value": "",
             "required": false

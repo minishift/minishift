@@ -205,7 +205,7 @@
         },
         {
             "displayName": "RH-SSO Service Username",
-            "description": "The username used to access the RH-SSO service. This is used by clients to create the appliction client(s) within the specified RH-SSO realm.",
+            "description": "The username used to access the RH-SSO service. This is used by clients to create the application client(s) within the specified RH-SSO realm.",
             "name": "SSO_SERVICE_USERNAME",
             "value": "",
             "required": false

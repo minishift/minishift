@@ -3,24 +3,24 @@
   "kind": "Template",
   "metadata": {
     "annotations": {
-      "openshift.io/display-name": "Red Hat Fuse 7.2 CXF JAX-WS with Spring Boot",
+      "openshift.io/display-name": "Red Hat Fuse 7.3 CXF JAX-WS with Spring Boot",
       "openshift.io/provider-display-name": "Red Hat, Inc.",
       "description": "Spring Boot and CXF JAX-WS QuickStart. This example demonstrates how you can use Apache CXF JAX-WS with Spring Boot on OpenShift. The quickstart uses Spring Boot to configure a CXF application which includes a JAX-WS endpoint.",
       "tags": "quickstart,java,springboot,fis,jboss-fuse",
       "iconClass": "icon-rh-integration",
-      "version": "1.2"
+      "version": "1.3"
     },
-    "name": "s2i-fuse72-spring-boot-cxf-jaxws"
+    "name": "s2i-fuse73-spring-boot-cxf-jaxws"
   },
   "labels": {
-    "template": "s2i-fuse72-spring-boot-cxf-jaxws"
+    "template": "s2i-fuse73-spring-boot-cxf-jaxws"
   },
   "parameters": [
     {
       "name": "APP_NAME",
       "displayName": "Application Name",
       "required": true,
-      "value": "s2i-fuse72-spring-boot-cxf-jaxws",
+      "value": "s2i-fuse73-spring-boot-cxf-jaxws",
       "description": "The name assigned to the application."
     },
     {
@@ -33,7 +33,7 @@
     {
       "name": "GIT_REF",
       "displayName": "Git Reference",
-      "value": "spring-boot-cxf-jaxws-1.0.0.fuse-720019-redhat-00001",
+      "value": "spring-boot-cxf-jaxws-1.0.0.fuse-730045-redhat-00002",
       "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch."
     },
     {
@@ -45,13 +45,13 @@
     {
       "name": "BUILDER_VERSION",
       "displayName": "Builder version",
-      "value": "1.2",
+      "value": "1.3",
       "description": "The version of the FIS S2I builder image to use."
     },
     {
       "name": "APP_VERSION",
       "displayName": "Application Version",
-      "value": "1.0.0.fuse-720019-redhat-00001",
+      "value": "1.0.0.fuse-730045-redhat-00002",
       "description": "The application version."
     },
     {

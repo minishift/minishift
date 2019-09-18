@@ -97,5 +97,5 @@ parameters:
   description: Always pull by default. Can be IfNotPresent
 labels:
   app: che
-  component: plugin-registry
+  component: devfile-registry
   template: che-devfile-registry

@@ -10,14 +10,14 @@ metadata:
     description: "Design beautiful, functional APIs with zero coding, using a visual designer for OpenAPI documents."
     tags: "fuse,apicurio,openapi,swagger,api"
     iconClass: "icon-rh-integration"
-    version: "1.0"
+    version: "1.3"
 message: |-
   Apicurito is now deployed to https://${ROUTE_HOSTNAME}.
 parameters:
 - name: APP_VERSION
   displayName: Application Version
   required: true
-  value: "1.2"
+  value: "1.3"
   description: The application version.
 - name: IMAGE_STREAM_NAMESPACE
   displayName: Image Stream Namespace
@@ -27,7 +27,7 @@ parameters:
     are normally installed in the 'openshift' namespace. You should only need to modify
     this if you've installed the image streams in a different namespace/project.
 - name: ROUTE_HOSTNAME
-  description: The The external hostname to access Apicurito
+  description: The external hostname to access Apicurito
   required: true
 - name: CPU_REQUEST
   displayName: CPU request

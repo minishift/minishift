@@ -6,7 +6,6 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
-
 ---
 kind: Template
 apiVersion: v1
@@ -44,6 +43,7 @@ objects:
       targetPort: 8087
     selector:
       app: che
+      component: che
 - apiVersion: v1
   kind: Route
   metadata:
@@ -66,21 +66,24 @@ objects:
    resources:
      requests:
        storage: 1Gi
-- apiVersion: v1
-  kind: DeploymentConfig
+- apiVersion: extensions/v1beta1
+  kind: Deployment
   metadata:
     name: che
   spec:
     replicas: 1
     revisionHistoryLimit: 2
     selector:
-      app: che
+      matchLabels:
+        app: che
+        component: che
     strategy:
       type: ${STRATEGY}
     template:
       metadata:
         labels:
           app: che
+          component: che
       spec:
         containers:
         - env:
@@ -150,8 +153,6 @@ objects:
             value: "${CHE_OAUTH_GITHUB_CLIENTID}"
           - name: CHE_OAUTH_GITHUB_CLIENTSECRET
             value: "${CHE_OAUTH_GITHUB_CLIENTSECRET}"
-          - name: CHE_PREDEFINED_STACKS_RELOAD__ON__START
-            value: 'true'
           - name: JAVA_OPTS
             value: "-XX:MaxRAMFraction=2 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10
               -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90
@@ -175,6 +176,8 @@ objects:
                 optional: true
           - name: CHE_WORKSPACE_PLUGIN__REGISTRY__URL
             value: "${CHE_WORKSPACE_PLUGIN__REGISTRY__URL}"
+          - name: CHE_WORKSPACE_DEVFILE__REGISTRY__URL
+            value: "${CHE_WORKSPACE_DEVFILE__REGISTRY__URL}"
           - name: CHE_TRACING_ENABLED
             value: "${CHE_TRACING_ENABLED}"
           - name: CHE_METRICS_ENABLED
@@ -191,6 +194,8 @@ objects:
             value: "${CHE_WSAGENT_CORS_ALLOWED__ORIGINS}"
           - name: CHE_WSAGENT_CORS_ALLOW__CREDENTIALS
             value: "${CHE_WSAGENT_CORS_ALLOW__CREDENTIALS}"
+          - name: CHE_INFRA_KUBERNETES_CLUSTER__ROLE__NAME
+            value: "${CHE_INFRA_KUBERNETES_CLUSTER__ROLE__NAME}"
           image: ${IMAGE_CHE}:${CHE_VERSION}
           imagePullPolicy: "${PULL_POLICY}"
           livenessProbe:
@@ -239,8 +244,6 @@ objects:
         restartPolicy: Always
         serviceAccountName: che
         terminationGracePeriodSeconds: 360
-    triggers:
-    - type: ConfigChange
 parameters:
 - name: CHE_WORKSPACE_HTTP__PROXY
   displayName: http_proxy for workspace containers
@@ -335,15 +338,19 @@ parameters:
   value: 'true'
 - name: CHE_OAUTH_GITHUB_CLIENTID
   displayName: GitHub Client ID
-  description: GitHub oAuth app client ID. Applicable to Che single user only!
+  description: GitHub OAuth app client ID. Applicable to Che single user only!
   value: ''
 - name: CHE_OAUTH_GITHUB_CLIENTSECRET
   displayName: GitHub Client Secret
-  description: GitHub oAuth app client servet. Applicable to Che single user only!
+  description: GitHub OAuth app client servet. Applicable to Che single user only!
   value: ''
 - name: CHE_WORKSPACE_PLUGIN__REGISTRY__URL
   displayName: Eclipse Che plugin registry URL
   description: Url that used to get meta information about Eclipse Che tooling
+  value: 'NULL'
+- name: CHE_WORKSPACE_DEVFILE__REGISTRY__URL
+  displayName: Eclipse Che devfile registry URL
+  description: Url that used to get meta information about predefined devfiles for workspaces
   value: 'NULL'
 - name: CHE_WORKSPACE_SIDECAR_DEFAULT__MEMORY__LIMIT__MB
   displayName: Plugin sidecar default memory limit
@@ -385,6 +392,11 @@ parameters:
   displayName: CORS credentials support for WS Agent
   description: Allow requests with credentials for CORS filter on WS Agent.
   value: 'true'
+- name: CHE_INFRA_KUBERNETES_CLUSTER__ROLE__NAME
+  displayName: Cluster role to bind to workspace
+  description: Binds the specified Cluster role to the workspace service account.
+  value: ''
 labels:
   app: che
+  component: che
   template: che

@@ -62,7 +62,7 @@ $ minishift addons apply --addon-env CHE_IMAGE_REPO=eclipse/che-server --addon-e
 To deploy latest Che 6.14.0 use:
 
 ```bash
-$ minishift addons apply --addon-env CHE_IMAGE_REPO=eclipse/che-server  --addon-env CHE_IMAGE_TAG=6.14.0 che
+$ minishift addons apply --addon-env CHE_IMAGE_REPO=eclipse/che-server  --addon-env CHE_IMAGE_TAG=7.1.0 che
 ```
 
 If the image is local, aka is not pushed to a cloud registry, this image should be
@@ -81,7 +81,7 @@ To customize the deployment of the Che server, the following variables can be ap
 |----|-----------|-------------|
 |`NAMESPACE`|The OpenShift project where Che service will be deployed|`che-mini`|
 |`CHE_IMAGE_REPO`|The docker image to be used for che.|`eclipse/che-server`|
-|`CHE_IMAGE_TAG`|The docker image tag to be used for che.|`latest`|
+|`CHE_IMAGE_TAG`|The docker image tag to be used for che.|`7.1.0`|
 |`GITHUB_CLIENT_ID`|GitHub client ID to be used in Che workspaces|`changeme`|
 |`GITHUB_CLIENT_SECRET`|GitHub client secret to be used in Che workspaces|`changeme`|
 
@@ -98,4 +98,3 @@ To remove all created template and che project:
 To uninstall the addon from the addon list:
 
     $ minishift addons uninstall che
-

@@ -26,7 +26,7 @@ and RH_REGISTRY_PASSWORD environment variables in order to run successfully.
   Scenario: User starts Minishift
     Given Minishift has state "Does Not Exist"
       And image caching is disabled
-     When executing "minishift start --memory 4GB" succeeds
+     When executing "minishift start --memory 8GB" succeeds
      Then Minishift should have state "Running"
       And stdout should contain
       """
@@ -39,16 +39,16 @@ and RH_REGISTRY_PASSWORD environment variables in order to run successfully.
      And executing "oc status" retrying 20 times with wait period of "3s"
     When executing "oc new-project <project-name>" succeeds
      And executing "oc new-app <template-name>" succeeds
-     And service "<service-name>" rollout successfully within "20m"
-    Then with up to "5" retries with wait period of "1s" the "body" of HTTP request to "<http-endpoint>" of service "<service-name>" in namespace "<project-name>" contains "<expected-hello>"
-     And with up to "5" retries with wait period of "1s" the "status code" of HTTP request to "<http-endpoint>" of service "<service-name>" in namespace "<project-name>" is equal to "200"
+     And service "<service-name>" rollout successfully within "35m"
+    Then with up to "10" retries with wait period of "60ss" the "body" of HTTP request to "<http-endpoint>" of service "<service-name>" in namespace "<project-name>" contains "<expected-hello>"
+     And with up to "10" retries with wait period of "60s" the "status code" of HTTP request to "<http-endpoint>" of service "<service-name>" in namespace "<project-name>" is equal to "200"
      And executing "oc delete project <project-name>" succeeds
 
   Examples: Required information to test the templates
     | project-name  | template-name           | service-name   | http-endpoint | expected-hello                        |
     | eap71-basic   | eap71-basic-s2i         | eap-app        | /             | Welcome to JBoss EAP 7                |
     | eap72-basic   | eap72-basic-s2i         | eap-app        | /index.jsf    | Welcome to JBoss!                     |
-    | datagrid72    | datagrid72-basic        | datagrid-app   | /rest         | Welcome to the Infinispan REST Server |
+    | datagrid73    | datagrid73-basic        | datagrid-app   | /rest         | Welcome to the Infinispan REST Server |
 
   Scenario: User deletes Minishift
      When executing "minishift delete --force" succeeds

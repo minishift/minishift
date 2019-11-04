@@ -1,0 +1,200 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: datagrid-service
+metadata:
+  annotations:
+    description: Red Hat Data Grid is an in-memory, distributed key/value store.
+    iconClass: icon-datagrid
+    openshift.io/display-name: Red Hat Data Grid Service
+    openshift.io/documentation-url: https://github.com/jboss-container-images/datagrid-7-image/blob/datagrid-services-dev/documentation/datagrid-service.asciidoc
+    openshift.io/long-description: Red Hat Data Grid Service provides a fully customizable implementation of Data Grid for OpenShift that is stable, persistent, and elastically scalable.
+    openshift.io/provider-display-name: Red Hat, Inc.
+    openshift.io/support-url: https://www.redhat.com/en/services/support
+    tags: database,datagrid
+  labels:
+    template: datagrid-service
+  creationTimestamp: null
+  name: datagrid-service
+objects:
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ${APPLICATION_NAME}
+    labels:
+      application: ${APPLICATION_NAME}
+  stringData:
+    application-password: ${APPLICATION_PASSWORD}
+    application-user: ${APPLICATION_USER}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: Provides a ping service for clustered applications.
+      service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+    labels:
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}-ping
+  spec:
+    clusterIP: None
+    ports:
+    - name: ping
+      port: 8888
+    selector:
+      deploymentConfig: ${APPLICATION_NAME}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: Provides a service for accessing the application over HTTPS or Hot Rod protocol.
+      service.alpha.openshift.io/serving-cert-secret-name: service-certs
+    labels:
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+  spec:
+    ports:
+    - name: hotrod
+      port: 11222
+      targetPort: 11222
+    - name: https
+      port: 8443
+      targetPort: 8443
+    selector:
+      deploymentConfig: ${APPLICATION_NAME}
+- apiVersion: apps/v1beta1
+  kind: StatefulSet
+  metadata:
+    labels:
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+  spec:
+    replicas: ${{NUMBER_OF_INSTANCES}}
+    serviceName: ${APPLICATION_NAME}-ping
+    strategy:
+      rollingParams:
+        intervalSeconds: 20
+        maxSurge: 1
+        maxUnavailable: 1
+        timeoutSeconds: 1200
+        updatePeriodSeconds: 20
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          application: ${APPLICATION_NAME}
+          deploymentConfig: ${APPLICATION_NAME}
+        name: ${APPLICATION_NAME}
+      spec:
+        containers:
+        - env:
+          - name: SERVICE_NAME
+            value: ${APPLICATION_NAME}
+          - name: SERVICE_PROFILE
+            value: datagrid-service
+          - name: JGROUPS_PING_PROTOCOL
+            value: openshift.DNS_PING
+          - name: OPENSHIFT_DNS_PING_SERVICE_NAME
+            value: ${APPLICATION_NAME}-ping
+          - name: USERNAME
+            valueFrom:
+              secretKeyRef:
+                key: application-user
+                name: ${APPLICATION_NAME}
+          - name: PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: application-password
+                name: ${APPLICATION_NAME}
+          image: ${IMAGE}
+          livenessProbe:
+            exec:
+              command:
+              - /opt/datagrid/bin/livenessProbe.sh
+            failureThreshold: 5
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            successThreshold: 1
+            timeoutSeconds: 10
+          name: ${APPLICATION_NAME}
+          ports:
+          - containerPort: 8443
+            name: https
+            protocol: TCP
+          - containerPort: 8888
+            name: ping
+            protocol: TCP
+          - containerPort: 11222
+            name: hotrod
+            protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+              - /opt/datagrid/bin/readinessProbe.sh
+            failureThreshold: 5
+            initialDelaySeconds: 17
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          resources:
+            limits:
+              memory: ${TOTAL_CONTAINER_MEM}Mi
+            requests:
+              cpu: "0.5"
+              memory: ${TOTAL_CONTAINER_MEM}Mi
+          volumeMounts:
+          - mountPath: /opt/datagrid/standalone/data
+            name: srv-data
+          - mountPath: /var/run/secrets/java.io/keystores
+            name: keystore-volume
+          - mountPath: /var/run/secrets/openshift.io/serviceaccount
+            name: service-certs
+        terminationGracePeriodSeconds: 60
+        volumes:
+        - empty-dir: {}
+          name: keystore-volume
+        - name: service-certs
+          secret:
+            secretName: service-certs
+    triggers:
+    - type: ConfigChange
+    volumeClaimTemplates:
+    - metadata:
+        name: srv-data
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: ${TOTAL_CONTAINER_STORAGE}Gi
+parameters:
+- description: Specifies a name for the application.
+  displayName: Application Name
+  name: APPLICATION_NAME
+  required: true
+  value: datagrid-service
+- description: Sets an image to bootstrap the service.
+  name: IMAGE
+  required: true
+  value: registry.redhat.io/jboss-datagrid-7/datagrid73-openshift
+- description: Specifies how many instances of the application to create in the cluster.
+  displayName: Number of Instances
+  name: NUMBER_OF_INSTANCES
+  required: true
+  value: "1"
+- description: Sets the total memory, in MiB, available to the application.
+  displayName: Total Memory
+  name: TOTAL_CONTAINER_MEM
+  value: "512"
+- description: Sets the storage capacity, in GiB, of the persistence volume.
+  displayName: Storage Capacity
+  name: TOTAL_CONTAINER_STORAGE
+  value: "1"
+- description: Specifies a username to authenticate client applications.
+  displayName: Client User
+  name: APPLICATION_USER
+  required: true
+- description: Sets a password to authenticate client applications.
+  displayName: Client Password
+  from: '[a-zA-Z0-9]{16}'
+  generate: expression
+  name: APPLICATION_PASSWORD

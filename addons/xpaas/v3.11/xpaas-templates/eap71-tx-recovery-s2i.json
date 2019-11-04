@@ -5,7 +5,7 @@
         "annotations": {
             "iconClass": "icon-eap",
             "tags": "eap,javaee,java,jboss",
-            "version": "1.4.14",
+            "version": "1.4.17",
             "openshift.io/display-name": "JBoss EAP 7.1 (tx recovery)",
             "openshift.io/provider-display-name": "Red Hat, Inc.",
             "description": "An example EAP 7 application. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
@@ -17,7 +17,7 @@
     },
     "labels": {
         "template": "eap71-tx-recovery-s2i",
-        "xpaas": "1.4.14"
+        "xpaas": "1.4.17"
     },
     "message": "A new EAP 7 based application has been created in your project.",
     "parameters": [
@@ -39,21 +39,28 @@
             "displayName": "Git Repository URL",
             "description": "Git source URI for application",
             "name": "SOURCE_REPOSITORY_URL",
-            "value": "https://github.com/jboss-developer/jboss-eap-quickstarts",
+            "value": "https://github.com/jboss-openshift/openshift-quickstarts.git",
             "required": true
         },
         {
             "displayName": "Git Reference",
             "description": "Git branch/tag reference",
             "name": "SOURCE_REPOSITORY_REF",
-            "value": "7.1.0.GA",
+            "value": "1.4",
             "required": false
         },
         {
             "displayName": "Context Directory",
             "description": "Path within Git project to build; empty for root project directory.",
             "name": "CONTEXT_DIR",
-            "value": "kitchensink",
+            "value": "jta-crash-rec-eap7",
+            "required": false
+        },
+        {
+            "displayName": "Custom install directories (see documentation).",
+            "description": "Additional directories from which to install.",
+            "name": "CUSTOM_INSTALL_DIRECTORIES",
+            "value": "extensions/*",
             "required": false
         },
         {
@@ -158,6 +165,30 @@
         }
     ],
     "objects": [
+        {
+            "apiVersion": "v1",
+            "kind": "ServiceAccount",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-sa"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "RoleBinding",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-role-binding"
+            },
+            "subjects": [
+                {
+                    "kind": "ServiceAccount",
+                    "name": "${APPLICATION_NAME}-sa"
+                }
+            ],
+            "roleRef": {
+                "kind": "Role",
+                "name": "view"
+            }
+        },
         {
             "kind": "Service",
             "apiVersion": "v1",
@@ -354,6 +385,7 @@
                         }
                     },
                     "spec": {
+                        "serviceAccountName": "${APPLICATION_NAME}-sa",
                         "terminationGracePeriodSeconds": 75,
                         "containers": [
                             {
@@ -443,6 +475,10 @@
                                     {
                                         "name": "SPLIT_DATA",
                                         "value": "${SPLIT_DATA}"
+                                    },
+                                    {
+                                        "name": "CUSTOM_INSTALL_DIRECTORIES",
+                                        "value": "${CUSTOM_INSTALL_DIRECTORIES}"
                                     }
                                 ]
                             }
@@ -503,6 +539,7 @@
                         }
                     },
                     "spec": {
+                        "serviceAccountName": "${APPLICATION_NAME}-sa",
                         "terminationGracePeriodSeconds": 75,
                         "containers": [
                             {
@@ -576,6 +613,10 @@
                                     {
                                         "name": "SPLIT_DATA",
                                         "value": "${SPLIT_DATA}"
+                                    },
+                                    {
+                                        "name": "CUSTOM_INSTALL_DIRECTORIES",
+                                        "value": "${CUSTOM_INSTALL_DIRECTORIES}"
                                     }
                                 ]
                             }

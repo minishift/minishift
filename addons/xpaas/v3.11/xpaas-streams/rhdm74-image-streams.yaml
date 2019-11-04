@@ -1,0 +1,140 @@
+kind: ImageStreamList
+apiVersion: v1
+metadata:
+  name: rhdm74-image-streams
+  annotations:
+    description: ImageStream definitions for Red Hat Decision Manager 7.4
+    openshift.io/provider-display-name: Red Hat, Inc.
+items:
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: rhdm74-decisioncentral-openshift
+    annotations:
+      openshift.io/display-name: Red Hat Decision Manager Decision Central 7.4
+      openshift.io/provider-display-name: Red Hat, Inc.
+  spec:
+    tags:
+    - name: '1.0'
+      annotations:
+        description: Red Hat Decision Manager 7.4 - Decision Central image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.4
+        version: '1.0'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7/rhdm74-decisioncentral-openshift:1.0
+    - name: '1.1'
+      annotations:
+        description: Red Hat Decision Manager 7.4 - Decision Central image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.4
+        version: '1.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7/rhdm74-decisioncentral-openshift:1.1
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: rhdm74-controller-openshift
+    annotations:
+      openshift.io/display-name: Red Hat Decision Manager Standalone Controller 7.4
+      openshift.io/provider-display-name: Red Hat, Inc.
+  spec:
+    tags:
+    - name: '1.0'
+      annotations:
+        description: Red Hat Decision Manager 7.4 - Standalone Controller image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.4
+        version: '1.0'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7/rhdm74-controller-openshift:1.0
+    - name: '1.1'
+      annotations:
+        description: Red Hat Decision Manager 7.4 - Standalone Controller image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.4
+        version: '1.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7/rhdm74-controller-openshift:1.1
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: rhdm74-kieserver-openshift
+    annotations:
+      openshift.io/display-name: Red Hat Decision Manager KIE Server 7.4
+      openshift.io/provider-display-name: Red Hat, Inc.
+  spec:
+    tags:
+    - name: '1.0'
+      annotations:
+        description: Red Hat Decision Manager 7.4 - KIE Server image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.4
+        version: '1.0'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7/rhdm74-kieserver-openshift:1.0
+    - name: '1.1'
+      annotations:
+        description: Red Hat Decision Manager 7.4 - KIE Server image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.4
+        version: '1.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7/rhdm74-kieserver-openshift:1.1
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: rhdm74-optaweb-employee-rostering-openshift
+    annotations:
+      openshift.io/display-name: Red Hat Decision Manager Business Optimizer OptaWeb Employee Rostering 7.4
+      openshift.io/provider-display-name: Red Hat, Inc.
+  spec:
+    tags:
+    - name: '1.0'
+      annotations:
+        description: Red Hat Decision Manager 7.4 - Business Optimizer OptaWeb Employee Rostering image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.4
+        version: '1.0'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7-tech-preview/rhdm74-optaweb-employee-rostering-openshift:1.0
+    - name: '1.1'
+      annotations:
+        description: Red Hat Decision Manager 7.4 - Business Optimizer OptaWeb Employee Rostering image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.4
+        version: '1.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7-tech-preview/rhdm74-optaweb-employee-rostering-openshift:1.1

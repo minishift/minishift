@@ -1,0 +1,888 @@
+{
+  "kind": "Template",
+  "apiVersion": "v1",
+  "metadata": {
+    "annotations": {
+      "iconClass": "icon-processserver",
+      "tags": "processserver,jboss,hidden",
+      "version": "1.4.17",
+      "openshift.io/display-name": "JBoss BPM Suite 6.4 intelligent process server + External Database",
+      "openshift.io/provider-display-name": "Red Hat, Inc.",
+      "description": "An example BPM Suite application with a external database. For more information about using this template, see https://github.com/jboss-openshift/application-templates.",
+      "template.openshift.io/long-description": "This template defines resources needed to develop Red Hat Business Process Suite intelligent process server 6.4 based application, including a build configuration, application deployment configuration, database deployment configuration for external database and secure communication using https.",
+      "template.openshift.io/documentation-url": "https://access.redhat.com/documentation/en/red-hat-jboss-bpm-suite/",
+      "template.openshift.io/support-url": "https://access.redhat.com",
+      "template.openshift.io/bindable": "false"
+    },
+    "name": "processserver64-externaldb-s2i"
+  },
+  "labels": {
+    "template": "processserver64-externaldb-s2i",
+    "xpaas": "1.4.17"
+  },
+  "message": "A new BPMS application has been created in your project. The username/password for accessing the KIE Server REST or JMS interface is ${KIE_SERVER_USER}/${KIE_SERVER_PASSWORD}. Please be sure to create the secret named \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content.",
+  "parameters": [
+    {
+      "displayName": "KIE Container Deployment",
+      "description": "The KIE Container deployment configuration in format: containerId=groupId:artifactId:version|c2=g2:a2:v2",
+      "name": "KIE_CONTAINER_DEPLOYMENT",
+      "value": "processserver-library=org.openshift.quickstarts:processserver-library:1.4.0.Final",
+      "required": false
+    },
+    {
+      "displayName": "KIE Server Protocol",
+      "description": "The protocol to access the KIE Server REST interface.",
+      "name": "KIE_SERVER_PROTOCOL",
+      "value": "https",
+      "required": false
+    },
+    {
+      "displayName": "KIE Server Port",
+      "description": "The port to access the KIE Server REST interface.",
+      "name": "KIE_SERVER_PORT",
+      "value": "8443",
+      "required": false
+    },
+    {
+      "displayName": "KIE Server Username",
+      "description": "The user name to access the KIE Server REST or JMS interface.",
+      "name": "KIE_SERVER_USER",
+      "value": "kieserver",
+      "required": false
+    },
+    {
+      "displayName": "KIE Server Password",
+      "description": "The password to access the KIE Server REST or JMS interface. Must be different than username; must not be root, admin, or administrator; must contain at least 8 characters, 1 alphabetic character(s), 1 digit(s), and 1 non-alphanumeric symbol(s).",
+      "name": "KIE_SERVER_PASSWORD",
+      "from": "[a-zA-Z]{6}[0-9]{1}!",
+      "generate": "expression",
+      "required": false
+    },
+    {
+      "displayName": "KIE Server Domain",
+      "description": "JAAS LoginContext domain that shall be used to authenticate users when using JMS.",
+      "name": "KIE_SERVER_DOMAIN",
+      "value": "other",
+      "required": false
+    },
+    {
+      "displayName": "Application Name",
+      "description": "The name for the application.",
+      "name": "APPLICATION_NAME",
+      "value": "kie-app",
+      "required": true
+    },
+    {
+      "displayName": "Custom http Route Hostname",
+      "description": "Custom hostname for http service route.  Leave blank for default hostname, e.g.: <application-name>-<project>.<default-domain-suffix>",
+      "name": "HOSTNAME_HTTP",
+      "value": "",
+      "required": false
+    },
+    {
+      "displayName": "Custom https Route Hostname",
+      "description": "Custom hostname for https service route.  Leave blank for default hostname, e.g.: secure-<application-name>-<project>.<default-domain-suffix>",
+      "name": "HOSTNAME_HTTPS",
+      "value": "",
+      "required": false
+    },
+    {
+      "displayName": "Git Repository URL",
+      "description": "Git source URI for application",
+      "name": "SOURCE_REPOSITORY_URL",
+      "value": "https://github.com/jboss-openshift/openshift-quickstarts",
+      "required": true
+    },
+    {
+      "displayName": "Git Reference",
+      "description": "Git branch/tag reference",
+      "name": "SOURCE_REPOSITORY_REF",
+      "value": "1.4",
+      "required": false
+    },
+    {
+      "displayName": "Context Directory",
+      "description": "Path within Git project to build; empty for root project directory.",
+      "name": "CONTEXT_DIR",
+      "value": "processserver/library",
+      "required": false
+    },
+    {
+      "displayName": "Queues",
+      "description": "Queue names",
+      "name": "HORNETQ_QUEUES",
+      "value": "",
+      "required": false
+    },
+    {
+      "displayName": "Topics",
+      "description": "Topic names",
+      "name": "HORNETQ_TOPICS",
+      "value": "",
+      "required": false
+    },
+    {
+      "displayName": "Server Keystore Secret Name",
+      "description": "The name of the secret containing the keystore file",
+      "name": "HTTPS_SECRET",
+      "value": "processserver-app-secret",
+      "required": false
+    },
+    {
+      "displayName": "Server Keystore Filename",
+      "description": "The name of the keystore file within the secret",
+      "name": "HTTPS_KEYSTORE",
+      "value": "keystore.jks",
+      "required": false
+    },
+    {
+      "displayName": "Server Certificate Name",
+      "description": "The name associated with the server certificate",
+      "name": "HTTPS_NAME",
+      "value": "jboss",
+      "required": false
+    },
+    {
+      "displayName": "Server Keystore Password",
+      "description": "The password for the keystore and certificate",
+      "name": "HTTPS_PASSWORD",
+      "value": "mykeystorepass",
+      "required": false
+    },
+    {
+      "displayName": "HornetQ Password",
+      "description": "HornetQ cluster admin password",
+      "name": "HORNETQ_CLUSTER_PASSWORD",
+      "from": "[a-zA-Z0-9]{8}",
+      "generate": "expression",
+      "required": true
+    },
+    {
+      "displayName": "Github Webhook Secret",
+      "description": "GitHub trigger secret",
+      "name": "GITHUB_WEBHOOK_SECRET",
+      "from": "[a-zA-Z0-9]{8}",
+      "generate": "expression",
+      "required": true
+    },
+    {
+      "displayName": "Generic Webhook Secret",
+      "description": "Generic build trigger secret",
+      "name": "GENERIC_WEBHOOK_SECRET",
+      "from": "[a-zA-Z0-9]{8}",
+      "generate": "expression",
+      "required": true
+    },
+    {
+      "displayName": "KIE Server Persistence Dialect",
+      "description": "Hibernate persistence dialect.",
+      "name": "KIE_SERVER_PERSISTENCE_DIALECT",
+      "example": "org.hibernate.dialect.MySQL5Dialect",
+      "required": true
+    },
+    {
+      "displayName": "KIE Server Persistence Schema",
+      "description": "Hibernate persistence schema.",
+      "name": "KIE_SERVER_PERSISTENCE_SCHEMA",
+      "example": "bd.schema",
+      "required": false
+    },
+    {
+      "displayName": "Datasource Service Host",
+      "description": "Sets the datasource service port. Use this if you want to use the predefined mysql or postgresql datasource properties. Leave blank if the URL or XA_CONNECTION_URL is set",
+      "name": "BPMS_SERVICE_HOST",
+      "example": "10.10.10.1",
+      "required": false
+    },
+    {
+      "displayName": "Database service Port",
+      "description": "Sets the datasource service port. Use this if you want to use the predefined mysql or postgresql datasource properties. Leave blank if the URL or XA_CONNECTION_URL is set",
+      "name": "BPMS_SERVICE_PORT",
+      "example": "4321",
+      "required": false
+    },
+    {
+      "displayName": "Non XA datasource",
+      "description": "Sets the datasources type. It can be XA or NONXA. For non XA set it to true. Default value is false.",
+      "name": "BPMS_NONXA",
+      "example": "true",
+      "required": false
+    },
+    {
+      "displayName": "Datasource Connection URL",
+      "description": "Sets the datasources jdbc connection url. Note that, if you are using PostgreSQL do not use this field, use the BPMS_SERVICE_HOST and PORT. If using SERVICE_PORT and HOST there is no need to fill this parameter.",
+      "name": "BPMS_CONNECTION_URL",
+      "example": "jdbc:oracle:thin:@10.1.1.1:1521:jbpm",
+      "required": false
+    },
+    {
+      "displayName": "Database Driver Name",
+      "description": "The predefined driver name, available values are mysql, postgresql or the preferred name for the external driver. For external driver the value passed here should be the same than EXTERNALDB_DRIVER_NAME.",
+      "name": "BPMS_DRIVER",
+      "example": "oracle",
+      "required": true
+    },
+    {
+      "displayName": "Quartz Database Driver Module",
+      "description": "The predefined driver name installed as a deployment, only required for Oracle, for jdbc driver as deployment append the keywork 'deployment' to the jar name, example: 'deployment.ojdbc6.jar'",
+      "name": "QUARTZ_DRIVER_MODULE",
+      "example": "oracle",
+      "required": false
+    },
+    {
+      "displayName": "Database JNDI Name",
+      "description": "Database JNDI name used by application to resolve the datasource, e.g. java:/jboss/datasources/ExampleDS",
+      "name": "BPMS_JNDI",
+      "value": "java:jboss/datasources/jbpmDS",
+      "required": true
+    },
+    {
+      "displayName": "Database Name",
+      "description": "Database name",
+      "name": "BPMS_DATABASE",
+      "example": "root",
+      "required": false
+    },
+    {
+      "displayName": "Database Username",
+      "description": "Database user name",
+      "name": "BPMS_DATABASE_USERNAME",
+      "from": "user[a-zA-Z0-9]{3}",
+      "generate": "expression",
+      "required": true
+    },
+    {
+      "displayName": "Database Password",
+      "description": "Database user password",
+      "name": "BPMS_DATABASE_PASSWORD",
+      "from": "[a-zA-Z0-9]{8}",
+      "generate": "expression",
+      "required": true
+    },
+    {
+      "displayName": "Datasource Minimum Pool Size",
+      "description": "Sets xa-pool/min-pool-size for the configured datasource.",
+      "name": "BPMS_MIN_POOL_SIZE",
+      "required": false
+    },
+    {
+      "displayName": "Datasource Maximum Pool Size",
+      "description": "Sets xa-pool/max-pool-size for the configured datasource.",
+      "name": "BPMS_MAX_POOL_SIZE",
+      "required": false
+    },
+    {
+      "displayName": "JDBC Connection Checker class",
+      "description": "An org.jboss.jca.adapters.jdbc.ValidConnectionChecker that provides a SQLException isValidConnection(Connection e) method to validate if a connection is valid.",
+      "name": "BPMS_CONNECTION_CHECKER",
+      "example": "org.jboss.jca.adapters.jdbc.extensions.oracle.OracleValidConnectionChecker",
+      "required": false
+    },
+    {
+      "displayName": "JDBC Exception Sorter class",
+      "description": "An org.jboss.jca.adapters.jdbc.ExceptionSorter that provides a boolean isExceptionFatal(SQLException e) method to validate if an exception should be broadcast to all javax.resource.spi.ConnectionEventListener as a connectionErrorOccurred.",
+      "name": "BPMS_EXCEPTION_SORTER",
+      "example": "org.jboss.jca.adapters.jdbc.extensions.oracle.OracleExceptionSorter",
+      "required": false
+    },
+    {
+      "displayName": "JDBC background validation",
+      "description": "Sets the sql validation method to background-validation, if set to false the validate-on-match method will be used.",
+      "name": "BPMS_BACKGROUND_VALIDATION",
+      "example": "true",
+      "required": false
+    },
+    {
+      "displayName": "JDBC Background Validation Millis",
+      "description": "Defines the interval for the background-validation check for the jdbc connections.",
+      "name": "BPMS_BACKGROUND_VALIDATION_MILLIS",
+      "example": "10000",
+      "required": false
+    },
+    {
+      "displayName": "Drivers Extension Image",
+      "description": "ImageStreamTag definition for the image containing the drivers and configuration. i.e custom-driver-image:1.0",
+      "name": "EXTENSIONS_IMAGE",
+      "value": "custom-driver-extension:1.0",
+      "required": true
+    },
+    {
+      "displayName": "Drivers ImageStream Namespace",
+      "description": "Namespace within which the ImageStream definition for the image containing the drivers and configuration is located.",
+      "name": "EXTENSIONS_IMAGE_NAMESPACE",
+      "value": "openshift",
+      "required": true
+    },
+    {
+      "displayName": "Drivers Image Install Directory",
+      "description": "Full path to the directory within the extensions image where the extensions are located (e.g. install.sh, modules/, etc.)",
+      "name": "EXTENSIONS_INSTALL_DIR",
+      "value": "/extensions",
+      "required": true
+    },
+    {
+      "displayName": "ImageStream Namespace",
+      "description": "Namespace in which the ImageStreams for Red Hat Middleware images are installed. These ImageStreams are normally installed in the openshift namespace. You should only need to modify this if you've installed the ImageStreams in a different namespace/project.",
+      "name": "IMAGE_STREAM_NAMESPACE",
+      "value": "openshift",
+      "required": true
+    },
+    {
+      "displayName": "Maven mirror URL",
+      "description": "Maven mirror to use for S2I builds",
+      "name": "MAVEN_MIRROR_URL",
+      "value": "",
+      "required": false
+    },
+    {
+      "displayName": "Maven Additional Arguments",
+      "description": "Maven additional arguments to use for S2I builds",
+      "name": "MAVEN_ARGS_APPEND",
+      "value": "",
+      "required": false
+    },
+    {
+      "displayName": "Artifact directory",
+      "description": "List of directories from which archives will be copied into the deployment folder. If unspecified, all archives in /target will be copied.",
+      "name": "ARTIFACT_DIR",
+      "value": "",
+      "required": false
+    },
+    {
+      "displayName": "Container Memory Limit",
+      "description": "Container memory limit",
+      "name": "MEMORY_LIMIT",
+      "value": "1Gi",
+      "required": false
+    }
+  ],
+  "objects": [
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "spec": {
+        "ports": [
+          {
+            "port": 8080,
+            "targetPort": 8080
+          }
+        ],
+        "selector": {
+          "deploymentConfig": "${APPLICATION_NAME}"
+        }
+      },
+      "metadata": {
+        "name": "${APPLICATION_NAME}",
+        "labels": {
+          "application": "${APPLICATION_NAME}"
+        },
+        "annotations": {
+          "description": "The web server's http port."
+        }
+      }
+    },
+    {
+      "kind": "Service",
+      "apiVersion": "v1",
+      "spec": {
+        "ports": [
+          {
+            "port": 8443,
+            "targetPort": 8443
+          }
+        ],
+        "selector": {
+          "deploymentConfig": "${APPLICATION_NAME}"
+        }
+      },
+      "metadata": {
+        "name": "secure-${APPLICATION_NAME}",
+        "labels": {
+          "application": "${APPLICATION_NAME}"
+        },
+        "annotations": {
+          "description": "The web server's https port."
+        }
+      }
+    },
+    {
+      "kind": "Route",
+      "apiVersion": "v1",
+      "id": "${APPLICATION_NAME}-http",
+      "metadata": {
+        "name": "${APPLICATION_NAME}",
+        "labels": {
+          "application": "${APPLICATION_NAME}"
+        },
+        "annotations": {
+          "description": "Route for application's http service."
+        }
+      },
+      "spec": {
+        "host": "${HOSTNAME_HTTP}",
+        "to": {
+          "name": "${APPLICATION_NAME}"
+        }
+      }
+    },
+    {
+      "kind": "Route",
+      "apiVersion": "v1",
+      "id": "${APPLICATION_NAME}-https",
+      "metadata": {
+        "name": "secure-${APPLICATION_NAME}",
+        "labels": {
+          "application": "${APPLICATION_NAME}"
+        },
+        "annotations": {
+          "description": "Route for application's https service."
+        }
+      },
+      "spec": {
+        "host": "${HOSTNAME_HTTPS}",
+        "to": {
+          "name": "secure-${APPLICATION_NAME}"
+        },
+        "tls": {
+          "termination": "passthrough"
+        }
+      }
+    },
+    {
+      "kind": "ImageStream",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME}",
+        "labels": {
+          "application": "${APPLICATION_NAME}"
+        }
+      }
+    },
+    {
+      "kind": "BuildConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME}",
+        "labels": {
+          "application": "${APPLICATION_NAME}"
+        },
+        "annotations": {
+          "template.alpha.openshift.io/wait-for-ready": "true"
+        }
+      },
+      "spec": {
+        "source": {
+          "type": "Git",
+          "git": {
+            "uri": "${SOURCE_REPOSITORY_URL}",
+            "ref": "${SOURCE_REPOSITORY_REF}"
+          },
+          "contextDir": "${CONTEXT_DIR}",
+          "images": [
+            {
+              "from": {
+                "kind": "ImageStreamTag",
+                "namespace": "${EXTENSIONS_IMAGE_NAMESPACE}",
+                "name": "${EXTENSIONS_IMAGE}"
+              },
+              "paths": [
+                {
+                  "destinationDir": "./${CONTEXT_DIR}/extensions/extras",
+                  "sourcePath": "${EXTENSIONS_INSTALL_DIR}/."
+                }
+              ]
+            }
+          ]
+        },
+        "strategy": {
+          "type": "Source",
+          "sourceStrategy": {
+            "env": [
+              {
+                "name": "KIE_CONTAINER_DEPLOYMENT",
+                "value": "${KIE_CONTAINER_DEPLOYMENT}"
+              },
+              {
+                "name": "MAVEN_MIRROR_URL",
+                "value": "${MAVEN_MIRROR_URL}"
+              },
+              {
+                "name": "MAVEN_ARGS_APPEND",
+                "value": "${MAVEN_ARGS_APPEND}"
+              },
+              {
+                "name": "CUSTOM_INSTALL_DIRECTORIES",
+                "value": "extensions/*"
+              },
+              {
+                "name": "ARTIFACT_DIR",
+                "value": "${ARTIFACT_DIR}"
+              }
+            ],
+            "forcePull": true,
+            "from": {
+              "kind": "ImageStreamTag",
+              "namespace": "${IMAGE_STREAM_NAMESPACE}",
+              "name": "jboss-processserver64-openshift:1.6"
+            }
+          }
+        },
+        "output": {
+          "to": {
+            "kind": "ImageStreamTag",
+            "name": "${APPLICATION_NAME}:latest"
+          }
+        },
+        "triggers": [
+          {
+            "type": "GitHub",
+            "github": {
+              "secret": "${GITHUB_WEBHOOK_SECRET}"
+            }
+          },
+          {
+            "type": "Generic",
+            "generic": {
+              "secret": "${GENERIC_WEBHOOK_SECRET}"
+            }
+          },
+          {
+            "type": "ImageChange",
+            "imageChange": {}
+          },
+          {
+            "type": "ImageChange",
+            "imageChange": {
+              "from": {
+                "kind": "ImageStreamTag",
+                "namespace": "${EXTENSIONS_IMAGE_NAMESPACE}",
+                "name": "${EXTENSIONS_IMAGE}"
+              }
+            }
+          },
+          {
+            "type": "ConfigChange"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "DeploymentConfig",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${APPLICATION_NAME}",
+        "labels": {
+          "application": "${APPLICATION_NAME}",
+          "service": "${APPLICATION_NAME}"
+        },
+        "annotations": {
+          "template.alpha.openshift.io/wait-for-ready": "true"
+        }
+      },
+      "spec": {
+        "strategy": {
+          "type": "Recreate"
+        },
+        "triggers": [
+          {
+            "type": "ImageChange",
+            "imageChangeParams": {
+              "automatic": true,
+              "containerNames": [
+                "${APPLICATION_NAME}"
+              ],
+              "from": {
+                "kind": "ImageStream",
+                "name": "${APPLICATION_NAME}"
+              }
+            }
+          },
+          {
+            "type": "ConfigChange"
+          }
+        ],
+        "replicas": 1,
+        "selector": {
+          "deploymentConfig": "${APPLICATION_NAME}"
+        },
+        "template": {
+          "metadata": {
+            "name": "${APPLICATION_NAME}",
+            "labels": {
+              "deploymentConfig": "${APPLICATION_NAME}",
+              "application": "${APPLICATION_NAME}"
+            }
+          },
+          "spec": {
+            "terminationGracePeriodSeconds": 60,
+            "containers": [
+              {
+                "name": "${APPLICATION_NAME}",
+                "image": "${APPLICATION_NAME}",
+                "imagePullPolicy": "Always",
+                "resources": {
+                  "limits": {
+                    "memory": "${MEMORY_LIMIT}"
+                  }
+                },
+                "volumeMounts": [
+                  {
+                    "name": "processserver-keystore-volume",
+                    "mountPath": "/etc/processserver-secret-volume",
+                    "readOnly": true
+                  }
+                ],
+                "livenessProbe": {
+                  "exec": {
+                    "command": [
+                      "/bin/bash",
+                      "-c",
+                      "/opt/eap/bin/livenessProbe.sh"
+                    ]
+                  },
+                  "initialDelaySeconds": 60
+                },
+                "readinessProbe": {
+                  "exec": {
+                    "command": [
+                      "/bin/bash",
+                      "-c",
+                      "/opt/eap/bin/readinessProbe.sh"
+                    ]
+                  }
+                },
+                "ports": [
+                  {
+                    "name": "jolokia",
+                    "containerPort": 8778,
+                    "protocol": "TCP"
+                  },
+                  {
+                    "name": "http",
+                    "containerPort": 8080,
+                    "protocol": "TCP"
+                  },
+                  {
+                    "name": "https",
+                    "containerPort": 8443,
+                    "protocol": "TCP"
+                  }
+                ],
+                "env": [
+                  {
+                    "name": "KIE_CONTAINER_DEPLOYMENT",
+                    "value": "${KIE_CONTAINER_DEPLOYMENT}"
+                  },
+                  {
+                    "name": "KIE_SERVER_PROTOCOL",
+                    "value": "${KIE_SERVER_PROTOCOL}"
+                  },
+                  {
+                    "name": "KIE_SERVER_PORT",
+                    "value": "${KIE_SERVER_PORT}"
+                  },
+                  {
+                    "name": "KIE_SERVER_USER",
+                    "value": "${KIE_SERVER_USER}"
+                  },
+                  {
+                    "name": "KIE_SERVER_PASSWORD",
+                    "value": "${KIE_SERVER_PASSWORD}"
+                  },
+                  {
+                    "name": "KIE_SERVER_DOMAIN",
+                    "value": "${KIE_SERVER_DOMAIN}"
+                  },
+                  {
+                    "name": "KIE_SERVER_PERSISTENCE_DIALECT",
+                    "value": "${KIE_SERVER_PERSISTENCE_DIALECT}"
+                  },
+                  {
+                    "name": "KIE_SERVER_PERSISTENCE_SCHEMA",
+                    "value": "${KIE_SERVER_PERSISTENCE_SCHEMA}"
+                  },
+                  {
+                    "name": "KIE_SERVER_PERSISTENCE_DS",
+                    "value": "${BPMS_JNDI}"
+                  },
+                  {
+                    "name": "DATASOURCES",
+                    "value": "BPMS,QUARTZ"
+                  },
+                  {
+                    "name": "BPMS_JNDI",
+                    "value": "${BPMS_JNDI}"
+                  },
+                  {
+                    "name": "BPMS_SERVICE_HOST",
+                    "value": "${BPMS_SERVICE_HOST}"
+                  },
+                  {
+                    "name": "BPMS_SERVICE_PORT",
+                    "value": "${BPMS_SERVICE_PORT}"
+                  },
+                  {
+                    "name": "BPMS_NONXA",
+                    "value": "${BPMS_NONXA}"
+                  },
+                  {
+                    "name": "BPMS_URL",
+                    "value": "${BPMS_CONNECTION_URL}"
+                  },
+                  {
+                    "name": "BPMS_XA_CONNECTION_PROPERTY_URL",
+                    "value": "${BPMS_CONNECTION_URL}"
+                  },
+                  {
+                    "name": "BPMS_DRIVER",
+                    "value": "${BPMS_DRIVER}"
+                  },
+                  {
+                    "name": "BPMS_DATABASE",
+                    "value": "${BPMS_DATABASE}"
+                  },
+                  {
+                    "name": "BPMS_USERNAME",
+                    "value": "${BPMS_DATABASE_USERNAME}"
+                  },
+                  {
+                    "name": "BPMS_PASSWORD",
+                    "value": "${BPMS_DATABASE_PASSWORD}"
+                  },
+                  {
+                    "name": "BPMS_MIN_POOL_SIZE",
+                    "value": "${BPMS_MIN_POOL_SIZE}"
+                  },
+                  {
+                    "name": "BPMS_MAX_POOL_SIZE",
+                    "value": "${BPMS_MAX_POOL_SIZE}"
+                  },
+                  {
+                    "name": "BPMS_CONNECTION_CHECKER",
+                    "value": "${BPMS_CONNECTION_CHECKER}"
+                  },
+                  {
+                    "name": "BPMS_EXCEPTION_SORTER",
+                    "value": "${BPMS_EXCEPTION_SORTER}"
+                  },
+                  {
+                    "name": "BPMS_BACKGROUND_VALIDATION",
+                    "value": "${BPMS_BACKGROUND_VALIDATION}"
+                  },
+                  {
+                    "name": "BPMS_BACKGROUND_VALIDATION_MILLIS",
+                    "value": "${BPMS_BACKGROUND_VALIDATION_MILLIS}"
+                  },
+                  {
+                    "name": "QUARTZ_JNDI",
+                    "value": "${BPMS_JNDI}NotManaged"
+                  },
+                  {
+                    "name": "QUARTZ_SERVICE_HOST",
+                    "value": "${BPMS_SERVICE_HOST}"
+                  },
+                  {
+                    "name": "QUARTZ_SERVICE_PORT",
+                    "value": "${BPMS_SERVICE_PORT}"
+                  },
+                  {
+                    "name": "QUARTZ_URL",
+                    "value": "${BPMS_CONNECTION_URL}"
+                  },
+                  {
+                    "name": "QUARTZ_DRIVER",
+                    "value": "${BPMS_DRIVER}"
+                  },
+                  {
+                    "name": "QUARTZ_DRIVER_MODULE",
+                    "value": "${QUARTZ_DRIVER_MODULE}"
+                  },
+                  {
+                    "name": "QUARTZ_DATABASE",
+                    "value": "${BPMS_DATABASE}"
+                  },
+                  {
+                    "name": "QUARTZ_USERNAME",
+                    "value": "${BPMS_DATABASE_USERNAME}"
+                  },
+                  {
+                    "name": "QUARTZ_PASSWORD",
+                    "value": "${BPMS_DATABASE_PASSWORD}"
+                  },
+                  {
+                    "name": "QUARTZ_JTA",
+                    "value": "false"
+                  },
+                  {
+                    "name": "QUARTZ_NONXA",
+                    "value": "true"
+                  },
+                  {
+                    "name": "QUARTZ_MIN_POOL_SIZE",
+                    "value": "${BPMS_MIN_POOL_SIZE}"
+                  },
+                  {
+                    "name": "QUARTZ_MAX_POOL_SIZE",
+                    "value": "${BPMS_MAX_POOL_SIZE}"
+                  },
+                  {
+                    "name": "QUARTZ_CONNECTION_CHECKER",
+                    "value": "${BPMS_CONNECTION_CHECKER}"
+                  },
+                  {
+                    "name": "QUARTZ_EXCEPTION_SORTER",
+                    "value": "${BPMS_EXCEPTION_SORTER}"
+                  },
+                  {
+                    "name": "QUARTZ_BACKGROUND_VALIDATION",
+                    "value": "${BPMS_BACKGROUND_VALIDATION}"
+                  },
+                  {
+                    "name": "QUARTZ_BACKGROUND_VALIDATION_MILLIS",
+                    "value": "${BPMS_BACKGROUND_VALIDATION_MILLIS}"
+                  },
+                  {
+                    "name": "HTTPS_KEYSTORE_DIR",
+                    "value": "/etc/processserver-secret-volume"
+                  },
+                  {
+                    "name": "HTTPS_KEYSTORE",
+                    "value": "${HTTPS_KEYSTORE}"
+                  },
+                  {
+                    "name": "HTTPS_NAME",
+                    "value": "${HTTPS_NAME}"
+                  },
+                  {
+                    "name": "HTTPS_PASSWORD",
+                    "value": "${HTTPS_PASSWORD}"
+                  },
+                  {
+                    "name": "HORNETQ_CLUSTER_PASSWORD",
+                    "value": "${HORNETQ_CLUSTER_PASSWORD}"
+                  },
+                  {
+                    "name": "HORNETQ_QUEUES",
+                    "value": "${HORNETQ_QUEUES}"
+                  },
+                  {
+                    "name": "HORNETQ_TOPICS",
+                    "value": "${HORNETQ_TOPICS}"
+                  }
+                ]
+              }
+            ],
+            "volumes": [
+              {
+                "name": "processserver-keystore-volume",
+                "secret": {
+                  "secretName": "${HTTPS_SECRET}"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

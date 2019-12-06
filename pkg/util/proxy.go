@@ -206,7 +206,10 @@ func parseProxySpecialChar(proxyUrl string, defaultScheme string) string {
 		proxyUrl = fmt.Sprintf("%s://%s", defaultScheme, proxyUrl)
 	}
 
-	u, _ := url.Parse(proxyUrl)
+	u, err := url.Parse(proxyUrl)
+	if err != nil {
+		return ""
+	}
 	scheme := fmt.Sprintf("%s://", u.Scheme)
 	if strings.HasPrefix(proxyUrl, scheme) {
 		s := strings.Replace(proxyUrl, scheme, "", 1)

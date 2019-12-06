@@ -160,7 +160,7 @@ func Test_parse_special_character_uri(t *testing.T) {
 		{"foo.com:3128", "http://foo.com:3128"},
 		{"http://foo.com:3128", "http://foo.com:3128"},
 		{"http://user:F@oo!B#ar$@myserver:3128", "http://user:F@oo%21B%23ar$@myserver:3128"},
-		{"https://myuser:my#pass@foo.com:3128", "https://myuser:my%23pass@foo.com:3128"},
+		{"https://myuser:my#pass@foo.com:3128", ""},
 		{"https://newuser:new(pas*)wrd@test.com:3128", "https://newuser:new%28pas%2A%29wrd@test.com:3128"},
 	}
 	for _, proxyUrl := range urlList {

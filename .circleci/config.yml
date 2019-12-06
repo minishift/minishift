@@ -7,7 +7,7 @@ jobs:
     macos:
       xcode: "9.0"
     environment:
-        GOVERSION: 1.11.4
+        GOVERSION: 1.13.3
         XCODE_SCHEME: symbolicator
         XCODE_WORKSPACE: symbolicator
 

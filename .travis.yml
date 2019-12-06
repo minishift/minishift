@@ -1,7 +1,7 @@
 language: go
 
 go:
-- 1.11.4
+- 1.13.3
 
 install:
 - mkdir -p /home/travis/gopath/bin

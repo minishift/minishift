@@ -6,7 +6,7 @@ clone_folder: C:\gopath\src\github.com\minishift\minishift
 
 environment:
   GOPATH: C:\gopath
-  GOVERSION: 1.11.4
+  GOVERSION: 1.13.3
 
 platform:
 - x64

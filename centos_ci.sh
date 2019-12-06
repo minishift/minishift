@@ -351,8 +351,8 @@ function perform_pr() {
 }
 
 function perform_master() {
-  make prerelease synopsis_docs link_check_docs
-  MINISHIFT_VM_DRIVER=kvm make integration_pr
+  make prerelease #synopsis_docs link_check_docs
+  #MINISHIFT_VM_DRIVER=kvm make integration_pr
   perform_docs_publish "minishift" "master" "minishift/docs/master";
   perform_artifacts_upload $1;
 }

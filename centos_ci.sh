@@ -318,8 +318,8 @@ function perform_release() {
     exit_on_failure "$?" "Integration tests failed."
   fi
 
-  make link_check_docs # Test docs builds and all links are valid
-  exit_on_failure "$?" "Documentation build failed."
+  #make link_check_docs # Test docs builds and all links are valid
+  #exit_on_failure "$?" "Documentation build failed."
 
   create_release_commit
   exit_on_failure "$?" "Unable to create release commit."
@@ -331,11 +331,11 @@ function perform_release() {
   add_release_notes;
   exit_on_failure "$?" "Failed to update release notes of Minishift v$RELEASE_VERSION. Try to manually update the release notes here - https://github.com/${REPO_OWNER}/minishift/releases/tag/v$RELEASE_VERSION."
 
-  make gen_adoc_tar
-  exit_on_failure "$?" "Documentation tarball build failed."
+  #make gen_adoc_tar
+  #exit_on_failure "$?" "Documentation tarball build failed."
 
-  docs_tar_upload $1
-  exit_on_failure "$?" "Failed to upload tar bundle for doc.openshift.org."
+  #docs_tar_upload $1
+  #exit_on_failure "$?" "Failed to upload tar bundle for doc.openshift.org."
 
   # Notify Minibot
   MESSAGE="Minishift v$RELEASE_VERSION successfully released by https://ci.centos.org/job/minishift-release/$BUILD_NUMBER."

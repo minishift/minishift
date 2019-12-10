@@ -39,8 +39,8 @@ and RH_REGISTRY_PASSWORD environment variables in order to run successfully.
      And executing "oc status" retrying 20 times with wait period of "3s"
     When executing "oc new-project <project-name>" succeeds
      And executing "oc new-app <template-name>" succeeds
-     And service "<service-name>" rollout successfully within "35m"
-    Then with up to "10" retries with wait period of "60ss" the "body" of HTTP request to "<http-endpoint>" of service "<service-name>" in namespace "<project-name>" contains "<expected-hello>"
+     And service "<service-name>" rollout successfully within "60m"
+    Then with up to "10" retries with wait period of "60s" the "body" of HTTP request to "<http-endpoint>" of service "<service-name>" in namespace "<project-name>" contains "<expected-hello>"
      And with up to "10" retries with wait period of "60s" the "status code" of HTTP request to "<http-endpoint>" of service "<service-name>" in namespace "<project-name>" is equal to "200"
      And executing "oc delete project <project-name>" succeeds
 

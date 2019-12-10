@@ -1,0 +1,140 @@
+kind: ImageStreamList
+apiVersion: v1
+metadata:
+  name: rhdm75-image-streams
+  annotations:
+    description: ImageStream definitions for Red Hat Decision Manager 7.5
+    openshift.io/provider-display-name: Red Hat, Inc.
+items:
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: rhdm-decisioncentral-rhel8
+    annotations:
+      openshift.io/display-name: Red Hat Decision Manager Decision Central 7.5
+      openshift.io/provider-display-name: Red Hat, Inc.
+  spec:
+    tags:
+    - name: '7.5.0'
+      annotations:
+        description: Red Hat Decision Manager 7.5 - Decision Central image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.5
+        version: '7.5.0'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7/rhdm-decisioncentral-rhel8:7.5.0
+    - name: '7.5.1'
+      annotations:
+        description: Red Hat Decision Manager 7.5 - Decision Central image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.5
+        version: '7.5.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7/rhdm-decisioncentral-rhel8:7.5.1
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: rhdm-controller-rhel8
+    annotations:
+      openshift.io/display-name: Red Hat Decision Manager Standalone Controller 7.5
+      openshift.io/provider-display-name: Red Hat, Inc.
+  spec:
+    tags:
+    - name: '7.5.0'
+      annotations:
+        description: Red Hat Decision Manager 7.5 - Standalone Controller image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.5
+        version: '7.5.0'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7/rhdm-controller-rhel8:7.5.0
+    - name: '7.5.1'
+      annotations:
+        description: Red Hat Decision Manager 7.5 - Standalone Controller image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.5
+        version: '7.5.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7/rhdm-controller-rhel8:7.5.1
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: rhdm-kieserver-rhel8
+    annotations:
+      openshift.io/display-name: Red Hat Decision Manager KIE Server 7.5
+      openshift.io/provider-display-name: Red Hat, Inc.
+  spec:
+    tags:
+    - name: '7.5.0'
+      annotations:
+        description: Red Hat Decision Manager 7.5 - KIE Server image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.5
+        version: '7.5.0'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7/rhdm-kieserver-rhel8:7.5.0
+    - name: '7.5.1'
+      annotations:
+        description: Red Hat Decision Manager 7.5 - KIE Server image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.5
+        version: '7.5.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7/rhdm-kieserver-rhel8:7.5.1
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: rhdm-optaweb-employee-rostering-rhel8
+    annotations:
+      openshift.io/display-name: Red Hat Decision Manager Business Optimizer OptaWeb Employee Rostering 7.5
+      openshift.io/provider-display-name: Red Hat, Inc.
+  spec:
+    tags:
+    - name: '7.5.0'
+      annotations:
+        description: Red Hat Decision Manager 7.5 - Business Optimizer OptaWeb Employee Rostering image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.5
+        version: '7.5.0'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7-tech-preview/rhdm-optaweb-employee-rostering-rhel8:7.5.0
+    - name: '7.5.1'
+      annotations:
+        description: Red Hat Decision Manager 7.5 - Business Optimizer OptaWeb Employee Rostering image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.5
+        version: '7.5.1'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7-tech-preview/rhdm-optaweb-employee-rostering-rhel8:7.5.1

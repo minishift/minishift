@@ -10,14 +10,14 @@ metadata:
     description: "Design beautiful, functional APIs with zero coding, using a visual designer for OpenAPI documents."
     tags: "fuse,apicurio,openapi,swagger,api"
     iconClass: "icon-rh-integration"
-    version: "1.3"
+    version: "1.5"
 message: |-
   Apicurito is now deployed to https://${ROUTE_HOSTNAME}.
 parameters:
 - name: APP_VERSION
   displayName: Application Version
   required: true
-  value: "1.3"
+  value: "1.5"
   description: The application version.
 - name: IMAGE_STREAM_NAMESPACE
   displayName: Image Stream Namespace

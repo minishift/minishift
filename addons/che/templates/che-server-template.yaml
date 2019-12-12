@@ -123,6 +123,13 @@ objects:
             value: "5"
           - name: CHE_INFRA_KUBERNETES_MASTER__URL
             value: "${CHE_INFRA_KUBERNETES_MASTER__URL}"
+            # this is environment variable that is used
+            # for configuring namespace on Che < 7.4.0
+            # It's needed for backward compatibility
+          - name: CHE_INFRA_OPENSHIFT_PROJECT
+            value: "${CHE_INFRA_KUBERNETES_NAMESPACE_DEFAULT}"
+            # this is environment variable that is used
+            # for configuring namespace on Che >= 7.4.0
           - name: CHE_INFRA_KUBERNETES_NAMESPACE_DEFAULT
             value: "${CHE_INFRA_KUBERNETES_NAMESPACE_DEFAULT}"
           - name: CHE_INFRA_KUBERNETES_SERVICE__ACCOUNT__NAME

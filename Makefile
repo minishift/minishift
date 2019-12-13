@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Various versions - Minishift, default OpenShift, default CentOS ISO
-MINISHIFT_VERSION = 1.34.1
+MINISHIFT_VERSION = 1.34.2
 OPENSHIFT_VERSION = v3.11.0
 CENTOS_ISO_VERSION = v1.16.0
 COMMIT_SHA=$(shell git rev-parse --short HEAD)

@@ -1,0 +1,71 @@
+kind: ImageStreamList
+apiVersion: v1
+metadata:
+  name: rhdm76-image-streams
+  annotations:
+    description: ImageStream definitions for Red Hat Decision Manager 7.6
+    openshift.io/provider-display-name: Red Hat, Inc.
+items:
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: rhdm-decisioncentral-rhel8
+    annotations:
+      openshift.io/display-name: Red Hat Decision Manager Decision Central 7.6
+      openshift.io/provider-display-name: Red Hat, Inc.
+  spec:
+    tags:
+    - name: '7.6.0'
+      annotations:
+        description: Red Hat Decision Manager 7.6 - Decision Central image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.6
+        version: '7.6.0'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7/rhdm-decisioncentral-rhel8:7.6.0
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: rhdm-controller-rhel8
+    annotations:
+      openshift.io/display-name: Red Hat Decision Manager Standalone Controller 7.6
+      openshift.io/provider-display-name: Red Hat, Inc.
+  spec:
+    tags:
+    - name: '7.6.0'
+      annotations:
+        description: Red Hat Decision Manager 7.6 - Standalone Controller image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.6
+        version: '7.6.0'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7/rhdm-controller-rhel8:7.6.0
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: rhdm-kieserver-rhel8
+    annotations:
+      openshift.io/display-name: Red Hat Decision Manager KIE Server 7.6
+      openshift.io/provider-display-name: Red Hat, Inc.
+  spec:
+    tags:
+    - name: '7.6.0'
+      annotations:
+        description: Red Hat Decision Manager 7.6 - KIE Server image.
+        iconClass: icon-jboss
+        tags: rhdm
+        supports: rhdm:7.6
+        version: '7.6.0'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhdm-7/rhdm-kieserver-rhel8:7.6.0

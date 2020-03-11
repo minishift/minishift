@@ -136,45 +136,6 @@ $ sudo virsh undefine minishift
 
 In case all of this fails, you might want to xref:../getting-started/uninstalling.adoc#[uninstall {project}] and do a fresh install of {project}.
 
-[[troubleshooting-driver-xhyve]]
-== xhyve
-
-[[create-vmnet-interface-permission]]
-=== Could not create vmnet interface
-
-The problem is likely that the xhyve driver is not able to clean up *vmnet* when a VM is removed.
-*vmnet.framework* determines the IP address based on the following files:
-
-* *_/var/db/dhcpd_leases_*
-* *_/Library/Preferences/SystemConfiguration/com.apple.vmnet.plist_*
-
-Reset the {project}-specific IP database, ensure that you remove the `minishift` entry section from the `dhcpd_leases` file, and reboot your system.
-
-----
-{
-  ip_address=192.168.64.2
-  hw_address=1,2:51:8:22:87:a6
-  identifier=1,2:51:8:22:87:a6
-  lease=0x585e6e70
-  name=minishift
-}
-----
-
-[NOTE]
-====
-You can completely reset the IP database by removing the files manually, but this is very risky.
-====
-
-[[xhyve-error-detecting-vbox-version]]
-=== Error detecting VBox version: exit status 126
-
-This error is caused by system files left by an improper uninstallation of a previously-installed VirtualBox application.
-
-Cause: Uninstalling VirtualBox by removing it from *Applications* only removes the *_.app_* bundle, not the other system-wide files installed by the VirtualBox installation package.
-The `libmachine` library detects the presence of these system-wide files and forces the use of VirtualBox, which is no longer present.
-
-Workaround: Uninstall VirtualBox via the VirtualBox installer package (*_.pkg_*) file contained in the VirtualBox disk image (*_.dmg_*).
-
 [[troubleshooting-driver-virtualbox]]
 == VirtualBox
 

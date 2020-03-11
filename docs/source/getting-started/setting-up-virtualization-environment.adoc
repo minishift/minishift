@@ -24,7 +24,7 @@ See xref:setting-up-virtualbox-driver[Setting Up {project} to Use VirtualBox] fo
 See the appropriate section for your hypervisor and operating system:
 
 - For xref:for-linux[Linux], xref:setting-up-kvm-driver[set up the KVM driver]
-- For xref:for-macos[macOS], xref:setting-up-xhyve-driver[set up the xhyve driver] or xref:setting-up-hyperkit-driver[set up the hyperkit driver]
+- For xref:for-macos[macOS], xref:setting-up-hyperkit-driver[set up the hyperkit driver]
 - For xref:for-windows[Windows], xref:setting-up-hyper-v-driver[set up the Hyper-V driver]
 - For VirtualBox, xref:setting-up-virtualbox-driver[set up {project} to use VirtualBox]
 
@@ -206,105 +206,12 @@ $ sudo virsh net-autostart default
 [[for-macos]]
 == macOS
 
-[[setting-up-xhyve-driver]]
-=== Setting Up the xhyve Driver
-
-{project} is currently tested against `docker-machine-driver-xhyve` version 0.3.3.
-
-[[xhyve-homebrew-install]]
-==== Homebrew Install
-
-Use the following command to install the latest version of the driver with Homebrew:
-
-----
-$ brew install docker-machine-driver-xhyve
-----
-
-Once installed, enable root access for the `docker-machine-driver-xhyve` binary and add it to the default *wheel* group:
-
-----
-$ sudo chown root:wheel $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
-----
-
-Set the owner User ID (SUID) for the binary as follows:
-
-----
-$ sudo chmod u+s $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
-----
-
-You can verify the existing version of the xhyve driver on your system using `brew info` as follows:
-
-----
-$ brew info --installed docker-machine-driver-xhyve
-docker-machine-driver-xhyve: stable 0.3.3 (bottled), HEAD
-Docker Machine driver for xhyve
-https://github.com/zchee/docker-machine-driver-xhyve
-/usr/local/Cellar/docker-machine-driver-xhyve/0.3.3 (3 files, 10.3MB) *
-  Poured from bottle on 2017-08-18 at 14:46:20
-From: https://github.com/Homebrew/homebrew-core/blob/master/Formula/docker-machine-driver-xhyve.rb
-----
-
-For more information, see the GitHub documentation for the link:https://github.com/zchee/docker-machine-driver-xhyve#install[xhyve driver].
-
-[[xhyve-manual-install]]
-==== Manual Install
-
-To manually install the xhyve driver, you need to download and install the `docker-machine-driver-xhyve` binary and place it in a directory which is on your `PATH` environment variable.
-The directory *_/usr/local/bin_* is recommended, as it is the default installation directory for Docker Machine binaries.
-
-The following steps explain the installation of the `docker-machine-driver-xhyve` binary to the *_/usr/local/bin/_* directory:
-
-. Download the `docker-machine-driver-xhyve` binary using:
-+
-----
-$ sudo curl -L  https://github.com/zchee/docker-machine-driver-xhyve/releases/download/v0.3.3/docker-machine-driver-xhyve -o /usr/local/bin/docker-machine-driver-xhyve
-----
-
-. Enable root access for the `docker-machine-driver-xhyve` binary and add it to the default *wheel* group:
-+
-----
-$ sudo chown root:wheel /usr/local/bin/docker-machine-driver-xhyve
-----
-
-. Set the owner User ID (SUID) for the binary as follows:
-+
-----
-$ sudo chmod u+s,+x /usr/local/bin/docker-machine-driver-xhyve
-----
-
-[NOTE]
-====
-The downloaded *docker-machine-driver-xhyve* binary is compiled against a specific version of macOS.
-The driver may fail to work after a macOS version upgrade.
-In this case, you can try to compile the driver from source:
-
-----
-$ go get -u -d github.com/zchee/docker-machine-driver-xhyve
-$ cd $GOPATH/src/github.com/zchee/docker-machine-driver-xhyve
-
-# Install docker-machine-driver-xhyve binary into /usr/local/bin
-$ make install
-
-# docker-machine-driver-xhyve need root owner and uid
-$ sudo chown root:wheel /usr/local/bin/docker-machine-driver-xhyve
-$ sudo chmod u+s /usr/local/bin/docker-machine-driver-xhyve
-----
-
-For more information, see the link:https://github.com/zchee/docker-machine-driver-xhyve#install[xhyve driver] documentation on GitHub.
-====
-
-==== Next Steps
-
-{next-steps}
-
-On macOS, you may also xref:../getting-started/installing.adoc#installing-with-homebrew[install {project} via Homebrew].
-
 [[setting-up-hyperkit-driver]]
 === Setting Up the hyperkit Driver
 
 {project} is currently tested against *docker-machine-driver-hyperkit* version 1.0.0.
 
-Using hyperkit requires having both the `hyperkit` driver and `docker-machine-driver-hyperkit` installed
+Using hyperkit requires having both `hyperkit` and `docker-machine-driver-hyperkit` installed
 
 ==== Installing hyperkit
 

@@ -35,7 +35,7 @@ Once the hypervisor is up and running, additional setup is required for {project
 Depending on your host operating system, you have the choice of the following recommended native hypervisors:
 
 macOS::
-- link:https://github.com/mist64/xhyve[xhyve]
+- link:https://github.com/moby/hyperkit[hyperkit]
 
 Linux::
 - link:https://en.wikipedia.org/wiki/Kernel-based_Virtual_Machine[KVM]

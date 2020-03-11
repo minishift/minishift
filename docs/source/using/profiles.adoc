@@ -48,17 +48,23 @@ When you run {project} `start` command with the `--profile` flag the profile get
 
 ----
 $ minishift --profile profile-demo start
--- Checking if requested hypervisor 'xhyve' is supported on this platform ... OK
--- Checking if xhyve driver is installed ...
-   Driver is available at /usr/local/bin/docker-machine-driver-xhyve
+-- Starting profile 'profile-demo'
+-- Check if deprecated options are used ... OK
+-- Checking if https://github.com is reachable ... OK
+-- Checking if requested OpenShift version 'v3.11.0' is valid ... OK
+-- Checking if requested OpenShift version 'v3.11.0' is supported ... OK
+-- Checking if requested hypervisor 'hyperkit' is supported on this platform ... OK
+-- Checking if hyperkit driver is installed ...
+   Driver is available at /usr/local/bin/docker-machine-driver-hyperkit
    Checking for setuid bit ... OK
 -- Checking the ISO URL ... OK
--- Starting local OpenShift cluster using 'xhyve' hypervisor ...
+-- Checking if provided oc flags are supported ... OK
+-- Starting the OpenShift cluster using 'hyperkit' hypervisor ...
 -- Minishift VM will be configured with ...
-   Memory:    2 GB
+   Memory:    4 GB
    vCPUs :    2
    Disk size: 20 GB
-...
+-- Starting Minishift VM .....
 ----
 
 See also xref:../using/profiles.adoc#example-workflow-profile-config[workflow for profile configuration].

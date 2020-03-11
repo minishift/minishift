@@ -75,10 +75,10 @@ If you want to force {project} to start despite a failing driver plugin-in check
 $ minishift config set warn-check-kvm-driver true
 ----
 
-- For xhyve on macOS, run the following command:
+- For hyperkit on macOS, run the following command:
 +
 ----
-$ minishift config set warn-check-xhyve-driver true
+$ minishift config set warn-check-hyperkit-driver true
 ----
 
 - For Hyper-V on Windows, run the following command:

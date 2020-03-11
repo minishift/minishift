@@ -6,7 +6,7 @@
  |                      /-------------> Minishift VM                                    |
  |                      |                                                               |
  |                      |         /--->  o boots from pluggable Live ISO                |
- | $PATH                |         |      o runs on VirtualBox, HyperV, xhyve or KVM     |
+ | $PATH                |         |      o runs on VirtualBox, HyperV, hyperkit or KVM  |
  | └── minishift -=-----|         |      o in 'platform' like Linux, macOS or Windows   |
  |                      |         |      o uses 'foo' version of OpenShift client 'oc'  |
  |                      |         |                                                     |

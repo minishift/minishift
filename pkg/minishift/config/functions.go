@@ -31,10 +31,6 @@ func IsHyperV() bool {
 	return checkDriver("hyperv")
 }
 
-func IsXhyve() bool {
-	return checkDriver("xhyve")
-}
-
 func IsKVM() bool {
 	return checkDriver("kvm")
 }

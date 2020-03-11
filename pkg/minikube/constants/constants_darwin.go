@@ -21,10 +21,9 @@ package constants
 var SupportedVMDrivers = [...]string{
 	"virtualbox",
 	"vmwarefusion",
-	"xhyve",
 	"hyperkit",
 	"generic",
 }
 
-const DefaultVMDriver = "xhyve"
+const DefaultVMDriver = "hyperkit"
 const OC_BINARY_NAME = "oc"

@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/minishift/minishift/pkg/minishift/setup/hypervisor"
 	"github.com/minishift/minishift/pkg/minishift/shell/powershell"
 	"github.com/minishift/minishift/pkg/util/os"
@@ -65,7 +66,7 @@ func runSetup(cmd *cobra.Command, args []string) {
 			"Note: Above two commands doesn't need to be run in Administrator mode.")
 	case "darwin":
 		// Check if driver is already present and configured, if not
-		// Download docker-machine-driver-xhyve from github/machine-drivers
+		// Download docker-machine-driver-hyperkit from github/machine-drivers
 		// Move it to path, add to proper group and set permissions
 		if err := hypervisor.CheckAndConfigureHypervisor(); err != nil {
 			atexit.ExitWithMessage(1, err.Error())

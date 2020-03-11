@@ -370,9 +370,6 @@ func getDriverOptions(config MachineConfig) interface{} {
 		driver = createVMwareFusionHost(config)
 	case "kvm":
 		driver = createKVMHost(config)
-	case "xhyve":
-		fmt.Println("xhyve driver will be deprecated in the next release. Please consider using the hyperkit driver.")
-		driver = createXhyveHost(config)
 	case "hyperv":
 		driver = createHypervHost(config)
 	case "hyperkit":

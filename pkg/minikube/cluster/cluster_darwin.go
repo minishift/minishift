@@ -36,25 +36,6 @@ func createVMwareFusionHost(config MachineConfig) drivers.Driver {
 	return d
 }
 
-type xhyveDriver struct {
-	*drivers.BaseDriver
-	Boot2DockerURL string
-	BootCmd        string
-	CPU            int
-	CaCertPath     string
-	DiskSize       int64
-	MacAddr        string
-	Memory         int
-	PrivateKeyPath string
-	UUID           string
-	NFSShare       bool
-	DiskNumber     int
-	Virtio9p       bool
-	Virtio9pFolder string
-	QCow2          bool
-	RawDisk        bool
-}
-
 type hyperkitDriver struct {
 	*drivers.BaseDriver
 	Boot2DockerURL string
@@ -69,21 +50,6 @@ type hyperkitDriver struct {
 	BootInitrd     string
 	Initrd         string
 	Vmlinuz        string
-}
-
-func createXhyveHost(config MachineConfig) *xhyveDriver {
-	return &xhyveDriver{
-		BaseDriver: &drivers.BaseDriver{
-			MachineName: constants.MachineName,
-			StorePath:   constants.Minipath,
-		},
-		Memory:         config.Memory,
-		CPU:            config.CPUs,
-		Boot2DockerURL: config.GetISOFileURI(),
-		DiskSize:       int64(config.DiskSize),
-		QCow2:          false,
-		RawDisk:        true,
-	}
 }
 
 func createHyperkitHost(config MachineConfig) *hyperkitDriver {

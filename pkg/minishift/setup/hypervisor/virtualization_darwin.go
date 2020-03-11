@@ -28,8 +28,8 @@ import (
 
 const (
 	driverBinaryDir   = "/usr/local/bin"
-	driverBinaryPath  = driverBinaryDir + "/docker-machine-driver-xhyve"
-	driverDownloadUrl = "https://github.com/machine-drivers/docker-machine-driver-xhyve/releases/download/v0.3.3/docker-machine-driver-xhyve"
+	driverBinaryPath  = driverBinaryDir + "/docker-machine-driver-hyperkit"
+	driverDownloadUrl = "https://github.com/machine-drivers/docker-machine-driver-hyperkit/releases/download/v1.0.0/docker-machine-driver-hyperkit"
 )
 
 func CheckHypervisorAvailable() error {
@@ -38,16 +38,16 @@ func CheckHypervisorAvailable() error {
 
 func CheckAndConfigureHypervisor() error {
 	if isRoot() {
-		fmt.Println("Configuring Xhyve Hypervisor ...")
-		err := downloadXhyveDriver(driverBinaryPath, driverDownloadUrl)
+		fmt.Println("Configuring Hyperkit Hypervisor ...")
+		err := downloadHyperkitDriver(driverBinaryPath, driverDownloadUrl)
 		return err
 	}
 	return errors.New("This command needs to be executed as administrator or with sudo.")
 }
 
-func isXhyveConfigured() bool {
+func isHyperkitConfigured() bool {
 	//Following check is also present in cmd/start_preflight.go
-	path, err := exec.LookPath("docker-machine-driver-xhyve")
+	path, err := exec.LookPath("docker-machine-driver-hyperkit")
 
 	if err != nil {
 		return false
@@ -72,9 +72,9 @@ func isXhyveConfigured() bool {
 	return true
 }
 
-func downloadXhyveDriver(filepath string, url string) error {
-	fmt.Println("Checking if docker-machine-driver-xhyve is already present and configured ... ")
-	if isXhyveConfigured() {
+func downloadHyperkitDriver(filepath string, url string) error {
+	fmt.Println("Checking if docker-machine-driver-hyperkit is already present and configured ... ")
+	if isHyperkitConfigured() {
 		return nil
 	}
 	os.MkdirAll(driverBinaryDir, 0751)
@@ -84,7 +84,7 @@ func downloadXhyveDriver(filepath string, url string) error {
 		return err
 	}
 	defer out.Close()
-	fmt.Printf("Downloading docker-machine-driver-xhyve binary to %s ... ", filepath)
+	fmt.Printf("Downloading docker-machine-driver-hyperkit binary to %s ... ", filepath)
 	resp, err := http.Get(url)
 	if err != nil {
 		return err

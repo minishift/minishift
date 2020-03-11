@@ -102,12 +102,12 @@ func preflightChecksBeforeStartingHost() {
 		driverErrorMessage)
 
 	switch viper.GetString(configCmd.VmDriver.Name) {
-	case "xhyve":
+	case "hyperkit":
 		preflightCheckSucceedsOrFails(
-			configCmd.SkipCheckXHyveDriver.Name,
-			checkXhyveDriver,
-			"Checking if xhyve driver is installed",
-			configCmd.WarnCheckXHyveDriver.Name,
+			configCmd.SkipCheckHyperkitDriver.Name,
+			checkHyperkitDriver,
+			"Checking if hyperkit driver is installed",
+			configCmd.WarnCheckHyperkitDriver.Name,
 			driverErrorMessage)
 	case "kvm":
 		preflightCheckSucceedsOrFails(
@@ -300,10 +300,10 @@ func checkDeprecation() bool {
 	return true
 }
 
-// checkXhyveDriver returns true if xhyve driver is available on path and has
+// checkHyperkitDriver returns true if hyperkit driver is available on path and has
 // the setuid-bit set
-func checkXhyveDriver() bool {
-	path, err := exec.LookPath("docker-machine-driver-xhyve")
+func checkHyperkitDriver() bool {
+	path, err := exec.LookPath("docker-machine-driver-hyperkit")
 
 	if err != nil {
 		return false

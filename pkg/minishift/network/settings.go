@@ -133,10 +133,10 @@ func ConfigureStaticAssignment(driver drivers.Driver) (string, error) {
 		WriteNetworkSettingsToInstance(driver, dhcpNetworkSettings)
 	}
 
-	// HyperV and Xhyve rely on a single interface
+	// HyperV relies on a single interface
 	// eth0 is used for hpst and external communication
 	// eth1 is disabled
-	if minishiftConfig.IsHyperV() || minishiftConfig.IsXhyve() {
+	if minishiftConfig.IsHyperV() {
 		disabledNetworkSettings := NetworkSettings{
 			Device:   "eth1",
 			Disabled: true,

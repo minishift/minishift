@@ -27,9 +27,11 @@ import (
 )
 
 const (
-	driverBinaryDir   = "/usr/local/bin"
-	driverBinaryPath  = driverBinaryDir + "/docker-machine-driver-hyperkit"
-	driverDownloadUrl = "https://github.com/machine-drivers/docker-machine-driver-hyperkit/releases/download/v1.0.0/docker-machine-driver-hyperkit"
+	driverBinaryDir     = "/usr/local/bin"
+	driverBinaryPath    = driverBinaryDir + "/docker-machine-driver-hyperkit"
+	hyperkitBinaryPath  = driverBinaryDir + "/hyperkit"
+	driverDownloadUrl   = "https://github.com/machine-drivers/docker-machine-driver-hyperkit/releases/download/v1.0.0/docker-machine-driver-hyperkit"
+	hyperkitDownloadUrl = "https://github.com/code-ready/machine-driver-hyperkit/releases/download/v0.12.6/hyperkit"
 )
 
 func CheckHypervisorAvailable() error {
@@ -39,16 +41,18 @@ func CheckHypervisorAvailable() error {
 func CheckAndConfigureHypervisor() error {
 	if isRoot() {
 		fmt.Println("Configuring Hyperkit Hypervisor ...")
-		err := downloadHyperkitDriver(driverBinaryPath, driverDownloadUrl)
-		return err
+		err := downloadHyperkit(hyperkitBinaryPath, hyperkitDownloadUrl)
+		if err != nil {
+			return err
+		}
+		return downloadHyperkitDriver(driverBinaryPath, driverDownloadUrl)
 	}
 	return errors.New("This command needs to be executed as administrator or with sudo.")
 }
 
-func isHyperkitConfigured() bool {
+func isHyperkitDriverConfigured() bool {
 	//Following check is also present in cmd/start_preflight.go
 	path, err := exec.LookPath("docker-machine-driver-hyperkit")
-
 	if err != nil {
 		return false
 	}
@@ -61,54 +65,71 @@ func isHyperkitConfigured() bool {
 			return false
 		}
 	}
-	fmt.Println("Driver is available at", path)
-
+	fmt.Println("\nDriver is available at", path)
 	fmt.Print("Checking for setuid bit ... ")
 	if fi.Mode()&os.ModeSetuid == 0 {
-		print("FAIL")
+		fmt.Print("FAIL")
 		return false
 	}
-	print("OK")
+	fmt.Print("OK")
+	return true
+}
+
+func isHyperkitConfigured() bool {
+	//Check if hyperkit binary is present
+	path, err := exec.LookPath("hyperkit")
+	if err != nil {
+		return false
+	}
+	// follow symlink
+	fi, _ := os.Stat(path)
+	if fi.Mode()&os.ModeSymlink != 0 {
+		path, err = os.Readlink(path)
+		if err != nil {
+			return false
+		}
+	}
+	fmt.Println("\nHyperkit is available at", path)
+	fmt.Print("Checking for setuid bit ... ")
+	if fi.Mode()&os.ModeSetuid == 0 {
+		fmt.Print("FAIL")
+		return false
+	}
+	fmt.Print("OK")
 	return true
 }
 
 func downloadHyperkitDriver(filepath string, url string) error {
-	fmt.Println("Checking if docker-machine-driver-hyperkit is already present and configured ... ")
+	fmt.Print("\nChecking if docker-machine-driver-hyperkit is already present and configured ... ")
+	if isHyperkitDriverConfigured() {
+		return nil
+	}
+	fmt.Print("FAIL")
+	fmt.Print("\nDownloading docker-machine-driver-hyperkit to: ", filepath, " ... ")
+	os.MkdirAll(driverBinaryDir, 0751)
+	err := download(url, filepath)
+	if err != nil {
+		fmt.Print("FAIL")
+		return err
+	}
+	fmt.Print("OK")
+	return nil
+}
+
+func downloadHyperkit(filepath string, url string) error {
+	fmt.Print("Checking if Hyperkit is already present ... ")
 	if isHyperkitConfigured() {
 		return nil
 	}
+	fmt.Print("FAIL")
+	fmt.Print("\nDownloading Hyperkit to: ", filepath, " ... ")
 	os.MkdirAll(driverBinaryDir, 0751)
-
-	out, err := os.Create(filepath)
+	err := download(url, filepath)
 	if err != nil {
-		return err
-	}
-	defer out.Close()
-	fmt.Printf("Downloading docker-machine-driver-hyperkit binary to %s ... ", filepath)
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	_, err = io.Copy(out, resp.Body)
-	if err != nil {
+		fmt.Print("FAIL")
 		return err
 	}
 	fmt.Print("OK")
-
-	fmt.Printf("\nSetting permissions and group for %s ... ", filepath)
-	err = out.Chown(0, 0)
-	if err != nil {
-		return err
-	}
-
-	err = out.Chmod(os.ModeSetuid | 0751)
-	if err != nil {
-		return err
-	}
-	fmt.Print("OK")
-
 	return nil
 }
 
@@ -122,4 +143,28 @@ func isRoot() bool {
 		return true
 	}
 	return false
+}
+
+func download(url, filepath string) error {
+	out, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		return err
+	}
+	err = out.Chown(0, 0)
+	if err != nil {
+		return err
+	}
+
+	return out.Chmod(os.ModeSetuid | 0751)
 }

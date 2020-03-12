@@ -104,6 +104,12 @@ func preflightChecksBeforeStartingHost() {
 	switch viper.GetString(configCmd.VmDriver.Name) {
 	case "hyperkit":
 		preflightCheckSucceedsOrFails(
+			configCmd.SkipCheckHyperkit.Name,
+			checkHyperkitInstalled,
+			"Checking if hyperkit is installed",
+			configCmd.WarnCheckHyperkit.Name,
+			driverErrorMessage)
+		preflightCheckSucceedsOrFails(
 			configCmd.SkipCheckHyperkitDriver.Name,
 			checkHyperkitDriver,
 			"Checking if hyperkit driver is installed",
@@ -324,6 +330,28 @@ func checkHyperkitDriver() bool {
 		return false
 	}
 
+	return true
+}
+
+func checkHyperkitInstalled() bool {
+	//Check if hyperkit binary is present
+	path, err := exec.LookPath("hyperkit")
+	if err != nil {
+		return false
+	}
+	// follow symlink
+	fi, _ := os.Stat(path)
+	if fi.Mode()&os.ModeSymlink != 0 {
+		path, err = os.Readlink(path)
+		if err != nil {
+			return false
+		}
+	}
+	fmt.Println("\n   Hyperkit is available at", path)
+	fmt.Print("   Checking for setuid bit ... ")
+	if fi.Mode()&os.ModeSetuid == 0 {
+		return false
+	}
 	return true
 }
 

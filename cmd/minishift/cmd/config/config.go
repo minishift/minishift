@@ -109,6 +109,8 @@ var (
 	WarnDeprecationCheck      = createConfigSetting("warn-check-deprecation", SetBool, nil, nil, true, true)
 	SkipCheckKVMDriver        = createConfigSetting("skip-check-kvm-driver", SetBool, nil, nil, true, nil)
 	WarnCheckKVMDriver        = createConfigSetting("warn-check-kvm-driver", SetBool, nil, nil, true, false)
+	SkipCheckHyperkit         = createConfigSetting("skip-check-hyperkit", SetBool, nil, nil, true, nil)
+	WarnCheckHyperkit         = createConfigSetting("warn-check-hyperkit", SetBool, nil, nil, true, false)
 	SkipCheckHyperkitDriver   = createConfigSetting("skip-check-hyperkit-driver", SetBool, nil, nil, true, nil)
 	WarnCheckHyperkitDriver   = createConfigSetting("warn-check-hyperkit-driver", SetBool, nil, nil, true, false)
 	SkipCheckHyperVDriver     = createConfigSetting("skip-check-hyperv-driver", SetBool, nil, nil, true, nil)

@@ -12,7 +12,7 @@ toc::[]
 [[installing-manually]]
 == Manually
 
-. Download the archive for your operating system from the link:{download-url}[{download-text}] page and extract its contents.
+. Download the archive for your operating system from the link:https://github.com/minishift/minishift/releases[releases] page and extract its contents.
 
 . Copy the contents of the directory to your preferred location.
 

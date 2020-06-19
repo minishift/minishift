@@ -56,15 +56,6 @@ function install_core_deps() {
 }
 
 function install_golang() {
-  # Install virt7-container-common-candidate to install latest golang package
-  # from the repo
-  cat > /etc/yum.repos.d/virt7-container-common-candidate.repo << EOF
-[virt7-container-common-candidate]
-name=virt7-container-common-candidate
-baseurl=https://cbs.centos.org/repos/virt7-container-common-candidate/x86_64/os/
-enabled=1
-gpgcheck=0
-EOF
   yum -y install golang
 
   echo 'CICO: Golang installed'

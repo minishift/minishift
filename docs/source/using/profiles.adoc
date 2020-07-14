@@ -157,5 +157,5 @@ The alternative is to execute a series of commands each specifying the targeted 
 $ minishift --profile profile-demo config set memory 8GB
 $ minishift --profile profile-demo config set cpus 4
 $ minishift --profile profile-demo addon enable anyuid
-$ minishift --profile profile-demo minishift start
+$ minishift --profile profile-demo start
 ----

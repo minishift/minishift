@@ -274,7 +274,7 @@
   revision = "aabc10ec26b754e797f9028f4589c5b7bd90dc20"
 
 [[projects]]
-  digest = "1:cf07650bf05986f41b0634cfe612191e28104f74a64a3248be1225a12621132c"
+  digest = "1:e766806b9bc8357663f7657214c2abe5780578148056b87370eda662dcdd13ed"
   name = "github.com/docker/machine"
   packages = [
     "commands/mcndirs",
@@ -314,7 +314,7 @@
     "version",
   ]
   pruneopts = "NUT"
-  revision = "6f34be407f21920decfd3c031f64e500e66979da"
+  revision = "4f91040061541cf5c23489009e1c6d946cc21d42"
   source = "github.com/machine-drivers/machine"
 
 [[projects]]
@@ -462,6 +462,17 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:372707045a3d3692e0b61edf50fa8d4c22f34d488815a2eba3aa957285166738"
+  name = "github.com/hectane/go-acl"
+  packages = [
+    ".",
+    "api",
+  ]
+  pruneopts = "NUT"
+  revision = "da78bae5fc95895d8855ed8c5b1505b10e254450"
+
+[[projects]]
+  branch = "master"
   digest = "1:b7f860847a1d71f925ba9385ed95f1ebc0abfeb418a78e219ab61f48fdfeffad"
   name = "github.com/howeyc/gopass"
   packages = ["."]
@@ -494,6 +505,14 @@
   pruneopts = "NUT"
   revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
   version = "v1.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:39867ef0616a6f5c53346fd3748878135c644f4a542fe5700070258eb577eee2"
+  name = "github.com/intel-go/cpuid"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "2aa72927c3e22cca9e2fc3b8f661086b9dc421f2"
 
 [[projects]]
   digest = "1:8e36686e8b139f8fe240c1d5cf3a145bc675c22ff8e707857cdd3ae17b00d728"

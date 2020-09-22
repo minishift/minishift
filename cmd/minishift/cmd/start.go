@@ -29,6 +29,7 @@ import (
 	"github.com/docker/machine/libmachine/drivers"
 	"github.com/docker/machine/libmachine/host"
 	"github.com/docker/machine/libmachine/provision"
+	"github.com/docker/machine/libmachine/ssh"
 	"github.com/golang/glog"
 	"github.com/minishift/minishift/cmd/minishift/cmd/addon"
 	configCmd "github.com/minishift/minishift/cmd/minishift/cmd/config"
@@ -147,6 +148,10 @@ For the latter see 'minishift config -h'.`,
 
 	viper.BindPFlags(startCmd.Flags())
 	RootCmd.AddCommand(startCmd)
+	// Force using the golang SSH implementation for windows
+	if runtime.GOOS == "windows" {
+		ssh.SetDefaultClient(ssh.Native)
+	}
 
 	provision.SetDetector(&provisioner.MinishiftProvisionerDetector{Delegate: provision.StandardDetector{}})
 }

@@ -32,13 +32,13 @@ Ensure that any SSH binary in the system `PATH` does not generate warning messag
 On macOS, you can also use link:https://caskroom.github.io[Homebrew Cask] to install the stable version of {project}:
 
 ----
-$ brew cask install minishift
+$ brew install --cask minishift
 ----
 
 To update the binary, run following command:
 
 ----
-$ brew cask install --force minishift
+$ brew install --cask --force minishift
 ----
 
 == Next Steps

@@ -1,0 +1,134 @@
+kind: ImageStreamList
+apiVersion: v1
+metadata:
+  name: rhpam79-image-streams
+  annotations:
+    description: ImageStream definitions for Red Hat Process Automation Manager 7.9
+    openshift.io/provider-display-name: Red Hat, Inc.
+items:
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: rhpam-businesscentral-rhel8
+    annotations:
+      openshift.io/display-name: Red Hat Process Automation Manager Business Central 7.9
+      openshift.io/provider-display-name: Red Hat, Inc.
+  spec:
+    tags:
+    - name: '7.9.0'
+      annotations:
+        description: Red Hat Process Automation Manager 7.9 - Business Central image.
+        iconClass: icon-jboss
+        tags: rhpam
+        supports: rhpam:7.9
+        version: '7.9.0'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhpam-7/rhpam-businesscentral-rhel8:7.9.0
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: rhpam-businesscentral-monitoring-rhel8
+    annotations:
+      openshift.io/display-name: Red Hat Process Automation Manager Business Central Monitoring 7.9
+      openshift.io/provider-display-name: Red Hat, Inc.
+  spec:
+    tags:
+    - name: '7.9.0'
+      annotations:
+        description: Red Hat Process Automation Manager 7.9 - Business Central Monitoring image.
+        iconClass: icon-jboss
+        tags: rhpam
+        supports: rhpam:7.9
+        version: '7.9.0'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhpam-7/rhpam-businesscentral-monitoring-rhel8:7.9.0
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: rhpam-controller-rhel8
+    annotations:
+      openshift.io/display-name: Red Hat Process Automation Manager Standalone Controller 7.9
+      openshift.io/provider-display-name: Red Hat, Inc.
+  spec:
+    tags:
+    - name: '7.9.0'
+      annotations:
+        description: Red Hat Process Automation Manager 7.9 - Standalone Controller image.
+        iconClass: icon-jboss
+        tags: rhpam
+        supports: rhpam:7.9
+        version: '7.9.0'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhpam-7/rhpam-controller-rhel8:7.9.0
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: rhpam-kieserver-rhel8
+    annotations:
+      openshift.io/display-name: Red Hat Process Automation Manager KIE Server 7.9
+      openshift.io/provider-display-name: Red Hat, Inc.
+  spec:
+    tags:
+    - name: '7.9.0'
+      annotations:
+        description: Red Hat Process Automation Manager 7.9 - KIE Server image.
+        iconClass: icon-jboss
+        tags: rhpam
+        supports: rhpam:7.9
+        version: '7.9.0'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhpam-7/rhpam-kieserver-rhel8:7.9.0
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: rhpam-smartrouter-rhel8
+    annotations:
+      openshift.io/display-name: Red Hat Process Automation Manager Smart Router 7.9
+      openshift.io/provider-display-name: Red Hat, Inc.
+  spec:
+    tags:
+    - name: '7.9.0'
+      annotations:
+        description: Red Hat Process Automation Manager 7.9 - Smart Router image.
+        iconClass: icon-jboss
+        tags: rhpam
+        supports: rhpam:7.9
+        version: '7.9.0'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhpam-7/rhpam-smartrouter-rhel8:7.9.0
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: rhpam-process-migration-rhel8
+    annotations:
+      openshift.io/display-name: Red Hat Process Automation Manager Process Migration 7.9
+      openshift.io/provider-display-name: Red Hat, Inc.
+  spec:
+    tags:
+    - name: '7.9.0'
+      annotations:
+        description: Red Hat Process Automation Manager 7.9 - Process Migration image.
+        iconClass: icon-jboss
+        tags: rhpam
+        supports: rhpam:7.9
+        version: '7.9.0'
+      referencePolicy:
+        type: Local
+      from:
+        kind: DockerImage
+        name: registry.redhat.io/rhpam-7/rhpam-process-migration-rhel8:7.9.0

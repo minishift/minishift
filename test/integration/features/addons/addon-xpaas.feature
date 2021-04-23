@@ -45,9 +45,9 @@ and RH_REGISTRY_PASSWORD environment variables in order to run successfully.
      And executing "oc delete project <project-name>" succeeds
 
   Examples: Required information to test the templates
-    | project-name  | template-name           | service-name    | http-endpoint | expected-hello              |
-    | eap71-basic   | eap71-basic-s2i         | eap-app         | /             | Welcome to JBoss EAP 7      |
-    | rhpam79       | rhpam79-trial-ephemeral | myapp-rhpamcentr| /             | Business Central            |
+    | project-name  | template-name            | service-name    | http-endpoint | expected-hello         |
+    | eap71-basic   | eap71-basic-s2i          | eap-app         | /             | Welcome to JBoss EAP 7 |
+    | rhpam710      | rhpam710-trial-ephemeral | myapp-rhpamcentr| /             | Business Central       |
 
   Scenario: User deletes Minishift
      When executing "minishift delete --force" succeeds

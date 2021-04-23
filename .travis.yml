@@ -20,9 +20,7 @@ install:
 
 script: |
   make prerelease
-  #token allows to use increased GH API limit, has no other rights
-  #to replace create new GH user and generate token with no extra privileges
-  MINISHIFT_GITHUB_API_TOKEN=f62950fc041df6f8788a7d23157a39936a0af440 make coverage
+  make coverage
 
 notifications:
   webhooks: http://minibot.19cf262c.svc.dockerapp.io:9009/hubot/travis-ci

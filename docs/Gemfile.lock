@@ -151,7 +151,7 @@ DEPENDENCIES
   middleman-asciidoc
   middleman-livereload (~> 3.4)
   middleman-syntax
-  nokogiri (~> 1.8.2)
+  nokogiri
   redcarpet
   therubyracer
   tzinfo-data

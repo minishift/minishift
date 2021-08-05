@@ -67,7 +67,6 @@ const (
 
 var (
 	baseSSHArgs = []string{
-		"-F", "/dev/null",
 		"-o", "ConnectionAttempts=3", // retry 3 times if SSH connection fails
 		"-o", "ConnectTimeout=10", // timeout after 10 seconds
 		"-o", "ControlMaster=no", // disable ssh multiplexing
@@ -370,8 +369,10 @@ func NewExternalClient(sshBinaryPath, user, host string, port int, auth *Auth) (
 		}
 	}
 
-	// Set which port to use for SSH.
-	args = append(args, "-p", fmt.Sprintf("%d", port))
+	if port != 22 {
+		// Set which port to use for SSH.
+		args = append(args, "-p", fmt.Sprintf("%d", port))
+	}
 
 	client.BaseArgs = args
 

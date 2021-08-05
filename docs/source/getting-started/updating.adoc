@@ -21,7 +21,7 @@ $ minishift update
 ----
 
 This command checks whether there is a newer version of Minishift available.
-If so, it prompts user to confirm the update, downloads the new binary and replaces the current version of Minishift.
+If so, it prompts the user to confirm the update, downloads the new binary and replaces the current version of Minishift.
 
 [NOTE]
 ====

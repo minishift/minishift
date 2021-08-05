@@ -18,7 +18,7 @@ Follow the appropriate procedure to set up the hypervisor for your particular op
 
 Some hypervisors require manual installation of the driver plug-in.
 {project} embeds the VirtualBox driver plug-in, so no additional steps are required to configure it.
-However, VirtualBox will need to be identified to {project} via the `--vm-driver virtualbox` flag or persistant configuration settings.
+However, VirtualBox will need to be identified to {project} via the `--vm-driver virtualbox` flag or persistent configuration settings.
 See xref:setting-up-virtualbox-driver[Setting Up {project} to Use VirtualBox] for more information.
 
 See the appropriate section for your hypervisor and operating system:

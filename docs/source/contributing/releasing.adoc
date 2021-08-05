@@ -69,7 +69,7 @@ where
 === Prerequisites
 
 - You must have a https://help.github.com/articles/creating-an-access-token-for-command-line-use[GitHub personal access token] defined in your environment as `GITHUB_ACCESS_TOKEN`.
-- You must set environment variable `GITHUB_USER` as _minishift_.
+- You must set the environment variable `GITHUB_USER` as _minishift_.
 - To create the systemtray binaries, link:https://developer.apple.com/xcode[`Xcode`] must be installed.
 
 [[cut-release]]
@@ -107,9 +107,9 @@ For more information, see xref:../contributing/writing-docs.adoc#[Writing and Pu
 [[post-release-tasks]]
 === Post-Release Tasks
 
-The systemtray bits also needs to be uploaded to the release in Github.
+The systemtray bits also need to be uploaded to the release in Github.
 Create {project} binaries with systemtray and upload them to Github. 
-The following command works only in macOS, please refer the xref:../contributing/releasing.adoc#release-prereqs[Prerequisites] for more information.
+The following command works only in macOS, please refer to the xref:../contributing/releasing.adoc#release-prereqs[Prerequisites] for more information.
 
 ----
 $ make release_systemtray
@@ -133,11 +133,11 @@ $ ./issue-list.sh -r minishift -m 9
 To update the {project} cask manually, we need to do the following tasks:
 
 . Fork the link:https://github.com/caskroom/homebrew-cask[homebrew-cask] repository and clone it locally if not already done.
-. Update the link:https://github.com/caskroom/homebrew-cask/blob/master/Casks/minishift.rb[minishift.rb] file with latest version, sha256sum and checkpoint.
+. Update the link:https://github.com/caskroom/homebrew-cask/blob/master/Casks/minishift.rb[minishift.rb] file with the latest version, sha256sum and checkpoint.
 . Push the changes to the forked repository.
 . And finally open a pull request in the link:https://github.com/caskroom/homebrew-cask[homebrew-cask] repository.
 
-You can also use the link:https://github.com/minishift/minishift/blob/master/scripts/release/brew-cask.sh[brew-cask.sh] script to update link:https://github.com/caskroom/homebrew-cask/blob/master/Casks/minishift.rb[minishift.rb] with latest version information.
+You can also use the link:https://github.com/minishift/minishift/blob/master/scripts/release/brew-cask.sh[brew-cask.sh] script to update link:https://github.com/caskroom/homebrew-cask/blob/master/Casks/minishift.rb[minishift.rb] with the latest version information.
 For example:
 
 ----

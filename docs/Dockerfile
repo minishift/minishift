@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM ruby:2.4
+FROM ruby:2.6
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update -qq && apt-get install -y default-jre pandoc locales -qq && locale-gen en_US.UTF-8 en_us && dpkg-reconfigure locales && dpkg-reconfigure locales && locale-gen C.UTF-8 && /usr/sbin/update-locale LANG=C.UTF-8

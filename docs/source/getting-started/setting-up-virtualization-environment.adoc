@@ -215,11 +215,24 @@ Using hyperkit requires having both `hyperkit` and `docker-machine-driver-hyperk
 
 ==== Installing hyperkit
 
-* If you have link:https://docs.docker.com/docker-for-mac/[Docker Desktop for macOS] installed, `hyperkit` is already installed. 
-* If you use link:https://brew.sh[Homebrew] you can install the latest version of `hyperkit`:
+The following steps explain the installation of the *hyperkit* binary to the *_/usr/local/bin/_* directory:
 
+. Download the *hyperkit* binary using:
++
 ----
-$ brew install hyperkit
+$ sudo curl -L https://github.com/code-ready/machine-driver-hyperkit/releases/download/v0.15.0/hyperkit -o /usr/local/bin/hyperkit
+----
+
+. Enable root access for the *hyperkit* binary and add it to the default *wheel* group:
++
+----
+$ sudo chown root:wheel /usr/local/bin/hyperkit
+----
+
+. Set owner User ID (SUID) for the binary as follows:
++
+----
+$ sudo chmod u+s,+x /usr/local/bin/hyperkit
 ----
 
 ==== Installing docker-machine-driver-hyperkit
